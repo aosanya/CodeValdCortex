@@ -11,6 +11,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// newTestManager creates a manager for testing without database
+func newTestManager(logger *logrus.Logger, config runtime.ManagerConfig) *runtime.Manager {
+	return runtime.NewManager(logger, config, nil)
+}
+
 func TestNewManager(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel) // Reduce noise in tests
@@ -22,7 +27,7 @@ func TestNewManager(t *testing.T) {
 		EnableMetrics:       true,
 	}
 
-	manager := runtime.NewManager(logger, config)
+	manager := newTestManager(logger, config)
 	assert.NotNil(t, manager)
 
 	// Clean shutdown
@@ -34,7 +39,7 @@ func TestCreateAgent(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{
+	manager := newTestManager(logger, runtime.ManagerConfig{
 		MaxAgents: 10,
 	})
 	defer manager.Shutdown()
@@ -56,7 +61,7 @@ func TestCreateAgentLimit(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{
+	manager := newTestManager(logger, runtime.ManagerConfig{
 		MaxAgents: 2,
 	})
 	defer manager.Shutdown()
@@ -80,7 +85,7 @@ func TestStartAgent(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	a, err := manager.CreateAgent("test-agent", "worker", agent.Config{})
@@ -95,7 +100,7 @@ func TestStartNonExistentAgent(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	err := manager.StartAgent("non-existent-id")
@@ -106,7 +111,7 @@ func TestStopAgent(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	a, err := manager.CreateAgent("test-agent", "worker", agent.Config{})
@@ -124,7 +129,7 @@ func TestGetAgent(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	a1, err := manager.CreateAgent("test-agent", "worker", agent.Config{})
@@ -140,7 +145,7 @@ func TestGetNonExistentAgent(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	_, err := manager.GetAgent("non-existent-id")
@@ -151,7 +156,7 @@ func TestListAgents(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	// Initially empty
@@ -173,7 +178,7 @@ func TestGetMetrics(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	metrics := manager.GetMetrics()
@@ -201,7 +206,7 @@ func TestAgentTaskExecution(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{})
+	manager := newTestManager(logger, runtime.ManagerConfig{})
 	defer manager.Shutdown()
 
 	a, err := manager.CreateAgent("test-agent", "worker", agent.Config{
@@ -237,7 +242,7 @@ func TestShutdown(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{
+	manager := newTestManager(logger, runtime.ManagerConfig{
 		ShutdownTimeout: 5 * time.Second,
 	})
 
@@ -265,7 +270,7 @@ func TestConcurrentOperations(t *testing.T) {
 	logger := logrus.New()
 	logger.SetLevel(logrus.ErrorLevel)
 
-	manager := runtime.NewManager(logger, runtime.ManagerConfig{
+	manager := newTestManager(logger, runtime.ManagerConfig{
 		MaxAgents: 50,
 	})
 	defer manager.Shutdown()

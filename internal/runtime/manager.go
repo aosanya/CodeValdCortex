@@ -7,13 +7,17 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agent"
+	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
 
 // Manager manages the lifecycle of all agents in the system
 type Manager struct {
-	// agents maps agent ID to agent instance
+	// agents maps agent ID to agent instance (in-memory cache)
 	agents map[string]*agent.Agent
+
+	// registry provides persistent storage for agents
+	registry *registry.Repository
 
 	// mu protects concurrent access to agents map
 	mu sync.RWMutex
@@ -69,7 +73,7 @@ type metricsHolder struct {
 }
 
 // NewManager creates a new runtime manager
-func NewManager(logger *logrus.Logger, config ManagerConfig) *Manager {
+func NewManager(logger *logrus.Logger, config ManagerConfig, reg *registry.Repository) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Set default configuration
@@ -84,12 +88,20 @@ func NewManager(logger *logrus.Logger, config ManagerConfig) *Manager {
 	}
 
 	m := &Manager{
-		agents:  make(map[string]*agent.Agent),
-		ctx:     ctx,
-		cancel:  cancel,
-		logger:  logger,
-		config:  config,
-		metrics: &metricsHolder{},
+		agents:   make(map[string]*agent.Agent),
+		registry: reg,
+		ctx:      ctx,
+		cancel:   cancel,
+		logger:   logger,
+		config:   config,
+		metrics:  &metricsHolder{},
+	}
+
+	// Load existing agents from registry into memory cache
+	if reg != nil {
+		if err := m.loadAgentsFromRegistry(); err != nil {
+			logger.WithError(err).Warn("Failed to load agents from registry")
+		}
 	}
 
 	// Start health check loop
@@ -97,6 +109,38 @@ func NewManager(logger *logrus.Logger, config ManagerConfig) *Manager {
 	go m.healthCheckLoop()
 
 	return m
+}
+
+// loadAgentsFromRegistry loads all agents from persistent storage into memory cache
+func (m *Manager) loadAgentsFromRegistry() error {
+	if m.registry == nil {
+		return nil
+	}
+
+	agents, err := m.registry.List(m.ctx)
+	if err != nil {
+		return fmt.Errorf("failed to list agents from registry: %w", err)
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, a := range agents {
+		m.agents[a.ID] = a
+		m.logger.WithFields(logrus.Fields{
+			"agent_id":   a.ID,
+			"agent_name": a.Name,
+			"state":      a.State,
+		}).Debug("Loaded agent from registry")
+	}
+
+	// Update metrics
+	m.metrics.mu.Lock()
+	m.metrics.metrics.CurrentActiveAgents = int64(len(agents))
+	m.metrics.mu.Unlock()
+
+	m.logger.WithField("count", len(agents)).Info("Loaded agents from registry")
+	return nil
 }
 
 // CreateAgent creates and registers a new agent
@@ -111,6 +155,15 @@ func (m *Manager) CreateAgent(name, agentType string, config agent.Config) (*age
 
 	// Create new agent
 	a := agent.New(name, agentType, config)
+
+	// Persist to registry if available
+	if m.registry != nil {
+		if err := m.registry.Create(m.ctx, a); err != nil {
+			return nil, fmt.Errorf("failed to persist agent to registry: %w", err)
+		}
+	}
+
+	// Add to in-memory cache
 	m.agents[a.ID] = a
 
 	// Update metrics
@@ -146,6 +199,13 @@ func (m *Manager) StartAgent(agentID string) error {
 
 	// Update state to running
 	a.SetState(agent.StateRunning)
+
+	// Persist state change to registry
+	if m.registry != nil {
+		if err := m.registry.Update(m.ctx, a); err != nil {
+			m.logger.WithError(err).Warn("Failed to persist agent state to registry")
+		}
+	}
 
 	// Start agent worker goroutines
 	m.wg.Add(1)
@@ -336,6 +396,13 @@ func (m *Manager) StopAgent(agentID string) error {
 	// Update state
 	a.SetState(agent.StateStopped)
 
+	// Persist state change to registry
+	if m.registry != nil {
+		if err := m.registry.Update(m.ctx, a); err != nil {
+			m.logger.WithError(err).Warn("Failed to persist agent state to registry")
+		}
+	}
+
 	// Update metrics
 	m.metrics.mu.Lock()
 	m.metrics.metrics.TotalAgentsStopped++
@@ -350,14 +417,29 @@ func (m *Manager) StopAgent(agentID string) error {
 // GetAgent retrieves an agent by ID
 func (m *Manager) GetAgent(agentID string) (*agent.Agent, error) {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
-
 	a, exists := m.agents[agentID]
-	if !exists {
-		return nil, agent.ErrAgentNotFound
+	m.mu.RUnlock()
+
+	if exists {
+		return a, nil
 	}
 
-	return a, nil
+	// Try to load from registry if not in memory
+	if m.registry != nil {
+		a, err := m.registry.Get(m.ctx, agentID)
+		if err != nil {
+			return nil, agent.ErrAgentNotFound
+		}
+
+		// Add to cache
+		m.mu.Lock()
+		m.agents[agentID] = a
+		m.mu.Unlock()
+
+		return a, nil
+	}
+
+	return nil, agent.ErrAgentNotFound
 }
 
 // ListAgents returns all registered agents
@@ -371,6 +453,21 @@ func (m *Manager) ListAgents() []*agent.Agent {
 	}
 
 	return agents
+}
+
+// ListAgentsFromRegistry returns all agents from persistent storage
+func (m *Manager) ListAgentsFromRegistry() ([]*agent.Agent, error) {
+	if m.registry == nil {
+		// Fallback to in-memory list
+		return m.ListAgents(), nil
+	}
+
+	agents, err := m.registry.List(m.ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list agents from registry: %w", err)
+	}
+
+	return agents, nil
 }
 
 // healthCheckLoop periodically checks agent health

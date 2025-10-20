@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/config"
+	"github.com/aosanya/CodeValdCortex/internal/database"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
+	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -21,6 +23,8 @@ type App struct {
 	config         *config.Config
 	server         *http.Server
 	logger         *logrus.Logger
+	dbClient       *database.ArangoClient
+	registry       *registry.Repository
 	runtimeManager *runtime.Manager
 }
 
@@ -28,17 +32,36 @@ type App struct {
 func New(cfg *config.Config) *App {
 	logger := logrus.New()
 
-	// Create runtime manager
+	// Initialize ArangoDB client
+	dbClient, err := database.NewArangoClient(&cfg.Database)
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to connect to ArangoDB")
+	}
+
+	// Verify database connection
+	if err := dbClient.Ping(); err != nil {
+		logger.WithError(err).Warn("Database ping failed, continuing with limited functionality")
+	}
+
+	// Initialize agent registry
+	reg, err := registry.NewRepository(dbClient)
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to initialize agent registry")
+	}
+
+	// Create runtime manager with registry
 	runtimeManager := runtime.NewManager(logger, runtime.ManagerConfig{
 		MaxAgents:           100,
 		HealthCheckInterval: 30 * time.Second,
 		ShutdownTimeout:     30 * time.Second,
 		EnableMetrics:       true,
-	})
+	}, reg)
 
 	return &App{
 		config:         cfg,
 		logger:         logger,
+		dbClient:       dbClient,
+		registry:       reg,
 		runtimeManager: runtimeManager,
 	}
 }
@@ -74,8 +97,15 @@ func (a *App) Run() error {
 	a.logger.Info("Shutting down server...")
 
 	// Shutdown runtime manager first
+	a.logger.Info("Shutting down runtime manager")
 	if err := a.runtimeManager.Shutdown(); err != nil {
 		a.logger.WithError(err).Error("Runtime manager shutdown error")
+	}
+
+	// Close database connection
+	a.logger.Info("Closing database connection")
+	if err := a.dbClient.Close(); err != nil {
+		a.logger.WithError(err).Error("Database close error")
 	}
 
 	// Graceful shutdown with timeout
