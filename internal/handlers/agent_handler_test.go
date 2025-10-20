@@ -31,7 +31,7 @@ func setupTestRouter() (*gin.Engine, *runtime.Manager) {
 	}
 
 	manager := runtime.NewManager(logger, config, nil) // nil registry for tests
-	handler := NewAgentHandler(manager, logger) // Register routes
+	handler := NewAgentHandler(manager, logger)        // Register routes
 	v1 := router.Group("/api/v1")
 	{
 		agents := v1.Group("/agents")
