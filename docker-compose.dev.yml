@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  codevaldcortex:
+    build:
+      target: builder
+    volumes:
+      - .:/build
+      - go_modules:/go/pkg/mod
+    working_dir: /build
+    command: go run ./cmd --config config.yaml
+    environment:
+      - CVXC_LOG_LEVEL=debug
+      - CVXC_LOG_FORMAT=text
+      - CGO_ENABLED=0
+
+volumes:
+  go_modules:

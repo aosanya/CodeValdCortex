@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+docs/
+documents/
+
+# Development files
+.vscode/
+.devcontainer/
+
+# Test files
+*_test.go
+test/
+coverage.out
+
+# Build artifacts
+bin/
+dist/
+
+# Dependencies (we copy go.mod/go.sum separately)
+vendor/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/

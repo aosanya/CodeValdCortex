@@ -100,29 +100,107 @@ CodeValdCortex/
 
 ### Prerequisites
 - Go 1.21+
-- Docker 24.0+
-- Kubernetes 1.28+
-- Helm 3.12+
+- Docker 24.0+ and Docker Compose
+- Make (for build automation)
 
-### Development Setup
+### Local Development Setup
+
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/CodeValdCortex.git
+# 1. Clone the repository
+git clone https://github.com/aosanya/CodeValdCortex.git
 cd CodeValdCortex
 
-# Set up development environment
-make dev-setup
+# 2. Copy and configure environment variables
+cp .env.example .env
+# Edit .env to set your configuration (optional, has sensible defaults)
 
-# Run local development stack
-make dev-up
+# 3. Install Go dependencies
+go mod download
 
-# Verify installation
-make test
+# 4. Build and run the application
+make build
+make run
+
+# 5. Verify the application is running
+curl http://localhost:8082/health
+# Expected response: {"status":"healthy","timestamp":"...","version":"dev"}
+
+# 6. Check application status
+curl http://localhost:8082/api/v1/status
+# Expected response: {"app_name":"CodeValdCortex","status":"running","version":"dev"}
 ```
 
-### Production Deployment
+### Running with Docker Compose
+
 ```bash
-# Deploy to Kubernetes cluster
+# Start all services (application + ArangoDB + monitoring)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f codevaldcortex
+
+# Stop all services
+docker-compose down
+```
+
+### Environment Configuration
+
+The application supports configuration through multiple sources (in order of precedence):
+1. **Environment variables** (`.env` file or shell exports)
+2. **YAML configuration** (`config.yaml`)
+3. **Default values** (hardcoded in code)
+
+**Key Environment Variables**:
+```bash
+# Server Configuration
+CVXC_SERVER_PORT=8082          # HTTP server port
+CVXC_LOG_LEVEL=info            # Logging level (debug, info, warn, error)
+
+# Database Configuration  
+CVXC_DATABASE_PORT=8529        # ArangoDB port
+CVXC_DATABASE_PASSWORD=secret  # Database password (for security)
+```
+
+### Development Commands
+
+```bash
+# Build the application
+make build
+
+# Run the application
+make run
+
+# Run tests
+make test
+
+# Run linter
+make lint
+
+# Build Docker image
+make docker-build
+
+# Clean build artifacts
+make clean
+```
+
+### Accessing Services
+
+After running `docker-compose up -d`, the following services will be available:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| CodeValdCortex API | http://localhost:8082 | Main application API |
+| Health Check | http://localhost:8082/health | Application health status |
+| Status Endpoint | http://localhost:8082/api/v1/status | Application status info |
+| ArangoDB | http://localhost:8529 | Database web interface |
+| Prometheus | http://localhost:9090 | Metrics collection |
+| Grafana | http://localhost:3000 | Metrics visualization (admin/admin) |
+| Jaeger | http://localhost:16686 | Distributed tracing |
+
+### Production Deployment
+
+```bash
+# Deploy to Kubernetes cluster (coming soon)
 helm install codevaldcortex ./deployments/helm/codevaldcortex \
   --namespace codevaldcortex \
   --create-namespace
@@ -130,6 +208,19 @@ helm install codevaldcortex ./deployments/helm/codevaldcortex \
 # Verify deployment
 kubectl get pods -n codevaldcortex
 ```
+
+### Testing with Postman
+
+```bash
+# Import test collection and environment
+# 1. Open Postman
+# 2. Import documents/4-QA/postman_collection.json
+# 3. Import documents/4-QA/postman_environment_local.json
+# 4. Select "CodeValdCortex - Local Development" environment
+# 5. Run the collection
+```
+
+See [QA Documentation](documents/4-QA/README.md) for detailed testing instructions.
 
 ## 🎯 Use Cases
 
@@ -219,23 +310,38 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 
 ## 🗺️ Roadmap
 
-### Current Release (v1.0)
-- ✅ Core agent orchestration
-- ✅ Kubernetes deployment
-- ✅ Basic monitoring and logging
-- ✅ REST API and authentication
+### ✅ Completed (MVP-001)
+- ✅ Core project infrastructure
+- ✅ Go application with HTTP server
+- ✅ Environment-based configuration system
+- ✅ Docker Compose development environment
+- ✅ Prometheus monitoring setup
+- ✅ Comprehensive QA testing framework
+- ✅ Health and status endpoints
 
-### Next Release (v1.1)
-- 🔄 Advanced workflow engine
-- 🔄 Multi-region deployment
-- 🔄 Enhanced security features
-- 🔄 Performance optimizations
+### 🔄 In Progress
+- 🔄 Agent runtime environment (MVP-002)
+- 🔄 Agent registry system (MVP-003)
+- 🔄 Agent lifecycle management (MVP-004)
 
-### Future Releases
+### � Planned (v1.0 MVP)
+- 📋 Agent communication system
+- 📋 Agent memory management
+- 📋 Multi-agent orchestration
+- � REST API layer
+- 📋 Kubernetes deployment
+- 📋 Management dashboard
+
+### Future Releases (v1.1+)
+- 📋 Advanced workflow engine
+- 📋 Multi-region deployment
 - 📋 Machine learning integration
 - 📋 Visual workflow designer
 - 📋 Advanced analytics dashboard
 - 📋 Third-party integrations
+
+**Current Status**: Foundation Phase - MVP-001 Complete ✅  
+**Next Milestone**: Agent Runtime Environment (MVP-002)
 
 ---
 
