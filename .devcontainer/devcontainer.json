@@ -1,0 +1,28 @@
+{
+    "name": "codevaldcortex",
+    "image": "mcr.microsoft.com/devcontainers/base:debian-12",
+    "runArgs": [
+        "--name",
+        "devcontainer"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/go:1": {},
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": false,
+            "upgradePackages": false
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.go"
+            ]
+        }
+    },
+    "forwardPorts": [
+        3000,
+        8090
+    ],
+    "remoteUser": "vscode"
+}
