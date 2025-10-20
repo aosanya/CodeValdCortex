@@ -10,24 +10,36 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/config"
+	"github.com/aosanya/CodeValdCortex/internal/handlers"
+	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 // App represents the main application
 type App struct {
-	config *config.Config
-	server *http.Server
-	logger *logrus.Logger
+	config         *config.Config
+	server         *http.Server
+	logger         *logrus.Logger
+	runtimeManager *runtime.Manager
 }
 
 // New creates a new application instance
 func New(cfg *config.Config) *App {
 	logger := logrus.New()
 
+	// Create runtime manager
+	runtimeManager := runtime.NewManager(logger, runtime.ManagerConfig{
+		MaxAgents:           100,
+		HealthCheckInterval: 30 * time.Second,
+		ShutdownTimeout:     30 * time.Second,
+		EnableMetrics:       true,
+	})
+
 	return &App{
-		config: cfg,
-		logger: logger,
+		config:         cfg,
+		logger:         logger,
+		runtimeManager: runtimeManager,
 	}
 }
 
@@ -61,6 +73,11 @@ func (a *App) Run() error {
 
 	a.logger.Info("Shutting down server...")
 
+	// Shutdown runtime manager first
+	if err := a.runtimeManager.Shutdown(); err != nil {
+		a.logger.WithError(err).Error("Runtime manager shutdown error")
+	}
+
 	// Graceful shutdown with timeout
 	shutdownCtx, shutdownCancel := context.WithTimeout(ctx, 30*time.Second)
 	defer shutdownCancel()
@@ -88,6 +105,10 @@ func (a *App) setupServer() error {
 	// Middleware
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	// Register agent handler routes
+	agentHandler := handlers.NewAgentHandler(a.runtimeManager, a.logger)
+	agentHandler.RegisterRoutes(router)
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {

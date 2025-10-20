@@ -1,0 +1,305 @@
+{
+    "info": {
+        "_postman_id": "codevaldcortex-mvp002",
+        "name": "CodeValdCortex - Agent Runtime (MVP-002)",
+        "description": "Agent Runtime Environment API tests for MVP-002",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "2.0.0"
+    },
+    "item": [
+        {
+            "name": "Create Agent",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test(\"Agent created successfully\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.expect(jsonData.state).to.eql('created');",
+                            "    pm.collectionVariables.set('agent_id', jsonData.id);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"test-worker\",\n    \"type\": \"worker\",\n    \"config\": {\n        \"max_concurrent_tasks\": 5,\n        \"task_queue_size\": 100\n    }\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agents",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agents"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List Agents",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response is array\", function () {",
+                            "    pm.expect(pm.response.json()).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agents",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agents"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Agent",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Agent details complete\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.expect(jsonData).to.have.property('state');",
+                            "    pm.expect(jsonData).to.have.property('is_healthy');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agents/{{agent_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agents",
+                        "{{agent_id}}"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Start Agent",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Agent is running\", function () {",
+                            "    pm.expect(pm.response.json().state).to.eql('running');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/start",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agents",
+                        "{{agent_id}}",
+                        "start"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Submit Task",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 202\", function () {",
+                            "    pm.response.to.have.status(202);",
+                            "});",
+                            "",
+                            "pm.test(\"Task submitted\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('task_id');",
+                            "    pm.collectionVariables.set('task_id', jsonData.task_id);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"type\": \"process_data\",\n    \"payload\": {\"data\": \"test\"},\n    \"priority\": 1,\n    \"timeout\": 60\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/tasks",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agents",
+                        "{{agent_id}}",
+                        "tasks"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Stop Agent",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Agent is stopped\", function () {",
+                            "    pm.expect(pm.response.json().state).to.eql('stopped');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/stop",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agents",
+                        "{{agent_id}}",
+                        "stop"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Get Metrics",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Metrics present\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('total_agents_created');",
+                            "    pm.expect(jsonData).to.have.property('current_active_agents');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/metrics",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "metrics"
+                    ]
+                }
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082"
+        },
+        {
+            "key": "agent_id",
+            "value": ""
+        },
+        {
+            "key": "task_id",
+            "value": ""
+        }
+    ]
+}

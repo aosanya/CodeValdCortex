@@ -4,9 +4,17 @@ This directory contains testing resources and documentation for quality assuranc
 
 ## 📋 Contents
 
-- **postman_collection.json** - Comprehensive API test collection
+### Postman Collections
+
+- **postman_agent_runtime.json** - Agent Runtime Environment API tests (MVP-002)
+  - Agent lifecycle management: Create, Start, Stop
+  - Task submission and tracking
+  - Runtime metrics and health checks
+  - Port: 8082 (local development)
+
+### Environments
+
 - **postman_environment_local.json** - Local development environment settings
-- **postman_environment_production.json** - Production environment settings
 
 ## 🚀 Getting Started with Postman Tests
 
@@ -21,13 +29,12 @@ This directory contains testing resources and documentation for quality assuranc
 
 2. **Import the Collection**:
    - Click "Import" button in Postman
-   - Select `postman_collection.json`
+   - Select `postman_agent_runtime.json` (MVP-002 Agent Runtime tests)
    - The collection will appear in your workspace
 
 3. **Import the Environment**:
    - Click "Import" button
    - Select `postman_environment_local.json` (for local testing)
-   - Or `postman_environment_production.json` (for production testing)
 
 4. **Select the Environment**:
    - In the top-right corner, select the imported environment from the dropdown
@@ -36,13 +43,13 @@ This directory contains testing resources and documentation for quality assuranc
 
 #### Run Entire Collection
 
-1. Click on the "CodeValdCortex API Tests" collection
+1. Click on the "CodeValdCortex - Agent Runtime (MVP-002)" collection
 2. Click "Run" button
 3. Configure run settings:
    - Select all requests or specific folders
    - Set delay between requests (optional)
    - Choose number of iterations
-4. Click "Run CodeValdCortex API Tests"
+4. Click "Run CodeValdCortex - Agent Runtime (MVP-002)"
 
 #### Run Individual Requests
 

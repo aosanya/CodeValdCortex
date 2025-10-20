@@ -12,7 +12,7 @@
 | Task ID | Title | Description | Status | Priority | Effort | Skills Required | Dependencies |
 | ------- | ----- | ----------- | ------ | -------- | ------ | --------------- | ------------ |
 | MVP-001 | Project Infrastructure Setup | Configure development environment, CI/CD pipeline, and version control workflows | ✅ Complete (2025-10-20) | P0 | High | DevOps, Backend Dev | None |
-| MVP-002 | Agent Runtime Environment | Set up Go-based agent execution environment with goroutine management | Ready to Start | P0 | High | Backend Dev, Go | MVP-001 |
+| MVP-002 | Agent Runtime Environment | Set up Go-based agent execution environment with goroutine management | ✅ Complete (2025-10-20) | P0 | High | Backend Dev, Go | MVP-001 |
 | MVP-003 | Agent Registry System | Implement agent discovery and registration service with ArangoDB | Not Started | P0 | Medium | Backend Dev, Database | MVP-002 |
 
 ## Core Agent Mechanics (P0 - Blocking)
@@ -124,6 +124,13 @@
    - Add completed task to summary table in `mvp_done.md` with completion date
    - Remove completed task from this active `mvp.md` file
    - Update any dependent task references
+   - Merge feature branch to main:
+     ```bash
+     # Merge when complete and tested
+     git checkout main
+     git merge feature/MVP-XXX_description
+     git branch -d feature/MVP-XXX_description
+     ```
 4. **Dependencies**: Ensure prerequisite tasks are completed before starting dependent work
 
 ### Branch Management (MANDATORY)
