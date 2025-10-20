@@ -414,6 +414,88 @@ func (m *Manager) StopAgent(agentID string) error {
 	return nil
 }
 
+// PauseAgent pauses a running agent
+func (m *Manager) PauseAgent(agentID string) error {
+	m.mu.RLock()
+	a, exists := m.agents[agentID]
+	m.mu.RUnlock()
+
+	if !exists {
+		return agent.ErrAgentNotFound
+	}
+
+	// Check current state
+	currentState := a.GetState()
+	if currentState != agent.StateRunning {
+		return fmt.Errorf("cannot pause agent in state: %s", currentState)
+	}
+
+	// Update state to paused
+	a.SetState(agent.StatePaused)
+
+	// Persist state change to registry
+	if m.registry != nil {
+		if err := m.registry.Update(m.ctx, a); err != nil {
+			m.logger.WithError(err).Warn("Failed to persist agent state to registry")
+		}
+	}
+
+	m.logger.WithField("agent_id", agentID).Info("Agent paused")
+
+	return nil
+}
+
+// ResumeAgent resumes a paused agent
+func (m *Manager) ResumeAgent(agentID string) error {
+	m.mu.RLock()
+	a, exists := m.agents[agentID]
+	m.mu.RUnlock()
+
+	if !exists {
+		return agent.ErrAgentNotFound
+	}
+
+	// Check current state
+	currentState := a.GetState()
+	if currentState != agent.StatePaused {
+		return fmt.Errorf("cannot resume agent in state: %s", currentState)
+	}
+
+	// Update state to running
+	a.SetState(agent.StateRunning)
+
+	// Persist state change to registry
+	if m.registry != nil {
+		if err := m.registry.Update(m.ctx, a); err != nil {
+			m.logger.WithError(err).Warn("Failed to persist agent state to registry")
+		}
+	}
+
+	m.logger.WithField("agent_id", agentID).Info("Agent resumed")
+
+	return nil
+}
+
+// RestartAgent stops and restarts an agent
+func (m *Manager) RestartAgent(agentID string) error {
+	// Stop the agent
+	if err := m.StopAgent(agentID); err != nil {
+		return fmt.Errorf("failed to stop agent: %w", err)
+	}
+
+	// Brief pause to ensure cleanup
+	time.Sleep(100 * time.Millisecond)
+
+	// Start the agent
+	if err := m.StartAgent(agentID); err != nil {
+		return fmt.Errorf("failed to start agent: %w", err)
+	}
+
+	m.logger.WithField("agent_id", agentID).Info("Agent restarted")
+
+	return nil
+}
+
 // GetAgent retrieves an agent by ID
 func (m *Manager) GetAgent(agentID string) (*agent.Agent, error) {
 	m.mu.RLock()

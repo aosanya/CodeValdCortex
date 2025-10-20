@@ -70,6 +70,9 @@ type Agent struct {
 
 	// errChan reports errors from the agent
 	errChan chan error
+
+	// doneClosed tracks if done channel is already closed
+	doneClosed bool
 }
 
 // Config holds agent configuration
