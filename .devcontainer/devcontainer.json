@@ -3,7 +3,7 @@
     "image": "mcr.microsoft.com/devcontainers/base:debian-12",
     "runArgs": [
         "--name",
-        "devcontainer"
+        "codevaldcortex-devcontainer"
     ],
     "features": {
         "ghcr.io/devcontainers/features/git:1": {},
