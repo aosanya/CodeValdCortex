@@ -19,7 +19,6 @@
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills Required | Dependencies |
 | ------- | ----- | ----------- | ------ | -------- | ------ | --------------- | ------------ |
-| MVP-004 | Agent Lifecycle Management | Create, start, stop, and monitor agent instances with state tracking | Not Started | P0 | High | Backend Dev, Go | MVP-003 |
 | MVP-005 | Agent Communication System | Implement database-driven message passing and pub/sub system for inter-agent communication via ArangoDB | Not Started | P0 | High | Backend Dev, Go, Database | MVP-004 |
 | MVP-006 | Agent Memory Management | Develop agent state persistence and memory synchronization | Not Started | P0 | Medium | Backend Dev, Database | MVP-005 |
 | MVP-007 | Agent Task Execution | Build task scheduling and execution framework for agents | Not Started | P0 | High | Backend Dev, Go | MVP-006 |

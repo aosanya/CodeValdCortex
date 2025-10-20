@@ -153,6 +153,86 @@ func (h *AgentHandler) StopAgent(c *gin.Context) {
 	c.JSON(http.StatusOK, toAgentResponse(a))
 }
 
+// PauseAgent godoc
+// @Summary Pause an agent
+// @Description Pauses a running agent
+// @Tags agents
+// @Produce json
+// @Param id path string true "Agent ID"
+// @Success 200 {object} AgentResponse
+// @Failure 404 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /agents/{id}/pause [post]
+func (h *AgentHandler) PauseAgent(c *gin.Context) {
+	agentID := c.Param("id")
+
+	if err := h.runtime.PauseAgent(agentID); err != nil {
+		if err == agent.ErrAgentNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "agent not found"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	a, _ := h.runtime.GetAgent(agentID)
+	c.JSON(http.StatusOK, toAgentResponse(a))
+}
+
+// ResumeAgent godoc
+// @Summary Resume an agent
+// @Description Resumes a paused agent
+// @Tags agents
+// @Produce json
+// @Param id path string true "Agent ID"
+// @Success 200 {object} AgentResponse
+// @Failure 404 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /agents/{id}/resume [post]
+func (h *AgentHandler) ResumeAgent(c *gin.Context) {
+	agentID := c.Param("id")
+
+	if err := h.runtime.ResumeAgent(agentID); err != nil {
+		if err == agent.ErrAgentNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "agent not found"})
+			return
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	a, _ := h.runtime.GetAgent(agentID)
+	c.JSON(http.StatusOK, toAgentResponse(a))
+}
+
+// RestartAgent godoc
+// @Summary Restart an agent
+// @Description Stops and restarts an agent
+// @Tags agents
+// @Produce json
+// @Param id path string true "Agent ID"
+// @Success 200 {object} AgentResponse
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /agents/{id}/restart [post]
+func (h *AgentHandler) RestartAgent(c *gin.Context) {
+	agentID := c.Param("id")
+
+	if err := h.runtime.RestartAgent(agentID); err != nil {
+		if err == agent.ErrAgentNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "agent not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	a, _ := h.runtime.GetAgent(agentID)
+	c.JSON(http.StatusOK, toAgentResponse(a))
+}
+
 // GetAgent godoc
 // @Summary Get agent details
 // @Description Retrieves details of a specific agent
@@ -281,6 +361,9 @@ func (h *AgentHandler) RegisterRoutes(router *gin.Engine) {
 		agents.GET("/:id", h.GetAgent)
 		agents.POST("/:id/start", h.StartAgent)
 		agents.POST("/:id/stop", h.StopAgent)
+		agents.POST("/:id/pause", h.PauseAgent)
+		agents.POST("/:id/resume", h.ResumeAgent)
+		agents.POST("/:id/restart", h.RestartAgent)
 		agents.POST("/:id/tasks", h.SubmitTask)
 	}
 
