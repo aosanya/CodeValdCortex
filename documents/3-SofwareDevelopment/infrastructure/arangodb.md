@@ -212,10 +212,174 @@ spec:
 }
 ```
 
-### Agent Communication Graph
+### Agent Communication Model (Database-Driven)
+
+#### agent_messages Collection (Document Collection)
+Point-to-point message delivery between agents:
 
 ```javascript
-// Agent Communications (Edge Collection)
+{
+  "_key": "msg-550e8400-e29b-41d4-a716-446655440000",
+  "_id": "agent_messages/msg-550e8400-e29b-41d4-a716-446655440000",
+  "from_agent_id": "agent-12345",
+  "to_agent_id": "agent-67890",
+  "message_type": "task_request",
+  "payload": {
+    "task_id": "task-789",
+    "action": "process_data",
+    "parameters": {
+      "dataset": "customers_q4_2025"
+    }
+  },
+  "status": "pending",
+  "priority": 5,
+  "created_at": "2025-10-20T10:00:00.000Z",
+  "delivered_at": null,
+  "acknowledged_at": null,
+  "expires_at": "2025-10-20T11:00:00.000Z",
+  "correlation_id": "conv-abc123",
+  "metadata": {
+    "source_system": "orchestrator",
+    "trace_id": "trace-xyz789"
+  }
+}
+
+// Indexes
+db.agent_messages.ensureIndex({
+  type: "persistent",
+  fields: ["to_agent_id", "status", "created_at"],
+  name: "idx_messages_recipient"
+});
+
+db.agent_messages.ensureIndex({
+  type: "persistent",
+  fields: ["to_agent_id", "priority", "created_at"],
+  name: "idx_messages_priority"
+});
+
+db.agent_messages.ensureIndex({
+  type: "persistent",
+  fields: ["expires_at"],
+  name: "idx_messages_expiration"
+});
+```
+
+#### agent_publications Collection (Document Collection)
+Broadcast events and status updates from agents:
+
+```javascript
+{
+  "_key": "pub-660e8400-e29b-41d4-a716-446655440001",
+  "_id": "agent_publications/pub-660e8400-e29b-41d4-a716-446655440001",
+  "publisher_agent_id": "agent-12345",
+  "publisher_agent_type": "data-processor",
+  "publication_type": "status_change",
+  "event_name": "state.changed",
+  "payload": {
+    "old_state": "running",
+    "new_state": "paused",
+    "reason": "manual_intervention",
+    "timestamp": "2025-10-20T10:00:00.000Z"
+  },
+  "published_at": "2025-10-20T10:00:00.000Z",
+  "ttl_seconds": 3600,
+  "expires_at": "2025-10-20T11:00:00.000Z",
+  "metadata": {
+    "severity": "info",
+    "source": "lifecycle_manager"
+  }
+}
+
+// Indexes
+db.agent_publications.ensureIndex({
+  type: "persistent",
+  fields: ["publisher_agent_id", "published_at"],
+  name: "idx_publications_publisher"
+});
+
+db.agent_publications.ensureIndex({
+  type: "persistent",
+  fields: ["event_name", "published_at"],
+  name: "idx_publications_event"
+});
+
+db.agent_publications.ensureIndex({
+  type: "persistent",
+  fields: ["publication_type", "published_at"],
+  name: "idx_publications_type"
+});
+```
+
+#### agent_subscriptions Collection (Document Collection)
+Agent subscription registrations with event filtering:
+
+```javascript
+{
+  "_key": "sub-770e8400-e29b-41d4-a716-446655440002",
+  "_id": "agent_subscriptions/sub-770e8400-e29b-41d4-a716-446655440002",
+  "subscriber_agent_id": "agent-67890",
+  "subscriber_agent_type": "coordinator",
+  "publisher_agent_id": "agent-12345",
+  "publisher_agent_type": null,
+  "event_pattern": "state.*",
+  "publication_types": ["status_change", "event"],
+  "filter_conditions": {
+    "severity": ["warning", "error"]
+  },
+  "created_at": "2025-10-20T09:00:00.000Z",
+  "updated_at": "2025-10-20T09:00:00.000Z",
+  "active": true,
+  "last_matched_at": null,
+  "metadata": {
+    "purpose": "monitor_upstream_agent_health"
+  }
+}
+
+// Indexes
+db.agent_subscriptions.ensureIndex({
+  type: "persistent",
+  fields: ["subscriber_agent_id", "active"],
+  name: "idx_subscriptions_subscriber"
+});
+
+db.agent_subscriptions.ensureIndex({
+  type: "persistent",
+  fields: ["publisher_agent_id", "active"],
+  name: "idx_subscriptions_publisher",
+  sparse: true
+});
+
+db.agent_subscriptions.ensureIndex({
+  type: "persistent",
+  fields: ["event_pattern", "active"],
+  name: "idx_subscriptions_pattern"
+});
+```
+
+#### agent_publication_deliveries Collection (Edge Collection - Optional)
+Tracks publication consumption by subscribers:
+
+```javascript
+{
+  "_key": "del-880e8400-e29b-41d4-a716-446655440003",
+  "_from": "agent_publications/pub-660e8400-e29b-41d4-a716-446655440001",
+  "_to": "agents/agent-67890",
+  "subscription_id": "sub-770e8400-e29b-41d4-a716-446655440002",
+  "delivered_at": "2025-10-20T10:00:05.000Z",
+  "acknowledged": true,
+  "processed": true,
+  "processing_result": "success",
+  "metadata": {
+    "processing_time_ms": 150
+  }
+}
+```
+
+### Agent Communication Graph (Legacy/Deprecated)
+
+```javascript
+// Agent Communications (Edge Collection - Deprecated in favor of agent_messages)
+// Kept for backward compatibility
 {
   "_key": "comm-12345-67890",
   "_id": "agent_communications/comm-12345-67890",

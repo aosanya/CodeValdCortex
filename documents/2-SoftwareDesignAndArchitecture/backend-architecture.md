@@ -372,6 +372,235 @@ func (hms *HealthMonitorService) checkAgentHealth(agent *Agent) (*HealthStatus, 
         Message:   "agent healthy",
         Timestamp: time.Now(),
     }, nil
+}
+```
+
+### 2.3 Agent Communication System
+
+#### Database-Driven Messaging Architecture
+
+CodeValdCortex implements a database-driven agent communication system using ArangoDB as the central coordination layer. This approach provides persistent, auditable, and scalable inter-agent communication with support for both direct messaging and publish/subscribe patterns.
+
+**Communication Patterns**:
+- **Direct Messaging**: Point-to-point message delivery between specific agents
+- **Publish/Subscribe**: Broadcast events with subscription-based filtering
+- **Event Sourcing**: Complete audit trail of all agent communications
+- **Polling-Based Delivery**: Agents poll for messages at configurable intervals
+
+**Key Benefits**:
+- **Persistence**: All messages stored in database for reliability and audit
+- **Scalability**: Database handles message routing and delivery coordination
+- **Flexibility**: Support for multiple communication patterns
+- **Observability**: Complete visibility into message flows and delivery status
+
+#### Message Service Architecture
+
+```go
+type AgentCommunicationService struct {
+    messageService *MessageService
+    pubsubService  *PubSubService
+    repository     *CommunicationRepository
+    poller         *MessagePoller
+    logger         *zap.Logger
+}
+
+// Direct messaging: Agent A → Agent B
+func (acs *AgentCommunicationService) SendMessage(
+    ctx context.Context, 
+    fromAgentID string,
+    toAgentID string,
+    messageType MessageType,
+    payload map[string]interface{},
+    options *MessageOptions) (string, error) {
+    
+    message := &Message{
+        FromAgentID: fromAgentID,
+        ToAgentID:   toAgentID,
+        MessageType: messageType,
+        Payload:     payload,
+        Priority:    options.Priority,
+        TTL:         options.TTL,
+    }
+    
+    // Validate message
+    if err := acs.validateMessage(message); err != nil {
+        return "", fmt.Errorf("invalid message: %w", err)
+    }
+    
+    // Store message in ArangoDB agent_messages collection
+    messageID, err := acs.messageService.SendMessage(ctx, message)
+    if err != nil {
+        return "", fmt.Errorf("failed to send message: %w", err)
+    }
+    
+    acs.logger.Info("message sent",
+        zap.String("from", fromAgentID),
+        zap.String("to", toAgentID),
+        zap.String("message_id", messageID))
+    
+    return messageID, nil
+}
+
+// Publish/Subscribe: Agent publishes event
+func (acs *AgentCommunicationService) Publish(
+    ctx context.Context,
+    publisherID string,
+    eventName string,
+    payload map[string]interface{},
+    options *PublicationOptions) (string, error) {
+    
+    publication := &Publication{
+        PublisherAgentID: publisherID,
+        EventName:        eventName,
+        PublicationType:  options.Type,
+        Payload:          payload,
+        TTLSeconds:       options.TTLSeconds,
+    }
+    
+    // Store publication in ArangoDB agent_publications collection
+    pubID, err := acs.pubsubService.Publish(ctx, publication)
+    if err != nil {
+        return "", fmt.Errorf("failed to publish: %w", err)
+    }
+    
+    acs.logger.Info("event published",
+        zap.String("publisher", publisherID),
+        zap.String("event", eventName),
+        zap.String("pub_id", pubID))
+    
+    return pubID, nil
+}
+
+// Subscribe: Agent subscribes to events
+func (acs *AgentCommunicationService) Subscribe(
+    ctx context.Context,
+    subscriberID string,
+    eventPattern string,
+    filters *SubscriptionFilters) (string, error) {
+    
+    subscription := &Subscription{
+        SubscriberAgentID: subscriberID,
+        EventPattern:      eventPattern,
+        PublisherAgentID:  filters.PublisherID,
+        PublicationTypes:  filters.Types,
+        FilterConditions:  filters.Conditions,
+    }
+    
+    // Store subscription in ArangoDB agent_subscriptions collection
+    subID, err := acs.pubsubService.Subscribe(ctx, subscription)
+    if err != nil {
+        return "", fmt.Errorf("failed to subscribe: %w", err)
+    }
+    
+    acs.logger.Info("subscription created",
+        zap.String("subscriber", subscriberID),
+        zap.String("pattern", eventPattern),
+        zap.String("sub_id", subID))
+    
+    return subID, nil
+}
+```
+
+#### ArangoDB Collections for Communication
+
+**agent_messages Collection**:
+```javascript
+{
+  "_key": "msg-uuid",
+  "from_agent_id": "agent-123",
+  "to_agent_id": "agent-456",
+  "message_type": "task_request",
+  "payload": { /* flexible JSON */ },
+  "status": "pending",
+  "priority": 5,
+  "created_at": "2025-10-20T10:00:00Z",
+  "delivered_at": null,
+  "expires_at": "2025-10-20T11:00:00Z"
+}
+```
+
+**agent_publications Collection**:
+```javascript
+{
+  "_key": "pub-uuid",
+  "publisher_agent_id": "agent-123",
+  "publication_type": "status_change",
+  "event_name": "state.changed",
+  "payload": {
+    "old_state": "running",
+    "new_state": "paused"
+  },
+  "published_at": "2025-10-20T10:00:00Z",
+  "ttl_seconds": 3600
+}
+```
+
+**agent_subscriptions Collection**:
+```javascript
+{
+  "_key": "sub-uuid",
+  "subscriber_agent_id": "agent-456",
+  "publisher_agent_id": "agent-123",
+  "event_pattern": "state.*",
+  "active": true,
+  "created_at": "2025-10-20T09:00:00Z"
+}
+```
+
+#### Message Polling Mechanism
+
+```go
+type MessagePoller struct {
+    agentID   string
+    interval  time.Duration
+    service   *MessageService
+    handler   MessageHandler
+}
+
+func (mp *MessagePoller) Start(ctx context.Context) {
+    ticker := time.NewTicker(mp.interval)
+    defer ticker.Stop()
+    
+    for {
+        select {
+        case <-ticker.C:
+            // Poll for pending messages
+            messages, err := mp.service.GetPendingMessages(ctx, mp.agentID, 100)
+            if err != nil {
+                log.Error("failed to poll messages", "error", err)
+                continue
+            }
+            
+            // Process each message
+            for _, msg := range messages {
+                if err := mp.handler(msg); err != nil {
+                    log.Error("message handling failed", "msg_id", msg.ID, "error", err)
+                    continue
+                }
+                
+                // Mark as delivered
+                mp.service.MarkDelivered(ctx, msg.ID)
+            }
+            
+        case <-ctx.Done():
+            return
+        }
+    }
+}
+```
+
+**Polling Configuration**:
+- **High Priority Agents**: 1-2 second intervals
+- **Normal Priority**: 5 second intervals
+- **Background Agents**: 10-30 second intervals
+- **Adaptive Polling**: Adjust based on message volume
+
+**Performance Optimizations**:
+- Database indexes on `to_agent_id`, `status`, `priority`
+- Batch message retrieval (up to 100 per poll)
+- Message expiration and automatic cleanup
+- Optional: ArangoDB change streams for push-based delivery (future enhancement)
+
 ## 3. Data Coordination Services
 
 ### 3.1 ArangoDB Integration and Change Streams
