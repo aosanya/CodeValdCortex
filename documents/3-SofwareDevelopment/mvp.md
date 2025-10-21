@@ -17,12 +17,10 @@
 
 ## Core Agent Mechanics (P0 - Blocking)
 
-| Task ID | Title                      | Description                                                                                             | Status                  | Priority | Effort | Skills Required               | Dependencies |
-| ------- | -------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------- | -------- | ------ | ----------------------------- | ------------ |
-| MVP-004 | Agent Lifecycle Management | Implement state machine for agent lifecycle with database persistence                                   | ✅ Complete (2025-10-20) | P0       | Medium | Backend Dev, State Management | MVP-003      |
-| MVP-005 | Agent Communication System | Implement database-driven message passing and pub/sub system for inter-agent communication via ArangoDB | ✅ Complete (2025-10-21) | P0       | High   | Backend Dev, Go, Database     | MVP-004      |
-| MVP-006 | Agent Memory Management    | Develop agent state persistence and memory synchronization                                              | Not Started             | P0       | Medium | Backend Dev, Database         | MVP-005      |
-| MVP-007 | Agent Task Execution       | Build task scheduling and execution framework for agents                                                | Not Started             | P0       | High   | Backend Dev, Go               | MVP-006      |
+| Task ID | Title                      | Description                                                     | Status      | Priority | Effort | Skills Required               | Dependencies |
+| ------- | -------------------------- | --------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------------- | ------------ |
+| MVP-006 | Agent Memory Management    | Develop agent state persistence and memory synchronization      | Not Started | P0       | Medium | Backend Dev, Database         | MVP-005      |
+| MVP-007 | Agent Task Execution       | Build task scheduling and execution framework for agents        | Not Started | P0       | High   | Backend Dev, Go               | MVP-006      |
 
 ## Core Functionality Tasks (P1 - Critical)
 
