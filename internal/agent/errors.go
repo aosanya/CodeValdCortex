@@ -17,4 +17,7 @@ var (
 
 	// ErrTaskTimeout is returned when task execution exceeds timeout
 	ErrTaskTimeout = errors.New("task execution timeout")
+
+	// ErrCommunicationNotSetup is returned when communication services are not initialized
+	ErrCommunicationNotSetup = errors.New("communication services not set up")
 )

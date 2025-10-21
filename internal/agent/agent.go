@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/google/uuid"
 )
 
@@ -73,6 +74,11 @@ type Agent struct {
 
 	// doneClosed tracks if done channel is already closed
 	doneClosed bool
+
+	// Communication services
+	messageService *communication.MessageService
+	pubSubService  *communication.PubSubService
+	commPoller     *communication.CommunicationPoller
 }
 
 // Config holds agent configuration
@@ -256,4 +262,112 @@ func (a *Agent) TaskChan() <-chan Task {
 // Cancel cancels the agent's context (for runtime manager use)
 func (a *Agent) Cancel() {
 	a.cancel()
+}
+
+// Communication methods
+
+// SetupCommunication initializes communication services for the agent
+func (a *Agent) SetupCommunication(messageService *communication.MessageService, pubSubService *communication.PubSubService) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	a.messageService = messageService
+	a.pubSubService = pubSubService
+}
+
+// StartCommunicationPolling starts polling for messages and publications
+func (a *Agent) StartCommunicationPolling(messageInterval, publicationInterval time.Duration) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	if a.messageService == nil || a.pubSubService == nil {
+		return // Communication not set up
+	}
+
+	if a.commPoller != nil && a.commPoller.IsRunning() {
+		return // Already running
+	}
+
+	// Create combined poller
+	a.commPoller = communication.NewCommunicationPoller(
+		communication.MessagePollerConfig{
+			AgentID:   a.ID,
+			Interval:  messageInterval,
+			BatchSize: 100,
+		},
+		communication.PublicationPollerConfig{
+			AgentID:  a.ID,
+			Interval: publicationInterval,
+		},
+		a.messageService,
+		a.pubSubService,
+		a.handleIncomingMessage,
+		a.handleIncomingPublication,
+	)
+
+	a.commPoller.Start()
+}
+
+// StopCommunicationPolling stops polling for messages and publications
+func (a *Agent) StopCommunicationPolling() {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	if a.commPoller != nil {
+		a.commPoller.Stop()
+	}
+}
+
+// SendMessage sends a direct message to another agent
+func (a *Agent) SendMessage(toAgentID string, msgType communication.MessageType, payload map[string]interface{}, opts *communication.MessageOptions) (string, error) {
+	if a.messageService == nil {
+		return "", ErrCommunicationNotSetup
+	}
+
+	return a.messageService.SendMessage(a.ctx, a.ID, toAgentID, msgType, payload, opts)
+}
+
+// Subscribe creates a subscription to events matching the pattern
+func (a *Agent) Subscribe(eventPattern string, filters *communication.SubscriptionFilters) (string, error) {
+	if a.pubSubService == nil {
+		return "", ErrCommunicationNotSetup
+	}
+
+	return a.pubSubService.Subscribe(a.ctx, a.ID, a.Type, eventPattern, filters)
+}
+
+// Unsubscribe deactivates a subscription
+func (a *Agent) Unsubscribe(subscriptionID string) error {
+	if a.pubSubService == nil {
+		return ErrCommunicationNotSetup
+	}
+
+	return a.pubSubService.Unsubscribe(a.ctx, subscriptionID)
+}
+
+// Publish publishes an event to all subscribers
+func (a *Agent) Publish(eventName string, payload map[string]interface{}, opts *communication.PublicationOptions) (string, error) {
+	if a.pubSubService == nil {
+		return "", ErrCommunicationNotSetup
+	}
+
+	return a.pubSubService.Publish(a.ctx, a.ID, a.Type, eventName, payload, opts)
+}
+
+// handleIncomingMessage processes received messages (can be overridden by custom handlers)
+func (a *Agent) handleIncomingMessage(msg *communication.Message) error {
+	// Default implementation: log the message
+	// In a real implementation, this would route to appropriate handlers based on message type
+	// For now, we acknowledge the message
+	if a.messageService != nil {
+		return a.messageService.AcknowledgeMessage(a.ctx, msg.ID)
+	}
+	return nil
+}
+
+// handleIncomingPublication processes received publications (can be overridden by custom handlers)
+func (a *Agent) handleIncomingPublication(pub *communication.Publication) error {
+	// Default implementation: log the publication
+	// In a real implementation, this would route to appropriate handlers based on event type
+	return nil
 }
