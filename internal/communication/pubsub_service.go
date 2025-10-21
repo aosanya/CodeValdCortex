@@ -11,12 +11,12 @@ import (
 
 // PubSubService handles publish/subscribe messaging
 type PubSubService struct {
-	repo    *Repository
+	repo    PubSubRepository
 	matcher *SubscriptionMatcher
 }
 
 // NewPubSubService creates a new pub/sub service
-func NewPubSubService(repo *Repository) *PubSubService {
+func NewPubSubService(repo PubSubRepository) *PubSubService {
 	return &PubSubService{
 		repo:    repo,
 		matcher: NewSubscriptionMatcher(),

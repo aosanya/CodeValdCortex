@@ -11,11 +11,11 @@ import (
 
 // MessageService handles direct agent-to-agent messaging
 type MessageService struct {
-	repo *Repository
+	repo MessageRepository
 }
 
 // NewMessageService creates a new message service
-func NewMessageService(repo *Repository) *MessageService {
+func NewMessageService(repo MessageRepository) *MessageService {
 	return &MessageService{repo: repo}
 }
 
