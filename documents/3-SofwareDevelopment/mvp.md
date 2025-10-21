@@ -27,13 +27,12 @@
 | MVP-008 | Agent Pool Management          | Implement agent grouping, load balancing, and resource allocation                                          | Not Started | P1       | Medium | Backend Dev, Go         | MVP-006          |
 | MVP-009 | Agent Event Processing         | Implement internal event loops and handler registration for processing incoming messages and state changes | ✅ Complete (2025-01-27) | P1       | Medium | Backend Dev, Go         | MVP-005, MVP-008 |
 | MVP-010 | Agent Health Monitoring        | Develop health checks, metrics collection, and failure detection with pub/sub status broadcasting          | ✅ Complete (2024-12-20) | P1       | Medium | Backend Dev, Monitoring | MVP-009          |
-| MVP-012 | Agent Configuration Management | Dynamic agent configuration and template-based deployment                                                  | Not Started | P1       | Medium | Backend Dev, DevOps     | MVP-010          |
 
 ## Platform Integration Tasks (P1 - Critical)
 
 | Task ID | Title                 | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | --------------------- | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
-| MVP-013 | REST API Layer        | Develop REST endpoints for agent management, monitoring, and communication history | Not Started | P1       | Medium | Backend Dev, API Design | MVP-012      |
+| MVP-013 | REST API Layer        | Develop REST endpoints for agent management, monitoring, and communication history | Not Started | P1       | Medium | Backend Dev, API Design | MVP-010      |
 | MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-013      |
 | MVP-015 | Management Dashboard  | Build web interface for agent monitoring, control, and communication visualization | Not Started | P1       | Medium | Frontend Dev, React     | MVP-014      |
 
