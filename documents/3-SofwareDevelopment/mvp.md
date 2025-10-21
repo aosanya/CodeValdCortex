@@ -17,10 +17,9 @@
 
 ## Core Agent Mechanics (P0 - Blocking)
 
-| Task ID | Title                   | Description                                                | Status      | Priority | Effort | Skills Required       | Dependencies |
-| ------- | ----------------------- | ---------------------------------------------------------- | ----------- | -------- | ------ | --------------------- | ------------ |
-| MVP-006 | Agent Memory Management | Develop agent state persistence and memory synchronization | Not Started | P0       | Medium | Backend Dev, Database | MVP-005      |
-| MVP-007 | Agent Task Execution    | Build task scheduling and execution framework for agents   | Not Started | P0       | High   | Backend Dev, Go       | MVP-006      |
+| Task ID | Title                | Description                                              | Status      | Priority | Effort | Skills Required | Dependencies |
+| ------- | -------------------- | -------------------------------------------------------- | ----------- | -------- | ------ | --------------- | ------------ |
+| MVP-007 | Agent Task Execution | Build task scheduling and execution framework for agents | Not Started | P0       | High   | Backend Dev, Go | MVP-006      |
 
 ## Core Functionality Tasks (P1 - Critical)
 
