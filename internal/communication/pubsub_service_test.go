@@ -178,7 +178,7 @@ func TestPubSubService_Publish(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name            string
+		name             string
 		publisherAgentID string
 		publisherType    string
 		eventName        string
@@ -289,13 +289,13 @@ func TestPubSubService_Subscribe(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name          string
-		subscriberID  string
+		name           string
+		subscriberID   string
 		subscriberType string
-		pattern       string
-		filters       *SubscriptionFilters
-		expectError   bool
-		validateSub   func(t *testing.T, sub *Subscription)
+		pattern        string
+		filters        *SubscriptionFilters
+		expectError    bool
+		validateSub    func(t *testing.T, sub *Subscription)
 	}{
 		{
 			name:           "subscribe basic pattern",
