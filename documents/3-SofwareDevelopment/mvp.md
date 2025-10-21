@@ -19,13 +19,12 @@
 
 | Task ID | Title                | Description                                              | Status      | Priority | Effort | Skills Required | Dependencies |
 | ------- | -------------------- | -------------------------------------------------------- | ----------- | -------- | ------ | --------------- | ------------ |
-| MVP-007 | Agent Task Execution | Build task scheduling and execution framework for agents | Not Started | P0       | High   | Backend Dev, Go | MVP-006      |
 
 ## Core Functionality Tasks (P1 - Critical)
 
 | Task ID | Title                          | Description                                                                                                | Status      | Priority | Effort | Skills Required         | Dependencies     |
 | ------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ---------------- |
-| MVP-008 | Agent Pool Management          | Implement agent grouping, load balancing, and resource allocation                                          | Not Started | P1       | Medium | Backend Dev, Go         | MVP-007          |
+| MVP-008 | Agent Pool Management          | Implement agent grouping, load balancing, and resource allocation                                          | Not Started | P1       | Medium | Backend Dev, Go         | MVP-006          |
 | MVP-009 | Agent Event Processing         | Implement internal event loops and handler registration for processing incoming messages and state changes | Not Started | P1       | Medium | Backend Dev, Go         | MVP-005, MVP-008 |
 | MVP-010 | Agent Health Monitoring        | Develop health checks, metrics collection, and failure detection with pub/sub status broadcasting          | Not Started | P1       | Medium | Backend Dev, Monitoring | MVP-009          |
 | MVP-011 | Multi-Agent Orchestration      | Implement workflow orchestration across multiple agents                                                    | Not Started | P1       | High   | Backend Dev, Go         | MVP-010          |

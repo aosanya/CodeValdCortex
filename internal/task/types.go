@@ -2,6 +2,8 @@ package task
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"time"
 )
 
@@ -176,6 +178,18 @@ type TaskScheduler interface {
 
 	// Clear removes all tasks from the queue
 	Clear()
+
+	// GetTask retrieves a task from the queue by ID
+	GetTask(taskID string) (*Task, error)
+
+	// GetQueuedTasks returns all tasks currently in the queue
+	GetQueuedTasks() []*Task
+
+	// Start starts the scheduler
+	Start() error
+
+	// Stop stops the scheduler
+	Stop() error
 }
 
 // TaskExecutor defines the interface for task execution
@@ -188,6 +202,15 @@ type TaskExecutor interface {
 
 	// GetHandler retrieves the handler for a task type
 	GetHandler(taskType string) (TaskHandler, error)
+
+	// ListHandlers returns all registered task types
+	ListHandlers() []string
+
+	// Start starts the executor
+	Start() error
+
+	// Stop stops the executor
+	Stop() error
 }
 
 // TaskManager defines the comprehensive task management interface
@@ -514,6 +537,6 @@ func DefaultRetryPolicy() *RetryPolicy {
 
 // generateTaskID generates a unique task ID
 func generateTaskID() string {
-	// This will be replaced with proper UUID generation
-	return "task_" + time.Now().Format("20060102150405")
+	// Use nanosecond precision timestamp with random suffix for uniqueness
+	return "task_" + time.Now().Format("20060102150405.000000") + "_" + fmt.Sprintf("%04d", rand.Intn(10000))
 }

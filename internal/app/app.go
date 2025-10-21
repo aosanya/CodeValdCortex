@@ -140,6 +140,10 @@ func (a *App) setupServer() error {
 	agentHandler := handlers.NewAgentHandler(a.runtimeManager, a.logger)
 	agentHandler.RegisterRoutes(router)
 
+	// Register task handler routes
+	taskHandler := handlers.NewTaskHandler(a.runtimeManager)
+	taskHandler.RegisterRoutes(router)
+
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

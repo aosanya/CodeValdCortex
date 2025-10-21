@@ -84,6 +84,9 @@ type Agent struct {
 	// Memory services
 	memoryService      *memory.Service
 	memorySynchronizer *memory.Synchronizer
+
+	// Task management (advanced task system)
+	taskManager *TaskManager
 }
 
 // Config holds agent configuration
