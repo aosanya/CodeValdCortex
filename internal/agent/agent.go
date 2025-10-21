@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/communication"
+	"github.com/aosanya/CodeValdCortex/internal/memory"
 	"github.com/google/uuid"
 )
 
@@ -79,6 +80,10 @@ type Agent struct {
 	messageService *communication.MessageService
 	pubSubService  *communication.PubSubService
 	commPoller     *communication.CommunicationPoller
+
+	// Memory services
+	memoryService      *memory.Service
+	memorySynchronizer *memory.Synchronizer
 }
 
 // Config holds agent configuration
@@ -370,4 +375,156 @@ func (a *Agent) handleIncomingPublication(pub *communication.Publication) error 
 	// Default implementation: log the publication
 	// In a real implementation, this would route to appropriate handlers based on event type
 	return nil
+}
+
+// Memory methods
+
+// SetupMemory initializes memory services for the agent
+func (a *Agent) SetupMemory(memoryService *memory.Service, memorySynchronizer *memory.Synchronizer) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	a.memoryService = memoryService
+	a.memorySynchronizer = memorySynchronizer
+}
+
+// StartMemorySync starts periodic memory synchronization
+func (a *Agent) StartMemorySync() error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	if a.memorySynchronizer == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memorySynchronizer.StartPeriodicSync(a.ctx, a.ID)
+}
+
+// StopMemorySync stops periodic memory synchronization
+func (a *Agent) StopMemorySync() error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	if a.memorySynchronizer == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memorySynchronizer.StopPeriodicSync()
+}
+
+// Remember stores a value in long-term memory
+func (a *Agent) Remember(key string, value interface{}, category string, metadata map[string]interface{}) error {
+	if a.memoryService == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memoryService.Remember(a.ctx, a.ID, key, value, category, metadata)
+}
+
+// Recall retrieves a value from long-term memory
+func (a *Agent) Recall(key string) (interface{}, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.Recall(a.ctx, a.ID, key)
+}
+
+// Forget removes a long-term memory entry
+func (a *Agent) Forget(key string) error {
+	if a.memoryService == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memoryService.Forget(a.ctx, a.ID, key)
+}
+
+// StoreWorking stores a value in working memory with TTL
+func (a *Agent) StoreWorking(key string, value interface{}, ttl time.Duration) error {
+	if a.memoryService == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memoryService.StoreWorking(a.ctx, a.ID, key, value, ttl)
+}
+
+// RetrieveWorking retrieves a value from working memory
+func (a *Agent) RetrieveWorking(key string) (interface{}, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.RetrieveWorking(a.ctx, a.ID, key)
+}
+
+// UpdateWorking updates an existing working memory value
+func (a *Agent) UpdateWorking(key string, value interface{}) error {
+	if a.memoryService == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memoryService.UpdateWorking(a.ctx, a.ID, key, value)
+}
+
+// DeleteWorking deletes a working memory entry
+func (a *Agent) DeleteWorking(key string) error {
+	if a.memoryService == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memoryService.DeleteWorking(a.ctx, a.ID, key)
+}
+
+// ClearWorking removes all working memory
+func (a *Agent) ClearWorking() error {
+	if a.memoryService == nil {
+		return ErrMemoryNotSetup
+	}
+
+	return a.memoryService.ClearWorking(a.ctx, a.ID)
+}
+
+// SearchMemory searches long-term memory based on query criteria
+func (a *Agent) SearchMemory(query memory.MemoryQuery) ([]*memory.LongtermMemory, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.Search(a.ctx, a.ID, query)
+}
+
+// CreateMemorySnapshot creates a point-in-time snapshot of agent state
+func (a *Agent) CreateMemorySnapshot(snapshotType, reason string) (*memory.StateSnapshot, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.CreateSnapshot(a.ctx, a.ID, snapshotType, reason)
+}
+
+// ListMemorySnapshots lists snapshots with optional filters
+func (a *Agent) ListMemorySnapshots(filters memory.SnapshotFilters) ([]*memory.StateSnapshot, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.ListSnapshots(a.ctx, a.ID, filters)
+}
+
+// GetMemoryStats retrieves memory usage statistics
+func (a *Agent) GetMemoryStats() (*memory.MemoryStats, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.GetMemoryStats(a.ctx, a.ID)
+}
+
+// SyncMemory performs a manual memory synchronization
+func (a *Agent) SyncMemory() (*memory.SyncResult, error) {
+	if a.memoryService == nil {
+		return nil, ErrMemoryNotSetup
+	}
+
+	return a.memoryService.SyncMemory(a.ctx, a.ID)
 }

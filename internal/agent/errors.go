@@ -20,4 +20,7 @@ var (
 
 	// ErrCommunicationNotSetup is returned when communication services are not initialized
 	ErrCommunicationNotSetup = errors.New("communication services not set up")
+
+	// ErrMemoryNotSetup is returned when memory services are not initialized
+	ErrMemoryNotSetup = errors.New("memory services not set up")
 )
