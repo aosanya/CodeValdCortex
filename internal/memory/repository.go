@@ -1154,9 +1154,18 @@ func (r *Repository) documentToWorkingMemory(doc map[string]interface{}) *Workin
 	m.CreatedAt, _ = parseTime(doc["created_at"])
 	m.UpdatedAt, _ = parseTime(doc["updated_at"])
 	m.AccessedAt, _ = parseTime(doc["accessed_at"])
-	m.AccessCount, _ = doc["access_count"].(int)
+
+	// Handle numeric types from ArangoDB (always float64)
+	if accessCount, ok := doc["access_count"].(float64); ok {
+		m.AccessCount = int(accessCount)
+	}
+
 	m.ExpiresAt, _ = parseTime(doc["expires_at"])
-	m.Version, _ = doc["version"].(int)
+
+	if version, ok := doc["version"].(float64); ok {
+		m.Version = int(version)
+	}
+
 	if m.Metadata == nil {
 		m.Metadata = make(map[string]interface{})
 	}
