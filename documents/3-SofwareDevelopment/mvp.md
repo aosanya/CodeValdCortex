@@ -33,7 +33,7 @@
 | Task ID | Title                 | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | --------------------- | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
 | MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-010      |
-| MVP-015 | Management Dashboard  | Build web interface for agent monitoring, control, and communication visualization | Not Started | P1       | Medium | Frontend Dev, React     | MVP-014      |
+| MVP-015 | Management Dashboard  | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | Not Started | P1       | Medium | Go, Frontend Dev, Templ | MVP-013      |
 
 ## Authentication & Security Tasks (P2 - Important)
 
