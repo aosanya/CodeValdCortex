@@ -1,4 +1,3 @@
-package examples
 package main
 
 import (
