@@ -32,15 +32,14 @@
 
 | Task ID | Title                 | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | --------------------- | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
-| MVP-013 | REST API Layer        | Develop REST endpoints for agent management, monitoring, and communication history | Not Started | P1       | Medium | Backend Dev, API Design | MVP-010      |
-| MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-013      |
+| MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-010      |
 | MVP-015 | Management Dashboard  | Build web interface for agent monitoring, control, and communication visualization | Not Started | P1       | Medium | Frontend Dev, React     | MVP-014      |
 
 ## Authentication & Security Tasks (P2 - Important)
 
 | Task ID | Title                     | Description                                                | Status      | Priority | Effort | Skills Required       | Dependencies |
 | ------- | ------------------------- | ---------------------------------------------------------- | ----------- | -------- | ------ | --------------------- | ------------ |
-| MVP-024 | Basic User Authentication | Implement user registration, login, and session management | Not Started | P2       | Medium | Backend Dev, Security | MVP-013      |
+| MVP-024 | Basic User Authentication | Implement user registration, login, and session management | Not Started | P2       | Medium | Backend Dev, Security | MVP-014      |
 | MVP-025 | Security Implementation   | Add input validation, HTTPS, and basic security headers    | Not Started | P2       | Medium | Security, Backend Dev | MVP-024      |
 | MVP-026 | Access Control System     | Implement role-based access control for agent operations   | Not Started | P2       | Low    | Backend Dev, Security | MVP-025      |
 

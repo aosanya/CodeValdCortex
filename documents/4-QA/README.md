@@ -1,284 +1,232 @@
-# CodeValdCortex - QA Testing Documentation
+# Quality Assurance - MVP-013 REST API Layer
 
-This directory contains testing resources and documentation for quality assurance of the CodeValdCortex platform.
+## Overview
 
-## 📋 Contents
+This directory contains comprehensive testing resources for the CodeValdCortex REST API Layer (MVP-013). The API provides complete agent management, configuration, templates, task orchestration, communication, and monitoring capabilities.
 
-### Postman Collections
+## Test Collections
 
-- **postman_agent_runtime.json** - Agent Runtime Environment API tests (MVP-002)
-  - Agent lifecycle management: Create, Start, Stop
-  - Task submission and tracking
-  - Runtime metrics and health checks
-  - Port: 8082 (local development)
+### 1. MVP-013 REST API Collection (`postman_mvp013_rest_api.json`)
 
-### Environments
+**Purpose**: Complete API testing for MVP-013 REST API Layer
+**Version**: 3.0.0
+**Base URL**: `http://localhost:8080`
 
-- **postman_environment_local.json** - Local development environment settings
+#### Test Categories:
 
-## 🚀 Getting Started with Postman Tests
+##### Health & System
+- **Health Check**: `GET /health` - Basic system health status
+- **System Info**: `GET /api/v1/info` - System information and capabilities
 
-### Prerequisites
+##### Agent Management
+- **CRUD Operations**: Create, Read, Update, Delete agents
+- **Lifecycle Control**: Start, stop, restart, pause, resume agents
+- **Status Monitoring**: Agent status, health, metrics, memory usage
+- **Pool Management**: Agent pool operations
 
-- Postman Desktop App or Postman Web
-- CodeValdCortex running locally or access to a deployed instance
+##### Configuration Management
+- **Configuration CRUD**: Create, read, update, delete configurations
+- **Version Control**: Configuration versions and rollback
+- **Template Integration**: Create configurations from templates
+- **Import/Export**: Configuration data portability
+- **Validation**: Configuration validation and compatibility checks
 
-### Import Collection and Environment
+##### Template Management
+- **Template CRUD**: Create, read, update, delete templates
+- **Rendering**: Template rendering with variable substitution
+- **Validation**: Template syntax and structure validation
+- **Variable Management**: Template variable definitions and defaults
 
-1. **Open Postman**
+##### Task Management
+- **Task CRUD**: Create, read, update, cancel tasks
+- **Task Control**: Retry, result retrieval, log access
+- **Workflow Management**: Multi-step workflow creation and execution
+- **Workflow Visualization**: Workflow graph and dependency tracking
 
-2. **Import the Collection**:
-   - Click "Import" button in Postman
-   - Select `postman_agent_runtime.json` (MVP-002 Agent Runtime tests)
-   - The collection will appear in your workspace
+##### Communication
+- **Message Management**: Send, receive, list messages
+- **Channel Management**: Create and manage communication channels
+- **Statistics**: Communication metrics and statistics
 
-3. **Import the Environment**:
-   - Click "Import" button
-   - Select `postman_environment_local.json` (for local testing)
+##### Monitoring & Metrics
+- **System Metrics**: Overall system performance metrics
+- **Agent Metrics**: Agent-specific performance data
+- **Resource Metrics**: System resource utilization
+- **Health Monitoring**: Service health checks (agents, services, database)
 
-4. **Select the Environment**:
-   - In the top-right corner, select the imported environment from the dropdown
+##### Administration
+- **System Configuration**: Configuration management and reload
+- **System Statistics**: Runtime statistics and diagnostics
+- **Maintenance**: System maintenance operations
+- **Diagnostics**: System diagnostic information
 
-### Running Tests
+#### Test Variables:
 
-#### Run Entire Collection
-
-1. Click on the "CodeValdCortex - Agent Runtime (MVP-002)" collection
-2. Click "Run" button
-3. Configure run settings:
-   - Select all requests or specific folders
-   - Set delay between requests (optional)
-   - Choose number of iterations
-4. Click "Run CodeValdCortex - Agent Runtime (MVP-002)"
-
-#### Run Individual Requests
-
-1. Navigate to specific request in the collection
-2. Click "Send" button
-3. View response and test results in the bottom panel
-
-### Test Scenarios
-
-#### 1. Health & Status Tests
-
-**Purpose**: Verify system availability and basic health
-
-**Endpoints**:
-- `GET /health` - Application health check
-- `GET /api/v1/status` - System status information
-
-**Expected Results**:
-- 200 OK response
-- Response time < 200ms
-- Status field shows "healthy"
-
-#### 2. Agent Management Tests
-
-**Purpose**: Validate agent lifecycle operations
-
-**Test Flow**:
-1. List existing agents
-2. Create a new test agent
-3. Get agent details
-4. Update agent configuration
-5. Scale agent replicas
-6. Delete agent
-
-**Expected Results**:
-- Agent CRUD operations succeed
-- Agent ID is properly generated and returned
-- Configuration changes are reflected
-- Scaling operations complete successfully
-
-#### 3. Workflow Management Tests
-
-**Purpose**: Test workflow orchestration capabilities
-
-**Test Flow**:
-1. List existing workflows
-2. Create workflow definition
-3. Execute workflow with parameters
-4. Monitor execution status
-5. Verify completion
-
-**Expected Results**:
-- Workflow creation returns workflow ID
-- Execution returns execution ID
-- Status updates correctly (pending → running → completed)
-
-#### 4. Metrics & Monitoring Tests
-
-**Purpose**: Verify observability endpoints
-
-**Endpoints**:
-- `GET /api/v1/metrics` - JSON metrics
-- `GET /metrics` - Prometheus format
-
-**Expected Results**:
-- Metrics data is returned
-- Data includes relevant system metrics
-
-## 🔑 Authentication
-
-If authentication is enabled:
-
-1. **Obtain Auth Token**:
-   ```bash
-   curl -X POST http://localhost:8080/api/v1/auth/login \
-     -H "Content-Type: application/json" \
-     -d '{"username": "admin", "password": "password"}'
-   ```
-
-2. **Set Token in Environment**:
-   - Go to "Environments" in Postman
-   - Edit your active environment
-   - Set `auth_token` variable value to the received token
-
-3. **Token Auto-Refresh**:
-   - The collection includes pre-request scripts for token refresh (if implemented)
-
-## 📊 Test Assertions
-
-Each request includes automated test scripts that verify:
-
-- **HTTP Status Codes**: Correct status codes for success/failure
-- **Response Structure**: Required fields are present
-- **Response Time**: Performance within acceptable limits
-- **Data Validation**: Values match expected formats
-- **State Management**: Operations update state correctly
-
-### Example Test Script
-
-```javascript
-pm.test("Status code is 200", function () {
-    pm.response.to.have.status(200);
-});
-
-pm.test("Response has required fields", function () {
-    var jsonData = pm.response.json();
-    pm.expect(jsonData).to.have.property('id');
-    pm.expect(jsonData).to.have.property('status');
-});
-
-pm.test("Response time is acceptable", function () {
-    pm.expect(pm.response.responseTime).to.be.below(200);
-});
+```json
+{
+    "base_url": "http://localhost:8080",
+    "agent_id": "",
+    "config_id": "",
+    "template_id": "",
+    "task_id": "",
+    "workflow_id": "",
+    "message_id": "",
+    "channel_id": ""
+}
 ```
 
-## 🔄 Environment Variables
+### 2. Legacy MVP-002 Collection (`postman_agent_runtime.json`)
 
-### Automatic Variables
+**Purpose**: Original agent runtime testing (maintained for backward compatibility)
+**Version**: 2.0.0
+**Base URL**: `http://localhost:8082`
 
-Variables automatically set during test execution:
+This collection contains the original MVP-002 agent runtime tests and should be used for regression testing when making changes to core agent functionality.
 
-- `agent_id` - Set after agent creation, used in subsequent requests
-- `workflow_id` - Set after workflow creation
-- `execution_id` - Set after workflow execution
+## Environment Configuration
 
-### Manual Configuration
+### Local Development (`postman_environment_local.json`)
 
-Variables you may need to set manually:
+- **Base URL**: `http://localhost:8080`
+- **API Version**: `v1`
+- **Environment**: Development mode with debug logging
 
-- `base_url` - API base URL (default: http://localhost:8080)
-- `auth_token` - Authentication token (if auth is enabled)
+### Production Environment
 
-## 🐛 Troubleshooting
+Create a separate environment file for production testing with:
+- HTTPS endpoints
+- Authentication tokens
+- Production-specific configuration
 
-### Connection Refused
+## Testing Strategy
 
-**Problem**: Cannot connect to API
-
-**Solution**:
+### 1. Smoke Tests
+Run basic health and system info endpoints to verify API server is operational:
 ```bash
-# Verify service is running
 curl http://localhost:8080/health
-
-# Check if correct port
-ps aux | grep codevaldcortex
-
-# Start service if needed
-make run-dev
+curl http://localhost:8080/api/v1/info
 ```
 
-### Authentication Failures
+### 2. Integration Tests
+Use the complete Postman collection to test all API endpoints:
+1. Import `postman_mvp013_rest_api.json` into Postman
+2. Import `postman_environment_local.json` as environment
+3. Run the entire collection to test all endpoints
 
-**Problem**: 401 Unauthorized responses
+### 3. Load Testing
+For performance testing:
+1. Use tools like `wrk` or `artillery` for load testing
+2. Focus on high-traffic endpoints (agent listing, metrics)
+3. Test concurrent agent operations
 
-**Solution**:
-- Verify `auth_token` is set correctly in environment
-- Check token hasn't expired
-- Obtain new token if necessary
+### 4. Security Testing
+- Verify proper HTTP headers are set
+- Test input validation and sanitization
+- Check for proper error handling
+- Validate CORS configuration
 
-### Test Failures
+## Current Implementation Status
 
-**Problem**: Tests failing unexpectedly
+### ✅ Implemented
+- Complete API server infrastructure
+- Middleware stack (logging, CORS, security headers, recovery)
+- Standardized response formats and error handling
+- Comprehensive endpoint routing structure
+- Health check and system info endpoints
 
-**Solution**:
-1. Run requests individually to isolate issue
-2. Check response body for error details
-3. Verify environment variables are set correctly
-4. Ensure service is in clean state (restart if needed)
+### 🚧 In Progress (MVP-013)
+- Agent management endpoint implementations
+- Configuration management endpoint implementations
+- Template management endpoint implementations
+- Task and workflow management
+- Communication system integration
+- Monitoring and metrics collection
 
-## 📈 CI/CD Integration
+### ⏳ Planned (Future MVPs)
+- Authentication and authorization
+- Rate limiting implementation
+- WebSocket support for real-time updates
+- Advanced monitoring dashboards
+- API versioning strategy
 
-### Running Tests in CI Pipeline
+## Usage Instructions
 
-```yaml
-# Example GitHub Actions integration
-- name: Run API Tests
-  run: |
-    newman run documents/4-QA/postman_collection.json \
-      -e documents/4-QA/postman_environment_local.json \
-      --reporters cli,json \
-      --reporter-json-export test-results.json
-```
-
-### Using Newman (CLI)
-
-Install Newman:
+### 1. Start the API Server
 ```bash
-npm install -g newman
+go run examples/api_server.go
+# or
+go run cmd/main.go --api-only
 ```
 
-Run collection:
+### 2. Verify Server is Running
 ```bash
-newman run postman_collection.json \
-  -e postman_environment_local.json \
-  --reporters cli,htmlextra \
-  --reporter-htmlextra-export report.html
+curl http://localhost:8080/health
 ```
 
-## 📝 Best Practices
+### 3. Import Postman Collection
+1. Open Postman
+2. Import `postman_mvp013_rest_api.json`
+3. Import `postman_environment_local.json`
+4. Select the local environment
+5. Run individual requests or the entire collection
 
-1. **Run Tests in Order**: Some tests depend on previous test results (e.g., agent creation before update)
+### 4. Run Automated Tests
+```bash
+# Using Newman (Postman CLI)
+newman run postman_mvp013_rest_api.json -e postman_environment_local.json
+```
 
-2. **Clean State**: Reset environment between test runs for consistent results
+## Development Guidelines
 
-3. **Monitor Performance**: Pay attention to response times and resource usage
+### Adding New Endpoints
+1. Define the endpoint in `internal/api/server.go`
+2. Implement the handler function
+3. Add corresponding Postman test in the collection
+4. Update this README with the new endpoint documentation
 
-4. **Update Collection**: Keep collection in sync with API changes
+### Test Data Management
+- Use Postman variables for dynamic test data
+- Include realistic test payloads in request bodies
+- Set up proper test assertions for response validation
 
-5. **Version Control**: Commit collection and environment files to git
+### Error Testing
+- Test both successful and error scenarios
+- Verify proper HTTP status codes
+- Check error response format consistency
 
-6. **Document Changes**: Update this README when adding new tests
+## Troubleshooting
 
-## 🤝 Contributing
+### Common Issues
+1. **Server not starting**: Check port 8080 is not in use
+2. **404 errors**: Verify API server is running with correct routing
+3. **CORS issues**: Check CORS middleware configuration
+4. **Request timeout**: Increase timeout settings for slow operations
 
-When adding new tests:
+### Debug Mode
+Start the server with debug logging:
+```bash
+go run examples/api_server.go --debug
+```
 
-1. Create descriptive test names
-2. Include appropriate assertions
-3. Add error handling
-4. Document expected behavior
-5. Update this README
+### Logs Analysis
+Check server logs for:
+- Request/response details
+- Error stack traces
+- Performance metrics
+- Middleware execution
 
-## 📚 Additional Resources
+## Contributing
 
+When adding new API endpoints:
+1. Follow RESTful conventions
+2. Use consistent response formats
+3. Add comprehensive Postman tests
+4. Update documentation
+5. Include error scenarios in tests
+
+## References
+
+- [REST API Design Guidelines](https://restfulapi.net/)
 - [Postman Documentation](https://learning.postman.com/)
-- [Newman CLI Documentation](https://github.com/postmanlabs/newman)
-- [CodeValdCortex API Documentation](../api.md)
-- [Test Writing Guide](./test-writing-guide.md)
-
----
-
-For questions or issues, please open a GitHub issue or contact the development team.
+- [Go Gin Framework](https://gin-gonic.com/)
+- [HTTP Status Codes](https://httpstatuses.com/)

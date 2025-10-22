@@ -1,0 +1,1588 @@
+{
+    "info": {
+        "_postman_id": "codevaldcortex-mvp013",
+        "name": "CodeValdCortex - REST API Layer (MVP-013)",
+        "description": "Complete REST API tests for MVP-013 - Agent Management, Configuration, Templates, Tasks, Communication, and Monitoring",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "version": "3.0.0"
+    },
+    "item": [
+        {
+            "name": "Health & System",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Health status is healthy\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data.status).to.eql('healthy');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "System Info",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"System info present\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('name');",
+                                    "    pm.expect(jsonData.data).to.have.property('version');",
+                                    "    pm.expect(jsonData.data.name).to.eql('CodeValdCortex');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "info"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Agent Management",
+            "item": [
+                {
+                    "name": "List Agents",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 501 (Not Implemented)\", function () {",
+                                    "    pm.response.to.have.status(501);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response indicates not implemented\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.error.code).to.eql('NOT_IMPLEMENTED');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents?page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Agent",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 501 (Not Implemented)\", function () {",
+                                    "    pm.response.to.have.status(501);",
+                                    "});",
+                                    "",
+                                    "// TODO: When implemented, expect 201 and set agent_id variable",
+                                    "// pm.collectionVariables.set('agent_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"test-worker-{{$timestamp}}\",\n    \"type\": \"worker\",\n    \"config\": {\n        \"max_concurrent_tasks\": 5,\n        \"task_queue_size\": 100,\n        \"timeout\": 30000\n    },\n    \"metadata\": {\n        \"environment\": \"test\",\n        \"version\": \"1.0.0\"\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Agent",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Agent",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"updated-worker\",\n    \"config\": {\n        \"max_concurrent_tasks\": 10,\n        \"task_queue_size\": 200\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Start Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/start",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "start"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Stop Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/stop",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "stop"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Restart Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/restart",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "restart"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Agent Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Agent Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Agent Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "metrics"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Agent Memory",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}/memory",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}",
+                                "memory"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Agent",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agents/{{agent_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agents",
+                                "{{agent_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Configuration Management",
+            "item": [
+                {
+                    "name": "List Configurations",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations?page=1&limit=10&agent_type=worker",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "agent_type",
+                                    "value": "worker"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Configuration",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// TODO: When implemented, capture config_id",
+                                    "// pm.collectionVariables.set('config_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"worker-config-{{$timestamp}}\",\n    \"agent_type\": \"worker\",\n    \"version\": \"1.0.0\",\n    \"configuration\": {\n        \"max_concurrent_tasks\": 5,\n        \"task_queue_size\": 100,\n        \"timeout\": 30000,\n        \"retry_attempts\": 3\n    },\n    \"metadata\": {\n        \"environment\": \"production\",\n        \"team\": \"platform\"\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Configuration",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Configuration",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"updated-worker-config\",\n    \"configuration\": {\n        \"max_concurrent_tasks\": 10,\n        \"task_queue_size\": 200,\n        \"timeout\": 45000\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Clone Configuration",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"cloned-config-{{$timestamp}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}/clone",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}",
+                                "clone"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Validate Configuration",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}/validate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Apply Configuration to Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}/apply/{{agent_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}",
+                                "apply",
+                                "{{agent_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Configuration Versions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}/versions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}",
+                                "versions"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Export Configuration",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/{{config_id}}/export",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "{{config_id}}",
+                                "export"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Import Configuration",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"imported-config\",\n    \"source\": \"file\",\n    \"data\": \"base64-encoded-config-data\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/configurations/import",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "configurations",
+                                "import"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Template Management",
+            "item": [
+                {
+                    "name": "List Templates",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/templates?page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Template",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// TODO: When implemented, capture template_id",
+                                    "// pm.collectionVariables.set('template_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"worker-template-{{$timestamp}}\",\n    \"description\": \"Standard worker agent template\",\n    \"agent_type\": \"worker\",\n    \"version\": \"1.0.0\",\n    \"content\": \"max_concurrent_tasks: {{.MaxTasks}}\\ntask_queue_size: {{.QueueSize}}\\ntimeout: {{.Timeout}}\",\n    \"variables\": [\n        {\n            \"name\": \"MaxTasks\",\n            \"type\": \"integer\",\n            \"default_value\": \"5\",\n            \"description\": \"Maximum concurrent tasks\"\n        },\n        {\n            \"name\": \"QueueSize\",\n            \"type\": \"integer\",\n            \"default_value\": \"100\",\n            \"description\": \"Task queue size\"\n        },\n        {\n            \"name\": \"Timeout\",\n            \"type\": \"integer\",\n            \"default_value\": \"30000\",\n            \"description\": \"Task timeout in ms\"\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/templates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Template",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/templates/{{template_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{template_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Render Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"variables\": {\n        \"MaxTasks\": \"10\",\n        \"QueueSize\": \"200\",\n        \"Timeout\": \"45000\"\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/templates/{{template_id}}/render",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{template_id}}",
+                                "render"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Validate Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/templates/{{template_id}}/validate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{template_id}}",
+                                "validate"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Template Variables",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/templates/{{template_id}}/variables",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "templates",
+                                "{{template_id}}",
+                                "variables"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Task Management",
+            "item": [
+                {
+                    "name": "List Tasks",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks?page=1&limit=10&status=pending",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "pending"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Task",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// TODO: When implemented, capture task_id",
+                                    "// pm.collectionVariables.set('task_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"test-task-{{$timestamp}}\",\n    \"type\": \"data_processing\",\n    \"agent_id\": \"{{agent_id}}\",\n    \"parameters\": {\n        \"input_file\": \"data.csv\",\n        \"output_format\": \"json\"\n    },\n    \"priority\": \"medium\",\n    \"timeout\": 30000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Task",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks/{{task_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks",
+                                "{{task_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Task",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"priority\": \"high\",\n    \"timeout\": 45000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks/{{task_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks",
+                                "{{task_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cancel Task",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks/{{task_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks",
+                                "{{task_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Retry Task",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks/{{task_id}}/retry",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks",
+                                "{{task_id}}",
+                                "retry"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Task Result",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks/{{task_id}}/result",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks",
+                                "{{task_id}}",
+                                "result"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Task Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tasks/{{task_id}}/logs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tasks",
+                                "{{task_id}}",
+                                "logs"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Workflow Management",
+            "item": [
+                {
+                    "name": "List Workflows",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/workflows?page=1&limit=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "workflows"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Workflow",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// TODO: When implemented, capture workflow_id",
+                                    "// pm.collectionVariables.set('workflow_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"data-pipeline-{{$timestamp}}\",\n    \"description\": \"Multi-step data processing workflow\",\n    \"steps\": [\n        {\n            \"name\": \"extract\",\n            \"type\": \"data_extraction\",\n            \"parameters\": {\"source\": \"database\"}\n        },\n        {\n            \"name\": \"transform\",\n            \"type\": \"data_transformation\",\n            \"depends_on\": [\"extract\"],\n            \"parameters\": {\"format\": \"json\"}\n        },\n        {\n            \"name\": \"load\",\n            \"type\": \"data_loading\",\n            \"depends_on\": [\"transform\"],\n            \"parameters\": {\"destination\": \"warehouse\"}\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/workflows",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "workflows"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Workflow",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/workflows/{{workflow_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "workflows",
+                                "{{workflow_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cancel Workflow",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/workflows/{{workflow_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "workflows",
+                                "{{workflow_id}}",
+                                "cancel"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Workflow Graph",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/workflows/{{workflow_id}}/graph",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "workflows",
+                                "{{workflow_id}}",
+                                "graph"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Communication",
+            "item": [
+                {
+                    "name": "List Messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/communications/messages?page=1&limit=10&channel={{channel_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "communications",
+                                "messages"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "channel",
+                                    "value": "{{channel_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Send Message",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// TODO: When implemented, capture message_id",
+                                    "// pm.collectionVariables.set('message_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"to\": \"{{agent_id}}\",\n    \"from\": \"api-client\",\n    \"type\": \"task_assignment\",\n    \"content\": {\n        \"task_id\": \"{{task_id}}\",\n        \"instructions\": \"Process the uploaded data file\"\n    },\n    \"priority\": \"normal\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/communications/messages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "communications",
+                                "messages"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Message",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/communications/messages/{{message_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "communications",
+                                "messages",
+                                "{{message_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Channels",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/communications/channels",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "communications",
+                                "channels"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Channel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// TODO: When implemented, capture channel_id",
+                                    "// pm.collectionVariables.set('channel_id', jsonData.data.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"agent-coordination-{{$timestamp}}\",\n    \"type\": \"broadcast\",\n    \"participants\": [\"{{agent_id}}\"],\n    \"metadata\": {\n        \"purpose\": \"task coordination\"\n    }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/communications/channels",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "communications",
+                                "channels"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Communication Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/communications/stats",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "communications",
+                                "stats"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Monitoring & Metrics",
+            "item": [
+                {
+                    "name": "System Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "metrics"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Agent Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/metrics/agents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "metrics",
+                                "agents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resource Metrics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/metrics/resources",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "metrics",
+                                "resources"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Agents Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/health/agents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health",
+                                "agents"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Services Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/health/services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health",
+                                "services"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Database Health",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/health/database",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "health",
+                                "database"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Administration",
+            "item": [
+                {
+                    "name": "System Config",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/admin/config",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "admin",
+                                "config"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reload Config",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/admin/config/reload",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "admin",
+                                "config",
+                                "reload"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "System Stats",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/admin/stats",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "admin",
+                                "stats"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Trigger Maintenance",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"type\": \"cleanup\",\n    \"scope\": \"completed_tasks\",\n    \"dry_run\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/admin/maintenance",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "admin",
+                                "maintenance"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "System Diagnostics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/admin/diagnostics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "admin",
+                                "diagnostics"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "agent_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "config_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "template_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "task_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "workflow_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "message_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "channel_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
