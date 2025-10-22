@@ -7,33 +7,22 @@
 
 ## Foundation Tasks (P0 - Blocking)
 
-## Foundation Tasks (P0 - Blocking)
-
-| Task ID | Title                        | Description                                                                      | Status                  | Priority | Effort | Skills Required       | Dependencies |
-| ------- | ---------------------------- | -------------------------------------------------------------------------------- | ----------------------- | -------- | ------ | --------------------- | ------------ |
-| MVP-001 | Project Infrastructure Setup | Configure development environment, CI/CD pipeline, and version control workflows | ✅ Complete (2025-10-20) | P0       | High   | DevOps, Backend Dev   | None         |
-| MVP-002 | Agent Runtime Environment    | Set up Go-based agent execution environment with goroutine management            | ✅ Complete (2025-10-20) | P0       | High   | Backend Dev, Go       | MVP-001      |
-| MVP-003 | Agent Registry System        | Implement agent discovery and registration service with ArangoDB                 | ✅ Complete (2025-10-20) | P0       | Medium | Backend Dev, Database | MVP-002      |
+*All foundation tasks completed. See `mvp_done.md` for details.*
 
 ## Core Agent Mechanics (P0 - Blocking)
 
-| Task ID | Title                | Description                                              | Status      | Priority | Effort | Skills Required | Dependencies |
-| ------- | -------------------- | -------------------------------------------------------- | ----------- | -------- | ------ | --------------- | ------------ |
+*All core agent mechanics tasks completed. See `mvp_done.md` for details.*
 
 ## Core Functionality Tasks (P1 - Critical)
 
-| Task ID | Title                          | Description                                                                                                | Status      | Priority | Effort | Skills Required         | Dependencies     |
-| ------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ---------------- |
-| MVP-008 | Agent Pool Management          | Implement agent grouping, load balancing, and resource allocation                                          | Not Started | P1       | Medium | Backend Dev, Go         | MVP-006          |
-| MVP-009 | Agent Event Processing         | Implement internal event loops and handler registration for processing incoming messages and state changes | ✅ Complete (2025-01-27) | P1       | Medium | Backend Dev, Go         | MVP-005, MVP-008 |
-| MVP-010 | Agent Health Monitoring        | Develop health checks, metrics collection, and failure detection with pub/sub status broadcasting          | ✅ Complete (2024-12-20) | P1       | Medium | Backend Dev, Monitoring | MVP-009          |
+*All core functionality tasks completed. See `mvp_done.md` for details.*
 
 ## Platform Integration Tasks (P1 - Critical)
 
 | Task ID | Title                 | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | --------------------- | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
 | MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-010      |
-| MVP-015 | Management Dashboard  | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | Not Started | P1       | Medium | Go, Frontend Dev, Templ | MVP-013      |
+| MVP-015 | Management Dashboard  | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | In Progress | P1       | Medium | Go, Frontend Dev, Templ | MVP-013      |
 
 ## Authentication & Security Tasks (P2 - Important)
 

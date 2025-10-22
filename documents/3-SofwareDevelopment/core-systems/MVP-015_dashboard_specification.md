@@ -748,17 +748,93 @@ go get github.com/a-h/templ
 # (Already have Gin, ArangoDB, etc.)
 ```
 
-### Frontend Dependencies (CDN)
-- **HTMX**: `https://unpkg.com/htmx.org@1.9.10`
-- **Alpine.js**: `https://unpkg.com/alpinejs@3.13.3`
-- **Tailwind CSS**: `https://cdn.tailwindcss.com`
-- **Chart.js**: `https://cdn.jsdelivr.net/npm/chart.js`
+### Frontend Assets (Self-Hosted - No CDN)
+
+**Important**: CodeValdCortex must work in air-gapped environments. All frontend assets must be downloaded and self-hosted.
+
+#### Required Assets
+
+```
+static/
+├── css/
+│   ├── tailwind.min.css          # Built with Tailwind CLI (~10KB)
+│   └── styles.css                # Custom styles
+├── js/
+│   ├── htmx.min.js               # HTMX v1.9.10+ (~14KB)
+│   ├── alpine.min.js             # Alpine.js v3.13.3+ (~15KB)
+│   ├── chart.min.js              # Chart.js v4.4.1+ (~60KB)
+│   └── alpine-components.js      # Custom components
+└── img/
+    └── logo.svg
+```
+
+#### Download Script
+
+Create `scripts/download-assets.sh`:
+
+```bash
+#!/bin/bash
+set -e
+
+echo "Downloading frontend assets..."
+mkdir -p static/{css,js,img}
+
+# Download HTMX
+curl -L https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js \
+  -o static/js/htmx.min.js
+
+# Download Alpine.js
+curl -L https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js \
+  -o static/js/alpine.min.js
+
+# Download Chart.js
+curl -L https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js \
+  -o static/js/chart.min.js
+
+echo "✓ All assets downloaded"
+```
+
+#### Tailwind CSS Setup
+
+```bash
+# Install Tailwind CLI
+npm install -D tailwindcss
+
+# Build CSS
+npx tailwindcss -i ./input.css -o ./static/css/tailwind.min.css --minify
+```
+
+#### Asset Verification
+
+Before deployment, verify all assets:
+
+```bash
+# Create verification script
+cat > scripts/verify-assets.sh << 'EOF'
+#!/bin/bash
+REQUIRED=(
+    "static/css/tailwind.min.css"
+    "static/js/htmx.min.js"
+    "static/js/alpine.min.js"
+    "static/js/chart.min.js"
+)
+
+for asset in "${REQUIRED[@]}"; do
+    [ -f "$asset" ] && echo "✓ $asset" || echo "✗ $asset MISSING"
+done
+EOF
+
+chmod +x scripts/verify-assets.sh
+./scripts/verify-assets.sh
+```
 
 ## Implementation Phases
 
 ### Phase 1: Foundation (2-3 hours)
 - [ ] Install Templ, setup project structure
-- [ ] Create base layout component
+- [ ] Download and setup static assets (run download-assets.sh)
+- [ ] Build Tailwind CSS
+- [ ] Create base layout component (with self-hosted assets)
 - [ ] Setup static file serving
 - [ ] Create dashboard handler
 - [ ] Basic routing

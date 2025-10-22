@@ -175,8 +175,30 @@
 - **Kubernetes Compatibility**: Certified compatibility with Kubernetes 1.24+
 - **Container Standards**: OCI-compliant container images with multi-architecture support
 - **On-Premises Deployment**: Support for air-gapped and on-premises deployments
+- **Air-Gapped Operations**: System must function completely without external internet dependencies
+- **Self-Contained Assets**: All frontend assets (JavaScript, CSS, fonts) must be self-hosted
+- **Offline Deployment**: Complete system deployment possible in disconnected environments
 
-**Acceptance Criteria**: Functional testing passes on all target cloud platforms
+**Acceptance Criteria**: Functional testing passes on all target cloud platforms and in fully air-gapped environments
+
+#### NFR-COM-002: Air-Gapped and Secure Environment Support
+**Requirement**: System must operate fully in secure, air-gapped, and disconnected environments without external dependencies.
+
+**Specifications**:
+- **No External CDN Dependencies**: All frontend assets served from local `/static` directory
+- **Self-Hosted Libraries**: HTMX, Alpine.js, Chart.js, and Tailwind CSS bundled with application
+- **Offline Documentation**: Complete documentation available offline
+- **Container Registry**: Support for private, air-gapped container registries
+- **Asset Verification**: Checksums and verification for all bundled assets
+- **Update Mechanism**: Controlled update process for vendored libraries
+
+**Security Rationale**: Government, defense, and high-security enterprise deployments require complete isolation from external networks.
+
+**Acceptance Criteria**: 
+- System deploys and operates without any external network requests
+- All assets verified with checksums
+- Asset verification script passes in air-gapped environment
+- Complete feature functionality without internet connectivity
 
 #### NFR-COM-002: Database and Storage Integration
 **Requirement**: System must support multiple database technologies and storage backends.

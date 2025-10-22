@@ -142,6 +142,9 @@ func Load(configPath string) (*Config, error) {
 	}
 
 	// Override with environment variables
+	if dbHost := os.Getenv("CVXC_DATABASE_HOST"); dbHost != "" {
+		config.Database.Host = dbHost
+	}
 	if password := os.Getenv("CVXC_DATABASE_PASSWORD"); password != "" {
 		config.Database.Password = password
 	}

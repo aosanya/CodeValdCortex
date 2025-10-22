@@ -14,6 +14,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
+	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -143,6 +144,23 @@ func (a *App) setupServer() error {
 	// Register task handler routes
 	taskHandler := handlers.NewTaskHandler(a.runtimeManager)
 	taskHandler.RegisterRoutes(router)
+
+	// Register web dashboard handler
+	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
+
+	// Serve static files
+	router.Static("/static", "./static")
+
+	// Web dashboard routes
+	router.GET("/", dashboardHandler.ShowDashboard)
+	router.GET("/dashboard", dashboardHandler.ShowDashboard)
+
+	// API routes for web dashboard (HTMX endpoints)
+	webAPI := router.Group("/api/web")
+	{
+		webAPI.GET("/agents/live", dashboardHandler.GetAgentsLive)
+		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
+	}
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {

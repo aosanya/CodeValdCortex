@@ -57,6 +57,33 @@
 
 **Mitigation Strategies**: Storage abstraction layer, performance benchmarking, migration tooling
 
+#### CONST-TECH-005: Air-Gapped and Disconnected Environment Constraints
+**Constraint Type**: Deployment Environment Limitation
+**Description**: System must function in completely isolated, air-gapped, and secure environments without external network access.
+
+**Specific Limitations**:
+- **No External CDN Access**: Cannot rely on external CDNs for JavaScript, CSS, or fonts
+- **Asset Bundling Required**: All frontend dependencies must be vendored and self-hosted
+- **Update Mechanism**: Updates must be deployed through controlled, offline processes
+- **Documentation Availability**: All documentation must be available offline
+- **Certificate Management**: TLS certificates managed without external CA validation
+- **Time Synchronization**: NTP may not be available; system must handle time drift
+
+**Impact on Requirements**: 
+- Frontend architecture must use self-hosted assets only
+- Build process must download and bundle all dependencies
+- Deployment packages must be completely self-contained
+- Asset verification and integrity checks required
+
+**Mitigation Strategies**: 
+- Asset download scripts for build-time dependency resolution
+- Comprehensive asset verification with checksums
+- Offline documentation generation
+- Self-contained deployment packages
+- Asset update procedures documented
+
+**Target Environments**: Government, defense, financial institutions, high-security enterprises
+
 ## 2. Enterprise Business Constraints
 
 ### 2.1 Market and Commercial Constraints
@@ -70,8 +97,9 @@
 - **Data Governance**: Strict data classification and handling procedures
 - **Access Controls**: Enterprise-grade role-based access control (RBAC) implementation
 - **Documentation**: Comprehensive security documentation and incident response procedures
+- **Air-Gapped Deployment**: Must support deployment in isolated, secure environments
 
-**Mitigation Strategies**: Security-first design principles, automated compliance monitoring, expert security consultation
+**Mitigation Strategies**: Security-first design principles, automated compliance monitoring, expert security consultation, self-contained deployment model
 
 #### CONST-BUS-002: Enterprise Integration Requirements
 **Constraint Type**: Technical and Commercial Limitation

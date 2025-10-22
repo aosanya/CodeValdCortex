@@ -9,15 +9,6 @@ server:
   write_timeout: 30
   tls_enabled: false
 
-database:
-  type: "arangodb"
-  host: "localhost"
-  port: 8529
-  database: "codevaldcortex"
-  username: "root"
-  password: ""
-  ssl_mode: "disable"
-
 kubernetes:
   config_path: ""
   namespace: "default"
