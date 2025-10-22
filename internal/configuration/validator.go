@@ -1,18 +1,23 @@
 package configuration
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agent"
+	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // DefaultValidator implements the Validator interface
 type DefaultValidator struct {
 	// resourceChecker checks resource availability
 	resourceChecker ResourceChecker
+
+	// agentTypeService validates against registered agent types
+	agentTypeService registry.AgentTypeService
 }
 
 // ResourceChecker defines the interface for checking resource availability
@@ -59,8 +64,22 @@ func (ve ValidationErrors) Error() string {
 // NewDefaultValidator creates a new default validator
 func NewDefaultValidator(resourceChecker ResourceChecker) *DefaultValidator {
 	return &DefaultValidator{
-		resourceChecker: resourceChecker,
+		resourceChecker:  resourceChecker,
+		agentTypeService: nil, // Set via SetAgentTypeService
 	}
+}
+
+// NewDefaultValidatorWithTypeService creates a validator with agent type service
+func NewDefaultValidatorWithTypeService(resourceChecker ResourceChecker, agentTypeService registry.AgentTypeService) *DefaultValidator {
+	return &DefaultValidator{
+		resourceChecker:  resourceChecker,
+		agentTypeService: agentTypeService,
+	}
+}
+
+// SetAgentTypeService sets the agent type service for validation
+func (v *DefaultValidator) SetAgentTypeService(service registry.AgentTypeService) {
+	v.agentTypeService = service
 }
 
 // Validate validates an agent configuration
@@ -84,13 +103,15 @@ func (v *DefaultValidator) Validate(config *AgentConfiguration) error {
 		})
 	}
 
-	// Validate agent type is supported
-	if !isValidAgentType(config.AgentType) {
-		errors = append(errors, ValidationError{
-			Field:   "agent_type",
-			Value:   config.AgentType,
-			Message: "unsupported agent type",
-		})
+	// Validate agent type is supported using registry if available
+	if config.AgentType != "" {
+		if err := v.validateAgentType(config.AgentType); err != nil {
+			errors = append(errors, ValidationError{
+				Field:   "agent_type",
+				Value:   config.AgentType,
+				Message: err.Error(),
+			})
+		}
 	}
 
 	// Validate base configuration
@@ -597,6 +618,32 @@ func (v *DefaultValidator) validateLabels(labels map[string]string) error {
 }
 
 // Helper functions
+
+// validateAgentType validates an agent type using the registry or fallback to hardcoded list
+func (v *DefaultValidator) validateAgentType(agentType string) error {
+	// If agent type service is available, use it
+	if v.agentTypeService != nil {
+		ctx := context.Background()
+		isValid, err := v.agentTypeService.IsValidType(ctx, agentType)
+		if err != nil {
+			// On error, fall back to hardcoded validation
+			if !isValidAgentType(agentType) {
+				return fmt.Errorf("unsupported agent type")
+			}
+			return nil
+		}
+		if !isValid {
+			return fmt.Errorf("agent type not registered or disabled")
+		}
+		return nil
+	}
+
+	// Fallback to hardcoded list
+	if !isValidAgentType(agentType) {
+		return fmt.Errorf("unsupported agent type")
+	}
+	return nil
+}
 
 func isValidAgentType(agentType string) bool {
 	validTypes := []string{"worker", "coordinator", "monitor", "proxy", "gateway"}

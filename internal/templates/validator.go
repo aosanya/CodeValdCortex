@@ -1,20 +1,39 @@
 package templates
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // DefaultValidator implements the Validator interface
-type DefaultValidator struct{}
+type DefaultValidator struct {
+	agentTypeService registry.AgentTypeService
+}
 
 // NewDefaultValidator creates a new default template validator
 func NewDefaultValidator() *DefaultValidator {
-	return &DefaultValidator{}
+	return &DefaultValidator{
+		agentTypeService: nil,
+	}
+}
+
+// NewDefaultValidatorWithTypeService creates a validator with agent type service
+func NewDefaultValidatorWithTypeService(agentTypeService registry.AgentTypeService) *DefaultValidator {
+	return &DefaultValidator{
+		agentTypeService: agentTypeService,
+	}
+}
+
+// SetAgentTypeService sets the agent type service for validation
+func (v *DefaultValidator) SetAgentTypeService(service registry.AgentTypeService) {
+	v.agentTypeService = service
 }
 
 // ValidateTemplate validates a template
@@ -308,6 +327,17 @@ func (v *DefaultValidator) validateVariableConstraints(tv TemplateVariable) erro
 // Helper methods
 
 func (v *DefaultValidator) isValidAgentType(agentType string) bool {
+	// If agent type service is available, use it
+	if v.agentTypeService != nil {
+		ctx := context.Background()
+		isValid, err := v.agentTypeService.IsValidType(ctx, agentType)
+		if err == nil && isValid {
+			return true
+		}
+		// Fall back to hardcoded list on error
+	}
+
+	// Fallback to hardcoded list
 	validTypes := []string{"worker", "coordinator", "monitor", "proxy", "gateway"}
 	for _, valid := range validTypes {
 		if agentType == valid {

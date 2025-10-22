@@ -1,9 +1,7 @@
 package config
 
 import (
-	"os"
 	"path/filepath"
-	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -124,9 +122,24 @@ func Load(configPath string) (*Config, error) {
 	viper.AddConfigPath("./configs")
 	viper.AddConfigPath("/etc/codevaldcortex")
 
-	// Environment variable support
+	// Environment variable support with CVXC prefix
 	viper.SetEnvPrefix("CVXC")
 	viper.AutomaticEnv()
+
+	// Bind specific environment variables for nested config
+	viper.BindEnv("app_name", "CVXC_APP_NAME")
+	viper.BindEnv("log_level", "CVXC_LOG_LEVEL")
+	viper.BindEnv("log_format", "CVXC_LOG_FORMAT")
+	viper.BindEnv("server.host", "CVXC_SERVER_HOST")
+	viper.BindEnv("server.port", "CVXC_SERVER_PORT")
+	viper.BindEnv("server.read_timeout", "CVXC_SERVER_READ_TIMEOUT")
+	viper.BindEnv("server.write_timeout", "CVXC_SERVER_WRITE_TIMEOUT")
+	viper.BindEnv("database.type", "CVXC_DATABASE_TYPE")
+	viper.BindEnv("database.host", "CVXC_DATABASE_HOST")
+	viper.BindEnv("database.port", "CVXC_DATABASE_PORT")
+	viper.BindEnv("database.database", "CVXC_DATABASE_DATABASE")
+	viper.BindEnv("database.username", "CVXC_DATABASE_USERNAME")
+	viper.BindEnv("database.password", "CVXC_DATABASE_PASSWORD")
 
 	// Read config file if it exists
 	if err := viper.ReadInConfig(); err != nil {
@@ -139,24 +152,6 @@ func Load(configPath string) (*Config, error) {
 	// Unmarshal into struct
 	if err := viper.Unmarshal(config); err != nil {
 		return nil, err
-	}
-
-	// Override with environment variables
-	if dbHost := os.Getenv("CVXC_DATABASE_HOST"); dbHost != "" {
-		config.Database.Host = dbHost
-	}
-	if password := os.Getenv("CVXC_DATABASE_PASSWORD"); password != "" {
-		config.Database.Password = password
-	}
-	if port := os.Getenv("CVXC_SERVER_PORT"); port != "" {
-		if p, err := strconv.Atoi(port); err == nil {
-			config.Server.Port = p
-		}
-	}
-	if dbPort := os.Getenv("CVXC_DATABASE_PORT"); dbPort != "" {
-		if p, err := strconv.Atoi(dbPort); err == nil {
-			config.Database.Port = p
-		}
 	}
 
 	return config, nil

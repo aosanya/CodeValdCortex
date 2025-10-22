@@ -1,0 +1,200 @@
+package components
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/registry"
+)
+
+templ AgentTypeCard(agentType *registry.AgentType) {
+	<div 
+		class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
+		x-data="{ expanded: false }"
+		data-type-id={ agentType.ID }
+	>
+		<!-- Header -->
+		<div class="flex justify-between items-start mb-4">
+			<div class="flex-1">
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+					{ agentType.Name }
+				</h3>
+				<p class="text-sm text-gray-500 dark:text-gray-400">
+					ID: <code class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{ agentType.ID }</code>
+				</p>
+			</div>
+			
+			<div class="flex items-center space-x-2">
+				@CategoryBadge(agentType.Category)
+				@EnabledBadge(agentType.IsEnabled)
+				if agentType.IsSystemType {
+					<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+						<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+						</svg>
+						System
+					</span>
+				}
+			</div>
+		</div>
+		
+		<!-- Description -->
+		<div class="mb-4">
+			<p class="text-sm text-gray-600 dark:text-gray-300">
+				{ agentType.Description }
+			</p>
+		</div>
+		
+		<!-- Info Grid -->
+		<div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+			<div>
+				<span class="text-gray-500 dark:text-gray-400">Version:</span>
+				<span class="ml-2 font-medium text-gray-900 dark:text-white">{ agentType.Version }</span>
+			</div>
+			<div>
+				<span class="text-gray-500 dark:text-gray-400">Category:</span>
+				<span class="ml-2 font-medium text-gray-900 dark:text-white">{ agentType.Category }</span>
+			</div>
+			<div>
+				<span class="text-gray-500 dark:text-gray-400">Required Caps:</span>
+				<span class="ml-2 font-medium text-gray-900 dark:text-white">{ fmt.Sprintf("%d", len(agentType.RequiredCapabilities)) }</span>
+			</div>
+			<div>
+				<span class="text-gray-500 dark:text-gray-400">Optional Caps:</span>
+				<span class="ml-2 font-medium text-gray-900 dark:text-white">{ fmt.Sprintf("%d", len(agentType.OptionalCapabilities)) }</span>
+			</div>
+		</div>
+		
+		<!-- Capabilities Section (Expandable) -->
+		<div class="border-t dark:border-gray-700 pt-4">
+			<button 
+				@click="expanded = !expanded"
+				class="flex items-center justify-between w-full text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+			>
+				<span>Capabilities & Details</span>
+				<svg 
+					class="w-5 h-5 transform transition-transform"
+					:class="{ 'rotate-180': expanded }"
+					fill="none" 
+					stroke="currentColor" 
+					viewBox="0 0 24 24"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+				</svg>
+			</button>
+			
+			<div 
+				x-show="expanded"
+				x-transition
+				class="mt-4 space-y-4"
+			>
+				<!-- Required Capabilities -->
+				if len(agentType.RequiredCapabilities) > 0 {
+					<div>
+						<h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Required Capabilities</h4>
+						<div class="flex flex-wrap gap-2">
+							for _, cap := range agentType.RequiredCapabilities {
+								<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+									{ cap }
+								</span>
+							}
+						</div>
+					</div>
+				}
+				
+				<!-- Optional Capabilities -->
+				if len(agentType.OptionalCapabilities) > 0 {
+					<div>
+						<h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Optional Capabilities</h4>
+						<div class="flex flex-wrap gap-2">
+							for _, cap := range agentType.OptionalCapabilities {
+								<span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+									{ cap }
+								</span>
+							}
+						</div>
+					</div>
+				}
+				
+				<!-- Default Config -->
+				if len(agentType.DefaultConfig) > 0 {
+					<div>
+						<h4 class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Default Configuration</h4>
+						<div class="bg-gray-50 dark:bg-gray-900 rounded p-3 overflow-x-auto">
+							<pre class="text-xs text-gray-800 dark:text-gray-200">
+								for key, value := range agentType.DefaultConfig {
+									{ fmt.Sprintf("%s: %v\n", key, value) }
+								}
+							</pre>
+						</div>
+					</div>
+				}
+				
+				<!-- Actions -->
+				<div class="flex space-x-2 pt-2">
+					if !agentType.IsSystemType {
+						if agentType.IsEnabled {
+							<button 
+								hx-post={ fmt.Sprintf("/api/v1/agent-types/%s/disable", agentType.ID) }
+								hx-target="closest div[data-type-id]"
+								hx-swap="outerHTML"
+								class="px-3 py-1 text-xs font-medium text-yellow-700 bg-yellow-100 rounded hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:hover:bg-yellow-800"
+							>
+								Disable
+							</button>
+						} else {
+							<button 
+								hx-post={ fmt.Sprintf("/api/v1/agent-types/%s/enable", agentType.ID) }
+								hx-target="closest div[data-type-id]"
+								hx-swap="outerHTML"
+								class="px-3 py-1 text-xs font-medium text-green-700 bg-green-100 rounded hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800"
+							>
+								Enable
+							</button>
+						}
+						<button 
+							@click="$dispatch('edit-agent-type', { id: agentType.ID })"
+							class="px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+						>
+							Edit
+						</button>
+					}
+					<button 
+						@click="$dispatch('view-schema', { id: agentType.ID })"
+						class="px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+					>
+						View Schema
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ CategoryBadge(category string) {
+	<span class={ 
+		"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+		templ.KV("bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200", category == "core"),
+		templ.KV("bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", category == "infrastructure"),
+		templ.KV("bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200", category == "monitoring"),
+		templ.KV("bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200", category != "core" && category != "infrastructure" && category != "monitoring"),
+	}>
+		{ category }
+	</span>
+}
+
+templ EnabledBadge(enabled bool) {
+	if enabled {
+		<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+			<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+			</svg>
+			Enabled
+		</span>
+	} else {
+		<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+			<svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+			</svg>
+			Disabled
+		</span>
+	}
+}
