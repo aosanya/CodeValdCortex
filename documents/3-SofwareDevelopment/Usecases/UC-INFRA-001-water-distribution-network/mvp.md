@@ -98,11 +98,10 @@
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-001 | Pipe Agent Implementation | Implement Pipe Agent with attributes (pipe_id, material, diameter, location, pressure_rating), capabilities (monitor flow, detect anomalies, communicate status), and state machine (Operational → Degraded → Warning → Critical → Maintenance) | **UC-INFRA-001** | Not Started | P0 | High | Go, CodeValdCortex | Framework Core |
-| INFRA-002 | Sensor Agent Implementation | Implement IoT Sensor Agent with real-time monitoring capabilities (pressure, flow rate, temperature), data validation, and anomaly detection logic | **UC-INFRA-001** | Not Started | P0 | High | Go, MQTT/IoT | INFRA-001 |
-| INFRA-003 | Pump Agent Implementation | Implement Pump Agent with control capabilities, efficiency monitoring, predictive maintenance logic, and automated response to pressure fluctuations | **UC-INFRA-001** | Not Started | P0 | High | Go, Control Systems | INFRA-001 |
-| INFRA-004 | Valve Agent Implementation | Implement Valve Agent with position control, automatic isolation for leak containment, and coordination with adjacent infrastructure agents | **UC-INFRA-001** | Not Started | P0 | Medium | Go | INFRA-001 |
-| INFRA-005 | Zone Coordinator Agent | Implement Zone Coordinator that manages groups of infrastructure agents, aggregates data, and coordinates zone-wide responses | **UC-INFRA-001** | Not Started | P0 | High | Go, Data Aggregation | INFRA-001 to INFRA-004 |
+| INFRA-002 | Sensor Agent Implementation | Implement IoT Sensor Agent with real-time monitoring capabilities (pressure, flow rate, temperature), data validation, and anomaly detection logic | **UC-INFRA-001** | Not Started | P0 | High | Go, MQTT/IoT | Framework Core |
+| INFRA-003 | Pump Agent Implementation | Implement Pump Agent with control capabilities, efficiency monitoring, predictive maintenance logic, and automated response to pressure fluctuations | **UC-INFRA-001** | Not Started | P0 | High | Go, Control Systems | Framework Core |
+| INFRA-004 | Valve Agent Implementation | Implement Valve Agent with position control, automatic isolation for leak containment, and coordination with adjacent infrastructure agents | **UC-INFRA-001** | Not Started | P0 | Medium | Go | Framework Core |
+| INFRA-005 | Zone Coordinator Agent | Implement Zone Coordinator that manages groups of infrastructure agents, aggregates data, and coordinates zone-wide responses | **UC-INFRA-001** | Not Started | P0 | High | Go, Data Aggregation | INFRA-002 to INFRA-004 |
 
 ## Phase 2: Agent Communication & Collaboration (P1 - Critical)
 

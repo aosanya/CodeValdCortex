@@ -1,0 +1,221 @@
+{
+    "id": "pipe",
+    "name": "Pipe Agent",
+    "description": "Water distribution pipe infrastructure agent for monitoring and managing pipe segments in the distribution network",
+    "category": "infrastructure",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "pipe_id",
+            "material",
+            "diameter",
+            "length"
+        ],
+        "properties": {
+            "pipe_id": {
+                "type": "string",
+                "pattern": "^PIPE-[0-9]+$",
+                "description": "Unique pipe identifier (e.g., PIPE-001)"
+            },
+            "material": {
+                "type": "string",
+                "enum": [
+                    "PVC",
+                    "steel",
+                    "copper",
+                    "cast_iron"
+                ],
+                "description": "Pipe material type"
+            },
+            "diameter": {
+                "type": "integer",
+                "minimum": 50,
+                "maximum": 2000,
+                "description": "Pipe diameter in millimeters"
+            },
+            "length": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Pipe length in meters"
+            },
+            "installation_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date when pipe was installed"
+            },
+            "pressure_rating": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum pressure rating in PSI"
+            },
+            "flow_capacity": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum flow rate in liters per minute"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "start",
+                    "end"
+                ],
+                "properties": {
+                    "start": {
+                        "type": "object",
+                        "required": [
+                            "latitude",
+                            "longitude"
+                        ],
+                        "properties": {
+                            "latitude": {
+                                "type": "number",
+                                "minimum": -90,
+                                "maximum": 90
+                            },
+                            "longitude": {
+                                "type": "number",
+                                "minimum": -180,
+                                "maximum": 180
+                            },
+                            "elevation": {
+                                "type": "number",
+                                "description": "Elevation in meters"
+                            }
+                        }
+                    },
+                    "end": {
+                        "type": "object",
+                        "required": [
+                            "latitude",
+                            "longitude"
+                        ],
+                        "properties": {
+                            "latitude": {
+                                "type": "number",
+                                "minimum": -90,
+                                "maximum": 90
+                            },
+                            "longitude": {
+                                "type": "number",
+                                "minimum": -180,
+                                "maximum": 180
+                            },
+                            "elevation": {
+                                "type": "number",
+                                "description": "Elevation in meters"
+                            }
+                        }
+                    }
+                },
+                "description": "Geographic location of pipe endpoints"
+            },
+            "expected_pressure": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Expected operating pressure in PSI"
+            },
+            "connected_agents": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "IDs of connected agents (valves, sensors, other pipes)"
+            },
+            "upstream_agent": {
+                "type": "string",
+                "description": "ID of upstream agent (pump or pipe)"
+            },
+            "downstream_agent": {
+                "type": "string",
+                "description": "ID of downstream agent (pipe or zone)"
+            },
+            "zone": {
+                "type": "string",
+                "description": "Distribution zone identifier"
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "active",
+                    "standby",
+                    "maintenance",
+                    "decommissioned"
+                ],
+                "default": "active",
+                "description": "Current operational status"
+            },
+            "condition_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Health score (0-100, higher is better)"
+            },
+            "maintenance_scheduled": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Next scheduled maintenance date"
+            },
+            "notes": {
+                "type": "string",
+                "description": "Additional notes or comments"
+            }
+        }
+    },
+    "required_capabilities": [
+        "flow_monitoring",
+        "pressure_monitoring",
+        "status_reporting",
+        "heartbeat"
+    ],
+    "optional_capabilities": [
+        "leak_detection",
+        "condition_assessment",
+        "predictive_maintenance",
+        "metrics_reporting"
+    ],
+    "default_config": {
+        "monitoring_interval": "60s",
+        "heartbeat_interval": "30s",
+        "status": "active",
+        "pressure_deviation_alert_threshold": 5.0,
+        "flow_efficiency_warning": 0.7,
+        "flow_efficiency_critical": 0.5,
+        "condition_score_warning": 70,
+        "condition_score_critical": 30
+    },
+    "validation_rules": [
+        {
+            "field": "diameter",
+            "rule_type": "range",
+            "parameters": {
+                "min": 50,
+                "max": 2000
+            },
+            "error_message": "Pipe diameter must be between 50mm and 2000mm"
+        },
+        {
+            "field": "pressure_rating",
+            "rule_type": "range",
+            "parameters": {
+                "min": 0,
+                "max": 500
+            },
+            "error_message": "Pressure rating must be between 0 and 500 PSI"
+        }
+    ],
+    "metadata": {
+        "use_case": "UC-INFRA-001",
+        "domain": "water-distribution",
+        "supported_materials": "PVC, steel, copper, cast_iron",
+        "typical_diameter_range": "50-2000mm",
+        "typical_pressure_range": "80-200 PSI",
+        "documentation_url": "https://docs.codevaldcortex.io/agent-types/pipe"
+    },
+    "is_system_type": false,
+    "is_enabled": true,
+    "created_at": "2025-10-22T00:00:00Z",
+    "updated_at": "2025-10-22T00:00:00Z",
+    "created_by": "system"
+}
