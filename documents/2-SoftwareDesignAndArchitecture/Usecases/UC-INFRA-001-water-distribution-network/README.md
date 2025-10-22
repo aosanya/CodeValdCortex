@@ -36,9 +36,9 @@ This directory contains the software design and architecture documentation for t
 - **Real-time**: Sub-second response times for critical events
 
 ### Technology Stack
-- **Runtime**: CodeValdCortex Framework (Go)
-- **Database**: PostgreSQL (state), TimescaleDB (time-series)
-- **Message Broker**: Redis Pub/Sub
+- **Runtime**: CodeValdCortex Framework (Go 1.21+)
+- **Database**: ArangoDB (multi-model: document, graph, key-value)
+- **Communication**: ArangoDB-based agent messaging with polling
 - **IoT Protocol**: MQTT, Modbus, OPC UA
 - **Deployment**: Kubernetes (cloud), Edge devices (field)
 

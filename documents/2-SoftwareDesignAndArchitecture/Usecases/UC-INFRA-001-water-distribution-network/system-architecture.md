@@ -29,10 +29,10 @@ The Water Distribution Network Management system follows a hierarchical edge-to-
 │  │  │ Agent Registry │  │ Communication  │  │  Task System     │  │  │
 │  │  └────────────────┘  └────────────────┘  └──────────────────┘  │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────────────┐   │
-│  │  Message Broker  │  │   Time-Series    │  │   Configuration    │   │
-│  │  (Redis)         │  │   Database       │  │   Service          │   │
-│  └──────────────────┘  └──────────────────┘  └────────────────────┘   │
+│  ┌──────────────────┐  ┌────────────────────┐  ┌────────────────────┐ │
+│  │  Message Bus     │  │   ArangoDB         │  │   Configuration    │ │
+│  │  (ArangoDB)      │  │   Multi-Model DB   │  │   Service          │ │
+│  └──────────────────┘  └────────────────────┘  └────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     │ (MQTT/TCP)
@@ -59,10 +59,10 @@ The Water Distribution Network Management system follows a hierarchical edge-to-
 │  │  │ Pressure   │  │ Flow       │  │ Quality    │  │  Temp    │  │  │
 │  │  │ Sensors    │  │ Sensors    │  │ Sensors    │  │  Sensors │  │  │
 │  │  └────────────┘  └────────────┘  └────────────┘  └──────────┘  │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
+│  └──────────────────────────────────────────────────────────────────┐  │
 │  ┌──────────────────┐  ┌──────────────────┐                            │
-│  │  Local Cache     │  │   Edge Database  │                            │
-│  │  (Redis)         │  │   (PostgreSQL)   │                            │
+│  │  ArangoDB Cache  │  │   ArangoDB       │                            │
+│  │  (Local)         │  │   (Edge DB)      │                            │
 │  └──────────────────┘  └──────────────────┘                            │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
@@ -106,10 +106,13 @@ The Water Distribution Network Management system follows a hierarchical edge-to-
 **Components**:
 - **CodeValdCortex Runtime Manager**: Agent lifecycle management
 - **Agent Registry**: Central registry of all agents and relationships
-- **Communication System**: Message routing and pub/sub
+- **Communication System**: ArangoDB-based message routing with polling
 - **Task System**: Scheduled tasks, maintenance windows
-- **Message Broker (Redis)**: High-performance message queuing
-- **Time-Series Database (TimescaleDB)**: Sensor data, metrics, trends
+- **ArangoDB**: Multi-model database (documents, graphs, key-value, time-series)
+  - Agent state and configuration (document collections)
+  - Agent relationships and network topology (graph)
+  - Message queues for agent communication (document collections)
+  - Time-series sensor data (document collections with date indexing)
 - **Configuration Service**: Agent parameters, thresholds, rules
 
 **Deployment**: Regional data centers for low-latency access
@@ -126,8 +129,9 @@ The Water Distribution Network Management system follows a hierarchical edge-to-
 - **Sensor Agents**: Process IoT sensor data locally
 - **Reservoir/Pump Agents**: Control critical infrastructure
 - **Network Optimizer**: Local pressure/flow optimization
-- **Local Cache**: Redis for fast agent communication
-- **Edge Database**: PostgreSQL for local state persistence
+- **ArangoDB Instance**: Local database for agent state and message persistence
+  - Can operate independently during network outages
+  - Syncs with regional server when connectivity restored
 
 **Deployment**: Industrial PCs at pumping stations, reservoirs, or key network locations
 
@@ -175,7 +179,7 @@ Infrastructure Agent (detects anomaly) → Zone Coordinator → Regional Server
 ```
 
 **Latency**: <1 second for critical alerts  
-**Protocol**: Redis Pub/Sub + WebSocket  
+**Protocol**: ArangoDB polling + WebSocket notifications  
 **Priority**: Emergency > Critical > Warning > Info
 
 ### 3. Control Command Flow
@@ -209,11 +213,12 @@ Infrastructure Agents (collect metrics) → Time-Series Database → ML Models
 - **Regional Servers**: Add servers per geographic region
 - **Field Gateways**: Add gateways for network expansion
 - **Agent Instances**: Agents scale independently based on infrastructure elements
+- **ArangoDB Sharding**: Distribute collections across multiple ArangoDB nodes
 
 ### Vertical Scaling
 
-- **Database Partitioning**: Time-series data partitioned by date/zone
-- **Message Broker Clustering**: Redis Cluster for high-throughput messaging
+- **Database Partitioning**: Time-series data partitioned by date/zone in ArangoDB
+- **ArangoDB Cluster**: Distributed ArangoDB deployment for high-throughput
 - **Load Balancing**: API Gateway distributes requests across servers
 
 ### Performance Targets
@@ -233,9 +238,10 @@ Infrastructure Agents (collect metrics) → Time-Series Database → ML Models
 ### Field Gateway Resilience
 
 - **Offline Operation**: Gateways continue local control if regional server unavailable
-- **Local Cache**: Critical state cached in Redis
+- **Local ArangoDB**: Edge database continues operation independently
 - **Automatic Reconnection**: Exponential backoff retry to regional server
 - **Data Buffering**: Queue messages during outages, sync when reconnected
+- **ArangoDB Replication**: Multi-master sync when connectivity restored
 
 ### Agent Resilience
 
@@ -246,10 +252,10 @@ Infrastructure Agents (collect metrics) → Time-Series Database → ML Models
 
 ### Infrastructure Resilience
 
-- **Database Replication**: PostgreSQL streaming replication (primary + standby)
-- **Message Broker HA**: Redis Sentinel for automatic failover
+- **Database Replication**: ArangoDB multi-coordinator cluster with synchronous replication
 - **Multi-Region Deployment**: Active-active or active-passive regional servers
 - **Backup Power**: Field gateways on UPS for continuous operation
+- **Automatic Failover**: ArangoDB agency provides automatic coordinator failover
 
 ## Security Architecture
 
@@ -322,25 +328,34 @@ Infrastructure Agents (collect metrics) → Time-Series Database → ML Models
 
 ### Why CodeValdCortex Framework?
 
-- Native agent runtime with lifecycle management
-- Built-in communication system for agent messaging
+- Native agent runtime with lifecycle management (Go 1.21+)
+- Built-in communication system for agent messaging (ArangoDB-based)
 - Task scheduling for maintenance and data collection
 - Memory service for state persistence
 - Configuration management for dynamic agent parameters
+- Agent registry for tracking all infrastructure agents
 
-### Why Redis for Message Broker?
+### Why ArangoDB?
 
-- Sub-millisecond latency for real-time messaging
-- Pub/Sub pattern perfect for agent-to-agent communication
-- High throughput (100K+ messages/sec)
-- Simple deployment and operation
+- **Multi-Model Database**: Combines document, graph, and key-value in one system
+  - Documents for agent state and messages
+  - Graphs for infrastructure topology and relationships
+  - Key-value for fast lookups
+- **Native Graph Queries**: AQL (ArangoDB Query Language) for traversing infrastructure networks
+- **Change Streams**: Real-time notifications for agent state changes (future feature)
+- **Horizontal Scaling**: Built-in sharding and clustering
+- **ACID Transactions**: Ensures data consistency across agent operations
+- **Time-Series Support**: Efficient storage with date-based partitioning
+- **Offline Capability**: Can run on edge devices independently
 
-### Why TimescaleDB for Time-Series?
+### Why ArangoDB Over PostgreSQL/Redis?
 
-- PostgreSQL extension = familiar SQL interface
-- Automatic data partitioning by time
-- High compression rates (90%+) for sensor data
-- Excellent query performance for time-range queries
+- **Unified Data Model**: No need for separate systems (one DB vs. PostgreSQL + Redis + TimescaleDB)
+- **Graph Capabilities**: Water network topology is naturally a graph structure
+- **Simplified Operations**: Single database system to deploy and maintain
+- **Consistent Transaction Model**: ACID across all data types
+- **Native JSON**: Perfect for agent state documents
+- **Embedded Option**: Can run on resource-constrained edge devices
 
 ### Why MQTT for IoT?
 
