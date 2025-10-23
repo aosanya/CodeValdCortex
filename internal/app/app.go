@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agent"
+	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
@@ -32,6 +33,8 @@ type App struct {
 	agentTypeService    registry.AgentTypeService
 	agentTypeRepository registry.AgentTypeRepository
 	runtimeManager      *runtime.Manager
+	messageService      *communication.MessageService
+	pubSubService       *communication.PubSubService
 }
 
 // New creates a new application instance
@@ -84,6 +87,22 @@ func New(cfg *config.Config) *App {
 		}
 	}
 
+	// Initialize communication repository and services
+	logger.Info("Initializing communication services")
+	commRepo, err := communication.NewRepository(dbClient)
+	if err != nil {
+		logger.WithError(err).Warn("Failed to initialize communication repository")
+	}
+
+	var messageService *communication.MessageService
+	var pubSubService *communication.PubSubService
+
+	if commRepo != nil {
+		messageService = communication.NewMessageService(commRepo)
+		pubSubService = communication.NewPubSubService(commRepo)
+		logger.Info("Communication services initialized successfully")
+	}
+
 	// Create runtime manager with registry
 	runtimeManager := runtime.NewManager(logger, runtime.ManagerConfig{
 		MaxAgents:           100,
@@ -100,6 +119,8 @@ func New(cfg *config.Config) *App {
 		agentTypeRepository: agentTypeRepo,
 		agentTypeService:    agentTypeService,
 		runtimeManager:      runtimeManager,
+		messageService:      messageService,
+		pubSubService:       pubSubService,
 	}
 }
 
@@ -180,6 +201,15 @@ func (a *App) setupServer() error {
 	// Register task handler routes
 	taskHandler := handlers.NewTaskHandler(a.runtimeManager)
 	taskHandler.RegisterRoutes(router)
+
+	// Register communication handler routes (if services are available)
+	if a.messageService != nil && a.pubSubService != nil {
+		commHandler := handlers.NewCommunicationHandler(a.messageService, a.pubSubService, a.logger)
+		commHandler.RegisterRoutes(router)
+		a.logger.Info("Communication endpoints registered")
+	} else {
+		a.logger.Warn("Communication services not available, endpoints not registered")
+	}
 
 	// Register web dashboard handler
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
