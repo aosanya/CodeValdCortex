@@ -1541,6 +1541,166 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Web Dashboard",
+            "item": [
+                {
+                    "name": "Get Agents Live (OOB Updates)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/live",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "live"
+                            ]
+                        },
+                        "description": "Returns HTMX OOB (Out-of-Band) updates for agent status, health, heartbeat, and actions. This endpoint sends multiple HTML fragments with hx-swap-oob attributes to update specific elements on the page without full page refresh."
+                    }
+                },
+                {
+                    "name": "Get Agents JSON",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/json?page=1&limit=50",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "json"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "50"
+                                }
+                            ]
+                        },
+                        "description": "Returns agents list in JSON format with pagination. Limit: 100 max per request."
+                    }
+                },
+                {
+                    "name": "Agent Action - Start",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/{{agent_id}}/start",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "{{agent_id}}",
+                                "start"
+                            ]
+                        },
+                        "description": "Start an agent from the web dashboard. Returns updated agent card HTML."
+                    }
+                },
+                {
+                    "name": "Agent Action - Stop",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/{{agent_id}}/stop",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "{{agent_id}}",
+                                "stop"
+                            ]
+                        },
+                        "description": "Stop an agent from the web dashboard. Returns updated agent card HTML."
+                    }
+                },
+                {
+                    "name": "Agent Action - Restart",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/{{agent_id}}/restart",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "{{agent_id}}",
+                                "restart"
+                            ]
+                        },
+                        "description": "Restart an agent from the web dashboard. Returns updated agent card HTML."
+                    }
+                },
+                {
+                    "name": "Agent Action - Pause",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/{{agent_id}}/pause",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "{{agent_id}}",
+                                "pause"
+                            ]
+                        },
+                        "description": "Pause an agent from the web dashboard. Returns updated agent card HTML."
+                    }
+                },
+                {
+                    "name": "Agent Action - Resume",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/web/agents/{{agent_id}}/resume",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "web",
+                                "agents",
+                                "{{agent_id}}",
+                                "resume"
+                            ]
+                        },
+                        "description": "Resume a paused agent from the web dashboard. Returns updated agent card HTML."
+                    }
+                }
+            ]
         }
     ],
     "variable": [

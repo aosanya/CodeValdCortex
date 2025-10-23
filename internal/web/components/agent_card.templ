@@ -10,73 +10,81 @@ templ AgentCard(a *agent.Agent) {
 	<div 
 		class="box"
 		x-data="{ expanded: false }"
-		data-agent-id={ a.ID }
+		x-init="$el.setAttribute('data-agent-id', '{ a.ID }')"
+		id={ fmt.Sprintf("agent-card-%s", a.ID) }
+		style="min-height: 300px; display: flex; flex-direction: column;"
 	>
 		<!-- Header -->
-		<div class="level is-mobile mb-4">
-			<div class="level-left">
-				<div class="level-item">
-					<div>
-						<h3 class="title is-5 mb-1">
-							{ a.Name }
-						</h3>
-						<p class="subtitle is-6 has-text-grey">
-							{ a.Type }
-						</p>
-					</div>
-				</div>
+		<div class="mb-4 is-flex is-justify-content-space-between is-align-items-start" style="flex-shrink: 0;">
+			<div class="is-flex-grow-1" style="min-width: 0; margin-right: 0.75rem;">
+				<h3 class="title is-5" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 0.25rem !important;">
+					{ a.Name }
+				</h3>
+				<p class="subtitle is-6 has-text-grey" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 0 !important; margin-bottom: 0 !important;">
+					{ a.Type }
+				</p>
 			</div>
 			
-			<div class="level-right">
-				<div class="level-item">
-					<div class="tags">
-						@StatusBadge(a.GetState())
-						@HealthIndicator(a.IsHealthy())
-					</div>
-				</div>
+			<div class="tags" style="flex-shrink: 0; white-space: nowrap;">
+				<span class={ "tag " + statusClasses(a.GetState()) } id={ fmt.Sprintf("agent-state-badge-%s", a.ID) }>
+					{ string(a.GetState()) }
+				</span>
+				<span class={ healthBadgeClass(a.IsHealthy()) } id={ fmt.Sprintf("agent-health-badge-%s", a.ID) }>
+					{ healthBadgeText(a.IsHealthy()) }
+				</span>
 			</div>
 		</div>
 		
 		<!-- Info -->
-		<div class="content is-small mb-4">
-			<div class="level is-mobile">
-				<div class="level-left">
-					<span class="has-text-grey">ID:</span>
+		<div class="content is-small mb-4" style="flex-shrink: 0;">
+			<div class="level is-mobile mb-2">
+				<div class="level-left" style="margin-right: 0.5rem;">
+					<div class="level-item">
+						<span class="has-text-grey">ID:</span>
+					</div>
 				</div>
 				<div class="level-right">
-					<span class="is-family-monospace is-size-7">{ a.ID[:8] }...</span>
+					<div class="level-item">
+						<span class="is-family-monospace is-size-7" style="overflow: hidden; text-overflow: ellipsis;">{ a.ID[:8] }...</span>
+					</div>
 				</div>
 			</div>
-			<div class="level is-mobile">
-				<div class="level-left">
-					<span class="has-text-grey">Created:</span>
+			<div class="level is-mobile mb-2">
+				<div class="level-left" style="margin-right: 0.5rem;">
+					<div class="level-item">
+						<span class="has-text-grey">Created:</span>
+					</div>
 				</div>
 				<div class="level-right">
-					<span>{ formatTime(a.CreatedAt) }</span>
+					<div class="level-item">
+						<span style="white-space: nowrap;">{ formatTime(a.CreatedAt) }</span>
+					</div>
 				</div>
 			</div>
-			if !a.LastHeartbeat.IsZero() {
-				<div class="level is-mobile">
-					<div class="level-left">
-						<span class="has-text-grey">Last Heartbeat:</span>
+			<div class="level is-mobile mb-2" style="min-height: 1.5rem;">
+				if !a.LastHeartbeat.IsZero() {
+					<div class="level-left" style="margin-right: 0.5rem;">
+						<div class="level-item">
+							<span class="has-text-grey">Last Heartbeat:</span>
+						</div>
 					</div>
 					<div class="level-right">
-						<span>{ formatTimeAgo(a.LastHeartbeat) }</span>
+						<div class="level-item">
+							<span id={ fmt.Sprintf("agent-heartbeat-%s", a.ID) } style="white-space: nowrap;">{ formatTimeAgo(a.LastHeartbeat) }</span>
+						</div>
 					</div>
-				</div>
-			}
+				}
+			</div>
 		</div>
 		
-		<!-- Actions -->
-		<div class="buttons mb-4">
+		<!-- Actions - Fixed height to prevent jumping -->
+		<div class="buttons mb-4" style="min-height: 2.5rem; flex-shrink: 0;" id={ fmt.Sprintf("agent-actions-%s", a.ID) }>
 			if a.GetState() == agent.StateStopped || a.GetState() == agent.StateCreated {
 				@ActionButton("Start", a.ID, "start", "success")
 			}
 			if a.GetState() == agent.StateRunning {
 				@ActionButton("Stop", a.ID, "stop", "danger")
 				@ActionButton("Restart", a.ID, "restart", "warning")
-			}
-			if a.GetState() == agent.StateRunning {
 				@ActionButton("Pause", a.ID, "pause", "warning")
 			}
 			if a.GetState() == agent.StatePaused {
@@ -114,12 +122,12 @@ templ AgentCard(a *agent.Agent) {
 					if len(a.Metadata) > 0 {
 						<div class="content is-small">
 							for key, value := range a.Metadata {
-								<div class="level is-mobile">
-									<div class="level-left">
-										<span class="has-text-grey">{ key }:</span>
+								<div class="is-flex mb-2" style="gap: 0.5rem;">
+									<div style="flex-shrink: 0; min-width: fit-content;">
+										<span class="has-text-grey has-text-weight-semibold">{ key }:</span>
 									</div>
-									<div class="level-right">
-										<span>{ value }</span>
+									<div style="min-width: 0; flex: 1;">
+										<span style="word-break: break-word;">{ value }</span>
 									</div>
 								</div>
 							}
@@ -137,6 +145,73 @@ templ AgentCard(a *agent.Agent) {
 				</a>
 			</div>
 		</div>
+	</div>
+}
+
+// AgentCardColumn wraps an agent card in a responsive column
+templ AgentCardColumn(a *agent.Agent) {
+	<div class="column is-one-third-desktop is-half-tablet" id={ fmt.Sprintf("agent-col-%s", a.ID) }>
+		@AgentCard(a)
+	</div>
+}
+
+// OOB Components - React-like granular updates for dynamic data only
+// Each component targets a specific element by ID and swaps only that element
+
+// AgentStatusOOB sends out-of-band update for status badge
+templ AgentStatusOOB(a *agent.Agent) {
+	<span 
+		class={ "tag " + statusClasses(a.GetState()) }
+		id={ fmt.Sprintf("agent-state-badge-%s", a.ID) }
+		hx-swap-oob="true"
+	>
+		{ string(a.GetState()) }
+	</span>
+}
+
+// AgentHealthOOB sends out-of-band update for health badge
+templ AgentHealthOOB(a *agent.Agent) {
+	<span 
+		class={ healthBadgeClass(a.IsHealthy()) }
+		id={ fmt.Sprintf("agent-health-badge-%s", a.ID) }
+		hx-swap-oob="true"
+	>
+		{ healthBadgeText(a.IsHealthy()) }
+	</span>
+}
+
+// AgentHeartbeatOOB sends out-of-band update for heartbeat timestamp only
+templ AgentHeartbeatOOB(a *agent.Agent) {
+	<span 
+		id={ fmt.Sprintf("agent-heartbeat-%s", a.ID) }
+		hx-swap-oob="innerHTML"
+		style="white-space: nowrap;"
+	>
+		if !a.LastHeartbeat.IsZero() {
+			{ formatTimeAgo(a.LastHeartbeat) }
+		}
+	</span>
+}
+
+// AgentActionsOOB sends out-of-band update for action buttons only
+templ AgentActionsOOB(a *agent.Agent) {
+	<div 
+		class="buttons mb-4" 
+		style="min-height: 2.5rem; flex-shrink: 0;" 
+		id={ fmt.Sprintf("agent-actions-%s", a.ID) }
+		hx-swap-oob="innerHTML"
+	>
+		if a.GetState() == agent.StateStopped || a.GetState() == agent.StateCreated {
+			@ActionButton("Start", a.ID, "start", "success")
+		}
+		if a.GetState() == agent.StateRunning {
+			@ActionButton("Stop", a.ID, "stop", "danger")
+			@ActionButton("Restart", a.ID, "restart", "warning")
+			@ActionButton("Pause", a.ID, "pause", "warning")
+		}
+		if a.GetState() == agent.StatePaused {
+			@ActionButton("Resume", a.ID, "resume", "success")
+		}
 	</div>
 }
 
@@ -229,4 +304,18 @@ func formatTimeAgo(t time.Time) string {
 		days := int(duration.Hours() / 24)
 		return fmt.Sprintf("%dd ago", days)
 	}
+}
+
+func healthBadgeClass(healthy bool) string {
+	if healthy {
+		return "tag is-success is-light"
+	}
+	return "tag is-danger is-light"
+}
+
+func healthBadgeText(healthy bool) string {
+	if healthy {
+		return "✓ Healthy"
+	}
+	return "✗ Unhealthy"
 }

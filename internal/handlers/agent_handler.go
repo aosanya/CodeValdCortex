@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"sort"
+	"strconv"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agent"
@@ -262,7 +264,39 @@ func (h *AgentHandler) GetAgent(c *gin.Context) {
 // @Success 200 {array} AgentResponse
 // @Router /agents [get]
 func (h *AgentHandler) ListAgents(c *gin.Context) {
-	agents := h.runtime.ListAgents()
+	// Support optional pagination query params: page and limit
+	page := 1
+	limit := 50
+
+	if p := c.Query("page"); p != "" {
+		if pv, err := strconv.Atoi(p); err == nil && pv > 0 {
+			page = pv
+		}
+	}
+
+	if l := c.Query("limit"); l != "" {
+		if lv, err := strconv.Atoi(l); err == nil && lv > 0 && lv <= 1000 {
+			limit = lv
+		}
+	}
+
+	allAgents := h.runtime.ListAgents()
+
+	// Safety: ensure deterministic ordering before pagination
+	sort.Slice(allAgents, func(i, j int) bool { return allAgents[i].ID < allAgents[j].ID })
+
+	total := len(allAgents)
+	startIdx := (page - 1) * limit
+	endIdx := startIdx + limit
+	if startIdx >= total {
+		c.JSON(http.StatusOK, []AgentResponse{})
+		return
+	}
+	if endIdx > total {
+		endIdx = total
+	}
+
+	agents := allAgents[startIdx:endIdx]
 
 	response := make([]AgentResponse, 0, len(agents))
 	for _, a := range agents {

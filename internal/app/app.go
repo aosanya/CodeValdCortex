@@ -197,6 +197,7 @@ func (a *App) setupServer() error {
 	webAPI := router.Group("/api/web")
 	{
 		webAPI.GET("/agents/live", dashboardHandler.GetAgentsLive)
+		webAPI.GET("/agents/json", dashboardHandler.GetAgentsJSON) // JSON API for large datasets
 		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
 
 		// Agent types web endpoints

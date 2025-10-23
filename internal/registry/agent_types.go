@@ -41,8 +41,8 @@ type AgentType struct {
 	// ValidationRules defines custom validation rules beyond schema
 	ValidationRules []ValidationRule `json:"validation_rules,omitempty"`
 
-	// Metadata contains additional type information
-	Metadata map[string]string `json:"metadata,omitempty"`
+	// Metadata contains additional type information (supports strings, arrays, and nested objects)
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 
 	// IsSystemType indicates if this is a core system type (cannot be deleted)
 	IsSystemType bool `json:"is_system_type"`

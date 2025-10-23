@@ -90,17 +90,23 @@ templ Dashboard(agents []*agent.Agent, stats DashboardStats) {
 				</div>
 			</div>
 			
-			<!-- Agent Grid with Auto-Update -->
+			<!-- Hidden trigger for OOB updates - no visible content, only triggers updates -->
+			<div 
+				hx-get="/api/web/agents/live"
+				hx-trigger="every 10s"
+				hx-swap="none"
+				style="display: none;"
+			></div>
+			
+			<!-- Agent Grid (no HTMX attributes - updated via OOB only) -->
 			<div 
 				id="agents-grid" 
 				class="columns is-multiline"
-				hx-get="/api/web/agents/live"
-				hx-trigger="every 5s"
-				hx-swap="innerHTML"
+				style="min-height: 300px;"
 			>
 				if len(agents) > 0 {
 					for _, a := range agents {
-						<div class="column is-4">
+						<div class="column is-one-third-desktop is-half-tablet" id={ fmt.Sprintf("agent-col-%s", a.ID) }>
 							@components.AgentCard(a)
 						</div>
 					}

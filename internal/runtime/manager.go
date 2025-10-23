@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -524,7 +525,7 @@ func (m *Manager) GetAgent(agentID string) (*agent.Agent, error) {
 	return nil, agent.ErrAgentNotFound
 }
 
-// ListAgents returns all registered agents
+// ListAgents returns all registered agents sorted by ID for consistent ordering
 func (m *Manager) ListAgents() []*agent.Agent {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -533,6 +534,11 @@ func (m *Manager) ListAgents() []*agent.Agent {
 	for _, a := range m.agents {
 		agents = append(agents, a)
 	}
+
+	// Sort by ID to ensure consistent order across requests (prevent shuffling in UI)
+	sort.Slice(agents, func(i, j int) bool {
+		return agents[i].ID < agents[j].ID
+	})
 
 	return agents
 }

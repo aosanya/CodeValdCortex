@@ -88,13 +88,26 @@ func Dashboard(agents []*agent.Agent, stats DashboardStats) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><!-- Filters --><div class=\"box mb-6\"><div class=\"columns\"><div class=\"column\"><div class=\"field\"><div class=\"control\"><input type=\"text\" x-model=\"search\" placeholder=\"Search agents...\" class=\"input\"></div></div></div><div class=\"column is-narrow\"><div class=\"field\"><div class=\"control\"><div class=\"select is-fullwidth\"><select x-model=\"filter\"><option value=\"all\">All States</option> <option value=\"running\">Running</option> <option value=\"stopped\">Stopped</option> <option value=\"paused\">Paused</option> <option value=\"error\">Error</option></select></div></div></div></div><div class=\"column is-narrow\"><div class=\"field\"><div class=\"control\"><div class=\"select is-fullwidth\"><select x-model=\"healthFilter\"><option value=\"all\">All Health</option> <option value=\"healthy\">Healthy</option> <option value=\"unhealthy\">Unhealthy</option></select></div></div></div></div></div></div><!-- Agent Grid with Auto-Update --><div id=\"agents-grid\" class=\"columns is-multiline\" hx-get=\"/api/web/agents/live\" hx-trigger=\"every 5s\" hx-swap=\"innerHTML\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><!-- Filters --><div class=\"box mb-6\"><div class=\"columns\"><div class=\"column\"><div class=\"field\"><div class=\"control\"><input type=\"text\" x-model=\"search\" placeholder=\"Search agents...\" class=\"input\"></div></div></div><div class=\"column is-narrow\"><div class=\"field\"><div class=\"control\"><div class=\"select is-fullwidth\"><select x-model=\"filter\"><option value=\"all\">All States</option> <option value=\"running\">Running</option> <option value=\"stopped\">Stopped</option> <option value=\"paused\">Paused</option> <option value=\"error\">Error</option></select></div></div></div></div><div class=\"column is-narrow\"><div class=\"field\"><div class=\"control\"><div class=\"select is-fullwidth\"><select x-model=\"healthFilter\"><option value=\"all\">All Health</option> <option value=\"healthy\">Healthy</option> <option value=\"unhealthy\">Unhealthy</option></select></div></div></div></div></div></div><!-- Hidden trigger for OOB updates - no visible content, only triggers updates --><div hx-get=\"/api/web/agents/live\" hx-trigger=\"every 10s\" hx-swap=\"none\" style=\"display: none;\"></div><!-- Agent Grid (no HTMX attributes - updated via OOB only) --><div id=\"agents-grid\" class=\"columns is-multiline\" style=\"min-height: 300px;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(agents) > 0 {
 				for _, a := range agents {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"column is-4\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"column is-one-third-desktop is-half-tablet\" id=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var3 string
+					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("agent-col-%s", a.ID))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/dashboard.templ`, Line: 109, Col: 100}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -102,18 +115,18 @@ func Dashboard(agents []*agent.Agent, stats DashboardStats) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"column\"><div class=\"has-text-centered py-6\"><svg style=\"width: 3rem; height: 3rem; margin: 0 auto;\" class=\"has-text-grey-light\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4\"></path></svg><h3 class=\"subtitle is-5 mt-4\">No agents</h3><p class=\"has-text-grey\">Get started by creating a new agent.</p><div class=\"mt-5\"><button @click=\"$dispatch('open-create-modal')\" class=\"button is-primary\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Create Agent</span></button></div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"column\"><div class=\"has-text-centered py-6\"><svg style=\"width: 3rem; height: 3rem; margin: 0 auto;\" class=\"has-text-grey-light\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4\"></path></svg><h3 class=\"subtitle is-5 mt-4\">No agents</h3><p class=\"has-text-grey\">Get started by creating a new agent.</p><div class=\"mt-5\"><button @click=\"$dispatch('open-create-modal')\" class=\"button is-primary\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Create Agent</span></button></div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><!-- Loading Indicator --><div class=\"htmx-indicator notification is-primary\" style=\"position: fixed; bottom: 1rem; right: 1rem; z-index: 9999;\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><span class=\"icon\"><svg class=\"spinning\" style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg></span></div><div class=\"level-item\"><span>Updating...</span></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div><!-- Loading Indicator --><div class=\"htmx-indicator notification is-primary\" style=\"position: fixed; bottom: 1rem; right: 1rem; z-index: 9999;\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><span class=\"icon\"><svg class=\"spinning\" style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg></span></div><div class=\"level-item\"><span>Updating...</span></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

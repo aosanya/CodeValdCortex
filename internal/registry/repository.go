@@ -196,7 +196,8 @@ func (r *Repository) Delete(ctx context.Context, id string) error {
 
 // List retrieves all agents from the registry
 func (r *Repository) List(ctx context.Context) ([]*agent.Agent, error) {
-	query := "FOR doc IN @@collection RETURN doc"
+	// Sort by id to ensure consistent ordering across requests
+	query := "FOR doc IN @@collection SORT doc.id ASC RETURN doc"
 	bindVars := map[string]interface{}{
 		"@collection": CollectionAgents,
 	}
@@ -225,7 +226,7 @@ func (r *Repository) List(ctx context.Context) ([]*agent.Agent, error) {
 
 // FindByType retrieves agents by type
 func (r *Repository) FindByType(ctx context.Context, agentType string) ([]*agent.Agent, error) {
-	query := "FOR doc IN @@collection FILTER doc.type == @type RETURN doc"
+	query := "FOR doc IN @@collection FILTER doc.type == @type SORT doc.id ASC RETURN doc"
 	bindVars := map[string]interface{}{
 		"@collection": CollectionAgents,
 		"type":        agentType,
@@ -236,7 +237,7 @@ func (r *Repository) FindByType(ctx context.Context, agentType string) ([]*agent
 
 // FindByState retrieves agents by state
 func (r *Repository) FindByState(ctx context.Context, state agent.State) ([]*agent.Agent, error) {
-	query := "FOR doc IN @@collection FILTER doc.state == @state RETURN doc"
+	query := "FOR doc IN @@collection FILTER doc.state == @state SORT doc.id ASC RETURN doc"
 	bindVars := map[string]interface{}{
 		"@collection": CollectionAgents,
 		"state":       string(state),
@@ -247,7 +248,7 @@ func (r *Repository) FindByState(ctx context.Context, state agent.State) ([]*age
 
 // FindHealthy retrieves all healthy agents
 func (r *Repository) FindHealthy(ctx context.Context) ([]*agent.Agent, error) {
-	query := "FOR doc IN @@collection FILTER doc.is_healthy == true RETURN doc"
+	query := "FOR doc IN @@collection FILTER doc.is_healthy == true SORT doc.id ASC RETURN doc"
 	bindVars := map[string]interface{}{
 		"@collection": CollectionAgents,
 	}
@@ -257,7 +258,7 @@ func (r *Repository) FindHealthy(ctx context.Context) ([]*agent.Agent, error) {
 
 // FindByTypeAndState retrieves agents by type and state
 func (r *Repository) FindByTypeAndState(ctx context.Context, agentType string, state agent.State) ([]*agent.Agent, error) {
-	query := "FOR doc IN @@collection FILTER doc.type == @type AND doc.state == @state RETURN doc"
+	query := "FOR doc IN @@collection FILTER doc.type == @type AND doc.state == @state SORT doc.id ASC RETURN doc"
 	bindVars := map[string]interface{}{
 		"@collection": CollectionAgents,
 		"type":        agentType,
