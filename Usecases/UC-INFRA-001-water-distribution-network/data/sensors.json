@@ -1,0 +1,162 @@
+[
+    {
+        "id": "SENSOR-001",
+        "name": "Pressure Sensor North Main",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "sensor_id": "SENSOR-001",
+            "sensor_type": "pressure",
+            "location": "PIPE-001",
+            "measurement_unit": "bar",
+            "measurement_range": "0-20",
+            "accuracy": "0.1",
+            "installation_date": "2018-03-20T00:00:00Z",
+            "calibration_date": "2025-09-01T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "2.0",
+            "alert_threshold_high": "12.0"
+        }
+    },
+    {
+        "id": "SENSOR-002",
+        "name": "Flow Sensor North Main",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "sensor_id": "SENSOR-002",
+            "sensor_type": "flow",
+            "location": "PIPE-001",
+            "measurement_unit": "m3/h",
+            "measurement_range": "0-500",
+            "accuracy": "2.0",
+            "installation_date": "2018-03-20T00:00:00Z",
+            "calibration_date": "2025-09-01T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "50",
+            "alert_threshold_high": "450"
+        }
+    },
+    {
+        "id": "SENSOR-003",
+        "name": "Pressure Sensor North Distribution-A",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "sensor_id": "SENSOR-003",
+            "sensor_type": "pressure",
+            "location": "PIPE-002",
+            "measurement_unit": "bar",
+            "measurement_range": "0-15",
+            "accuracy": "0.1",
+            "installation_date": "2020-06-15T00:00:00Z",
+            "calibration_date": "2025-09-10T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "1.5",
+            "alert_threshold_high": "10.0"
+        }
+    },
+    {
+        "id": "SENSOR-004",
+        "name": "Pressure Sensor North Distribution-B",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "sensor_id": "SENSOR-004",
+            "sensor_type": "pressure",
+            "location": "PIPE-003",
+            "measurement_unit": "bar",
+            "measurement_range": "0-15",
+            "accuracy": "0.1",
+            "installation_date": "2020-06-15T00:00:00Z",
+            "calibration_date": "2025-09-10T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "1.5",
+            "alert_threshold_high": "10.0"
+        }
+    },
+    {
+        "id": "SENSOR-005",
+        "name": "Pressure Sensor Central Main",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "sensor_id": "SENSOR-005",
+            "sensor_type": "pressure",
+            "location": "PIPE-006",
+            "measurement_unit": "bar",
+            "measurement_range": "0-20",
+            "accuracy": "0.1",
+            "installation_date": "2017-08-25T00:00:00Z",
+            "calibration_date": "2025-08-15T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "2.5",
+            "alert_threshold_high": "13.0"
+        }
+    },
+    {
+        "id": "SENSOR-006",
+        "name": "Flow Sensor Central Main",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "sensor_id": "SENSOR-006",
+            "sensor_type": "flow",
+            "location": "PIPE-006",
+            "measurement_unit": "m3/h",
+            "measurement_range": "0-800",
+            "accuracy": "2.0",
+            "installation_date": "2017-08-25T00:00:00Z",
+            "calibration_date": "2025-08-15T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "100",
+            "alert_threshold_high": "750"
+        }
+    },
+    {
+        "id": "SENSOR-007",
+        "name": "Pressure Sensor Central Distribution-A",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "sensor_id": "SENSOR-007",
+            "sensor_type": "pressure",
+            "location": "PIPE-007",
+            "measurement_unit": "bar",
+            "measurement_range": "0-15",
+            "accuracy": "0.1",
+            "installation_date": "2019-04-15T00:00:00Z",
+            "calibration_date": "2025-08-20T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "2.0",
+            "alert_threshold_high": "11.0"
+        }
+    },
+    {
+        "id": "SENSOR-008",
+        "name": "Pressure Sensor Central Distribution-B",
+        "type": "sensor",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "sensor_id": "SENSOR-008",
+            "sensor_type": "pressure",
+            "location": "PIPE-008",
+            "measurement_unit": "bar",
+            "measurement_range": "0-15",
+            "accuracy": "0.1",
+            "installation_date": "2019-04-15T00:00:00Z",
+            "calibration_date": "2025-08-20T00:00:00Z",
+            "sampling_interval": "60",
+            "alert_threshold_low": "2.0",
+            "alert_threshold_high": "11.0"
+        }
+    }
+]

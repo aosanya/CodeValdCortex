@@ -48,7 +48,7 @@
 - Generic agent interfaces and base implementations
 
 ### Use Case Module (UC-INFRA-001)
-**Location**: `/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network/`  
+**Location**: `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/`  
 **Module**: `github.com/aosanya/UC-INFRA-001-water-distribution-network`  
 **Purpose**: Water Distribution Network specific implementation
 

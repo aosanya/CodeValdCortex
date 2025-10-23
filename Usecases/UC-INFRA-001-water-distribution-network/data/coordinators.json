@@ -1,0 +1,42 @@
+[
+    {
+        "id": "COORD-NORTH",
+        "name": "North Zone Coordinator",
+        "type": "zone_coordinator",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "coordinator_id": "COORD-NORTH",
+            "zone_name": "North Zone",
+            "managed_pipes": "PIPE-001,PIPE-002,PIPE-003,PIPE-004,PIPE-005",
+            "managed_sensors": "SENSOR-001,SENSOR-002,SENSOR-003,SENSOR-004",
+            "managed_pumps": "PUMP-001,PUMP-002",
+            "managed_valves": "VALVE-001,VALVE-002,VALVE-006",
+            "service_area_km2": "25.5",
+            "population_served": "45000",
+            "optimization_strategy": "balanced",
+            "target_pressure_bar": "3.5",
+            "alert_email": "north-ops@waterutility.example"
+        }
+    },
+    {
+        "id": "COORD-CENTRAL",
+        "name": "Central Zone Coordinator",
+        "type": "zone_coordinator",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "coordinator_id": "COORD-CENTRAL",
+            "zone_name": "Central Zone",
+            "managed_pipes": "PIPE-006,PIPE-007,PIPE-008,PIPE-009,PIPE-010",
+            "managed_sensors": "SENSOR-005,SENSOR-006,SENSOR-007,SENSOR-008",
+            "managed_pumps": "PUMP-003",
+            "managed_valves": "VALVE-003,VALVE-004,VALVE-005",
+            "service_area_km2": "32.8",
+            "population_served": "68000",
+            "optimization_strategy": "efficiency",
+            "target_pressure_bar": "4.0",
+            "alert_email": "central-ops@waterutility.example"
+        }
+    }
+]

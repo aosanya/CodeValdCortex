@@ -1,0 +1,68 @@
+[
+    {
+        "id": "PUMP-001",
+        "name": "Primary Pump North",
+        "type": "pump",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "pump_id": "PUMP-001",
+            "pump_type": "centrifugal",
+            "location": "north_pump_station",
+            "capacity": "300",
+            "power_rating": "75",
+            "installation_date": "2018-02-10T00:00:00Z",
+            "last_maintenance": "2025-08-15T00:00:00Z",
+            "efficiency": "82",
+            "operating_hours": "45620",
+            "speed_rpm": "1450",
+            "current_speed_percent": "75",
+            "head_meters": "50",
+            "status": "operational"
+        }
+    },
+    {
+        "id": "PUMP-002",
+        "name": "Backup Pump North",
+        "type": "pump",
+        "state": "paused",
+        "metadata": {
+            "zone": "north",
+            "pump_id": "PUMP-002",
+            "pump_type": "centrifugal",
+            "location": "north_pump_station",
+            "capacity": "300",
+            "power_rating": "75",
+            "installation_date": "2018-02-10T00:00:00Z",
+            "last_maintenance": "2025-08-15T00:00:00Z",
+            "efficiency": "83",
+            "operating_hours": "23140",
+            "speed_rpm": "1450",
+            "current_speed_percent": "0",
+            "head_meters": "50",
+            "status": "standby"
+        }
+    },
+    {
+        "id": "PUMP-003",
+        "name": "Primary Pump Central",
+        "type": "pump",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "pump_id": "PUMP-003",
+            "pump_type": "centrifugal",
+            "location": "central_pump_station",
+            "capacity": "500",
+            "power_rating": "110",
+            "installation_date": "2017-07-15T00:00:00Z",
+            "last_maintenance": "2025-07-20T00:00:00Z",
+            "efficiency": "80",
+            "operating_hours": "58340",
+            "speed_rpm": "1450",
+            "current_speed_percent": "80",
+            "head_meters": "60",
+            "status": "operational"
+        }
+    }
+]

@@ -232,7 +232,7 @@ The `.env` file in each use case configures the framework:
 # Use case identification
 USECASE_ID=UC-INFRA-001
 USECASE_NAME=water-distribution-network
-USECASE_CONFIG_DIR=/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network
+USECASE_CONFIG_DIR=/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network
 
 # Database
 DB_NAME=water_distribution_network

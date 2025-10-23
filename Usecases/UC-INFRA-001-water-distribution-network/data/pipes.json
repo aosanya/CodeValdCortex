@@ -1,0 +1,202 @@
+[
+    {
+        "id": "PIPE-001",
+        "name": "Main Supply Line North",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "pipe_id": "PIPE-001",
+            "material": "steel",
+            "diameter": "600",
+            "length": "1500",
+            "pressure_rating": "16.0",
+            "installation_date": "2018-03-15T00:00:00Z",
+            "condition_score": "85",
+            "last_inspection": "2025-09-10T00:00:00Z",
+            "segment": "main",
+            "upstream_connection": "reservoir",
+            "downstream_connection": "PIPE-002,PIPE-003"
+        }
+    },
+    {
+        "id": "PIPE-002",
+        "name": "Distribution Line North-A",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "pipe_id": "PIPE-002",
+            "material": "PVC",
+            "diameter": "300",
+            "length": "800",
+            "pressure_rating": "10.0",
+            "installation_date": "2020-06-10T00:00:00Z",
+            "condition_score": "92",
+            "last_inspection": "2025-09-15T00:00:00Z",
+            "segment": "distribution",
+            "upstream_connection": "PIPE-001",
+            "downstream_connection": "PIPE-004"
+        }
+    },
+    {
+        "id": "PIPE-003",
+        "name": "Distribution Line North-B",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "pipe_id": "PIPE-003",
+            "material": "PVC",
+            "diameter": "250",
+            "length": "650",
+            "pressure_rating": "10.0",
+            "installation_date": "2020-06-10T00:00:00Z",
+            "condition_score": "90",
+            "last_inspection": "2025-09-15T00:00:00Z",
+            "segment": "distribution",
+            "upstream_connection": "PIPE-001",
+            "downstream_connection": "PIPE-005"
+        }
+    },
+    {
+        "id": "PIPE-004",
+        "name": "Service Line North-1",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "pipe_id": "PIPE-004",
+            "material": "copper",
+            "diameter": "100",
+            "length": "200",
+            "pressure_rating": "16.0",
+            "installation_date": "2021-02-20T00:00:00Z",
+            "condition_score": "95",
+            "last_inspection": "2025-10-01T00:00:00Z",
+            "segment": "service",
+            "upstream_connection": "PIPE-002",
+            "downstream_connection": "customer_meters"
+        }
+    },
+    {
+        "id": "PIPE-005",
+        "name": "Service Line North-2",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "pipe_id": "PIPE-005",
+            "material": "copper",
+            "diameter": "100",
+            "length": "180",
+            "pressure_rating": "16.0",
+            "installation_date": "2021-02-20T00:00:00Z",
+            "condition_score": "96",
+            "last_inspection": "2025-10-01T00:00:00Z",
+            "segment": "service",
+            "upstream_connection": "PIPE-003",
+            "downstream_connection": "customer_meters"
+        }
+    },
+    {
+        "id": "PIPE-006",
+        "name": "Main Supply Line Central",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "pipe_id": "PIPE-006",
+            "material": "steel",
+            "diameter": "800",
+            "length": "2000",
+            "pressure_rating": "16.0",
+            "installation_date": "2017-08-20T00:00:00Z",
+            "condition_score": "78",
+            "last_inspection": "2025-08-20T00:00:00Z",
+            "segment": "main",
+            "upstream_connection": "reservoir",
+            "downstream_connection": "PIPE-007,PIPE-008"
+        }
+    },
+    {
+        "id": "PIPE-007",
+        "name": "Distribution Line Central-A",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "pipe_id": "PIPE-007",
+            "material": "PVC",
+            "diameter": "400",
+            "length": "1000",
+            "pressure_rating": "10.0",
+            "installation_date": "2019-04-10T00:00:00Z",
+            "condition_score": "88",
+            "last_inspection": "2025-09-05T00:00:00Z",
+            "segment": "distribution",
+            "upstream_connection": "PIPE-006",
+            "downstream_connection": "PIPE-009"
+        }
+    },
+    {
+        "id": "PIPE-008",
+        "name": "Distribution Line Central-B",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "pipe_id": "PIPE-008",
+            "material": "PVC",
+            "diameter": "400",
+            "length": "1100",
+            "pressure_rating": "10.0",
+            "installation_date": "2019-04-10T00:00:00Z",
+            "condition_score": "87",
+            "last_inspection": "2025-09-05T00:00:00Z",
+            "segment": "distribution",
+            "upstream_connection": "PIPE-006",
+            "downstream_connection": "PIPE-010"
+        }
+    },
+    {
+        "id": "PIPE-009",
+        "name": "Service Line Central-1",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "pipe_id": "PIPE-009",
+            "material": "PVC",
+            "diameter": "150",
+            "length": "300",
+            "pressure_rating": "10.0",
+            "installation_date": "2020-11-05T00:00:00Z",
+            "condition_score": "93",
+            "last_inspection": "2025-09-20T00:00:00Z",
+            "segment": "service",
+            "upstream_connection": "PIPE-007",
+            "downstream_connection": "customer_meters"
+        }
+    },
+    {
+        "id": "PIPE-010",
+        "name": "Service Line Central-2",
+        "type": "pipe",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "pipe_id": "PIPE-010",
+            "material": "PVC",
+            "diameter": "150",
+            "length": "320",
+            "pressure_rating": "10.0",
+            "installation_date": "2020-11-05T00:00:00Z",
+            "condition_score": "94",
+            "last_inspection": "2025-09-20T00:00:00Z",
+            "segment": "service",
+            "upstream_connection": "PIPE-008",
+            "downstream_connection": "customer_meters"
+        }
+    }
+]

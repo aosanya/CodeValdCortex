@@ -449,8 +449,8 @@ INFO[0000] Starting HTTP server host=0.0.0.0 port=8083
 ### Created Files:
 1. `/workspaces/CodeValdCortex/internal/registry/arango_agent_type_repository.go` - ArangoDB persistence
 2. `/workspaces/CodeValdCortex/documents/2-SoftwareDesignAndArchitecture/usecase-architecture.md` - Architecture documentation
-3. `/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network/config/agents/pipe.json` - Pipe agent type definition
-4. `/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network/start.sh` - Startup script
+3. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/config/agents/pipe.json` - Pipe agent type definition
+4. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/start.sh` - Startup script
 
 ### Modified Files:
 1. `/workspaces/CodeValdCortex/internal/app/app.go` - Added agent type loading from config
@@ -460,9 +460,9 @@ INFO[0000] Starting HTTP server host=0.0.0.0 port=8083
 5. `/workspaces/CodeValdCortex/internal/registry/agent_type_test.go` - Updated expectations
 6. `/workspaces/CodeValdCortex/internal/config/config.go` - Added viper.BindEnv calls
 7. `/workspaces/CodeValdCortex/internal/database/arangodb.go` - Database auto-creation
-8. `/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network/.env` - CVXC_ prefix
-9. `/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network/cmd/main.go` - Informational only
-10. `/workspaces/CodeValdCortex/Usecases/UC-INFRA-001-water-distribution-network/README.md` - Updated docs
+8. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/.env` - CVXC_ prefix
+9. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/cmd/main.go` - Informational only
+10. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/README.md` - Updated docs
 11. `/workspaces/CodeValdCortex/go.mod` - Added gojsonschema as direct dependency
 
 ## Design-to-Implementation Mapping

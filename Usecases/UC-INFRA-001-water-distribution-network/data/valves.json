@@ -1,0 +1,117 @@
+[
+    {
+        "id": "VALVE-001",
+        "name": "Isolation Valve North Main",
+        "type": "valve",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "valve_id": "VALVE-001",
+            "valve_type": "isolation",
+            "location": "PIPE-001",
+            "size": "600",
+            "installation_date": "2018-03-15T00:00:00Z",
+            "last_maintenance": "2025-06-10T00:00:00Z",
+            "position": "100",
+            "operational_status": "open",
+            "actuator_type": "electric",
+            "response_time_seconds": "15"
+        }
+    },
+    {
+        "id": "VALVE-002",
+        "name": "Control Valve North Distribution-A",
+        "type": "valve",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "valve_id": "VALVE-002",
+            "valve_type": "control",
+            "location": "PIPE-002",
+            "size": "300",
+            "installation_date": "2020-06-10T00:00:00Z",
+            "last_maintenance": "2025-09-05T00:00:00Z",
+            "position": "85",
+            "operational_status": "open",
+            "actuator_type": "electric",
+            "response_time_seconds": "10"
+        }
+    },
+    {
+        "id": "VALVE-003",
+        "name": "Isolation Valve Central Main",
+        "type": "valve",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "valve_id": "VALVE-003",
+            "valve_type": "isolation",
+            "location": "PIPE-006",
+            "size": "800",
+            "installation_date": "2017-08-20T00:00:00Z",
+            "last_maintenance": "2025-05-15T00:00:00Z",
+            "position": "100",
+            "operational_status": "open",
+            "actuator_type": "electric",
+            "response_time_seconds": "20"
+        }
+    },
+    {
+        "id": "VALVE-004",
+        "name": "Control Valve Central Distribution-A",
+        "type": "valve",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "valve_id": "VALVE-004",
+            "valve_type": "control",
+            "location": "PIPE-007",
+            "size": "400",
+            "installation_date": "2019-04-10T00:00:00Z",
+            "last_maintenance": "2025-08-25T00:00:00Z",
+            "position": "90",
+            "operational_status": "open",
+            "actuator_type": "electric",
+            "response_time_seconds": "12"
+        }
+    },
+    {
+        "id": "VALVE-005",
+        "name": "Control Valve Central Distribution-B",
+        "type": "valve",
+        "state": "running",
+        "metadata": {
+            "zone": "central",
+            "valve_id": "VALVE-005",
+            "valve_type": "control",
+            "location": "PIPE-008",
+            "size": "400",
+            "installation_date": "2019-04-10T00:00:00Z",
+            "last_maintenance": "2025-08-25T00:00:00Z",
+            "position": "88",
+            "operational_status": "open",
+            "actuator_type": "electric",
+            "response_time_seconds": "12"
+        }
+    },
+    {
+        "id": "VALVE-006",
+        "name": "Pressure Relief Valve North",
+        "type": "valve",
+        "state": "running",
+        "metadata": {
+            "zone": "north",
+            "valve_id": "VALVE-006",
+            "valve_type": "pressure_relief",
+            "location": "PIPE-001",
+            "size": "150",
+            "installation_date": "2018-03-15T00:00:00Z",
+            "last_maintenance": "2025-06-10T00:00:00Z",
+            "position": "0",
+            "operational_status": "closed",
+            "actuator_type": "spring_loaded",
+            "response_time_seconds": "1",
+            "set_pressure_bar": "14.0"
+        }
+    }
+]
