@@ -32,6 +32,252 @@
 | MVP-025 | Security Implementation   | Add input validation, HTTPS, and basic security headers    | Not Started | P2       | Medium | Security, Backend Dev | MVP-024      |
 | MVP-026 | Access Control System     | Implement role-based access control for agent operations   | Not Started | P2       | Low    | Backend Dev, Security | MVP-025      |
 
+## Agent Property Broadcasting Feature (P1 - Critical)
+
+*Enables UC-TRACK-001 (Safiri Salama) and other real-time tracking/monitoring use cases*
+
+| Task ID | Title                                    | Description                                                                                                      | Status      | Priority | Effort | Skills Required            | Dependencies |
+| ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | -------------------------- | ------------ |
+| MVP-016 | Core Broadcasting Infrastructure         | Implement BroadcastConfiguration, PropertyBroadcaster service, ContextEvaluator, and integration with PubSub    | Not Started | P1       | High   | Go, Backend Dev, PubSub    | MVP-013      |
+| MVP-017 | Subscription Management                  | Build SubscriptionManager, subscriber filtering, favorite functionality, and subscription API endpoints          | Not Started | P1       | Medium | Go, Backend Dev, REST API  | MVP-016      |
+| MVP-018 | Privacy & Security Controls              | Implement geofencing, property masking, permission model, audit logging, and encryption for sensitive properties | Not Started | P1       | Medium | Security, Backend Dev      | MVP-017      |
+| MVP-019 | Performance Optimization & Scale         | Performance tuning, caching, load balancing for broadcasters, message broker optimization, monitoring & alerting | Not Started | P1       | Medium | Performance, DevOps        | MVP-018      |
+| MVP-020 | UC-TRACK-001 Integration & Testing       | Implement Vehicle & Passenger agents, build mobile/web UI, SACCO management portal, end-to-end testing          | Not Started | P1       | High   | Full-stack, Mobile Dev     | MVP-019      |
+
+### MVP-016: Core Broadcasting Infrastructure
+
+**Objective**: Build the foundational broadcasting system that enables agents to automatically publish properties at configurable intervals.
+
+**Key Deliverables**:
+1. **Data Structures**:
+   - `BroadcastConfiguration` type with rules, intervals, privacy controls
+   - `BroadcastRule` with condition evaluation logic
+   - `PropertyUpdateMessage` format
+   - `BroadcastMetrics` for monitoring
+
+2. **Core Services**:
+   - `PropertyBroadcaster` service implementing lifecycle management
+   - `ContextEvaluator` for rule matching and interval determination
+   - `BroadcastConfigRepository` for persistent storage
+
+3. **Agent Integration**:
+   - Extend Agent base class with broadcasting methods
+   - Add `EnableBroadcasting()`, `StartBroadcasting()`, `StopBroadcasting()`
+   - Add `UpdateBroadcastInterval()`, `PauseBroadcasting()`, `BroadcastNow()`
+   - Implement property collection from agent state
+
+4. **PubSub Integration**:
+   - Extend PubSubService with `PublishPropertyUpdate()`
+   - Add topic routing for property updates
+   - Implement message formatting and priority handling
+
+**Acceptance Criteria**:
+- Agent can configure and start broadcasting
+- Context-aware interval adjustment works correctly
+- Properties are published to message bus
+- Basic metrics collection functional
+- Unit tests for all core components (>80% coverage)
+
+**Technical Details**: See `documents/3-SofwareDevelopment/core-systems/agent-property-broadcasting.md`
+
+### MVP-017: Subscription Management
+
+**Objective**: Enable agents to subscribe to property updates from other agents with filtering and notification preferences.
+
+**Key Deliverables**:
+1. **Subscription Service**:
+   - `SubscriptionManager` interface and implementation
+   - Subscribe/Unsubscribe operations
+   - Favorite/Unfavorite functionality
+   - Subscription approval workflow
+
+2. **Filtering Logic**:
+   - Property-based filtering
+   - Priority-based filtering
+   - Geofence-based filtering
+   - Time window filtering
+   - Subscriber type restrictions
+
+3. **Data Models**:
+   - `Subscriber` type with preferences
+   - `SubscriptionFilters` configuration
+   - `NotificationPreferences` settings
+
+4. **REST API Endpoints**:
+   ```
+   POST   /api/v1/agents/{agentId}/broadcasting/subscribe
+   DELETE /api/v1/agents/{agentId}/broadcasting/unsubscribe
+   POST   /api/v1/agents/{agentId}/broadcasting/favorite
+   DELETE /api/v1/agents/{agentId}/broadcasting/favorite
+   GET    /api/v1/agents/{agentId}/broadcasting/subscribers
+   GET    /api/v1/agents/{agentId}/subscribers/subscriptions
+   ```
+
+5. **Notification Delivery**:
+   - Push notification integration
+   - SMS notification integration
+   - Email notification integration
+   - In-app notification handling
+
+**Acceptance Criteria**:
+- Subscribers receive filtered property updates
+- Favorite notifications work with priority
+- API endpoints functional and documented
+- Subscription persistence works correctly
+- Integration tests for subscribe/receive flow
+
+### MVP-018: Privacy & Security Controls
+
+**Objective**: Implement comprehensive privacy and security features to protect sensitive location and property data.
+
+**Key Deliverables**:
+1. **Geofencing Service**:
+   - Geofence zone definition and storage
+   - Point-in-polygon detection
+   - Integration with broadcast pause logic
+   - Admin UI for geofence management
+
+2. **Property Masking**:
+   - Masking rule configuration per property
+   - Context-aware masking (e.g., mask exact location, show only vicinity)
+   - Redaction of sensitive fields
+
+3. **Permission Model**:
+   - `BroadcastPermissions` service
+   - Subscriber authorization checks
+   - Property-level access control
+   - Approval workflow for sensitive publishers
+
+4. **Audit Logging**:
+   - Log all subscription requests
+   - Track property access patterns
+   - Record broadcast pause/resume events
+   - Generate compliance reports
+
+5. **Encryption**:
+   - Encrypt sensitive properties in transit
+   - Secure storage of subscriber credentials
+   - API authentication and authorization
+
+**Acceptance Criteria**:
+- Broadcasting pauses in restricted geofences
+- Property masking works correctly
+- Unauthorized subscribers cannot access data
+- Complete audit trail for all operations
+- Security tests pass (no critical vulnerabilities)
+
+### MVP-019: Performance Optimization & Scale
+
+**Objective**: Ensure the broadcasting system can handle production-scale loads with low latency and high reliability.
+
+**Key Deliverables**:
+1. **Caching Strategy**:
+   - Cache subscriber lists in memory with TTL
+   - Cache broadcast configurations
+   - Cache geofence definitions
+   - Redis integration for distributed caching
+
+2. **Performance Optimizations**:
+   - Batch property updates where possible
+   - Async message publishing
+   - Connection pooling for message broker
+   - Efficient subscriber filtering at source
+
+3. **Load Balancing**:
+   - Distribute agents across broadcaster instances
+   - Sharding strategy for high-volume agents
+   - Health checks and failover
+
+4. **Monitoring & Alerting**:
+   - Prometheus metrics integration
+   - Grafana dashboards for broadcast metrics
+   - Alert rules for anomalies (high latency, failures)
+   - Performance profiling tools
+
+5. **Resource Limits**:
+   - Implement `BroadcastResourceLimits`
+   - Rate limiting per agent
+   - Throttling for misbehaving agents
+   - Circuit breakers for external services
+
+**Acceptance Criteria**:
+- Support 10,000+ concurrent broadcasting agents
+- Sub-second delivery latency (p99 < 500ms)
+- Handle 100,000+ messages per minute
+- Memory usage stays within bounds under load
+- Passes load and stress tests
+
+**Performance Targets**:
+- Broadcast-to-delivery latency: <500ms (p99)
+- Concurrent agents: 10,000+
+- Subscribers per agent: 1,000+
+- Message throughput: 100,000/min
+- System uptime: 99.9%
+
+### MVP-020: UC-TRACK-001 Integration & Testing
+
+**Objective**: Complete end-to-end implementation of the Safiri Salama tracking system as the reference implementation.
+
+**Key Deliverables**:
+1. **Vehicle Agent Implementation**:
+   - GPS location tracking integration
+   - Context-aware broadcast configuration
+   - Status state machine (idle, en_route, at_stop, etc.)
+   - Driver dashboard (mobile/tablet)
+
+2. **Passenger Agent Implementation**:
+   - Favorite vehicle management
+   - Smart notification handling
+   - Trip rating and feedback
+   - Commute pattern learning
+
+3. **Parent Agent Implementation**:
+   - Child bus tracking
+   - Emergency alert handling
+   - Proximity notifications
+   - School communication portal
+
+4. **Fleet Operator Portal**:
+   - SACCO manager dashboard
+   - Loyalty analytics
+   - Vehicle performance metrics
+   - Passenger engagement insights
+
+5. **Mobile Applications**:
+   - Passenger app (iOS/Android) - track favorites
+   - Parent app (iOS/Android) - track school bus
+   - Driver app (iOS/Android) - status control
+
+6. **Web Portal**:
+   - Admin dashboard for fleet operators
+   - Real-time fleet map view
+   - Analytics and reporting
+   - Configuration management
+
+7. **Use Case Deployment**:
+   - UC-TRACK-001 folder structure
+   - Agent JSON schemas (Vehicle, Passenger, Parent, etc.)
+   - Environment configuration (.env)
+   - Deployment scripts (start.sh)
+   - Documentation and user guides
+
+**Acceptance Criteria**:
+- All 5 agent types functional (Vehicle, Parent, Passenger, Route Manager, Fleet Operator)
+- Mobile apps published to app stores (beta)
+- End-to-end tracking works: Vehicle → Broadcast → Passenger receives
+- Favorite notification feature works
+- Real-world pilot with 5+ vehicles and 50+ subscribers
+- User feedback positive (>4.0 rating)
+- System stable under real usage patterns
+
+**Pilot Program**:
+1. **School Pilot**: 2-3 schools, 5-10 buses, 200-300 parents
+2. **Matatu Pilot**: 1-2 SACCOs, 10-15 vehicles, 500-1000 passengers
+3. **Duration**: 4 weeks
+4. **Success Metrics**: >70% active usage, <5% error rate, positive feedback
+
+---
+
 ## Resource Requirements
 
 ### Team Members
