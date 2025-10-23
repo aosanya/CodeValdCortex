@@ -31,11 +31,11 @@ func StatsCard(title, value, icon, color string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-white dark:bg-gray-800 rounded-lg shadow p-6\"><div class=\"flex items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"box\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{fmt.Sprintf("flex-shrink-0 p-3 rounded-lg %s", getIconBg(color))}
+		var templ_7745c5c3_Var2 = []any{fmt.Sprintf("icon is-large %s", getIconBg(color))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -53,7 +53,7 @@ func StatsCard(title, value, icon, color string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" style=\"width: 3rem; height: 3rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,33 +61,33 @@ func StatsCard(title, value, icon, color string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"ml-5 w-0 flex-1\"><dl><dt class=\"text-sm font-medium text-gray-500 dark:text-gray-400 truncate\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><div class=\"level-item\"><div><p class=\"heading\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/stats_card.templ`, Line: 14, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/stats_card.templ`, Line: 16, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</dt><dd class=\"flex items-baseline\"><div class=\"text-2xl font-semibold text-gray-900 dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p><p class=\"title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/stats_card.templ`, Line: 18, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/stats_card.templ`, Line: 17, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></dd></dl></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -116,12 +116,12 @@ func Icon(name, colorClass string) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var7 = []any{fmt.Sprintf("w-6 h-6 %s", colorClass)}
+		var templ_7745c5c3_Var7 = []any{colorClass}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<svg class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<svg style=\"width: 1.5rem; height: 1.5rem;\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,30 +181,30 @@ func Icon(name, colorClass string) templ.Component {
 func getIconBg(color string) string {
 	switch color {
 	case "blue":
-		return "bg-blue-100 dark:bg-blue-900"
+		return "has-background-link-light"
 	case "green":
-		return "bg-green-100 dark:bg-green-900"
+		return "has-background-success-light"
 	case "yellow":
-		return "bg-yellow-100 dark:bg-yellow-900"
+		return "has-background-warning-light"
 	case "red":
-		return "bg-red-100 dark:bg-red-900"
+		return "has-background-danger-light"
 	default:
-		return "bg-gray-100 dark:bg-gray-700"
+		return "has-background-light"
 	}
 }
 
 func getIconColor(color string) string {
 	switch color {
 	case "blue":
-		return "text-blue-600 dark:text-blue-300"
+		return "has-text-link"
 	case "green":
-		return "text-green-600 dark:text-green-300"
+		return "has-text-success"
 	case "yellow":
-		return "text-yellow-600 dark:text-yellow-300"
+		return "has-text-warning"
 	case "red":
-		return "text-red-600 dark:text-red-300"
+		return "has-text-danger"
 	default:
-		return "text-gray-600 dark:text-gray-300"
+		return "has-text-grey"
 	}
 }
 

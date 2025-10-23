@@ -8,8 +8,8 @@ templ Layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title } - CodeValdCortex</title>
 			
-			<!-- Tailwind CSS (self-hosted) -->
-			<link rel="stylesheet" href="/static/css/tailwind.min.css"/>
+			<!-- Bulma CSS (self-hosted) -->
+			<link rel="stylesheet" href="/static/css/bulma.min.css"/>
 			
 			<!-- Custom styles -->
 			<link rel="stylesheet" href="/static/css/styles.css"/>
@@ -29,68 +29,108 @@ templ Layout(title string) {
 			<!-- Progress bar for HTMX requests -->
 			<div id="htmx-progress"></div>
 		</head>
-		<body class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+		<body>
 			@Navbar()
 			
-			<main class="container mx-auto px-4 py-6">
-				{ children... }
+			<main class="section">
+				<div class="container">
+					{ children... }
+				</div>
 			</main>
 			
 			<!-- Custom JavaScript -->
 			<script src="/static/js/alpine-components.js"></script>
+			
+			<!-- Bulma navbar burger toggle -->
+			<script>
+				document.addEventListener('DOMContentLoaded', () => {
+					// Get all "navbar-burger" elements
+					const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+					
+					// Add a click event on each of them
+					$navbarBurgers.forEach( el => {
+						el.addEventListener('click', () => {
+							// Get the target from the "data-target" attribute
+							const target = el.dataset.target;
+							const $target = document.getElementById(target);
+							
+							// Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+							el.classList.toggle('is-active');
+							$target.classList.toggle('is-active');
+						});
+					});
+				});
+			</script>
 		</body>
 	</html>
 }
 
 templ Navbar() {
-	<nav class="bg-white dark:bg-gray-800 shadow-lg mb-6">
-		<div class="container mx-auto px-4">
-			<div class="flex justify-between items-center h-16">
-				<div class="flex items-center space-x-4">
-					<a href="/dashboard" class="flex items-center space-x-2">
-						<svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
-						</svg>
-						<span class="text-xl font-bold text-gray-900 dark:text-white">CodeValdCortex</span>
+	<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+		<div class="container">
+			<div class="navbar-brand">
+				<a href="/dashboard" class="navbar-item">
+					<svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+					</svg>
+					<span class="ml-2 has-text-weight-bold is-size-5">CodeValdCortex</span>
+				</a>
+				
+				<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+				</a>
+			</div>
+			
+			<div id="navbarMenu" class="navbar-menu">
+				<div class="navbar-start">
+					<a href="/dashboard" class="navbar-item">
+						Dashboard
 					</a>
-					
-					<div class="hidden md:flex space-x-4 ml-8">
-						<a href="/dashboard" class="text-gray-700 dark:text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-							Dashboard
-						</a>
-						<a href="/dashboard/agents" class="text-gray-700 dark:text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-							Agents
-						</a>
-						<a href="/dashboard/pools" class="text-gray-700 dark:text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-							Pools
-						</a>
-						<a href="/agent-types" class="text-gray-700 dark:text-gray-300 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-							Agent Types
-						</a>
-					</div>
+					<a href="/dashboard/agents" class="navbar-item">
+						Agents
+					</a>
+					<a href="/dashboard/pools" class="navbar-item">
+						Pools
+					</a>
+					<a href="/agent-types" class="navbar-item">
+						Agent Types
+					</a>
 				</div>
 				
-				<div class="flex items-center space-x-4">
-					<button 
-						@click="darkMode = !darkMode"
-						class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
-						x-data="{ darkMode: false }"
-						x-init="darkMode = localStorage.getItem('darkMode') === 'true'; $watch('darkMode', val => { localStorage.setItem('darkMode', val); document.documentElement.classList.toggle('dark', val); })"
-					>
-						<svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-						</svg>
-						<svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-						</svg>
-					</button>
-					
-					<button 
-						@click="$dispatch('open-create-modal')"
-						class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
-					>
-						+ Create Agent
-					</button>
+				<div class="navbar-end">
+					<div class="navbar-item">
+						<div class="buttons">
+							<button 
+								@click="darkMode = !darkMode"
+								class="button is-light"
+								x-data="{ darkMode: false }"
+								x-init="darkMode = localStorage.getItem('darkMode') === 'true'; $watch('darkMode', val => { localStorage.setItem('darkMode', val); document.documentElement.classList.toggle('dark', val); })"
+							>
+								<span class="icon" x-show="!darkMode">
+									<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+									</svg>
+								</span>
+								<span class="icon" x-show="darkMode">
+									<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+									</svg>
+								</span>
+							</button>
+							
+							<button 
+								@click="$dispatch('open-create-modal')"
+								class="button is-primary"
+							>
+								<span class="icon">
+									<i class="fas fa-plus"></i>
+								</span>
+								<span>Create Agent</span>
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -20,8 +20,30 @@
     }
 }
 
-.animate-spin {
+.animate-spin,
+.spinning {
     animation: spin 1s linear infinite;
+}
+
+/* Icon size constraints */
+.icon svg {
+    width: 1em;
+    height: 1em;
+}
+
+.icon.is-small svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.icon.is-medium svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.icon.is-large svg {
+    width: 2rem;
+    height: 2rem;
 }
 
 /* Loading states */

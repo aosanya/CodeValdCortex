@@ -47,7 +47,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto px-4 py-8\"><!-- Header --><div class=\"mb-8\"><div class=\"flex justify-between items-center\"><div><h1 class=\"text-3xl font-bold text-gray-900 dark:text-white mb-2\">Agent Types</h1><p class=\"text-gray-600 dark:text-gray-400\">Manage and configure agent type definitions</p></div><button @click=\"$dispatch('open-create-type-modal')\" class=\"px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2\"><svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 4v16m8-8H4\"></path></svg> <span>Create Agent Type</span></button></div></div><!-- Stats --><div class=\"grid grid-cols-1 md:grid-cols-4 gap-6 mb-8\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div><!-- Header --><div class=\"mb-5\"><div class=\"is-flex is-justify-content-space-between is-align-items-start\"><div><h1 class=\"title is-2 mb-2\">Agent Types</h1><p class=\"subtitle is-5 has-text-grey mt-0\">Manage and configure agent type definitions</p></div><div><button @click=\"$dispatch('open-create-type-modal')\" class=\"button is-primary\"><span class=\"icon\"><svg style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 4v16m8-8H4\"></path></svg></span> <span>Create Agent Type</span></button></div></div></div><!-- Stats --><div class=\"columns mb-5\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -55,76 +55,84 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><!-- Filter Tabs --><div x-data=\"{ activeTab: 'all' }\" class=\"mb-6\"><div class=\"border-b border-gray-200 dark:border-gray-700\"><nav class=\"-mb-px flex space-x-8\"><button @click=\"activeTab = 'all'\" :class=\"{ 'border-blue-500 text-blue-600': activeTab === 'all', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'all' }\" class=\"whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm\">All Types <span class=\"ml-2 py-0.5 px-2 rounded-full bg-gray-100 dark:bg-gray-800 text-xs\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><!-- Filter Tabs --><div x-data=\"{ activeTab: 'all' }\" class=\"mb-5\"><div class=\"tabs is-boxed\"><ul><li :class=\"{ 'is-active': activeTab === 'all' }\"><a @click=\"activeTab = 'all'\"><span>All Types</span> <span class=\"tag is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(len(agentTypes))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 54, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 55, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></button> <button @click=\"activeTab = 'core'\" :class=\"{ 'border-blue-500 text-blue-600': activeTab === 'core', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'core' }\" class=\"whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm\" hx-get=\"/api/web/agent-types?category=core\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\">Core <span class=\"ml-2 py-0.5 px-2 rounded-full bg-purple-100 dark:bg-purple-900 text-xs\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'core' }\"><a @click=\"activeTab = 'core'\" hx-get=\"/api/web/agent-types?category=core\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Core</span> <span class=\"tag is-primary is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(countByCategory(agentTypes, "core"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 67, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 68, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></button> <button @click=\"activeTab = 'infrastructure'\" :class=\"{ 'border-blue-500 text-blue-600': activeTab === 'infrastructure', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'infrastructure' }\" class=\"whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm\" hx-get=\"/api/web/agent-types?category=infrastructure\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\">Infrastructure <span class=\"ml-2 py-0.5 px-2 rounded-full bg-green-100 dark:bg-green-900 text-xs\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'infrastructure' }\"><a @click=\"activeTab = 'infrastructure'\" hx-get=\"/api/web/agent-types?category=infrastructure\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Infrastructure</span> <span class=\"tag is-success is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(countByCategory(agentTypes, "infrastructure"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 80, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 81, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></button> <button @click=\"activeTab = 'enabled'\" :class=\"{ 'border-blue-500 text-blue-600': activeTab === 'enabled', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'enabled' }\" class=\"whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm\" hx-get=\"/api/web/agent-types?enabled=true\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\">Enabled Only <span class=\"ml-2 py-0.5 px-2 rounded-full bg-green-100 dark:bg-green-900 text-xs\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'enabled' }\"><a @click=\"activeTab = 'enabled'\" hx-get=\"/api/web/agent-types?enabled=true\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Enabled Only</span> <span class=\"tag is-success is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(countEnabled(agentTypes))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 93, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 94, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></button></nav></div></div><!-- Agent Types Grid --><div id=\"agent-types-grid\" class=\"grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></a></li></ul></div></div><!-- Agent Types Grid --><div id=\"agent-types-grid\" class=\"columns is-multiline\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(agentTypes) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"col-span-full text-center py-12\"><svg class=\"mx-auto h-12 w-12 text-gray-400\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4\"></path></svg><h3 class=\"mt-2 text-sm font-medium text-gray-900 dark:text-white\">No agent types</h3><p class=\"mt-1 text-sm text-gray-500 dark:text-gray-400\">Get started by creating a new agent type.</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"column\"><div class=\"has-text-centered py-6\"><svg style=\"width: 3rem; height: 3rem; margin: 0 auto;\" class=\"has-text-grey-light\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4\"></path></svg><h3 class=\"subtitle is-5 mt-4\">No agent types</h3><p class=\"has-text-grey\">Get started by creating a new agent type.</p></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
 				for _, agentType := range agentTypes {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"column is-one-third\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
 					templ_7745c5c3_Err = components.AgentTypeCard(agentType).Render(ctx, templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -159,59 +167,59 @@ func AgentTypeStats(agentTypes []*registry.AgentType) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"bg-white dark:bg-gray-800 rounded-lg shadow p-6\"><div class=\"flex items-center\"><div class=\"flex-shrink-0 bg-blue-500 rounded-md p-3\"><svg class=\"h-6 w-6 text-white\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4\"></path></svg></div><div class=\"ml-5 w-0 flex-1\"><dl><dt class=\"text-sm font-medium text-gray-500 dark:text-gray-400 truncate\">Total Types</dt><dd class=\"text-2xl font-semibold text-gray-900 dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"column\"><div class=\"box\"><div class=\"level is-mobile\"><div class=\"level-item\"><div class=\"has-background-link p-3\" style=\"border-radius: 0.25rem;\"><span class=\"icon has-text-white\"><svg style=\"width: 1.5rem; height: 1.5rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4\"></path></svg></span></div></div><div class=\"level-item\"><div><p class=\"heading\">Total Types</p><p class=\"title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(len(agentTypes))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 137, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 145, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</dd></dl></div></div></div><div class=\"bg-white dark:bg-gray-800 rounded-lg shadow p-6\"><div class=\"flex items-center\"><div class=\"flex-shrink-0 bg-green-500 rounded-md p-3\"><svg class=\"h-6 w-6 text-white\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg></div><div class=\"ml-5 w-0 flex-1\"><dl><dt class=\"text-sm font-medium text-gray-500 dark:text-gray-400 truncate\">Enabled</dt><dd class=\"text-2xl font-semibold text-gray-900 dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</p></div></div></div></div></div><div class=\"column\"><div class=\"box\"><div class=\"level is-mobile\"><div class=\"level-item\"><div class=\"has-background-success p-3\" style=\"border-radius: 0.25rem;\"><span class=\"icon has-text-white\"><svg style=\"width: 1.5rem; height: 1.5rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg></span></div></div><div class=\"level-item\"><div><p class=\"heading\">Enabled</p><p class=\"title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(countEnabled(agentTypes))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 157, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 167, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</dd></dl></div></div></div><div class=\"bg-white dark:bg-gray-800 rounded-lg shadow p-6\"><div class=\"flex items-center\"><div class=\"flex-shrink-0 bg-purple-500 rounded-md p-3\"><svg class=\"h-6 w-6 text-white\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\"></path></svg></div><div class=\"ml-5 w-0 flex-1\"><dl><dt class=\"text-sm font-medium text-gray-500 dark:text-gray-400 truncate\">System Types</dt><dd class=\"text-2xl font-semibold text-gray-900 dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p></div></div></div></div></div><div class=\"column\"><div class=\"box\"><div class=\"level is-mobile\"><div class=\"level-item\"><div class=\"has-background-primary p-3\" style=\"border-radius: 0.25rem;\"><span class=\"icon has-text-white\"><svg style=\"width: 1.5rem; height: 1.5rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\"></path></svg></span></div></div><div class=\"level-item\"><div><p class=\"heading\">System Types</p><p class=\"title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(countSystemTypes(agentTypes))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 177, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 189, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</dd></dl></div></div></div><div class=\"bg-white dark:bg-gray-800 rounded-lg shadow p-6\"><div class=\"flex items-center\"><div class=\"flex-shrink-0 bg-orange-500 rounded-md p-3\"><svg class=\"h-6 w-6 text-white\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01\"></path></svg></div><div class=\"ml-5 w-0 flex-1\"><dl><dt class=\"text-sm font-medium text-gray-500 dark:text-gray-400 truncate\">Categories</dt><dd class=\"text-2xl font-semibold text-gray-900 dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</p></div></div></div></div></div><div class=\"column\"><div class=\"box\"><div class=\"level is-mobile\"><div class=\"level-item\"><div class=\"has-background-warning p-3\" style=\"border-radius: 0.25rem;\"><span class=\"icon has-text-white\"><svg style=\"width: 1.5rem; height: 1.5rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01\"></path></svg></span></div></div><div class=\"level-item\"><div><p class=\"heading\">Categories</p><p class=\"title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(countCategories(agentTypes))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 197, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agent_types.templ`, Line: 211, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</dd></dl></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
