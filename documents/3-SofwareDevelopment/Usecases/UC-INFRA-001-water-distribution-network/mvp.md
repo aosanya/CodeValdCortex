@@ -185,8 +185,8 @@
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-007 | Create Infrastructure Agent Instances | Create initial agent instances for demo: 10 pipes, 8 sensors, 3 pumps, 6 valves, 2 zone coordinators with realistic configurations and network topology | **UC-INFRA-001** | Not Started | P0 | Medium | Go, REST API, Network Design | INFRA-001 to INFRA-006 |
-| INFRA-008 | Agent State Initialization | Initialize agent states with baseline data: pipe conditions, sensor calibration, pump efficiency, valve positions, zone boundaries using REST API or database seeding | **UC-INFRA-001** | Not Started | P0 | Low | Go, ArangoDB | INFRA-007 |
+| INFRA-007 | Create Infrastructure Agent Instances | Create initial agent instances for demo: 10 pipes, 8 sensors, 3 pumps, 6 valves, 2 zone coordinators with realistic configurations and network topology | **UC-INFRA-001** | ✅ Complete | P0 | Medium | Go, REST API, Network Design | INFRA-001 to INFRA-006 |
+| INFRA-008 | Agent State Initialization | Initialize agent states with baseline data: pipe conditions, sensor calibration, pump efficiency, valve positions, zone boundaries using REST API or database seeding | **UC-INFRA-001** | ✅ Complete | P0 | Low | Go, ArangoDB | INFRA-007 |
 
 ## Phase 4: Scenario Implementations (P1 - Critical)
 
@@ -439,6 +439,14 @@
    - Include examples demonstrating functionality
    - Add completed task to `mvp_done.md` with completion date
    - Update any dependent task references in this file
+   - Merge feature branch to main:
+     ```bash
+     # Merge when complete and tested
+     git checkout main
+     git merge feature/MVP-XXX_description
+     git branch -d feature/MVP-XXX_description
+     git push origin main
+     ```
 5. **Dependencies**: Ensure prerequisite tasks are completed before starting dependent work
 
 ### Branch Management
