@@ -196,7 +196,7 @@
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
 | INFRA-009 | Leak Detection Scenario | Implement multi-agent leak detection workflow: Sensor detects anomaly → Publishes alert → Pipe agent analyzes → Valve isolates → Zone Coordinator escalates | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Event Processing | INFRA-007, INFRA-008 |
 | INFRA-010 | Pressure Optimization Scenario | Implement collaborative pressure management: Sensors publish readings → Pumps subscribe and adjust output → Zone coordinator monitors overall balance | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Control Algorithms | INFRA-007, INFRA-008 |
-| INFRA-011 | Predictive Maintenance Scenario | Implement degradation detection: Pump monitors efficiency → Detects decline pattern → Publishes maintenance alert → Zone coordinator schedules work order | **UC-INFRA-001** | Not Started | P1 | High | Go, Analytics | INFRA-009 |
+| INFRA-011 | Predictive Maintenance Scenario | Implement degradation detection: Pump monitors efficiency → Detects decline pattern → Publishes maintenance alert → Zone coordinator schedules work order | **UC-INFRA-001** | 🚧 In Progress | P1 | High | Go, Analytics | INFRA-009 |
 
 ## Phase 5: Data Storage & Analytics (P1 - Critical) ⚠️ PARTIALLY COMPLETE
 
@@ -409,13 +409,13 @@
 5. **Phase 6**: Base web UI with agent management (INFRA-016)
 6. **Infrastructure**: Environment configuration, startup scripts, database auto-creation
 
-### ⏳ In Progress (0 tasks)
-- None - ready for next task
+### ⏳ In Progress (1 task)
+- **INFRA-011**: Predictive Maintenance Scenario - Implementing pump degradation detection with efficiency monitoring, maintenance alerts, and work order scheduling
 
 ### 🎯 Next Priorities
-1. **INFRA-011**: Implement water quality monitoring scenario (new agent collaboration pattern)
-2. **INFRA-017**: Build network topology visualizer for dashboard
-3. **INFRA-013**: Time-series data storage for sensor readings
+1. **INFRA-017**: Build network topology visualizer for dashboard
+2. **INFRA-013**: Time-series data storage for sensor readings
+3. **INFRA-015**: Historical analytics queries for infrastructure metrics
 
 ### 📊 Overall Statistics
 - **Total MVP Tasks**: 27 tasks
