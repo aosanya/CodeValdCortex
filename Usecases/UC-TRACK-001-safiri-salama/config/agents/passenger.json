@@ -1,0 +1,342 @@
+{
+    "id": "passenger",
+    "name": "Passenger/Commuter Agent",
+    "description": "Subscriber agent representing a regular commuter who tracks favorite matatus for optimal commute planning and reduced wait time anxiety",
+    "category": "subscriber",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "passenger_id",
+            "name",
+            "phone_number"
+        ],
+        "properties": {
+            "passenger_id": {
+                "type": "string",
+                "pattern": "^PASSENGER-[A-Z0-9]{6,12}$",
+                "description": "Unique passenger identifier"
+            },
+            "name": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 100,
+                "description": "Passenger full name"
+            },
+            "phone_number": {
+                "type": "string",
+                "pattern": "^\\+?[1-9]\\d{1,14}$",
+                "description": "Contact phone number in E.164 format"
+            },
+            "email": {
+                "type": "string",
+                "format": "email",
+                "description": "Email address for notifications"
+            },
+            "favorite_matatu_ids": {
+                "type": "array",
+                "maxItems": 10,
+                "items": {
+                    "type": "string"
+                },
+                "description": "List of preferred matatu vehicle IDs"
+            },
+            "favorite_reasons": {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "good_music",
+                            "safe_driver",
+                            "clean",
+                            "comfortable",
+                            "punctual",
+                            "respectful_crew",
+                            "fast_route",
+                            "affordable"
+                        ]
+                    }
+                },
+                "description": "Reasons for favoriting each matatu (vehicle_id -> reasons)"
+            },
+            "usual_stops": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "stop_id": {
+                            "type": "string"
+                        },
+                        "stop_name": {
+                            "type": "string"
+                        },
+                        "usage_frequency": {
+                            "type": "string",
+                            "enum": [
+                                "daily",
+                                "weekly",
+                                "occasional"
+                            ]
+                        },
+                        "time_of_day": {
+                            "type": "string",
+                            "enum": [
+                                "morning",
+                                "afternoon",
+                                "evening"
+                            ]
+                        }
+                    }
+                },
+                "description": "Frequently used pickup/dropoff locations"
+            },
+            "commute_schedule": {
+                "type": "object",
+                "properties": {
+                    "morning_commute": {
+                        "type": "object",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean"
+                            },
+                            "typical_time": {
+                                "type": "string",
+                                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "days": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "monday",
+                                        "tuesday",
+                                        "wednesday",
+                                        "thursday",
+                                        "friday",
+                                        "saturday",
+                                        "sunday"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "evening_commute": {
+                        "type": "object",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean"
+                            },
+                            "typical_time": {
+                                "type": "string",
+                                "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$"
+                            },
+                            "days": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "monday",
+                                        "tuesday",
+                                        "wednesday",
+                                        "thursday",
+                                        "friday",
+                                        "saturday",
+                                        "sunday"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Typical travel times for intelligent notifications"
+            },
+            "notification_preferences": {
+                "type": "object",
+                "properties": {
+                    "channels": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "push",
+                                "sms",
+                                "email"
+                            ]
+                        }
+                    },
+                    "notify_on_favorite_approaching": {
+                        "type": "boolean",
+                        "description": "Alert when favorite matatu is nearby"
+                    },
+                    "notify_on_capacity_available": {
+                        "type": "boolean",
+                        "description": "Alert when favorite has available seats"
+                    },
+                    "notify_on_delays": {
+                        "type": "boolean",
+                        "description": "Alert about traffic delays affecting favorites"
+                    },
+                    "distance_threshold_km": {
+                        "type": "number",
+                        "minimum": 0.1,
+                        "maximum": 10.0,
+                        "description": "Distance for proximity notifications"
+                    },
+                    "smart_alerts_enabled": {
+                        "type": "boolean",
+                        "description": "Enable ML-based predictive notifications"
+                    }
+                }
+            },
+            "home_location": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                    },
+                    "address": {
+                        "type": "string"
+                    }
+                },
+                "description": "Home location for proximity-based alerts (optional)"
+            },
+            "work_location": {
+                "type": "object",
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                    },
+                    "address": {
+                        "type": "string"
+                    }
+                },
+                "description": "Work location for commute pattern analysis (optional)"
+            },
+            "tracking_active": {
+                "type": "boolean",
+                "description": "Whether currently monitoring matatus"
+            },
+            "payment_method": {
+                "type": "string",
+                "enum": [
+                    "mpesa",
+                    "cash",
+                    "card"
+                ],
+                "description": "Preferred payment method (for future premium features)"
+            },
+            "loyalty_points": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Accumulated loyalty points from tracked trips"
+            },
+            "trip_history": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "trip_id": {
+                            "type": "string"
+                        },
+                        "vehicle_id": {
+                            "type": "string"
+                        },
+                        "date": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "rating": {
+                            "type": "number",
+                            "minimum": 1,
+                            "maximum": 5
+                        },
+                        "comment": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "description": "Record of past trips with favorited vehicles"
+            },
+            "badges_earned": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "frequent_rider",
+                        "early_bird",
+                        "night_owl",
+                        "loyal_passenger_50",
+                        "loyal_passenger_100",
+                        "review_contributor"
+                    ]
+                },
+                "description": "Achievements and badges earned"
+            },
+            "subscription_tier": {
+                "type": "string",
+                "enum": [
+                    "free",
+                    "premium"
+                ],
+                "description": "Subscription level (free: 3 favorites, premium: unlimited)"
+            }
+        }
+    },
+    "required_capabilities": [
+        "matatu_subscription",
+        "favorite_management",
+        "notification_handling",
+        "trip_rating"
+    ],
+    "optional_capabilities": [
+        "location_tracking",
+        "commute_pattern_learning",
+        "loyalty_points_management",
+        "social_features"
+    ],
+    "default_config": {
+        "max_favorites_free": 3,
+        "max_favorites_premium": 10,
+        "distance_threshold_km": 2.0,
+        "smart_alerts_enabled": true,
+        "notification_channels": [
+            "push"
+        ]
+    },
+    "validation_rules": [
+        {
+            "name": "favorite_limit_free",
+            "description": "Free tier limited to 3 favorites",
+            "condition": "subscription_tier != 'free' || len(favorite_matatu_ids) <= 3"
+        },
+        {
+            "name": "favorite_limit_premium",
+            "description": "Premium tier limited to 10 favorites",
+            "condition": "subscription_tier != 'premium' || len(favorite_matatu_ids) <= 10"
+        },
+        {
+            "name": "valid_phone",
+            "description": "Phone number must be in valid format",
+            "condition": "phone_number matches E.164 format"
+        }
+    ],
+    "is_system_type": false,
+    "is_enabled": true
+}

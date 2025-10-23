@@ -1,0 +1,401 @@
+{
+    "id": "caretaker",
+    "name": "Animal Caretaker Agent",
+    "description": "Represents caretakers who provide animal keeping services",
+    "category": "livestock",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "caretaker_id",
+            "name",
+            "location",
+            "specialization",
+            "capacity"
+        ],
+        "properties": {
+            "caretaker_id": {
+                "type": "string",
+                "pattern": "^CAR-[A-Z0-9]{8}$",
+                "description": "Unique caretaker identifier"
+            },
+            "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Caretaker's full name"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "region",
+                    "country"
+                ],
+                "properties": {
+                    "region": {
+                        "type": "string"
+                    },
+                    "district": {
+                        "type": "string"
+                    },
+                    "village": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "coordinates": {
+                        "type": "object",
+                        "properties": {
+                            "latitude": {
+                                "type": "number"
+                            },
+                            "longitude": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "terrain_type": {
+                        "type": "string",
+                        "enum": [
+                            "grassland",
+                            "savanna",
+                            "highland",
+                            "semi_arid",
+                            "mixed"
+                        ]
+                    }
+                }
+            },
+            "contact_info": {
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "preferred_method": {
+                        "type": "string",
+                        "enum": [
+                            "sms",
+                            "phone",
+                            "email",
+                            "in_app"
+                        ]
+                    }
+                }
+            },
+            "specialization": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "cattle",
+                        "goats",
+                        "sheep",
+                        "chickens",
+                        "pigs",
+                        "donkeys",
+                        "horses",
+                        "mixed_livestock"
+                    ]
+                },
+                "minItems": 1
+            },
+            "experience": {
+                "type": "object",
+                "properties": {
+                    "years": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "previous_animals_cared": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "breeding_experience": {
+                        "type": "boolean"
+                    },
+                    "veterinary_skills": {
+                        "type": "boolean"
+                    },
+                    "traditional_knowledge": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "capacity": {
+                "type": "object",
+                "required": [
+                    "total_capacity",
+                    "current_occupancy"
+                ],
+                "properties": {
+                    "total_capacity": {
+                        "type": "number",
+                        "minimum": 1,
+                        "description": "Maximum number of animals"
+                    },
+                    "current_occupancy": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "available_slots": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "by_type": {
+                        "type": "object",
+                        "properties": {
+                            "cattle": {
+                                "type": "number"
+                            },
+                            "goats": {
+                                "type": "number"
+                            },
+                            "sheep": {
+                                "type": "number"
+                            },
+                            "chickens": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "facilities": {
+                "type": "object",
+                "properties": {
+                    "land_size_hectares": {
+                        "type": "number"
+                    },
+                    "shelter_available": {
+                        "type": "boolean"
+                    },
+                    "water_access": {
+                        "type": "string",
+                        "enum": [
+                            "natural_spring",
+                            "borehole",
+                            "river",
+                            "dam",
+                            "municipal"
+                        ]
+                    },
+                    "fencing": {
+                        "type": "boolean"
+                    },
+                    "kraals": {
+                        "type": "number"
+                    },
+                    "grazing_land": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "animals_in_care": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "animal_id": {
+                            "type": "string"
+                        },
+                        "owner_id": {
+                            "type": "string"
+                        },
+                        "start_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "status": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "reputation": {
+                "type": "object",
+                "properties": {
+                    "overall_rating": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                    },
+                    "total_reviews": {
+                        "type": "number"
+                    },
+                    "successful_arrangements": {
+                        "type": "number"
+                    },
+                    "disputes": {
+                        "type": "number"
+                    },
+                    "animal_health_score": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    "communication_score": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                    },
+                    "reliability_score": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                    }
+                }
+            },
+            "community_standing": {
+                "type": "object",
+                "properties": {
+                    "elder_endorsements": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "community_references": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "relationship": {
+                                    "type": "string"
+                                },
+                                "contact": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "years_in_community": {
+                        "type": "number"
+                    }
+                }
+            },
+            "availability": {
+                "type": "object",
+                "properties": {
+                    "accepting_new_animals": {
+                        "type": "boolean"
+                    },
+                    "seasonal_restrictions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "preferred_arrangement_duration": {
+                        "type": "string",
+                        "enum": [
+                            "short_term",
+                            "medium_term",
+                            "long_term",
+                            "permanent"
+                        ]
+                    }
+                }
+            },
+            "services_offered": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "daily_grazing",
+                        "shelter",
+                        "breeding",
+                        "medical_care",
+                        "training",
+                        "slaughter_management"
+                    ]
+                }
+            },
+            "joined_date": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "last_update_sent": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "verification_status": {
+                "type": "string",
+                "enum": [
+                    "pending",
+                    "verified",
+                    "endorsed",
+                    "flagged"
+                ],
+                "default": "pending"
+            }
+        }
+    },
+    "capabilities": [
+        "accept_animal_custody",
+        "provide_regular_updates",
+        "upload_photos_videos",
+        "report_health_issues",
+        "communicate_with_owner",
+        "request_veterinary_services",
+        "document_breeding_events",
+        "manage_feeding_schedule",
+        "track_animal_growth",
+        "receive_care_instructions",
+        "report_emergencies"
+    ],
+    "state_machine": {
+        "states": [
+            "available",
+            "at_capacity",
+            "caring",
+            "emergency_situation",
+            "inactive"
+        ],
+        "initial_state": "available",
+        "transitions": [
+            {
+                "from": "available",
+                "to": "caring",
+                "trigger": "animal_accepted"
+            },
+            {
+                "from": "caring",
+                "to": "at_capacity",
+                "trigger": "capacity_reached"
+            },
+            {
+                "from": "caring",
+                "to": "emergency_situation",
+                "trigger": "health_crisis"
+            },
+            {
+                "from": "emergency_situation",
+                "to": "caring",
+                "trigger": "crisis_resolved"
+            }
+        ]
+    },
+    "communication_protocols": [
+        "sms",
+        "in_app_messaging",
+        "photo_sharing",
+        "video_sharing",
+        "voice_messages"
+    ],
+    "integration_points": [
+        "animal_registry",
+        "owner_directory",
+        "health_monitoring_system",
+        "messaging_service",
+        "reputation_system",
+        "emergency_alert_system"
+    ]
+}

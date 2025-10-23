@@ -1,0 +1,523 @@
+{
+    "id": "covenant_monitor",
+    "name": "Covenant Monitoring Agent",
+    "description": "Continuous monitoring of loan covenants and contractual obligations with real-time breach detection and multi-tier alerting",
+    "category": "financial",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "monitor_id",
+            "entity_id",
+            "facility_id"
+        ],
+        "properties": {
+            "monitor_id": {
+                "type": "string",
+                "pattern": "^MON-[A-Z0-9]{8}$",
+                "description": "Unique monitor instance identifier"
+            },
+            "entity_id": {
+                "type": "string",
+                "description": "Associated entity identifier"
+            },
+            "facility_id": {
+                "type": "string",
+                "description": "Loan or credit facility identifier"
+            },
+            "facility_details": {
+                "type": "object",
+                "properties": {
+                    "facility_type": {
+                        "type": "string",
+                        "enum": [
+                            "revolving_credit",
+                            "term_loan",
+                            "letter_of_credit",
+                            "bridge_loan",
+                            "project_finance"
+                        ]
+                    },
+                    "commitment_amount": {
+                        "type": "number"
+                    },
+                    "outstanding_balance": {
+                        "type": "number"
+                    },
+                    "maturity_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "origination_date": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                }
+            },
+            "financial_covenants": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": [
+                        "covenant_id",
+                        "covenant_type",
+                        "threshold",
+                        "current_value"
+                    ],
+                    "properties": {
+                        "covenant_id": {
+                            "type": "string"
+                        },
+                        "covenant_name": {
+                            "type": "string",
+                            "description": "Descriptive name (e.g., 'Maximum Leverage Ratio')"
+                        },
+                        "covenant_type": {
+                            "type": "string",
+                            "enum": [
+                                "max_leverage",
+                                "min_interest_coverage",
+                                "min_debt_service_coverage",
+                                "min_current_ratio",
+                                "min_tangible_net_worth",
+                                "max_debt_to_ebitda",
+                                "min_ebitda",
+                                "max_capex",
+                                "min_liquidity",
+                                "max_senior_leverage"
+                            ]
+                        },
+                        "threshold": {
+                            "type": "object",
+                            "required": [
+                                "value",
+                                "operator"
+                            ],
+                            "properties": {
+                                "value": {
+                                    "type": "number",
+                                    "description": "Covenant threshold value"
+                                },
+                                "operator": {
+                                    "type": "string",
+                                    "enum": [
+                                        "<=",
+                                        ">=",
+                                        "<",
+                                        ">",
+                                        "="
+                                    ],
+                                    "description": "Comparison operator"
+                                },
+                                "warning_threshold": {
+                                    "type": "number",
+                                    "description": "Early warning threshold (e.g., 90% of covenant)"
+                                }
+                            }
+                        },
+                        "current_value": {
+                            "type": "number",
+                            "description": "Current calculated value"
+                        },
+                        "compliance_status": {
+                            "type": "string",
+                            "enum": [
+                                "compliant",
+                                "warning",
+                                "breach",
+                                "waived",
+                                "cured"
+                            ],
+                            "description": "Current compliance state"
+                        },
+                        "headroom": {
+                            "type": "object",
+                            "properties": {
+                                "absolute": {
+                                    "type": "number",
+                                    "description": "Absolute distance from threshold"
+                                },
+                                "percentage": {
+                                    "type": "number",
+                                    "description": "Percentage cushion"
+                                }
+                            }
+                        },
+                        "testing_frequency": {
+                            "type": "string",
+                            "enum": [
+                                "monthly",
+                                "quarterly",
+                                "annually",
+                                "upon_request"
+                            ]
+                        },
+                        "measurement_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "next_test_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "historical_values": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "value": {
+                                        "type": "number"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "operational_covenants": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "covenant_id": {
+                            "type": "string"
+                        },
+                        "covenant_type": {
+                            "type": "string",
+                            "enum": [
+                                "financial_reporting",
+                                "maintain_insurance",
+                                "maintain_business_operations",
+                                "maintain_licenses",
+                                "maintain_properties"
+                            ]
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "compliance_status": {
+                            "type": "string",
+                            "enum": [
+                                "compliant",
+                                "non_compliant",
+                                "pending_verification"
+                            ]
+                        },
+                        "last_verification_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "next_verification_date": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                }
+            },
+            "negative_covenants": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "covenant_id": {
+                            "type": "string"
+                        },
+                        "covenant_type": {
+                            "type": "string",
+                            "enum": [
+                                "no_additional_debt",
+                                "no_asset_sales",
+                                "no_dividends",
+                                "no_acquisitions",
+                                "no_liens",
+                                "no_guarantees",
+                                "no_change_of_control"
+                            ]
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "exceptions": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "compliance_status": {
+                            "type": "string",
+                            "enum": [
+                                "compliant",
+                                "violated",
+                                "pending_approval"
+                            ]
+                        }
+                    }
+                }
+            },
+            "breach_history": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "breach_date": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "covenant_id": {
+                            "type": "string"
+                        },
+                        "covenant_name": {
+                            "type": "string"
+                        },
+                        "threshold": {
+                            "type": "number"
+                        },
+                        "actual_value": {
+                            "type": "number"
+                        },
+                        "variance": {
+                            "type": "number",
+                            "description": "How much threshold was exceeded"
+                        },
+                        "severity": {
+                            "type": "string",
+                            "enum": [
+                                "minor",
+                                "moderate",
+                                "material",
+                                "critical"
+                            ]
+                        },
+                        "cure_period_days": {
+                            "type": "integer"
+                        },
+                        "cure_deadline": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "resolution": {
+                            "type": "string",
+                            "enum": [
+                                "cured",
+                                "waived",
+                                "amended",
+                                "default_declared",
+                                "pending"
+                            ]
+                        },
+                        "resolution_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "resolution_details": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "waiver_requests": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "waiver_id": {
+                            "type": "string"
+                        },
+                        "request_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "covenant_id": {
+                            "type": "string"
+                        },
+                        "waiver_type": {
+                            "type": "string",
+                            "enum": [
+                                "one_time",
+                                "temporary",
+                                "permanent_amendment"
+                            ]
+                        },
+                        "waiver_period": {
+                            "type": "object",
+                            "properties": {
+                                "start_date": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "end_date": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            }
+                        },
+                        "justification": {
+                            "type": "string"
+                        },
+                        "status": {
+                            "type": "string",
+                            "enum": [
+                                "requested",
+                                "approved",
+                                "denied",
+                                "expired"
+                            ]
+                        },
+                        "approval_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "conditions": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "fee_amount": {
+                            "type": "number",
+                            "description": "Waiver fee charged"
+                        }
+                    }
+                }
+            },
+            "alert_configuration": {
+                "type": "object",
+                "properties": {
+                    "alert_tiers": {
+                        "type": "object",
+                        "properties": {
+                            "info": {
+                                "type": "object",
+                                "properties": {
+                                    "threshold_percentage": {
+                                        "type": "number",
+                                        "description": "Alert at 75% of covenant"
+                                    },
+                                    "recipients": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "warning": {
+                                "type": "object",
+                                "properties": {
+                                    "threshold_percentage": {
+                                        "type": "number",
+                                        "description": "Alert at 90% of covenant"
+                                    },
+                                    "recipients": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "breach": {
+                                "type": "object",
+                                "properties": {
+                                    "threshold_percentage": {
+                                        "type": "number",
+                                        "description": "Alert at 100%+ (actual breach)"
+                                    },
+                                    "recipients": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "escalation_required": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "notification_methods": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "email",
+                                "sms",
+                                "dashboard",
+                                "api_webhook"
+                            ]
+                        }
+                    }
+                }
+            },
+            "monitoring_metadata": {
+                "type": "object",
+                "properties": {
+                    "last_check_timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "next_scheduled_check": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "monitoring_frequency": {
+                        "type": "string",
+                        "enum": [
+                            "real_time",
+                            "hourly",
+                            "daily",
+                            "weekly",
+                            "on_data_update"
+                        ]
+                    },
+                    "data_source": {
+                        "type": "string"
+                    },
+                    "calculation_method": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "monitor_covenants",
+        "detect_breaches",
+        "calculate_headroom",
+        "generate_alerts",
+        "track_waivers"
+    ],
+    "optional_capabilities": [
+        "predictive_breach_warning",
+        "covenant_negotiation_support",
+        "cure_period_tracking",
+        "amendment_management"
+    ],
+    "default_config": {
+        "monitoring_frequency": "on_data_update",
+        "warning_threshold_percentage": 90,
+        "breach_alert_delay_seconds": 0,
+        "cure_period_reminder_days": 7,
+        "historical_retention_years": 7
+    },
+    "metadata": {
+        "use_case": "UC-FRA-001",
+        "domain": "financial-risk-analysis",
+        "author": "CodeValdCortex",
+        "compliance_standards": [
+            "Basel_III",
+            "Commercial_Lending_Standards"
+        ],
+        "audit_requirement": "full_trail"
+    },
+    "is_enabled": true
+}

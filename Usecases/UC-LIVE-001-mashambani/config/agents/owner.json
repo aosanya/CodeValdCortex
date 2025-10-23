@@ -1,0 +1,276 @@
+{
+    "id": "owner",
+    "name": "Livestock Owner Agent",
+    "description": "Represents livestock owners who entrust their animals to caretakers",
+    "category": "livestock",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "owner_id",
+            "name",
+            "location",
+            "contact_info"
+        ],
+        "properties": {
+            "owner_id": {
+                "type": "string",
+                "pattern": "^OWN-[A-Z0-9]{8}$",
+                "description": "Unique owner identifier"
+            },
+            "name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Owner's full name"
+            },
+            "owner_type": {
+                "type": "string",
+                "enum": [
+                    "individual",
+                    "family",
+                    "community",
+                    "cooperative"
+                ],
+                "default": "individual",
+                "description": "Type of ownership"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "region",
+                    "country"
+                ],
+                "properties": {
+                    "region": {
+                        "type": "string",
+                        "description": "Geographic region (province/state)"
+                    },
+                    "district": {
+                        "type": "string"
+                    },
+                    "village": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "coordinates": {
+                        "type": "object",
+                        "properties": {
+                            "latitude": {
+                                "type": "number"
+                            },
+                            "longitude": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "contact_info": {
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "pattern": "^\\+[0-9]{1,3}[0-9]{9,15}$"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "preferred_method": {
+                        "type": "string",
+                        "enum": [
+                            "sms",
+                            "phone",
+                            "email",
+                            "in_app"
+                        ]
+                    },
+                    "alternative_contact": {
+                        "type": "string"
+                    }
+                }
+            },
+            "animals_owned": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "pattern": "^ANI-[A-Z0-9]{8}$"
+                },
+                "description": "List of animal IDs owned"
+            },
+            "current_arrangements": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "animal_id": {
+                            "type": "string"
+                        },
+                        "caretaker_id": {
+                            "type": "string"
+                        },
+                        "start_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "status": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "pending",
+                                "completed",
+                                "disputed"
+                            ]
+                        }
+                    }
+                }
+            },
+            "preferences": {
+                "type": "object",
+                "properties": {
+                    "update_frequency": {
+                        "type": "string",
+                        "enum": [
+                            "daily",
+                            "weekly",
+                            "biweekly",
+                            "monthly"
+                        ],
+                        "default": "weekly"
+                    },
+                    "photo_updates": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "video_updates": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "health_alerts": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "breeding_notifications": {
+                        "type": "boolean",
+                        "default": true
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "en",
+                            "sw",
+                            "zu",
+                            "xh",
+                            "st"
+                        ],
+                        "default": "en"
+                    }
+                }
+            },
+            "cultural_info": {
+                "type": "object",
+                "properties": {
+                    "ethnic_group": {
+                        "type": "string"
+                    },
+                    "traditional_ceremonies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "customary_practices": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "reputation_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5,
+                "description": "Owner reputation (0-5 stars)"
+            },
+            "joined_date": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "last_active": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "verification_status": {
+                "type": "string",
+                "enum": [
+                    "pending",
+                    "verified",
+                    "flagged"
+                ],
+                "default": "pending"
+            }
+        }
+    },
+    "capabilities": [
+        "list_owned_animals",
+        "search_caretakers",
+        "initiate_custody_arrangement",
+        "receive_animal_updates",
+        "communicate_with_caretaker",
+        "view_animal_health_records",
+        "transfer_ownership",
+        "provide_care_instructions",
+        "rate_caretaker",
+        "report_issues",
+        "terminate_arrangement"
+    ],
+    "state_machine": {
+        "states": [
+            "active",
+            "seeking_caretaker",
+            "arrangements_pending",
+            "monitoring",
+            "inactive"
+        ],
+        "initial_state": "active",
+        "transitions": [
+            {
+                "from": "active",
+                "to": "seeking_caretaker",
+                "trigger": "need_caretaker"
+            },
+            {
+                "from": "seeking_caretaker",
+                "to": "arrangements_pending",
+                "trigger": "caretaker_found"
+            },
+            {
+                "from": "arrangements_pending",
+                "to": "monitoring",
+                "trigger": "arrangement_confirmed"
+            },
+            {
+                "from": "monitoring",
+                "to": "active",
+                "trigger": "arrangement_ended"
+            }
+        ]
+    },
+    "communication_protocols": [
+        "sms",
+        "in_app_messaging",
+        "email",
+        "push_notification"
+    ],
+    "integration_points": [
+        "animal_registry",
+        "caretaker_directory",
+        "messaging_service",
+        "health_monitoring_system",
+        "reputation_system"
+    ]
+}

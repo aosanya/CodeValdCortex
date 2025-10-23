@@ -1,0 +1,287 @@
+{
+    "id": "entity",
+    "name": "Business Entity Agent",
+    "description": "Represents individual business entities (borrowers, counterparties) with comprehensive financial profile and historical data management",
+    "category": "financial",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "entity_id",
+            "legal_name",
+            "entity_type",
+            "industry_sector"
+        ],
+        "properties": {
+            "entity_id": {
+                "type": "string",
+                "pattern": "^ENT-[A-Z0-9]{8}$",
+                "description": "Unique entity identifier"
+            },
+            "legal_name": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Legal business name"
+            },
+            "entity_type": {
+                "type": "string",
+                "enum": [
+                    "Corporation",
+                    "LLC",
+                    "Partnership",
+                    "Sole_Proprietorship",
+                    "Public_Company",
+                    "Private_Company"
+                ],
+                "description": "Legal structure"
+            },
+            "industry_sector": {
+                "type": "object",
+                "required": [
+                    "primary_naics",
+                    "description"
+                ],
+                "properties": {
+                    "primary_naics": {
+                        "type": "string",
+                        "pattern": "^[0-9]{6}$",
+                        "description": "6-digit NAICS code"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "sub_sector": {
+                        "type": "string"
+                    }
+                }
+            },
+            "financial_statements": {
+                "type": "object",
+                "properties": {
+                    "balance_sheet": {
+                        "type": "object",
+                        "properties": {
+                            "as_of_date": {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "total_assets": {
+                                "type": "number"
+                            },
+                            "current_assets": {
+                                "type": "number"
+                            },
+                            "total_liabilities": {
+                                "type": "number"
+                            },
+                            "current_liabilities": {
+                                "type": "number"
+                            },
+                            "total_equity": {
+                                "type": "number"
+                            },
+                            "cash_and_equivalents": {
+                                "type": "number"
+                            },
+                            "accounts_receivable": {
+                                "type": "number"
+                            },
+                            "inventory": {
+                                "type": "number"
+                            },
+                            "total_debt": {
+                                "type": "number"
+                            },
+                            "long_term_debt": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "income_statement": {
+                        "type": "object",
+                        "properties": {
+                            "period_end": {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "revenue": {
+                                "type": "number"
+                            },
+                            "cost_of_goods_sold": {
+                                "type": "number"
+                            },
+                            "gross_profit": {
+                                "type": "number"
+                            },
+                            "operating_expenses": {
+                                "type": "number"
+                            },
+                            "ebitda": {
+                                "type": "number"
+                            },
+                            "ebit": {
+                                "type": "number"
+                            },
+                            "interest_expense": {
+                                "type": "number"
+                            },
+                            "net_income": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "cash_flow_statement": {
+                        "type": "object",
+                        "properties": {
+                            "period_end": {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "operating_cash_flow": {
+                                "type": "number"
+                            },
+                            "investing_cash_flow": {
+                                "type": "number"
+                            },
+                            "financing_cash_flow": {
+                                "type": "number"
+                            },
+                            "free_cash_flow": {
+                                "type": "number"
+                            },
+                            "capital_expenditures": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "credit_ratings": {
+                "type": "object",
+                "properties": {
+                    "internal_rating": {
+                        "type": "string",
+                        "description": "Internal risk rating (e.g., AAA, BB+, CCC)"
+                    },
+                    "external_ratings": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "agency": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Moody's",
+                                        "S&P",
+                                        "Fitch"
+                                    ]
+                                },
+                                "rating": {
+                                    "type": "string"
+                                },
+                                "outlook": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Positive",
+                                        "Stable",
+                                        "Negative"
+                                    ]
+                                },
+                                "date": {
+                                    "type": "string",
+                                    "format": "date"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "geographic_exposure": {
+                "type": "object",
+                "properties": {
+                    "headquarters_country": {
+                        "type": "string"
+                    },
+                    "operating_countries": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "revenue_by_region": {
+                        "type": "object"
+                    }
+                }
+            },
+            "key_personnel": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
+                        },
+                        "tenure_years": {
+                            "type": "number"
+                        }
+                    }
+                }
+            },
+            "relationship_details": {
+                "type": "object",
+                "properties": {
+                    "relationship_manager": {
+                        "type": "string"
+                    },
+                    "relationship_start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "total_exposure": {
+                        "type": "number"
+                    },
+                    "facility_types": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "ingest_financials",
+        "validate_data",
+        "track_history",
+        "detect_material_events",
+        "coordinate_analysis"
+    ],
+    "optional_capabilities": [
+        "xbrl_parsing",
+        "document_management",
+        "peer_comparison",
+        "trend_analysis"
+    ],
+    "default_config": {
+        "financial_statement_frequency": "quarterly",
+        "historical_retention_years": 10,
+        "validation_rules": "strict",
+        "alert_on_restatement": true
+    },
+    "metadata": {
+        "use_case": "UC-FRA-001",
+        "domain": "financial-risk-analysis",
+        "author": "CodeValdCortex",
+        "regulatory_compliance": [
+            "Basel_III",
+            "IFRS_9",
+            "CECL"
+        ]
+    },
+    "is_enabled": true
+}

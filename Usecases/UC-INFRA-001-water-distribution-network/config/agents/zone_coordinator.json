@@ -1,0 +1,323 @@
+{
+    "id": "zone_coordinator",
+    "name": "Zone Coordinator Agent",
+    "description": "Zone coordination agent that manages groups of infrastructure agents, aggregates data, and coordinates zone-wide responses",
+    "category": "infrastructure",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "zone_id",
+            "zone_name",
+            "coverage_area"
+        ],
+        "properties": {
+            "zone_id": {
+                "type": "string",
+                "pattern": "^ZONE-[0-9]+$",
+                "description": "Unique zone identifier (e.g., ZONE-001)"
+            },
+            "zone_name": {
+                "type": "string",
+                "description": "Human-readable zone name (e.g., 'North District', 'Downtown Area')"
+            },
+            "coverage_area": {
+                "type": "object",
+                "required": ["boundary"],
+                "properties": {
+                    "boundary": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["latitude", "longitude"],
+                            "properties": {
+                                "latitude": {
+                                    "type": "number",
+                                    "minimum": -90,
+                                    "maximum": 90
+                                },
+                                "longitude": {
+                                    "type": "number",
+                                    "minimum": -180,
+                                    "maximum": 180
+                                }
+                            }
+                        },
+                        "description": "Polygon boundary coordinates defining the zone coverage"
+                    },
+                    "area_sqkm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Total area in square kilometers"
+                    },
+                    "population_served": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Estimated population served by this zone"
+                    }
+                },
+                "description": "Geographic coverage area of the zone"
+            },
+            "managed_agents": {
+                "type": "object",
+                "properties": {
+                    "pipes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of pipe agent IDs managed by this zone"
+                    },
+                    "sensors": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of sensor agent IDs in this zone"
+                    },
+                    "pumps": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of pump agent IDs in this zone"
+                    },
+                    "valves": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of valve agent IDs in this zone"
+                    }
+                },
+                "description": "Infrastructure agents managed by this coordinator"
+            },
+            "coordination_strategy": {
+                "type": "string",
+                "enum": ["centralized", "distributed", "hierarchical", "adaptive"],
+                "description": "Strategy for coordinating agent actions"
+            },
+            "priority_level": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"],
+                "description": "Priority level of this zone (affects resource allocation)"
+            },
+            "aggregation_interval": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3600,
+                "description": "Data aggregation interval in seconds"
+            },
+            "alert_escalation": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Enable automatic alert escalation"
+                    },
+                    "escalation_delay": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Time in seconds before escalating unacknowledged alerts"
+                    },
+                    "escalation_chain": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of recipient IDs in escalation order"
+                    }
+                },
+                "description": "Alert escalation configuration"
+            },
+            "performance_targets": {
+                "type": "object",
+                "properties": {
+                    "min_pressure": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Minimum acceptable pressure in PSI"
+                    },
+                    "max_pressure": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Maximum acceptable pressure in PSI"
+                    },
+                    "target_flow_rate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Target average flow rate in L/s"
+                    },
+                    "max_leak_rate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Maximum acceptable leak rate as percentage"
+                    },
+                    "service_level": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Target service level as percentage (uptime)"
+                    }
+                },
+                "description": "Performance targets for the zone"
+            },
+            "automated_responses": {
+                "type": "object",
+                "properties": {
+                    "leak_detection": {
+                        "type": "object",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean"
+                            },
+                            "isolation_strategy": {
+                                "type": "string",
+                                "enum": ["immediate", "staged", "manual_confirmation"]
+                            },
+                            "pressure_adjustment": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "pressure_optimization": {
+                        "type": "object",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean"
+                            },
+                            "adjustment_frequency": {
+                                "type": "integer",
+                                "description": "How often to optimize (in seconds)"
+                            },
+                            "max_pump_changes": {
+                                "type": "integer",
+                                "description": "Maximum pump adjustments per hour"
+                            }
+                        }
+                    },
+                    "demand_forecasting": {
+                        "type": "object",
+                        "properties": {
+                            "enabled": {
+                                "type": "boolean"
+                            },
+                            "forecast_horizon": {
+                                "type": "integer",
+                                "description": "Forecast horizon in hours"
+                            },
+                            "model_type": {
+                                "type": "string",
+                                "enum": ["statistical", "ml", "hybrid"]
+                            }
+                        }
+                    }
+                },
+                "description": "Automated response configurations"
+            },
+            "neighbor_zones": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "List of adjacent zone IDs for inter-zone coordination"
+            },
+            "emergency_contacts": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "role": {
+                            "type": "string"
+                        },
+                        "phone": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string",
+                            "format": "email"
+                        }
+                    }
+                },
+                "description": "Emergency contact information"
+            },
+            "operational_hours": {
+                "type": "object",
+                "properties": {
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone identifier (e.g., 'America/New_York')"
+                    },
+                    "schedule": {
+                        "type": "string",
+                        "enum": ["24/7", "business_hours", "custom"],
+                        "description": "Operational schedule type"
+                    }
+                },
+                "description": "Zone operational hours"
+            }
+        }
+    },
+    "required_capabilities": [
+        "agent_coordination",
+        "data_aggregation",
+        "zone_monitoring",
+        "alert_management",
+        "performance_tracking"
+    ],
+    "optional_capabilities": [
+        "predictive_analytics",
+        "demand_forecasting",
+        "automated_optimization",
+        "inter_zone_coordination",
+        "emergency_response"
+    ],
+    "default_config": {
+        "coordination_strategy": "adaptive",
+        "priority_level": "medium",
+        "aggregation_interval": 60,
+        "alert_escalation": {
+            "enabled": true,
+            "escalation_delay": 300
+        },
+        "performance_targets": {
+            "min_pressure": 30.0,
+            "max_pressure": 80.0,
+            "max_leak_rate": 5.0,
+            "service_level": 99.5
+        },
+        "automated_responses": {
+            "leak_detection": {
+                "enabled": true,
+                "isolation_strategy": "staged",
+                "pressure_adjustment": true
+            },
+            "pressure_optimization": {
+                "enabled": true,
+                "adjustment_frequency": 300,
+                "max_pump_changes": 10
+            },
+            "demand_forecasting": {
+                "enabled": true,
+                "forecast_horizon": 24,
+                "model_type": "hybrid"
+            }
+        },
+        "operational_hours": {
+            "timezone": "UTC",
+            "schedule": "24/7"
+        }
+    },
+    "metadata": {
+        "use_case": "UC-INFRA-001",
+        "domain": "water-distribution",
+        "author": "CodeValdCortex",
+        "tags": ["coordinator", "zone-management", "orchestration", "optimization"]
+    },
+    "is_enabled": true
+}

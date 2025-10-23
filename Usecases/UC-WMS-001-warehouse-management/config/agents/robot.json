@@ -1,0 +1,120 @@
+{
+    "id": "robot",
+    "name": "Warehouse Robot Agent",
+    "description": "Autonomous mobile robot agent for material handling, picking, and transportation within warehouse facilities",
+    "category": "warehouse",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "robot_id",
+            "robot_type",
+            "location",
+            "battery_level"
+        ],
+        "properties": {
+            "robot_id": {
+                "type": "string",
+                "pattern": "^ROBOT-[A-Z0-9]{6}$",
+                "description": "Unique robot identifier"
+            },
+            "robot_type": {
+                "type": "string",
+                "enum": [
+                    "AGV",
+                    "AMR",
+                    "Picker",
+                    "Forklift",
+                    "Sorter"
+                ],
+                "description": "Type of warehouse robot"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "zone",
+                    "x",
+                    "y"
+                ],
+                "properties": {
+                    "zone": {
+                        "type": "string",
+                        "description": "Warehouse zone identifier"
+                    },
+                    "x": {
+                        "type": "number",
+                        "description": "X coordinate in meters"
+                    },
+                    "y": {
+                        "type": "number",
+                        "description": "Y coordinate in meters"
+                    },
+                    "level": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Warehouse level/floor"
+                    }
+                }
+            },
+            "battery_level": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Battery percentage"
+            },
+            "payload_capacity": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum payload in kilograms"
+            },
+            "current_task": {
+                "type": "string",
+                "description": "Current task identifier"
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "idle",
+                    "moving",
+                    "picking",
+                    "loading",
+                    "charging",
+                    "error"
+                ],
+                "description": "Current operational status"
+            },
+            "speed": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Current speed in m/s"
+            }
+        }
+    },
+    "required_capabilities": [
+        "navigate",
+        "pick_item",
+        "transport_item",
+        "report_status",
+        "collision_avoidance"
+    ],
+    "optional_capabilities": [
+        "self_charging",
+        "collaborative_transport",
+        "obstacle_mapping",
+        "predictive_maintenance"
+    ],
+    "default_config": {
+        "monitoring_interval": 5,
+        "battery_warning_threshold": 20,
+        "battery_critical_threshold": 10,
+        "max_speed": 2.0,
+        "collision_detection_range": 3.0
+    },
+    "metadata": {
+        "use_case": "UC-WMS-001",
+        "domain": "warehouse-management",
+        "author": "CodeValdCortex"
+    },
+    "is_enabled": true
+}

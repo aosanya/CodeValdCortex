@@ -1,0 +1,522 @@
+{
+    "id": "risk_scorer",
+    "name": "Risk Scoring Agent",
+    "description": "Aggregate multi-dimensional risk factors into comprehensive risk scores, probability of default (PD) estimates, and internal risk ratings",
+    "category": "financial",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "scorer_id",
+            "entity_id",
+            "scoring_date",
+            "risk_rating"
+        ],
+        "properties": {
+            "scorer_id": {
+                "type": "string",
+                "pattern": "^SCORE-[A-Z0-9]{8}$",
+                "description": "Unique scorer instance identifier"
+            },
+            "entity_id": {
+                "type": "string",
+                "description": "Associated entity identifier"
+            },
+            "scoring_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp of risk assessment"
+            },
+            "risk_rating": {
+                "type": "object",
+                "required": [
+                    "scale",
+                    "rating",
+                    "notches"
+                ],
+                "properties": {
+                    "scale": {
+                        "type": "string",
+                        "enum": [
+                            "1-10",
+                            "AAA-D",
+                            "Investment_Grade_Scale"
+                        ],
+                        "description": "Rating scale used"
+                    },
+                    "rating": {
+                        "type": "string",
+                        "description": "Current risk rating (e.g., BB+, 7, BBB-)"
+                    },
+                    "notches": {
+                        "type": "integer",
+                        "description": "Numeric representation for sorting"
+                    },
+                    "rating_category": {
+                        "type": "string",
+                        "enum": [
+                            "Investment_Grade",
+                            "Sub_Investment_Grade",
+                            "High_Yield",
+                            "Distressed"
+                        ],
+                        "description": "Broad rating category"
+                    },
+                    "previous_rating": {
+                        "type": "string",
+                        "description": "Prior period rating"
+                    },
+                    "rating_change": {
+                        "type": "string",
+                        "enum": [
+                            "upgrade",
+                            "downgrade",
+                            "affirmed",
+                            "new"
+                        ],
+                        "description": "Direction of rating change"
+                    },
+                    "rating_date": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                }
+            },
+            "probability_of_default": {
+                "type": "object",
+                "required": [
+                    "one_year",
+                    "three_year"
+                ],
+                "properties": {
+                    "one_year": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "1-year PD percentage"
+                    },
+                    "three_year": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "3-year cumulative PD percentage"
+                    },
+                    "five_year": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "5-year cumulative PD percentage"
+                    },
+                    "lifetime": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Lifetime PD percentage"
+                    },
+                    "model_used": {
+                        "type": "string",
+                        "description": "PD model identifier"
+                    },
+                    "model_version": {
+                        "type": "string"
+                    }
+                }
+            },
+            "risk_dimensions": {
+                "type": "object",
+                "properties": {
+                    "financial_risk": {
+                        "type": "object",
+                        "properties": {
+                            "score": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "weight": {
+                                "type": "number"
+                            },
+                            "key_drivers": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "trend": {
+                                "type": "string",
+                                "enum": [
+                                    "improving",
+                                    "stable",
+                                    "deteriorating"
+                                ]
+                            }
+                        }
+                    },
+                    "industry_risk": {
+                        "type": "object",
+                        "properties": {
+                            "score": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "weight": {
+                                "type": "number"
+                            },
+                            "cyclicality": {
+                                "type": "string",
+                                "enum": [
+                                    "low",
+                                    "moderate",
+                                    "high"
+                                ]
+                            },
+                            "growth_outlook": {
+                                "type": "string",
+                                "enum": [
+                                    "positive",
+                                    "neutral",
+                                    "negative"
+                                ]
+                            },
+                            "competitive_intensity": {
+                                "type": "string",
+                                "enum": [
+                                    "low",
+                                    "moderate",
+                                    "high"
+                                ]
+                            }
+                        }
+                    },
+                    "management_risk": {
+                        "type": "object",
+                        "properties": {
+                            "score": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "weight": {
+                                "type": "number"
+                            },
+                            "experience": {
+                                "type": "string",
+                                "enum": [
+                                    "strong",
+                                    "adequate",
+                                    "weak"
+                                ]
+                            },
+                            "governance": {
+                                "type": "string",
+                                "enum": [
+                                    "strong",
+                                    "adequate",
+                                    "weak"
+                                ]
+                            },
+                            "succession_planning": {
+                                "type": "string",
+                                "enum": [
+                                    "strong",
+                                    "adequate",
+                                    "weak"
+                                ]
+                            }
+                        }
+                    },
+                    "operational_risk": {
+                        "type": "object",
+                        "properties": {
+                            "score": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "weight": {
+                                "type": "number"
+                            },
+                            "business_model_sustainability": {
+                                "type": "string",
+                                "enum": [
+                                    "strong",
+                                    "adequate",
+                                    "weak"
+                                ]
+                            },
+                            "operational_efficiency": {
+                                "type": "string",
+                                "enum": [
+                                    "strong",
+                                    "adequate",
+                                    "weak"
+                                ]
+                            }
+                        }
+                    },
+                    "market_risk": {
+                        "type": "object",
+                        "properties": {
+                            "score": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "weight": {
+                                "type": "number"
+                            },
+                            "market_position": {
+                                "type": "string",
+                                "enum": [
+                                    "leader",
+                                    "strong",
+                                    "moderate",
+                                    "weak"
+                                ]
+                            },
+                            "customer_concentration": {
+                                "type": "string",
+                                "enum": [
+                                    "low",
+                                    "moderate",
+                                    "high"
+                                ]
+                            }
+                        }
+                    },
+                    "esg_risk": {
+                        "type": "object",
+                        "properties": {
+                            "score": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 100
+                            },
+                            "weight": {
+                                "type": "number"
+                            },
+                            "environmental_score": {
+                                "type": "number"
+                            },
+                            "social_score": {
+                                "type": "number"
+                            },
+                            "governance_score": {
+                                "type": "number"
+                            },
+                            "climate_risk": {
+                                "type": "string",
+                                "enum": [
+                                    "low",
+                                    "moderate",
+                                    "high",
+                                    "severe"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "composite_score": {
+                "type": "object",
+                "properties": {
+                    "overall_score": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Weighted composite risk score"
+                    },
+                    "score_components": {
+                        "type": "object",
+                        "description": "Breakdown of composite score"
+                    },
+                    "confidence_level": {
+                        "type": "string",
+                        "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                        ],
+                        "description": "Confidence in score accuracy"
+                    }
+                }
+            },
+            "early_warning_signals": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "signal_type": {
+                            "type": "string",
+                            "enum": [
+                                "deteriorating_trend",
+                                "threshold_breach",
+                                "covenant_risk",
+                                "industry_stress",
+                                "management_change"
+                            ]
+                        },
+                        "severity": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high",
+                                "critical"
+                            ]
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "recommended_action": {
+                            "type": "string"
+                        },
+                        "detected_date": {
+                            "type": "string",
+                            "format": "date-time"
+                        }
+                    }
+                }
+            },
+            "watch_list_status": {
+                "type": "object",
+                "properties": {
+                    "on_watch_list": {
+                        "type": "boolean"
+                    },
+                    "watch_list_category": {
+                        "type": "string",
+                        "enum": [
+                            "standard_monitoring",
+                            "enhanced_monitoring",
+                            "special_mention",
+                            "substandard",
+                            "doubtful"
+                        ]
+                    },
+                    "monitoring_frequency": {
+                        "type": "string",
+                        "enum": [
+                            "quarterly",
+                            "monthly",
+                            "weekly",
+                            "daily"
+                        ]
+                    },
+                    "assigned_analyst": {
+                        "type": "string"
+                    }
+                }
+            },
+            "stress_test_results": {
+                "type": "object",
+                "properties": {
+                    "base_case_pd": {
+                        "type": "number"
+                    },
+                    "adverse_case_pd": {
+                        "type": "number"
+                    },
+                    "severely_adverse_pd": {
+                        "type": "number"
+                    },
+                    "scenario_assumptions": {
+                        "type": "object"
+                    }
+                }
+            },
+            "rating_rationale": {
+                "type": "object",
+                "properties": {
+                    "key_strengths": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "key_weaknesses": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "rating_drivers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "outlook": {
+                        "type": "string",
+                        "enum": [
+                            "positive",
+                            "stable",
+                            "negative",
+                            "developing"
+                        ]
+                    }
+                }
+            },
+            "scoring_metadata": {
+                "type": "object",
+                "properties": {
+                    "analyst": {
+                        "type": "string"
+                    },
+                    "reviewed_by": {
+                        "type": "string"
+                    },
+                    "approved_by": {
+                        "type": "string"
+                    },
+                    "scoring_duration_ms": {
+                        "type": "number"
+                    },
+                    "data_completeness": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "calculate_pd",
+        "assign_rating",
+        "multi_factor_analysis",
+        "early_warning_detection",
+        "stress_testing"
+    ],
+    "optional_capabilities": [
+        "machine_learning_scoring",
+        "industry_specific_models",
+        "esg_integration",
+        "scenario_analysis"
+    ],
+    "default_config": {
+        "rating_scale": "1-10",
+        "default_model": "logistic_regression_v2",
+        "confidence_threshold": 0.7,
+        "early_warning_lookback_periods": 4,
+        "stress_scenarios": [
+            "base",
+            "adverse",
+            "severely_adverse"
+        ]
+    },
+    "metadata": {
+        "use_case": "UC-FRA-001",
+        "domain": "financial-risk-analysis",
+        "author": "CodeValdCortex",
+        "model_governance": "required",
+        "regulatory_models": [
+            "Basel_IRB",
+            "IFRS9_Stage_Assignment",
+            "CECL"
+        ]
+    },
+    "is_enabled": true
+}

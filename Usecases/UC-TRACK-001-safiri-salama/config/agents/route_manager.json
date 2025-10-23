@@ -1,0 +1,262 @@
+{
+    "id": "route_manager",
+    "name": "Route Manager Agent",
+    "description": "Fleet coordinator agent that monitors and optimizes all vehicles, detecting anomalies and coordinating responses",
+    "category": "coordination",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "manager_id",
+            "organization_id"
+        ],
+        "properties": {
+            "manager_id": {
+                "type": "string",
+                "pattern": "^MGR-[A-Z0-9]{6,12}$",
+                "description": "Unique route manager identifier"
+            },
+            "organization_id": {
+                "type": "string",
+                "description": "School or SACCO identifier"
+            },
+            "organization_type": {
+                "type": "string",
+                "enum": [
+                    "school",
+                    "sacco"
+                ],
+                "description": "Type of organization being managed"
+            },
+            "managed_vehicle_ids": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "List of vehicles under management"
+            },
+            "route_definitions": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "route_id": {
+                            "type": "string"
+                        },
+                        "route_name": {
+                            "type": "string"
+                        },
+                        "stops": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "stop_id": {
+                                        "type": "string"
+                                    },
+                                    "stop_name": {
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "type": "object",
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "number"
+                                            },
+                                            "longitude": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    },
+                                    "sequence_number": {
+                                        "type": "integer"
+                                    },
+                                    "scheduled_time": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "active": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "description": "Planned routes with stops and schedules"
+            },
+            "active_alerts": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "alert_id": {
+                            "type": "string"
+                        },
+                        "alert_type": {
+                            "type": "string",
+                            "enum": [
+                                "route_deviation",
+                                "excessive_speed",
+                                "prolonged_stop",
+                                "emergency",
+                                "maintenance"
+                            ]
+                        },
+                        "vehicle_id": {
+                            "type": "string"
+                        },
+                        "severity": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high",
+                                "critical"
+                            ]
+                        },
+                        "created_at": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "acknowledged": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "description": "Current warnings and incidents"
+            },
+            "fleet_status": {
+                "type": "object",
+                "properties": {
+                    "total_vehicles": {
+                        "type": "integer"
+                    },
+                    "active_vehicles": {
+                        "type": "integer"
+                    },
+                    "vehicles_on_route": {
+                        "type": "integer"
+                    },
+                    "vehicles_idle": {
+                        "type": "integer"
+                    },
+                    "vehicles_in_emergency": {
+                        "type": "integer"
+                    }
+                },
+                "description": "Aggregated status of all vehicles"
+            },
+            "geofence_boundaries": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "geofence_id": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "allowed_area",
+                                "restricted_area",
+                                "route_corridor"
+                            ]
+                        },
+                        "coordinates": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "latitude": {
+                                        "type": "number"
+                                    },
+                                    "longitude": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Allowed operational areas and restrictions"
+            },
+            "speed_limits": {
+                "type": "object",
+                "properties": {
+                    "urban_kmh": {
+                        "type": "integer",
+                        "minimum": 20,
+                        "maximum": 80
+                    },
+                    "highway_kmh": {
+                        "type": "integer",
+                        "minimum": 60,
+                        "maximum": 120
+                    },
+                    "school_zone_kmh": {
+                        "type": "integer",
+                        "minimum": 10,
+                        "maximum": 40
+                    }
+                },
+                "description": "Maximum allowed speeds per route segment type"
+            },
+            "monitoring_config": {
+                "type": "object",
+                "properties": {
+                    "route_deviation_threshold_meters": {
+                        "type": "integer",
+                        "minimum": 100,
+                        "maximum": 2000
+                    },
+                    "prolonged_stop_threshold_minutes": {
+                        "type": "integer",
+                        "minimum": 5,
+                        "maximum": 60
+                    },
+                    "check_interval_seconds": {
+                        "type": "integer",
+                        "minimum": 10,
+                        "maximum": 300
+                    }
+                },
+                "description": "Anomaly detection configuration"
+            }
+        }
+    },
+    "required_capabilities": [
+        "fleet_monitoring",
+        "route_management",
+        "anomaly_detection",
+        "emergency_coordination"
+    ],
+    "optional_capabilities": [
+        "traffic_integration",
+        "route_optimization",
+        "predictive_analytics",
+        "automated_dispatch"
+    ],
+    "default_config": {
+        "route_deviation_threshold_meters": 500,
+        "prolonged_stop_threshold_minutes": 15,
+        "check_interval_seconds": 30,
+        "speed_limits": {
+            "urban_kmh": 60,
+            "highway_kmh": 110,
+            "school_zone_kmh": 20
+        }
+    },
+    "validation_rules": [
+        {
+            "name": "reasonable_speed_limits",
+            "description": "Speed limits must be reasonable",
+            "condition": "speed_limits.urban_kmh < speed_limits.highway_kmh"
+        }
+    ],
+    "is_system_type": false,
+    "is_enabled": true
+}

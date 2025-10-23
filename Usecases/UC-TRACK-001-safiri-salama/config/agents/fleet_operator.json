@@ -1,0 +1,415 @@
+{
+    "id": "fleet_operator",
+    "name": "Fleet Operator Agent",
+    "description": "Oversight agent providing fleet-wide visibility, compliance monitoring, subscriber communication management, and loyalty program oversight (School Admin or SACCO Manager)",
+    "category": "administration",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "operator_id",
+            "operator_type",
+            "organization_id"
+        ],
+        "properties": {
+            "operator_id": {
+                "type": "string",
+                "pattern": "^OPR-[A-Z0-9]{6,12}$",
+                "description": "Unique fleet operator identifier"
+            },
+            "operator_type": {
+                "type": "string",
+                "enum": [
+                    "school_admin",
+                    "sacco_manager"
+                ],
+                "description": "Type of fleet operator"
+            },
+            "organization_id": {
+                "type": "string",
+                "description": "Associated school or SACCO identifier"
+            },
+            "organization_name": {
+                "type": "string",
+                "description": "School or SACCO name"
+            },
+            "managed_routes": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "All routes under management"
+            },
+            "registered_subscribers": {
+                "type": "object",
+                "properties": {
+                    "parents": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Parent agent IDs (school context)"
+                    },
+                    "passengers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Passenger agent IDs (matatu context)"
+                    },
+                    "total_count": {
+                        "type": "integer"
+                    }
+                },
+                "description": "Directory of subscribers"
+            },
+            "compliance_rules": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "rule_id": {
+                            "type": "string"
+                        },
+                        "rule_type": {
+                            "type": "string",
+                            "enum": [
+                                "speed_limit",
+                                "route_adherence",
+                                "broadcast_frequency",
+                                "response_time"
+                            ]
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "threshold": {
+                            "type": "object"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "description": "Safety and operational policies"
+            },
+            "performance_metrics": {
+                "type": "object",
+                "properties": {
+                    "on_time_percentage": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    "average_delay_minutes": {
+                        "type": "number"
+                    },
+                    "safety_incidents_count": {
+                        "type": "integer"
+                    },
+                    "subscriber_satisfaction_score": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                    },
+                    "vehicle_utilization_percentage": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    }
+                },
+                "description": "KPIs for fleet operations"
+            },
+            "communication_log": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "message_id": {
+                            "type": "string"
+                        },
+                        "sent_at": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "message_type": {
+                            "type": "string",
+                            "enum": [
+                                "delay_alert",
+                                "emergency",
+                                "route_change",
+                                "general_announcement"
+                            ]
+                        },
+                        "recipients_count": {
+                            "type": "integer"
+                        },
+                        "delivery_status": {
+                            "type": "string",
+                            "enum": [
+                                "sent",
+                                "delivered",
+                                "failed"
+                            ]
+                        }
+                    }
+                },
+                "description": "History of notifications sent"
+            },
+            "incident_reports": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "incident_id": {
+                            "type": "string"
+                        },
+                        "vehicle_id": {
+                            "type": "string"
+                        },
+                        "incident_type": {
+                            "type": "string"
+                        },
+                        "severity": {
+                            "type": "string"
+                        },
+                        "reported_at": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "resolution_status": {
+                            "type": "string",
+                            "enum": [
+                                "open",
+                                "investigating",
+                                "resolved",
+                                "closed"
+                            ]
+                        }
+                    }
+                },
+                "description": "Record of all alerts and responses"
+            },
+            "loyalty_program_config": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean"
+                    },
+                    "points_per_trip": {
+                        "type": "integer"
+                    },
+                    "badge_requirements": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                                "min_trips": {
+                                    "type": "integer"
+                                },
+                                "min_rating": {
+                                    "type": "number"
+                                },
+                                "min_favorites": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "verified_badge_criteria": {
+                        "type": "object",
+                        "properties": {
+                            "min_rating": {
+                                "type": "number"
+                            },
+                            "min_favorites": {
+                                "type": "integer"
+                            },
+                            "min_trips": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                },
+                "description": "Rules for passenger rewards (matatu context)"
+            },
+            "revenue_analytics": {
+                "type": "object",
+                "properties": {
+                    "monthly_revenue": {
+                        "type": "number"
+                    },
+                    "subscriber_premium_count": {
+                        "type": "integer"
+                    },
+                    "average_revenue_per_vehicle": {
+                        "type": "number"
+                    },
+                    "loyalty_program_roi": {
+                        "type": "number"
+                    }
+                },
+                "description": "Financial performance tracking (matatu context)"
+            },
+            "customer_satisfaction_scores": {
+                "type": "object",
+                "properties": {
+                    "overall_rating": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 5
+                    },
+                    "total_ratings": {
+                        "type": "integer"
+                    },
+                    "rating_distribution": {
+                        "type": "object",
+                        "properties": {
+                            "5_star": {
+                                "type": "integer"
+                            },
+                            "4_star": {
+                                "type": "integer"
+                            },
+                            "3_star": {
+                                "type": "integer"
+                            },
+                            "2_star": {
+                                "type": "integer"
+                            },
+                            "1_star": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "top_rated_vehicles": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "vehicle_id": {
+                                    "type": "string"
+                                },
+                                "rating": {
+                                    "type": "number"
+                                },
+                                "favorite_count": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Ratings and feedback aggregated"
+            },
+            "school_config": {
+                "type": "object",
+                "properties": {
+                    "school_name": {
+                        "type": "string"
+                    },
+                    "academic_calendar": {
+                        "type": "object",
+                        "properties": {
+                            "term_start": {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            "term_end": {
+                                "type": "string",
+                                "format": "date"
+                            }
+                        }
+                    },
+                    "operating_hours": {
+                        "type": "object",
+                        "properties": {
+                            "start_time": {
+                                "type": "string"
+                            },
+                            "end_time": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "emergency_contacts": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "phone": {
+                                    "type": "string"
+                                },
+                                "role": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "School-specific configuration (school admin context)"
+            },
+            "sacco_config": {
+                "type": "object",
+                "properties": {
+                    "sacco_name": {
+                        "type": "string"
+                    },
+                    "registration_number": {
+                        "type": "string"
+                    },
+                    "routes_operated": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "membership_count": {
+                        "type": "integer"
+                    },
+                    "trackable_vehicles_count": {
+                        "type": "integer"
+                    }
+                },
+                "description": "SACCO-specific configuration (SACCO manager context)"
+            }
+        }
+    },
+    "required_capabilities": [
+        "fleet_oversight",
+        "compliance_monitoring",
+        "subscriber_management",
+        "analytics_reporting"
+    ],
+    "optional_capabilities": [
+        "loyalty_program_management",
+        "revenue_analytics",
+        "incident_management",
+        "marketing_campaigns",
+        "parent_communication",
+        "passenger_engagement"
+    ],
+    "default_config": {
+        "compliance_check_interval_minutes": 60,
+        "analytics_refresh_interval_minutes": 15,
+        "loyalty_program_enabled": true,
+        "verified_badge_criteria": {
+            "min_rating": 4.0,
+            "min_favorites": 20,
+            "min_trips": 50
+        }
+    },
+    "validation_rules": [
+        {
+            "name": "operator_type_context",
+            "description": "School admin requires school_config, SACCO manager requires sacco_config",
+            "condition": "(operator_type == 'school_admin' && school_config) || (operator_type == 'sacco_manager' && sacco_config)"
+        }
+    ],
+    "is_system_type": false,
+    "is_enabled": true
+}

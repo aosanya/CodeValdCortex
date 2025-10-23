@@ -1,0 +1,170 @@
+{
+    "id": "sensor",
+    "name": "Sensor Agent",
+    "description": "IoT sensor agent for real-time monitoring of water distribution network parameters (pressure, flow, temperature, quality)",
+    "category": "infrastructure",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "sensor_id",
+            "sensor_type",
+            "location"
+        ],
+        "properties": {
+            "sensor_id": {
+                "type": "string",
+                "pattern": "^SENSOR-[0-9]+$",
+                "description": "Unique sensor identifier (e.g., SENSOR-001)"
+            },
+            "sensor_type": {
+                "type": "string",
+                "enum": [
+                    "pressure",
+                    "flow",
+                    "temperature",
+                    "quality",
+                    "multi"
+                ],
+                "description": "Type of sensor measurement"
+            },
+            "location": {
+                "type": "object",
+                "required": ["latitude", "longitude"],
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90,
+                        "description": "GPS latitude"
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180,
+                        "description": "GPS longitude"
+                    },
+                    "elevation": {
+                        "type": "number",
+                        "description": "Elevation in meters"
+                    }
+                },
+                "description": "Geographic location of the sensor"
+            },
+            "measurement_range": {
+                "type": "object",
+                "properties": {
+                    "min": {
+                        "type": "number",
+                        "description": "Minimum measurement value"
+                    },
+                    "max": {
+                        "type": "number",
+                        "description": "Maximum measurement value"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "description": "Unit of measurement (e.g., PSI, L/s, °C)"
+                    }
+                },
+                "description": "Sensor measurement range"
+            },
+            "sampling_rate": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3600,
+                "description": "Sampling rate in seconds"
+            },
+            "accuracy": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Sensor accuracy as percentage"
+            },
+            "manufacturer": {
+                "type": "string",
+                "description": "Sensor manufacturer name"
+            },
+            "model": {
+                "type": "string",
+                "description": "Sensor model number"
+            },
+            "installation_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date when sensor was installed"
+            },
+            "calibration_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last calibration date"
+            },
+            "battery_level": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Battery level percentage (for battery-powered sensors)"
+            },
+            "communication_protocol": {
+                "type": "string",
+                "enum": ["MQTT", "Modbus", "OPC_UA", "HTTP", "LoRaWAN"],
+                "description": "Communication protocol used by sensor"
+            },
+            "alert_thresholds": {
+                "type": "object",
+                "properties": {
+                    "low_warning": {
+                        "type": "number",
+                        "description": "Low warning threshold"
+                    },
+                    "low_critical": {
+                        "type": "number",
+                        "description": "Low critical threshold"
+                    },
+                    "high_warning": {
+                        "type": "number",
+                        "description": "High warning threshold"
+                    },
+                    "high_critical": {
+                        "type": "number",
+                        "description": "High critical threshold"
+                    }
+                },
+                "description": "Alert threshold configuration"
+            }
+        }
+    },
+    "required_capabilities": [
+        "data_collection",
+        "real_time_monitoring",
+        "anomaly_detection",
+        "data_validation",
+        "status_reporting"
+    ],
+    "optional_capabilities": [
+        "self_calibration",
+        "predictive_diagnostics",
+        "edge_processing",
+        "data_compression",
+        "secure_communication"
+    ],
+    "default_config": {
+        "sampling_rate": 60,
+        "accuracy": 95.0,
+        "communication_protocol": "MQTT",
+        "alert_thresholds": {
+            "low_warning": 20.0,
+            "low_critical": 10.0,
+            "high_warning": 80.0,
+            "high_critical": 90.0
+        }
+    },
+    "metadata": {
+        "use_case": "UC-INFRA-001",
+        "domain": "water-distribution",
+        "author": "CodeValdCortex",
+        "tags": ["IoT", "monitoring", "sensors", "real-time"]
+    },
+    "is_enabled": true
+}

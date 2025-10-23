@@ -1,0 +1,232 @@
+{
+    "id": "donor",
+    "name": "Donor Agent",
+    "description": "Represents individuals or organizations donating items or resources",
+    "category": "charity",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "donor_id",
+            "donor_type",
+            "name",
+            "location"
+        ],
+        "properties": {
+            "donor_id": {
+                "type": "string",
+                "pattern": "^DNR-[A-Z0-9]{3,6}$",
+                "description": "Unique donor identifier"
+            },
+            "donor_type": {
+                "type": "string",
+                "enum": [
+                    "individual",
+                    "family",
+                    "business",
+                    "organization",
+                    "school"
+                ],
+                "description": "Type of donor"
+            },
+            "name": {
+                "type": "string",
+                "description": "Donor name or 'Anonymous'"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "address"
+                ],
+                "properties": {
+                    "address": {
+                        "type": "string"
+                    },
+                    "city": {
+                        "type": "string"
+                    },
+                    "region": {
+                        "type": "string"
+                    },
+                    "coordinates": {
+                        "type": "object",
+                        "properties": {
+                            "latitude": {
+                                "type": "number"
+                            },
+                            "longitude": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "contact_preferences": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "email",
+                        "sms",
+                        "in_app",
+                        "phone"
+                    ]
+                }
+            },
+            "donation_history": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "item_id": {
+                            "type": "string"
+                        },
+                        "date": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "category": {
+                            "type": "string"
+                        },
+                        "recipient_id": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "preferred_causes": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "children",
+                        "education",
+                        "disaster_relief",
+                        "elderly",
+                        "homeless",
+                        "veterans",
+                        "refugees",
+                        "medical",
+                        "general"
+                    ]
+                }
+            },
+            "available_items": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "Item IDs currently available for donation"
+            },
+            "recurring_donor": {
+                "type": "boolean",
+                "default": false
+            },
+            "total_donations_count": {
+                "type": "number",
+                "minimum": 0,
+                "default": 0
+            },
+            "total_items_donated": {
+                "type": "number",
+                "minimum": 0,
+                "default": 0
+            },
+            "impact_score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Calculated impact of donations"
+            },
+            "recognition_level": {
+                "type": "string",
+                "enum": [
+                    "bronze",
+                    "silver",
+                    "gold",
+                    "platinum"
+                ],
+                "description": "Recognition tier based on contributions"
+            },
+            "tax_receipt_required": {
+                "type": "boolean",
+                "default": false
+            },
+            "anonymity_preference": {
+                "type": "string",
+                "enum": [
+                    "public",
+                    "anonymous",
+                    "semi_anonymous"
+                ],
+                "default": "public"
+            }
+        }
+    },
+    "capabilities": [
+        "list_available_items",
+        "schedule_pickup",
+        "schedule_dropoff",
+        "track_donation_status",
+        "receive_impact_reports",
+        "receive_recipient_feedback",
+        "view_recipient_needs",
+        "connect_with_recipients",
+        "receive_tax_receipts",
+        "share_success_stories",
+        "invite_other_donors",
+        "setup_recurring_donations"
+    ],
+    "state_machine": {
+        "states": [
+            "active",
+            "occasional",
+            "planning",
+            "inactive",
+            "recognized"
+        ],
+        "initial_state": "planning",
+        "transitions": [
+            {
+                "from": "planning",
+                "to": "active",
+                "trigger": "first_donation_made"
+            },
+            {
+                "from": "active",
+                "to": "occasional",
+                "trigger": "donation_frequency_decreased"
+            },
+            {
+                "from": "occasional",
+                "to": "active",
+                "trigger": "donation_frequency_increased"
+            },
+            {
+                "from": "active",
+                "to": "recognized",
+                "trigger": "milestone_achieved"
+            },
+            {
+                "from": "active",
+                "to": "inactive",
+                "trigger": "long_period_no_activity"
+            }
+        ]
+    },
+    "communication_protocols": [
+        "email",
+        "sms",
+        "in_app_messaging",
+        "push_notification",
+        "phone"
+    ],
+    "integration_points": [
+        "item_registry",
+        "recipient_directory",
+        "logistics_coordinator",
+        "impact_tracker",
+        "tax_receipt_generator"
+    ]
+}

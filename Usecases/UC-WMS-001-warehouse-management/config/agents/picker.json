@@ -1,0 +1,182 @@
+{
+    "id": "picker",
+    "name": "Order Picker Agent",
+    "description": "Intelligent order picker agent for optimizing pick paths, batch picking, and coordinating with robots and warehouse workers",
+    "category": "warehouse",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "picker_id",
+            "picker_type",
+            "location",
+            "status"
+        ],
+        "properties": {
+            "picker_id": {
+                "type": "string",
+                "pattern": "^PICKER-[A-Z0-9]{6}$",
+                "description": "Unique picker identifier"
+            },
+            "picker_type": {
+                "type": "string",
+                "enum": [
+                    "human",
+                    "robot",
+                    "hybrid"
+                ],
+                "description": "Type of order picker"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "zone",
+                    "aisle"
+                ],
+                "properties": {
+                    "zone": {
+                        "type": "string"
+                    },
+                    "aisle": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "object",
+                        "properties": {
+                            "x": {
+                                "type": "number"
+                            },
+                            "y": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "idle",
+                    "picking",
+                    "traveling",
+                    "staging",
+                    "break",
+                    "offline"
+                ],
+                "description": "Current operational status"
+            },
+            "current_orders": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "order_id": {
+                            "type": "string"
+                        },
+                        "priority": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "normal",
+                                "high",
+                                "urgent"
+                            ]
+                        },
+                        "items_remaining": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
+                }
+            },
+            "pick_path": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string"
+                        },
+                        "sku": {
+                            "type": "string"
+                        },
+                        "quantity": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "sequence": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                }
+            },
+            "cart_capacity": {
+                "type": "object",
+                "properties": {
+                    "max_items": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "max_weight": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "current_items": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "current_weight": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                }
+            },
+            "performance_metrics": {
+                "type": "object",
+                "properties": {
+                    "picks_per_hour": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "accuracy_rate": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100
+                    },
+                    "distance_traveled": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Distance in meters"
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "optimize_pick_path",
+        "pick_items",
+        "verify_items",
+        "report_status",
+        "batch_picking"
+    ],
+    "optional_capabilities": [
+        "voice_picking",
+        "vision_verification",
+        "collaborative_picking",
+        "quality_check"
+    ],
+    "default_config": {
+        "monitoring_interval": 15,
+        "batch_size": 5,
+        "path_optimization": "shortest",
+        "break_interval": 120
+    },
+    "metadata": {
+        "use_case": "UC-WMS-001",
+        "domain": "warehouse-management",
+        "author": "CodeValdCortex"
+    },
+    "is_enabled": true
+}

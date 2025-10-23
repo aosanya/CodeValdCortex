@@ -1,0 +1,754 @@
+{
+    "id": "portfolio_aggregator",
+    "name": "Portfolio Risk Aggregation Agent",
+    "description": "Portfolio-wide risk consolidation, concentration analysis, stress testing, and regulatory reporting",
+    "category": "financial",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "portfolio_id",
+            "as_of_date"
+        ],
+        "properties": {
+            "portfolio_id": {
+                "type": "string",
+                "pattern": "^PRT-[A-Z0-9]{8}$",
+                "description": "Unique portfolio identifier"
+            },
+            "portfolio_name": {
+                "type": "string"
+            },
+            "as_of_date": {
+                "type": "string",
+                "format": "date"
+            },
+            "portfolio_composition": {
+                "type": "object",
+                "properties": {
+                    "total_entities": {
+                        "type": "integer"
+                    },
+                    "total_exposure": {
+                        "type": "number",
+                        "description": "Total outstanding balance across all facilities"
+                    },
+                    "total_commitment": {
+                        "type": "number",
+                        "description": "Total committed amount across all facilities"
+                    },
+                    "utilization_rate": {
+                        "type": "number",
+                        "description": "Exposure / Commitment"
+                    },
+                    "weighted_average_maturity_years": {
+                        "type": "number"
+                    },
+                    "entity_breakdown": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "entity_id": {
+                                    "type": "string"
+                                },
+                                "entity_name": {
+                                    "type": "string"
+                                },
+                                "exposure": {
+                                    "type": "number"
+                                },
+                                "exposure_percentage": {
+                                    "type": "number"
+                                },
+                                "risk_rating": {
+                                    "type": "string"
+                                },
+                                "pd_1yr": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "risk_rating_distribution": {
+                "type": "object",
+                "properties": {
+                    "by_rating": {
+                        "type": "object",
+                        "properties": {
+                            "AAA": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "AA": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "A": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "BBB": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "BB": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "B": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "CCC_and_below": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "investment_grade_percentage": {
+                        "type": "number",
+                        "description": "BBB- and above"
+                    },
+                    "sub_investment_grade_percentage": {
+                        "type": "number",
+                        "description": "BB+ and below"
+                    }
+                }
+            },
+            "concentration_analysis": {
+                "type": "object",
+                "properties": {
+                    "by_industry": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "industry_code": {
+                                    "type": "string",
+                                    "description": "NAICS code"
+                                },
+                                "industry_name": {
+                                    "type": "string"
+                                },
+                                "entity_count": {
+                                    "type": "integer"
+                                },
+                                "exposure": {
+                                    "type": "number"
+                                },
+                                "exposure_percentage": {
+                                    "type": "number"
+                                },
+                                "average_pd": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    },
+                    "by_geography": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "country_code": {
+                                    "type": "string"
+                                },
+                                "country_name": {
+                                    "type": "string"
+                                },
+                                "entity_count": {
+                                    "type": "integer"
+                                },
+                                "exposure": {
+                                    "type": "number"
+                                },
+                                "exposure_percentage": {
+                                    "type": "number"
+                                },
+                                "country_risk_rating": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "single_name_concentration": {
+                        "type": "object",
+                        "properties": {
+                            "largest_single_exposure": {
+                                "type": "object",
+                                "properties": {
+                                    "entity_id": {
+                                        "type": "string"
+                                    },
+                                    "entity_name": {
+                                        "type": "string"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "percentage": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "top_10_exposure_percentage": {
+                                "type": "number"
+                            },
+                            "top_20_exposure_percentage": {
+                                "type": "number"
+                            },
+                            "herfindahl_index": {
+                                "type": "number",
+                                "description": "Sum of squared exposure percentages"
+                            }
+                        }
+                    },
+                    "concentration_limits": {
+                        "type": "object",
+                        "properties": {
+                            "single_entity_limit_percentage": {
+                                "type": "number"
+                            },
+                            "industry_limit_percentage": {
+                                "type": "number"
+                            },
+                            "country_limit_percentage": {
+                                "type": "number"
+                            },
+                            "violations": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit_type": {
+                                            "type": "string"
+                                        },
+                                        "limit_value": {
+                                            "type": "number"
+                                        },
+                                        "actual_value": {
+                                            "type": "number"
+                                        },
+                                        "excess": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "portfolio_metrics": {
+                "type": "object",
+                "properties": {
+                    "expected_loss": {
+                        "type": "object",
+                        "properties": {
+                            "total_el": {
+                                "type": "number",
+                                "description": "Sum of PD * LGD * EAD"
+                            },
+                            "el_percentage": {
+                                "type": "number",
+                                "description": "EL / Total Exposure"
+                            },
+                            "provision_coverage": {
+                                "type": "number",
+                                "description": "Actual reserves / EL"
+                            }
+                        }
+                    },
+                    "unexpected_loss": {
+                        "type": "object",
+                        "properties": {
+                            "portfolio_variance": {
+                                "type": "number"
+                            },
+                            "portfolio_std_dev": {
+                                "type": "number"
+                            },
+                            "diversification_benefit": {
+                                "type": "number",
+                                "description": "Reduction from correlation"
+                            }
+                        }
+                    },
+                    "return_metrics": {
+                        "type": "object",
+                        "properties": {
+                            "weighted_average_yield": {
+                                "type": "number"
+                            },
+                            "risk_adjusted_return": {
+                                "type": "number",
+                                "description": "Return / Economic Capital"
+                            },
+                            "raroc": {
+                                "type": "number",
+                                "description": "Risk-Adjusted Return on Capital"
+                            }
+                        }
+                    }
+                }
+            },
+            "stress_testing": {
+                "type": "object",
+                "properties": {
+                    "scenarios": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "scenario_id": {
+                                    "type": "string"
+                                },
+                                "scenario_name": {
+                                    "type": "string",
+                                    "enum": [
+                                        "base",
+                                        "adverse",
+                                        "severely_adverse",
+                                        "custom"
+                                    ]
+                                },
+                                "scenario_description": {
+                                    "type": "string"
+                                },
+                                "macroeconomic_assumptions": {
+                                    "type": "object",
+                                    "properties": {
+                                        "gdp_growth": {
+                                            "type": "number"
+                                        },
+                                        "unemployment_rate": {
+                                            "type": "number"
+                                        },
+                                        "interest_rate_change": {
+                                            "type": "number"
+                                        },
+                                        "equity_market_decline": {
+                                            "type": "number"
+                                        },
+                                        "commodity_price_change": {
+                                            "type": "number"
+                                        }
+                                    }
+                                },
+                                "portfolio_impact": {
+                                    "type": "object",
+                                    "properties": {
+                                        "stressed_pd_average": {
+                                            "type": "number"
+                                        },
+                                        "pd_increase_factor": {
+                                            "type": "number"
+                                        },
+                                        "stressed_expected_loss": {
+                                            "type": "number"
+                                        },
+                                        "el_increase": {
+                                            "type": "number"
+                                        },
+                                        "entities_downgraded": {
+                                            "type": "integer"
+                                        },
+                                        "entities_to_default": {
+                                            "type": "integer"
+                                        },
+                                        "estimated_losses": {
+                                            "type": "number"
+                                        }
+                                    }
+                                },
+                                "capital_impact": {
+                                    "type": "object",
+                                    "properties": {
+                                        "additional_provisions_required": {
+                                            "type": "number"
+                                        },
+                                        "capital_depletion": {
+                                            "type": "number"
+                                        },
+                                        "post_stress_capital_ratio": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "watch_list_summary": {
+                "type": "object",
+                "properties": {
+                    "total_watch_list_entities": {
+                        "type": "integer"
+                    },
+                    "total_watch_list_exposure": {
+                        "type": "number"
+                    },
+                    "watch_list_percentage": {
+                        "type": "number"
+                    },
+                    "by_category": {
+                        "type": "object",
+                        "properties": {
+                            "standard_monitoring": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "enhanced_monitoring": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "special_mention": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "substandard": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "doubtful": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "covenant_compliance_summary": {
+                "type": "object",
+                "properties": {
+                    "total_covenants": {
+                        "type": "integer"
+                    },
+                    "compliant_count": {
+                        "type": "integer"
+                    },
+                    "warning_count": {
+                        "type": "integer"
+                    },
+                    "breach_count": {
+                        "type": "integer"
+                    },
+                    "compliance_rate": {
+                        "type": "number"
+                    },
+                    "entities_with_breaches": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "entity_id": {
+                                    "type": "string"
+                                },
+                                "entity_name": {
+                                    "type": "string"
+                                },
+                                "breach_count": {
+                                    "type": "integer"
+                                },
+                                "exposure": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "regulatory_reporting": {
+                "type": "object",
+                "properties": {
+                    "basel_metrics": {
+                        "type": "object",
+                        "properties": {
+                            "risk_weighted_assets": {
+                                "type": "number"
+                            },
+                            "tier1_capital_requirement": {
+                                "type": "number"
+                            },
+                            "total_capital_requirement": {
+                                "type": "number"
+                            },
+                            "capital_conservation_buffer": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "ifrs9_staging": {
+                        "type": "object",
+                        "properties": {
+                            "stage_1": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "provision": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "stage_2": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "provision": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            "stage_3": {
+                                "type": "object",
+                                "properties": {
+                                    "count": {
+                                        "type": "integer"
+                                    },
+                                    "exposure": {
+                                        "type": "number"
+                                    },
+                                    "provision": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "cecl_allowance": {
+                        "type": "object",
+                        "properties": {
+                            "total_allowance": {
+                                "type": "number"
+                            },
+                            "allowance_percentage": {
+                                "type": "number"
+                            },
+                            "coverage_ratio": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "trend_analysis": {
+                "type": "object",
+                "properties": {
+                    "quarterly_trends": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "quarter": {
+                                    "type": "string"
+                                },
+                                "total_exposure": {
+                                    "type": "number"
+                                },
+                                "average_pd": {
+                                    "type": "number"
+                                },
+                                "expected_loss": {
+                                    "type": "number"
+                                },
+                                "watch_list_percentage": {
+                                    "type": "number"
+                                },
+                                "breach_count": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "migration_matrix": {
+                        "type": "object",
+                        "description": "Rating transitions quarter-over-quarter",
+                        "additionalProperties": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "aggregation_metadata": {
+                "type": "object",
+                "properties": {
+                    "calculation_timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "data_sources": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "entity_count_processed": {
+                        "type": "integer"
+                    },
+                    "calculation_duration_ms": {
+                        "type": "integer"
+                    },
+                    "data_quality_score": {
+                        "type": "number",
+                        "description": "Completeness and accuracy score 0-100"
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "aggregate_portfolio_risk",
+        "analyze_concentration",
+        "calculate_portfolio_metrics",
+        "run_stress_tests",
+        "generate_regulatory_reports"
+    ],
+    "optional_capabilities": [
+        "monte_carlo_simulation",
+        "correlation_modeling",
+        "economic_capital_allocation",
+        "peer_benchmarking"
+    ],
+    "default_config": {
+        "aggregation_frequency": "daily",
+        "stress_testing_frequency": "quarterly",
+        "concentration_threshold_entity": 10.0,
+        "concentration_threshold_industry": 25.0,
+        "concentration_threshold_country": 30.0,
+        "historical_retention_quarters": 20
+    },
+    "metadata": {
+        "use_case": "UC-FRA-001",
+        "domain": "financial-risk-analysis",
+        "author": "CodeValdCortex",
+        "compliance_standards": [
+            "Basel_III",
+            "IFRS_9",
+            "CECL",
+            "Dodd_Frank"
+        ],
+        "audit_requirement": "full_trail",
+        "data_sensitivity": "highly_confidential"
+    },
+    "is_enabled": true
+}

@@ -1,0 +1,238 @@
+{
+    "id": "vehicle",
+    "name": "Vehicle Agent",
+    "description": "Autonomous agent representing a vehicle (school bus or matatu) with GPS tracking and context-aware location broadcasting capabilities",
+    "category": "transportation",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "vehicle_id",
+            "vehicle_type",
+            "registration_number",
+            "route_id",
+            "capacity"
+        ],
+        "properties": {
+            "vehicle_id": {
+                "type": "string",
+                "pattern": "^(BUS|MATATU)-[A-Z]{2,3}-[A-Z0-9]{3,6}$",
+                "description": "Unique vehicle identifier (e.g., BUS-KE-001, MATATU-KCA-123X)"
+            },
+            "vehicle_type": {
+                "type": "string",
+                "enum": [
+                    "school_bus",
+                    "matatu"
+                ],
+                "description": "Type of vehicle"
+            },
+            "registration_number": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}\\s?[0-9]{3}[A-Z]?$",
+                "description": "Vehicle registration plate (e.g., KCA 123X)"
+            },
+            "vehicle_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 50,
+                "description": "Friendly vehicle name/branding (e.g., 'Ngong Road Flyer', 'School Bus #3')"
+            },
+            "matatu_sacco": {
+                "type": "string",
+                "description": "SACCO affiliation (for matatus only)"
+            },
+            "route_name": {
+                "type": "string",
+                "description": "Human-readable route name (e.g., 'CBD-Ngong', 'Westlands School Route')"
+            },
+            "route_id": {
+                "type": "string",
+                "description": "Assigned route identifier"
+            },
+            "driver_id": {
+                "type": "string",
+                "description": "Current driver identifier"
+            },
+            "conductor_id": {
+                "type": "string",
+                "description": "Current conductor identifier (for matatus)"
+            },
+            "capacity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "description": "Maximum passenger capacity"
+            },
+            "current_location": {
+                "type": "object",
+                "required": [
+                    "latitude",
+                    "longitude"
+                ],
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                    },
+                    "heading": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 360,
+                        "description": "Direction of travel in degrees"
+                    },
+                    "altitude": {
+                        "type": "number",
+                        "description": "Altitude in meters"
+                    },
+                    "accuracy": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "GPS accuracy in meters"
+                    }
+                },
+                "description": "Current GPS location"
+            },
+            "current_speed": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Current speed in km/h"
+            },
+            "current_passenger_count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of passengers currently on board"
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "idle",
+                    "pre_route",
+                    "en_route_highway",
+                    "approaching_stop",
+                    "at_stop",
+                    "delayed",
+                    "emergency",
+                    "privacy_mode",
+                    "full",
+                    "maintenance"
+                ],
+                "description": "Current operational status"
+            },
+            "last_stop_id": {
+                "type": "string",
+                "description": "Most recently visited stop identifier"
+            },
+            "next_stop_id": {
+                "type": "string",
+                "description": "Upcoming stop identifier"
+            },
+            "eta_to_next_stop": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Estimated time of arrival to next stop (minutes)"
+            },
+            "is_trackable": {
+                "type": "boolean",
+                "description": "Whether vehicle participates in public tracking (premium feature for matatus)"
+            },
+            "vehicle_features": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "AC",
+                        "WiFi",
+                        "USB_charging",
+                        "music",
+                        "clean",
+                        "comfortable_seats",
+                        "seatbelts"
+                    ]
+                },
+                "description": "Vehicle amenities and features"
+            },
+            "rating_average": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 5,
+                "description": "Average passenger rating (1-5 stars)"
+            },
+            "total_trips": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Cumulative trip count"
+            },
+            "favorite_count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of passengers who have favorited this vehicle"
+            },
+            "broadcast_config": {
+                "type": "object",
+                "description": "Property broadcasting configuration",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Whether auto-broadcasting is active"
+                    },
+                    "current_interval": {
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 300,
+                        "description": "Current broadcast frequency in seconds"
+                    },
+                    "privacy_mode": {
+                        "type": "boolean",
+                        "description": "Whether broadcasting is paused for privacy"
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "gps_tracking",
+        "location_broadcasting",
+        "subscriber_management",
+        "status_reporting"
+    ],
+    "optional_capabilities": [
+        "passenger_counting",
+        "route_optimization",
+        "emergency_alerts",
+        "passenger_ratings",
+        "loyalty_tracking"
+    ],
+    "default_config": {
+        "broadcast_interval_seconds": 30,
+        "enable_privacy_mode": true,
+        "max_subscribers": 1000,
+        "gps_update_frequency_seconds": 5
+    },
+    "validation_rules": [
+        {
+            "name": "capacity_check",
+            "description": "Current passenger count should not exceed capacity",
+            "condition": "current_passenger_count <= capacity"
+        },
+        {
+            "name": "speed_check",
+            "description": "Speed should be reasonable",
+            "condition": "current_speed <= 150"
+        },
+        {
+            "name": "matatu_sacco_required",
+            "description": "Matatus must have SACCO affiliation",
+            "condition": "vehicle_type != 'matatu' || matatu_sacco != ''"
+        }
+    ],
+    "is_system_type": false,
+    "is_enabled": true
+}

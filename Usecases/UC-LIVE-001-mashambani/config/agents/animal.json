@@ -1,0 +1,523 @@
+{
+    "id": "animal",
+    "name": "Animal Agent",
+    "description": "Represents individual animals with comprehensive tracking of health, custody, and lifecycle",
+    "category": "livestock",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "animal_id",
+            "species",
+            "owner_id",
+            "identification_marks"
+        ],
+        "properties": {
+            "animal_id": {
+                "type": "string",
+                "pattern": "^ANI-[A-Z0-9]{8}$",
+                "description": "Unique animal identifier"
+            },
+            "species": {
+                "type": "string",
+                "enum": [
+                    "cattle",
+                    "goat",
+                    "sheep",
+                    "chicken",
+                    "pig",
+                    "donkey",
+                    "horse"
+                ]
+            },
+            "breed": {
+                "type": "string",
+                "description": "Specific breed or local variety"
+            },
+            "owner_id": {
+                "type": "string",
+                "pattern": "^OWN-[A-Z0-9]{8}$"
+            },
+            "current_caretaker_id": {
+                "type": "string",
+                "pattern": "^CAR-[A-Z0-9]{8}$"
+            },
+            "name": {
+                "type": "string",
+                "description": "Animal's name (if given)"
+            },
+            "identification_marks": {
+                "type": "object",
+                "properties": {
+                    "color": {
+                        "type": "string"
+                    },
+                    "patterns": {
+                        "type": "string"
+                    },
+                    "scars": {
+                        "type": "string"
+                    },
+                    "ear_tags": {
+                        "type": "string"
+                    },
+                    "brands": {
+                        "type": "string"
+                    },
+                    "microchip_id": {
+                        "type": "string"
+                    },
+                    "distinguishing_features": {
+                        "type": "string"
+                    }
+                }
+            },
+            "physical_characteristics": {
+                "type": "object",
+                "properties": {
+                    "gender": {
+                        "type": "string",
+                        "enum": [
+                            "male",
+                            "female",
+                            "castrated"
+                        ]
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "estimated_age": {
+                        "type": "string",
+                        "description": "If exact DOB unknown"
+                    },
+                    "weight_kg": {
+                        "type": "number"
+                    },
+                    "height_cm": {
+                        "type": "number"
+                    },
+                    "body_condition_score": {
+                        "type": "number",
+                        "minimum": 1,
+                        "maximum": 5
+                    }
+                }
+            },
+            "health_records": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "vaccination",
+                                "deworming",
+                                "illness",
+                                "injury",
+                                "checkup",
+                                "treatment"
+                            ]
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "administered_by": {
+                            "type": "string"
+                        },
+                        "medication": {
+                            "type": "string"
+                        },
+                        "next_due_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "outcome": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "vaccination_schedule": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "vaccine_name": {
+                            "type": "string"
+                        },
+                        "last_administered": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "next_due": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "status": {
+                            "type": "string",
+                            "enum": [
+                                "up_to_date",
+                                "due_soon",
+                                "overdue"
+                            ]
+                        }
+                    }
+                }
+            },
+            "custody_history": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "caretaker_id": {
+                            "type": "string"
+                        },
+                        "start_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "end_date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "reason": {
+                            "type": "string"
+                        },
+                        "performance_rating": {
+                            "type": "number"
+                        }
+                    }
+                }
+            },
+            "current_custody": {
+                "type": "object",
+                "properties": {
+                    "caretaker_id": {
+                        "type": "string"
+                    },
+                    "start_date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "location": {
+                        "type": "object",
+                        "properties": {
+                            "region": {
+                                "type": "string"
+                            },
+                            "village": {
+                                "type": "string"
+                            },
+                            "coordinates": {
+                                "type": "object",
+                                "properties": {
+                                    "latitude": {
+                                        "type": "number"
+                                    },
+                                    "longitude": {
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "arrangement_type": {
+                        "type": "string",
+                        "enum": [
+                            "temporary",
+                            "seasonal",
+                            "long_term",
+                            "permanent"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "pending_transfer",
+                            "returning",
+                            "disputed"
+                        ]
+                    }
+                }
+            },
+            "breeding_records": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "mate_id": {
+                            "type": "string"
+                        },
+                        "pregnancy_confirmed": {
+                            "type": "boolean"
+                        },
+                        "expected_delivery": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "actual_delivery": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "offspring_ids": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "complications": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "offspring": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "pattern": "^ANI-[A-Z0-9]{8}$"
+                },
+                "description": "IDs of offspring produced"
+            },
+            "parents": {
+                "type": "object",
+                "properties": {
+                    "sire_id": {
+                        "type": "string"
+                    },
+                    "dam_id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "photos": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "url": {
+                            "type": "string"
+                        },
+                        "date": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "uploaded_by": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "identification",
+                                "health_check",
+                                "update",
+                                "milestone"
+                            ]
+                        }
+                    }
+                }
+            },
+            "care_requirements": {
+                "type": "object",
+                "properties": {
+                    "special_diet": {
+                        "type": "string"
+                    },
+                    "medical_conditions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "behavioral_notes": {
+                        "type": "string"
+                    },
+                    "handling_instructions": {
+                        "type": "string"
+                    }
+                }
+            },
+            "current_health_status": {
+                "type": "string",
+                "enum": [
+                    "excellent",
+                    "good",
+                    "fair",
+                    "poor",
+                    "sick",
+                    "injured",
+                    "deceased"
+                ],
+                "default": "good"
+            },
+            "economic_value": {
+                "type": "object",
+                "properties": {
+                    "estimated_value": {
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "last_valuation_date": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                }
+            },
+            "ownership_transfers": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "format": "date"
+                        },
+                        "from_owner_id": {
+                            "type": "string"
+                        },
+                        "to_owner_id": {
+                            "type": "string"
+                        },
+                        "reason": {
+                            "type": "string",
+                            "enum": [
+                                "sale",
+                                "gift",
+                                "inheritance",
+                                "dowry",
+                                "exchange",
+                                "other"
+                            ]
+                        },
+                        "witnesses": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "documentation": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "cultural_significance": {
+                "type": "object",
+                "properties": {
+                    "ceremonial_use": {
+                        "type": "boolean"
+                    },
+                    "traditional_value": {
+                        "type": "string"
+                    },
+                    "cultural_events": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "registration_date": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "last_update": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "active",
+                    "in_custody",
+                    "returning",
+                    "sold",
+                    "deceased",
+                    "missing"
+                ],
+                "default": "active"
+            }
+        }
+    },
+    "capabilities": [
+        "track_location",
+        "monitor_health",
+        "record_vaccinations",
+        "document_breeding",
+        "maintain_custody_history",
+        "alert_health_issues",
+        "track_ownership_changes",
+        "store_photos",
+        "calculate_age",
+        "assess_condition"
+    ],
+    "state_machine": {
+        "states": [
+            "with_owner",
+            "in_custody",
+            "in_transit",
+            "sick",
+            "breeding",
+            "deceased"
+        ],
+        "initial_state": "with_owner",
+        "transitions": [
+            {
+                "from": "with_owner",
+                "to": "in_custody",
+                "trigger": "custody_transferred"
+            },
+            {
+                "from": "in_custody",
+                "to": "in_transit",
+                "trigger": "returning_to_owner"
+            },
+            {
+                "from": "in_transit",
+                "to": "with_owner",
+                "trigger": "return_completed"
+            },
+            {
+                "from": "in_custody",
+                "to": "sick",
+                "trigger": "health_issue_detected"
+            },
+            {
+                "from": "sick",
+                "to": "in_custody",
+                "trigger": "recovered"
+            }
+        ]
+    },
+    "communication_protocols": [
+        "health_alerts",
+        "status_updates",
+        "photo_sharing",
+        "emergency_notifications"
+    ],
+    "integration_points": [
+        "owner_agent",
+        "caretaker_agent",
+        "health_monitoring_system",
+        "photo_storage",
+        "location_tracking"
+    ]
+}

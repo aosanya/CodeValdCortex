@@ -1,0 +1,322 @@
+{
+    "id": "ratio_calculator",
+    "name": "Financial Ratio Calculator Agent",
+    "description": "Specialized agent for computing comprehensive financial ratios and metrics across liquidity, leverage, profitability, efficiency, and cash flow dimensions",
+    "category": "financial",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "calculator_id",
+            "entity_id",
+            "calculation_date"
+        ],
+        "properties": {
+            "calculator_id": {
+                "type": "string",
+                "pattern": "^CALC-[A-Z0-9]{8}$",
+                "description": "Unique calculator instance identifier"
+            },
+            "entity_id": {
+                "type": "string",
+                "description": "Associated entity identifier"
+            },
+            "calculation_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Timestamp of calculation"
+            },
+            "ratio_categories": {
+                "type": "object",
+                "properties": {
+                    "liquidity_ratios": {
+                        "type": "object",
+                        "properties": {
+                            "current_ratio": {
+                                "type": "number",
+                                "description": "Current Assets / Current Liabilities"
+                            },
+                            "quick_ratio": {
+                                "type": "number",
+                                "description": "(Current Assets - Inventory) / Current Liabilities"
+                            },
+                            "cash_ratio": {
+                                "type": "number",
+                                "description": "Cash & Equivalents / Current Liabilities"
+                            },
+                            "working_capital_ratio": {
+                                "type": "number",
+                                "description": "(Current Assets - Current Liabilities) / Total Assets"
+                            },
+                            "operating_cash_flow_ratio": {
+                                "type": "number",
+                                "description": "Operating Cash Flow / Current Liabilities"
+                            }
+                        }
+                    },
+                    "leverage_ratios": {
+                        "type": "object",
+                        "properties": {
+                            "debt_to_equity": {
+                                "type": "number",
+                                "description": "Total Debt / Total Equity"
+                            },
+                            "debt_to_assets": {
+                                "type": "number",
+                                "description": "Total Debt / Total Assets"
+                            },
+                            "debt_to_ebitda": {
+                                "type": "number",
+                                "description": "Total Debt / EBITDA"
+                            },
+                            "net_debt_to_ebitda": {
+                                "type": "number",
+                                "description": "(Total Debt - Cash) / EBITDA"
+                            },
+                            "interest_coverage": {
+                                "type": "number",
+                                "description": "EBIT / Interest Expense"
+                            },
+                            "ebitda_to_interest": {
+                                "type": "number",
+                                "description": "EBITDA / Interest Expense"
+                            },
+                            "debt_service_coverage": {
+                                "type": "number",
+                                "description": "Operating Cash Flow / (Principal + Interest)"
+                            },
+                            "equity_multiplier": {
+                                "type": "number",
+                                "description": "Total Assets / Total Equity"
+                            }
+                        }
+                    },
+                    "profitability_ratios": {
+                        "type": "object",
+                        "properties": {
+                            "gross_margin": {
+                                "type": "number",
+                                "description": "Gross Profit / Revenue"
+                            },
+                            "operating_margin": {
+                                "type": "number",
+                                "description": "Operating Income / Revenue"
+                            },
+                            "ebitda_margin": {
+                                "type": "number",
+                                "description": "EBITDA / Revenue"
+                            },
+                            "ebit_margin": {
+                                "type": "number",
+                                "description": "EBIT / Revenue"
+                            },
+                            "net_profit_margin": {
+                                "type": "number",
+                                "description": "Net Income / Revenue"
+                            },
+                            "return_on_assets": {
+                                "type": "number",
+                                "description": "Net Income / Total Assets"
+                            },
+                            "return_on_equity": {
+                                "type": "number",
+                                "description": "Net Income / Total Equity"
+                            },
+                            "return_on_invested_capital": {
+                                "type": "number",
+                                "description": "NOPAT / (Debt + Equity)"
+                            }
+                        }
+                    },
+                    "efficiency_ratios": {
+                        "type": "object",
+                        "properties": {
+                            "asset_turnover": {
+                                "type": "number",
+                                "description": "Revenue / Average Total Assets"
+                            },
+                            "inventory_turnover": {
+                                "type": "number",
+                                "description": "COGS / Average Inventory"
+                            },
+                            "receivables_turnover": {
+                                "type": "number",
+                                "description": "Revenue / Average Accounts Receivable"
+                            },
+                            "payables_turnover": {
+                                "type": "number",
+                                "description": "COGS / Average Accounts Payable"
+                            },
+                            "days_sales_outstanding": {
+                                "type": "number",
+                                "description": "365 / Receivables Turnover"
+                            },
+                            "days_inventory_outstanding": {
+                                "type": "number",
+                                "description": "365 / Inventory Turnover"
+                            },
+                            "days_payable_outstanding": {
+                                "type": "number",
+                                "description": "365 / Payables Turnover"
+                            },
+                            "cash_conversion_cycle": {
+                                "type": "number",
+                                "description": "DSO + DIO - DPO"
+                            }
+                        }
+                    },
+                    "cash_flow_ratios": {
+                        "type": "object",
+                        "properties": {
+                            "operating_cf_to_sales": {
+                                "type": "number",
+                                "description": "Operating Cash Flow / Revenue"
+                            },
+                            "free_cash_flow_to_sales": {
+                                "type": "number",
+                                "description": "Free Cash Flow / Revenue"
+                            },
+                            "cash_flow_to_debt": {
+                                "type": "number",
+                                "description": "Operating Cash Flow / Total Debt"
+                            },
+                            "capex_to_operating_cf": {
+                                "type": "number",
+                                "description": "Capital Expenditures / Operating Cash Flow"
+                            },
+                            "cash_flow_adequacy": {
+                                "type": "number",
+                                "description": "Operating CF / (Capex + Dividends + Debt Repayment)"
+                            }
+                        }
+                    }
+                }
+            },
+            "trend_analysis": {
+                "type": "object",
+                "properties": {
+                    "quarter_over_quarter": {
+                        "type": "object",
+                        "description": "QoQ changes for key ratios"
+                    },
+                    "year_over_year": {
+                        "type": "object",
+                        "description": "YoY changes for key ratios"
+                    },
+                    "rolling_averages": {
+                        "type": "object",
+                        "properties": {
+                            "four_quarter_avg": {
+                                "type": "object"
+                            },
+                            "eight_quarter_avg": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            },
+            "peer_comparison": {
+                "type": "object",
+                "properties": {
+                    "industry_median": {
+                        "type": "object",
+                        "description": "Industry median ratios"
+                    },
+                    "industry_percentile": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 100,
+                        "description": "Entity's percentile ranking"
+                    },
+                    "peer_group": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Comparable company identifiers"
+                    }
+                }
+            },
+            "anomaly_flags": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "ratio_name": {
+                            "type": "string"
+                        },
+                        "severity": {
+                            "type": "string",
+                            "enum": [
+                                "info",
+                                "warning",
+                                "critical"
+                            ]
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "threshold_breached": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            },
+            "calculation_metadata": {
+                "type": "object",
+                "properties": {
+                    "formulas_used": {
+                        "type": "object"
+                    },
+                    "data_sources": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "adjustments_applied": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "calculation_duration_ms": {
+                        "type": "number"
+                    }
+                }
+            }
+        }
+    },
+    "required_capabilities": [
+        "calculate_ratios",
+        "trend_analysis",
+        "peer_benchmarking",
+        "anomaly_detection",
+        "validate_calculations"
+    ],
+    "optional_capabilities": [
+        "custom_ratios",
+        "industry_adjustment",
+        "statistical_analysis",
+        "visualization_data"
+    ],
+    "default_config": {
+        "calculation_precision": 3,
+        "calculation_timeout_seconds": 30,
+        "enable_trend_analysis": true,
+        "peer_group_size": 10,
+        "anomaly_threshold_std_dev": 2.5
+    },
+    "metadata": {
+        "use_case": "UC-FRA-001",
+        "domain": "financial-risk-analysis",
+        "author": "CodeValdCortex",
+        "supported_standards": [
+            "GAAP",
+            "IFRS"
+        ]
+    },
+    "is_enabled": true
+}

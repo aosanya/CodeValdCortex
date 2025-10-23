@@ -1,0 +1,188 @@
+{
+    "id": "pump",
+    "name": "Pump Agent",
+    "description": "Water pump agent for pressure management, flow control, and energy optimization in the distribution network",
+    "category": "infrastructure",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "pump_id",
+            "pump_type",
+            "capacity",
+            "location"
+        ],
+        "properties": {
+            "pump_id": {
+                "type": "string",
+                "pattern": "^PUMP-[0-9]+$",
+                "description": "Unique pump identifier (e.g., PUMP-001)"
+            },
+            "pump_type": {
+                "type": "string",
+                "enum": [
+                    "centrifugal",
+                    "submersible",
+                    "booster",
+                    "variable_speed"
+                ],
+                "description": "Type of pump"
+            },
+            "capacity": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum flow capacity in liters per second"
+            },
+            "location": {
+                "type": "object",
+                "required": ["latitude", "longitude"],
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90,
+                        "description": "GPS latitude"
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180,
+                        "description": "GPS longitude"
+                    },
+                    "elevation": {
+                        "type": "number",
+                        "description": "Elevation in meters"
+                    }
+                },
+                "description": "Geographic location of the pump"
+            },
+            "power_rating": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Power rating in kilowatts (kW)"
+            },
+            "efficiency": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Pump efficiency as percentage"
+            },
+            "max_head": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum pumping head in meters"
+            },
+            "operating_speed": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Current operating speed in RPM"
+            },
+            "speed_range": {
+                "type": "object",
+                "properties": {
+                    "min_rpm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Minimum speed in RPM"
+                    },
+                    "max_rpm": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Maximum speed in RPM"
+                    }
+                },
+                "description": "Allowable speed range for variable speed pumps"
+            },
+            "manufacturer": {
+                "type": "string",
+                "description": "Pump manufacturer name"
+            },
+            "model": {
+                "type": "string",
+                "description": "Pump model number"
+            },
+            "installation_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date when pump was installed"
+            },
+            "last_maintenance": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last maintenance date"
+            },
+            "operating_hours": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total operating hours"
+            },
+            "control_mode": {
+                "type": "string",
+                "enum": ["manual", "automatic", "scheduled", "demand_based"],
+                "description": "Current control mode"
+            },
+            "target_pressure": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Target discharge pressure in PSI"
+            },
+            "energy_optimization": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Enable energy optimization"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": ["cost", "reliability", "balanced"],
+                        "description": "Optimization priority"
+                    }
+                },
+                "description": "Energy optimization settings"
+            },
+            "vibration_threshold": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum acceptable vibration level (mm/s)"
+            },
+            "temperature_threshold": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum operating temperature in Celsius"
+            }
+        }
+    },
+    "required_capabilities": [
+        "flow_control",
+        "pressure_management",
+        "status_monitoring",
+        "automatic_response",
+        "performance_tracking"
+    ],
+    "optional_capabilities": [
+        "energy_optimization",
+        "predictive_maintenance",
+        "demand_forecasting",
+        "variable_speed_control",
+        "remote_diagnostics"
+    ],
+    "default_config": {
+        "efficiency": 85.0,
+        "control_mode": "automatic",
+        "energy_optimization": {
+            "enabled": true,
+            "priority": "balanced"
+        },
+        "vibration_threshold": 4.5,
+        "temperature_threshold": 80.0
+    },
+    "metadata": {
+        "use_case": "UC-INFRA-001",
+        "domain": "water-distribution",
+        "author": "CodeValdCortex",
+        "tags": ["pump", "pressure", "flow-control", "energy"]
+    },
+    "is_enabled": true
+}

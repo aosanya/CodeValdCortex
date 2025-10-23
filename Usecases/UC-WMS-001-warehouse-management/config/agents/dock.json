@@ -1,0 +1,129 @@
+{
+    "id": "dock",
+    "name": "Loading Dock Agent",
+    "description": "Loading dock agent for managing inbound/outbound shipments, dock scheduling, and carrier coordination",
+    "category": "warehouse",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "dock_id",
+            "dock_type",
+            "status"
+        ],
+        "properties": {
+            "dock_id": {
+                "type": "string",
+                "pattern": "^DOCK-[A-Z0-9]{4}$",
+                "description": "Unique dock identifier"
+            },
+            "dock_type": {
+                "type": "string",
+                "enum": [
+                    "inbound",
+                    "outbound",
+                    "cross_dock"
+                ],
+                "description": "Type of loading dock"
+            },
+            "status": {
+                "type": "string",
+                "enum": [
+                    "available",
+                    "occupied",
+                    "scheduled",
+                    "loading",
+                    "unloading",
+                    "maintenance"
+                ],
+                "description": "Current dock status"
+            },
+            "current_shipment": {
+                "type": "object",
+                "properties": {
+                    "shipment_id": {
+                        "type": "string"
+                    },
+                    "carrier": {
+                        "type": "string"
+                    },
+                    "vehicle_type": {
+                        "type": "string"
+                    },
+                    "items_count": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "arrival_time": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "estimated_completion": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "schedule": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "time_slot": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "shipment_id": {
+                            "type": "string"
+                        },
+                        "duration_minutes": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
+                }
+            },
+            "equipment": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "forklift",
+                        "pallet_jack",
+                        "conveyor",
+                        "dock_leveler"
+                    ]
+                }
+            },
+            "throughput_rate": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Items per hour"
+            }
+        }
+    },
+    "required_capabilities": [
+        "schedule_shipments",
+        "track_loading",
+        "coordinate_equipment",
+        "report_status"
+    ],
+    "optional_capabilities": [
+        "yard_management",
+        "carrier_communication",
+        "cross_docking",
+        "performance_analytics"
+    ],
+    "default_config": {
+        "monitoring_interval": 10,
+        "average_loading_time": 60,
+        "notification_lead_time": 30
+    },
+    "metadata": {
+        "use_case": "UC-WMS-001",
+        "domain": "warehouse-management",
+        "author": "CodeValdCortex"
+    },
+    "is_enabled": true
+}

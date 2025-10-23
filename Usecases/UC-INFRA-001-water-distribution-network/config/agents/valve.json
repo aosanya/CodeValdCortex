@@ -1,0 +1,197 @@
+{
+    "id": "valve",
+    "name": "Valve Agent",
+    "description": "Control valve agent for flow regulation, isolation, and automated response in the water distribution network",
+    "category": "infrastructure",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "valve_id",
+            "valve_type",
+            "size",
+            "location"
+        ],
+        "properties": {
+            "valve_id": {
+                "type": "string",
+                "pattern": "^VALVE-[0-9]+$",
+                "description": "Unique valve identifier (e.g., VALVE-001)"
+            },
+            "valve_type": {
+                "type": "string",
+                "enum": [
+                    "gate",
+                    "ball",
+                    "butterfly",
+                    "globe",
+                    "check",
+                    "pressure_reducing"
+                ],
+                "description": "Type of valve"
+            },
+            "size": {
+                "type": "integer",
+                "minimum": 25,
+                "maximum": 2000,
+                "description": "Valve size in millimeters (DN)"
+            },
+            "location": {
+                "type": "object",
+                "required": ["latitude", "longitude"],
+                "properties": {
+                    "latitude": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90,
+                        "description": "GPS latitude"
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180,
+                        "description": "GPS longitude"
+                    },
+                    "elevation": {
+                        "type": "number",
+                        "description": "Elevation in meters"
+                    }
+                },
+                "description": "Geographic location of the valve"
+            },
+            "current_position": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Current valve position as percentage (0=closed, 100=fully open)"
+            },
+            "actuator_type": {
+                "type": "string",
+                "enum": ["manual", "electric", "pneumatic", "hydraulic"],
+                "description": "Type of valve actuator"
+            },
+            "control_mode": {
+                "type": "string",
+                "enum": ["manual", "automatic", "remote", "scheduled"],
+                "description": "Current control mode"
+            },
+            "pressure_rating": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Maximum pressure rating in PSI"
+            },
+            "flow_coefficient": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Valve flow coefficient (Cv)"
+            },
+            "material": {
+                "type": "string",
+                "enum": ["brass", "stainless_steel", "cast_iron", "bronze", "PVC"],
+                "description": "Valve body material"
+            },
+            "manufacturer": {
+                "type": "string",
+                "description": "Valve manufacturer name"
+            },
+            "model": {
+                "type": "string",
+                "description": "Valve model number"
+            },
+            "installation_date": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Date when valve was installed"
+            },
+            "last_maintenance": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last maintenance date"
+            },
+            "operation_count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total number of open/close operations"
+            },
+            "response_time": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Time to fully open/close in seconds"
+            },
+            "isolation_zones": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "description": "List of zone IDs that this valve can isolate"
+            },
+            "automated_closure": {
+                "type": "object",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Enable automated closure on anomalies"
+                    },
+                    "triggers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": ["pressure_drop", "flow_anomaly", "leak_detection", "quality_alert"]
+                        },
+                        "description": "Events that trigger automated closure"
+                    },
+                    "confirmation_required": {
+                        "type": "boolean",
+                        "description": "Require operator confirmation before closure"
+                    }
+                },
+                "description": "Automated closure configuration"
+            },
+            "position_feedback": {
+                "type": "boolean",
+                "description": "Whether valve has position feedback sensor"
+            },
+            "torque_monitoring": {
+                "type": "boolean",
+                "description": "Whether valve has torque monitoring capability"
+            },
+            "leak_detection": {
+                "type": "boolean",
+                "description": "Whether valve has leak detection on seat"
+            }
+        }
+    },
+    "required_capabilities": [
+        "position_control",
+        "flow_regulation",
+        "isolation",
+        "status_reporting",
+        "safety_shutdown"
+    ],
+    "optional_capabilities": [
+        "automated_response",
+        "predictive_maintenance",
+        "remote_operation",
+        "pressure_regulation",
+        "leak_containment"
+    ],
+    "default_config": {
+        "current_position": 100,
+        "control_mode": "automatic",
+        "automated_closure": {
+            "enabled": true,
+            "triggers": ["pressure_drop", "leak_detection"],
+            "confirmation_required": false
+        },
+        "position_feedback": true,
+        "response_time": 30
+    },
+    "metadata": {
+        "use_case": "UC-INFRA-001",
+        "domain": "water-distribution",
+        "author": "CodeValdCortex",
+        "tags": ["valve", "control", "isolation", "safety"]
+    },
+    "is_enabled": true
+}

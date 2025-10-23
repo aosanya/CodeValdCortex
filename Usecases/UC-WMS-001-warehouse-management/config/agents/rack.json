@@ -1,0 +1,148 @@
+{
+    "id": "rack",
+    "name": "Storage Rack Agent",
+    "description": "Intelligent storage rack agent for inventory tracking, capacity management, and automated replenishment",
+    "category": "warehouse",
+    "version": "1.0.0",
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+            "rack_id",
+            "location",
+            "capacity",
+            "current_occupancy"
+        ],
+        "properties": {
+            "rack_id": {
+                "type": "string",
+                "pattern": "^RACK-[A-Z0-9]{6}$",
+                "description": "Unique rack identifier"
+            },
+            "location": {
+                "type": "object",
+                "required": [
+                    "aisle",
+                    "position",
+                    "level"
+                ],
+                "properties": {
+                    "aisle": {
+                        "type": "string",
+                        "description": "Aisle identifier"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Position in aisle"
+                    },
+                    "level": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Shelf level"
+                    }
+                }
+            },
+            "capacity": {
+                "type": "object",
+                "required": [
+                    "slots",
+                    "weight_limit"
+                ],
+                "properties": {
+                    "slots": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Number of storage slots"
+                    },
+                    "weight_limit": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Maximum weight in kilograms"
+                    },
+                    "volume": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Storage volume in cubic meters"
+                    }
+                }
+            },
+            "current_occupancy": {
+                "type": "object",
+                "properties": {
+                    "used_slots": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of occupied slots"
+                    },
+                    "current_weight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Current total weight"
+                    }
+                }
+            },
+            "stored_items": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "sku": {
+                            "type": "string"
+                        },
+                        "quantity": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "slot": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            },
+            "temperature": {
+                "type": "number",
+                "description": "Current temperature in Celsius"
+            },
+            "humidity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Relative humidity percentage"
+            },
+            "access_frequency": {
+                "type": "string",
+                "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                ],
+                "description": "Item access frequency classification"
+            }
+        }
+    },
+    "required_capabilities": [
+        "track_inventory",
+        "monitor_occupancy",
+        "report_capacity",
+        "alert_replenishment"
+    ],
+    "optional_capabilities": [
+        "temperature_control",
+        "humidity_monitoring",
+        "slotting_optimization",
+        "predictive_restocking"
+    ],
+    "default_config": {
+        "monitoring_interval": 30,
+        "occupancy_warning_threshold": 90,
+        "temperature_alert_threshold": 25,
+        "humidity_alert_threshold": 80
+    },
+    "metadata": {
+        "use_case": "UC-WMS-001",
+        "domain": "warehouse-management",
+        "author": "CodeValdCortex"
+    },
+    "is_enabled": true
+}
