@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/configuration"
 	"github.com/aosanya/CodeValdCortex/internal/lifecycle"
 	"github.com/aosanya/CodeValdCortex/internal/memory"
@@ -43,6 +44,8 @@ type Services struct {
 	TemplateEngine   *templates.Engine
 	LifecycleManager *lifecycle.Manager
 	MemoryService    *memory.Service
+	MessageService   *communication.MessageService
+	PubSubService    *communication.PubSubService
 }
 
 // NewServer creates a new API server instance
@@ -243,9 +246,15 @@ func (s *Server) setupTaskRoutes(rg *gin.RouterGroup) {
 func (s *Server) setupCommunicationRoutes(rg *gin.RouterGroup) {
 	comm := rg.Group("/communications")
 	{
+		// Direct messaging
 		comm.GET("/messages", s.listMessages)
 		comm.POST("/messages", s.sendMessage)
 		comm.GET("/messages/:id", s.getMessage)
+
+		// Pub/sub messaging
+		comm.POST("/publish", s.publishMessage)
+
+		// Channels and stats (not yet implemented)
 		comm.GET("/channels", s.listChannels)
 		comm.POST("/channels", s.createChannel)
 		comm.GET("/stats", s.getCommunicationStats)
@@ -404,8 +413,112 @@ func (s *Server) getWorkflow(c *gin.Context)      { NotImplementedError(c) }
 func (s *Server) cancelWorkflow(c *gin.Context)   { NotImplementedError(c) }
 func (s *Server) getWorkflowGraph(c *gin.Context) { NotImplementedError(c) }
 
-func (s *Server) listMessages(c *gin.Context)          { NotImplementedError(c) }
-func (s *Server) sendMessage(c *gin.Context)           { NotImplementedError(c) }
+func (s *Server) listMessages(c *gin.Context) { NotImplementedError(c) }
+
+// sendMessage handles POST /api/v1/communications/messages
+func (s *Server) sendMessage(c *gin.Context) {
+	var req struct {
+		FromAgentID   string                 `json:"from_agent_id" binding:"required"`
+		ToAgentID     string                 `json:"to_agent_id" binding:"required"`
+		MessageType   string                 `json:"message_type" binding:"required"`
+		Payload       map[string]interface{} `json:"payload" binding:"required"`
+		Priority      int                    `json:"priority"`
+		CorrelationID string                 `json:"correlation_id"`
+		ReplyTo       string                 `json:"reply_to"`
+		TTL           int                    `json:"ttl"`
+		Metadata      map[string]string      `json:"metadata"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(c, 400, "INVALID_REQUEST", "Invalid request body", err)
+		return
+	}
+
+	// Check if message service is available
+	if s.services.MessageService == nil {
+		ErrorResponse(c, 503, "SERVICE_UNAVAILABLE", "Message service not initialized", nil)
+		return
+	}
+
+	// Prepare message options
+	opts := &communication.MessageOptions{
+		Priority:      req.Priority,
+		CorrelationID: req.CorrelationID,
+		ReplyTo:       req.ReplyTo,
+		TTL:           req.TTL,
+		Metadata:      req.Metadata,
+	}
+
+	// Send message
+	ctx := c.Request.Context()
+	msgType := communication.MessageType(req.MessageType)
+	messageID, err := s.services.MessageService.SendMessage(ctx, req.FromAgentID, req.ToAgentID, msgType, req.Payload, opts)
+	if err != nil {
+		log.WithError(err).Error("Failed to send message")
+		ErrorResponse(c, 500, "SEND_FAILED", "Failed to send message", err)
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"message_id": messageID,
+		"status":     "sent",
+	})
+}
+
+// publishMessage handles POST /api/v1/communications/publish
+func (s *Server) publishMessage(c *gin.Context) {
+	var req struct {
+		PublisherAgentID   string                 `json:"publisher_agent_id" binding:"required"`
+		PublisherAgentType string                 `json:"publisher_agent_type"`
+		EventName          string                 `json:"event_name" binding:"required"`
+		Payload            map[string]interface{} `json:"payload" binding:"required"`
+		PublicationType    string                 `json:"publication_type"`
+		TTLSeconds         int                    `json:"ttl_seconds"`
+		Metadata           map[string]string      `json:"metadata"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ErrorResponse(c, 400, "INVALID_REQUEST", "Invalid request body", err)
+		return
+	}
+
+	// Check if pubsub service is available
+	if s.services.PubSubService == nil {
+		ErrorResponse(c, 503, "SERVICE_UNAVAILABLE", "PubSub service not initialized", nil)
+		return
+	}
+
+	// Prepare publication options
+	opts := &communication.PublicationOptions{
+		TTLSeconds: req.TTLSeconds,
+		Metadata:   req.Metadata,
+	}
+
+	if req.PublicationType != "" {
+		opts.Type = communication.PublicationType(req.PublicationType)
+	}
+
+	// Default agent type if not provided
+	agentType := req.PublisherAgentType
+	if agentType == "" {
+		agentType = "unknown"
+	}
+
+	// Publish event
+	ctx := c.Request.Context()
+	pubID, err := s.services.PubSubService.Publish(ctx, req.PublisherAgentID, agentType, req.EventName, req.Payload, opts)
+	if err != nil {
+		log.WithError(err).Error("Failed to publish message")
+		ErrorResponse(c, 500, "PUBLISH_FAILED", "Failed to publish message", err)
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"publication_id": pubID,
+		"status":         "published",
+	})
+}
+
 func (s *Server) getMessage(c *gin.Context)            { NotImplementedError(c) }
 func (s *Server) listChannels(c *gin.Context)          { NotImplementedError(c) }
 func (s *Server) createChannel(c *gin.Context)         { NotImplementedError(c) }

@@ -194,7 +194,7 @@
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-009 | Leak Detection Scenario | Implement multi-agent leak detection workflow: Sensor detects anomaly → Publishes alert → Pipe agent analyzes → Valve isolates → Zone Coordinator escalates | **UC-INFRA-001** | Not Started | P1 | High | Go, Event Processing | INFRA-007, INFRA-008 |
+| INFRA-009 | Leak Detection Scenario | Implement multi-agent leak detection workflow: Sensor detects anomaly → Publishes alert → Pipe agent analyzes → Valve isolates → Zone Coordinator escalates | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Event Processing | INFRA-007, INFRA-008 |
 | INFRA-010 | Pressure Optimization Scenario | Implement collaborative pressure management: Sensors publish readings → Pumps subscribe and adjust output → Zone coordinator monitors overall balance | **UC-INFRA-001** | Not Started | P1 | High | Go, Control Algorithms | INFRA-007, INFRA-008 |
 | INFRA-011 | Predictive Maintenance Scenario | Implement degradation detection: Pump monitors efficiency → Detects decline pattern → Publishes maintenance alert → Zone coordinator schedules work order | **UC-INFRA-001** | Not Started | P1 | High | Go, Analytics | INFRA-009 |
 
@@ -408,13 +408,11 @@
 4. **Phase 6**: Base web UI with agent management (INFRA-016)
 5. **Infrastructure**: Environment configuration, startup scripts, database auto-creation
 
-### ⏳ In Progress (0%)
+### ⏳ In Progress (0 tasks)
 - No tasks currently in progress
 
 ### 🎯 Next Priorities
-1. **INFRA-007**: Create agent instances for demo topology (10 pipes, 8 sensors, 3 pumps, 6 valves, 2 coordinators)
-2. **INFRA-008**: Initialize agent states with baseline configuration data
-3. **INFRA-009**: Implement leak detection scenario with multi-agent messaging
+1. **INFRA-010**: Implement pressure optimization scenario with multi-agent coordination
 4. **INFRA-010**: Implement pressure optimization scenario
 5. **INFRA-017**: Build network topology visualizer for dashboard
 
