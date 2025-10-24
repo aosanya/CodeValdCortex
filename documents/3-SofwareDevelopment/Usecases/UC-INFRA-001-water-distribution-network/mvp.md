@@ -148,7 +148,7 @@
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-017 | Network Topology Visualizer | Add water network topology map to dashboard: pipes, sensors, pumps, valves with color-coded status indicators and real-time updates using SVG/Canvas | **UC-INFRA-001** | Not Started | P1 | High | Frontend, SVG/Canvas | INFRA-016, INFRA-008 |
+| INFRA-017 | Network Topology Visualizer | Add water network topology map to dashboard: pipes, sensors, pumps, valves with color-coded status indicators and real-time updates using SVG/Canvas | **UC-INFRA-001** | 🚧 In Progress | P1 | High | Frontend, SVG/Canvas | INFRA-016, INFRA-008 |
 | INFRA-018 | Alert Management UI | Enhance framework alert system with water-specific alerts: leak detection, pressure anomalies, maintenance schedules with priority indicators | **UC-INFRA-001** | Not Started | P1 | Medium | Go, Frontend | INFRA-016, INFRA-009 |
 | INFRA-019 | Performance Metrics Dashboard | Add infrastructure metrics view: flow rates, pressure trends, energy consumption, leak detection stats, agent health for zones | **UC-INFRA-001** | Not Started | P1 | Medium | Frontend, Chart.js | INFRA-016, INFRA-015 |
 
@@ -339,8 +339,8 @@
 5. **Phase 6**: Base web UI with agent management (INFRA-016)
 6. **Infrastructure**: Environment configuration, startup scripts, database auto-creation
 
-### ⏳ In Progress (0 tasks)
-- None - ready for next task
+### ⏳ In Progress (1 task)
+- **INFRA-017**: Network Topology Visualizer - Add water network topology map to dashboard
 
 ### 🎯 Next Priorities
 1. **INFRA-017**: Build network topology visualizer for dashboard
