@@ -1,7 +1,7 @@
 # MVP - UC-INFRA-001 Water Distribution Network Showcase
 
-**Last Updated**: October 23, 2025  
-**Current Status**: Configuration Complete (33%), Scenarios Pending (67%)
+**Last Updated**: October 24, 2025  
+**Current Status**: Phase 4 Complete (100%), Moving to Visualization and Analytics
 
 ## Task Overview
 - **Objective**: Demonstrate CodeValdCortex framework capabilities using the Water Distribution Network use case
@@ -12,24 +12,27 @@
 ## Current State Summary
 
 ### ✅ What's Working Now
-1. **Agent Type System**: 5 water infrastructure agent types defined and loaded (pipe, sensor, pump, valve, zone coordinator)
-2. **Framework Core**: Complete agent runtime, messaging (direct + pub/sub), state persistence, REST API, Web UI
-3. **Deployment**: Environment configuration, startup script, database auto-creation
-4. **Web Interface**: Bulma CSS-styled dashboard for agent type and instance management
+1. **Agent Type System**: 5 water infrastructure agent types defined and loaded (pipe, sensor, pump, valve, zone coordinator) - See INFRA-001 to INFRA-005 in mvp_done.md
+2. **Framework Core**: Complete agent runtime, messaging (direct + pub/sub), state persistence, REST API, Web UI - See INFRA-006, INFRA-012, INFRA-014, INFRA-016 in mvp_done.md
+3. **Agent Instances**: 27 agent instances created representing water distribution zone topology - See INFRA-007, INFRA-008 in mvp_done.md
+4. **Demonstration Scenarios**: Leak detection, pressure optimization, and predictive maintenance implemented - See INFRA-009, INFRA-010, INFRA-011 in mvp_done.md
+5. **Web Interface**: Bulma CSS-styled dashboard for agent type and instance management
 
 ### 🎯 What's Next
-1. **Agent Instances**: Create 27 agent instances representing a water distribution zone topology
-2. **Scenarios**: Implement leak detection, pressure optimization, and predictive maintenance demonstrations
-3. **Visualization**: Build network topology map showing real-time agent states and interactions
-4. **Analytics**: Add time-series data collection and water infrastructure-specific metrics
+1. **Visualization**: Build network topology map showing real-time agent states and interactions (INFRA-017)
+2. **Data Storage**: Implement time-series storage for sensor readings and metrics (INFRA-013)
+3. **Analytics**: Add water infrastructure-specific analytics queries and reports (INFRA-015)
+4. **Advanced UI**: Alert management and performance metrics dashboards (INFRA-018, INFRA-019)
 
 ### 📊 Progress Metrics
 - **Framework Foundation**: ✅ 100% Complete
 - **Agent Type Configuration**: ✅ 100% Complete (5/5 types)
-- **Instance Creation**: ⏳ 0% (0/27 agents)
-- **Scenario Implementation**: ⏳ 0% (0/3 scenarios)
-- **Visualization & UI**: ⚠️ 40% Complete (base UI done, topology visualizer pending)
-- **Overall MVP**: 33% Complete (9/27 tasks)
+- **Instance Creation**: ✅ 100% Complete (27/27 agents)
+- **Scenario Implementation**: ✅ 100% Complete (3/3 scenarios)
+- **Visualization & UI**: ⚠️ 40% Complete (base UI done, topology visualizer and dashboards pending)
+- **Overall MVP**: 41% Complete (11/27 tasks)
+
+**Note**: Completed tasks (11 total) have been moved to mvp_done.md for detailed documentation. See that file for INFRA-001 through INFRA-011 details.
 
 ## Module Architecture
 
@@ -120,116 +123,36 @@
 - INFRA-018-021: Advanced water infrastructure features
 - INFRA-022-025: Deployment and integration
 
-## Phase 1: Core Agent Type Definitions (P0 - Foundation) ✅ COMPLETE
-
-**Status**: All 5 core infrastructure agent types are defined as JSON configurations and automatically loaded by the framework.
-
-| Task ID | Title | Description | Module | Status | Priority | Effort | Completion Date |
-|---------|-------|-------------|--------|--------|----------|--------|-----------------|
-| INFRA-001 | Pipe Agent Configuration | Pipe agent type with material, diameter, length, pressure rating, condition monitoring schema | **UC-INFRA-001** | ✅ Complete | P0 | Low | Oct 22, 2025 |
-| INFRA-002 | Sensor Agent Configuration | IoT sensor agent type for pressure, flow, temperature, quality monitoring with location and calibration schema | **UC-INFRA-001** | ✅ Complete | P0 | Low | Oct 22, 2025 |
-| INFRA-003 | Pump Agent Configuration | Pump agent type with capacity, efficiency, power consumption, and control parameters schema | **UC-INFRA-001** | ✅ Complete | P0 | Low | Oct 22, 2025 |
-| INFRA-004 | Valve Agent Configuration | Valve agent type with position control, automation capabilities, and isolation logic schema | **UC-INFRA-001** | ✅ Complete | P0 | Low | Oct 22, 2025 |
-| INFRA-005 | Zone Coordinator Configuration | Zone coordinator agent type for managing agent groups, data aggregation, and zone-wide coordination schema | **UC-INFRA-001** | ✅ Complete | P0 | Low | Oct 22, 2025 |
-
-**Artifacts Created**:
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/config/agents/pipe.json` (221 lines)
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/config/agents/sensor.json` (171 lines)
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/config/agents/pump.json` (189 lines)
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/config/agents/valve.json` (198 lines)
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/config/agents/zone_coordinator.json` (324 lines)
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/.env` (environment configuration)
-- ✅ `/usecases/UC-INFRA-001-water-distribution-network/start.sh` (startup script)
-
-**Notes**: 
-- Configuration-only approach validated - no custom Go code needed for agent types
-- Framework automatically loads agent types from JSON at startup
-- All JSON schemas validated and persisted to ArangoDB `agent_types` collection
-- Types are available through Web UI and REST API immediately upon startup
-
-## Phase 2: Framework Communication System (P0 - Critical) ✅ COMPLETE
-
-**Status**: ArangoDB-based message and pub/sub systems are fully implemented in the framework with polling-based delivery, pattern matching, and comprehensive testing.
-
-| Task ID | Title | Description | Module | Status | Priority | Effort | Completion Date |
-|---------|-------|-------------|--------|--------|----------|--------|-----------------|
-| INFRA-006 | ArangoDB Message System | **[FRAMEWORK]** Agent-to-agent communication using ArangoDB collections for message queues with polling, event schemas, routing, pub/sub support, and topic pattern matching | **CodeValdCortex** | ✅ Complete | P1 | Medium | Prior to Oct 22, 2025 |
-
-**Artifacts Created**:
-- ✅ `/internal/communication/message_service.go` - Direct agent-to-agent messaging
-- ✅ `/internal/communication/pubsub_service.go` - Publish/subscribe with topic patterns
-- ✅ `/internal/communication/poller.go` - Polling-based message delivery
-- ✅ `/internal/communication/matcher.go` - Topic pattern matching (wildcards supported)
-- ✅ `/internal/communication/repository.go` - ArangoDB persistence layer
-- ✅ `/internal/communication/types.go` - Message types and schemas
-- ✅ `/internal/communication/*_test.go` - Comprehensive unit tests
-- ✅ `/internal/communication/TESTING.md` - Testing documentation
-
-**Features Implemented**:
-- ✅ Direct agent-to-agent messaging with priority, TTL, correlation IDs
-- ✅ Message status tracking (pending, delivered, failed, expired)
-- ✅ Pub/sub with topic patterns (e.g., `zone.*.alert`, `sensor.pressure.#`)
-- ✅ Polling mechanism for message retrieval (configurable intervals)
-- ✅ Message history and acknowledgment
-- ✅ Expired message cleanup
-- ✅ Integration with Agent runtime (agents have MessageService, PubSubService, and CommunicationPoller)
-
-**Notes**: 
-- No additional work needed - framework provides complete communication infrastructure
-- Agents automatically gain messaging capabilities when created
-- Use cases can immediately leverage messaging for scenarios without additional code
-
 ## Phase 3: Agent Runtime & Instance Management (P0 - Critical)
 
-**Status**: Framework provides agent lifecycle management, but use case-specific agent instances need to be created for demonstration scenarios.
-
-| Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
-|---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-007 | Create Infrastructure Agent Instances | Create initial agent instances for demo: 10 pipes, 8 sensors, 3 pumps, 6 valves, 2 zone coordinators with realistic configurations and network topology | **UC-INFRA-001** | ✅ Complete | P0 | Medium | Go, REST API, Network Design | INFRA-001 to INFRA-006 |
-| INFRA-008 | Agent State Initialization | Initialize agent states with baseline data: pipe conditions, sensor calibration, pump efficiency, valve positions, zone boundaries using REST API or database seeding | **UC-INFRA-001** | ✅ Complete | P0 | Low | Go, ArangoDB | INFRA-007 |
+**Status**: ✅ Complete - All tasks moved to mvp_done.md
 
 ## Phase 4: Scenario Implementations (P1 - Critical)
 
-**Status**: Agent types and communication infrastructure are ready. Now implement use case-specific scenarios that demonstrate agent collaboration.
-
-| Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
-|---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-009 | Leak Detection Scenario | Implement multi-agent leak detection workflow: Sensor detects anomaly → Publishes alert → Pipe agent analyzes → Valve isolates → Zone Coordinator escalates | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Event Processing | INFRA-007, INFRA-008 |
-| INFRA-010 | Pressure Optimization Scenario | Implement collaborative pressure management: Sensors publish readings → Pumps subscribe and adjust output → Zone coordinator monitors overall balance | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Control Algorithms | INFRA-007, INFRA-008 |
-| INFRA-011 | Predictive Maintenance Scenario | Implement degradation detection: Pump monitors efficiency → Detects decline pattern → Publishes maintenance alert → Zone coordinator schedules work order | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Analytics | INFRA-009 |
+**Status**: ✅ Complete - All tasks moved to mvp_done.md
 
 ## Phase 5: Data Storage & Analytics (P1 - Critical) ⚠️ PARTIALLY COMPLETE
 
-**Status**: ArangoDB collections exist, but time-series storage patterns and analytics queries need optimization for water infrastructure metrics.
+**Status**: INFRA-012 and INFRA-014 complete (see mvp_done.md). Time-series storage patterns and analytics queries need optimization for water infrastructure metrics.
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-012 | ArangoDB Collections Schema | **[FRAMEWORK]** Document and validate ArangoDB collections: agents, agent_types, messages, events, topics, subscriptions with proper indexes and relationships | **CodeValdCortex** | ✅ Complete | P1 | Low | AQL, Database Design | INFRA-006 |
 | INFRA-013 | Time-Series Data Storage | Implement efficient storage pattern for sensor readings: pressure logs, flow rates, temperature with date-based partitioning and retention policies using ArangoDB collections | **UC-INFRA-001** | Not Started | P1 | Medium | ArangoDB, AQL | INFRA-012 |
-| INFRA-014 | Agent State Persistence | **[FRAMEWORK]** Validate agent state persistence system: agents save state to ArangoDB, recover from failures, maintain consistency using memory service | **CodeValdCortex** | ✅ Complete | P1 | Low | Go, ArangoDB | INFRA-012 |
 | INFRA-015 | Historical Analytics Queries | Implement AQL queries for water infrastructure analytics: trend analysis, efficiency reports, leak history, maintenance predictions | **UC-INFRA-001** | Not Started | P1 | Medium | AQL, Analytics | INFRA-013 |
 
-**Notes**:
-- Framework provides `/internal/memory/` service for agent state persistence
-- Collections are auto-created by framework on startup
-- Time-series patterns can use standard ArangoDB collections with date-based keys
+**Completed Tasks**: See mvp_done.md for INFRA-012 (Collections Schema) and INFRA-014 (State Persistence)
 
 ## Phase 6: Visualization & UI (P1 - Critical) ⚠️ PARTIALLY COMPLETE
 
-**Status**: Framework provides base dashboard and agent management UI with Bulma CSS. Need to add water infrastructure-specific visualizations.
+**Status**: INFRA-016 complete (see mvp_done.md). Water infrastructure-specific visualizations need to be added.
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-016 | Framework Web UI | **[FRAMEWORK]** Base web dashboard with agent registry, agent type management, health monitoring using Templ+HTMX+Alpine.js+Bulma CSS | **CodeValdCortex** | ✅ Complete | P1 | N/A | Frontend | Framework |
 | INFRA-017 | Network Topology Visualizer | Add water network topology map to dashboard: pipes, sensors, pumps, valves with color-coded status indicators and real-time updates using SVG/Canvas | **UC-INFRA-001** | Not Started | P1 | High | Frontend, SVG/Canvas | INFRA-016, INFRA-008 |
 | INFRA-018 | Alert Management UI | Enhance framework alert system with water-specific alerts: leak detection, pressure anomalies, maintenance schedules with priority indicators | **UC-INFRA-001** | Not Started | P1 | Medium | Go, Frontend | INFRA-016, INFRA-009 |
 | INFRA-019 | Performance Metrics Dashboard | Add infrastructure metrics view: flow rates, pressure trends, energy consumption, leak detection stats, agent health for zones | **UC-INFRA-001** | Not Started | P1 | Medium | Frontend, Chart.js | INFRA-016, INFRA-015 |
 
-**Notes**:
-- Framework UI available at http://localhost:8083 (configured in .env)
-- Existing pages: Dashboard, Agent Types, Agents (CRUD operations)
-- Agent instances can be created via UI or REST API
-- Bulma CSS styling already applied (self-hosted at `/static/css/bulma.min.css`)
+**Completed Tasks**: See mvp_done.md for INFRA-016 (Framework Web UI)
 
 ## Phase 7: Advanced Features & Scenarios (P2 - Enhancement)
 
@@ -292,35 +215,42 @@
 
 **Available Now**:
 - ✅ Web UI at http://localhost:8083 with Bulma CSS styling
-- ✅ Agent Type registry (view, create, edit, delete types)
-- ✅ Agent instance management (CRUD operations via UI and REST API)
+- ✅ Agent Type registry (5 water infrastructure types loaded)
+- ✅ Agent instance management (27 agents deployed)
+- ✅ Three complete demonstration scenarios:
+  - ✅ Leak Detection (INFRA-009) - 4-step workflow with multi-agent coordination
+  - ✅ Pressure Optimization (INFRA-010) - 3-cycle continuous optimization
+  - ✅ Predictive Maintenance (INFRA-011) - 4-week degradation monitoring
+- ✅ ArangoDB message and pub/sub infrastructure
 - ✅ Real-time health monitoring and status display
-- ✅ ArangoDB persistence for all entities
-- ✅ Message and pub/sub infrastructure (ready to use)
-- ✅ Configuration-based deployment with environment variables
-- ✅ Startup script (`./usecases/UC-INFRA-001-water-distribution-network/start.sh`)
+- ✅ Configuration-based deployment with startup scripts
 
 **Needs Implementation**:
-- ⚠️ Agent instance creation scripts/seeders for demo topology
-- ⚠️ Scenario logic (leak detection, pressure optimization workflows)
-- ⚠️ Network topology visualizer
-- ⚠️ Water-specific metrics and analytics
-- ⚠️ Time-series data collection and visualization
+- ⚠️ Network topology visualizer (INFRA-017)
+- ⚠️ Time-series data storage (INFRA-013)
+- ⚠️ Water-specific analytics queries (INFRA-015)
+- ⚠️ Alert management UI (INFRA-018)
+- ⚠️ Performance metrics dashboard (INFRA-019)
 
 ### Documentation Deliverables
 
-**Completed**:
-- ✅ Agent type JSON schemas with detailed property definitions
+**Completed** (See mvp_done.md):
+- ✅ Agent type JSON schemas with detailed property definitions (INFRA-001 to INFRA-005)
 - ✅ Configuration-based architecture documentation
 - ✅ Environment variable configuration guide
 - ✅ Startup and deployment scripts
+- ✅ Five detailed coding session documents:
+  - INFRA-001: Pipe Agent Implementation
+  - INFRA-007: Fix Agent Instance Data Loading Path
+  - INFRA-009: Leak Detection Scenario
+  - INFRA-010: Pressure Optimization Scenario
+  - INFRA-011: Predictive Maintenance Scenario
 
 **Remaining**:
 - Architecture alignment: design → implementation mapping document
-- Agent behavior demonstrations with message flow examples
 - Performance benchmarks (agent response times, message throughput)
 - REST API usage guide for agent operations
-- Scenario implementation guides
+- Visualization implementation guides
 
 ## Resource Requirements
 
@@ -473,6 +403,8 @@ git push origin main
 
 ### Implementation Patterns Established
 
+**Note**: Detailed implementation documentation for INFRA-001 through INFRA-011 is available in mvp_done.md.
+
 **Configuration-Based Agent Types** ✅:
 - Agent types defined in JSON files (`config/agents/*.json`)
 - Framework auto-loads from `USECASE_CONFIG_DIR/config/agents/`
@@ -491,6 +423,11 @@ git push origin main
 - Pub/sub: `PubSubService.Publish(topic, payload)` and `Subscribe(pattern, handler)`
 - Polling: `CommunicationPoller` automatically checks for new messages
 - Topic patterns: `zone.*.alert`, `sensor.pressure.#` (wildcards supported)
+
+**Scenario Patterns** ✅:
+- Event-driven: Leak Detection (INFRA-009) - 4-step reactive workflow
+- Continuous optimization: Pressure Management (INFRA-010) - 3-cycle adaptive loop
+- Time-series predictive: Maintenance (INFRA-011) - 4-week degradation analysis
 
 **Environment Configuration** ✅:
 - All settings in `.env` file with `CVXC_` prefix
