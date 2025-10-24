@@ -1422,6 +1422,7 @@ This use case serves as a reference implementation for applying agentic principl
 
 **Related Documents**:
 - System Architecture: `documents/2-SoftwareDesignAndArchitecture/`
+- Standard Use Case Definition: `documents/1-SoftwareRequirements/requirements/use-cases/standardusecasedefinition.md`
 - Agent Implementation: `internal/agent/`
 - Communication System: `internal/communication/`
 - RAG Implementation: `internal/ai/`
@@ -1429,6 +1430,13 @@ This use case serves as a reference implementation for applying agentic principl
 - Dashboard: MVP-015 Management Dashboard
 
 **Related Use Cases**:
-- UC-INFRA-001: Water Distribution Network Management
-- UC-COMM-001: Community Chatter Management (Political Engagement)
-- UC-CHAR-001: Charity Distribution Network
+- [UC-INFRA-001]: Water Distribution Network Management
+- [UC-COMM-001]: Community Chatter Management (Diramoja - Political Engagement)
+- [UC-CHAR-001]: Charity Distribution Network (Tumaini)
+- [UC-INFRA-002]: Electric Power Distribution Network (Stima)
+
+**Note on Visualization**: While this use case does not currently require the Framework Topology Visualizer, future enhancements could include:
+- Venue map with attendee heatmaps and staff positioning
+- Incident location visualization for emergency coordination
+- Real-time crowd flow monitoring with agent positions
+- If implemented, would use MapLibre-GL renderer with Geographic layout

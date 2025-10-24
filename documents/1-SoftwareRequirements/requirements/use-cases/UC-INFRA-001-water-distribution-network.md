@@ -45,12 +45,20 @@ An agentic system where each infrastructure element is an autonomous agent that:
 - `diameter`: Pipe diameter in millimeters
 - `length`: Pipe length in meters
 - `installation_date`: Date installed
-- `location`: GPS coordinates (start and end points)
+- `coordinates`: GPS coordinates array [[start_lat, start_lon], [end_lat, end_lon]]
+- `location`: GPS coordinates (start and end points) - human readable
 - `pressure_rating`: Maximum pressure rating
 - `flow_capacity`: Maximum flow rate (liters/minute)
 - `age`: Calculated from installation date
 - `condition_score`: Health score (0-100)
 - `connected_agents`: List of connected pipe, valve, and sensor agents
+- `connection_rules`: Array of connection definitions with canonical_type
+  - `{ target_type: "pipe", canonical_type: "route", directionality: "directed" }`
+  - `{ target_type: "valve", canonical_type: "command", directionality: "bidirectional" }`
+- `visualization_metadata`: Display properties for topology visualizer
+  - `color`: Dynamic based on condition_score (green: >80, yellow: 60-80, red: <60)
+  - `width`: Dynamic based on diameter
+  - `flow_direction`: Boolean indicating flow direction visualization
 
 **Capabilities**:
 - Monitor flow rate and pressure
@@ -83,7 +91,8 @@ IF pressure_drop > threshold AND flow_rate > 0
 **Attributes**:
 - `sensor_id`: Unique identifier (e.g., "SENS-P-001" for pressure sensor)
 - `sensor_type`: pressure, flow, quality, temperature, vibration
-- `location`: GPS coordinates
+- `coordinates`: GPS coordinates [latitude, longitude]
+- `location`: GPS coordinates - human readable
 - `attached_to`: Reference to pipe/hydrant/valve agent
 - `sampling_rate`: Measurement frequency (seconds)
 - `accuracy`: Sensor accuracy rating
@@ -91,6 +100,11 @@ IF pressure_drop > threshold AND flow_rate > 0
 - `last_calibration`: Date of last calibration
 - `measurement_range`: Min/max measurement values
 - `alert_thresholds`: Warning and critical thresholds
+- `connection_rules`: Array of connection definitions
+  - `{ target_id: attached_to, canonical_type: "observe", directionality: "directed" }`
+- `visualization_metadata`: Display properties
+  - `icon`: Sensor type specific icon
+  - `color`: Status-based (green: active, yellow: calibrating, red: error)
 
 **Capabilities**:
 - Continuous monitoring and data collection
@@ -167,7 +181,8 @@ IF hydrant_opened
 **Attributes**:
 - `valve_id`: Unique identifier (e.g., "VLV-001")
 - `valve_type`: gate, butterfly, check, pressure_reducing
-- `location`: GPS coordinates
+- `coordinates`: GPS coordinates [latitude, longitude]
+- `location`: GPS coordinates - human readable
 - `position`: open, closed, throttled (0-100%)
 - `actuator_type`: manual, motorized, automated
 - `upstream_pipe`: Reference to upstream pipe agent
@@ -177,6 +192,12 @@ IF hydrant_opened
 - `last_operated`: Timestamp of last operation
 - `maintenance_interval`: Days between maintenance
 - `condition`: Health score (0-100)
+- `connection_rules`: Array of connection definitions
+  - `{ target_id: upstream_pipe, canonical_type: "command", directionality: "bidirectional" }`
+  - `{ target_id: downstream_pipe, canonical_type: "command", directionality: "bidirectional" }`
+- `visualization_metadata`: Display properties
+  - `icon`: Valve type specific icon
+  - `color`: Position-based (green: open, red: closed, yellow: throttled)
 
 **Capabilities**:
 - Control water flow and pressure
@@ -595,6 +616,58 @@ Central Control (Cloud/On-Premise)
   └─ External Integrations
 ```
 
+### Visualization Configuration
+
+**Framework Topology Visualizer Integration**:
+
+This use case uses the **Framework Topology Visualizer** (schema version 1.0.0) for real-time network topology visualization. The visualizer renders the water distribution network as a graph where nodes represent infrastructure agents and edges represent physical connections and logical relationships.
+
+**Renderer**: MapLibre-GL (geographic basemap with infrastructure overlay)  
+**Layout**: Geographic (lat/lon coordinates mapped to mercator projection)  
+**Configuration**: `/usecases/UC-INFRA-001-water-distribution-network/viz-config.json`
+
+**Canonical Relationship Types Used**:
+
+| canonical_type | Source Agent | Target Agent | Description | Directional |
+|----------------|--------------|--------------|-------------|-------------|
+| `route` | Pipe | Pipe | Water flow routing between pipe segments | Yes |
+| `route` | Pipe | Hydrant | Water supply to hydrant | Yes |
+| `route` | Pipe | Reservoir | Water supply from reservoir | Yes |
+| `observe` | Sensor | Pipe | Sensor monitoring pipe | Yes |
+| `observe` | Sensor | Valve | Sensor monitoring valve | Yes |
+| `observe` | Sensor | Pump | Sensor monitoring pump | Yes |
+| `command` | Valve | Pipe | Valve controlling flow in pipe | Bidirectional |
+| `supply` | Pump | Pipe | Pump supplying water to pipe | Yes |
+| `supply` | Reservoir | Pipe | Reservoir supplying water to network | Yes |
+| `depends_on` | Pipe | Pump | Pipe depends on pump for pressure | Yes |
+
+**Edge Inference**:
+- Primary: Agent `connection_rules` specify canonical relationships
+- Secondary: Materialized edges from message history (valve operations, flow changes)
+- Edge IDs: Deterministic SHA256 hash of (sorted node IDs + canonical_type + label)
+
+**Real-time Updates**:
+- WebSocket connection to `/api/v1/visualization/ws`
+- JSON Patch (RFC 6902) diffs with sequence numbers
+- Update frequency: 1-5 seconds for sensor data, immediate for alerts
+- Replay window: Last 1000 patches (approximately 1 hour)
+
+**Styling Rules**:
+- Pipes: Color by condition_score, width by diameter
+- Sensors: Icon by sensor_type, color by status
+- Valves: Icon by valve_type, color by position
+- Pumps: Icon with animation when running
+- Hydrants: Special icon, highlight when in use
+- Alerts: Pulsing red borders for warning/critical states
+
+**Security**:
+- Server-side RBAC enforcement
+- Field-level masking for sensitive attributes (customer data)
+- Expression sandbox for client-side filters
+- Deny edges for unauthorized relationships
+
+**Reference Documentation**: `/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
+
 ## Integration Points
 
 ### 1. SCADA Systems
@@ -721,6 +794,18 @@ This use case serves as a reference implementation for applying agentic principl
 
 **Related Documents**:
 - System Architecture: `documents/2-SoftwareDesignAndArchitecture/`
+- Framework Topology Visualizer: `documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
 - Agent Implementation: `internal/agent/`
+- Communication System: `internal/communication/`
 - API Documentation: `documents/4-QA/`
 - Dashboard: MVP-015 Management Dashboard
+
+**Related Use Cases**:
+- [UC-INFRA-002]: Electric Power Distribution Network (Stima)
+- [UC-INFRA-003]: Gas Distribution Network
+- [UC-INFRA-004]: Telecommunications Network (Mawasiliano)
+- [UC-INFRA-005]: Smart City Infrastructure
+
+**Visualization Configuration**:
+- Viz Config: `/usecases/UC-INFRA-001-water-distribution-network/viz-config.json`
+- Canonical Types Reference: `/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/07-canonical_types.json`

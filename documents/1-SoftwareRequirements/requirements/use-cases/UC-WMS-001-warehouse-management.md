@@ -201,7 +201,67 @@ Coordinator Finds Available Charger
    Resumes Tasks After Charge
 ```
 
-## Functional Requirements
+## Visualization Configuration
+
+**Framework Topology Visualizer Integration**:
+
+This use case uses the **Framework Topology Visualizer** (schema version 1.0.0) for real-time warehouse topology visualization. The visualizer renders the warehouse layout as a graph where nodes represent infrastructure agents (robots, racks, docks) and edges represent physical connections and logical relationships.
+
+**Renderer**: Canvas (for indoor warehouse layout with 2D floor plan)  
+**Layout**: Custom grid-based layout matching physical warehouse coordinates  
+**Alternative**: Force-Directed for logical relationships  
+**Configuration**: `/usecases/UC-WMS-001-warehouse-management/viz-config.json`
+
+**Canonical Relationship Types Used**:
+
+| canonical_type | Source Agent | Target Agent | Description | Directional |
+|----------------|--------------|--------------|-------------|-------------|
+| `route` | Robot | Rack | Robot navigation path to rack | Yes |
+| `route` | Robot | Dock | Robot path to loading dock | Yes |
+| `host` | Rack | Item | Rack contains/hosts items | No |
+| `command` | Picker | Robot | Picker assigns task to robot | Yes |
+| `depends_on` | Order | Rack | Order depends on items in rack | Yes |
+| `supply` | Dock | Rack | Inbound shipment supplies rack | Yes |
+| `observe` | Sensor | Robot | Sensor monitors robot position | Yes |
+
+**Agent Attributes for Visualization**:
+
+All agent types should include:
+- `coordinates`: [x, y] position in warehouse coordinate system (meters from origin)
+- `connection_rules`: Array of canonical relationship definitions
+- `visualization_metadata`: Display properties
+  - Robot: Icon with direction arrow, color by status, animated when moving
+  - Rack: Rectangle by dimensions, color by occupancy percentage
+  - Dock: Special dock icon, color by status (available, loading, unloading)
+  - Picker: Human icon, color by workload
+
+**Edge Inference**:
+- Primary: Agent `connection_rules` and warehouse floor plan
+- Secondary: Real-time robot telemetry and task assignments
+- Edge IDs: Deterministic SHA256 hash
+
+**Real-time Updates**:
+- WebSocket connection for live robot positions (10 Hz updates)
+- Task state changes pushed via JSON Patch
+- Inventory updates via efficient delta updates
+- Replay window: Last 10,000 patches
+
+**Styling Rules**:
+- Robots: Animated movement along edges, battery level indicator
+- Racks: Heatmap by inventory level (empty=blue, full=red)
+- Docks: Status indicators (idle, active, blocked)
+- Paths: Dynamic highlighting for active robot routes
+- Alerts: Pulsing borders for collision warnings or errors
+
+**Security**:
+- Server-side RBAC enforcement
+- Field-level masking for sensitive inventory data
+- Real-time position data restricted by role
+- Expression sandbox for custom filters
+
+**Reference Documentation**: `/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
+
+## Integration Points
 
 ### FR-WMS-001: Robot Navigation and Task Execution
 **Priority**: P0  
@@ -396,45 +456,86 @@ Coordinator Finds Available Charger
 
 ## Success Metrics
 
-### Operational Metrics
-- **Order Fulfillment Time**: < 15 minutes (average)
+### Technical Metrics
+- **System Uptime**: > 99.9%
+- **Agent Response Time**: < 100ms
+- **Dashboard Updates**: Every 2 seconds
+- **Robot Availability**: > 95%
 - **Pick Accuracy**: > 99.5%
 - **Inventory Accuracy**: > 99.9%
+
+### Operational Metrics
+- **Order Fulfillment Time**: < 15 minutes (average)
 - **Robot Utilization**: > 80%
 - **Dock Turnaround Time**: < 45 minutes
+- **Pick Path Efficiency**: 30% travel reduction
+- **Throughput**: 1000+ orders per hour
 
-### Financial Metrics
+### Business Metrics
 - **Labor Cost Reduction**: 25%
 - **Space Utilization Improvement**: 30%
 - **Order Throughput Increase**: 50%
 - **ROI Period**: 18 months
-
-### Quality Metrics
-- **System Uptime**: > 99.9%
-- **Safety Incidents**: Zero robot-related injuries
 - **Customer Satisfaction**: > 95%
 - **On-Time Delivery**: > 98%
 
-## Technology Stack
+### Quality and Safety Metrics
+- **Safety Incidents**: Zero robot-related injuries
+- **Collision Rate**: < 0.01% of movements
+- **Order Accuracy**: > 99.5%
+- **Damage Rate**: < 0.1%
 
-### Agent Platform
-- **Framework**: CodeValdCortex
-- **Language**: Go 1.21+
-- **Database**: ArangoDB 3.11+ (agent state, messages, time-series)
-- **Message System**: ArangoDB polling-based queues
+## Benefits Demonstrated
 
-### Integration Points
-- **WMS API**: RESTful API for order management
-- **ERP Integration**: SAP/Oracle connectors
-- **IoT Devices**: MQTT broker for sensor data
-- **Carrier Systems**: EDI/API integration
-- **Vision Systems**: Camera/barcode scanner integration
+### 1. Order Fulfillment Speed
+- **Before**: Manual picking, 45-60 minutes average fulfillment time
+- **With Agents**: Coordinated robot-human collaboration, optimized paths
+- **Metric**: 40% reduction in fulfillment time (15-20 minutes average)
 
-### Hardware Requirements
-- **Robots**: AGV/AMR with navigation systems
-- **Sensors**: RFID, barcode scanners, cameras
-- **Network**: 5G/WiFi 6 for robot connectivity
-- **Edge Devices**: Local processing for vision AI
+### 2. Labor Efficiency
+- **Before**: High manual labor for picking, packing, movement
+- **With Agents**: Robots handle transportation, humans focus on value-add tasks
+- **Metric**: 25% reduction in labor costs, 50% increase in orders per worker
+
+### 3. Space Utilization
+- **Before**: Traditional warehouse layout, 60-65% space utilization
+- **With Agents**: AI-optimized slotting, dynamic storage allocation
+- **Metric**: 30% increase in storage density (85% utilization)
+
+### 4. Inventory Accuracy
+- **Before**: 95-97% accuracy with manual tracking, quarterly cycle counts
+- **With Agents**: Real-time RFID/barcode tracking, continuous validation
+- **Metric**: 99.9% inventory accuracy, eliminated manual cycle counts
+
+### 5. Peak Season Capacity
+- **Before**: Temporary workers, overtime, fulfillment delays during peaks
+- **With Agents**: Scalable robot fleet, dynamic task allocation
+- **Metric**: 50% throughput increase without proportional labor increase
+
+### 6. Safety and Quality
+- **Before**: Manual handling injuries, product damage from drops/collisions
+- **With Agents**: Robots handle heavy lifting, collision avoidance systems
+- **Metric**: 80% reduction in workplace injuries, 60% reduction in product damage
+
+### 7. Predictive Maintenance
+- **Before**: Reactive equipment repairs, unexpected downtime
+- **With Agents**: Continuous health monitoring, predictive failure detection
+- **Metric**: 50% reduction in unplanned downtime, 35% maintenance cost savings
+
+### 8. Real-time Visibility
+- **Before**: Manual tracking, delayed updates, limited operational insight
+- **With Agents**: Real-time dashboards, complete agent visibility
+- **Metric**: 100% operational transparency, sub-second status updates
+
+### 9. Scalability
+- **Before**: Linear scaling (more volume = more workers = more space)
+- **With Agents**: Sublinear scaling with robot fleet coordination
+- **Metric**: 3x order volume growth with only 50% infrastructure expansion
+
+### 10. Customer Experience
+- **Before**: Fulfillment delays, order errors, limited tracking
+- **With Agents**: Fast fulfillment, high accuracy, real-time tracking
+- **Metric**: 95% customer satisfaction (up from 78%), 50% reduction in order errors
 
 ## Implementation Phases
 
@@ -522,6 +623,45 @@ Coordinator Finds Available Charger
 - **ASN**: Advanced Shipping Notice - inbound shipment details
 - **Pick-to-Light**: LED-guided picking system
 - **WMS**: Warehouse Management System
+- **Canonical Type**: Standardized relationship classification in topology visualizer
+
+## Conclusion
+
+The Intelligent Warehouse Management System demonstrates the power of the CodeValdCortex agent framework applied to complex logistics environments. By treating warehouse infrastructure elements (robots, racks, docks, pickers) as intelligent, autonomous agents, the system achieves:
+
+- **Efficiency**: 40% faster order fulfillment through optimized coordination
+- **Intelligence**: Predictive maintenance and AI-powered slotting optimization
+- **Scalability**: 50% throughput increase without proportional infrastructure growth
+- **Safety**: 80% reduction in workplace injuries through automated material handling
+- **Visibility**: Real-time topology visualization and operational transparency
+- **Adaptability**: Dynamic response to demand changes and equipment availability
+
+This use case serves as a reference implementation for applying agentic principles to other logistics and automation domains such as distribution centers, fulfillment centers, manufacturing facilities, cross-dock operations, cold storage warehouses, and automated retail stores.
+
+The integration with the Framework Topology Visualizer provides unprecedented real-time visibility into warehouse operations, enabling operators to monitor robot movements, identify bottlenecks, optimize workflows, and respond to incidents with complete situational awareness.
+
+---
+
+**Related Documents**:
+- System Architecture: `documents/2-SoftwareDesignAndArchitecture/`
+- Framework Topology Visualizer: `documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
+- Standard Use Case Definition: `documents/1-SoftwareRequirements/requirements/use-cases/standardusecasedefinition.md`
+- Agent Implementation: `internal/agent/`
+- Communication System: `internal/communication/`
+- Orchestration: `internal/orchestration/`
+- API Documentation: `documents/4-QA/`
+- Dashboard: MVP-015 Management Dashboard
+
+**Related Use Cases**:
+- [UC-LOG-001]: Smart Logistics Platform
+- [UC-INFRA-001]: Water Distribution Network Management
+- [UC-CHAR-001]: Charity Distribution Network (Tumaini)
+- [UC-TRACK-001]: Asset Tracking Platform (Safiri Salama)
+
+**Visualization Configuration**:
+- Viz Config: `/usecases/UC-WMS-001-warehouse-management/viz-config.json`
+- Canonical Types Reference: `/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/07-canonical_types.json`
+- Warehouse Floor Plan: `/usecases/UC-WMS-001-warehouse-management/floor-plan.json`
 
 ## References
 
@@ -530,13 +670,15 @@ Coordinator Finds Available Charger
 - ArangoDB Message System Design
 - Warehouse Automation Best Practices
 - Industry Standards: ANSI MH10, ISO 18626
-
-## Approval
-
-**Document Owner**: CodeValdCortex Architecture Team  
-**Last Updated**: October 23, 2025  
-**Next Review**: January 2026
+- Framework Topology Visualizer Specification
 
 ---
 
-*This use case demonstrates the CodeValdCortex framework's ability to orchestrate complex multi-agent systems in real-world logistics environments, showcasing autonomous decision-making, real-time coordination, and scalable agent collaboration.*
+**Document Version**: 1.1  
+**Last Updated**: October 24, 2025  
+**Status**: Proposed  
+**Compliant with**: Standard Use Case Definition v1.0
+
+---
+
+*This use case demonstrates the CodeValdCortex framework's ability to orchestrate complex multi-agent systems in real-world logistics environments, showcasing autonomous decision-making, real-time coordination, scalable agent collaboration, and comprehensive operational visibility through integrated topology visualization.*

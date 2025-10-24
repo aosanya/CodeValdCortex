@@ -639,26 +639,231 @@ A logistics platform where shippers (businesses/individuals needing transport), 
    - Customer retention rate: >80%
    - Driver retention rate: >75%
 
-## Related Documents
+## Visualization Configuration
 
-- [Use Case: Ride-Hailing Platform](./UC-RIDE-001-ride-hailing-platform.md)
-- [Use Case: Charity Distribution Network](./UC-CHAR-001-charity-distribution-network.md)
-- [System Architecture](../../2-SoftwareDesignAndArchitecture/backend-architecture.md)
-- [Agent Design Patterns](../../2-SoftwareDesignAndArchitecture/Usecases/UsecaseDeisgn.md)
+**Framework Topology Visualizer Integration**:
 
-## Approval
+This use case uses the **Framework Topology Visualizer** (schema version 1.0.0) for real-time logistics network visualization. The visualizer renders the logistics platform as a geographic network where nodes represent agents (shippers, drivers, facilities) and edges represent routes and service relationships.
 
-| Role | Name | Signature | Date |
-|------|------|-----------|------|
-| Product Owner | | | |
-| Technical Lead | | | |
-| Business Analyst | | | |
-| Stakeholder | | | |
+**Renderer**: MapLibre-GL (geographic basemap with logistics overlay)  
+**Layout**: Geographic (real-world GPS coordinates mapped to mercator projection)  
+**Configuration**: `/usecases/UC-LOG-001-smart-logistics-platform/viz-config.json`
+
+**Canonical Relationship Types Used**:
+
+| canonical_type | Source Agent | Target Agent | Description | Directional |
+|----------------|--------------|--------------|-------------|-------------|
+| `route` | Driver/Truck | Shipper | Pickup route from driver to shipper location | Yes |
+| `route` | Driver/Truck | Facility | Delivery/transfer route to facility | Yes |
+| `supply` | Driver/Truck | Shipper | Transportation service provision | Yes |
+| `observe` | Platform | Driver/Truck | Platform monitoring truck GPS position | Yes |
+| `command` | Platform | Driver/Truck | Platform assigning tasks to driver | Yes |
+| `depends_on` | Shipper | Driver/Truck | Shipper depends on driver for delivery | Yes |
+| `host` | Facility | Shipment | Facility temporarily hosts shipment | No |
+
+**Agent Attributes for Visualization**:
+
+All agent types should include:
+- `coordinates`: GPS [latitude, longitude] for real-time positioning
+- `connection_rules`: Array of canonical relationship definitions
+- `visualization_metadata`: Display properties
+  - Driver/Truck: Vehicle icon with direction arrow, color by status (available, en_route, delivering), animated movement along routes
+  - Shipper: Pickup point icon, color by urgency
+  - Facility: Warehouse/depot icon, color by capacity utilization
+  - Shipment: Package icon on truck or facility
+
+**Edge Inference**:
+- Primary: Active shipment assignments create `route` edges
+- Secondary: Bid history and service area matching
+- Dynamic: Routes update in real-time as trucks move
+- Edge IDs: Deterministic based on shipment ID + driver ID
+
+**Real-time Updates**:
+- WebSocket connection for live GPS tracking (30-second intervals)
+- Shipment status changes via JSON Patch (pickup, in_transit, delivered)
+- Bid activity updates (new bids, acceptances)
+- Replay window: Last 5,000 patches (approximately 24 hours)
+
+**Styling Rules**:
+- Trucks: Animated movement with trail showing recent path, color by load status
+- Routes: Polylines from origin to destination, color by status (planned, active, completed)
+- Facilities: Heatmap by current cargo volume
+- Shippers: Urgency indicators (pulse for urgent requests)
+- Alerts: Red borders for delayed shipments or issues
+
+**Security**:
+- Server-side RBAC enforcement
+- Shippers see only their own shipments
+- Drivers see only assigned and bid-eligible shipments
+- Facilities see only relevant incoming/outgoing cargo
+- Platform admin has full visibility
+- Expression sandbox for filters
+
+**Reference Documentation**: `/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
+
+## Benefits Demonstrated
+
+### 1. Marketplace Efficiency
+- **Before**: Manual phone calls, spreadsheets, limited driver network
+- **With Agents**: Automated broadcast, intelligent matching, large driver pool
+- **Metric**: 90%+ bid fill rate vs 60% manual matching, 70% faster booking
+
+### 2. Price Discovery and Transparency
+- **Before**: Fixed prices, limited negotiation, information asymmetry
+- **With Agents**: Competitive bidding, real-time market pricing, transparent quotes
+- **Metric**: 15-20% cost reduction for shippers, 10-15% revenue increase for efficient drivers
+
+### 3. Real-time Visibility
+- **Before**: "Black box" shipments, no tracking, manual status calls
+- **With Agents**: Live GPS tracking, automated status updates, ETA calculations
+- **Metric**: 100% shipment visibility, 50% reduction in status inquiry calls
+
+### 4. Network Optimization
+- **Before**: Empty return trips, inefficient routing, wasted fuel
+- **With Agents**: Return cargo matching, multi-stop optimization, route efficiency
+- **Metric**: 30% reduction in empty miles, 20% fuel savings per delivery
+
+### 5. Emergency Response and Flexibility
+- **Before**: Manual backup coordination, long delays when issues arise
+- **With Agents**: Automated backup driver assignment, rapid re-routing
+- **Metric**: 80% faster incident response, 95% delivery recovery rate
+
+### 6. Data-Driven Insights
+- **Before**: Limited analytics, anecdotal performance feedback
+- **With Agents**: Comprehensive metrics, predictive demand, performance dashboards
+- **Metric**: 100% transaction tracking, actionable insights for capacity planning
+
+### 7. Driver Earnings Optimization
+- **Before**: Drivers wait for dispatcher assignments, frequent empty returns
+- **With Agents**: Self-service bid selection, intelligent route suggestions, return cargo
+- **Metric**: 25% increase in driver daily earnings, 40% more loads per driver
+
+### 8. Trust and Safety
+- **Before**: Limited driver vetting, cargo security concerns, dispute resolution challenges
+- **With Agents**: Verified profiles, GPS monitoring, automated dispute workflow
+- **Metric**: 95%+ shipper trust rating, <1% cargo loss rate, 90% disputes resolved within 48 hours
+
+## Implementation Phases
+
+### Phase 1: Core Platform (Months 1-3)
+- Deploy Shipper, Driver/Truck, and Platform agents
+- Implement shipment request and bidding workflows
+- Build mobile apps for drivers and web portal for shippers
+- Establish GPS tracking infrastructure
+- **Deliverable**: Functional marketplace with bidding and booking
+
+### Phase 2: Facility Integration (Months 4-5)
+- Implement Facility agents for warehouses and depots
+- Add dock scheduling and appointment management
+- Integrate cross-docking workflows
+- **Deliverable**: Multi-facility logistics coordination
+
+### Phase 3: Optimization Layer (Months 6-8)
+- Deploy Route Optimizer agents
+- Implement return cargo matching algorithms
+- Add multi-stop route planning
+- Build predictive demand forecasting
+- **Deliverable**: AI-powered route and load optimization
+
+### Phase 4: Payments and Trust (Months 9-10)
+- Implement Payment agents with multiple gateways
+- Add escrow and automated payment release
+- Deploy driver background check integration
+- Build dispute resolution workflow
+- **Deliverable**: Secure payment and trust infrastructure
+
+### Phase 5: Analytics and Visualization (Months 11-12)
+- Deploy Framework Topology Visualizer for network monitoring
+- Build comprehensive analytics dashboards
+- Implement performance metrics and KPIs
+- Add predictive analytics for capacity planning
+- **Deliverable**: Complete operational visibility platform
+
+## Success Criteria
+
+### Technical Metrics
+- ✅ 99.5% platform uptime
+- ✅ <500ms API response time (95th percentile)
+- ✅ 30-second GPS update frequency
+- ✅ <5 minute bid reconciliation time
+- ✅ Support for 50,000+ active vehicles
+
+### Operational Metrics
+- ✅ 90%+ bid fill rate (requests receiving bids)
+- ✅ 85%+ on-time pickup rate
+- ✅ 90%+ on-time delivery rate
+- ✅ <3 minute average bid response time
+- ✅ 70%+ driver acceptance rate
+
+### Quality Metrics
+- ✅ 4.2+ star average shipper rating
+- ✅ 4.2+ star average driver rating
+- ✅ <1% cargo damage rate
+- ✅ <5% dispute rate
+- ✅ 95%+ successful delivery rate
+
+### Business Metrics
+- ✅ 20% month-over-month shipper growth
+- ✅ 15% month-over-month driver growth
+- ✅ 80%+ customer retention rate
+- ✅ 75%+ driver retention rate
+- ✅ Platform profitability within 18 months
+
+### Impact Metrics
+- ✅ 30% reduction in empty miles (environmental impact)
+- ✅ 25% increase in driver earnings
+- ✅ 20% cost reduction for shippers
+- ✅ 50% reduction in coordination time
+
+## Conclusion
+
+The Smart Logistics Platform demonstrates the power of the CodeValdCortex agent framework applied to freight and transportation logistics. By treating shippers, drivers, facilities, and the platform itself as intelligent, autonomous agents that coordinate through bidding, reconciliation, and real-time communication, the system achieves:
+
+- **Marketplace Efficiency**: Automated bid matching connects shippers with optimal drivers in minutes
+- **Price Discovery**: Competitive bidding creates fair, market-driven pricing
+- **Network Optimization**: Return cargo matching and route optimization reduce waste and costs
+- **Real-time Visibility**: GPS tracking and status updates provide complete shipment transparency
+- **Trust and Safety**: Verified profiles, monitoring, and dispute resolution build marketplace confidence
+- **Scalability**: Agent architecture supports thousands of concurrent shipments and users
+- **Intelligence**: ML-powered optimization and predictive analytics improve outcomes
+
+The integration with the Framework Topology Visualizer provides unprecedented visibility into the logistics network, enabling platform operators to monitor active shipments, identify bottlenecks, optimize driver allocation, predict demand patterns, and respond to disruptions with complete situational awareness.
+
+This use case serves as a reference implementation for applying agentic principles to other logistics and marketplace domains such as ride-hailing, food delivery, courier services, freight forwarding, last-mile delivery, and on-demand service platforms.
 
 ---
 
-**Change History**
+**Related Documents**:
+- System Architecture: `documents/2-SoftwareDesignAndArchitecture/`
+- Framework Topology Visualizer: `documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
+- Standard Use Case Definition: `documents/1-SoftwareRequirements/requirements/use-cases/standardusecasedefinition.md`
+- Agent Implementation: `internal/agent/`
+- Communication System: `internal/communication/`
+- Orchestration: `internal/orchestration/`
+- API Documentation: `documents/4-QA/`
+- Dashboard: MVP-015 Management Dashboard
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-10-22 | System Architect | Initial version |
+**Related Use Cases**:
+- [UC-WMS-001]: Warehouse Management System
+- [UC-CHAR-001]: Charity Distribution Network (Tumaini)
+- [UC-RIDE-001]: Ride-Hailing Platform
+- [UC-TRACK-001]: Asset Tracking Platform (Safiri Salama)
+- [UC-INFRA-001]: Water Distribution Network Management
+
+**Visualization Configuration**:
+- Viz Config: `/usecases/UC-LOG-001-smart-logistics-platform/viz-config.json`
+- Canonical Types Reference: `/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/07-canonical_types.json`
+- Service Area Maps: `/usecases/UC-LOG-001-smart-logistics-platform/service-areas.geojson`
+
+---
+
+**Document Version**: 1.1  
+**Last Updated**: October 24, 2025  
+**Status**: Proposed  
+**Compliant with**: Standard Use Case Definition v1.0
+
+---
+
+---
+
+*This use case demonstrates the CodeValdCortex framework's ability to orchestrate complex marketplace dynamics with autonomous agent bidding, reconciliation, real-time tracking, and comprehensive network visualization for operational excellence.*

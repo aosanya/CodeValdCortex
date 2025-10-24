@@ -1,6 +1,6 @@
 # Use Case: Mashambani - Livestock Keeping Arrangements Network
 
-**Use Case ID**: UC-LIVE-001  
+**Use Case ID**: UC-AGRO-001  
 **Use Case Name**: Traditional Livestock Keeping Arrangement Agent System  
 **System**: Mashambani  
 **Created**: October 23, 2025  
@@ -810,7 +810,7 @@ This use case serves as a reference implementation for applying agentic principl
 - System Architecture: `documents/2-SoftwareDesignAndArchitecture/`
 - Agent Implementation: `internal/agent/`
 - Communication System: `internal/communication/`
-- Livestock Agent Configs: `usecases/UC-LIVE-001-mashambani/config/agents/`
+- Livestock Agent Configs: `usecases/UC-AGRO-001-mashambani/config/agents/`
 - API Documentation: `documents/4-QA/`
 - Dashboard: MVP-015 Management Dashboard
 

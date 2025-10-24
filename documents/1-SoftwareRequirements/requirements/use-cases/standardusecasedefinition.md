@@ -518,6 +518,112 @@ Security model and privacy protections for sensitive use cases
 
 ---
 
+## References and Framework Rules
+
+### Framework Topology Visualizer
+
+When designing use cases that require visualization of agent networks and topologies, refer to the **Framework Topology Visualizer** documentation:
+
+**Location**: `/workspaces/CodeValdCortex/documents/2-SoftwareDesignAndArchitecture/framework-topology-visualizer/`
+
+**Key Documents**:
+- `README.md` - Overview and file structure
+- `01-overview.md` - Executive summary, goals, MVP scope
+- `02-architecture.md` - Component architecture and determinism contract
+- `03-data-source-and-inference.md` - Agent API integration, edge inference, JSON Patch semantics
+- `04-rendering.md` - Renderer selection, layouts, basemap behavior
+- `05-security-and-testing.md` - RBAC, expression sandboxing, testing strategy
+- `06-delivery-mvp.md` - Delivery phases and acceptance criteria
+- `07-canonical_types.json` - Standard relationship taxonomy
+- `00-full.md` - Complete canonical reference document
+
+**When to Apply**:
+Use the Framework Topology Visualizer specifications when your use case involves:
+- Multiple agent types with spatial or network relationships
+- Real-time visualization of agent networks and topologies
+- Cross-domain relationship modeling (supply, observe, route, command, host, depends_on)
+- Geographic or force-directed layout of agent systems
+- Interactive topology exploration and analysis
+
+**Mandatory Rules**:
+
+1. **Canonical Relationship Types**: Use the standardized relationship taxonomy defined in `07-canonical_types.json`:
+   - `supply` - Resource/service provision
+   - `observe` - Monitoring/sensing relationships
+   - `route` - Path/flow connections
+   - `command` - Control/authority relationships
+   - `host` - Container/hosting relationships
+   - `depends_on` - Dependency relationships
+
+2. **Agent Data Structure**: Ensure all agents include:
+   - `id` - Unique identifier
+   - `agentType` - Type classification
+   - `coordinates` - Geographic location (if applicable)
+   - `metadata` - Additional attributes for visualization
+
+3. **Schema Versioning**: All visualization configurations must:
+   - Include mandatory `schemaVersion` field
+   - Follow semantic versioning (MAJOR.MINOR.PATCH)
+   - Validate against `visualization-config.schema.json`
+
+4. **Deterministic Rendering**:
+   - Use stable, deterministic IDs for agents and relationships
+   - Apply seeded layout algorithms for consistent positioning
+   - Document layout seed values in use case specifications
+
+5. **Security and Access Control**:
+   - Define RBAC policies for agent data access
+   - Use server-side expression sandboxing for dynamic filters
+   - Document security requirements in use case
+
+6. **Real-time Updates**:
+   - Use JSON Patch (RFC 6902) for incremental updates
+   - Include sequence numbers for replay and consistency
+   - Handle update conflicts and network failures
+
+7. **Agent API Integration**:
+   - Use the Agent API as the single source of truth
+   - Document API endpoints used for agent data
+   - Specify polling intervals or WebSocket configuration
+
+**Integration with Use Case Template**:
+
+When documenting a use case with visualization requirements:
+
+- **Section 3 (Agent Types)**: Include visualization-relevant attributes in agent specifications
+  - Add `coordinates` attribute for geographic positioning
+  - Define `visualization_metadata` for display properties
+  - Specify relationship types using canonical taxonomy
+
+- **Section 4 (Agent Interaction Scenarios)**: Show how topology changes during scenarios
+  - Document edge creation/deletion triggers
+  - Illustrate network state before/after interactions
+
+- **Section 5 (Technical Architecture)**: 
+  - Reference Framework Topology Visualizer in deployment model
+  - Specify visualization configuration schema version
+  - Document renderer choice (Canvas, SVG, WebGL, MapLibre-GL)
+
+- **Section 6 (Integration Points)**:
+  - List Agent API endpoints for topology data
+  - Specify visualization update mechanisms (polling/WebSocket)
+  - Document basemap services if using geographic rendering
+
+- **Section 9 (Success Criteria)**:
+  - Add visualization-specific metrics (render time, frame rate, update latency)
+  - Define topology complexity limits (max nodes, max edges)
+
+**Example Reference**:
+```markdown
+**Visualization**: This use case uses the Framework Topology Visualizer 
+(schema version 1.0.0) with Canvas rendering and Force-Directed layout. 
+Relationships follow the canonical taxonomy defined in 07-canonical_types.json, 
+using `supply`, `route`, and `observe` edge types. See visualization 
+configuration in `/usecases/UC-INFRA-001-water-distribution-network/viz-config.json`.
+```
+
+---
+
 ## Document Guidelines
 
 ### Writing Style

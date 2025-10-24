@@ -1,0 +1,65 @@
+{
+    "taxonomyVersion": "1.0.0",
+    "canonical_types": [
+        {
+            "id": "supply",
+            "displayName": "Supply",
+            "aliases": [
+                "supplies",
+                "provides"
+            ],
+            "defaultWeight": 1.0,
+            "directional": true
+        },
+        {
+            "id": "observe",
+            "displayName": "Observe",
+            "aliases": [
+                "observes",
+                "monitors"
+            ],
+            "defaultWeight": 0.5,
+            "directional": true
+        },
+        {
+            "id": "route",
+            "displayName": "Route",
+            "aliases": [
+                "routes_to",
+                "routes_through"
+            ],
+            "defaultWeight": 0.8,
+            "directional": true
+        },
+        {
+            "id": "command",
+            "displayName": "Command",
+            "aliases": [
+                "controls",
+                "commands"
+            ],
+            "defaultWeight": 0.9,
+            "directional": true
+        },
+        {
+            "id": "host",
+            "displayName": "Host",
+            "aliases": [
+                "hosts",
+                "contains"
+            ],
+            "defaultWeight": 0.2,
+            "directional": false
+        },
+        {
+            "id": "depends_on",
+            "displayName": "Depends On",
+            "aliases": [
+                "depends_on",
+                "requires"
+            ],
+            "defaultWeight": 1.2,
+            "directional": true
+        }
+    ]
+}

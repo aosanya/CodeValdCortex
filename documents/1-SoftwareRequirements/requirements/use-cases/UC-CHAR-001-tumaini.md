@@ -1536,6 +1536,7 @@ This use case serves as a reference implementation for applying agentic principl
 
 **Related Documents**:
 - System Architecture: `documents/2-SoftwareDesignAndArchitecture/`
+- Standard Use Case Definition: `documents/1-SoftwareRequirements/requirements/use-cases/standardusecasedefinition.md`
 - Agent Implementation: `internal/agent/`
 - Communication System: `internal/communication/`
 - Logistics Optimization: `internal/orchestration/`
@@ -1543,5 +1544,14 @@ This use case serves as a reference implementation for applying agentic principl
 - Dashboard: MVP-015 Management Dashboard
 
 **Related Use Cases**:
-- UC-INFRA-001: Water Distribution Network Management
-- UC-COMM-001: Community Chatter Management (Political Engagement)
+- [UC-INFRA-001]: Water Distribution Network Management
+- [UC-COMM-001]: Community Chatter Management (Diramoja)
+- [UC-EVENT-001]: AI-Powered Event Info Desk (Nuruyetu)
+- [UC-LOG-001]: Smart Logistics Platform
+
+**Note on Visualization**: Future enhancements could include Framework Topology Visualizer for:
+- Real-time volunteer route visualization with pickup/delivery tracking
+- Donation flow mapping from donors through facilities to recipients
+- Geographic heatmaps of needs vs. available donations
+- Network graph of donor-recipient-volunteer connections
+- If implemented, would use MapLibre-GL renderer with Geographic layout and `route` canonical edge type for logistics paths

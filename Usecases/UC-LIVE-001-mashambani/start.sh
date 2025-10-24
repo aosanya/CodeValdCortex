@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# UC-LIVE-001: Mashambani - Livestock Keeping Arrangements Startup Script
+# UC-AGRO-001: Mashambani - Livestock Keeping Arrangements Startup Script
 
 set -e
 
@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 echo "=========================================="
-echo "UC-LIVE-001: Mashambani"
+echo "UC-AGRO-001: Mashambani"
 echo "Livestock Keeping Arrangements Network"
 echo "=========================================="
 echo ""
