@@ -1,3 +1,4 @@
+package predictivemaintenance
 package main
 
 import (
