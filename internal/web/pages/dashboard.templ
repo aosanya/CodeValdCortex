@@ -18,17 +18,41 @@ type DashboardStats struct {
 templ Dashboard(agents []*agent.Agent, stats DashboardStats) {
 	@components.Layout("Dashboard") {
 		<div x-data="dashboard()" x-init="init()">
-			<!-- Page Header -->
-			<div class="mb-6">
-				<h1 class="title is-2 mb-2">
-					Agent Dashboard
-				</h1>
-				<p class="subtitle is-5 has-text-grey mt-0">
-					Monitor and manage your AI agents
-				</p>
+		<!-- Page Header -->
+		<div class="mb-6">
+			<div class="level">
+				<div class="level-left">
+					<div class="level-item">
+						<div>
+							<h1 class="title is-2 mb-2">
+								Agent Dashboard
+							</h1>
+							<p class="subtitle is-5 has-text-grey mt-0">
+								Monitor and manage your AI agents
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="level-right">
+					<div class="level-item">
+						<div class="buttons">
+							<a href="/geo-network" class="button is-primary is-light">
+								<span class="icon">
+									<i class="fas fa-map-marked-alt"></i>
+								</span>
+								<span>Geographic Visualizer</span>
+							</a>
+							<a href="/topology" class="button is-info is-light">
+								<span class="icon">
+									<i class="fas fa-project-diagram"></i>
+								</span>
+								<span>Topology View</span>
+							</a>
+						</div>
+					</div>
+				</div>
 			</div>
-			
-			<!-- Stats Grid -->
+		</div>			<!-- Stats Grid -->
 			<div class="columns is-multiline mb-6">
 				<div class="column is-3">
 					@components.StatsCard("Total Agents", fmt.Sprintf("%d", stats.Total), "users", "blue")

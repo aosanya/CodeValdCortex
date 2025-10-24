@@ -214,6 +214,7 @@ func (a *App) setupServer() error {
 	// Register web dashboard handler
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
 	agentTypesWebHandler := webhandlers.NewAgentTypesWebHandler(a.agentTypeService, a.logger)
+	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
 
 	// Serve static files
 	router.Static("/static", "./static")
@@ -222,8 +223,8 @@ func (a *App) setupServer() error {
 	router.GET("/", dashboardHandler.ShowDashboard)
 	router.GET("/dashboard", dashboardHandler.ShowDashboard)
 	router.GET("/agent-types", agentTypesWebHandler.ShowAgentTypes)
-
-	// API routes for web dashboard (HTMX endpoints)
+	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
+	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer) // API routes for web dashboard (HTMX endpoints)
 	webAPI := router.Group("/api/web")
 	{
 		webAPI.GET("/agents/live", dashboardHandler.GetAgentsLive)
@@ -233,6 +234,10 @@ func (a *App) setupServer() error {
 		// Agent types web endpoints
 		webAPI.GET("/agent-types", agentTypesWebHandler.GetAgentTypesLive)
 		webAPI.POST("/agent-types/:id/:action", agentTypesWebHandler.HandleAgentTypeAction)
+
+		// Topology visualizer endpoints
+		webAPI.GET("/topology/data", topologyVisualizerHandler.GetTopologyData)
+		webAPI.GET("/topology/updates", topologyVisualizerHandler.GetTopologyUpdates)
 	}
 
 	// Health check endpoint

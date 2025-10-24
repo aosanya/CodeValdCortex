@@ -56,7 +56,7 @@ func Dashboard(agents []*agent.Agent, stats DashboardStats) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"dashboard()\" x-init=\"init()\"><!-- Page Header --><div class=\"mb-6\"><h1 class=\"title is-2 mb-2\">Agent Dashboard</h1><p class=\"subtitle is-5 has-text-grey mt-0\">Monitor and manage your AI agents</p></div><!-- Stats Grid --><div class=\"columns is-multiline mb-6\"><div class=\"column is-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div x-data=\"dashboard()\" x-init=\"init()\"><!-- Page Header --><div class=\"mb-6\"><div class=\"level\"><div class=\"level-left\"><div class=\"level-item\"><div><h1 class=\"title is-2 mb-2\">Agent Dashboard</h1><p class=\"subtitle is-5 has-text-grey mt-0\">Monitor and manage your AI agents</p></div></div></div><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><a href=\"/geo-network\" class=\"button is-primary is-light\"><span class=\"icon\"><i class=\"fas fa-map-marked-alt\"></i></span> <span>Geographic Visualizer</span></a> <a href=\"/topology\" class=\"button is-info is-light\"><span class=\"icon\"><i class=\"fas fa-project-diagram\"></i></span> <span>Topology View</span></a></div></div></div></div></div><!-- Stats Grid --><div class=\"columns is-multiline mb-6\"><div class=\"column is-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -101,7 +101,7 @@ func Dashboard(agents []*agent.Agent, stats DashboardStats) templ.Component {
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("agent-col-%s", a.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/dashboard.templ`, Line: 109, Col: 100}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/dashboard.templ`, Line: 133, Col: 100}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 					if templ_7745c5c3_Err != nil {

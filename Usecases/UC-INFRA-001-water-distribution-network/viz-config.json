@@ -1,0 +1,195 @@
+{
+    "schemaVersion": "1.0.0",
+    "renderer": "deck.gl",
+    "layout": "geographic",
+    "layoutConfig": {
+        "basemap": {
+            "style": "https://demotiles.maplibre.org/style.json",
+            "center": [
+                -0.1276,
+                51.5074
+            ],
+            "zoom": 12,
+            "bounds": [
+                [
+                    -0.2,
+                    51.4
+                ],
+                [
+                    0.0,
+                    51.6
+                ]
+            ]
+        }
+    },
+    "styleRules": [
+        {
+            "selector": {
+                "type": "node",
+                "agentType": "pipe"
+            },
+            "style": {
+                "color": "$.condition_score > 80 ? '#22c55e' : $.condition_score > 60 ? '#eab308' : '#ef4444'",
+                "size": "$.diameter / 50",
+                "lineStyle": "solid",
+                "label": {
+                    "text": "$.pipe_id",
+                    "fontSize": 10,
+                    "color": "#333",
+                    "position": "bottom"
+                }
+            }
+        },
+        {
+            "selector": {
+                "type": "node",
+                "agentType": "sensor"
+            },
+            "style": {
+                "color": "$.status === 'Active' ? '#3b82f6' : $.status === 'Error' ? '#ef4444' : '#f59e0b'",
+                "size": 4,
+                "shape": "diamond",
+                "icon": "sensor",
+                "label": {
+                    "text": "$.sensor_id",
+                    "fontSize": 8,
+                    "color": "#666"
+                }
+            }
+        },
+        {
+            "selector": {
+                "type": "node",
+                "agentType": "valve"
+            },
+            "style": {
+                "color": "$.position === 'open' ? '#22c55e' : $.position === 'closed' ? '#ef4444' : '#f59e0b'",
+                "size": 6,
+                "shape": "square",
+                "icon": "valve"
+            }
+        },
+        {
+            "selector": {
+                "type": "node",
+                "agentType": "pump"
+            },
+            "style": {
+                "color": "$.state === 'Running' ? '#3b82f6' : '#94a3b8'",
+                "size": 8,
+                "shape": "circle",
+                "animation": {
+                    "enabled": true,
+                    "type": "pulse",
+                    "duration": 1000
+                }
+            }
+        },
+        {
+            "selector": {
+                "type": "node",
+                "agentType": "hydrant"
+            },
+            "style": {
+                "color": "$.state === 'In_Use' ? '#ef4444' : '#22c55e'",
+                "size": 7,
+                "shape": "star",
+                "icon": "hydrant"
+            }
+        },
+        {
+            "selector": {
+                "type": "node",
+                "agentType": "reservoir"
+            },
+            "style": {
+                "color": "$.level < $.min_level ? '#ef4444' : '#3b82f6'",
+                "size": 12,
+                "shape": "circle",
+                "label": {
+                    "text": "$.reservoir_id",
+                    "fontSize": 12,
+                    "color": "#000",
+                    "position": "top"
+                }
+            }
+        },
+        {
+            "selector": {
+                "type": "edge",
+                "canonicalType": "route"
+            },
+            "style": {
+                "color": "#3b82f6",
+                "width": 2,
+                "lineStyle": "solid",
+                "animation": {
+                    "enabled": true,
+                    "type": "flow",
+                    "duration": 2000
+                }
+            }
+        },
+        {
+            "selector": {
+                "type": "edge",
+                "canonicalType": "observe"
+            },
+            "style": {
+                "color": "#94a3b8",
+                "width": 1,
+                "lineStyle": "dashed"
+            }
+        },
+        {
+            "selector": {
+                "type": "edge",
+                "canonicalType": "command"
+            },
+            "style": {
+                "color": "#f59e0b",
+                "width": 1.5,
+                "lineStyle": "solid"
+            }
+        },
+        {
+            "selector": {
+                "type": "edge",
+                "canonicalType": "supply"
+            },
+            "style": {
+                "color": "#22c55e",
+                "width": 3,
+                "lineStyle": "solid"
+            }
+        }
+    ],
+    "interactions": {
+        "enablePan": true,
+        "enableZoom": true,
+        "enableSelection": true,
+        "enableTooltip": true,
+        "tooltipTemplate": "<strong>$.id</strong><br/>Type: $.agentType<br/>Status: $.state || $.status"
+    },
+    "filters": {
+        "nodes": [],
+        "edges": [],
+        "denyEdges": []
+    },
+    "realtime": {
+        "enabled": true,
+        "websocketUrl": "ws://localhost:8080/api/v1/visualization/ws",
+        "replayWindowSize": 1000,
+        "debounceMs": 100
+    },
+    "performance": {
+        "maxNodes": 10000,
+        "maxEdges": 50000,
+        "clusterThreshold": 1000,
+        "levelOfDetail": "medium"
+    },
+    "telemetry": {
+        "enabled": false,
+        "sampleRate": 0.1
+    }
+}

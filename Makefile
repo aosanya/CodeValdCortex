@@ -57,6 +57,17 @@ run-dev: ## Run the application in development mode
 	@echo "Running in development mode..."
 	$(GOCMD) run ./cmd --config config.yaml
 
+.PHONY: run-water
+run-water: ## Run with UC-INFRA-001 water distribution network config
+	@echo "Running with UC-INFRA-001 (Water Distribution Network) configuration..."
+	@if [ -f usecases/UC-INFRA-001-water-distribution-network/.env ]; then \
+		export $$(cat usecases/UC-INFRA-001-water-distribution-network/.env | grep -v '^#' | xargs) && \
+		$(GOCMD) run ./cmd --config config.yaml; \
+	else \
+		echo "Error: .env file not found at usecases/UC-INFRA-001-water-distribution-network/.env"; \
+		exit 1; \
+	fi
+
 .PHONY: test
 test: ## Run tests
 	@echo "Running tests..."

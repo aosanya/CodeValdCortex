@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geographic Network Visualizer - CodeValdCortex</title>
+
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="/static/css/bulma.min.css">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+
+    <!-- MapLibre GL CSS (open-source) -->
+    <link rel="stylesheet" href="/static/css/maplibre-gl.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .viz-container {
+            display: flex;
+            height: calc(100vh - 52px);
+            /* Account for navbar */
+            overflow: hidden;
+        }
+
+        .viz-sidebar {
+            width: 320px;
+            background: #f5f5f5;
+            border-right: 1px solid #dbdbdb;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .viz-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .viz-header {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #dbdbdb;
+        }
+
+        #topology-container {
+            flex: 1;
+            position: relative;
+            background: #fafafa;
+        }
+
+        .filter-option {
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-group {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .topology-tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            border: 1px solid #3273dc;
+        }
+
+        .tooltip-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #3273dc;
+            border-bottom: 1px solid #3273dc;
+            padding-bottom: 4px;
+        }
+
+        .tooltip-content div {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar (matching dashboard) -->
+    <nav class="navbar is-light" role="navigation">
+        <div class="container is-fluid">
+            <div class="navbar-brand">
+                <a href="/dashboard" class="navbar-item">
+                    <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                        </path>
+                    </svg>
+                    <span class="ml-2 has-text-weight-bold is-size-5">CodeValdCortex</span>
+                </a>
+            </div>
+
+            <div class="navbar-menu">
+                <div class="navbar-start">
+                    <a href="/dashboard" class="navbar-item">Dashboard</a>
+                    <a href="/agent-types" class="navbar-item">Agent Types</a>
+                    <a href="/geo-network" class="navbar-item is-active">Geographic Visualizer</a>
+                    <a href="/topology" class="navbar-item">Topology</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="viz-container">
+        <!-- Sidebar -->
+        <div class="viz-sidebar">
+            <h2 class="title is-5 mb-4">
+                <span class="icon-text">
+                    <span class="icon"><i class="fas fa-globe"></i></span>
+                    <span>Network Visualizer</span>
+                </span>
+            </h2>
+
+            <!-- Use Case Selector -->
+            <div class="box mb-4">
+                <div class="field">
+                    <label class="label is-small">Use Case</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select id="usecase-select">
+                                <option value="generic">Generic Network</option>
+                                <option value="UC-INFRA-001">💧 Water Distribution</option>
+                                <option value="UC-TRACK-001">🚗 Vehicle Tracking</option>
+                                <option value="UC-RIDE-001">🚕 Ride Hailing</option>
+                                <option value="UC-LOG-001">📦 Logistics</option>
+                                <option value="UC-WMS-001">🏭 Warehouse</option>
+                                <option value="UC-LIVE-001">🌾 Agriculture</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="box mb-4">
+                <p class="heading">Data Controls</p>
+
+                <div class="field">
+                    <label class="label is-small">Layout Algorithm</label>
+                    <div class="control">
+                        <div class="select is-fullwidth is-small">
+                            <select id="layout-select">
+                                <option value="geographic" selected>Geographic (GPS)</option>
+                                <option value="force">Force-Directed</option>
+                                <option value="hierarchical">Hierarchical</option>
+                                <option value="grid">Grid</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary is-fullwidth is-small" id="load-data-btn">
+                            <span class="icon"><i class="fas fa-sync-alt"></i></span>
+                            <span>Load Data</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-light is-fullwidth is-small" id="refresh-btn">
+                            <span class="icon"><i class="fas fa-redo"></i></span>
+                            <span>Refresh View</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="box mb-4">
+                <p class="heading">Filter by Type</p>
+                <div class="filter-group" id="filter-container">
+                    <!-- Filters populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="box mb-4">
+                <p class="heading">Status Legend</p>
+                <div class="content is-small">
+                    <div class="field">
+                        <span class="tag is-success">Active / Optimal</span>
+                    </div>
+                    <div class="field">
+                        <span class="tag is-info">Running / Normal</span>
+                    </div>
+                    <div class="field">
+                        <span class="tag is-warning">Warning / Degraded</span>
+                    </div>
+                    <div class="field">
+                        <span class="tag is-danger">Error / Critical</span>
+                    </div>
+                    <div class="field">
+                        <span class="tag is-light">Idle / Offline</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="box">
+                <p class="heading">Network Statistics</p>
+                <table class="table is-fullwidth is-narrow">
+                    <tbody>
+                        <tr>
+                            <td><strong>Agents</strong></td>
+                            <td class="has-text-right"><span id="node-count" class="tag is-info is-light">0</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Connections</strong></td>
+                            <td class="has-text-right"><span id="edge-count" class="tag is-info is-light">0</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Active</strong></td>
+                            <td class="has-text-right"><span id="active-count" class="tag is-success is-light">0</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Selected</strong></td>
+                            <td class="has-text-right"><span id="selected-node" class="tag is-light">None</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="viz-main">
+            <div class="viz-header">
+                <div>
+                    <h1 class="title is-4 mb-1">
+                        <span id="header-icon"></span>
+                        <span id="header-title"></span>
+                    </h1>
+                    <p class="subtitle is-6 has-text-grey mb-0" id="header-subtitle"></p>
+                </div>
+            </div>
+
+            <div id="topology-container">
+                <div class="loading" id="loading">
+                    <button class="button is-primary is-loading is-large"></button>
+                    <p class="mt-3">Initializing visualizer...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="/static/js/vendor/maplibre-gl.js"></script>
+    <script src="/static/js/vendor/deck.gl.min.js"></script>
+    <script src="/static/js/vendor/d3.min.js"></script>
+    <script src="/static/js/vendor/d3-hierarchy.min.js"></script>
+
+    <!-- Topology Visualizer -->
+    <script src="/static/js/visualization/topology-visualizer.js"></script>
+
+    <script>
+        let visualizer;
+        let activeFilters = {};
+        let currentUseCase = 'generic';
+        let useCaseConfig = null;
+        let allAgents = [];
+
+        // Use case configurations
+        const useCaseConfigs = {
+            'generic': {
+                title: 'Generic Network Visualizer',
+                icon: '🌐',
+                subtitle: 'INFRA-017 • Generic agent network',
+                center: [0, 0],
+                zoom: 2,
+                agentTypes: {}
+            },
+            'UC-INFRA-001': {
+                title: 'Water Distribution Network',
+                icon: '💧',
+                subtitle: 'UC-INFRA-001 • Water infrastructure monitoring',
+                center: [-0.1276, 51.5074], // London
+                zoom: 12,
+                agentTypes: {
+                    'pipe': { label: '🔵 Pipes', icon: '🔵' },
+                    'sensor': { label: '📡 Sensors', icon: '📡' },
+                    'valve': { label: '🔧 Valves', icon: '🔧' },
+                    'pump': { label: '⚙️ Pumps', icon: '⚙️' },
+                    'zone_coordinator': { label: '🎯 Coordinators', icon: '🎯' }
+                }
+            },
+            'UC-TRACK-001': {
+                title: 'Vehicle Tracking - Safiri Salama',
+                icon: '🚗',
+                subtitle: 'UC-TRACK-001 • Real-time vehicle tracking',
+                center: [36.8219, -1.2921], // Nairobi
+                zoom: 11,
+                agentTypes: {
+                    'vehicle': { label: '🚗 Vehicles', icon: '🚗' },
+                    'driver': { label: '👤 Drivers', icon: '👤' },
+                    'route': { label: '🛣️ Routes', icon: '🛣️' },
+                    'checkpoint': { label: '📍 Checkpoints', icon: '📍' }
+                }
+            },
+            'UC-RIDE-001': {
+                title: 'Ride Hailing - RideLink',
+                icon: '🚕',
+                subtitle: 'UC-RIDE-001 • Ride matching and tracking',
+                center: [36.8219, -1.2921], // Nairobi
+                zoom: 11,
+                agentTypes: {
+                    'rider': { label: '👥 Riders', icon: '👥' },
+                    'driver': { label: '🚕 Drivers', icon: '🚕' },
+                    'matcher': { label: '🎯 Matchers', icon: '🎯' }
+                }
+            },
+            'UC-LOG-001': {
+                title: 'Smart Logistics Platform',
+                icon: '📦',
+                subtitle: 'UC-LOG-001 • Supply chain optimization',
+                center: [36.8219, -1.2921], // Nairobi
+                zoom: 10,
+                agentTypes: {
+                    'truck': { label: '🚛 Trucks', icon: '🚛' },
+                    'warehouse': { label: '🏭 Warehouses', icon: '🏭' },
+                    'package': { label: '📦 Packages', icon: '📦' },
+                    'route': { label: '🛣️ Routes', icon: '🛣️' }
+                }
+            },
+            'UC-WMS-001': {
+                title: 'Warehouse Management',
+                icon: '🏭',
+                subtitle: 'UC-WMS-001 • Indoor facility management',
+                center: [0, 0],
+                zoom: 3,
+                agentTypes: {
+                    'robot': { label: '🤖 Robots', icon: '🤖' },
+                    'rack': { label: '📚 Racks', icon: '📚' },
+                    'dock': { label: '🚪 Docks', icon: '🚪' },
+                    'zone': { label: '🏪 Zones', icon: '🏪' }
+                }
+            },
+            'UC-LIVE-001': {
+                title: 'Agriculture - Mashambani',
+                icon: '🌾',
+                subtitle: 'UC-LIVE-001 • Livestock and farm management',
+                center: [36.8219, -1.2921], // Kenya
+                zoom: 8,
+                agentTypes: {
+                    'animal': { label: '🐄 Animals', icon: '🐄' },
+                    'owner': { label: '👨‍🌾 Owners', icon: '👨‍🌾' },
+                    'caretaker': { label: '👷 Caretakers', icon: '👷' },
+                    'farm': { label: '🌾 Farms', icon: '🌾' }
+                }
+            }
+        };
+
+        // Initialize visualizer
+        function init() {
+            document.getElementById('loading').style.display = 'block';
+
+            const container = document.getElementById('topology-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const config = useCaseConfigs[currentUseCase];
+
+            visualizer = new TopologyVisualizer('topology-container', {
+                width: width,
+                height: height,
+                layoutAlgorithm: 'geographic',
+                initialViewState: {
+                    longitude: config.center[0],
+                    latitude: config.center[1],
+                    zoom: config.zoom,
+                    pitch: 0,
+                    bearing: 0
+                }
+            });
+
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Update UI for use case
+        function updateUseCaseUI() {
+            const config = useCaseConfigs[currentUseCase];
+            document.getElementById('header-icon').textContent = config.icon;
+            document.getElementById('header-title').textContent = config.title;
+            document.getElementById('header-subtitle').textContent = config.subtitle;
+
+            // Update filters
+            const filterContainer = document.getElementById('filter-container');
+            filterContainer.innerHTML = '';
+
+            const agentTypes = Object.keys(config.agentTypes);
+            if (agentTypes.length === 0) {
+                filterContainer.innerHTML = '<p class="has-text-grey is-size-7">No filters available</p>';
+            } else {
+                agentTypes.forEach(type => {
+                    const typeConfig = config.agentTypes[type];
+                    activeFilters[type] = true;
+
+                    const field = document.createElement('div');
+                    field.className = 'field filter-option';
+                    field.innerHTML = `
+                        <div class="control">
+                            <label class="checkbox is-small">
+                                <input type="checkbox" id="filter-${type}" checked>
+                                ${typeConfig.label}
+                            </label>
+                        </div>
+                    `;
+                    filterContainer.appendChild(field);
+
+                    field.querySelector('input').addEventListener('change', (e) => {
+                        activeFilters[type] = e.target.checked;
+                        applyFilters();
+                    });
+                });
+            }
+        }
+
+        // Apply filters
+        function applyFilters() {
+            if (!visualizer || !allAgents) return;
+
+            const filteredAgents = allAgents.filter(agent => {
+                const agentType = agent.agent_type || agent.type;
+                return activeFilters[agentType] !== false;
+            });
+
+            visualizer.loadData(filteredAgents, []);
+            updateStats();
+        }
+
+        // Load data
+        async function loadData() {
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const url = currentUseCase === 'generic'
+                    ? '/api/web/topology/data'
+                    : `/api/web/topology/data?usecase=${currentUseCase}`;
+
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    allAgents = data.nodes || data.agents || [];
+                    const edges = data.edges || [];
+                    visualizer.loadData(allAgents, edges);
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                console.log('API error, continuing with existing agents');
+                allAgents = [];
+            }
+
+            updateStats();
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Update statistics
+        function updateStats() {
+            if (!visualizer) return;
+            document.getElementById('node-count').textContent = visualizer.nodes.length;
+            document.getElementById('edge-count').textContent = visualizer.edges.length;
+
+            const activeCount = visualizer.nodes.filter(n => n.status === 'active' || n.status === 'running').length;
+            document.getElementById('active-count').textContent = activeCount;
+        }
+
+        // Event listeners
+        document.getElementById('usecase-select').addEventListener('change', (e) => {
+            currentUseCase = e.target.value;
+            updateUseCaseUI();
+
+            // Update viewport
+            const config = useCaseConfigs[currentUseCase];
+            if (visualizer && visualizer.deck) {
+                visualizer.deck.setProps({
+                    initialViewState: {
+                        longitude: config.center[0],
+                        latitude: config.center[1],
+                        zoom: config.zoom,
+                        pitch: 0,
+                        bearing: 0,
+                        transitionDuration: 1000,
+                        transitionInterpolator: new deck.FlyToInterpolator()
+                    }
+                });
+            }
+
+            loadData();
+        });
+
+        document.getElementById('layout-select').addEventListener('change', (e) => {
+            visualizer.config.layoutAlgorithm = e.target.value;
+            visualizer.computeLayout();
+            visualizer.render();
+        });
+
+        document.getElementById('load-data-btn').addEventListener('click', loadData);
+
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            visualizer.computeLayout();
+            visualizer.render();
+        });
+
+        // Listen for node selection
+        document.addEventListener('topology:nodeSelected', (e) => {
+            const node = e.detail;
+            document.getElementById('selected-node').textContent = node.name;
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('topology-container');
+            if (visualizer && visualizer.deck) {
+                visualizer.deck.setProps({
+                    width: container.clientWidth,
+                    height: container.clientHeight
+                });
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            updateUseCaseUI();
+            init();
+            loadData();
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            if (visualizer && document.getElementById('loading').style.display === 'none') {
+                loadData();
+            }
+        }, 30000);
+    </script>
+</body>
+
+</html>
