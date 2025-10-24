@@ -196,7 +196,7 @@
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
 | INFRA-009 | Leak Detection Scenario | Implement multi-agent leak detection workflow: Sensor detects anomaly → Publishes alert → Pipe agent analyzes → Valve isolates → Zone Coordinator escalates | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Event Processing | INFRA-007, INFRA-008 |
 | INFRA-010 | Pressure Optimization Scenario | Implement collaborative pressure management: Sensors publish readings → Pumps subscribe and adjust output → Zone coordinator monitors overall balance | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Control Algorithms | INFRA-007, INFRA-008 |
-| INFRA-011 | Predictive Maintenance Scenario | Implement degradation detection: Pump monitors efficiency → Detects decline pattern → Publishes maintenance alert → Zone coordinator schedules work order | **UC-INFRA-001** | Not Started | P1 | High | Go, Analytics | INFRA-009 |
+| INFRA-011 | Predictive Maintenance Scenario | Implement degradation detection: Pump monitors efficiency → Detects decline pattern → Publishes maintenance alert → Zone coordinator schedules work order | **UC-INFRA-001** | ✅ Complete | P1 | High | Go, Analytics | INFRA-009 |
 
 ## Phase 5: Data Storage & Analytics (P1 - Critical) ⚠️ PARTIALLY COMPLETE
 
@@ -401,10 +401,10 @@
 
 ## Current Progress Summary
 
-### ✅ Completed (37% of MVP)
+### ✅ Completed (41% of MVP)
 1. **Phase 1**: All 5 agent type configurations (INFRA-001 to INFRA-005)
 2. **Phase 2**: Complete framework communication system (INFRA-006)
-3. **Phase 4**: Two demonstration scenarios (INFRA-009, INFRA-010)
+3. **Phase 4**: Three demonstration scenarios (INFRA-009, INFRA-010, INFRA-011)
 4. **Phase 5**: ArangoDB collections and agent state persistence (INFRA-012, INFRA-014)
 5. **Phase 6**: Base web UI with agent management (INFRA-016)
 6. **Infrastructure**: Environment configuration, startup scripts, database auto-creation
@@ -413,17 +413,17 @@
 - None - ready for next task
 
 ### 🎯 Next Priorities
-1. **INFRA-011**: Implement water quality monitoring scenario (new agent collaboration pattern)
-2. **INFRA-017**: Build network topology visualizer for dashboard
-3. **INFRA-013**: Time-series data storage for sensor readings
+1. **INFRA-017**: Build network topology visualizer for dashboard
+2. **INFRA-013**: Time-series data storage for sensor readings
+3. **INFRA-015**: Historical analytics queries for infrastructure metrics
 
 ### 📊 Overall Statistics
 - **Total MVP Tasks**: 27 tasks
-- **Completed**: 10 tasks (37%)
+- **Completed**: 11 tasks (41%)
 - **Framework-Provided**: 5 tasks (19%)
-- **Remaining**: 12 tasks (44%)
+- **Remaining**: 11 tasks (41%)
 - **P0 (Critical) Complete**: 7/10 (70%)
-- **P1 (High) Complete**: 3/11 (27%)
+- **P1 (High) Complete**: 4/11 (36%)
 - **P2 (Enhancement) Complete**: 0/6 (0%)
 
 ## Workflow Integration
