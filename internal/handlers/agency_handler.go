@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/gin-gonic/gin"
@@ -39,8 +41,43 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 	var req agency.CreateAgencyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
+	}
+
+	// Sanitize ID - ensure it has the "agency_" prefix and remove hyphens from UUID part
+	if !strings.HasPrefix(req.ID, "agency_") {
+		// If no prefix, add it
+		req.ID = "agency_" + strings.ReplaceAll(req.ID, "-", "")
+	} else {
+		// If prefix exists, just remove hyphens from the UUID part
+		parts := strings.SplitN(req.ID, "_", 2)
+		if len(parts) == 2 {
+			req.ID = parts[0] + "_" + strings.ReplaceAll(parts[1], "-", "")
+		}
+	}
+
+	// Set default icon based on category if not provided
+	icon := req.Icon
+	if icon == "" {
+		icon = getCategoryIcon(req.Category)
+	}
+
+	// Set default metadata values
+	metadata := req.Metadata
+	if metadata.APIEndpoint == "" {
+		metadata.APIEndpoint = fmt.Sprintf("/api/v1/agencies/%s", req.ID)
+	}
+
+	// Set default settings
+	settings := req.Settings
+	if !hasSettings(req.Settings) {
+		settings = agency.AgencySettings{
+			AutoStart:         false,
+			MonitoringEnabled: true,
+			DashboardEnabled:  true,
+			VisualizerEnabled: true,
+		}
 	}
 
 	newAgency := &agency.Agency{
@@ -49,10 +86,11 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		DisplayName: req.DisplayName,
 		Description: req.Description,
 		Category:    req.Category,
-		Icon:        req.Icon,
+		Icon:        icon,
 		Status:      agency.AgencyStatusActive,
-		Metadata:    req.Metadata,
-		Settings:    req.Settings,
+		// Database field will be set by service with proper prefix
+		Metadata:    metadata,
+		Settings:    settings,
 		CreatedBy:   "system", // TODO: Get from auth context
 	}
 
@@ -62,6 +100,33 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, newAgency)
+}
+
+// hasSettings checks if settings have been provided
+func hasSettings(settings agency.AgencySettings) bool {
+	return settings.AutoStart || settings.MonitoringEnabled || settings.DashboardEnabled || settings.VisualizerEnabled
+}
+
+// getCategoryIcon returns the default icon for a category
+func getCategoryIcon(category string) string {
+	categoryIcons := map[string]string{
+		"infrastructure": "🏗️",
+		"agriculture":    "🌾",
+		"logistics":      "📦",
+		"transportation": "🚗",
+		"healthcare":     "🏥",
+		"education":      "🎓",
+		"finance":        "💰",
+		"retail":         "🛒",
+		"energy":         "⚡",
+		"other":          "📋",
+	}
+
+	icon, ok := categoryIcons[category]
+	if !ok {
+		return "📋"
+	}
+	return icon
 }
 
 // GetAgency handles GET /api/v1/agencies/:id

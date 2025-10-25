@@ -22,6 +22,7 @@ type Service interface {
 type service struct {
 	repo      Repository
 	validator Validator
+	dbInit    DatabaseInitializer
 	active    string // Currently active agency ID
 }
 
@@ -30,6 +31,15 @@ func NewService(repo Repository, validator Validator) Service {
 	return &service{
 		repo:      repo,
 		validator: validator,
+	}
+}
+
+// NewServiceWithDBInit creates a new agency service with database initialization support
+func NewServiceWithDBInit(repo Repository, validator Validator, dbInit DatabaseInitializer) Service {
+	return &service{
+		repo:      repo,
+		validator: validator,
+		dbInit:    dbInit,
 	}
 }
 
@@ -48,6 +58,19 @@ func (s *service) CreateAgency(ctx context.Context, agency *Agency) error {
 	// Set default status if not provided
 	if agency.Status == "" {
 		agency.Status = AgencyStatusActive
+	}
+
+	// Set database field if not provided 
+	// Database name uses the agency ID directly (which already has "agency_" prefix)
+	if agency.Database == "" {
+		agency.Database = agency.ID
+	}
+
+	// Initialize agency database if database initializer is available
+	if s.dbInit != nil {
+		if err := s.dbInit.InitializeAgencyDatabase(ctx, agency.ID); err != nil {
+			return fmt.Errorf("failed to initialize agency database: %w", err)
+		}
 	}
 
 	// Create in repository
