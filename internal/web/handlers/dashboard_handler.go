@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
@@ -33,13 +34,39 @@ func NewDashboardHandler(runtime *runtime.Manager, logger *logrus.Logger) *Dashb
 
 // ShowDashboard renders the main dashboard page
 func (h *DashboardHandler) ShowDashboard(c *gin.Context) {
-	agents := h.runtime.ListAgents()
+	// Get all agents
+	allAgents := h.runtime.ListAgents()
+
+	// Filter by agency if one is selected
+	var agents []*agent.Agent
+	if ag, exists := c.Get("agency"); exists {
+		if agencyPtr, ok := ag.(*agency.Agency); ok {
+			// Filter agents by agency
+			for _, a := range allAgents {
+				if agencyID, exists := a.Metadata["agency_id"]; exists && agencyID == agencyPtr.ID {
+					agents = append(agents, a)
+				}
+			}
+		} else {
+			agents = allAgents
+		}
+	} else {
+		agents = allAgents
+	}
 
 	stats := h.calculateStats(agents)
 
+	// Get current agency from context (if available)
+	var currentAgency *agency.Agency
+	if ag, exists := c.Get("agency"); exists {
+		if agencyPtr, ok := ag.(*agency.Agency); ok {
+			currentAgency = agencyPtr
+		}
+	}
+
 	// Render Templ component
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err := pages.Dashboard(agents, stats).Render(c.Request.Context(), c.Writer)
+	err := pages.Dashboard(agents, stats, currentAgency).Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.Errorf("Failed to render dashboard: %v", err)
 		c.String(http.StatusInternalServerError, "Failed to render dashboard")

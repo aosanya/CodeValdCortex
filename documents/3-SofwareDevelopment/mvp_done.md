@@ -22,6 +22,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-012 | Agent Configuration Management | Dynamic agent configuration and template-based deployment with comprehensive validation and hot-reload | 2025-10-21     | `feature/MVP-012_agent_configuration_management` | ~6 hours   | ✅ Complete |
 | MVP-013 | REST API Layer        | Develop comprehensive REST endpoints for agent management, monitoring, and communication history with Gin framework | 2025-10-22     | `feature/MVP-013_rest_api_layer`             | ~3 hours   | ✅ Complete |
 | MVP-021 | Agency Management System     | Create database schema and backend services for managing agencies (use cases). Store agency metadata, configurations, and settings in ArangoDB. Implement CRUD operations and API endpoints for agency lifecycle management | 2025-10-25     | `feature/MVP-021_agency-management-system`    | ~4 hours   | ✅ Complete |
+| MVP-022 | Agency Selection Homepage    | Build homepage UI for selecting and switching between agencies with agency-specific database integration. Implement multi-database architecture where each agency operates with its own isolated ArangoDB database | 2025-10-25     | `feature/MVP-022_agency-selection-homepage`   | ~6 hours   | ✅ Complete |
 
 ---
 

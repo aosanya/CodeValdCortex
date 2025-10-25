@@ -102,6 +102,25 @@ func (ac *ArangoClient) Database() driver.Database {
 	return ac.db
 }
 
+// GetDatabase returns a specific database by name
+func (ac *ArangoClient) GetDatabase(ctx context.Context, dbName string) (driver.Database, error) {
+	exists, err := ac.client.DatabaseExists(ctx, dbName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check database existence: %w", err)
+	}
+
+	if !exists {
+		return nil, fmt.Errorf("database %s does not exist", dbName)
+	}
+
+	db, err := ac.client.Database(ctx, dbName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database %s: %w", dbName, err)
+	}
+
+	return db, nil
+}
+
 // Client returns the client instance
 func (ac *ArangoClient) Client() driver.Client {
 	return ac.client

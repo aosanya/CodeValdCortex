@@ -14,6 +14,7 @@ type Agency struct {
 	Category    string         `json:"category"`
 	Icon        string         `json:"icon"`
 	Status      AgencyStatus   `json:"status"`
+	Database    string         `json:"database"` // Database name for this agency
 	Metadata    AgencyMetadata `json:"metadata"`
 	Settings    AgencySettings `json:"settings"`
 	CreatedAt   time.Time      `json:"created_at"`
