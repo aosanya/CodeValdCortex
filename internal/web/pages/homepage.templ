@@ -178,7 +178,8 @@ templ AgencyCard(ag agency.Agency) {
 					class="card-footer-item has-text-weight-semibold has-text-primary"
 					hx-post={ fmt.Sprintf("/agencies/%s/select", ag.ID) }
 					hx-swap="none"
-					hx-on::after-request="window.location.href = '/agencies/' + '{ ag.ID }' + '/dashboard'"
+					data-dashboard-url={ fmt.Sprintf("/agencies/%s/dashboard", ag.ID) }
+					hx-on::after-request="window.location.href=event.target.dataset.dashboardUrl"
 				>
 					<span class="icon-text">
 						<span class="icon">

@@ -20,6 +20,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
+	webmiddleware "github.com/aosanya/CodeValdCortex/internal/web/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -230,14 +231,17 @@ func (a *App) setupServer() error {
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
 	agentTypesWebHandler := webhandlers.NewAgentTypesWebHandler(a.agentTypeService, a.logger)
 	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
-	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.logger)
+	// Initialize homepage handler
+	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.runtimeManager, a.dbClient, a.registry, a.logger)
+
+	// Agency middleware
+	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger)
 
 	// Serve static files
 	router.Static("/static", "./static")
 
 	// Web dashboard routes
 	router.GET("/", homepageHandler.ShowHomepage)
-	router.GET("/dashboard", dashboardHandler.ShowDashboard)
 	router.GET("/agent-types", agentTypesWebHandler.ShowAgentTypes)
 	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
 	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
@@ -245,8 +249,15 @@ func (a *App) setupServer() error {
 	// Agency routes
 	router.POST("/agencies/:id/select", homepageHandler.SelectAgency)
 	router.GET("/agencies/:id", homepageHandler.RedirectToAgencyDashboard)
-	router.GET("/agencies/:id/dashboard", homepageHandler.ShowAgencyDashboard)
-	router.GET("/agencies/switch", homepageHandler.ShowAgencySwitcher) // API routes for web dashboard (HTMX endpoints)
+
+	// Agency-specific dashboard (with middleware to inject agency context)
+	router.GET("/agencies/:id/dashboard", agencyMiddleware.InjectAgencyContext(), homepageHandler.ShowAgencyDashboard)
+	router.GET("/agencies/switch", homepageHandler.ShowAgencySwitcher)
+
+	// Main dashboard route with agency context injection
+	router.GET("/dashboard", agencyMiddleware.InjectAgencyContext(), dashboardHandler.ShowDashboard)
+
+	// API routes for web dashboard (HTMX endpoints)
 	webAPI := router.Group("/api/web")
 	{
 		webAPI.GET("/agents/live", dashboardHandler.GetAgentsLive)

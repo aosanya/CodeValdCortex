@@ -18,7 +18,8 @@ const (
 
 // Repository handles agent persistence in ArangoDB
 type Repository struct {
-	db         *database.ArangoClient
+	dbClient   *database.ArangoClient // Optional: only set when created with NewRepository
+	database   driver.Database        // Direct database connection
 	collection driver.Collection
 }
 
@@ -56,7 +57,32 @@ func NewRepository(dbClient *database.ArangoClient) (*Repository, error) {
 	log.WithField("collection", CollectionAgents).Info("Agent registry repository initialized")
 
 	return &Repository{
-		db:         dbClient,
+		dbClient:   dbClient,
+		database:   db,
+		collection: col,
+	}, nil
+}
+
+// NewRepositoryWithDB creates a new agent registry repository with a specific database instance
+func NewRepositoryWithDB(db driver.Database) (*Repository, error) {
+	ctx := context.Background()
+
+	// Ensure collection exists
+	col, err := ensureCollection(ctx, db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to ensure collection: %w", err)
+	}
+
+	// Create indexes
+	if err := ensureIndexes(ctx, col); err != nil {
+		return nil, fmt.Errorf("failed to ensure indexes: %w", err)
+	}
+
+	log.WithField("collection", CollectionAgents).Info("Agent registry repository initialized")
+
+	return &Repository{
+		dbClient:   nil, // No ArangoClient wrapper
+		database:   db,
 		collection: col,
 	}, nil
 }
@@ -202,7 +228,7 @@ func (r *Repository) List(ctx context.Context) ([]*agent.Agent, error) {
 		"@collection": CollectionAgents,
 	}
 
-	cursor, err := r.db.Database().Query(ctx, query, bindVars)
+	cursor, err := r.database.Query(ctx, query, bindVars)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -270,7 +296,7 @@ func (r *Repository) FindByTypeAndState(ctx context.Context, agentType string, s
 
 // executeQuery executes an AQL query and returns agents
 func (r *Repository) executeQuery(ctx context.Context, query string, bindVars map[string]interface{}) ([]*agent.Agent, error) {
-	cursor, err := r.db.Database().Query(ctx, query, bindVars)
+	cursor, err := r.database.Query(ctx, query, bindVars)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}

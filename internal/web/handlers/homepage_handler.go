@@ -3,8 +3,13 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agent"
+	"github.com/aosanya/CodeValdCortex/internal/database"
+	"github.com/aosanya/CodeValdCortex/internal/registry"
+	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -18,15 +23,27 @@ const (
 
 // HomepageHandler handles homepage and agency selection routes
 type HomepageHandler struct {
-	agencyService agency.Service
-	logger        *logrus.Logger
+	agencyService  agency.Service
+	runtimeManager *runtime.Manager
+	dbClient       *database.ArangoClient
+	registry       *registry.Repository
+	logger         *logrus.Logger
 }
 
 // NewHomepageHandler creates a new homepage handler
-func NewHomepageHandler(agencyService agency.Service, logger *logrus.Logger) *HomepageHandler {
+func NewHomepageHandler(
+	agencyService agency.Service,
+	runtimeManager *runtime.Manager,
+	dbClient *database.ArangoClient,
+	registry *registry.Repository,
+	logger *logrus.Logger,
+) *HomepageHandler {
 	return &HomepageHandler{
-		agencyService: agencyService,
-		logger:        logger,
+		agencyService:  agencyService,
+		runtimeManager: runtimeManager,
+		dbClient:       dbClient,
+		registry:       registry,
+		logger:         logger,
 	}
 }
 
@@ -158,10 +175,82 @@ func (h *HomepageHandler) ShowAgencyDashboard(c *gin.Context) {
 		h.logger.Errorf("Failed to set active agency: %v", err)
 	}
 
-	// For now, redirect to the existing dashboard
-	// TODO: Create agency-specific dashboard template
-	h.logger.Infof("Agency dashboard requested: %s (%s)", ag.Name, ag.ID)
-	c.Redirect(http.StatusFound, "/dashboard")
+	// Store agency in context for the dashboard
+	c.Set("agency", ag)
+	c.Set("agency_id", agencyID)
+
+	h.logger.Infof("Rendering agency dashboard: %s (%s)", ag.Name, ag.ID)
+
+	// Get the agency-specific database
+	agencyDB := agencyID
+	if ag.Database != "" {
+		agencyDB = ag.Database
+	}
+
+	// Get database connection for this agency
+	db, err := h.dbClient.GetDatabase(c.Request.Context(), agencyDB)
+	if err != nil {
+		h.logger.Errorf("Failed to connect to agency database %s: %v", agencyDB, err)
+		c.String(http.StatusInternalServerError, "Failed to connect to agency database")
+		return
+	}
+
+	// Create a registry for this agency's database
+	agencyRegistry, err := registry.NewRepositoryWithDB(db)
+	if err != nil {
+		h.logger.Errorf("Failed to create registry for agency %s: %v", agencyID, err)
+		c.String(http.StatusInternalServerError, "Failed to initialize agency registry")
+		return
+	}
+
+	// Create a runtime manager for this agency
+	agencyRuntimeManager := runtime.NewManager(h.logger, runtime.ManagerConfig{
+		MaxAgents:           100,
+		HealthCheckInterval: 30 * time.Second,
+		ShutdownTimeout:     30 * time.Second,
+		EnableMetrics:       true,
+	}, agencyRegistry)
+
+	// Get all agents from the agency-specific database
+	agencyAgents := agencyRuntimeManager.ListAgents()
+
+	stats := h.calculateStats(agencyAgents)
+
+	// Render the dashboard with agency context
+	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+	err = pages.Dashboard(agencyAgents, stats, ag).Render(c.Request.Context(), c.Writer)
+	if err != nil {
+		h.logger.Errorf("Failed to render agency dashboard: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to render dashboard")
+		return
+	}
+}
+
+// calculateStats calculates dashboard statistics from agents
+func (h *HomepageHandler) calculateStats(agents []*agent.Agent) pages.DashboardStats {
+	stats := pages.DashboardStats{
+		Total: len(agents),
+	}
+
+	for _, a := range agents {
+		state := a.GetState()
+		switch state {
+		case agent.StateRunning:
+			stats.Running++
+		case agent.StateStopped:
+			stats.Stopped++
+		case agent.StatePaused:
+			stats.Paused++
+		}
+
+		if a.IsHealthy() {
+			stats.Healthy++
+		} else {
+			stats.Unhealthy++
+		}
+	}
+
+	return stats
 }
 
 // GetActiveAgency returns the currently active agency

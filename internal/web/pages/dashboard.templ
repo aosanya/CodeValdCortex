@@ -2,6 +2,7 @@ package pages
 
 import (
 	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
@@ -15,9 +16,48 @@ type DashboardStats struct {
 	Healthy   int
 }
 
-templ Dashboard(agents []*agent.Agent, stats DashboardStats) {
+templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *agency.Agency) {
 	@components.Layout("Dashboard") {
 		<div x-data="dashboard()" x-init="init()">
+		<!-- Current Agency Indicator -->
+		if currentAgency != nil {
+			<div class="notification is-info is-light mb-5">
+				<div class="level is-mobile">
+					<div class="level-left">
+						<div class="level-item">
+							<span class="icon is-medium">
+								<svg style="width: 1.5rem; height: 1.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+								</svg>
+							</span>
+						</div>
+						<div class="level-item">
+							<div>
+								<p class="is-size-7 has-text-weight-semibold has-text-grey-dark">Current Agency</p>
+								<p class="is-size-5 has-text-weight-bold">{ currentAgency.Name }</p>
+							</div>
+						</div>
+						if currentAgency.Category != "" {
+							<div class="level-item">
+								<span class="tag is-info">{ currentAgency.Category }</span>
+							</div>
+						}
+					</div>
+					<div class="level-right">
+						<div class="level-item">
+							<a href="/" class="button is-info is-outlined is-small">
+								<span class="icon">
+									<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+									</svg>
+								</span>
+								<span>Switch Agency</span>
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
 		<!-- Page Header -->
 		<div class="mb-6">
 			<div class="level">
