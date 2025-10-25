@@ -1,602 +1,1602 @@
 [
   {
     "id": "SENSOR-NBI-001",
-    "name": "CBD Pressure Sensor 1",
+    "name": "Uhuru Highway Flow 1",
     "type": "sensor",
-    "state": "idle",
+    "state": "running",
     "metadata": {
       "zone": "central",
-      "sensor_type": "pressure",
-      "latitude": "-1.3464",
-      "longitude": "36.7572",
-      "measurement_unit": "bar",
+      "sensor_type": "flow",
+      "latitude": "-1.2875",
+      "longitude": "36.82065",
+      "measurement_unit": "m3/h",
       "sampling_interval": "60",
-      "installation_date": "2019-01-15"
+      "road_location": "Uhuru Highway",
+      "installation_date": "2019-02-15"
     }
   },
   {
     "id": "SENSOR-NBI-002",
-    "name": "CBD Flow Sensor 2",
+    "name": "Uhuru Highway Quality 2",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "central",
-      "sensor_type": "flow",
-      "latitude": "-1.3314",
-      "longitude": "36.8622",
-      "measurement_unit": "m3/h",
+      "sensor_type": "quality",
+      "latitude": "-1.287",
+      "longitude": "36.82115",
+      "measurement_unit": "pH",
       "sampling_interval": "60",
-      "installation_date": "2020-02-15"
+      "road_location": "Uhuru Highway",
+      "installation_date": "2020-03-15"
     }
   },
   {
     "id": "SENSOR-NBI-003",
-    "name": "CBD Quality Sensor 3",
+    "name": "Uhuru Highway Temperature 3",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "central",
-      "sensor_type": "quality",
-      "latitude": "-1.3164",
-      "longitude": "36.8472",
-      "measurement_unit": "pH",
+      "sensor_type": "temperature",
+      "latitude": "-1.29275",
+      "longitude": "36.82",
+      "measurement_unit": "\u00b0C",
       "sampling_interval": "60",
-      "installation_date": "2021-03-15"
+      "road_location": "Uhuru Highway",
+      "installation_date": "2021-04-15"
     }
   },
   {
     "id": "SENSOR-NBI-004",
-    "name": "CBD Temperature Sensor 4",
+    "name": "Uhuru Highway Leak Detection 4",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "central",
-      "sensor_type": "temperature",
-      "latitude": "-1.3014",
-      "longitude": "36.8322",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-04-15"
+      "sensor_type": "leak_detection",
+      "latitude": "-1.29225",
+      "longitude": "36.8205",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2022-05-15"
     }
   },
   {
     "id": "SENSOR-NBI-005",
-    "name": "CBD Pressure Sensor 5",
+    "name": "Uhuru Highway Pressure 5",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "central",
       "sensor_type": "pressure",
-      "latitude": "-1.2864",
-      "longitude": "36.8172",
+      "latitude": "-1.29825",
+      "longitude": "36.81975",
       "measurement_unit": "bar",
       "sampling_interval": "60",
-      "installation_date": "2019-05-15"
+      "road_location": "Uhuru Highway",
+      "installation_date": "2018-06-15"
     }
   },
   {
     "id": "SENSOR-NBI-006",
-    "name": "CBD Flow Sensor 6",
+    "name": "Uhuru Highway Flow 6",
     "type": "sensor",
-    "state": "idle",
+    "state": "running",
     "metadata": {
       "zone": "central",
       "sensor_type": "flow",
-      "latitude": "-1.2714",
-      "longitude": "36.8022",
+      "latitude": "-1.29775",
+      "longitude": "36.82025",
       "measurement_unit": "m3/h",
       "sampling_interval": "60",
-      "installation_date": "2020-06-15"
+      "road_location": "Uhuru Highway",
+      "installation_date": "2019-07-15"
     }
   },
   {
     "id": "SENSOR-NBI-007",
-    "name": "CBD Quality Sensor 7",
+    "name": "Uhuru Highway Quality 7",
     "type": "sensor",
     "state": "running",
     "metadata": {
-      "zone": "central",
+      "zone": "south",
       "sensor_type": "quality",
-      "latitude": "-1.2564",
-      "longitude": "36.7872",
+      "latitude": "-1.30425",
+      "longitude": "36.81925",
       "measurement_unit": "pH",
       "sampling_interval": "60",
-      "installation_date": "2021-07-15"
+      "road_location": "Uhuru Highway",
+      "installation_date": "2020-08-15"
     }
   },
   {
     "id": "SENSOR-NBI-008",
-    "name": "CBD Temperature Sensor 8",
+    "name": "Uhuru Highway Temperature 8",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.30375",
+      "longitude": "36.81975",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2021-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-009",
+    "name": "Uhuru Highway Leak Detection 9",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.30875",
+      "longitude": "36.81825",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2022-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-010",
+    "name": "Uhuru Highway Pressure 10",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.30825",
+      "longitude": "36.81875",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2018-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-011",
+    "name": "Uhuru Highway Flow 11",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.31275",
+      "longitude": "36.82375",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2019-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-012",
+    "name": "Uhuru Highway Quality 12",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.31225",
+      "longitude": "36.82425",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2020-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-013",
+    "name": "Uhuru Highway Temperature 13",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.3191",
+      "longitude": "36.8378",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2021-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-014",
+    "name": "Uhuru Highway Leak Detection 14",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.3186",
+      "longitude": "36.8383",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2022-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-015",
+    "name": "Thika Road Pressure 15",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.2621",
+      "longitude": "36.8299",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2018-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-016",
+    "name": "Thika Road Flow 16",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "flow",
+      "latitude": "-1.25775",
+      "longitude": "36.83625",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2019-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-017",
+    "name": "Thika Road Quality 17",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "quality",
+      "latitude": "-1.25275",
+      "longitude": "36.84475",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-018",
+    "name": "Thika Road Temperature 18",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "temperature",
+      "latitude": "-1.24815",
+      "longitude": "36.8642",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2021-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-019",
+    "name": "Thika Road Leak Detection 19",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.24765",
+      "longitude": "36.8647",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Thika Road",
+      "installation_date": "2022-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-020",
+    "name": "Thika Road Pressure 20",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.24065",
+      "longitude": "36.8817",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2018-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-021",
+    "name": "Thika Road Flow 21",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "flow",
+      "latitude": "-1.23165",
+      "longitude": "36.88855",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2019-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-022",
+    "name": "Thika Road Quality 22",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "quality",
+      "latitude": "-1.22415",
+      "longitude": "36.89605",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2020-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-023",
+    "name": "Thika Road Temperature 23",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.2147",
+      "longitude": "36.9059",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Thika Road",
+      "installation_date": "2021-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-024",
+    "name": "Thika Road Leak Detection 24",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.2142",
+      "longitude": "36.9064",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Thika Road",
+      "installation_date": "2022-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-025",
+    "name": "Mombasa Road Pressure 25",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.29475",
+      "longitude": "36.8232",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2018-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-026",
+    "name": "Mombasa Road Flow 26",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.30125",
+      "longitude": "36.82975",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2019-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-027",
+    "name": "Mombasa Road Quality 27",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.30875",
+      "longitude": "36.84725",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2020-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-028",
+    "name": "Mombasa Road Temperature 28",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.30825",
+      "longitude": "36.84775",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2021-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-029",
+    "name": "Mombasa Road Leak Detection 29",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.31485",
+      "longitude": "36.876",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Mombasa Road",
+      "installation_date": "2022-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-030",
+    "name": "Mombasa Road Pressure 30",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.31435",
+      "longitude": "36.8765",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2018-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-031",
+    "name": "Mombasa Road Flow 31",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.32135",
+      "longitude": "36.896",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2019-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-032",
+    "name": "Mombasa Road Quality 32",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.32775",
+      "longitude": "36.90475",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Mombasa Road",
+      "installation_date": "2020-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-033",
+    "name": "Ngong Road Temperature 33",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "central",
       "sensor_type": "temperature",
-      "latitude": "-1.2414",
-      "longitude": "36.7722",
+      "latitude": "-1.29375",
+      "longitude": "36.8157",
       "measurement_unit": "\u00b0C",
       "sampling_interval": "60",
-      "installation_date": "2022-08-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-009",
-    "name": "WL Pressure Sensor 1",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "pressure",
-      "latitude": "-1.3274",
-      "longitude": "36.747",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-01-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-010",
-    "name": "WL Flow Sensor 2",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "flow",
-      "latitude": "-1.3124",
-      "longitude": "36.852",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-02-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-011",
-    "name": "WL Quality Sensor 3",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "quality",
-      "latitude": "-1.2974",
-      "longitude": "36.837",
-      "measurement_unit": "pH",
-      "sampling_interval": "60",
-      "installation_date": "2021-03-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-012",
-    "name": "WL Temperature Sensor 4",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "temperature",
-      "latitude": "-1.2824",
-      "longitude": "36.822",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-04-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-013",
-    "name": "WL Pressure Sensor 5",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "pressure",
-      "latitude": "-1.2674",
-      "longitude": "36.807",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-05-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-014",
-    "name": "WL Flow Sensor 6",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "flow",
-      "latitude": "-1.2524",
-      "longitude": "36.792",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-06-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-015",
-    "name": "WL Quality Sensor 7",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "quality",
-      "latitude": "-1.2374",
-      "longitude": "36.777",
-      "measurement_unit": "pH",
-      "sampling_interval": "60",
-      "installation_date": "2021-07-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-016",
-    "name": "WL Temperature Sensor 8",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "sensor_type": "temperature",
-      "latitude": "-1.2224",
-      "longitude": "36.762",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-08-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-017",
-    "name": "EL Pressure Sensor 1",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "pressure",
-      "latitude": "-1.3415",
-      "longitude": "36.7967",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-01-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-018",
-    "name": "EL Flow Sensor 2",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "flow",
-      "latitude": "-1.3265",
-      "longitude": "36.9017",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-02-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-019",
-    "name": "EL Quality Sensor 3",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "quality",
-      "latitude": "-1.3115",
-      "longitude": "36.8867",
-      "measurement_unit": "pH",
-      "sampling_interval": "60",
-      "installation_date": "2021-03-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-020",
-    "name": "EL Temperature Sensor 4",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "temperature",
-      "latitude": "-1.2965",
-      "longitude": "36.8717",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-04-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-021",
-    "name": "EL Pressure Sensor 5",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "pressure",
-      "latitude": "-1.2815",
-      "longitude": "36.8567",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-05-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-022",
-    "name": "EL Flow Sensor 6",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "flow",
-      "latitude": "-1.2665",
-      "longitude": "36.8417",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-06-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-023",
-    "name": "EL Quality Sensor 7",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "quality",
-      "latitude": "-1.2515",
-      "longitude": "36.8267",
-      "measurement_unit": "pH",
-      "sampling_interval": "60",
-      "installation_date": "2021-07-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-024",
-    "name": "EL Temperature Sensor 8",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "eastlands",
-      "sensor_type": "temperature",
-      "latitude": "-1.2365",
-      "longitude": "36.8117",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-08-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-025",
-    "name": "KR Pressure Sensor 1",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "pressure",
-      "latitude": "-1.3799",
-      "longitude": "36.647",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-01-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-026",
-    "name": "KR Flow Sensor 2",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "flow",
-      "latitude": "-1.3649",
-      "longitude": "36.752",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-02-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-027",
-    "name": "KR Quality Sensor 3",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "quality",
-      "latitude": "-1.3499",
-      "longitude": "36.737",
-      "measurement_unit": "pH",
-      "sampling_interval": "60",
-      "installation_date": "2021-03-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-028",
-    "name": "KR Temperature Sensor 4",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "temperature",
-      "latitude": "-1.3349",
-      "longitude": "36.722",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-04-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-029",
-    "name": "KR Pressure Sensor 5",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "pressure",
-      "latitude": "-1.3199",
-      "longitude": "36.707",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-05-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-030",
-    "name": "KR Flow Sensor 6",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "flow",
-      "latitude": "-1.3049",
-      "longitude": "36.692",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-06-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-031",
-    "name": "KR Quality Sensor 7",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "quality",
-      "latitude": "-1.2899",
-      "longitude": "36.677",
-      "measurement_unit": "pH",
-      "sampling_interval": "60",
-      "installation_date": "2021-07-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-032",
-    "name": "KR Temperature Sensor 8",
-    "type": "sensor",
-    "state": "running",
-    "metadata": {
-      "zone": "south",
-      "sensor_type": "temperature",
-      "latitude": "-1.2749",
-      "longitude": "36.662",
-      "measurement_unit": "\u00b0C",
-      "sampling_interval": "60",
-      "installation_date": "2022-08-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-033",
-    "name": "KS Pressure Sensor 1",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "north",
-      "sensor_type": "pressure",
-      "latitude": "-1.2878",
-      "longitude": "36.8326",
-      "measurement_unit": "bar",
-      "sampling_interval": "60",
-      "installation_date": "2019-01-15"
+      "road_location": "Ngong Road",
+      "installation_date": "2021-10-15"
     }
   },
   {
     "id": "SENSOR-NBI-034",
-    "name": "KS Flow Sensor 2",
+    "name": "Ngong Road Leak Detection 34",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.29655",
+      "longitude": "36.79595",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Ngong Road",
+      "installation_date": "2022-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-035",
+    "name": "Ngong Road Pressure 35",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.29605",
+      "longitude": "36.79645",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2018-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-036",
+    "name": "Ngong Road Flow 36",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "flow",
+      "latitude": "-1.30005",
+      "longitude": "36.77595",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-037",
+    "name": "Ngong Road Quality 37",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.30375",
+      "longitude": "36.76725",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-038",
+    "name": "Ngong Road Temperature 38",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.30775",
+      "longitude": "36.75225",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-039",
+    "name": "Ngong Road Leak Detection 39",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.30725",
+      "longitude": "36.75275",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Ngong Road",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-040",
+    "name": "Ngong Road Pressure 40",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.31195",
+      "longitude": "36.72035",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2018-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-041",
+    "name": "Ngong Road Flow 41",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.31145",
+      "longitude": "36.72085",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2019-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-042",
+    "name": "Ngong Road Quality 42",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.31945",
+      "longitude": "36.71035",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2020-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-043",
+    "name": "Ngong Road Temperature 43",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.31895",
+      "longitude": "36.71085",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2021-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-044",
+    "name": "Ngong Road Leak Detection 44",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.3328",
+      "longitude": "36.72645",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Ngong Road",
+      "installation_date": "2022-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-045",
+    "name": "Ngong Road Pressure 45",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.3323",
+      "longitude": "36.72695",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2018-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-046",
+    "name": "Ngong Road Flow 46",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.34665",
+      "longitude": "36.7373",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2019-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-047",
+    "name": "Ngong Road Quality 47",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.34615",
+      "longitude": "36.7378",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Ngong Road",
+      "installation_date": "2020-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-048",
+    "name": "Waiyaki Way Temperature 48",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "temperature",
+      "latitude": "-1.26695",
+      "longitude": "36.80325",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2021-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-049",
+    "name": "Waiyaki Way Leak Detection 49",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.26585",
+      "longitude": "36.79725",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2022-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-050",
+    "name": "Waiyaki Way Pressure 50",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.26485",
+      "longitude": "36.79225",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2018-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-051",
+    "name": "Waiyaki Way Flow 51",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "flow",
+      "latitude": "-1.26325",
+      "longitude": "36.78475",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2019-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-052",
+    "name": "Waiyaki Way Quality 52",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "quality",
+      "latitude": "-1.26125",
+      "longitude": "36.77475",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2020-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-053",
+    "name": "Waiyaki Way Temperature 53",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.26",
+      "longitude": "36.76475",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2021-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-054",
+    "name": "Waiyaki Way Leak Detection 54",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.25975",
+      "longitude": "36.75215",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2022-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-055",
+    "name": "Waiyaki Way Pressure 55",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.25925",
+      "longitude": "36.75265",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2018-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-056",
+    "name": "Jogoo Road Flow 56",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "flow",
+      "latitude": "-1.284",
+      "longitude": "36.8279",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2019-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-057",
+    "name": "Jogoo Road Quality 57",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "quality",
+      "latitude": "-1.2835",
+      "longitude": "36.8284",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2020-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-058",
+    "name": "Jogoo Road Temperature 58",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "temperature",
+      "latitude": "-1.2823",
+      "longitude": "36.84195",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2021-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-059",
+    "name": "Jogoo Road Leak Detection 59",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.2818",
+      "longitude": "36.84245",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Jogoo Road",
+      "installation_date": "2022-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-060",
+    "name": "Jogoo Road Pressure 60",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.2808",
+      "longitude": "36.85195",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2018-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-061",
+    "name": "Jogoo Road Flow 61",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "flow",
+      "latitude": "-1.2797",
+      "longitude": "36.85975",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2019-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-062",
+    "name": "Jogoo Road Quality 62",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "quality",
+      "latitude": "-1.2772",
+      "longitude": "36.87225",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2020-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-063",
+    "name": "Jogoo Road Temperature 63",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "temperature",
+      "latitude": "-1.2767",
+      "longitude": "36.87275",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2021-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-064",
+    "name": "Jogoo Road Leak Detection 64",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.27445",
+      "longitude": "36.8881",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Jogoo Road",
+      "installation_date": "2022-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-065",
+    "name": "Jogoo Road Pressure 65",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.27395",
+      "longitude": "36.8886",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Jogoo Road",
+      "installation_date": "2018-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-066",
+    "name": "Outer Ring Road North Flow 66",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "flow",
+      "latitude": "-1.255",
+      "longitude": "36.74965",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2019-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-067",
+    "name": "Outer Ring Road North Quality 67",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "quality",
+      "latitude": "-1.2545",
+      "longitude": "36.75015",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2020-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-068",
+    "name": "Outer Ring Road North Temperature 68",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.24775",
+      "longitude": "36.75725",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2021-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-069",
+    "name": "Outer Ring Road North Leak Detection 69",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.24275",
+      "longitude": "36.76475",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2022-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-070",
+    "name": "Outer Ring Road North Pressure 70",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.23775",
+      "longitude": "36.77475",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2018-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-071",
+    "name": "Outer Ring Road North Flow 71",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "north",
       "sensor_type": "flow",
-      "latitude": "-1.2728",
-      "longitude": "36.9376",
+      "latitude": "-1.23275",
+      "longitude": "36.78475",
       "measurement_unit": "m3/h",
       "sampling_interval": "60",
-      "installation_date": "2020-02-15"
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2019-12-15"
     }
   },
   {
-    "id": "SENSOR-NBI-035",
-    "name": "KS Quality Sensor 3",
+    "id": "SENSOR-NBI-072",
+    "name": "Outer Ring Road North Quality 72",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "north",
       "sensor_type": "quality",
-      "latitude": "-1.2578",
-      "longitude": "36.9226",
+      "latitude": "-1.22915",
+      "longitude": "36.79975",
       "measurement_unit": "pH",
       "sampling_interval": "60",
-      "installation_date": "2021-03-15"
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2020-01-15"
     }
   },
   {
-    "id": "SENSOR-NBI-036",
-    "name": "KS Temperature Sensor 4",
+    "id": "SENSOR-NBI-073",
+    "name": "Outer Ring Road North Temperature 73",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "north",
       "sensor_type": "temperature",
-      "latitude": "-1.2428",
-      "longitude": "36.9076",
+      "latitude": "-1.22865",
+      "longitude": "36.80025",
       "measurement_unit": "\u00b0C",
       "sampling_interval": "60",
-      "installation_date": "2022-04-15"
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2021-02-15"
     }
   },
   {
-    "id": "SENSOR-NBI-037",
-    "name": "KS Pressure Sensor 5",
+    "id": "SENSOR-NBI-074",
+    "name": "Outer Ring Road North Leak Detection 74",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.22665",
+      "longitude": "36.82475",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2022-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-075",
+    "name": "Outer Ring Road North Pressure 75",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "north",
       "sensor_type": "pressure",
-      "latitude": "-1.2278",
-      "longitude": "36.8926",
+      "latitude": "-1.22615",
+      "longitude": "36.82525",
       "measurement_unit": "bar",
       "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2018-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-076",
+    "name": "Outer Ring Road North Flow 76",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "flow",
+      "latitude": "-1.22665",
+      "longitude": "36.86605",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
       "installation_date": "2019-05-15"
     }
   },
   {
-    "id": "SENSOR-NBI-038",
-    "name": "KS Flow Sensor 6",
-    "type": "sensor",
-    "state": "idle",
-    "metadata": {
-      "zone": "north",
-      "sensor_type": "flow",
-      "latitude": "-1.2128",
-      "longitude": "36.8776",
-      "measurement_unit": "m3/h",
-      "sampling_interval": "60",
-      "installation_date": "2020-06-15"
-    }
-  },
-  {
-    "id": "SENSOR-NBI-039",
-    "name": "KS Quality Sensor 7",
+    "id": "SENSOR-NBI-077",
+    "name": "Outer Ring Road North Quality 77",
     "type": "sensor",
     "state": "running",
     "metadata": {
       "zone": "north",
       "sensor_type": "quality",
-      "latitude": "-1.1978",
-      "longitude": "36.8626",
+      "latitude": "-1.22615",
+      "longitude": "36.86655",
       "measurement_unit": "pH",
       "sampling_interval": "60",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-078",
+    "name": "Outer Ring Road East Temperature 78",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.23165",
+      "longitude": "36.89605",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
       "installation_date": "2021-07-15"
     }
   },
   {
-    "id": "SENSOR-NBI-040",
-    "name": "KS Temperature Sensor 8",
+    "id": "SENSOR-NBI-079",
+    "name": "Outer Ring Road East Leak Detection 79",
     "type": "sensor",
     "state": "running",
     "metadata": {
-      "zone": "north",
+      "zone": "eastlands",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.24275",
+      "longitude": "36.90475",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2022-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-080",
+    "name": "Outer Ring Road East Pressure 80",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.24225",
+      "longitude": "36.90525",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2018-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-081",
+    "name": "Outer Ring Road East Flow 81",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "flow",
+      "latitude": "-1.26025",
+      "longitude": "36.91225",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2019-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-082",
+    "name": "Outer Ring Road East Quality 82",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "quality",
+      "latitude": "-1.25975",
+      "longitude": "36.91275",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2020-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-083",
+    "name": "Outer Ring Road East Temperature 83",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
       "sensor_type": "temperature",
-      "latitude": "-1.1828",
-      "longitude": "36.8476",
+      "latitude": "-1.27525",
+      "longitude": "36.91725",
       "measurement_unit": "\u00b0C",
       "sampling_interval": "60",
-      "installation_date": "2022-08-15"
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2021-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-084",
+    "name": "Outer Ring Road East Leak Detection 84",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.29025",
+      "longitude": "36.91475",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2022-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-085",
+    "name": "Outer Ring Road East Pressure 85",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.28975",
+      "longitude": "36.91525",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2018-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-086",
+    "name": "Outer Ring Road East Flow 86",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.30885",
+      "longitude": "36.901",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2019-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-087",
+    "name": "Outer Ring Road East Quality 87",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.30835",
+      "longitude": "36.9015",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2020-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-088",
+    "name": "Southern Bypass Temperature 88",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.3227",
+      "longitude": "36.71825",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2021-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-089",
+    "name": "Southern Bypass Leak Detection 89",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.3222",
+      "longitude": "36.71875",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Southern Bypass",
+      "installation_date": "2022-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-090",
+    "name": "Southern Bypass Pressure 90",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.32775",
+      "longitude": "36.73975",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2018-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-091",
+    "name": "Southern Bypass Flow 91",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.32725",
+      "longitude": "36.74025",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2019-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-092",
+    "name": "Southern Bypass Quality 92",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.33525",
+      "longitude": "36.76475",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2020-09-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-093",
+    "name": "Southern Bypass Temperature 93",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.33475",
+      "longitude": "36.76525",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2021-10-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-094",
+    "name": "Southern Bypass Leak Detection 94",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.34275",
+      "longitude": "36.78975",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Southern Bypass",
+      "installation_date": "2022-11-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-095",
+    "name": "Southern Bypass Pressure 95",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.34225",
+      "longitude": "36.79025",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2018-12-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-096",
+    "name": "Southern Bypass Flow 96",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.34775",
+      "longitude": "36.80975",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-097",
+    "name": "Southern Bypass Quality 97",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.34725",
+      "longitude": "36.81025",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-098",
+    "name": "Southern Bypass Temperature 98",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.34525",
+      "longitude": "36.82725",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-099",
+    "name": "Southern Bypass Leak Detection 99",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "leak_detection",
+      "latitude": "-1.34475",
+      "longitude": "36.82775",
+      "measurement_unit": "boolean",
+      "sampling_interval": "30",
+      "road_location": "Southern Bypass",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-100",
+    "name": "Southern Bypass Pressure 100",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.3316",
+      "longitude": "36.8403",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "road_location": "Southern Bypass",
+      "installation_date": "2018-05-15"
     }
   }
 ]

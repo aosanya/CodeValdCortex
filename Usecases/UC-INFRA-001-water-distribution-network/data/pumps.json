@@ -8,15 +8,90 @@
       "zone": "westlands",
       "latitude": "-1.2595",
       "longitude": "36.7448",
-      "capacity_m3_per_hour": "1200",
-      "power_kw": "450",
-      "efficiency_percent": "87",
-      "installation_date": "2019-06-15"
+      "capacity_m3_per_hour": "1500",
+      "power_kw": "525",
+      "efficiency_percent": "84",
+      "installation_date": "2018-02-15"
     }
   },
   {
     "id": "PUMP-NBI-002",
-    "name": "Ngong Road Booster Station",
+    "name": "Kabete Backup Pump Station",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2595",
+      "longitude": "36.75",
+      "capacity_m3_per_hour": "1200",
+      "power_kw": "420",
+      "efficiency_percent": "85",
+      "installation_date": "2019-03-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-003",
+    "name": "City Centre Main Distribution",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.292",
+      "longitude": "36.8219",
+      "capacity_m3_per_hour": "1100",
+      "power_kw": "385",
+      "efficiency_percent": "86",
+      "installation_date": "2020-04-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-004",
+    "name": "CBD North Booster",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2845",
+      "longitude": "36.8213",
+      "capacity_m3_per_hour": "850",
+      "power_kw": "297",
+      "efficiency_percent": "87",
+      "installation_date": "2021-05-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-005",
+    "name": "Gikomba Booster Station",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.288",
+      "longitude": "36.835",
+      "capacity_m3_per_hour": "750",
+      "power_kw": "262",
+      "efficiency_percent": "88",
+      "installation_date": "2017-06-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-006",
+    "name": "Westlands Junction Pump",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2674",
+      "longitude": "36.807",
+      "capacity_m3_per_hour": "900",
+      "power_kw": "315",
+      "efficiency_percent": "89",
+      "installation_date": "2018-07-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-007",
+    "name": "Ngong Road Booster",
     "type": "pump",
     "state": "running",
     "metadata": {
@@ -24,58 +99,88 @@
       "latitude": "-1.2976",
       "longitude": "36.7824",
       "capacity_m3_per_hour": "850",
-      "power_kw": "320",
-      "efficiency_percent": "84",
-      "installation_date": "2020-03-22"
+      "power_kw": "297",
+      "efficiency_percent": "90",
+      "installation_date": "2019-08-15"
     }
   },
   {
-    "id": "PUMP-NBI-003",
-    "name": "City Centre Pressure Booster",
+    "id": "PUMP-NBI-008",
+    "name": "ABC Place Booster",
     "type": "pump",
     "state": "running",
     "metadata": {
-      "zone": "central",
-      "latitude": "-1.2845",
-      "longitude": "36.8213",
+      "zone": "westlands",
+      "latitude": "-1.2652",
+      "longitude": "36.8",
       "capacity_m3_per_hour": "650",
-      "power_kw": "280",
-      "efficiency_percent": "89",
-      "installation_date": "2018-11-08"
+      "power_kw": "227",
+      "efficiency_percent": "83",
+      "installation_date": "2020-09-15"
     }
   },
   {
-    "id": "PUMP-NBI-004",
-    "name": "Parklands Distribution Pump",
+    "id": "PUMP-NBI-009",
+    "name": "Parklands Estate Pump",
     "type": "pump",
     "state": "running",
     "metadata": {
-      "zone": "central",
-      "latitude": "-1.2637",
-      "longitude": "36.8273",
-      "capacity_m3_per_hour": "720",
-      "power_kw": "295",
-      "efficiency_percent": "86",
-      "installation_date": "2021-01-14"
+      "zone": "westlands",
+      "latitude": "-1.264",
+      "longitude": "36.79",
+      "capacity_m3_per_hour": "700",
+      "power_kw": "244",
+      "efficiency_percent": "84",
+      "installation_date": "2021-10-15"
     }
   },
   {
-    "id": "PUMP-NBI-005",
-    "name": "Eastleigh Booster Station",
+    "id": "PUMP-NBI-010",
+    "name": "Eastleigh Main Booster",
     "type": "pump",
     "state": "running",
     "metadata": {
       "zone": "eastlands",
       "latitude": "-1.2811",
       "longitude": "36.8494",
-      "capacity_m3_per_hour": "890",
-      "power_kw": "340",
+      "capacity_m3_per_hour": "950",
+      "power_kw": "332",
       "efficiency_percent": "85",
-      "installation_date": "2019-09-30"
+      "installation_date": "2017-11-15"
     }
   },
   {
-    "id": "PUMP-NBI-006",
+    "id": "PUMP-NBI-011",
+    "name": "Eastleigh South Pump",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.277",
+      "longitude": "36.855",
+      "capacity_m3_per_hour": "750",
+      "power_kw": "262",
+      "efficiency_percent": "86",
+      "installation_date": "2018-12-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-012",
+    "name": "Umoja Distribution Pump",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.2734",
+      "longitude": "36.8967",
+      "capacity_m3_per_hour": "800",
+      "power_kw": "280",
+      "efficiency_percent": "87",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-013",
     "name": "Embakasi Main Pump",
     "type": "pump",
     "state": "running",
@@ -83,14 +188,29 @@
       "zone": "eastlands",
       "latitude": "-1.3172",
       "longitude": "36.8925",
-      "capacity_m3_per_hour": "980",
-      "power_kw": "385",
+      "capacity_m3_per_hour": "1050",
+      "power_kw": "367",
       "efficiency_percent": "88",
-      "installation_date": "2020-07-19"
+      "installation_date": "2020-02-15"
     }
   },
   {
-    "id": "PUMP-NBI-007",
+    "id": "PUMP-NBI-014",
+    "name": "Embakasi Airport Booster",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.325",
+      "longitude": "36.9",
+      "capacity_m3_per_hour": "850",
+      "power_kw": "297",
+      "efficiency_percent": "89",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-015",
     "name": "Karen Hillside Pump",
     "type": "pump",
     "state": "running",
@@ -98,44 +218,119 @@
       "zone": "south",
       "latitude": "-1.3134",
       "longitude": "36.7012",
-      "capacity_m3_per_hour": "620",
-      "power_kw": "265",
-      "efficiency_percent": "83",
-      "installation_date": "2019-04-11"
+      "capacity_m3_per_hour": "750",
+      "power_kw": "262",
+      "efficiency_percent": "90",
+      "installation_date": "2017-04-15"
     }
   },
   {
-    "id": "PUMP-NBI-008",
+    "id": "PUMP-NBI-016",
+    "name": "Karen North Booster",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.325",
+      "longitude": "36.715",
+      "capacity_m3_per_hour": "650",
+      "power_kw": "227",
+      "efficiency_percent": "83",
+      "installation_date": "2018-05-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-017",
     "name": "Langata Distribution Pump",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3401",
+      "longitude": "36.7334",
+      "capacity_m3_per_hour": "800",
+      "power_kw": "280",
+      "efficiency_percent": "84",
+      "installation_date": "2019-06-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-018",
+    "name": "Langata South Booster",
     "type": "pump",
     "state": "running",
     "metadata": {
       "zone": "south",
       "latitude": "-1.3527",
       "longitude": "36.7417",
-      "capacity_m3_per_hour": "740",
-      "power_kw": "310",
-      "efficiency_percent": "87",
-      "installation_date": "2021-05-27"
+      "capacity_m3_per_hour": "700",
+      "power_kw": "244",
+      "efficiency_percent": "85",
+      "installation_date": "2020-07-15"
     }
   },
   {
-    "id": "PUMP-NBI-009",
-    "name": "Kasarani Booster Station",
+    "id": "PUMP-NBI-019",
+    "name": "Industrial Area Main Pump",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.3227",
+      "longitude": "36.8461",
+      "capacity_m3_per_hour": "1300",
+      "power_kw": "454",
+      "efficiency_percent": "86",
+      "installation_date": "2021-08-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-020",
+    "name": "Industrial North Booster",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.315",
+      "longitude": "36.825",
+      "capacity_m3_per_hour": "900",
+      "power_kw": "315",
+      "efficiency_percent": "87",
+      "installation_date": "2017-09-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-021",
+    "name": "Kasarani Main Booster",
     "type": "pump",
     "state": "running",
     "metadata": {
       "zone": "north",
-      "latitude": "-1.2234",
-      "longitude": "36.8981",
-      "capacity_m3_per_hour": "810",
-      "power_kw": "325",
-      "efficiency_percent": "86",
-      "installation_date": "2020-02-16"
+      "latitude": "-1.2278",
+      "longitude": "36.8926",
+      "capacity_m3_per_hour": "950",
+      "power_kw": "332",
+      "efficiency_percent": "88",
+      "installation_date": "2018-10-15"
     }
   },
   {
-    "id": "PUMP-NBI-010",
+    "id": "PUMP-NBI-022",
+    "name": "Kasarani North Pump",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.22",
+      "longitude": "36.9",
+      "capacity_m3_per_hour": "800",
+      "power_kw": "280",
+      "efficiency_percent": "89",
+      "installation_date": "2019-11-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-023",
     "name": "Ruaraka Distribution Pump",
     "type": "pump",
     "state": "running",
@@ -143,40 +338,40 @@
       "zone": "north",
       "latitude": "-1.2458",
       "longitude": "36.8789",
-      "capacity_m3_per_hour": "690",
-      "power_kw": "285",
-      "efficiency_percent": "84",
-      "installation_date": "2019-12-03"
+      "capacity_m3_per_hour": "750",
+      "power_kw": "262",
+      "efficiency_percent": "90",
+      "installation_date": "2020-12-15"
     }
   },
   {
-    "id": "PUMP-NBI-011",
-    "name": "Industrial Area Pump Station",
+    "id": "PUMP-NBI-024",
+    "name": "Ruaraka East Booster",
+    "type": "pump",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.235",
+      "longitude": "36.885",
+      "capacity_m3_per_hour": "700",
+      "power_kw": "244",
+      "efficiency_percent": "83",
+      "installation_date": "2021-01-15"
+    }
+  },
+  {
+    "id": "PUMP-NBI-025",
+    "name": "Parklands Main Distribution",
     "type": "pump",
     "state": "running",
     "metadata": {
       "zone": "central",
-      "latitude": "-1.3227",
-      "longitude": "36.8461",
-      "capacity_m3_per_hour": "1100",
-      "power_kw": "425",
-      "efficiency_percent": "88",
-      "installation_date": "2018-08-21"
-    }
-  },
-  {
-    "id": "PUMP-NBI-012",
-    "name": "Kilimani Pressure Booster",
-    "type": "pump",
-    "state": "running",
-    "metadata": {
-      "zone": "westlands",
-      "latitude": "-1.2894",
-      "longitude": "36.7842",
-      "capacity_m3_per_hour": "580",
-      "power_kw": "245",
-      "efficiency_percent": "85",
-      "installation_date": "2021-03-08"
+      "latitude": "-1.2637",
+      "longitude": "36.8273",
+      "capacity_m3_per_hour": "850",
+      "power_kw": "297",
+      "efficiency_percent": "84",
+      "installation_date": "2017-02-15"
     }
   }
 ]

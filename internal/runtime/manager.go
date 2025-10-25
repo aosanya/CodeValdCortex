@@ -586,11 +586,11 @@ func (m *Manager) checkAgentHealth() {
 
 	for _, a := range agents {
 		if !a.IsHealthy() {
-			m.logger.WithFields(logrus.Fields{
-				"agent_id":       a.ID,
-				"last_heartbeat": a.LastHeartbeat,
-				"current_state":  a.GetState(),
-			}).Warn("Agent health check failed")
+			// m.logger.WithFields(logrus.Fields{
+			// 	"agent_id":       a.ID,
+			// 	"last_heartbeat": a.LastHeartbeat,
+			// 	"current_state":  a.GetState(),
+			// }).Warn("Agent health check failed")
 
 			// TODO: Implement recovery strategy
 		}

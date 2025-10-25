@@ -42,16 +42,25 @@ func (h *TopologyVisualizerHandler) GetTopologyData(c *gin.Context) {
 	// Transform agents to topology nodes
 	nodes := make([]gin.H, len(agents))
 	for i, a := range agents {
+		// Preserve original metadata and add runtime info
+		metadata := a.Metadata
+		if metadata == nil {
+			metadata = make(map[string]string)
+		}
+		// Add runtime health info to metadata (convert bool to string)
+		if a.IsHealthy() {
+			metadata["healthy"] = "true"
+		} else {
+			metadata["healthy"] = "false"
+		}
+		metadata["last_heartbeat"] = a.LastHeartbeat.String()
+
 		nodes[i] = gin.H{
 			"id":         a.ID,
 			"name":       a.Name,
 			"agent_type": a.Type,
 			"status":     string(a.GetState()),
-			"metadata": gin.H{
-				"healthy":        a.IsHealthy(),
-				"created_at":     a.CreatedAt,
-				"last_heartbeat": a.LastHeartbeat,
-			},
+			"metadata":   metadata,
 		}
 	}
 

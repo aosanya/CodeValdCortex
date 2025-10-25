@@ -1,212 +1,658 @@
 [
   {
     "id": "VALVE-NBI-001",
-    "name": "Uhuru Highway Main Valve",
+    "name": "Uhuru Highway Control Valve 1",
     "type": "valve",
     "state": "open",
     "metadata": {
       "zone": "central",
-      "latitude": "-1.2919",
-      "longitude": "36.8219",
-      "valve_type": "gate",
-      "diameter_mm": "600",
-      "position_percent": "100"
+      "latitude": "-1.28725",
+      "longitude": "36.8209",
+      "valve_type": "butterfly",
+      "diameter_mm": "700",
+      "position_percent": "90",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2018-02-20"
     }
   },
   {
     "id": "VALVE-NBI-002",
-    "name": "Westlands Isolator Valve",
+    "name": "Uhuru Highway Control Valve 2",
     "type": "valve",
     "state": "open",
     "metadata": {
-      "zone": "westlands",
-      "latitude": "-1.2652",
-      "longitude": "36.8102",
-      "valve_type": "butterfly",
-      "diameter_mm": "500",
-      "position_percent": "100"
+      "zone": "south",
+      "latitude": "-1.304",
+      "longitude": "36.8195",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "700",
+      "position_percent": "95",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2019-03-20"
     }
   },
   {
     "id": "VALVE-NBI-003",
-    "name": "Eastleigh Control Valve",
+    "name": "Uhuru Highway Control Valve 3",
     "type": "valve",
     "state": "open",
     "metadata": {
-      "zone": "eastlands",
-      "latitude": "-1.2789",
-      "longitude": "36.8523",
-      "valve_type": "gate",
-      "diameter_mm": "450",
-      "position_percent": "85"
+      "zone": "south",
+      "latitude": "-1.31885",
+      "longitude": "36.83805",
+      "valve_type": "check",
+      "diameter_mm": "700",
+      "position_percent": "100",
+      "road_location": "Uhuru Highway",
+      "installation_date": "2020-04-20"
     }
   },
   {
     "id": "VALVE-NBI-004",
-    "name": "Karen Zone Isolator",
+    "name": "Thika Road Control Valve 4",
     "type": "valve",
     "state": "open",
     "metadata": {
-      "zone": "south",
-      "latitude": "-1.3167",
-      "longitude": "36.7089",
-      "valve_type": "butterfly",
+      "zone": "north",
+      "latitude": "-1.2525",
+      "longitude": "36.845",
+      "valve_type": "gate",
       "diameter_mm": "400",
-      "position_percent": "100"
+      "position_percent": "85",
+      "road_location": "Thika Road",
+      "installation_date": "2021-05-20"
     }
   },
   {
     "id": "VALVE-NBI-005",
-    "name": "Kasarani Main Valve",
+    "name": "Thika Road Control Valve 5",
     "type": "valve",
     "state": "open",
     "metadata": {
-      "zone": "north",
-      "latitude": "-1.2256",
-      "longitude": "36.8954",
-      "valve_type": "gate",
-      "diameter_mm": "550",
-      "position_percent": "100"
+      "zone": "eastlands",
+      "latitude": "-1.2314",
+      "longitude": "36.8888",
+      "valve_type": "butterfly",
+      "diameter_mm": "400",
+      "position_percent": "90",
+      "road_location": "Thika Road",
+      "installation_date": "2017-06-20"
     }
   },
   {
     "id": "VALVE-NBI-006",
-    "name": "Ngara Junction Valve",
+    "name": "Mombasa Road Control Valve 6",
     "type": "valve",
     "state": "open",
     "metadata": {
       "zone": "central",
-      "latitude": "-1.2723",
-      "longitude": "36.8342",
-      "valve_type": "butterfly",
+      "latitude": "-1.2945",
+      "longitude": "36.82345",
+      "valve_type": "pressure_reducing",
       "diameter_mm": "400",
-      "position_percent": "90"
+      "position_percent": "95",
+      "road_location": "Mombasa Road",
+      "installation_date": "2018-07-20"
     }
   },
   {
     "id": "VALVE-NBI-007",
-    "name": "Kilimani Pressure Valve",
+    "name": "Mombasa Road Control Valve 7",
     "type": "valve",
-    "state": "open",
+    "state": "partially_open",
     "metadata": {
-      "zone": "westlands",
-      "latitude": "-1.2881",
-      "longitude": "36.7867",
-      "valve_type": "pressure_reducing",
-      "diameter_mm": "350",
-      "position_percent": "75"
+      "zone": "south",
+      "latitude": "-1.3146",
+      "longitude": "36.87625",
+      "valve_type": "check",
+      "diameter_mm": "600",
+      "position_percent": "75",
+      "road_location": "Mombasa Road",
+      "installation_date": "2019-08-20"
     }
   },
   {
     "id": "VALVE-NBI-008",
-    "name": "Umoja Estate Valve",
-    "type": "valve",
-    "state": "open",
-    "metadata": {
-      "zone": "eastlands",
-      "latitude": "-1.2734",
-      "longitude": "36.8967",
-      "valve_type": "gate",
-      "diameter_mm": "400",
-      "position_percent": "100"
-    }
-  },
-  {
-    "id": "VALVE-NBI-009",
-    "name": "Langata Road Isolator",
-    "type": "valve",
-    "state": "open",
-    "metadata": {
-      "zone": "south",
-      "latitude": "-1.3401",
-      "longitude": "36.7334",
-      "valve_type": "butterfly",
-      "diameter_mm": "450",
-      "position_percent": "100"
-    }
-  },
-  {
-    "id": "VALVE-NBI-010",
-    "name": "Ruaraka Distribution Valve",
-    "type": "valve",
-    "state": "open",
-    "metadata": {
-      "zone": "north",
-      "latitude": "-1.2423",
-      "longitude": "36.8812",
-      "valve_type": "gate",
-      "diameter_mm": "400",
-      "position_percent": "95"
-    }
-  },
-  {
-    "id": "VALVE-NBI-011",
-    "name": "Industrial Area Main Valve",
+    "name": "Ngong Road Control Valve 8",
     "type": "valve",
     "state": "open",
     "metadata": {
       "zone": "central",
-      "latitude": "-1.3189",
-      "longitude": "36.8501",
+      "latitude": "-1.2935",
+      "longitude": "36.81595",
       "valve_type": "gate",
-      "diameter_mm": "700",
-      "position_percent": "100"
+      "diameter_mm": "400",
+      "position_percent": "85",
+      "road_location": "Ngong Road",
+      "installation_date": "2020-09-20"
     }
   },
   {
-    "id": "VALVE-NBI-012",
-    "name": "Lavington Control Valve",
-    "type": "valve",
-    "state": "open",
-    "metadata": {
-      "zone": "westlands",
-      "latitude": "-1.2789",
-      "longitude": "36.7723",
-      "valve_type": "butterfly",
-      "diameter_mm": "350",
-      "position_percent": "100"
-    }
-  },
-  {
-    "id": "VALVE-NBI-013",
-    "name": "Embakasi Zone Isolator",
-    "type": "valve",
-    "state": "open",
-    "metadata": {
-      "zone": "eastlands",
-      "latitude": "-1.3134",
-      "longitude": "36.8889",
-      "valve_type": "gate",
-      "diameter_mm": "500",
-      "position_percent": "100"
-    }
-  },
-  {
-    "id": "VALVE-NBI-014",
-    "name": "Rongai Border Valve",
+    "id": "VALVE-NBI-009",
+    "name": "Ngong Road Control Valve 9",
     "type": "valve",
     "state": "open",
     "metadata": {
       "zone": "south",
-      "latitude": "-1.3856",
-      "longitude": "36.7156",
+      "latitude": "-1.3035",
+      "longitude": "36.7675",
       "valve_type": "butterfly",
       "diameter_mm": "400",
-      "position_percent": "100"
+      "position_percent": "90",
+      "road_location": "Ngong Road",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-010",
+    "name": "Ngong Road Control Valve 10",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3192",
+      "longitude": "36.7106",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "600",
+      "position_percent": "95",
+      "road_location": "Ngong Road",
+      "installation_date": "2017-11-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-011",
+    "name": "Waiyaki Way Control Valve 11",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2667",
+      "longitude": "36.8035",
+      "valve_type": "check",
+      "diameter_mm": "400",
+      "position_percent": "100",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2018-12-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-012",
+    "name": "Waiyaki Way Control Valve 12",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.263",
+      "longitude": "36.785",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "85",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2019-01-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-013",
+    "name": "Waiyaki Way Control Valve 13",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2595",
+      "longitude": "36.7524",
+      "valve_type": "butterfly",
+      "diameter_mm": "500",
+      "position_percent": "90",
+      "road_location": "Waiyaki Way",
+      "installation_date": "2020-02-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-014",
+    "name": "Jogoo Road Control Valve 14",
+    "type": "valve",
+    "state": "partially_open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.28055",
+      "longitude": "36.8522",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "400",
+      "position_percent": "75",
+      "road_location": "Jogoo Road",
+      "installation_date": "2021-03-20"
     }
   },
   {
     "id": "VALVE-NBI-015",
-    "name": "Kahawa West Valve",
+    "name": "Jogoo Road Control Valve 15",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.2742",
+      "longitude": "36.88835",
+      "valve_type": "check",
+      "diameter_mm": "500",
+      "position_percent": "100",
+      "road_location": "Jogoo Road",
+      "installation_date": "2017-04-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-016",
+    "name": "Outer Ring Road North Control Valve 16",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2425",
+      "longitude": "36.765",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "85",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2018-05-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-017",
+    "name": "Outer Ring Road North Control Valve 17",
     "type": "valve",
     "state": "open",
     "metadata": {
       "zone": "north",
-      "latitude": "-1.2089",
-      "longitude": "36.9123",
+      "latitude": "-1.2289",
+      "longitude": "36.8",
+      "valve_type": "butterfly",
+      "diameter_mm": "600",
+      "position_percent": "90",
+      "road_location": "Outer Ring Road North",
+      "installation_date": "2019-06-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-018",
+    "name": "Outer Ring Road East Control Valve 18",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.2314",
+      "longitude": "36.8963",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "400",
+      "position_percent": "95",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2020-07-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-019",
+    "name": "Outer Ring Road East Control Valve 19",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.275",
+      "longitude": "36.9175",
+      "valve_type": "check",
+      "diameter_mm": "400",
+      "position_percent": "100",
+      "road_location": "Outer Ring Road East",
+      "installation_date": "2021-08-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-020",
+    "name": "Southern Bypass Control Valve 20",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.32245",
+      "longitude": "36.7185",
       "valve_type": "gate",
-      "diameter_mm": "450",
-      "position_percent": "100"
+      "diameter_mm": "700",
+      "position_percent": "85",
+      "road_location": "Southern Bypass",
+      "installation_date": "2017-09-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-021",
+    "name": "Southern Bypass Control Valve 21",
+    "type": "valve",
+    "state": "partially_open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3425",
+      "longitude": "36.79",
+      "valve_type": "butterfly",
+      "diameter_mm": "700",
+      "position_percent": "75",
+      "road_location": "Southern Bypass",
+      "installation_date": "2018-10-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-022",
+    "name": "Southern Bypass Control Valve 22",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.33135",
+      "longitude": "36.84055",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "700",
+      "position_percent": "95",
+      "road_location": "Southern Bypass",
+      "installation_date": "2019-11-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-023",
+    "name": "Limuru Road Control Valve 23",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.245",
+      "longitude": "36.76",
+      "valve_type": "check",
+      "diameter_mm": "600",
+      "position_percent": "100",
+      "road_location": "Limuru Road",
+      "installation_date": "2020-12-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-024",
+    "name": "Forest Road Control Valve 24",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2675",
+      "longitude": "36.8175",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "85",
+      "road_location": "Forest Road",
+      "installation_date": "2021-01-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-025",
+    "name": "Kenyatta Avenue Control Valve 25",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.28475",
+      "longitude": "36.82315",
+      "valve_type": "butterfly",
+      "diameter_mm": "350",
+      "position_percent": "90",
+      "road_location": "Kenyatta Avenue",
+      "installation_date": "2017-02-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-026",
+    "name": "Kenyatta Avenue Control Valve 26",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2875",
+      "longitude": "36.8375",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "350",
+      "position_percent": "95",
+      "road_location": "Kenyatta Avenue",
+      "installation_date": "2018-03-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-027",
+    "name": "Haile Selassie Avenue Control Valve 27",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3025",
+      "longitude": "36.8215",
+      "valve_type": "check",
+      "diameter_mm": "350",
+      "position_percent": "100",
+      "road_location": "Haile Selassie Avenue",
+      "installation_date": "2019-04-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-028",
+    "name": "Juja Road Control Valve 28",
+    "type": "valve",
+    "state": "partially_open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2725",
+      "longitude": "36.845",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "75",
+      "road_location": "Juja Road",
+      "installation_date": "2020-05-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-029",
+    "name": "Kiambu Road Control Valve 29",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.25",
+      "longitude": "36.815",
+      "valve_type": "butterfly",
+      "diameter_mm": "500",
+      "position_percent": "90",
+      "road_location": "Kiambu Road",
+      "installation_date": "2021-06-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-030",
+    "name": "Langata Road Control Valve 30",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2985",
+      "longitude": "36.81595",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "500",
+      "position_percent": "95",
+      "road_location": "Langata Road",
+      "installation_date": "2017-07-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-031",
+    "name": "Langata Road Control Valve 31",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.33255",
+      "longitude": "36.7517",
+      "valve_type": "check",
+      "diameter_mm": "600",
+      "position_percent": "100",
+      "road_location": "Langata Road",
+      "installation_date": "2018-08-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-032",
+    "name": "Enterprise Road Control Valve 32",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.32135",
+      "longitude": "36.84055",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "85",
+      "road_location": "Enterprise Road",
+      "installation_date": "2019-09-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-033",
+    "name": "Eastleigh 1st Avenue Control Valve 33",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.278",
+      "longitude": "36.8535",
+      "valve_type": "butterfly",
+      "diameter_mm": "350",
+      "position_percent": "90",
+      "road_location": "Eastleigh 1st Avenue",
+      "installation_date": "2020-10-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-034",
+    "name": "Eastleigh 2nd Avenue Control Valve 34",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.28155",
+      "longitude": "36.8507",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "350",
+      "position_percent": "95",
+      "road_location": "Eastleigh 2nd Avenue",
+      "installation_date": "2021-11-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-035",
+    "name": "Eastleigh 2nd Avenue Control Valve 35",
+    "type": "valve",
+    "state": "partially_open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2845",
+      "longitude": "36.859",
+      "valve_type": "check",
+      "diameter_mm": "350",
+      "position_percent": "75",
+      "road_location": "Eastleigh 2nd Avenue",
+      "installation_date": "2017-12-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-036",
+    "name": "Karen Road Control Valve 36",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3235",
+      "longitude": "36.7125",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "85",
+      "road_location": "Karen Road",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-037",
+    "name": "Ruaraka Road Control Valve 37",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.249",
+      "longitude": "36.8725",
+      "valve_type": "butterfly",
+      "diameter_mm": "400",
+      "position_percent": "90",
+      "road_location": "Ruaraka Road",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-038",
+    "name": "ABC Place Link Control Valve 38",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2676",
+      "longitude": "36.8025",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "300",
+      "position_percent": "95",
+      "road_location": "ABC Place Link",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-039",
+    "name": "CBD East Link Control Valve 39",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2895",
+      "longitude": "36.8325",
+      "valve_type": "check",
+      "diameter_mm": "300",
+      "position_percent": "100",
+      "road_location": "CBD East Link",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-040",
+    "name": "Eastleigh Cross Link Control Valve 40",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2795",
+      "longitude": "36.8535",
+      "valve_type": "gate",
+      "diameter_mm": "300",
+      "position_percent": "85",
+      "road_location": "Eastleigh Cross Link",
+      "installation_date": "2017-05-20"
+    }
+  },
+  {
+    "id": "VALVE-NBI-041",
+    "name": "Kasarani Estate Link Control Valve 41",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.2289",
+      "longitude": "36.8888",
+      "valve_type": "butterfly",
+      "diameter_mm": "300",
+      "position_percent": "90",
+      "road_location": "Kasarani Estate Link",
+      "installation_date": "2018-06-20"
     }
   }
 ]

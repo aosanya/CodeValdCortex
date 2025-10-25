@@ -1,7 +1,7 @@
 # MVP - UC-INFRA-001 Water Distribution Network Showcase
 
-**Last Updated**: October 24, 2025  
-**Current Status**: Phase 4 Complete (100%), Moving to Visualization and Analytics
+**Last Updated**: October 25, 2025  
+**Current Status**: Phase 4 Complete (100%), Phase 6 In Progress (33%)
 
 ## Task Overview
 - **Objective**: Demonstrate CodeValdCortex framework capabilities using the Water Distribution Network use case
@@ -14,25 +14,25 @@
 ### ✅ What's Working Now
 1. **Agent Type System**: 5 water infrastructure agent types defined and loaded (pipe, sensor, pump, valve, zone coordinator) - See INFRA-001 to INFRA-005 in mvp_done.md
 2. **Framework Core**: Complete agent runtime, messaging (direct + pub/sub), state persistence, REST API, Web UI - See INFRA-006, INFRA-012, INFRA-014, INFRA-016 in mvp_done.md
-3. **Agent Instances**: 27 agent instances created representing water distribution zone topology - See INFRA-007, INFRA-008 in mvp_done.md
+3. **Agent Instances**: 293 agent instances representing comprehensive Nairobi water distribution network - See INFRA-007, INFRA-008, INFRA-017 in mvp_done.md
 4. **Demonstration Scenarios**: Leak detection, pressure optimization, and predictive maintenance implemented - See INFRA-009, INFRA-010, INFRA-011 in mvp_done.md
-5. **Web Interface**: Bulma CSS-styled dashboard for agent type and instance management
+5. **Web Interface**: Bulma CSS-styled dashboard with agent management and geographic visualizer
+6. **Network Topology Visualizer**: Deck.gl + MapLibre GL geographic visualization showing 293 agents on Nairobi map - See INFRA-017 in mvp_done.md
 
 ### 🎯 What's Next
-1. **Visualization**: Build network topology map showing real-time agent states and interactions (INFRA-017)
-2. **Data Storage**: Implement time-series storage for sensor readings and metrics (INFRA-013)
-3. **Analytics**: Add water infrastructure-specific analytics queries and reports (INFRA-015)
-4. **Advanced UI**: Alert management and performance metrics dashboards (INFRA-018, INFRA-019)
+1. **Data Storage**: Implement time-series storage for sensor readings and metrics (INFRA-013)
+2. **Analytics**: Add water infrastructure-specific analytics queries and reports (INFRA-015)
+3. **Advanced UI**: Alert management and performance metrics dashboards (INFRA-018, INFRA-019)
 
 ### 📊 Progress Metrics
 - **Framework Foundation**: ✅ 100% Complete
 - **Agent Type Configuration**: ✅ 100% Complete (5/5 types)
-- **Instance Creation**: ✅ 100% Complete (27/27 agents)
+- **Instance Creation**: ✅ 100% Complete (293/293 agents)
 - **Scenario Implementation**: ✅ 100% Complete (3/3 scenarios)
-- **Visualization & UI**: ⚠️ 40% Complete (base UI done, topology visualizer and dashboards pending)
-- **Overall MVP**: 41% Complete (11/27 tasks)
+- **Visualization & UI**: ⚠️ 67% Complete (base UI + topology visualizer done, advanced dashboards pending)
+- **Overall MVP**: 44% Complete (12/27 tasks)
 
-**Note**: Completed tasks (11 total) have been moved to mvp_done.md for detailed documentation. See that file for INFRA-001 through INFRA-011 details.
+**Note**: Completed tasks (12 total) have been moved to mvp_done.md for detailed documentation. See that file for INFRA-001 through INFRA-017 details.
 
 ## Module Architecture
 
@@ -144,15 +144,14 @@
 
 ## Phase 6: Visualization & UI (P1 - Critical) ⚠️ PARTIALLY COMPLETE
 
-**Status**: INFRA-016 complete (see mvp_done.md). Water infrastructure-specific visualizations need to be added.
+**Status**: INFRA-016 and INFRA-017 complete (see mvp_done.md). Alert management and performance metrics dashboards remain.
 
 | Task ID | Title | Description | Module | Status | Priority | Effort | Skills Required | Dependencies |
 |---------|-------|-------------|--------|--------|----------|--------|-----------------|--------------|
-| INFRA-017 | Network Topology Visualizer | Add water network topology map to dashboard: pipes, sensors, pumps, valves with color-coded status indicators and real-time updates using SVG/Canvas | **UC-INFRA-001** | 🚧 In Progress | P1 | High | Frontend, SVG/Canvas | INFRA-016, INFRA-008 |
 | INFRA-018 | Alert Management UI | Enhance framework alert system with water-specific alerts: leak detection, pressure anomalies, maintenance schedules with priority indicators | **UC-INFRA-001** | Not Started | P1 | Medium | Go, Frontend | INFRA-016, INFRA-009 |
 | INFRA-019 | Performance Metrics Dashboard | Add infrastructure metrics view: flow rates, pressure trends, energy consumption, leak detection stats, agent health for zones | **UC-INFRA-001** | Not Started | P1 | Medium | Frontend, Chart.js | INFRA-016, INFRA-015 |
 
-**Completed Tasks**: See mvp_done.md for INFRA-016 (Framework Web UI)
+**Completed Tasks**: See mvp_done.md for INFRA-016 (Framework Web UI) and INFRA-017 (Network Topology Visualizer)
 
 ## Phase 7: Advanced Features & Scenarios (P2 - Enhancement)
 
@@ -216,17 +215,17 @@
 **Available Now**:
 - ✅ Web UI at http://localhost:8083 with Bulma CSS styling
 - ✅ Agent Type registry (5 water infrastructure types loaded)
-- ✅ Agent instance management (27 agents deployed)
+- ✅ Agent instance management (293 agents representing Nairobi water network)
 - ✅ Three complete demonstration scenarios:
   - ✅ Leak Detection (INFRA-009) - 4-step workflow with multi-agent coordination
   - ✅ Pressure Optimization (INFRA-010) - 3-cycle continuous optimization
   - ✅ Predictive Maintenance (INFRA-011) - 4-week degradation monitoring
+- ✅ Geographic network visualizer (INFRA-017) - Deck.gl + MapLibre GL showing 293 agents on Nairobi map
 - ✅ ArangoDB message and pub/sub infrastructure
 - ✅ Real-time health monitoring and status display
 - ✅ Configuration-based deployment with startup scripts
 
 **Needs Implementation**:
-- ⚠️ Network topology visualizer (INFRA-017)
 - ⚠️ Time-series data storage (INFRA-013)
 - ⚠️ Water-specific analytics queries (INFRA-015)
 - ⚠️ Alert management UI (INFRA-018)
@@ -238,6 +237,13 @@
 - ✅ Agent type JSON schemas with detailed property definitions (INFRA-001 to INFRA-005)
 - ✅ Configuration-based architecture documentation
 - ✅ Environment variable configuration guide
+- ✅ Six detailed coding session documents:
+  - INFRA-001: Pipe Agent Implementation
+  - INFRA-007: Fix Agent Instance Data Loading Path
+  - INFRA-009: Leak Detection Scenario
+  - INFRA-010: Pressure Optimization Scenario
+  - INFRA-011: Predictive Maintenance Scenario
+  - INFRA-017: Network Topology Visualizer
 - ✅ Startup and deployment scripts
 - ✅ Five detailed coding session documents:
   - INFRA-001: Pipe Agent Implementation
@@ -336,24 +342,24 @@
 2. **Phase 2**: Complete framework communication system (INFRA-006)
 3. **Phase 4**: Three demonstration scenarios (INFRA-009, INFRA-010, INFRA-011)
 4. **Phase 5**: ArangoDB collections and agent state persistence (INFRA-012, INFRA-014)
-5. **Phase 6**: Base web UI with agent management (INFRA-016)
-6. **Infrastructure**: Environment configuration, startup scripts, database auto-creation
+5. **Phase 6**: Base web UI with agent management (INFRA-016), Geographic network visualizer (INFRA-017)
+6. **Infrastructure**: Environment configuration, startup scripts, database auto-creation, 293-agent Nairobi water network
 
-### ⏳ In Progress (1 task)
-- **INFRA-017**: Network Topology Visualizer - Add water network topology map to dashboard
+### ⏳ In Progress (0 tasks)
+- None - Ready for next phase
 
 ### 🎯 Next Priorities
-1. **INFRA-017**: Build network topology visualizer for dashboard
-2. **INFRA-013**: Time-series data storage for sensor readings
-3. **INFRA-015**: Historical analytics queries for infrastructure metrics
+1. **INFRA-013**: Time-series data storage for sensor readings
+2. **INFRA-015**: Historical analytics queries for infrastructure metrics
+3. **INFRA-018**: Alert management UI
 
 ### 📊 Overall Statistics
 - **Total MVP Tasks**: 27 tasks
-- **Completed**: 11 tasks (41%)
+- **Completed**: 12 tasks (44%)
 - **Framework-Provided**: 5 tasks (19%)
-- **Remaining**: 11 tasks (41%)
+- **Remaining**: 10 tasks (37%)
 - **P0 (Critical) Complete**: 7/10 (70%)
-- **P1 (High) Complete**: 4/11 (36%)
+- **P1 (High) Complete**: 5/11 (45%)
 - **P2 (Enhancement) Complete**: 0/6 (0%)
 
 ## Workflow Integration

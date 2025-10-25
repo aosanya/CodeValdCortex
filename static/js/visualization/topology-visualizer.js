@@ -87,6 +87,13 @@ class TopologyVisualizer {
      * Load data and render
      */
     async loadData(agents, edges) {
+        console.log(`Loading ${agents.length} agents, ${edges.length} edges`);
+
+        // Log first agent to see structure
+        if (agents.length > 0) {
+            console.log('First agent structure:', JSON.stringify(agents[0], null, 2));
+        }
+
         // Transform agents to nodes
         this.nodes = agents.map(agent => {
             const metadata = agent.metadata || {};
@@ -118,6 +125,13 @@ class TopologyVisualizer {
             };
         });
 
+        // Log sample of parsed nodes
+        const nodesWithCoords = this.nodes.filter(n => n.position !== null);
+        console.log(`Parsed: ${nodesWithCoords.length}/${this.nodes.length} nodes have coordinates`);
+        if (nodesWithCoords.length > 0) {
+            console.log('Sample node:', nodesWithCoords[0]);
+        }
+
         // Transform edges
         this.edges = edges.map(edge => ({
             source: edge.source || edge.from,
@@ -139,11 +153,27 @@ class TopologyVisualizer {
     computeLayout() {
         if (this.config.layoutAlgorithm === 'geographic') {
             // Use coordinates if available
+            let coordCount = 0;
+            let noCoordCount = 0;
+
             this.nodes.forEach(node => {
-                if (!node.position && node.coordinates) {
+                if (node.position) {
+                    coordCount++;
+                } else if (node.coordinates) {
                     node.position = [node.coordinates.longitude, node.coordinates.latitude];
+                    coordCount++;
+                } else {
+                    noCoordCount++;
+                    // Default position for nodes without coordinates
+                    node.position = [0, 0];
                 }
             });
+
+            console.log(`Geographic layout: ${coordCount} nodes with coordinates, ${noCoordCount} without`);
+            if (coordCount > 0) {
+                const positions = this.nodes.filter(n => n.position[0] !== 0 || n.position[1] !== 0).map(n => n.position);
+                console.log('Sample positions:', positions.slice(0, 5));
+            }
         } else if (this.config.layoutAlgorithm === 'hierarchical') {
             // Use d3-hierarchy for tree layout
             const positions = this.layoutEngine.computeHierarchical(this.nodes, this.edges);
