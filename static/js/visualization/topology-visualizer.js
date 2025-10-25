@@ -88,16 +88,35 @@ class TopologyVisualizer {
      */
     async loadData(agents, edges) {
         // Transform agents to nodes
-        this.nodes = agents.map(agent => ({
-            id: agent.id,
-            name: agent.name || agent.id,
-            type: agent.agent_type || agent.type,
-            status: agent.status || 'unknown',
-            metadata: agent.metadata || {},
-            coordinates: agent.coordinates || null,
-            // Will be set by layout engine if not provided
-            position: agent.coordinates ? [agent.coordinates.longitude, agent.coordinates.latitude] : null
-        }));
+        this.nodes = agents.map(agent => {
+            const metadata = agent.metadata || {};
+
+            // Extract coordinates from metadata (latitude/longitude as strings)
+            let coordinates = null;
+            let position = null;
+
+            if (metadata.latitude && metadata.longitude) {
+                const lat = parseFloat(metadata.latitude);
+                const lng = parseFloat(metadata.longitude);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    coordinates = { latitude: lat, longitude: lng };
+                    position = [lng, lat]; // [longitude, latitude] for map rendering
+                }
+            } else if (agent.coordinates) {
+                coordinates = agent.coordinates;
+                position = [agent.coordinates.longitude, agent.coordinates.latitude];
+            }
+
+            return {
+                id: agent.id,
+                name: agent.name || agent.id,
+                type: agent.agent_type || agent.type,
+                status: agent.status || 'unknown',
+                metadata: metadata,
+                coordinates: coordinates,
+                position: position
+            };
+        });
 
         // Transform edges
         this.edges = edges.map(edge => ({

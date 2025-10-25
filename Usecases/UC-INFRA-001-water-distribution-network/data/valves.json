@@ -1,117 +1,212 @@
 [
-    {
-        "id": "VALVE-001",
-        "name": "Isolation Valve North Main",
-        "type": "valve",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "valve_id": "VALVE-001",
-            "valve_type": "isolation",
-            "location": "PIPE-001",
-            "size": "600",
-            "installation_date": "2018-03-15T00:00:00Z",
-            "last_maintenance": "2025-06-10T00:00:00Z",
-            "position": "100",
-            "operational_status": "open",
-            "actuator_type": "electric",
-            "response_time_seconds": "15"
-        }
-    },
-    {
-        "id": "VALVE-002",
-        "name": "Control Valve North Distribution-A",
-        "type": "valve",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "valve_id": "VALVE-002",
-            "valve_type": "control",
-            "location": "PIPE-002",
-            "size": "300",
-            "installation_date": "2020-06-10T00:00:00Z",
-            "last_maintenance": "2025-09-05T00:00:00Z",
-            "position": "85",
-            "operational_status": "open",
-            "actuator_type": "electric",
-            "response_time_seconds": "10"
-        }
-    },
-    {
-        "id": "VALVE-003",
-        "name": "Isolation Valve Central Main",
-        "type": "valve",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "valve_id": "VALVE-003",
-            "valve_type": "isolation",
-            "location": "PIPE-006",
-            "size": "800",
-            "installation_date": "2017-08-20T00:00:00Z",
-            "last_maintenance": "2025-05-15T00:00:00Z",
-            "position": "100",
-            "operational_status": "open",
-            "actuator_type": "electric",
-            "response_time_seconds": "20"
-        }
-    },
-    {
-        "id": "VALVE-004",
-        "name": "Control Valve Central Distribution-A",
-        "type": "valve",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "valve_id": "VALVE-004",
-            "valve_type": "control",
-            "location": "PIPE-007",
-            "size": "400",
-            "installation_date": "2019-04-10T00:00:00Z",
-            "last_maintenance": "2025-08-25T00:00:00Z",
-            "position": "90",
-            "operational_status": "open",
-            "actuator_type": "electric",
-            "response_time_seconds": "12"
-        }
-    },
-    {
-        "id": "VALVE-005",
-        "name": "Control Valve Central Distribution-B",
-        "type": "valve",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "valve_id": "VALVE-005",
-            "valve_type": "control",
-            "location": "PIPE-008",
-            "size": "400",
-            "installation_date": "2019-04-10T00:00:00Z",
-            "last_maintenance": "2025-08-25T00:00:00Z",
-            "position": "88",
-            "operational_status": "open",
-            "actuator_type": "electric",
-            "response_time_seconds": "12"
-        }
-    },
-    {
-        "id": "VALVE-006",
-        "name": "Pressure Relief Valve North",
-        "type": "valve",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "valve_id": "VALVE-006",
-            "valve_type": "pressure_relief",
-            "location": "PIPE-001",
-            "size": "150",
-            "installation_date": "2018-03-15T00:00:00Z",
-            "last_maintenance": "2025-06-10T00:00:00Z",
-            "position": "0",
-            "operational_status": "closed",
-            "actuator_type": "spring_loaded",
-            "response_time_seconds": "1",
-            "set_pressure_bar": "14.0"
-        }
+  {
+    "id": "VALVE-NBI-001",
+    "name": "Uhuru Highway Main Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2919",
+      "longitude": "36.8219",
+      "valve_type": "gate",
+      "diameter_mm": "600",
+      "position_percent": "100"
     }
+  },
+  {
+    "id": "VALVE-NBI-002",
+    "name": "Westlands Isolator Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2652",
+      "longitude": "36.8102",
+      "valve_type": "butterfly",
+      "diameter_mm": "500",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-003",
+    "name": "Eastleigh Control Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.2789",
+      "longitude": "36.8523",
+      "valve_type": "gate",
+      "diameter_mm": "450",
+      "position_percent": "85"
+    }
+  },
+  {
+    "id": "VALVE-NBI-004",
+    "name": "Karen Zone Isolator",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3167",
+      "longitude": "36.7089",
+      "valve_type": "butterfly",
+      "diameter_mm": "400",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-005",
+    "name": "Kasarani Main Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.2256",
+      "longitude": "36.8954",
+      "valve_type": "gate",
+      "diameter_mm": "550",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-006",
+    "name": "Ngara Junction Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.2723",
+      "longitude": "36.8342",
+      "valve_type": "butterfly",
+      "diameter_mm": "400",
+      "position_percent": "90"
+    }
+  },
+  {
+    "id": "VALVE-NBI-007",
+    "name": "Kilimani Pressure Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2881",
+      "longitude": "36.7867",
+      "valve_type": "pressure_reducing",
+      "diameter_mm": "350",
+      "position_percent": "75"
+    }
+  },
+  {
+    "id": "VALVE-NBI-008",
+    "name": "Umoja Estate Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.2734",
+      "longitude": "36.8967",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-009",
+    "name": "Langata Road Isolator",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3401",
+      "longitude": "36.7334",
+      "valve_type": "butterfly",
+      "diameter_mm": "450",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-010",
+    "name": "Ruaraka Distribution Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.2423",
+      "longitude": "36.8812",
+      "valve_type": "gate",
+      "diameter_mm": "400",
+      "position_percent": "95"
+    }
+  },
+  {
+    "id": "VALVE-NBI-011",
+    "name": "Industrial Area Main Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "central",
+      "latitude": "-1.3189",
+      "longitude": "36.8501",
+      "valve_type": "gate",
+      "diameter_mm": "700",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-012",
+    "name": "Lavington Control Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "westlands",
+      "latitude": "-1.2789",
+      "longitude": "36.7723",
+      "valve_type": "butterfly",
+      "diameter_mm": "350",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-013",
+    "name": "Embakasi Zone Isolator",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "eastlands",
+      "latitude": "-1.3134",
+      "longitude": "36.8889",
+      "valve_type": "gate",
+      "diameter_mm": "500",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-014",
+    "name": "Rongai Border Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "south",
+      "latitude": "-1.3856",
+      "longitude": "36.7156",
+      "valve_type": "butterfly",
+      "diameter_mm": "400",
+      "position_percent": "100"
+    }
+  },
+  {
+    "id": "VALVE-NBI-015",
+    "name": "Kahawa West Valve",
+    "type": "valve",
+    "state": "open",
+    "metadata": {
+      "zone": "north",
+      "latitude": "-1.2089",
+      "longitude": "36.9123",
+      "valve_type": "gate",
+      "diameter_mm": "450",
+      "position_percent": "100"
+    }
+  }
 ]

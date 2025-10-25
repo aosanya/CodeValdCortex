@@ -1,162 +1,602 @@
 [
-    {
-        "id": "SENSOR-001",
-        "name": "Pressure Sensor North Main",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "sensor_id": "SENSOR-001",
-            "sensor_type": "pressure",
-            "location": "PIPE-001",
-            "measurement_unit": "bar",
-            "measurement_range": "0-20",
-            "accuracy": "0.1",
-            "installation_date": "2018-03-20T00:00:00Z",
-            "calibration_date": "2025-09-01T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "2.0",
-            "alert_threshold_high": "12.0"
-        }
-    },
-    {
-        "id": "SENSOR-002",
-        "name": "Flow Sensor North Main",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "sensor_id": "SENSOR-002",
-            "sensor_type": "flow",
-            "location": "PIPE-001",
-            "measurement_unit": "m3/h",
-            "measurement_range": "0-500",
-            "accuracy": "2.0",
-            "installation_date": "2018-03-20T00:00:00Z",
-            "calibration_date": "2025-09-01T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "50",
-            "alert_threshold_high": "450"
-        }
-    },
-    {
-        "id": "SENSOR-003",
-        "name": "Pressure Sensor North Distribution-A",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "sensor_id": "SENSOR-003",
-            "sensor_type": "pressure",
-            "location": "PIPE-002",
-            "measurement_unit": "bar",
-            "measurement_range": "0-15",
-            "accuracy": "0.1",
-            "installation_date": "2020-06-15T00:00:00Z",
-            "calibration_date": "2025-09-10T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "1.5",
-            "alert_threshold_high": "10.0"
-        }
-    },
-    {
-        "id": "SENSOR-004",
-        "name": "Pressure Sensor North Distribution-B",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "sensor_id": "SENSOR-004",
-            "sensor_type": "pressure",
-            "location": "PIPE-003",
-            "measurement_unit": "bar",
-            "measurement_range": "0-15",
-            "accuracy": "0.1",
-            "installation_date": "2020-06-15T00:00:00Z",
-            "calibration_date": "2025-09-10T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "1.5",
-            "alert_threshold_high": "10.0"
-        }
-    },
-    {
-        "id": "SENSOR-005",
-        "name": "Pressure Sensor Central Main",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "sensor_id": "SENSOR-005",
-            "sensor_type": "pressure",
-            "location": "PIPE-006",
-            "measurement_unit": "bar",
-            "measurement_range": "0-20",
-            "accuracy": "0.1",
-            "installation_date": "2017-08-25T00:00:00Z",
-            "calibration_date": "2025-08-15T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "2.5",
-            "alert_threshold_high": "13.0"
-        }
-    },
-    {
-        "id": "SENSOR-006",
-        "name": "Flow Sensor Central Main",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "sensor_id": "SENSOR-006",
-            "sensor_type": "flow",
-            "location": "PIPE-006",
-            "measurement_unit": "m3/h",
-            "measurement_range": "0-800",
-            "accuracy": "2.0",
-            "installation_date": "2017-08-25T00:00:00Z",
-            "calibration_date": "2025-08-15T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "100",
-            "alert_threshold_high": "750"
-        }
-    },
-    {
-        "id": "SENSOR-007",
-        "name": "Pressure Sensor Central Distribution-A",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "sensor_id": "SENSOR-007",
-            "sensor_type": "pressure",
-            "location": "PIPE-007",
-            "measurement_unit": "bar",
-            "measurement_range": "0-15",
-            "accuracy": "0.1",
-            "installation_date": "2019-04-15T00:00:00Z",
-            "calibration_date": "2025-08-20T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "2.0",
-            "alert_threshold_high": "11.0"
-        }
-    },
-    {
-        "id": "SENSOR-008",
-        "name": "Pressure Sensor Central Distribution-B",
-        "type": "sensor",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "sensor_id": "SENSOR-008",
-            "sensor_type": "pressure",
-            "location": "PIPE-008",
-            "measurement_unit": "bar",
-            "measurement_range": "0-15",
-            "accuracy": "0.1",
-            "installation_date": "2019-04-15T00:00:00Z",
-            "calibration_date": "2025-08-20T00:00:00Z",
-            "sampling_interval": "60",
-            "alert_threshold_low": "2.0",
-            "alert_threshold_high": "11.0"
-        }
+  {
+    "id": "SENSOR-NBI-001",
+    "name": "CBD Pressure Sensor 1",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.3464",
+      "longitude": "36.7572",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-01-15"
     }
+  },
+  {
+    "id": "SENSOR-NBI-002",
+    "name": "CBD Flow Sensor 2",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "flow",
+      "latitude": "-1.3314",
+      "longitude": "36.8622",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-003",
+    "name": "CBD Quality Sensor 3",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "quality",
+      "latitude": "-1.3164",
+      "longitude": "36.8472",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-004",
+    "name": "CBD Temperature Sensor 4",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "temperature",
+      "latitude": "-1.3014",
+      "longitude": "36.8322",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-005",
+    "name": "CBD Pressure Sensor 5",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "pressure",
+      "latitude": "-1.2864",
+      "longitude": "36.8172",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-006",
+    "name": "CBD Flow Sensor 6",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "flow",
+      "latitude": "-1.2714",
+      "longitude": "36.8022",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-007",
+    "name": "CBD Quality Sensor 7",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "quality",
+      "latitude": "-1.2564",
+      "longitude": "36.7872",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-008",
+    "name": "CBD Temperature Sensor 8",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "central",
+      "sensor_type": "temperature",
+      "latitude": "-1.2414",
+      "longitude": "36.7722",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-009",
+    "name": "WL Pressure Sensor 1",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.3274",
+      "longitude": "36.747",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-010",
+    "name": "WL Flow Sensor 2",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "flow",
+      "latitude": "-1.3124",
+      "longitude": "36.852",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-011",
+    "name": "WL Quality Sensor 3",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "quality",
+      "latitude": "-1.2974",
+      "longitude": "36.837",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-012",
+    "name": "WL Temperature Sensor 4",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.2824",
+      "longitude": "36.822",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-013",
+    "name": "WL Pressure Sensor 5",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.2674",
+      "longitude": "36.807",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-014",
+    "name": "WL Flow Sensor 6",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "flow",
+      "latitude": "-1.2524",
+      "longitude": "36.792",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-015",
+    "name": "WL Quality Sensor 7",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "quality",
+      "latitude": "-1.2374",
+      "longitude": "36.777",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-016",
+    "name": "WL Temperature Sensor 8",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "westlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.2224",
+      "longitude": "36.762",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-017",
+    "name": "EL Pressure Sensor 1",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.3415",
+      "longitude": "36.7967",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-018",
+    "name": "EL Flow Sensor 2",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "flow",
+      "latitude": "-1.3265",
+      "longitude": "36.9017",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-019",
+    "name": "EL Quality Sensor 3",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "quality",
+      "latitude": "-1.3115",
+      "longitude": "36.8867",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-020",
+    "name": "EL Temperature Sensor 4",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.2965",
+      "longitude": "36.8717",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-021",
+    "name": "EL Pressure Sensor 5",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "pressure",
+      "latitude": "-1.2815",
+      "longitude": "36.8567",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-022",
+    "name": "EL Flow Sensor 6",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "flow",
+      "latitude": "-1.2665",
+      "longitude": "36.8417",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-023",
+    "name": "EL Quality Sensor 7",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "quality",
+      "latitude": "-1.2515",
+      "longitude": "36.8267",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-024",
+    "name": "EL Temperature Sensor 8",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "eastlands",
+      "sensor_type": "temperature",
+      "latitude": "-1.2365",
+      "longitude": "36.8117",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-025",
+    "name": "KR Pressure Sensor 1",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.3799",
+      "longitude": "36.647",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-026",
+    "name": "KR Flow Sensor 2",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.3649",
+      "longitude": "36.752",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-027",
+    "name": "KR Quality Sensor 3",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.3499",
+      "longitude": "36.737",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-028",
+    "name": "KR Temperature Sensor 4",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.3349",
+      "longitude": "36.722",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-029",
+    "name": "KR Pressure Sensor 5",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "pressure",
+      "latitude": "-1.3199",
+      "longitude": "36.707",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-030",
+    "name": "KR Flow Sensor 6",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "flow",
+      "latitude": "-1.3049",
+      "longitude": "36.692",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-031",
+    "name": "KR Quality Sensor 7",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "quality",
+      "latitude": "-1.2899",
+      "longitude": "36.677",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-032",
+    "name": "KR Temperature Sensor 8",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "south",
+      "sensor_type": "temperature",
+      "latitude": "-1.2749",
+      "longitude": "36.662",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-08-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-033",
+    "name": "KS Pressure Sensor 1",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "pressure",
+      "latitude": "-1.2878",
+      "longitude": "36.8326",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-01-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-034",
+    "name": "KS Flow Sensor 2",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "flow",
+      "latitude": "-1.2728",
+      "longitude": "36.9376",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-02-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-035",
+    "name": "KS Quality Sensor 3",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "quality",
+      "latitude": "-1.2578",
+      "longitude": "36.9226",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-03-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-036",
+    "name": "KS Temperature Sensor 4",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "temperature",
+      "latitude": "-1.2428",
+      "longitude": "36.9076",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-04-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-037",
+    "name": "KS Pressure Sensor 5",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "pressure",
+      "latitude": "-1.2278",
+      "longitude": "36.8926",
+      "measurement_unit": "bar",
+      "sampling_interval": "60",
+      "installation_date": "2019-05-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-038",
+    "name": "KS Flow Sensor 6",
+    "type": "sensor",
+    "state": "idle",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "flow",
+      "latitude": "-1.2128",
+      "longitude": "36.8776",
+      "measurement_unit": "m3/h",
+      "sampling_interval": "60",
+      "installation_date": "2020-06-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-039",
+    "name": "KS Quality Sensor 7",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "quality",
+      "latitude": "-1.1978",
+      "longitude": "36.8626",
+      "measurement_unit": "pH",
+      "sampling_interval": "60",
+      "installation_date": "2021-07-15"
+    }
+  },
+  {
+    "id": "SENSOR-NBI-040",
+    "name": "KS Temperature Sensor 8",
+    "type": "sensor",
+    "state": "running",
+    "metadata": {
+      "zone": "north",
+      "sensor_type": "temperature",
+      "latitude": "-1.1828",
+      "longitude": "36.8476",
+      "measurement_unit": "\u00b0C",
+      "sampling_interval": "60",
+      "installation_date": "2022-08-15"
+    }
+  }
 ]

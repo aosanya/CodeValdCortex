@@ -1,202 +1,4222 @@
 [
-    {
-        "id": "PIPE-001",
-        "name": "Main Supply Line North",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "pipe_id": "PIPE-001",
-            "material": "steel",
-            "diameter": "600",
-            "length": "1500",
-            "pressure_rating": "16.0",
-            "installation_date": "2018-03-15T00:00:00Z",
-            "condition_score": "85",
-            "last_inspection": "2025-09-10T00:00:00Z",
-            "segment": "main",
-            "upstream_connection": "reservoir",
-            "downstream_connection": "PIPE-002,PIPE-003"
-        }
-    },
-    {
-        "id": "PIPE-002",
-        "name": "Distribution Line North-A",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "pipe_id": "PIPE-002",
-            "material": "PVC",
-            "diameter": "300",
-            "length": "800",
-            "pressure_rating": "10.0",
-            "installation_date": "2020-06-10T00:00:00Z",
-            "condition_score": "92",
-            "last_inspection": "2025-09-15T00:00:00Z",
-            "segment": "distribution",
-            "upstream_connection": "PIPE-001",
-            "downstream_connection": "PIPE-004"
-        }
-    },
-    {
-        "id": "PIPE-003",
-        "name": "Distribution Line North-B",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "pipe_id": "PIPE-003",
-            "material": "PVC",
-            "diameter": "250",
-            "length": "650",
-            "pressure_rating": "10.0",
-            "installation_date": "2020-06-10T00:00:00Z",
-            "condition_score": "90",
-            "last_inspection": "2025-09-15T00:00:00Z",
-            "segment": "distribution",
-            "upstream_connection": "PIPE-001",
-            "downstream_connection": "PIPE-005"
-        }
-    },
-    {
-        "id": "PIPE-004",
-        "name": "Service Line North-1",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "pipe_id": "PIPE-004",
-            "material": "copper",
-            "diameter": "100",
-            "length": "200",
-            "pressure_rating": "16.0",
-            "installation_date": "2021-02-20T00:00:00Z",
-            "condition_score": "95",
-            "last_inspection": "2025-10-01T00:00:00Z",
-            "segment": "service",
-            "upstream_connection": "PIPE-002",
-            "downstream_connection": "customer_meters"
-        }
-    },
-    {
-        "id": "PIPE-005",
-        "name": "Service Line North-2",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "north",
-            "pipe_id": "PIPE-005",
-            "material": "copper",
-            "diameter": "100",
-            "length": "180",
-            "pressure_rating": "16.0",
-            "installation_date": "2021-02-20T00:00:00Z",
-            "condition_score": "96",
-            "last_inspection": "2025-10-01T00:00:00Z",
-            "segment": "service",
-            "upstream_connection": "PIPE-003",
-            "downstream_connection": "customer_meters"
-        }
-    },
-    {
-        "id": "PIPE-006",
-        "name": "Main Supply Line Central",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "pipe_id": "PIPE-006",
-            "material": "steel",
-            "diameter": "800",
-            "length": "2000",
-            "pressure_rating": "16.0",
-            "installation_date": "2017-08-20T00:00:00Z",
-            "condition_score": "78",
-            "last_inspection": "2025-08-20T00:00:00Z",
-            "segment": "main",
-            "upstream_connection": "reservoir",
-            "downstream_connection": "PIPE-007,PIPE-008"
-        }
-    },
-    {
-        "id": "PIPE-007",
-        "name": "Distribution Line Central-A",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "pipe_id": "PIPE-007",
-            "material": "PVC",
-            "diameter": "400",
-            "length": "1000",
-            "pressure_rating": "10.0",
-            "installation_date": "2019-04-10T00:00:00Z",
-            "condition_score": "88",
-            "last_inspection": "2025-09-05T00:00:00Z",
-            "segment": "distribution",
-            "upstream_connection": "PIPE-006",
-            "downstream_connection": "PIPE-009"
-        }
-    },
-    {
-        "id": "PIPE-008",
-        "name": "Distribution Line Central-B",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "pipe_id": "PIPE-008",
-            "material": "PVC",
-            "diameter": "400",
-            "length": "1100",
-            "pressure_rating": "10.0",
-            "installation_date": "2019-04-10T00:00:00Z",
-            "condition_score": "87",
-            "last_inspection": "2025-09-05T00:00:00Z",
-            "segment": "distribution",
-            "upstream_connection": "PIPE-006",
-            "downstream_connection": "PIPE-010"
-        }
-    },
-    {
-        "id": "PIPE-009",
-        "name": "Service Line Central-1",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "pipe_id": "PIPE-009",
-            "material": "PVC",
-            "diameter": "150",
-            "length": "300",
-            "pressure_rating": "10.0",
-            "installation_date": "2020-11-05T00:00:00Z",
-            "condition_score": "93",
-            "last_inspection": "2025-09-20T00:00:00Z",
-            "segment": "service",
-            "upstream_connection": "PIPE-007",
-            "downstream_connection": "customer_meters"
-        }
-    },
-    {
-        "id": "PIPE-010",
-        "name": "Service Line Central-2",
-        "type": "pipe",
-        "state": "running",
-        "metadata": {
-            "zone": "central",
-            "pipe_id": "PIPE-010",
-            "material": "PVC",
-            "diameter": "150",
-            "length": "320",
-            "pressure_rating": "10.0",
-            "installation_date": "2020-11-05T00:00:00Z",
-            "condition_score": "94",
-            "last_inspection": "2025-09-20T00:00:00Z",
-            "segment": "service",
-            "upstream_connection": "PIPE-008",
-            "downstream_connection": "customer_meters"
-        }
+  {
+    "id": "PIPE-NBI-0001",
+    "name": "Trunk Line 1 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "trunk",
+      "diameter_mm": "897",
+      "material": "ductile_iron",
+      "length_m": "6959.7",
+      "latitude": "-1.26345",
+      "longitude": "36.7759",
+      "from_lat": "-1.2595",
+      "from_lng": "36.7448",
+      "to_lat": "-1.2674",
+      "to_lng": "36.807",
+      "installation_date": "2018-02-10"
     }
+  },
+  {
+    "id": "PIPE-NBI-0002",
+    "name": "Trunk Line 2 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "trunk",
+      "diameter_mm": "804",
+      "material": "ductile_iron",
+      "length_m": "4323.6",
+      "latitude": "-1.2825",
+      "longitude": "36.7947",
+      "from_lat": "-1.2976",
+      "from_lng": "36.7824",
+      "to_lat": "-1.2674",
+      "to_lng": "36.807",
+      "installation_date": "2019-03-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0003",
+    "name": "Trunk Line 3 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "trunk",
+      "diameter_mm": "719",
+      "material": "ductile_iron",
+      "length_m": "501.6",
+      "latitude": "-1.28545",
+      "longitude": "36.81925",
+      "from_lat": "-1.2845",
+      "from_lng": "36.8213",
+      "to_lat": "-1.2864",
+      "to_lng": "36.8172",
+      "installation_date": "2020-04-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0004",
+    "name": "Trunk Line 4 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "trunk",
+      "diameter_mm": "787",
+      "material": "ductile_iron",
+      "length_m": "2757.9",
+      "latitude": "-1.27505",
+      "longitude": "36.82225",
+      "from_lat": "-1.2637",
+      "from_lng": "36.8273",
+      "to_lat": "-1.2864",
+      "to_lng": "36.8172",
+      "installation_date": "2021-05-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0005",
+    "name": "Trunk Line 5 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "trunk",
+      "diameter_mm": "737",
+      "material": "ductile_iron",
+      "length_m": "811.5",
+      "latitude": "-1.2813",
+      "longitude": "36.85305",
+      "from_lat": "-1.2811",
+      "from_lng": "36.8494",
+      "to_lat": "-1.2815",
+      "to_lng": "36.8567",
+      "installation_date": "2017-06-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0006",
+    "name": "Trunk Line 6 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "trunk",
+      "diameter_mm": "897",
+      "material": "ductile_iron",
+      "length_m": "5612.0",
+      "latitude": "-1.29935",
+      "longitude": "36.8746",
+      "from_lat": "-1.3172",
+      "from_lng": "36.8925",
+      "to_lat": "-1.2815",
+      "to_lng": "36.8567",
+      "installation_date": "2018-07-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0007",
+    "name": "Trunk Line 7 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "trunk",
+      "diameter_mm": "870",
+      "material": "ductile_iron",
+      "length_m": "967.0",
+      "latitude": "-1.31665",
+      "longitude": "36.7041",
+      "from_lat": "-1.3134",
+      "from_lng": "36.7012",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2019-08-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0008",
+    "name": "Trunk Line 8 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "trunk",
+      "diameter_mm": "896",
+      "material": "ductile_iron",
+      "length_m": "5300.1",
+      "latitude": "-1.3363",
+      "longitude": "36.72435",
+      "from_lat": "-1.3527",
+      "from_lng": "36.7417",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2020-09-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0009",
+    "name": "Trunk Line 9 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "trunk",
+      "diameter_mm": "813",
+      "material": "ductile_iron",
+      "length_m": "781.8",
+      "latitude": "-1.2256",
+      "longitude": "36.89535",
+      "from_lat": "-1.2234",
+      "from_lng": "36.8981",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2021-10-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0010",
+    "name": "Trunk Line 10 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "trunk",
+      "diameter_mm": "792",
+      "material": "ductile_iron",
+      "length_m": "2510.9",
+      "latitude": "-1.2368",
+      "longitude": "36.88575",
+      "from_lat": "-1.2458",
+      "from_lng": "36.8789",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2017-11-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0011",
+    "name": "Trunk Line 11 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "trunk",
+      "diameter_mm": "846",
+      "material": "ductile_iron",
+      "length_m": "5150.3",
+      "latitude": "-1.30455",
+      "longitude": "36.83165",
+      "from_lat": "-1.3227",
+      "from_lng": "36.8461",
+      "to_lat": "-1.2864",
+      "to_lng": "36.8172",
+      "installation_date": "2018-12-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0012",
+    "name": "Trunk Line 12 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "trunk",
+      "diameter_mm": "866",
+      "material": "ductile_iron",
+      "length_m": "3516.9",
+      "latitude": "-1.2784",
+      "longitude": "36.7956",
+      "from_lat": "-1.2894",
+      "from_lng": "36.7842",
+      "to_lat": "-1.2674",
+      "to_lng": "36.807",
+      "installation_date": "2019-01-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0013",
+    "name": "Inter-Zone Trunk Central-Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "674",
+      "material": "ductile_iron",
+      "length_m": "2393.7",
+      "latitude": "-1.2769",
+      "longitude": "36.8121",
+      "from_lat": "-1.2864",
+      "from_lng": "36.8172",
+      "to_lat": "-1.2674",
+      "to_lng": "36.807",
+      "installation_date": "2021-02-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0014",
+    "name": "Inter-Zone Trunk Central-Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "716",
+      "material": "ductile_iron",
+      "length_m": "4418.1",
+      "latitude": "-1.28395",
+      "longitude": "36.83695",
+      "from_lat": "-1.2864",
+      "from_lng": "36.8172",
+      "to_lat": "-1.2815",
+      "to_lng": "36.8567",
+      "installation_date": "2015-03-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0015",
+    "name": "Inter-Zone Trunk Central-South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "713",
+      "material": "ductile_iron",
+      "length_m": "12784.9",
+      "latitude": "-1.30315",
+      "longitude": "36.7621",
+      "from_lat": "-1.2864",
+      "from_lng": "36.8172",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2016-04-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0016",
+    "name": "Inter-Zone Trunk Central-North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "717",
+      "material": "ductile_iron",
+      "length_m": "10599.8",
+      "latitude": "-1.2571",
+      "longitude": "36.8549",
+      "from_lat": "-1.2864",
+      "from_lng": "36.8172",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2017-05-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0017",
+    "name": "Inter-Zone Trunk Westlands-Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "767",
+      "material": "ductile_iron",
+      "length_m": "5734.4",
+      "latitude": "-1.27445",
+      "longitude": "36.83185",
+      "from_lat": "-1.2674",
+      "from_lng": "36.807",
+      "to_lat": "-1.2815",
+      "to_lng": "36.8567",
+      "installation_date": "2018-06-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0018",
+    "name": "Inter-Zone Trunk Westlands-South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "708",
+      "material": "ductile_iron",
+      "length_m": "12536.7",
+      "latitude": "-1.29365",
+      "longitude": "36.757",
+      "from_lat": "-1.2674",
+      "from_lng": "36.807",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2019-07-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0019",
+    "name": "Inter-Zone Trunk Westlands-North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "694",
+      "material": "ductile_iron",
+      "length_m": "10469.1",
+      "latitude": "-1.2476",
+      "longitude": "36.8498",
+      "from_lat": "-1.2674",
+      "from_lng": "36.807",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2020-08-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0020",
+    "name": "Inter-Zone Trunk Eastlands-South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "716",
+      "material": "ductile_iron",
+      "length_m": "17154.7",
+      "latitude": "-1.3007",
+      "longitude": "36.78185",
+      "from_lat": "-1.2815",
+      "from_lng": "36.8567",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2021-09-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0021",
+    "name": "Inter-Zone Trunk Eastlands-North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "725",
+      "material": "ductile_iron",
+      "length_m": "7170.0",
+      "latitude": "-1.25465",
+      "longitude": "36.87465",
+      "from_lat": "-1.2815",
+      "from_lng": "36.8567",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2015-10-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0022",
+    "name": "Inter-Zone Trunk South-North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "inter-zone",
+      "pipe_type": "trunk",
+      "diameter_mm": "758",
+      "material": "ductile_iron",
+      "length_m": "22998.6",
+      "latitude": "-1.27385",
+      "longitude": "36.7998",
+      "from_lat": "-1.3199",
+      "from_lng": "36.707",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2016-11-10"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0023",
+    "name": "Main Line 23 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "488",
+      "material": "steel",
+      "length_m": "803.0",
+      "latitude": "-1.28915",
+      "longitude": "36.81955",
+      "from_lat": "-1.2919",
+      "from_lng": "36.8219",
+      "to_lat": "-1.2864",
+      "to_lng": "36.8172",
+      "installation_date": "2022-12-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0024",
+    "name": "Main Line 24 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "570",
+      "material": "steel",
+      "length_m": "824.1",
+      "latitude": "-1.2882",
+      "longitude": "36.8216",
+      "from_lat": "-1.2919",
+      "from_lng": "36.8219",
+      "to_lat": "-1.2845",
+      "to_lng": "36.8213",
+      "installation_date": "2017-01-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0025",
+    "name": "Main Line 25 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "407",
+      "material": "steel",
+      "length_m": "2568.5",
+      "latitude": "-1.2821",
+      "longitude": "36.82805",
+      "from_lat": "-1.2919",
+      "from_lng": "36.8219",
+      "to_lat": "-1.2723",
+      "to_lng": "36.8342",
+      "installation_date": "2018-02-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0026",
+    "name": "Main Line 26 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "541",
+      "material": "steel",
+      "length_m": "431.0",
+      "latitude": "-1.2663",
+      "longitude": "36.8086",
+      "from_lat": "-1.2652",
+      "from_lng": "36.8102",
+      "to_lat": "-1.2674",
+      "to_lng": "36.807",
+      "installation_date": "2019-03-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0027",
+    "name": "Main Line 27 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "473",
+      "material": "steel",
+      "length_m": "3642.2",
+      "latitude": "-1.27665",
+      "longitude": "36.79845",
+      "from_lat": "-1.2652",
+      "from_lng": "36.8102",
+      "to_lat": "-1.2881",
+      "to_lng": "36.7867",
+      "installation_date": "2020-04-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0028",
+    "name": "Main Line 28 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "440",
+      "material": "steel",
+      "length_m": "3942.7",
+      "latitude": "-1.2773",
+      "longitude": "36.7972",
+      "from_lat": "-1.2652",
+      "from_lng": "36.8102",
+      "to_lat": "-1.2894",
+      "to_lng": "36.7842",
+      "installation_date": "2021-05-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0029",
+    "name": "Main Line 29 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "main",
+      "diameter_mm": "569",
+      "material": "steel",
+      "length_m": "404.0",
+      "latitude": "-1.28",
+      "longitude": "36.85085",
+      "from_lat": "-1.2789",
+      "from_lng": "36.8523",
+      "to_lat": "-1.2811",
+      "to_lng": "36.8494",
+      "installation_date": "2022-06-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0030",
+    "name": "Main Line 30 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "main",
+      "diameter_mm": "470",
+      "material": "steel",
+      "length_m": "567.3",
+      "latitude": "-1.2802",
+      "longitude": "36.8545",
+      "from_lat": "-1.2789",
+      "from_lng": "36.8523",
+      "to_lat": "-1.2815",
+      "to_lng": "36.8567",
+      "installation_date": "2017-07-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0031",
+    "name": "Main Line 31 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "420",
+      "material": "steel",
+      "length_m": "413.1",
+      "latitude": "-1.3183",
+      "longitude": "36.70795",
+      "from_lat": "-1.3167",
+      "from_lng": "36.7089",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2018-08-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0032",
+    "name": "Main Line 32 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "494",
+      "material": "steel",
+      "length_m": "929.9",
+      "latitude": "-1.31505",
+      "longitude": "36.70505",
+      "from_lat": "-1.3167",
+      "from_lng": "36.7089",
+      "to_lat": "-1.3134",
+      "to_lng": "36.7012",
+      "installation_date": "2019-09-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0033",
+    "name": "Main Line 33 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "568",
+      "material": "steel",
+      "length_m": "386.6",
+      "latitude": "-1.2245",
+      "longitude": "36.89675",
+      "from_lat": "-1.2256",
+      "from_lng": "36.8954",
+      "to_lat": "-1.2234",
+      "to_lng": "36.8981",
+      "installation_date": "2020-10-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0034",
+    "name": "Main Line 34 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "411",
+      "material": "steel",
+      "length_m": "395.3",
+      "latitude": "-1.2267",
+      "longitude": "36.894",
+      "from_lat": "-1.2256",
+      "from_lng": "36.8954",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2021-11-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0035",
+    "name": "Main Line 35 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "482",
+      "material": "steel",
+      "length_m": "1223.9",
+      "latitude": "-1.268",
+      "longitude": "36.83075",
+      "from_lat": "-1.2723",
+      "from_lng": "36.8342",
+      "to_lat": "-1.2637",
+      "to_lng": "36.8273",
+      "installation_date": "2022-12-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0036",
+    "name": "Main Line 36 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "542",
+      "material": "steel",
+      "length_m": "1970.8",
+      "latitude": "-1.2784",
+      "longitude": "36.82775",
+      "from_lat": "-1.2723",
+      "from_lng": "36.8342",
+      "to_lat": "-1.2845",
+      "to_lng": "36.8213",
+      "installation_date": "2017-01-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0037",
+    "name": "Main Line 37 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "591",
+      "material": "steel",
+      "length_m": "312.8",
+      "latitude": "-1.28875",
+      "longitude": "36.78545",
+      "from_lat": "-1.2881",
+      "from_lng": "36.7867",
+      "to_lat": "-1.2894",
+      "to_lng": "36.7842",
+      "installation_date": "2018-02-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0038",
+    "name": "Main Line 38 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "417",
+      "material": "steel",
+      "length_m": "1157.5",
+      "latitude": "-1.29285",
+      "longitude": "36.78455",
+      "from_lat": "-1.2881",
+      "from_lng": "36.7867",
+      "to_lat": "-1.2976",
+      "to_lng": "36.7824",
+      "installation_date": "2019-03-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0039",
+    "name": "Main Line 39 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "507",
+      "material": "steel",
+      "length_m": "1896.8",
+      "latitude": "-1.2835",
+      "longitude": "36.7795",
+      "from_lat": "-1.2881",
+      "from_lng": "36.7867",
+      "to_lat": "-1.2789",
+      "to_lng": "36.7723",
+      "installation_date": "2020-04-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0040",
+    "name": "Main Line 40 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "main",
+      "diameter_mm": "476",
+      "material": "steel",
+      "length_m": "4523.6",
+      "latitude": "-1.2934",
+      "longitude": "36.8928",
+      "from_lat": "-1.2734",
+      "from_lng": "36.8967",
+      "to_lat": "-1.3134",
+      "to_lng": "36.8889",
+      "installation_date": "2021-05-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0041",
+    "name": "Main Line 41 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "main",
+      "diameter_mm": "501",
+      "material": "steel",
+      "length_m": "4530.1",
+      "latitude": "-1.27745",
+      "longitude": "36.8767",
+      "from_lat": "-1.2734",
+      "from_lng": "36.8967",
+      "to_lat": "-1.2815",
+      "to_lng": "36.8567",
+      "installation_date": "2022-06-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0042",
+    "name": "Main Line 42 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "542",
+      "material": "steel",
+      "length_m": "1674.8",
+      "latitude": "-1.3464",
+      "longitude": "36.73755",
+      "from_lat": "-1.3401",
+      "from_lng": "36.7334",
+      "to_lat": "-1.3527",
+      "to_lng": "36.7417",
+      "installation_date": "2017-07-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0043",
+    "name": "Main Line 43 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "559",
+      "material": "steel",
+      "length_m": "3689.8",
+      "latitude": "-1.33",
+      "longitude": "36.7202",
+      "from_lat": "-1.3401",
+      "from_lng": "36.7334",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2018-08-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0044",
+    "name": "Main Line 44 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "564",
+      "material": "steel",
+      "length_m": "464.9",
+      "latitude": "-1.24405",
+      "longitude": "36.88005",
+      "from_lat": "-1.2423",
+      "from_lng": "36.8812",
+      "to_lat": "-1.2458",
+      "to_lng": "36.8789",
+      "installation_date": "2019-09-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0045",
+    "name": "Main Line 45 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "561",
+      "material": "steel",
+      "length_m": "2047.4",
+      "latitude": "-1.23505",
+      "longitude": "36.8869",
+      "from_lat": "-1.2423",
+      "from_lng": "36.8812",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2020-10-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0046",
+    "name": "Main Line 46 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "568",
+      "material": "steel",
+      "length_m": "2433.2",
+      "latitude": "-1.23395",
+      "longitude": "36.8883",
+      "from_lat": "-1.2423",
+      "from_lng": "36.8812",
+      "to_lat": "-1.2256",
+      "to_lng": "36.8954",
+      "installation_date": "2021-11-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0047",
+    "name": "Main Line 47 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "541",
+      "material": "steel",
+      "length_m": "612.4",
+      "latitude": "-1.3208",
+      "longitude": "36.8481",
+      "from_lat": "-1.3189",
+      "from_lng": "36.8501",
+      "to_lat": "-1.3227",
+      "to_lng": "36.8461",
+      "installation_date": "2022-12-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0048",
+    "name": "Main Line 48 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "main",
+      "diameter_mm": "538",
+      "material": "steel",
+      "length_m": "4333.6",
+      "latitude": "-1.3054",
+      "longitude": "36.836",
+      "from_lat": "-1.3189",
+      "from_lng": "36.8501",
+      "to_lat": "-1.2919",
+      "to_lng": "36.8219",
+      "installation_date": "2017-01-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0049",
+    "name": "Main Line 49 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "456",
+      "material": "steel",
+      "length_m": "1761.6",
+      "latitude": "-1.28415",
+      "longitude": "36.77825",
+      "from_lat": "-1.2789",
+      "from_lng": "36.7723",
+      "to_lat": "-1.2894",
+      "to_lng": "36.7842",
+      "installation_date": "2018-02-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0050",
+    "name": "Main Line 50 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "main",
+      "diameter_mm": "488",
+      "material": "steel",
+      "length_m": "1896.8",
+      "latitude": "-1.2835",
+      "longitude": "36.7795",
+      "from_lat": "-1.2789",
+      "from_lng": "36.7723",
+      "to_lat": "-1.2881",
+      "to_lng": "36.7867",
+      "installation_date": "2019-03-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0051",
+    "name": "Main Line 51 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "main",
+      "diameter_mm": "494",
+      "material": "steel",
+      "length_m": "581.0",
+      "latitude": "-1.3153",
+      "longitude": "36.8907",
+      "from_lat": "-1.3134",
+      "from_lng": "36.8889",
+      "to_lat": "-1.3172",
+      "to_lng": "36.8925",
+      "installation_date": "2020-04-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0052",
+    "name": "Main Line 52 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "main",
+      "diameter_mm": "471",
+      "material": "steel",
+      "length_m": "4523.6",
+      "latitude": "-1.2934",
+      "longitude": "36.8928",
+      "from_lat": "-1.3134",
+      "from_lng": "36.8889",
+      "to_lat": "-1.2734",
+      "to_lng": "36.8967",
+      "installation_date": "2021-05-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0053",
+    "name": "Main Line 53 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "451",
+      "material": "steel",
+      "length_m": "4661.5",
+      "latitude": "-1.36915",
+      "longitude": "36.72865",
+      "from_lat": "-1.3856",
+      "from_lng": "36.7156",
+      "to_lat": "-1.3527",
+      "to_lng": "36.7417",
+      "installation_date": "2022-06-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0054",
+    "name": "Main Line 54 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "526",
+      "material": "steel",
+      "length_m": "5423.2",
+      "latitude": "-1.36285",
+      "longitude": "36.7245",
+      "from_lat": "-1.3856",
+      "from_lng": "36.7156",
+      "to_lat": "-1.3401",
+      "to_lng": "36.7334",
+      "installation_date": "2017-07-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0055",
+    "name": "Main Line 55 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "main",
+      "diameter_mm": "438",
+      "material": "steel",
+      "length_m": "7354.9",
+      "latitude": "-1.35275",
+      "longitude": "36.7113",
+      "from_lat": "-1.3856",
+      "from_lng": "36.7156",
+      "to_lat": "-1.3199",
+      "to_lng": "36.707",
+      "installation_date": "2018-08-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0056",
+    "name": "Main Line 56 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "433",
+      "material": "steel",
+      "length_m": "2252.8",
+      "latitude": "-1.21615",
+      "longitude": "36.9052",
+      "from_lat": "-1.2089",
+      "from_lng": "36.9123",
+      "to_lat": "-1.2234",
+      "to_lng": "36.8981",
+      "installation_date": "2019-09-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0057",
+    "name": "Main Line 57 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "588",
+      "material": "steel",
+      "length_m": "2637.3",
+      "latitude": "-1.21725",
+      "longitude": "36.90385",
+      "from_lat": "-1.2089",
+      "from_lng": "36.9123",
+      "to_lat": "-1.2256",
+      "to_lng": "36.8954",
+      "installation_date": "2020-10-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0058",
+    "name": "Main Line 58 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "main",
+      "diameter_mm": "594",
+      "material": "steel",
+      "length_m": "3030.3",
+      "latitude": "-1.21835",
+      "longitude": "36.90245",
+      "from_lat": "-1.2089",
+      "from_lng": "36.9123",
+      "to_lat": "-1.2278",
+      "to_lng": "36.8926",
+      "installation_date": "2021-11-15"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0059",
+    "name": "Distribution Line 59 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "324",
+      "material": "steel",
+      "length_m": "1362.0",
+      "latitude": "-1.295361",
+      "longitude": "36.825735",
+      "from_lat": "-1.292177368322178",
+      "from_lng": "36.82049112464105",
+      "to_lat": "-1.2985452501636199",
+      "to_lng": "36.83097915586724",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0060",
+    "name": "Distribution Line 60 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "267",
+      "material": "steel",
+      "length_m": "4288.4",
+      "latitude": "-1.27547",
+      "longitude": "36.832024",
+      "from_lat": "-1.2622879799668327",
+      "from_lng": "36.8461440444514",
+      "to_lat": "-1.2886523182510214",
+      "to_lng": "36.8179033361465",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0061",
+    "name": "Distribution Line 61 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "324",
+      "material": "steel",
+      "length_m": "5637.4",
+      "latitude": "-1.279338",
+      "longitude": "36.828362",
+      "from_lat": "-1.3001871840230945",
+      "from_lng": "36.84285868471762",
+      "to_lat": "-1.2584897133439723",
+      "to_lng": "36.813864994815276",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0062",
+    "name": "Distribution Line 62 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "333",
+      "material": "steel",
+      "length_m": "1921.9",
+      "latitude": "-1.304808",
+      "longitude": "36.833954",
+      "from_lat": "-1.3003025805969008",
+      "from_lng": "36.826561459753634",
+      "to_lat": "-1.309313478045561",
+      "to_lng": "36.84134588430424",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0063",
+    "name": "Distribution Line 63 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "372",
+      "material": "steel",
+      "length_m": "2603.1",
+      "latitude": "-1.275956",
+      "longitude": "36.807992",
+      "from_lat": "-1.2684071864185247",
+      "from_lng": "36.799019733886155",
+      "to_lat": "-1.2835050540141717",
+      "to_lng": "36.816964841423186",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0064",
+    "name": "Distribution Line 64 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "267",
+      "material": "steel",
+      "length_m": "3751.5",
+      "latitude": "-1.267959",
+      "longitude": "36.811111",
+      "from_lat": "-1.2579197325554083",
+      "from_lng": "36.82470403995529",
+      "to_lat": "-1.2779983150093115",
+      "to_lng": "36.79751749402624",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0065",
+    "name": "Distribution Line 65 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "325",
+      "material": "steel",
+      "length_m": "6358.4",
+      "latitude": "-1.292392",
+      "longitude": "36.824474",
+      "from_lat": "-1.2737850491934624",
+      "from_lng": "36.84624767468332",
+      "to_lat": "-1.3109992249169689",
+      "to_lng": "36.80270017950567",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0066",
+    "name": "Distribution Line 66 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "268",
+      "material": "steel",
+      "length_m": "1980.0",
+      "latitude": "-1.301",
+      "longitude": "36.815355",
+      "from_lat": "-1.3071500265916765",
+      "from_lng": "36.82181433647402",
+      "to_lat": "-1.2948498886315347",
+      "to_lng": "36.808895880905226",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0067",
+    "name": "Distribution Line 67 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "342",
+      "material": "steel",
+      "length_m": "5012.2",
+      "latitude": "-1.265979",
+      "longitude": "36.817022",
+      "from_lat": "-1.2737749186770015",
+      "from_lng": "36.83821114919684",
+      "to_lat": "-1.25818225157742",
+      "to_lng": "36.795833570396425",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0068",
+    "name": "Distribution Line 68 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "366",
+      "material": "steel",
+      "length_m": "7267.1",
+      "latitude": "-1.288235",
+      "longitude": "36.809924",
+      "from_lat": "-1.2602963346927207",
+      "from_lng": "36.826981535769065",
+      "to_lat": "-1.3161743914496595",
+      "to_lng": "36.79286567748038",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0069",
+    "name": "Distribution Line 69 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "288",
+      "material": "steel",
+      "length_m": "4338.0",
+      "latitude": "-1.27487",
+      "longitude": "36.837995",
+      "from_lat": "-1.2575530262791468",
+      "from_lng": "36.84704751118601",
+      "to_lat": "-1.2921874230841968",
+      "to_lng": "36.82894169942035",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0070",
+    "name": "Distribution Line 70 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "393",
+      "material": "steel",
+      "length_m": "4832.2",
+      "latitude": "-1.287694",
+      "longitude": "36.804398",
+      "from_lat": "-1.309027436439462",
+      "from_lng": "36.8087192960525",
+      "to_lat": "-1.2663603965616084",
+      "to_lng": "36.80007756148514",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0071",
+    "name": "Distribution Line 71 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "336",
+      "material": "steel",
+      "length_m": "1491.9",
+      "latitude": "-1.27804",
+      "longitude": "36.841702",
+      "from_lat": "-1.2714779299100047",
+      "from_lng": "36.84025471546431",
+      "to_lat": "-1.284602919672416",
+      "to_lng": "36.843148354133206",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0072",
+    "name": "Distribution Line 72 - Central",
+    "type": "pipe",
+    "state": "maintenance",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "374",
+      "material": "steel",
+      "length_m": "2893.2",
+      "latitude": "-1.279676",
+      "longitude": "36.801053",
+      "from_lat": "-1.2794771355223533",
+      "from_lng": "36.81408396904946",
+      "to_lat": "-1.2798746060057216",
+      "to_lng": "36.78802195263958",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0073",
+    "name": "Distribution Line 73 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "314",
+      "material": "steel",
+      "length_m": "5268.6",
+      "latitude": "-1.279126",
+      "longitude": "36.804996",
+      "from_lat": "-1.2598357132158644",
+      "from_lng": "36.81882134825755",
+      "to_lat": "-1.2984155667586499",
+      "to_lng": "36.79117083980356",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0074",
+    "name": "Distribution Line 74 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "274",
+      "material": "steel",
+      "length_m": "1205.4",
+      "latitude": "-1.275844",
+      "longitude": "36.792781",
+      "from_lat": "-1.2708619798079521",
+      "from_lng": "36.7949390113305",
+      "to_lat": "-1.2808266932913392",
+      "to_lng": "36.79062218329488",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0075",
+    "name": "Distribution Line 75 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "268",
+      "material": "steel",
+      "length_m": "2288.3",
+      "latitude": "-1.303681",
+      "longitude": "36.838223",
+      "from_lat": "-1.3092190411189877",
+      "from_lng": "36.84691612756463",
+      "to_lat": "-1.2981421968399764",
+      "to_lng": "36.829529141012145",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0076",
+    "name": "Distribution Line 76 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "distribution",
+      "diameter_mm": "347",
+      "material": "steel",
+      "length_m": "813.1",
+      "latitude": "-1.302736",
+      "longitude": "36.804408",
+      "from_lat": "-1.3049072533333004",
+      "from_lng": "36.80145853657365",
+      "to_lat": "-1.300565744054344",
+      "to_lng": "36.80735841795414",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0077",
+    "name": "Distribution Line 77 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "321",
+      "material": "steel",
+      "length_m": "5169.3",
+      "latitude": "-1.251799",
+      "longitude": "36.803088",
+      "from_lat": "-1.2654990319820754",
+      "from_lng": "36.82191611875408",
+      "to_lat": "-1.2380981293410582",
+      "to_lng": "36.78425982503437",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0078",
+    "name": "Distribution Line 78 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "261",
+      "material": "steel",
+      "length_m": "1292.4",
+      "latitude": "-1.289254",
+      "longitude": "36.826236",
+      "from_lat": "-1.2947027927252597",
+      "from_lng": "36.824187394871245",
+      "to_lat": "-1.2838045153413862",
+      "to_lng": "36.82828436448138",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0079",
+    "name": "Distribution Line 79 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "267",
+      "material": "steel",
+      "length_m": "4453.0",
+      "latitude": "-1.273568",
+      "longitude": "36.783228",
+      "from_lat": "-1.293374261516221",
+      "from_lng": "36.78639770249379",
+      "to_lat": "-1.2537615715141663",
+      "to_lng": "36.78005764024769",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0080",
+    "name": "Distribution Line 80 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "386",
+      "material": "steel",
+      "length_m": "4671.9",
+      "latitude": "-1.257097",
+      "longitude": "36.798601",
+      "from_lat": "-1.2467952199947563",
+      "from_lng": "36.81695138830353",
+      "to_lat": "-1.2673981543630641",
+      "to_lng": "36.78025014680853",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0081",
+    "name": "Distribution Line 81 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "291",
+      "material": "steel",
+      "length_m": "2801.3",
+      "latitude": "-1.264911",
+      "longitude": "36.821454",
+      "from_lat": "-1.252580108568995",
+      "from_lng": "36.82413345580154",
+      "to_lat": "-1.277241715844862",
+      "to_lng": "36.81877382932657",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0082",
+    "name": "Distribution Line 82 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "321",
+      "material": "steel",
+      "length_m": "1378.4",
+      "latitude": "-1.259421",
+      "longitude": "36.787988",
+      "from_lat": "-1.2656060743703352",
+      "from_lng": "36.78744192885153",
+      "to_lat": "-1.2532362610178474",
+      "to_lng": "36.7885341331605",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0083",
+    "name": "Distribution Line 83 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "315",
+      "material": "steel",
+      "length_m": "434.2",
+      "latitude": "-1.286574",
+      "longitude": "36.832447",
+      "from_lat": "-1.2882490640234567",
+      "from_lng": "36.83345739615585",
+      "to_lat": "-1.2848996138033753",
+      "to_lng": "36.83143620555997",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0084",
+    "name": "Distribution Line 84 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "307",
+      "material": "steel",
+      "length_m": "5799.9",
+      "latitude": "-1.273679",
+      "longitude": "36.817673",
+      "from_lat": "-1.2519971695604302",
+      "from_lng": "36.832248037952155",
+      "to_lat": "-1.2953611410592702",
+      "to_lng": "36.803097802881275",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0085",
+    "name": "Distribution Line 85 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "251",
+      "material": "steel",
+      "length_m": "4223.6",
+      "latitude": "-1.273682",
+      "longitude": "36.816068",
+      "from_lat": "-1.2750239790262992",
+      "from_lng": "36.797090015480045",
+      "to_lat": "-1.2723405097823355",
+      "to_lng": "36.83504557392839",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0086",
+    "name": "Distribution Line 86 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "255",
+      "material": "steel",
+      "length_m": "4918.3",
+      "latitude": "-1.268033",
+      "longitude": "36.809562",
+      "from_lat": "-1.2531068030770875",
+      "from_lng": "36.82593316772058",
+      "to_lat": "-1.282959522607796",
+      "to_lng": "36.793190764633536",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0087",
+    "name": "Distribution Line 87 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "301",
+      "material": "steel",
+      "length_m": "5532.4",
+      "latitude": "-1.242472",
+      "longitude": "36.802026",
+      "from_lat": "-1.2466729490740862",
+      "from_lng": "36.77746169229817",
+      "to_lat": "-1.238270127815979",
+      "to_lng": "36.82658995439667",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0088",
+    "name": "Distribution Line 88 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "290",
+      "material": "steel",
+      "length_m": "3565.0",
+      "latitude": "-1.259957",
+      "longitude": "36.790469",
+      "from_lat": "-1.2748248823850292",
+      "from_lng": "36.79653759507325",
+      "to_lat": "-1.2450898087508602",
+      "to_lng": "36.784400212207736",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0089",
+    "name": "Distribution Line 89 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "340",
+      "material": "steel",
+      "length_m": "5231.6",
+      "latitude": "-1.253467",
+      "longitude": "36.8129",
+      "from_lat": "-1.2627154266445564",
+      "from_lng": "36.7912245413912",
+      "to_lat": "-1.244218999294276",
+      "to_lng": "36.834574856351",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0090",
+    "name": "Distribution Line 90 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "380",
+      "material": "steel",
+      "length_m": "4737.9",
+      "latitude": "-1.270175",
+      "longitude": "36.83385",
+      "from_lat": "-1.2488432714452886",
+      "from_lng": "36.83319182778563",
+      "to_lat": "-1.2915063656945995",
+      "to_lng": "36.83450746544713",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0091",
+    "name": "Distribution Line 91 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "265",
+      "material": "steel",
+      "length_m": "4576.6",
+      "latitude": "-1.274104",
+      "longitude": "36.814504",
+      "from_lat": "-1.2654726447406355",
+      "from_lng": "36.79578312088427",
+      "to_lat": "-1.2827353153685088",
+      "to_lng": "36.83322548726982",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0092",
+    "name": "Distribution Line 92 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "345",
+      "material": "steel",
+      "length_m": "844.7",
+      "latitude": "-1.266811",
+      "longitude": "36.799154",
+      "from_lat": "-1.270529320563601",
+      "from_lng": "36.79834666252166",
+      "to_lat": "-1.263092417348607",
+      "to_lng": "36.79996165751097",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0093",
+    "name": "Distribution Line 93 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "339",
+      "material": "steel",
+      "length_m": "2412.1",
+      "latitude": "-1.254232",
+      "longitude": "36.814705",
+      "from_lat": "-1.2643763177784653",
+      "from_lng": "36.81859666060516",
+      "to_lat": "-1.2440873118739466",
+      "to_lng": "36.81081270281372",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0094",
+    "name": "Distribution Line 94 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "366",
+      "material": "steel",
+      "length_m": "1504.9",
+      "latitude": "-1.286593",
+      "longitude": "36.86523",
+      "from_lat": "-1.2862769010214006",
+      "from_lng": "36.858458660601634",
+      "to_lat": "-1.2869087677207798",
+      "to_lng": "36.87200149554928",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0095",
+    "name": "Distribution Line 95 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "279",
+      "material": "steel",
+      "length_m": "3950.7",
+      "latitude": "-1.288669",
+      "longitude": "36.870275",
+      "from_lat": "-1.3057456984027207",
+      "from_lng": "36.86526568397394",
+      "to_lat": "-1.2715923874409887",
+      "to_lng": "36.875283320929604",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0096",
+    "name": "Distribution Line 96 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "307",
+      "material": "steel",
+      "length_m": "5577.3",
+      "latitude": "-1.282797",
+      "longitude": "36.86551",
+      "from_lat": "-1.2648766419911532",
+      "from_lng": "36.88311735501297",
+      "to_lat": "-1.300718220815664",
+      "to_lng": "36.84790348394469",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0097",
+    "name": "Distribution Line 97 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "339",
+      "material": "steel",
+      "length_m": "2883.3",
+      "latitude": "-1.260987",
+      "longitude": "36.860929",
+      "from_lat": "-1.270186731305531",
+      "from_lng": "36.87009596245207",
+      "to_lat": "-1.251786572669383",
+      "to_lng": "36.85176134943642",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0098",
+    "name": "Distribution Line 98 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "352",
+      "material": "steel",
+      "length_m": "3962.9",
+      "latitude": "-1.29483",
+      "longitude": "36.859051",
+      "from_lat": "-1.302026942442694",
+      "from_lng": "36.87538665796825",
+      "to_lat": "-1.287633694332924",
+      "to_lng": "36.8427150711398",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0099",
+    "name": "Distribution Line 99 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "268",
+      "material": "steel",
+      "length_m": "5632.3",
+      "latitude": "-1.280522",
+      "longitude": "36.857865",
+      "from_lat": "-1.305839722501808",
+      "from_lng": "36.856223903128985",
+      "to_lat": "-1.2552042579896396",
+      "to_lng": "36.85950527673506",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0100",
+    "name": "Distribution Line 100 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "373",
+      "material": "steel",
+      "length_m": "4672.8",
+      "latitude": "-1.288297",
+      "longitude": "36.857349",
+      "from_lat": "-1.3005449596148912",
+      "from_lng": "36.840230357508915",
+      "to_lat": "-1.2760495321731515",
+      "to_lng": "36.87446733637564",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0101",
+    "name": "Distribution Line 101 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "294",
+      "material": "steel",
+      "length_m": "2705.1",
+      "latitude": "-1.287758",
+      "longitude": "36.851705",
+      "from_lat": "-1.276671480870762",
+      "from_lng": "36.85676063629866",
+      "to_lat": "-1.2988447335642874",
+      "to_lng": "36.84664920677768",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0102",
+    "name": "Distribution Line 102 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "340",
+      "material": "steel",
+      "length_m": "266.5",
+      "latitude": "-1.286165",
+      "longitude": "36.866297",
+      "from_lat": "-1.2849853596445413",
+      "from_lng": "36.866072459535644",
+      "to_lat": "-1.2873440602163457",
+      "to_lng": "36.866520955607946",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0103",
+    "name": "Distribution Line 103 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "392",
+      "material": "steel",
+      "length_m": "4796.9",
+      "latitude": "-1.271419",
+      "longitude": "36.852851",
+      "from_lat": "-1.2887391247154665",
+      "from_lng": "36.86576910694276",
+      "to_lat": "-1.2540979095581108",
+      "to_lng": "36.83993285817324",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0104",
+    "name": "Distribution Line 104 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "348",
+      "material": "steel",
+      "length_m": "1959.0",
+      "latitude": "-1.267156",
+      "longitude": "36.878311",
+      "from_lat": "-1.274637215812699",
+      "from_lng": "36.873632212853984",
+      "to_lat": "-1.2596742038454216",
+      "to_lng": "36.88299012544461",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0105",
+    "name": "Distribution Line 105 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "337",
+      "material": "steel",
+      "length_m": "1317.6",
+      "latitude": "-1.262009",
+      "longitude": "36.852738",
+      "from_lat": "-1.2676551128726647",
+      "from_lng": "36.854567811236144",
+      "to_lat": "-1.2563629416718105",
+      "to_lng": "36.850907600032265",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0106",
+    "name": "Distribution Line 106 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "267",
+      "material": "steel",
+      "length_m": "5432.6",
+      "latitude": "-1.279744",
+      "longitude": "36.839089",
+      "from_lat": "-1.3031728061768437",
+      "from_lng": "36.84615319737628",
+      "to_lat": "-1.2563146882901186",
+      "to_lng": "36.83202391641802",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0107",
+    "name": "Distribution Line 107 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "394",
+      "material": "steel",
+      "length_m": "1960.1",
+      "latitude": "-1.260352",
+      "longitude": "36.868429",
+      "from_lat": "-1.2521247648962548",
+      "from_lng": "36.86522557285652",
+      "to_lat": "-1.2685800513305217",
+      "to_lng": "36.87163258831741",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0108",
+    "name": "Distribution Line 108 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "360",
+      "material": "steel",
+      "length_m": "1257.9",
+      "latitude": "-1.304827",
+      "longitude": "36.838235",
+      "from_lat": "-1.2991634456216876",
+      "from_lng": "36.83807039666451",
+      "to_lat": "-1.3104907490824",
+      "to_lng": "36.83839865382876",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0109",
+    "name": "Distribution Line 109 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "340",
+      "material": "steel",
+      "length_m": "4900.2",
+      "latitude": "-1.283686",
+      "longitude": "36.864165",
+      "from_lat": "-1.2621038446249948",
+      "from_lng": "36.86879558285706",
+      "to_lat": "-1.3052672124731126",
+      "to_lng": "36.85953513336152",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0110",
+    "name": "Distribution Line 110 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "distribution",
+      "diameter_mm": "302",
+      "material": "steel",
+      "length_m": "2350.1",
+      "latitude": "-1.292822",
+      "longitude": "36.850167",
+      "from_lat": "-1.2883455140681326",
+      "from_lng": "36.85975988912329",
+      "to_lat": "-1.2972994627876417",
+      "to_lng": "36.84057421553403",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0111",
+    "name": "Distribution Line 111 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "369",
+      "material": "steel",
+      "length_m": "2452.4",
+      "latitude": "-1.30626",
+      "longitude": "36.689655",
+      "from_lat": "-1.3147855236546484",
+      "from_lng": "36.68263002148368",
+      "to_lat": "-1.297734349324383",
+      "to_lng": "36.696679923136",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0112",
+    "name": "Distribution Line 112 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "331",
+      "material": "steel",
+      "length_m": "3187.8",
+      "latitude": "-1.327976",
+      "longitude": "36.729483",
+      "from_lat": "-1.3419691795274062",
+      "from_lng": "36.7262606580988",
+      "to_lat": "-1.3139826806072281",
+      "to_lng": "36.7327053908795",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0113",
+    "name": "Distribution Line 113 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "391",
+      "material": "steel",
+      "length_m": "5479.9",
+      "latitude": "-1.324932",
+      "longitude": "36.730665",
+      "from_lat": "-1.3009938303575357",
+      "from_lng": "36.73668846275255",
+      "to_lat": "-1.3488694158360774",
+      "to_lng": "36.724640697852394",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0114",
+    "name": "Distribution Line 114 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "308",
+      "material": "steel",
+      "length_m": "3616.3",
+      "latitude": "-1.316978",
+      "longitude": "36.717311",
+      "from_lat": "-1.3224214737968178",
+      "from_lng": "36.7326641068117",
+      "to_lat": "-1.31153401899982",
+      "to_lng": "36.701958275848156",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0115",
+    "name": "Distribution Line 115 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "294",
+      "material": "steel",
+      "length_m": "1466.5",
+      "latitude": "-1.303564",
+      "longitude": "36.707325",
+      "from_lat": "-1.2993248375850324",
+      "from_lng": "36.71239066708127",
+      "to_lat": "-1.3078036206958443",
+      "to_lng": "36.70225845552754",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0116",
+    "name": "Distribution Line 116 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "335",
+      "material": "steel",
+      "length_m": "3501.7",
+      "latitude": "-1.305999",
+      "longitude": "36.708778",
+      "from_lat": "-1.3040212997123193",
+      "from_lng": "36.693129288350455",
+      "to_lat": "-1.3079766226544083",
+      "to_lng": "36.724427443529784",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0117",
+    "name": "Distribution Line 117 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "388",
+      "material": "steel",
+      "length_m": "4203.5",
+      "latitude": "-1.333575",
+      "longitude": "36.693152",
+      "from_lat": "-1.343893052812257",
+      "from_lng": "36.70902863002391",
+      "to_lat": "-1.323255988002444",
+      "to_lng": "36.6772760501343",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0118",
+    "name": "Distribution Line 118 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "364",
+      "material": "steel",
+      "length_m": "4571.8",
+      "latitude": "-1.31587",
+      "longitude": "36.708871",
+      "from_lat": "-1.3116042897354834",
+      "from_lng": "36.729018737919894",
+      "to_lat": "-1.3201354162588945",
+      "to_lng": "36.68872415620826",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0119",
+    "name": "Distribution Line 119 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "388",
+      "material": "steel",
+      "length_m": "5505.6",
+      "latitude": "-1.332502",
+      "longitude": "36.701759",
+      "from_lat": "-1.3454328386009577",
+      "from_lng": "36.68059641468693",
+      "to_lat": "-1.3195720555529389",
+      "to_lng": "36.722921118210195",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0120",
+    "name": "Distribution Line 120 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "263",
+      "material": "steel",
+      "length_m": "4677.4",
+      "latitude": "-1.315063",
+      "longitude": "36.716995",
+      "from_lat": "-1.30809518422792",
+      "from_lng": "36.73687878445994",
+      "to_lat": "-1.3220300544709584",
+      "to_lng": "36.69711100677958",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0121",
+    "name": "Distribution Line 121 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "364",
+      "material": "steel",
+      "length_m": "2137.7",
+      "latitude": "-1.318391",
+      "longitude": "36.723062",
+      "from_lat": "-1.314056683164826",
+      "from_lng": "36.73166096402834",
+      "to_lat": "-1.3227244283760147",
+      "to_lng": "36.7144628833719",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0122",
+    "name": "Distribution Line 122 - South",
+    "type": "pipe",
+    "state": "maintenance",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "267",
+      "material": "steel",
+      "length_m": "4791.6",
+      "latitude": "-1.34054",
+      "longitude": "36.698181",
+      "from_lat": "-1.3357044954885025",
+      "from_lng": "36.6771460293984",
+      "to_lat": "-1.3453760497592198",
+      "to_lng": "36.71921578829618",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0123",
+    "name": "Distribution Line 123 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "292",
+      "material": "steel",
+      "length_m": "2175.5",
+      "latitude": "-1.323966",
+      "longitude": "36.70483",
+      "from_lat": "-1.3169119440249444",
+      "from_lng": "36.71163231245374",
+      "to_lat": "-1.33101995865691",
+      "to_lng": "36.69802707085308",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0124",
+    "name": "Distribution Line 124 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "289",
+      "material": "steel",
+      "length_m": "2522.0",
+      "latitude": "-1.323966",
+      "longitude": "36.691107",
+      "from_lat": "-1.3337532698316088",
+      "from_lng": "36.68533880098471",
+      "to_lat": "-1.3141791474779914",
+      "to_lng": "36.696874210659146",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0125",
+    "name": "Distribution Line 125 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "306",
+      "material": "steel",
+      "length_m": "1369.0",
+      "latitude": "-1.314419",
+      "longitude": "36.726046",
+      "from_lat": "-1.308516193600889",
+      "from_lng": "36.72783134937891",
+      "to_lat": "-1.3203209664004945",
+      "to_lng": "36.724260016328465",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0126",
+    "name": "Distribution Line 126 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "384",
+      "material": "steel",
+      "length_m": "4170.3",
+      "latitude": "-1.32522",
+      "longitude": "36.717116",
+      "from_lat": "-1.3294900471379094",
+      "from_lng": "36.698822239032054",
+      "to_lat": "-1.3209505901055194",
+      "to_lng": "36.73540942904863",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0127",
+    "name": "Distribution Line 127 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "distribution",
+      "diameter_mm": "279",
+      "material": "steel",
+      "length_m": "4429.6",
+      "latitude": "-1.313835",
+      "longitude": "36.700872",
+      "from_lat": "-1.2940190996862746",
+      "from_lng": "36.698535377997516",
+      "to_lat": "-1.3336509828175824",
+      "to_lng": "36.70320824025578",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0128",
+    "name": "Distribution Line 128 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "322",
+      "material": "steel",
+      "length_m": "1736.2",
+      "latitude": "-1.200645",
+      "longitude": "36.882368",
+      "from_lat": "-1.2030860331824016",
+      "from_lng": "36.88979737630399",
+      "to_lat": "-1.1982036655985806",
+      "to_lng": "36.874937853669515",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0129",
+    "name": "Distribution Line 129 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "266",
+      "material": "steel",
+      "length_m": "4861.3",
+      "latitude": "-1.223315",
+      "longitude": "36.89053",
+      "from_lat": "-1.2029560496920413",
+      "from_lng": "36.898592948625655",
+      "to_lat": "-1.2436738061723192",
+      "to_lng": "36.882466236534746",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0130",
+    "name": "Distribution Line 130 - North",
+    "type": "pipe",
+    "state": "maintenance",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "374",
+      "material": "steel",
+      "length_m": "5925.7",
+      "latitude": "-1.213899",
+      "longitude": "36.890971",
+      "from_lat": "-1.2037201588930073",
+      "from_lng": "36.915646145225445",
+      "to_lat": "-1.2240780834774547",
+      "to_lng": "36.86629528799501",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0131",
+    "name": "Distribution Line 131 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "318",
+      "material": "steel",
+      "length_m": "1917.3",
+      "latitude": "-1.245258",
+      "longitude": "36.885277",
+      "from_lat": "-1.2366585701852302",
+      "from_lng": "36.88447325338434",
+      "to_lat": "-1.2538567845563382",
+      "to_lng": "36.88608107810677",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0132",
+    "name": "Distribution Line 132 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "371",
+      "material": "steel",
+      "length_m": "5823.9",
+      "latitude": "-1.231984",
+      "longitude": "36.889799",
+      "from_lat": "-1.2385818144723757",
+      "from_lng": "36.86440824681128",
+      "to_lat": "-1.225385415741168",
+      "to_lng": "36.91518942376544",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0133",
+    "name": "Distribution Line 133 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "317",
+      "material": "steel",
+      "length_m": "5564.9",
+      "latitude": "-1.215078",
+      "longitude": "36.896323",
+      "from_lat": "-1.2085319074289498",
+      "from_lng": "36.87212555265174",
+      "to_lat": "-1.221624833133404",
+      "to_lng": "36.920520249569066",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0134",
+    "name": "Distribution Line 134 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "272",
+      "material": "steel",
+      "length_m": "5818.7",
+      "latitude": "-1.232126",
+      "longitude": "36.899486",
+      "from_lat": "-1.2108409761867953",
+      "from_lng": "36.884190999025364",
+      "to_lat": "-1.253411606106535",
+      "to_lng": "36.914780544481495",
+      "installation_date": "2020-03-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0135",
+    "name": "Distribution Line 135 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "302",
+      "material": "steel",
+      "length_m": "2710.0",
+      "latitude": "-1.226132",
+      "longitude": "36.895556",
+      "from_lat": "-1.2164882795106096",
+      "from_lng": "36.88807119233764",
+      "to_lat": "-1.2357751043268939",
+      "to_lng": "36.903040486210585",
+      "installation_date": "2021-04-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0136",
+    "name": "Distribution Line 136 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "281",
+      "material": "steel",
+      "length_m": "2223.4",
+      "latitude": "-1.220525",
+      "longitude": "36.873017",
+      "from_lat": "-1.2207749279084437",
+      "from_lng": "36.863004508449016",
+      "to_lat": "-1.2202742615346747",
+      "to_lng": "36.88302907431325",
+      "installation_date": "2022-05-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0137",
+    "name": "Distribution Line 137 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "305",
+      "material": "steel",
+      "length_m": "1624.5",
+      "latitude": "-1.235549",
+      "longitude": "36.872583",
+      "from_lat": "-1.2426361154221757",
+      "from_lng": "36.87440568076628",
+      "to_lat": "-1.228461751862826",
+      "to_lng": "36.87076104565519",
+      "installation_date": "2023-06-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0138",
+    "name": "Distribution Line 138 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "339",
+      "material": "steel",
+      "length_m": "6305.2",
+      "latitude": "-1.223151",
+      "longitude": "36.904553",
+      "from_lat": "-1.2005112343812527",
+      "from_lng": "36.92170318449716",
+      "to_lat": "-1.2457898943547618",
+      "to_lng": "36.887402631928836",
+      "installation_date": "2018-07-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0139",
+    "name": "Distribution Line 139 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "371",
+      "material": "steel",
+      "length_m": "5221.5",
+      "latitude": "-1.228219",
+      "longitude": "36.900406",
+      "from_lat": "-1.2047983148586558",
+      "from_lng": "36.90256715691752",
+      "to_lat": "-1.2516396667278924",
+      "to_lng": "36.89824507271226",
+      "installation_date": "2019-08-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0140",
+    "name": "Distribution Line 140 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "277",
+      "material": "steel",
+      "length_m": "2946.4",
+      "latitude": "-1.217425",
+      "longitude": "36.876756",
+      "from_lat": "-1.2264555514655477",
+      "from_lng": "36.8670298597565",
+      "to_lat": "-1.2083935047577863",
+      "to_lng": "36.886481770589114",
+      "installation_date": "2020-09-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0141",
+    "name": "Distribution Line 141 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "390",
+      "material": "steel",
+      "length_m": "2057.9",
+      "latitude": "-1.235417",
+      "longitude": "36.90101",
+      "from_lat": "-1.2399802605899921",
+      "from_lng": "36.89294086591398",
+      "to_lat": "-1.2308538209131992",
+      "to_lng": "36.90907903969012",
+      "installation_date": "2021-10-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0142",
+    "name": "Distribution Line 142 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "261",
+      "material": "steel",
+      "length_m": "7013.2",
+      "latitude": "-1.234216",
+      "longitude": "36.89311",
+      "from_lat": "-1.2138637313582437",
+      "from_lng": "36.86894890199655",
+      "to_lat": "-1.2545676773707908",
+      "to_lng": "36.91727177762662",
+      "installation_date": "2022-11-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0143",
+    "name": "Distribution Line 143 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "267",
+      "material": "steel",
+      "length_m": "3163.8",
+      "latitude": "-1.230501",
+      "longitude": "36.901532",
+      "from_lat": "-1.2172996327477048",
+      "from_lng": "36.896163759657064",
+      "to_lat": "-1.2437029233973413",
+      "to_lng": "36.906900541690554",
+      "installation_date": "2023-12-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0144",
+    "name": "Distribution Line 144 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "354",
+      "material": "steel",
+      "length_m": "4365.1",
+      "latitude": "-1.242759",
+      "longitude": "36.884581",
+      "from_lat": "-1.2467031589171",
+      "from_lng": "36.865318329179495",
+      "to_lat": "-1.2388141538781106",
+      "to_lng": "36.90384455102793",
+      "installation_date": "2018-01-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0145",
+    "name": "Distribution Line 145 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "distribution",
+      "diameter_mm": "297",
+      "material": "steel",
+      "length_m": "3095.9",
+      "latitude": "-1.219473",
+      "longitude": "36.883662",
+      "from_lat": "-1.2324111559989053",
+      "from_lng": "36.88886646694503",
+      "to_lat": "-1.2065356590882919",
+      "to_lng": "36.878456989306514",
+      "installation_date": "2019-02-20"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0146",
+    "name": "Service Line 146 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "220",
+      "material": "pvc",
+      "length_m": "397.6",
+      "latitude": "-1.291813",
+      "longitude": "36.81441",
+      "from_lat": "-1.293595968637571",
+      "from_lng": "36.81424219235947",
+      "to_lat": "-1.2900296294252103",
+      "to_lng": "36.814578056245864",
+      "installation_date": "2020-03-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0147",
+    "name": "Service Line 147 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "170",
+      "material": "pvc",
+      "length_m": "730.6",
+      "latitude": "-1.280566",
+      "longitude": "36.798739",
+      "from_lat": "-1.2815695834562262",
+      "from_lng": "36.79560503309544",
+      "to_lat": "-1.279562344727268",
+      "to_lng": "36.801873048855306",
+      "installation_date": "2021-04-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0148",
+    "name": "Service Line 148 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "240",
+      "material": "pvc",
+      "length_m": "666.6",
+      "latitude": "-1.300909",
+      "longitude": "36.831001",
+      "from_lat": "-1.2980559960314129",
+      "from_lng": "36.83006378276607",
+      "to_lat": "-1.3037612006455988",
+      "to_lng": "36.83193913002696",
+      "installation_date": "2022-05-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0149",
+    "name": "Service Line 149 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "219",
+      "material": "pvc",
+      "length_m": "1112.9",
+      "latitude": "-1.294324",
+      "longitude": "36.843217",
+      "from_lat": "-1.2903667959756027",
+      "from_lng": "36.84013878024312",
+      "to_lat": "-1.298280303187556",
+      "to_lng": "36.84629487888776",
+      "installation_date": "2023-06-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0150",
+    "name": "Service Line 150 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "194",
+      "material": "pvc",
+      "length_m": "248.4",
+      "latitude": "-1.302716",
+      "longitude": "36.791804",
+      "from_lat": "-1.3029302299341645",
+      "from_lng": "36.79290286514622",
+      "to_lat": "-1.3025027602648491",
+      "to_lng": "36.79070612307798",
+      "installation_date": "2019-07-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0151",
+    "name": "Service Line 151 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "190",
+      "material": "pvc",
+      "length_m": "76.1",
+      "latitude": "-1.26749",
+      "longitude": "36.806899",
+      "from_lat": "-1.2674011395498215",
+      "from_lng": "36.807229727216615",
+      "to_lat": "-1.267579824922529",
+      "to_lng": "36.80656774272358",
+      "installation_date": "2020-08-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0152",
+    "name": "Service Line 152 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "226",
+      "material": "pvc",
+      "length_m": "223.3",
+      "latitude": "-1.274904",
+      "longitude": "36.828203",
+      "from_lat": "-1.2755489156995936",
+      "from_lng": "36.82897460893502",
+      "to_lat": "-1.2742588359060405",
+      "to_lng": "36.82743061357059",
+      "installation_date": "2021-09-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0153",
+    "name": "Service Line 153 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "246",
+      "material": "pvc",
+      "length_m": "1065.6",
+      "latitude": "-1.280508",
+      "longitude": "36.828021",
+      "from_lat": "-1.2775334583491254",
+      "from_lng": "36.82425302432242",
+      "to_lat": "-1.2834818588887975",
+      "to_lng": "36.83178838598781",
+      "installation_date": "2022-10-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0154",
+    "name": "Service Line 154 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "226",
+      "material": "pvc",
+      "length_m": "946.1",
+      "latitude": "-1.282703",
+      "longitude": "36.810405",
+      "from_lat": "-1.2866812877820917",
+      "from_lng": "36.80887627302182",
+      "to_lat": "-1.2787248600565886",
+      "to_lng": "36.81193373501981",
+      "installation_date": "2023-11-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0155",
+    "name": "Service Line 155 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "152",
+      "material": "pvc",
+      "length_m": "567.6",
+      "latitude": "-1.283322",
+      "longitude": "36.828349",
+      "from_lat": "-1.2811583024109234",
+      "from_lng": "36.82698630484699",
+      "to_lat": "-1.2854854125692061",
+      "to_lng": "36.829710965837506",
+      "installation_date": "2019-12-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0156",
+    "name": "Service Line 156 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "159",
+      "material": "pvc",
+      "length_m": "299.9",
+      "latitude": "-1.310175",
+      "longitude": "36.795218",
+      "from_lat": "-1.3089103980944992",
+      "from_lng": "36.794743727429214",
+      "to_lat": "-1.3114405685739177",
+      "to_lng": "36.795692286766666",
+      "installation_date": "2020-01-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0157",
+    "name": "Service Line 157 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "241",
+      "material": "pvc",
+      "length_m": "720.1",
+      "latitude": "-1.302681",
+      "longitude": "36.795484",
+      "from_lat": "-1.30350305653342",
+      "from_lng": "36.79234614808415",
+      "to_lat": "-1.3018582609435072",
+      "to_lng": "36.798621159220254",
+      "installation_date": "2021-02-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0158",
+    "name": "Service Line 158 - Central",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "central",
+      "pipe_type": "service",
+      "diameter_mm": "187",
+      "material": "pvc",
+      "length_m": "245.5",
+      "latitude": "-1.305389",
+      "longitude": "36.826541",
+      "from_lat": "-1.305215185913537",
+      "from_lng": "36.825449219200536",
+      "to_lat": "-1.305563122738256",
+      "to_lng": "36.8276332520056",
+      "installation_date": "2022-03-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0159",
+    "name": "Service Line 159 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "248",
+      "material": "pvc",
+      "length_m": "875.9",
+      "latitude": "-1.28722",
+      "longitude": "36.791187",
+      "from_lat": "-1.2911655906015016",
+      "from_lng": "36.79116523652486",
+      "to_lat": "-1.2832751000433904",
+      "to_lng": "36.791208193187025",
+      "installation_date": "2023-04-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0160",
+    "name": "Service Line 160 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "185",
+      "material": "pvc",
+      "length_m": "1121.9",
+      "latitude": "-1.265648",
+      "longitude": "36.782866",
+      "from_lat": "-1.2695792816510987",
+      "from_lng": "36.78604123753549",
+      "to_lat": "-1.2617157251682263",
+      "to_lng": "36.77969122402315",
+      "installation_date": "2019-05-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0161",
+    "name": "Service Line 161 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "223",
+      "material": "pvc",
+      "length_m": "548.1",
+      "latitude": "-1.274359",
+      "longitude": "36.831675",
+      "from_lat": "-1.2750100332022771",
+      "from_lng": "36.82929379397591",
+      "to_lat": "-1.2737084802769993",
+      "to_lng": "36.834056587522184",
+      "installation_date": "2020-06-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0162",
+    "name": "Service Line 162 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "221",
+      "material": "pvc",
+      "length_m": "792.3",
+      "latitude": "-1.247208",
+      "longitude": "36.795771",
+      "from_lat": "-1.2497775896869592",
+      "from_lng": "36.79329347967004",
+      "to_lat": "-1.2446389019432467",
+      "to_lng": "36.79824773562526",
+      "installation_date": "2021-07-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0163",
+    "name": "Service Line 163 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "230",
+      "material": "pvc",
+      "length_m": "806.0",
+      "latitude": "-1.257287",
+      "longitude": "36.785734",
+      "from_lat": "-1.2564805243587016",
+      "from_lng": "36.782194202649386",
+      "to_lat": "-1.2580936484504022",
+      "to_lng": "36.78927440682277",
+      "installation_date": "2022-08-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0164",
+    "name": "Service Line 164 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "150",
+      "material": "pvc",
+      "length_m": "630.1",
+      "latitude": "-1.284131",
+      "longitude": "36.816899",
+      "from_lat": "-1.2815790170646393",
+      "from_lng": "36.81565657960355",
+      "to_lat": "-1.28668280148229",
+      "to_lng": "36.81814123177816",
+      "installation_date": "2023-09-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0165",
+    "name": "Service Line 165 - Westlands",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "213",
+      "material": "pvc",
+      "length_m": "679.4",
+      "latitude": "-1.272806",
+      "longitude": "36.796134",
+      "from_lat": "-1.2702962557935589",
+      "from_lng": "36.794381907222984",
+      "to_lat": "-1.275314876820348",
+      "to_lng": "36.797885151621834",
+      "installation_date": "2019-10-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0166",
+    "name": "Service Line 166 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "157",
+      "material": "pvc",
+      "length_m": "189.7",
+      "latitude": "-1.250676",
+      "longitude": "36.785776",
+      "from_lat": "-1.2498313890075983",
+      "from_lng": "36.78590321799168",
+      "to_lat": "-1.2515212184509938",
+      "to_lng": "36.78564830042953",
+      "installation_date": "2020-11-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0167",
+    "name": "Service Line 167 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "170",
+      "material": "pvc",
+      "length_m": "763.7",
+      "latitude": "-1.287083",
+      "longitude": "36.814862",
+      "from_lat": "-1.2836525743085414",
+      "from_lng": "36.815119416232754",
+      "to_lat": "-1.2905137880342417",
+      "to_lng": "36.81460371674294",
+      "installation_date": "2021-12-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0168",
+    "name": "Service Line 168 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "152",
+      "material": "pvc",
+      "length_m": "910.1",
+      "latitude": "-1.257216",
+      "longitude": "36.79747",
+      "from_lat": "-1.253881243933653",
+      "from_lng": "36.79508544717617",
+      "to_lat": "-1.2605515729660732",
+      "to_lng": "36.799853992188694",
+      "installation_date": "2022-01-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0169",
+    "name": "Service Line 169 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "172",
+      "material": "pvc",
+      "length_m": "760.0",
+      "latitude": "-1.279749",
+      "longitude": "36.831502",
+      "from_lat": "-1.2794522234434",
+      "from_lng": "36.828091426262716",
+      "to_lat": "-1.2800465876012797",
+      "to_lng": "36.834912098149445",
+      "installation_date": "2023-02-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0170",
+    "name": "Service Line 170 - Westlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "213",
+      "material": "pvc",
+      "length_m": "877.9",
+      "latitude": "-1.262411",
+      "longitude": "36.824976",
+      "from_lat": "-1.2584728481561411",
+      "from_lng": "36.82533567104227",
+      "to_lat": "-1.266349391758383",
+      "to_lng": "36.82461680112597",
+      "installation_date": "2019-03-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0171",
+    "name": "Service Line 171 - Westlands",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "westlands",
+      "pipe_type": "service",
+      "diameter_mm": "173",
+      "material": "pvc",
+      "length_m": "859.1",
+      "latitude": "-1.282522",
+      "longitude": "36.804098",
+      "from_lat": "-1.2842742301964931",
+      "from_lng": "36.80754834126628",
+      "to_lat": "-1.28077061730401",
+      "to_lng": "36.80064685316583",
+      "installation_date": "2020-04-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0172",
+    "name": "Service Line 172 - Eastlands",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "184",
+      "material": "pvc",
+      "length_m": "309.8",
+      "latitude": "-1.259231",
+      "longitude": "36.838224",
+      "from_lat": "-1.2585822222120475",
+      "from_lng": "36.83698842762081",
+      "to_lat": "-1.259878936799483",
+      "to_lng": "36.83945972746877",
+      "installation_date": "2021-05-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0173",
+    "name": "Service Line 173 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "243",
+      "material": "pvc",
+      "length_m": "817.4",
+      "latitude": "-1.274844",
+      "longitude": "36.850654",
+      "from_lat": "-1.2770467081430903",
+      "from_lng": "36.853604684477816",
+      "to_lat": "-1.2726403045919519",
+      "to_lng": "36.84770423273959",
+      "installation_date": "2022-06-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0174",
+    "name": "Service Line 174 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "216",
+      "material": "pvc",
+      "length_m": "589.8",
+      "latitude": "-1.294682",
+      "longitude": "36.880328",
+      "from_lat": "-1.2935584587731275",
+      "from_lng": "36.877919994308726",
+      "to_lat": "-1.2958054461796251",
+      "to_lng": "36.88273525149988",
+      "installation_date": "2023-07-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0175",
+    "name": "Service Line 175 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "171",
+      "material": "pvc",
+      "length_m": "857.7",
+      "latitude": "-1.270626",
+      "longitude": "36.870265",
+      "from_lat": "-1.2667836012755505",
+      "from_lng": "36.87066759670053",
+      "to_lat": "-1.2744690596308719",
+      "to_lng": "36.86986306071601",
+      "installation_date": "2019-08-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0176",
+    "name": "Service Line 176 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "182",
+      "material": "pvc",
+      "length_m": "667.6",
+      "latitude": "-1.299497",
+      "longitude": "36.846862",
+      "from_lat": "-1.3022289388396517",
+      "from_lng": "36.848118540250375",
+      "to_lat": "-1.2967646179055574",
+      "to_lng": "36.845605459142604",
+      "installation_date": "2020-09-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0177",
+    "name": "Service Line 177 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "242",
+      "material": "pvc",
+      "length_m": "411.6",
+      "latitude": "-1.285688",
+      "longitude": "36.876589",
+      "from_lat": "-1.2849860630421313",
+      "from_lng": "36.87830497583566",
+      "to_lat": "-1.2863898032827772",
+      "to_lng": "36.87487262841004",
+      "installation_date": "2021-10-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0178",
+    "name": "Service Line 178 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "234",
+      "material": "pvc",
+      "length_m": "440.7",
+      "latitude": "-1.305134",
+      "longitude": "36.839025",
+      "from_lat": "-1.3034988781094161",
+      "from_lng": "36.84015113223861",
+      "to_lat": "-1.3067693488192245",
+      "to_lng": "36.83789942076528",
+      "installation_date": "2022-11-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0179",
+    "name": "Service Line 179 - Eastlands",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "170",
+      "material": "pvc",
+      "length_m": "790.8",
+      "latitude": "-1.292052",
+      "longitude": "36.838992",
+      "from_lat": "-1.2938434426435315",
+      "from_lng": "36.835913118999066",
+      "to_lat": "-1.290260963844543",
+      "to_lng": "36.84207164716453",
+      "installation_date": "2023-12-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0180",
+    "name": "Service Line 180 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "196",
+      "material": "pvc",
+      "length_m": "893.4",
+      "latitude": "-1.28728",
+      "longitude": "36.877086",
+      "from_lat": "-1.2904137588758458",
+      "from_lng": "36.87456148278144",
+      "to_lat": "-1.28414542772004",
+      "to_lng": "36.879610243996105",
+      "installation_date": "2019-01-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0181",
+    "name": "Service Line 181 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "191",
+      "material": "pvc",
+      "length_m": "1021.5",
+      "latitude": "-1.285596",
+      "longitude": "36.861955",
+      "from_lat": "-1.2878782466865732",
+      "from_lng": "36.8659502153541",
+      "to_lat": "-1.2833131956087283",
+      "to_lng": "36.857959109361694",
+      "installation_date": "2020-02-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0182",
+    "name": "Service Line 182 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "192",
+      "material": "pvc",
+      "length_m": "771.7",
+      "latitude": "-1.256894",
+      "longitude": "36.845166",
+      "from_lat": "-1.2585966747384918",
+      "from_lng": "36.84819654597924",
+      "to_lat": "-1.2551908915983854",
+      "to_lng": "36.84213529883967",
+      "installation_date": "2021-03-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0183",
+    "name": "Service Line 183 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "151",
+      "material": "pvc",
+      "length_m": "1018.3",
+      "latitude": "-1.264224",
+      "longitude": "36.883899",
+      "from_lat": "-1.2671134128764932",
+      "from_lng": "36.88033611172487",
+      "to_lat": "-1.2613344939547688",
+      "to_lng": "36.887460976021245",
+      "installation_date": "2022-04-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0184",
+    "name": "Service Line 184 - Eastlands",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "eastlands",
+      "pipe_type": "service",
+      "diameter_mm": "220",
+      "material": "pvc",
+      "length_m": "666.1",
+      "latitude": "-1.25657",
+      "longitude": "36.840381",
+      "from_lat": "-1.2582379173926312",
+      "from_lng": "36.83788742192035",
+      "to_lat": "-1.2549022869826298",
+      "to_lng": "36.84287546916643",
+      "installation_date": "2023-05-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0185",
+    "name": "Service Line 185 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "192",
+      "material": "pvc",
+      "length_m": "260.4",
+      "latitude": "-1.315803",
+      "longitude": "36.684162",
+      "from_lat": "-1.3147435721827982",
+      "from_lng": "36.68365847587453",
+      "to_lat": "-1.3168624549107293",
+      "to_lng": "36.68466559147007",
+      "installation_date": "2019-06-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0186",
+    "name": "Service Line 186 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "179",
+      "material": "pvc",
+      "length_m": "663.5",
+      "latitude": "-1.346509",
+      "longitude": "36.705595",
+      "from_lat": "-1.3438555528377503",
+      "from_lng": "36.70421985184668",
+      "to_lat": "-1.3491617762523858",
+      "to_lng": "36.70697103762974",
+      "installation_date": "2020-07-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0187",
+    "name": "Service Line 187 - South",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "166",
+      "material": "pvc",
+      "length_m": "527.8",
+      "latitude": "-1.338458",
+      "longitude": "36.692096",
+      "from_lat": "-1.3383994344698344",
+      "from_lng": "36.69447282715243",
+      "to_lat": "-1.338515724560726",
+      "to_lng": "36.68971901223232",
+      "installation_date": "2021-08-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0188",
+    "name": "Service Line 188 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "205",
+      "material": "pvc",
+      "length_m": "245.9",
+      "latitude": "-1.324568",
+      "longitude": "36.68663",
+      "from_lat": "-1.3235618778929716",
+      "from_lng": "36.68616679629154",
+      "to_lat": "-1.3255740280907864",
+      "to_lng": "36.68709325575436",
+      "installation_date": "2022-09-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0189",
+    "name": "Service Line 189 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "189",
+      "material": "pvc",
+      "length_m": "523.2",
+      "latitude": "-1.295361",
+      "longitude": "36.720302",
+      "from_lat": "-1.296066108335976",
+      "from_lng": "36.722550223844024",
+      "to_lat": "-1.2946562842171077",
+      "to_lng": "36.71805284281935",
+      "installation_date": "2023-10-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0190",
+    "name": "Service Line 190 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "243",
+      "material": "pvc",
+      "length_m": "916.8",
+      "latitude": "-1.34588",
+      "longitude": "36.720263",
+      "from_lat": "-1.3425209080447575",
+      "from_lng": "36.72266417663972",
+      "to_lat": "-1.3492399575989054",
+      "to_lng": "36.71786124528632",
+      "installation_date": "2019-11-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0191",
+    "name": "Service Line 191 - South",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "159",
+      "material": "pvc",
+      "length_m": "260.1",
+      "latitude": "-1.301775",
+      "longitude": "36.72518",
+      "from_lat": "-1.302737219637838",
+      "from_lng": "36.7245110489169",
+      "to_lat": "-1.3008135099949345",
+      "to_lng": "36.725849015250766",
+      "installation_date": "2020-12-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0192",
+    "name": "Service Line 192 - South",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "241",
+      "material": "pvc",
+      "length_m": "949.8",
+      "latitude": "-1.327262",
+      "longitude": "36.691996",
+      "from_lat": "-1.3304131210050765",
+      "from_lng": "36.6891025761773",
+      "to_lat": "-1.3241109605524466",
+      "to_lng": "36.694890011829045",
+      "installation_date": "2021-01-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0193",
+    "name": "Service Line 193 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "194",
+      "material": "pvc",
+      "length_m": "210.4",
+      "latitude": "-1.337875",
+      "longitude": "36.694152",
+      "from_lat": "-1.3374383145803321",
+      "from_lng": "36.6949933431116",
+      "to_lat": "-1.3383108475862922",
+      "to_lng": "36.693310215442715",
+      "installation_date": "2022-02-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0194",
+    "name": "Service Line 194 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "239",
+      "material": "pvc",
+      "length_m": "770.2",
+      "latitude": "-1.334389",
+      "longitude": "36.732847",
+      "from_lat": "-1.3311320825851742",
+      "from_lng": "36.73165235278813",
+      "to_lat": "-1.3376465619895452",
+      "to_lng": "36.734042619682",
+      "installation_date": "2023-03-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0195",
+    "name": "Service Line 195 - South",
+    "type": "pipe",
+    "state": "idle",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "202",
+      "material": "pvc",
+      "length_m": "841.8",
+      "latitude": "-1.325558",
+      "longitude": "36.72682",
+      "from_lat": "-1.329111345770523",
+      "from_lng": "36.72549476985006",
+      "to_lat": "-1.3220056429195517",
+      "to_lng": "36.7281457864907",
+      "installation_date": "2019-04-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0196",
+    "name": "Service Line 196 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "150",
+      "material": "pvc",
+      "length_m": "970.6",
+      "latitude": "-1.345164",
+      "longitude": "36.717863",
+      "from_lat": "-1.3429216264184374",
+      "from_lng": "36.721616121958995",
+      "to_lat": "-1.3474062331959986",
+      "to_lng": "36.71410911737732",
+      "installation_date": "2020-05-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0197",
+    "name": "Service Line 197 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "169",
+      "material": "pvc",
+      "length_m": "657.5",
+      "latitude": "-1.311155",
+      "longitude": "36.689089",
+      "from_lat": "-1.3140539547476833",
+      "from_lng": "36.688481022868224",
+      "to_lat": "-1.308256660682163",
+      "to_lng": "36.68969795623281",
+      "installation_date": "2021-06-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0198",
+    "name": "Service Line 198 - South",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "south",
+      "pipe_type": "service",
+      "diameter_mm": "244",
+      "material": "pvc",
+      "length_m": "623.3",
+      "latitude": "-1.342449",
+      "longitude": "36.72849",
+      "from_lat": "-1.3448764518505976",
+      "from_lng": "36.72707974295018",
+      "to_lat": "-1.3400207356371219",
+      "to_lng": "36.72990087727727",
+      "installation_date": "2022-07-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0199",
+    "name": "Service Line 199 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "152",
+      "material": "pvc",
+      "length_m": "914.3",
+      "latitude": "-1.239586",
+      "longitude": "36.880022",
+      "from_lat": "-1.2367839356439179",
+      "from_lng": "36.87700387102823",
+      "to_lat": "-1.242387288322487",
+      "to_lng": "36.88304111466202",
+      "installation_date": "2023-08-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0200",
+    "name": "Service Line 200 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "150",
+      "material": "pvc",
+      "length_m": "619.5",
+      "latitude": "-1.225759",
+      "longitude": "36.903963",
+      "from_lat": "-1.223690006620905",
+      "from_lng": "36.90583585466191",
+      "to_lat": "-1.2278285055017897",
+      "to_lng": "36.902091034616696",
+      "installation_date": "2019-09-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0201",
+    "name": "Service Line 201 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "249",
+      "material": "pvc",
+      "length_m": "725.4",
+      "latitude": "-1.210044",
+      "longitude": "36.873545",
+      "from_lat": "-1.213297304130203",
+      "from_lng": "36.87384987654874",
+      "to_lat": "-1.2067909833049388",
+      "to_lng": "36.87324074400412",
+      "installation_date": "2020-10-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0202",
+    "name": "Service Line 202 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "231",
+      "material": "pvc",
+      "length_m": "850.0",
+      "latitude": "-1.227439",
+      "longitude": "36.883404",
+      "from_lat": "-1.2312675311755827",
+      "from_lng": "36.883440799737905",
+      "to_lat": "-1.2236099205466922",
+      "to_lng": "36.88336645965761",
+      "installation_date": "2021-11-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0203",
+    "name": "Service Line 203 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "176",
+      "material": "pvc",
+      "length_m": "505.8",
+      "latitude": "-1.228848",
+      "longitude": "36.876546",
+      "from_lat": "-1.22780093510255",
+      "from_lng": "36.874522434442795",
+      "to_lat": "-1.2298944671746117",
+      "to_lng": "36.87856931312656",
+      "installation_date": "2022-12-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0204",
+    "name": "Service Line 204 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "242",
+      "material": "pvc",
+      "length_m": "223.9",
+      "latitude": "-1.239497",
+      "longitude": "36.901189",
+      "from_lat": "-1.2399413008758",
+      "from_lng": "36.902095003606945",
+      "to_lat": "-1.23905310665286",
+      "to_lng": "36.9002838047685",
+      "installation_date": "2023-01-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0205",
+    "name": "Service Line 205 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "158",
+      "material": "pvc",
+      "length_m": "706.8",
+      "latitude": "-1.252533",
+      "longitude": "36.905182",
+      "from_lat": "-1.252540252172707",
+      "from_lng": "36.90199841310106",
+      "to_lat": "-1.2525258778396506",
+      "to_lng": "36.9083660748803",
+      "installation_date": "2019-02-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0206",
+    "name": "Service Line 206 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "179",
+      "material": "pvc",
+      "length_m": "1004.0",
+      "latitude": "-1.215768",
+      "longitude": "36.884542",
+      "from_lat": "-1.2135630443600411",
+      "from_lng": "36.88059359125291",
+      "to_lat": "-1.2179721107816348",
+      "to_lng": "36.88849105047392",
+      "installation_date": "2020-03-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0207",
+    "name": "Service Line 207 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "201",
+      "material": "pvc",
+      "length_m": "790.7",
+      "latitude": "-1.223768",
+      "longitude": "36.889828",
+      "from_lat": "-1.2233328606058678",
+      "from_lng": "36.88629243803408",
+      "to_lat": "-1.2242039099472044",
+      "to_lng": "36.8933628203705",
+      "installation_date": "2021-04-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0208",
+    "name": "Service Line 208 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "240",
+      "material": "pvc",
+      "length_m": "351.7",
+      "latitude": "-1.218623",
+      "longitude": "36.875481",
+      "from_lat": "-1.220207427232827",
+      "from_lng": "36.875459511801246",
+      "to_lat": "-1.2170395111413663",
+      "to_lng": "36.87550157329335",
+      "installation_date": "2022-05-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0209",
+    "name": "Service Line 209 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "190",
+      "material": "pvc",
+      "length_m": "982.8",
+      "latitude": "-1.230007",
+      "longitude": "36.908181",
+      "from_lat": "-1.226745790628685",
+      "from_lng": "36.91117519025587",
+      "to_lat": "-1.2332675999907678",
+      "to_lng": "36.905186681386944",
+      "installation_date": "2023-06-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0210",
+    "name": "Service Line 210 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "211",
+      "material": "pvc",
+      "length_m": "572.5",
+      "latitude": "-1.212936",
+      "longitude": "36.899505",
+      "from_lat": "-1.2154028600701383",
+      "from_lng": "36.89875360135943",
+      "to_lat": "-1.2104686689064095",
+      "to_lng": "36.90025562245629",
+      "installation_date": "2019-07-25"
+    }
+  },
+  {
+    "id": "PIPE-NBI-0211",
+    "name": "Service Line 211 - North",
+    "type": "pipe",
+    "state": "active",
+    "metadata": {
+      "zone": "north",
+      "pipe_type": "service",
+      "diameter_mm": "241",
+      "material": "pvc",
+      "length_m": "506.3",
+      "latitude": "-1.237819",
+      "longitude": "36.88682",
+      "from_lat": "-1.2380075472257188",
+      "from_lng": "36.88909248298136",
+      "to_lat": "-1.237630534391736",
+      "to_lng": "36.88454680267537",
+      "installation_date": "2020-08-25"
+    }
+  }
 ]
