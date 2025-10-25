@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
@@ -124,8 +123,6 @@ func discoverUseCases(rootDir string) ([]*agency.Agency, error) {
 			Category:    category,
 			Icon:        getIconForCategory(category),
 			Status:      agency.AgencyStatusActive,
-			ConfigPath:  filepath.Join(rootDir, dirName),
-			EnvFile:     ".env",
 			Metadata: agency.AgencyMetadata{
 				AgentTypes:  []string{},
 				TotalAgents: 0,

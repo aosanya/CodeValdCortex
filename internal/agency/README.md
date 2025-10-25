@@ -28,7 +28,6 @@ type Agency struct {
     Category    string            // Category (infrastructure, agriculture, etc.)
     Icon        string            // Emoji icon for UI
     Status      AgencyStatus      // active, inactive, paused, archived
-    ConfigPath  string            // Path to configuration files
     Metadata    AgencyMetadata    // Additional metadata
     Settings    AgencySettings    // Configuration settings
     CreatedAt   time.Time         // Creation timestamp
@@ -63,7 +62,6 @@ newAgency := &agency.Agency{
     DisplayName: "💧 Water Distribution",
     Category:    "infrastructure",
     Status:      agency.AgencyStatusActive,
-    ConfigPath:  "/usecases/UC-INFRA-001-water-distribution-network",
 }
 
 err := service.CreateAgency(ctx, newAgency)

@@ -24,7 +24,7 @@ func (m *AgencyContext) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Try to get agency ID from various sources
 		agencyID := m.getAgencyID(r)
-		
+
 		if agencyID != "" {
 			// Inject agency context
 			ctx, err := m.contextManager.WithAgency(r.Context(), agencyID)
@@ -57,22 +57,22 @@ func (m *AgencyContext) getAgencyID(r *http.Request) string {
 	// 1. Check URL path parameter (e.g., /agencies/{id}/...)
 	// This would typically be extracted by the router (mux.Vars)
 	// For now, check query parameter and header as fallbacks
-	
+
 	// 2. Check query parameter
 	if agencyID := r.URL.Query().Get("agency_id"); agencyID != "" {
 		return agencyID
 	}
-	
+
 	// 3. Check header
 	if agencyID := r.Header.Get("X-Agency-ID"); agencyID != "" {
 		return agencyID
 	}
-	
+
 	// 4. Check session/cookie
 	if cookie, err := r.Cookie("agency_id"); err == nil {
 		return cookie.Value
 	}
-	
+
 	return ""
 }
 
@@ -111,9 +111,9 @@ func WithAgencyContext(ctx context.Context, agencyID string, svc agency.Service)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	ctx = context.WithValue(ctx, agency.AgencyContextKey, agencyObj)
 	ctx = context.WithValue(ctx, agency.AgencyIDContextKey, agencyID)
-	
+
 	return ctx, nil
 }

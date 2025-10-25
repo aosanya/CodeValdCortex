@@ -2,14 +2,12 @@ package agency
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 )
 
 // Validator defines the interface for agency validation
 type Validator interface {
 	ValidateAgency(agency *Agency) error
-	ValidateConfiguration(configPath string) error
 }
 
 // validator implements the Validator interface
@@ -50,27 +48,6 @@ func (v *validator) ValidateAgency(agency *Agency) error {
 		if !isValidStatus(agency.Status) {
 			return fmt.Errorf("invalid agency status: %s", agency.Status)
 		}
-	}
-
-	// Validate config path if provided
-	if agency.ConfigPath != "" {
-		if err := v.ValidateConfiguration(agency.ConfigPath); err != nil {
-			return fmt.Errorf("invalid config path: %w", err)
-		}
-	}
-
-	return nil
-}
-
-// ValidateConfiguration validates a configuration path
-func (v *validator) ValidateConfiguration(configPath string) error {
-	if configPath == "" {
-		return fmt.Errorf("config path cannot be empty")
-	}
-
-	// Check if path is absolute or starts with /usecases/
-	if !filepath.IsAbs(configPath) && !strings.HasPrefix(configPath, "/usecases/") {
-		return fmt.Errorf("config path must be absolute or start with /usecases/")
 	}
 
 	return nil

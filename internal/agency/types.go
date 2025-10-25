@@ -6,21 +6,19 @@ import (
 
 // Agency represents a use case operating as an independent entity with its own configuration
 type Agency struct {
-	Key         string            `json:"_key,omitempty"`
-	ID          string            `json:"id"`
-	Name        string            `json:"name"`
-	DisplayName string            `json:"display_name"`
-	Description string            `json:"description"`
-	Category    string            `json:"category"`
-	Icon        string            `json:"icon"`
-	Status      AgencyStatus      `json:"status"`
-	ConfigPath  string            `json:"config_path"`
-	EnvFile     string            `json:"env_file"`
-	Metadata    AgencyMetadata    `json:"metadata"`
-	Settings    AgencySettings    `json:"settings"`
-	CreatedAt   time.Time         `json:"created_at"`
-	UpdatedAt   time.Time         `json:"updated_at"`
-	CreatedBy   string            `json:"created_by"`
+	Key         string         `json:"_key,omitempty"`
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	DisplayName string         `json:"display_name"`
+	Description string         `json:"description"`
+	Category    string         `json:"category"`
+	Icon        string         `json:"icon"`
+	Status      AgencyStatus   `json:"status"`
+	Metadata    AgencyMetadata `json:"metadata"`
+	Settings    AgencySettings `json:"settings"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedBy   string         `json:"created_by"`
 }
 
 // AgencyStatus represents the current state of an agency
@@ -35,20 +33,20 @@ const (
 
 // AgencyMetadata contains additional information about the agency
 type AgencyMetadata struct {
-	Location     string   `json:"location,omitempty"`
-	AgentTypes   []string `json:"agent_types,omitempty"`
-	TotalAgents  int      `json:"total_agents"`
-	Zones        int      `json:"zones,omitempty"`
-	APIEndpoint  string   `json:"api_endpoint,omitempty"`
-	Tags         []string `json:"tags,omitempty"`
+	Location    string   `json:"location,omitempty"`
+	AgentTypes  []string `json:"agent_types,omitempty"`
+	TotalAgents int      `json:"total_agents"`
+	Zones       int      `json:"zones,omitempty"`
+	APIEndpoint string   `json:"api_endpoint,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
 }
 
 // AgencySettings contains configuration options for the agency
 type AgencySettings struct {
-	AutoStart          bool `json:"auto_start"`
-	MonitoringEnabled  bool `json:"monitoring_enabled"`
-	DashboardEnabled   bool `json:"dashboard_enabled"`
-	VisualizerEnabled  bool `json:"visualizer_enabled"`
+	AutoStart         bool `json:"auto_start"`
+	MonitoringEnabled bool `json:"monitoring_enabled"`
+	DashboardEnabled  bool `json:"dashboard_enabled"`
+	VisualizerEnabled bool `json:"visualizer_enabled"`
 }
 
 // AgencyFilters defines criteria for filtering agencies in queries
@@ -92,8 +90,6 @@ type CreateAgencyRequest struct {
 	Description string         `json:"description"`
 	Category    string         `json:"category" binding:"required"`
 	Icon        string         `json:"icon"`
-	ConfigPath  string         `json:"config_path"`
-	EnvFile     string         `json:"env_file"`
 	Metadata    AgencyMetadata `json:"metadata"`
 	Settings    AgencySettings `json:"settings"`
 }

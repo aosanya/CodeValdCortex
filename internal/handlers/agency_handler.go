@@ -51,8 +51,6 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		Category:    req.Category,
 		Icon:        req.Icon,
 		Status:      agency.AgencyStatusActive,
-		ConfigPath:  req.ConfigPath,
-		EnvFile:     req.EnvFile,
 		Metadata:    req.Metadata,
 		Settings:    req.Settings,
 		CreatedBy:   "system", // TODO: Get from auth context
