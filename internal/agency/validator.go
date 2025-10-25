@@ -3,6 +3,8 @@ package agency
 import (
 	"fmt"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // Validator defines the interface for agency validation
@@ -38,9 +40,34 @@ func (v *validator) ValidateAgency(agency *Agency) error {
 		return fmt.Errorf("agency category is required")
 	}
 
-	// Validate ID format (should start with UC-)
-	if !strings.HasPrefix(agency.ID, "UC-") {
-		return fmt.Errorf("agency ID must start with 'UC-'")
+	// Validate ID format (should be "agency_" + 32 hex characters without hyphens)
+	if !strings.HasPrefix(agency.ID, "agency_") {
+		return fmt.Errorf("agency ID must start with 'agency_' prefix")
+	}
+	
+	// Extract the UUID part after the prefix
+	uuidPart := strings.TrimPrefix(agency.ID, "agency_")
+	
+	// Validate the UUID part (32 hex characters without hyphens)
+	if len(uuidPart) == 32 {
+		// Without hyphens - validate it's all hex
+		for _, c := range uuidPart {
+			if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+				return fmt.Errorf("agency ID must be 'agency_' followed by 32 hex characters without hyphens")
+			}
+		}
+	} else if len(uuidPart) == 36 {
+		// Try parsing with hyphens (for backwards compatibility)
+		if _, err := uuid.Parse(uuidPart); err != nil {
+			return fmt.Errorf("agency ID UUID part must be valid UUID format: %w", err)
+		}
+	} else {
+		return fmt.Errorf("agency ID must be 'agency_' followed by a valid UUID (32 or 36 characters)")
+	}
+
+	// Validate category
+	if !isValidCategory(agency.Category) {
+		return fmt.Errorf("invalid category: %s", agency.Category)
 	}
 
 	// Validate status
@@ -61,4 +88,26 @@ func isValidStatus(status AgencyStatus) bool {
 	default:
 		return false
 	}
+}
+
+// isValidCategory checks if the category is valid
+func isValidCategory(category string) bool {
+	validCategories := map[string]bool{
+		"infrastructure": true,
+		"agriculture":    true,
+		"logistics":      true,
+		"transportation": true,
+		"healthcare":     true,
+		"education":      true,
+		"finance":        true,
+		"retail":         true,
+		"energy":         true,
+		"other":          true,
+	}
+	return validCategories[strings.ToLower(category)]
+}
+
+// GenerateAgencyID generates a new UUID for an agency with "agency_" prefix and without hyphens
+func GenerateAgencyID() string {
+	return "agency_" + strings.ReplaceAll(uuid.New().String(), "-", "")
 }

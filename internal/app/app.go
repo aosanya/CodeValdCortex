@@ -122,7 +122,8 @@ func New(cfg *config.Config) *App {
 		logger.WithError(err).Fatal("Failed to initialize agency repository")
 	}
 	agencyValidator := agency.NewValidator()
-	agencyService := agency.NewService(agencyRepo, agencyValidator)
+	agencyDBInit := agency.NewDatabaseInitializer(dbClient.Client(), logger)
+	agencyService := agency.NewServiceWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
 	logger.Info("Agency management service initialized successfully")
 
 	return &App{

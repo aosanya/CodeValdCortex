@@ -1,0 +1,221 @@
+package components
+
+templ HomepageLayout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } - CodeValdCortex</title>
+			
+			<!-- Bulma CSS (self-hosted) -->
+			<link rel="stylesheet" href="/static/css/bulma.min.css"/>
+			
+			<!-- Custom styles -->
+			<link rel="stylesheet" href="/static/css/styles.css"/>
+			
+			<!-- HTMX (self-hosted) -->
+			<script src="/static/js/htmx.min.js"></script>
+			
+			<!-- Alpine.js (self-hosted) -->
+			<script defer src="/static/js/alpine.min.js"></script>
+			
+			<!-- Progress bar for HTMX requests -->
+			<div id="htmx-progress"></div>
+		</head>
+		<body>
+			@HomepageNavbar()
+			
+			<main>
+				{ children... }
+			</main>
+			
+			<!-- Create Agency Modal -->
+			@CreateAgencyModal()
+			
+			<!-- Bulma navbar burger toggle -->
+			<script>
+				document.addEventListener('DOMContentLoaded', () => {
+					// Get all "navbar-burger" elements
+					const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+					
+					// Add a click event on each of them
+					$navbarBurgers.forEach( el => {
+						el.addEventListener('click', () => {
+							// Get the target from the "data-target" attribute
+							const target = el.dataset.target;
+							const $target = document.getElementById(target);
+							
+							// Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+							el.classList.toggle('is-active');
+							$target.classList.toggle('is-active');
+						});
+					});
+				});
+			</script>
+		</body>
+	</html>
+}
+
+templ HomepageNavbar() {
+	<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+		<div class="container">
+			<div class="navbar-brand">
+				<a href="/" class="navbar-item">
+					<svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+					</svg>
+					<span class="ml-2 has-text-weight-bold is-size-5">CodeValdCortex</span>
+				</a>
+				
+				<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+				</a>
+			</div>
+			
+			<div id="navbarMenu" class="navbar-menu">
+				<div class="navbar-start">
+					<!-- Empty - no links on homepage -->
+				</div>
+				
+				<div class="navbar-end">
+					<div class="navbar-item">
+						<div class="buttons">
+							<button 
+								class="button is-primary"
+								onclick="openCreateAgencyModal()"
+							>
+								<span class="icon">
+									<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+									</svg>
+								</span>
+								<span>Create Agency</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+}
+
+templ CreateAgencyModal() {
+	<div id="create-agency-modal" class="modal">
+		<div class="modal-background" onclick="closeCreateAgencyModal()"></div>
+		<div class="modal-card" style="max-width: 500px;">
+			<header class="modal-card-head">
+				<p class="modal-card-title">Create New Agency</p>
+				<button class="delete" aria-label="close" onclick="closeCreateAgencyModal()"></button>
+			</header>
+			
+			<section class="modal-card-body">
+				<form id="create-agency-form">
+					<!-- Agency Name -->
+					<div class="field">
+						<label class="label">Agency Name</label>
+						<div class="control">
+							<input class="input is-large" type="text" name="name" id="agency-name"
+								   placeholder="e.g., Smart Logistics Platform" required autofocus/>
+						</div>
+						<p class="help">Enter a descriptive name for your agency. You can configure details in the designer.</p>
+					</div>
+
+					<!-- Error message display -->
+					<div id="error-message" class="notification is-danger" style="display: none;"></div>
+				</form>
+			</section>
+			
+			<footer class="modal-card-foot">
+				<button class="button is-success is-large" type="button" onclick="submitCreateAgency()">
+					<span class="icon">✓</span>
+					<span>Create & Open Designer</span>
+				</button>
+				<button class="button" onclick="closeCreateAgencyModal()">Cancel</button>
+			</footer>
+		</div>
+	</div>
+
+	<script>
+		function openCreateAgencyModal() {
+			document.getElementById('create-agency-modal').classList.add('is-active');
+			// Focus on name input
+			setTimeout(() => {
+				document.getElementById('agency-name').focus();
+			}, 100);
+		}
+
+		function closeCreateAgencyModal() {
+			document.getElementById('create-agency-modal').classList.remove('is-active');
+			document.getElementById('create-agency-form').reset();
+			document.getElementById('error-message').style.display = 'none';
+		}
+
+		async function submitCreateAgency() {
+			const form = document.getElementById('create-agency-form');
+			const errorDiv = document.getElementById('error-message');
+			const nameInput = document.getElementById('agency-name');
+			
+			// Validate name is provided
+			if (!nameInput.value.trim()) {
+				errorDiv.textContent = 'Agency name is required';
+				errorDiv.style.display = 'block';
+				return;
+			}
+			
+			// Generate UUID with "agency_" prefix and without hyphens
+			const uuid = 'agency_' + crypto.randomUUID().replace(/-/g, '');
+			
+			// Create request payload with minimal data
+			const payload = {
+				id: uuid, // UUID with agency_ prefix and without hyphens
+				name: nameInput.value.trim(),
+				display_name: nameInput.value.trim(), // Use name as display name initially
+				category: 'other', // Default category
+				icon: '📋', // Default icon
+				description: 'Created via quick setup', // Default description
+			};
+
+			try {
+				const response = await fetch('/api/v1/agencies', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(payload)
+				});
+
+				if (!response.ok) {
+					const error = await response.json();
+					throw new Error(error.error || error.details || 'Failed to create agency');
+				}
+
+				const result = await response.json();
+				
+				// Close modal and redirect to agency dashboard/designer
+				closeCreateAgencyModal();
+				// TODO: Redirect to agency designer when MVP-025 is implemented
+				// For now, redirect to agency dashboard
+				window.location.href = `/agencies/${result.id}/dashboard`;
+			} catch (error) {
+				errorDiv.textContent = error.message;
+				errorDiv.style.display = 'block';
+			}
+		}
+
+		// Allow Enter key to submit
+		document.addEventListener('DOMContentLoaded', () => {
+			const nameInput = document.getElementById('agency-name');
+			if (nameInput) {
+				nameInput.addEventListener('keypress', (e) => {
+					if (e.key === 'Enter') {
+						e.preventDefault();
+						submitCreateAgency();
+					}
+				});
+			}
+		});
+	</script>
+}

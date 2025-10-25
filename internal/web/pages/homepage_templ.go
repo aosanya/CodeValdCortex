@@ -70,7 +70,7 @@ func Homepage(agencies []*agency.Agency) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = components.Layout("Select Agency").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.HomepageLayout("Select Agency").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
