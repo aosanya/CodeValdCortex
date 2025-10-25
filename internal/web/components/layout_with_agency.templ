@@ -1,0 +1,71 @@
+package components
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+templ LayoutWithAgency(title string, currentAgency *agency.Agency) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } - CodeValdCortex</title>
+			
+			<!-- Bulma CSS (self-hosted) -->
+			<link rel="stylesheet" href="/static/css/bulma.min.css"/>
+			
+			<!-- Custom styles -->
+			<link rel="stylesheet" href="/static/css/styles.css"/>
+			<link rel="stylesheet" href="/static/css/agencies.css"/>
+			
+			<!-- HTMX (self-hosted) -->
+			<script src="/static/js/htmx.min.js"></script>
+			
+			<!-- Alpine.js (self-hosted) -->
+			<script defer src="/static/js/alpine.min.js"></script>
+			
+			<!-- Chart.js (self-hosted) -->
+			<script src="/static/js/chart.min.js"></script>
+			
+			<!-- Custom Alpine components -->
+			<script src="/static/js/alpine-components.js"></script>
+			
+			<!-- Agency switcher -->
+			<script src="/static/js/agency-switcher.js"></script>
+			
+			<!-- Progress bar for HTMX requests -->
+			<div id="htmx-progress"></div>
+		</head>
+		<body>
+			@NavbarWithAgency(currentAgency)
+			
+			<main class="section">
+				<div class="container">
+					{ children... }
+				</div>
+			</main>
+			
+			<!-- Bulma navbar burger toggle -->
+			<script>
+				document.addEventListener('DOMContentLoaded', () => {
+					// Get all "navbar-burger" elements
+					const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+					
+					// Add a click event on each of them
+					$navbarBurgers.forEach( el => {
+						el.addEventListener('click', () => {
+							// Get the target from the "data-target" attribute
+							const target = el.dataset.target;
+							const $target = document.getElementById(target);
+							
+							// Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+							el.classList.toggle('is-active');
+							$target.classList.toggle('is-active');
+						});
+					});
+				});
+			</script>
+		</body>
+	</html>
+}

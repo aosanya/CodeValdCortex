@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
@@ -32,6 +33,8 @@ type App struct {
 	registry            *registry.Repository
 	agentTypeService    registry.AgentTypeService
 	agentTypeRepository registry.AgentTypeRepository
+	agencyService       agency.Service
+	agencyRepository    agency.Repository
 	runtimeManager      *runtime.Manager
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
@@ -111,6 +114,16 @@ func New(cfg *config.Config) *App {
 		EnableMetrics:       true,
 	}, reg)
 
+	// Initialize agency management
+	logger.Info("Initializing agency management service")
+	agencyRepo, err := agency.NewArangoRepository(dbClient.Database())
+	if err != nil {
+		logger.WithError(err).Fatal("Failed to initialize agency repository")
+	}
+	agencyValidator := agency.NewValidator()
+	agencyService := agency.NewService(agencyRepo, agencyValidator)
+	logger.Info("Agency management service initialized successfully")
+
 	return &App{
 		config:              cfg,
 		logger:              logger,
@@ -118,6 +131,8 @@ func New(cfg *config.Config) *App {
 		registry:            reg,
 		agentTypeRepository: agentTypeRepo,
 		agentTypeService:    agentTypeService,
+		agencyService:       agencyService,
+		agencyRepository:    agencyRepo,
 		runtimeManager:      runtimeManager,
 		messageService:      messageService,
 		pubSubService:       pubSubService,
@@ -215,16 +230,23 @@ func (a *App) setupServer() error {
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
 	agentTypesWebHandler := webhandlers.NewAgentTypesWebHandler(a.agentTypeService, a.logger)
 	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
+	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.logger)
 
 	// Serve static files
 	router.Static("/static", "./static")
 
 	// Web dashboard routes
-	router.GET("/", dashboardHandler.ShowDashboard)
+	router.GET("/", homepageHandler.ShowHomepage)
 	router.GET("/dashboard", dashboardHandler.ShowDashboard)
 	router.GET("/agent-types", agentTypesWebHandler.ShowAgentTypes)
 	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
-	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer) // API routes for web dashboard (HTMX endpoints)
+	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
+
+	// Agency routes
+	router.POST("/agencies/:id/select", homepageHandler.SelectAgency)
+	router.GET("/agencies/:id", homepageHandler.RedirectToAgencyDashboard)
+	router.GET("/agencies/:id/dashboard", homepageHandler.ShowAgencyDashboard)
+	router.GET("/agencies/switch", homepageHandler.ShowAgencySwitcher) // API routes for web dashboard (HTMX endpoints)
 	webAPI := router.Group("/api/web")
 	{
 		webAPI.GET("/agents/live", dashboardHandler.GetAgentsLive)
@@ -261,6 +283,17 @@ func (a *App) setupServer() error {
 		v1.DELETE("/agent-types/:id", agentTypeHandler.DeleteAgentType)
 		v1.POST("/agent-types/:id/enable", agentTypeHandler.EnableAgentType)
 		v1.POST("/agent-types/:id/disable", agentTypeHandler.DisableAgentType)
+
+		// Agency endpoints
+		agencyHandler := handlers.NewAgencyHandler(a.agencyService)
+		v1.GET("/agencies", agencyHandler.ListAgencies)
+		v1.GET("/agencies/:id", agencyHandler.GetAgency)
+		v1.POST("/agencies", agencyHandler.CreateAgency)
+		v1.PUT("/agencies/:id", agencyHandler.UpdateAgency)
+		v1.DELETE("/agencies/:id", agencyHandler.DeleteAgency)
+		v1.POST("/agencies/:id/activate", agencyHandler.ActivateAgency)
+		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
+		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
 
 		v1.GET("/status", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{

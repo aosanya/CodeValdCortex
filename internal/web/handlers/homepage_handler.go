@@ -1,0 +1,200 @@
+package handlers
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+)
+
+const (
+	// Session keys
+	sessionKeyAgencyID = "agency_id"
+	cookieAgencyID     = "agency_id"
+)
+
+// HomepageHandler handles homepage and agency selection routes
+type HomepageHandler struct {
+	agencyService agency.Service
+	logger        *logrus.Logger
+}
+
+// NewHomepageHandler creates a new homepage handler
+func NewHomepageHandler(agencyService agency.Service, logger *logrus.Logger) *HomepageHandler {
+	return &HomepageHandler{
+		agencyService: agencyService,
+		logger:        logger,
+	}
+}
+
+// ShowHomepage renders the agency selection homepage
+func (h *HomepageHandler) ShowHomepage(c *gin.Context) {
+	// List all agencies
+	filters := agency.AgencyFilters{
+		// Default: show all active and inactive agencies
+		// Exclude archived by default
+	}
+
+	agencies, err := h.agencyService.ListAgencies(c.Request.Context(), filters)
+	if err != nil {
+		h.logger.Errorf("Failed to list agencies: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to load agencies")
+		return
+	}
+
+	// Render homepage
+	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+	err = pages.Homepage(agencies).Render(c.Request.Context(), c.Writer)
+	if err != nil {
+		h.logger.Errorf("Failed to render homepage: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to render page")
+		return
+	}
+}
+
+// SelectAgency sets the selected agency in session and cookie
+func (h *HomepageHandler) SelectAgency(c *gin.Context) {
+	agencyID := c.Param("id")
+	if agencyID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "agency ID required"})
+		return
+	}
+
+	// Verify agency exists
+	_, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.Errorf("Failed to get agency %s: %v", agencyID, err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "agency not found"})
+		return
+	}
+
+	// Set active agency in service
+	err = h.agencyService.SetActiveAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.Errorf("Failed to set active agency: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set active agency"})
+		return
+	}
+
+	// Store in session (if session middleware is available)
+	// For now, we'll use cookies
+	c.SetCookie(
+		cookieAgencyID,
+		agencyID,
+		3600*24*30, // 30 days
+		"/",
+		"",
+		false, // secure (set to true in production with HTTPS)
+		true,  // httpOnly
+	)
+
+	h.logger.Infof("Agency %s selected", agencyID)
+	c.JSON(http.StatusOK, gin.H{
+		"success":   true,
+		"agency_id": agencyID,
+		"message":   "Agency selected successfully",
+	})
+}
+
+// RedirectToAgencyDashboard redirects to the agency-specific dashboard
+func (h *HomepageHandler) RedirectToAgencyDashboard(c *gin.Context) {
+	agencyID := c.Param("id")
+	if agencyID == "" {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	// Verify agency exists
+	_, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.Errorf("Failed to get agency %s: %v", agencyID, err)
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	// Set active agency
+	err = h.agencyService.SetActiveAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.Errorf("Failed to set active agency: %v", err)
+	}
+
+	// Set cookie
+	c.SetCookie(
+		cookieAgencyID,
+		agencyID,
+		3600*24*30,
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	// Redirect to dashboard
+	c.Redirect(http.StatusFound, fmt.Sprintf("/agencies/%s/dashboard", agencyID))
+}
+
+// ShowAgencyDashboard renders the dashboard for a specific agency
+func (h *HomepageHandler) ShowAgencyDashboard(c *gin.Context) {
+	agencyID := c.Param("id")
+	if agencyID == "" {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	// Get agency details
+	ag, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.Errorf("Failed to get agency %s: %v", agencyID, err)
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	// Set as active agency
+	err = h.agencyService.SetActiveAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.Errorf("Failed to set active agency: %v", err)
+	}
+
+	// For now, redirect to the existing dashboard
+	// TODO: Create agency-specific dashboard template
+	h.logger.Infof("Agency dashboard requested: %s (%s)", ag.Name, ag.ID)
+	c.Redirect(http.StatusFound, "/dashboard")
+}
+
+// GetActiveAgency returns the currently active agency
+func (h *HomepageHandler) GetActiveAgency(c *gin.Context) {
+	ag, err := h.agencyService.GetActiveAgency(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active agency"})
+		return
+	}
+
+	c.JSON(http.StatusOK, ag)
+}
+
+// ShowAgencySwitcher renders the agency switcher modal
+func (h *HomepageHandler) ShowAgencySwitcher(c *gin.Context) {
+	// List all agencies
+	filters := agency.AgencyFilters{}
+	agencies, err := h.agencyService.ListAgencies(c.Request.Context(), filters)
+	if err != nil {
+		h.logger.Errorf("Failed to list agencies: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to load agencies")
+		return
+	}
+
+	// Get current agency
+	currentAgency, _ := h.agencyService.GetActiveAgency(c.Request.Context())
+
+	// Render agency switcher modal
+	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+	err = pages.AgencySwitcherModal(agencies, currentAgency).Render(c.Request.Context(), c.Writer)
+	if err != nil {
+		h.logger.Errorf("Failed to render agency switcher: %v", err)
+		c.String(http.StatusInternalServerError, "Failed to render modal")
+		return
+	}
+}

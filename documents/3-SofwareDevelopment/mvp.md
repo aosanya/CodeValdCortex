@@ -17,7 +17,7 @@
 
 | Task ID | Title                          | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | ------------------------------ | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
-| MVP-022 | Agency Selection Homepage      | Build homepage UI for selecting and switching between agencies. Display available agencies with descriptions, set selected agency as app context, persist selection in session. Integrate with dashboard navigation | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-021      |
+| MVP-022 | Agency Selection Homepage      | Build homepage UI for selecting and switching between agencies. Display available agencies with descriptions, set selected agency as app context, persist selection in session. Integrate with dashboard navigation | In Progress | P1       | Medium | Go, Templ, Frontend Dev | MVP-021      |
 
 ## Platform Integration Tasks (P1 - Critical)
 

@@ -1,0 +1,269 @@
+package pages
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+templ Homepage(agencies []*agency.Agency) {
+	@components.Layout("Select Agency") {
+		<!-- Agency-specific CSS -->
+		<link rel="stylesheet" href="/static/css/agencies.css"/>
+		
+		<section class="hero is-light">
+			<div class="hero-body">
+				<div class="container">
+					<h1 class="title is-1">
+						<span class="icon-text">
+							<span class="icon is-large">
+								<svg style="width: 3rem; height: 3rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+								</svg>
+							</span>
+							<span>Select Agency</span>
+						</span>
+					</h1>
+					<p class="subtitle is-4">Choose a use case to begin</p>
+				</div>
+			</div>
+		</section>
+		
+		<section class="section">
+			<div class="container">
+				<!-- Search and Filter Controls -->
+				<div class="field is-grouped is-grouped-multiline mb-5">
+					<div class="control is-expanded">
+						<input 
+							class="input is-medium" 
+							type="text" 
+							placeholder="Search agencies by name or description..." 
+							id="agency-search"
+						/>
+					</div>
+					<div class="control">
+						<div class="select is-medium">
+							<select id="category-filter">
+								<option value="">All Categories</option>
+								<option value="infrastructure">Infrastructure</option>
+								<option value="agriculture">Agriculture</option>
+								<option value="logistics">Logistics</option>
+								<option value="transportation">Transportation</option>
+								<option value="warehousing">Warehousing</option>
+								<option value="finance">Finance</option>
+								<option value="charity">Charity</option>
+								<option value="events">Events</option>
+								<option value="communication">Communication</option>
+							</select>
+						</div>
+					</div>
+					<div class="control">
+						<div class="select is-medium">
+							<select id="status-filter">
+								<option value="">All Status</option>
+								<option value="active">Active</option>
+								<option value="inactive">Inactive</option>
+								<option value="paused">Paused</option>
+							</select>
+						</div>
+					</div>
+					<div class="control">
+						<div class="select is-medium">
+							<select id="sort-by">
+								<option value="name">Sort by Name</option>
+								<option value="category">Sort by Category</option>
+								<option value="agents">Sort by Agent Count</option>
+								<option value="recent">Recently Updated</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Agency Cards Grid -->
+				<div class="columns is-multiline" id="agency-grid">
+					if len(agencies) == 0 {
+						<div class="column is-full">
+							<div class="notification is-warning">
+								<p class="has-text-centered">
+									<span class="icon is-large">
+										<svg style="width: 3rem; height: 3rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+										</svg>
+									</span>
+								</p>
+								<p class="has-text-centered is-size-5">No agencies available</p>
+								<p class="has-text-centered">Contact your administrator to set up use cases.</p>
+							</div>
+						</div>
+					} else {
+						for _, ag := range agencies {
+							@AgencyCard(*ag)
+						}
+					}
+				</div>
+			</div>
+		</section>
+		
+		<!-- Agency-specific JavaScript -->
+		<script src="/static/js/agency-switcher.js"></script>
+	}
+}
+
+templ AgencyCard(ag agency.Agency) {
+	<div 
+		class="column is-one-third-desktop is-half-tablet agency-card-column" 
+		data-category={ ag.Category }
+		data-status={ string(ag.Status) }
+		data-name={ ag.Name }
+		data-description={ ag.Description }
+	>
+		<div class="card agency-card" style="height: 100%;">
+			<div class="card-content">
+				<div class="media">
+					<div class="media-left">
+						<span class="icon is-large" style="font-size: 3rem;">
+							{ ag.Icon }
+						</span>
+					</div>
+					<div class="media-content">
+						<p class="title is-4">{ ag.Name }</p>
+						<p class="subtitle is-6">
+							@CategoryBadge(ag.Category)
+						</p>
+					</div>
+				</div>
+				
+				<div class="content">
+					<p>{ ag.Description }</p>
+					
+					<div class="tags mt-4">
+						@StatusBadge(ag.Status)
+						if ag.Metadata.TotalAgents > 0 {
+							<span class="tag is-info is-light">
+								<span class="icon">
+									<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+									</svg>
+								</span>
+								<span>{ fmt.Sprintf("%d", ag.Metadata.TotalAgents) } Agents</span>
+							</span>
+						}
+						if ag.Metadata.Zones > 0 {
+							<span class="tag is-link is-light">
+								<span class="icon">
+									<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+									</svg>
+								</span>
+								<span>{ fmt.Sprintf("%d", ag.Metadata.Zones) } Zones</span>
+							</span>
+						}
+						if len(ag.Metadata.AgentTypes) > 0 {
+							<span class="tag is-warning is-light">
+								<span class="icon">
+									<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+									</svg>
+								</span>
+								<span>{ fmt.Sprintf("%d", len(ag.Metadata.AgentTypes)) } Types</span>
+							</span>
+						}
+					</div>
+				</div>
+			</div>
+			
+			<footer class="card-footer">
+				<a 
+					href={ templ.SafeURL(fmt.Sprintf("/agencies/%s/select", ag.ID)) }
+					class="card-footer-item has-text-weight-semibold has-text-primary"
+					hx-post={ fmt.Sprintf("/agencies/%s/select", ag.ID) }
+					hx-swap="none"
+					hx-on::after-request="window.location.href = '/agencies/' + '{ ag.ID }' + '/dashboard'"
+				>
+					<span class="icon-text">
+						<span class="icon">
+							<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+							</svg>
+						</span>
+						<span>Open</span>
+					</span>
+				</a>
+				<a 
+					href={ templ.SafeURL(fmt.Sprintf("/agencies/%s", ag.ID)) }
+					class="card-footer-item"
+				>
+					Details
+				</a>
+			</footer>
+		</div>
+	</div>
+}
+
+templ CategoryBadge(category string) {
+	switch category {
+		case "infrastructure":
+			<span class="tag is-primary">Infrastructure</span>
+		case "agriculture":
+			<span class="tag is-success">Agriculture</span>
+		case "logistics":
+			<span class="tag is-warning">Logistics</span>
+		case "transportation":
+			<span class="tag is-info">Transportation</span>
+		case "warehousing":
+			<span class="tag is-link">Warehousing</span>
+		case "finance":
+			<span class="tag is-danger">Finance</span>
+		case "charity":
+			<span class="tag is-success is-light">Charity</span>
+		case "events":
+			<span class="tag is-warning is-light">Events</span>
+		case "communication":
+			<span class="tag is-info is-light">Communication</span>
+		default:
+			<span class="tag">{ category }</span>
+	}
+}
+
+templ StatusBadge(status agency.AgencyStatus) {
+	switch status {
+		case agency.AgencyStatusActive:
+			<span class="tag is-success">
+				<span class="icon">
+					<svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
+						<circle cx="10" cy="10" r="3"></circle>
+					</svg>
+				</span>
+				<span>Active</span>
+			</span>
+		case agency.AgencyStatusInactive:
+			<span class="tag is-light">
+				<span class="icon">
+					<svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
+						<circle cx="10" cy="10" r="3"></circle>
+					</svg>
+				</span>
+				<span>Inactive</span>
+			</span>
+		case agency.AgencyStatusPaused:
+			<span class="tag is-warning">
+				<span class="icon">
+					<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+					</svg>
+				</span>
+				<span>Paused</span>
+			</span>
+		case agency.AgencyStatusArchived:
+			<span class="tag is-dark">
+				<span class="icon">
+					<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+					</svg>
+				</span>
+				<span>Archived</span>
+			</span>
+		default:
+			<span class="tag">{ string(status) }</span>
+	}
+}
