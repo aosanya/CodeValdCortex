@@ -17,7 +17,6 @@
 
 | Task ID | Title                          | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | ------------------------------ | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
-| MVP-021 | Agency Management System       | Create database schema and backend services for managing agencies (use cases). Store agency metadata, configurations, and settings in ArangoDB. Implement CRUD operations and API endpoints for agency lifecycle management | Not Started | P1       | High   | Go, ArangoDB, Backend Dev | MVP-010      |
 | MVP-022 | Agency Selection Homepage      | Build homepage UI for selecting and switching between agencies. Display available agencies with descriptions, set selected agency as app context, persist selection in session. Integrate with dashboard navigation | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-021      |
 
 ## Platform Integration Tasks (P1 - Critical)
@@ -38,115 +37,6 @@
 ## Agency Management Feature (P1 - Critical)
 
 *Enables multi-tenant architecture where each use case operates as an independent agency with its own configuration, agents, and context*
-
-### MVP-021: Agency Management System
-
-**Objective**: Build the backend infrastructure for managing agencies (use cases) as first-class entities in the system, with database persistence and full CRUD operations.
-
-**Key Deliverables**:
-
-1. **Database Schema (ArangoDB)**:
-   - `agencies` collection with fields:
-     ```json
-     {
-       "_key": "UC-INFRA-001",
-       "id": "UC-INFRA-001",
-       "name": "Water Distribution Network",
-       "display_name": "💧 Water Distribution",
-       "description": "Smart water infrastructure monitoring and management",
-       "category": "infrastructure",
-       "icon": "💧",
-       "status": "active",
-       "config_path": "/usecases/UC-INFRA-001-water-distribution-network",
-       "env_file": ".env",
-       "metadata": {
-         "location": "Nairobi, Kenya",
-         "agent_types": ["pipe", "sensor", "pump", "valve", "coordinator"],
-         "total_agents": 293,
-         "zones": 5,
-         "api_endpoint": "/api/v1/agencies/UC-INFRA-001"
-       },
-       "settings": {
-         "auto_start": true,
-         "monitoring_enabled": true,
-         "dashboard_enabled": true,
-         "visualizer_enabled": true
-       },
-       "created_at": "2025-10-20T10:00:00Z",
-       "updated_at": "2025-10-25T14:30:00Z",
-       "created_by": "system"
-     }
-     ```
-   - Indexes on `id`, `category`, `status` for efficient queries
-   - Unique constraint on `id` field
-
-2. **Backend Services**:
-   - `AgencyService` interface:
-     ```go
-     type AgencyService interface {
-         CreateAgency(agency *Agency) error
-         GetAgency(id string) (*Agency, error)
-         ListAgencies(filters AgencyFilters) ([]*Agency, error)
-         UpdateAgency(id string, updates AgencyUpdates) error
-         DeleteAgency(id string) error
-         SetActiveAgency(id string) error
-         GetActiveAgency() (*Agency, error)
-     }
-     ```
-   - `AgencyRepository` for ArangoDB operations
-   - Configuration loader for agency-specific .env files
-   - Validation service for agency configurations
-
-3. **REST API Endpoints**:
-   ```
-   POST   /api/v1/agencies                    # Create new agency
-   GET    /api/v1/agencies                    # List all agencies
-   GET    /api/v1/agencies/{id}               # Get agency details
-   PUT    /api/v1/agencies/{id}               # Update agency
-   DELETE /api/v1/agencies/{id}               # Delete agency
-   POST   /api/v1/agencies/{id}/activate      # Set as active agency
-   GET    /api/v1/agencies/active             # Get current active agency
-   GET    /api/v1/agencies/{id}/agents        # Get agency's agents
-   GET    /api/v1/agencies/{id}/statistics    # Get agency statistics
-   ```
-
-4. **Agency Context Management**:
-   - Middleware to inject current agency context into requests
-   - Session storage for active agency selection
-   - Environment variable management per agency
-   - Scoped agent queries (filter by agency)
-
-5. **Data Migration Script**:
-   - Auto-discover existing use cases from `/usecases/` directory
-   - Parse use case metadata from folders and .env files
-   - Create initial agency records in database
-   - Support for bulk import from JSON/YAML
-
-**Acceptance Criteria**:
-- Database schema created with proper indexes
-- All CRUD operations functional via API
-- Agency context correctly scopes agent queries
-- Migration script successfully imports 10+ existing use cases
-- Unit tests for service layer (>80% coverage)
-- API endpoints documented with examples
-
-**Technical Implementation**:
-```
-/workspaces/CodeValdCortex/
-├── internal/
-│   ├── agency/
-│   │   ├── service.go              # AgencyService implementation
-│   │   ├── repository.go           # ArangoDB repository
-│   │   ├── types.go                # Agency, AgencyFilters, AgencyUpdates
-│   │   ├── validator.go            # Configuration validation
-│   │   └── context.go              # Agency context management
-│   ├── handlers/
-│   │   └── agency_handler.go       # REST API handlers
-│   └── middleware/
-│       └── agency_context.go       # Agency context middleware
-└── scripts/
-    └── migrate-agencies.go         # Discovery and migration script
-```
 
 ### MVP-022: Agency Selection Homepage
 
