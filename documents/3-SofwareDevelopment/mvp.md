@@ -17,7 +17,7 @@
 
 | Task ID | Title                          | Description                                                                        | Status      | Priority | Effort | Skills Required         | Dependencies |
 | ------- | ------------------------------ | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
-| MVP-021 | Agency Management System       | Create database schema and backend services for managing agencies (use cases). Store agency metadata, configurations, and settings in ArangoDB. Implement CRUD operations and API endpoints for agency lifecycle management | Not Started | P1       | High   | Go, ArangoDB, Backend Dev | MVP-010      |
+| MVP-021 | Agency Management System       | Create database schema and backend services for managing agencies (use cases). Store agency metadata, configurations, and settings in ArangoDB. Implement CRUD operations and API endpoints for agency lifecycle management | In Progress | P1       | High   | Go, ArangoDB, Backend Dev | MVP-010      |
 | MVP-022 | Agency Selection Homepage      | Build homepage UI for selecting and switching between agencies. Display available agencies with descriptions, set selected agency as app context, persist selection in session. Integrate with dashboard navigation | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-021      |
 
 ## Platform Integration Tasks (P1 - Critical)
