@@ -127,47 +127,15 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"overview-section\"><div class=\"card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></p></header><div class=\"card-content\"><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if currentAgency.ID != "" {
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><footer class=\"card-footer\">")
+		templ_7745c5c3_Err = IntroductionCard(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "saveOverviewIntroduction()"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 templ.ComponentScript = templ.ComponentScript{Call: "saveOverviewIntroduction()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "undoOverviewIntroduction()"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 templ.ComponentScript = templ.ComponentScript{Call: "undoOverviewIntroduction()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></a></footer></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -192,80 +160,24 @@ func ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.Con
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"overview-section\"><!-- Problem Editor Card (Hidden by default) --><div class=\"card mb-4\" id=\"problem-editor-card\" style=\"display: none;\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span id=\"problem-editor-title\">Add New Problem</span></p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "cancelProblemEdit()"})
+		templ_7745c5c3_Err = ProblemEditorCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<button class=\"card-header-icon button is-small is-text\" onclick=\"")
+		templ_7745c5c3_Err = ProblemsListCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 templ.ComponentScript = templ.ComponentScript{Call: "cancelProblemEdit()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><div class=\"field\"><label class=\"label\">Problem Description</label><div class=\"control\"><textarea class=\"textarea\" id=\"problem-description-editor\" placeholder=\"Describe the problem this agency needs to solve...\" rows=\"8\" style=\"font-family: monospace; font-size: 14px;\"></textarea></div><p class=\"help\">Provide a clear description of the problem. This will help define the agency's purpose.</p></div></div><footer class=\"card-footer\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "saveProblemFromEditor()"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 templ.ComponentScript = templ.ComponentScript{Call: "saveProblemFromEditor()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" id=\"save-problem-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "cancelProblemEdit()"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 templ.ComponentScript = templ.ComponentScript{Call: "cancelProblemEdit()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" id=\"cancel-problem-btn\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></a></footer></div><!-- Problems List Card --><div class=\"card m-0\" id=\"problems-list-card\"><header class=\"card-header\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "showProblemEditor('add')"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button class=\"card-header-icon button is-small is-success\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var10 templ.ComponentScript = templ.ComponentScript{Call: "showProblemEditor('add')"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" id=\"add-problem-btn\" title=\"Add New Problem\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Add</span></button></header><div class=\"card-content\" style=\"padding: 0;\"><div id=\"problems-list\" class=\"problems-list\"><!-- Problems will be loaded here dynamically --><div class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-spinner fa-spin\"></i> Loading problems...</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -290,80 +202,24 @@ func UnitsOfWorkContent(currentAgency *agency.Agency, conversation *ai.Conversat
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var11 == nil {
-			templ_7745c5c3_Var11 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"overview-section\"><!-- Unit of Work Editor Card (Hidden by default) --><div class=\"card mb-4 is-hidden\" id=\"unit-editor-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span id=\"unit-editor-title\">Add New Unit of Work</span></p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "cancelUnitEdit()"})
+		templ_7745c5c3_Err = UnitOfWorkEditorCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<button class=\"card-header-icon button is-small is-text\" onclick=\"")
+		templ_7745c5c3_Err = UnitsOfWorkListCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var12 templ.ComponentScript = templ.ComponentScript{Call: "cancelUnitEdit()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><div class=\"field\"><label class=\"label\">Unit of Work Description</label><div class=\"control\"><textarea class=\"textarea\" id=\"unit-description-input\" placeholder=\"Describe the unit of work this agency needs to handle...\" rows=\"8\" style=\"font-family: monospace; font-size: 14px;\"></textarea></div><p class=\"help\">Provide a clear description of the unit of work. This will help define the agency's capabilities.</p></div></div><footer class=\"card-footer\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "saveUnitFromEditor()"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var13 templ.ComponentScript = templ.ComponentScript{Call: "saveUnitFromEditor()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" id=\"save-unit-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "cancelUnitEdit()"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var14 templ.ComponentScript = templ.ComponentScript{Call: "cancelUnitEdit()"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" id=\"cancel-unit-btn\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></a></footer></div><!-- Units of Work List Card --><div class=\"card\" id=\"units-list-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-clipboard-list\"></i></span> <span>Units of Work</span></p>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "showUnitEditor('add')"})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<button class=\"card-header-icon button is-small is-success\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var15 templ.ComponentScript = templ.ComponentScript{Call: "showUnitEditor('add')"}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" id=\"add-unit-btn\" title=\"Add New Unit of Work\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Add</span></button></header><div class=\"card-content\"><div id=\"units-list\" class=\"units-list\"><!-- Units will be loaded here dynamically --><div class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-spinner fa-spin\"></i> Loading units of work...</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

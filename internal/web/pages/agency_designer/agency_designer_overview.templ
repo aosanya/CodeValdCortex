@@ -90,198 +90,22 @@ templ OverviewNavigationList() {
 // IntroductionContent shows the introduction section
 templ IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		<div class="card">
-			<header class="card-header">
-				<p class="card-header-title">
-					<span class="icon"><i class="fas fa-info-circle"></i></span>
-					<span>Introduction</span>
-				</p>
-			</header>
-			<div class="card-content">
-				<div class="field">
-					<div class="control">
-						<textarea 
-							class="textarea"
-							id="introduction-editor"
-							placeholder="Enter introduction text for this agency..."
-							rows="20"
-							style="font-family: monospace; font-size: 14px;">
-							// Get introduction from agency overview if available
-							if currentAgency.ID != "" {
-								// Introduction will be loaded via HTMX
-							}
-						</textarea>
-					</div>
-				</div>
-				<p class="help">Use this section to provide an overview and introduction to your agency.</p>
-			</div>
-			<footer class="card-footer">
-				<a 
-					class="card-footer-item has-text-primary"
-					onclick={ templ.ComponentScript{Call: "saveOverviewIntroduction()"} }
-					id="save-introduction-btn">
-					<span class="icon"><i class="fas fa-save"></i></span>
-					<span>Save</span>
-				</a>
-				<a 
-					class="card-footer-item has-text-grey"
-					onclick={ templ.ComponentScript{Call: "undoOverviewIntroduction()"} }
-					id="undo-introduction-btn">
-					<span class="icon"><i class="fas fa-undo"></i></span>
-					<span>Undo</span>
-				</a>
-			</footer>
-		</div>
+		@IntroductionCard(currentAgency, conversation)
 	</div>
 }
 
 // ProblemDefinitionContent shows the problem definition section
 templ ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		<!-- Problem Editor Card (Hidden by default) -->
-		<div class="card mb-4" id="problem-editor-card" style="display: none;">
-			<header class="card-header">
-				<p class="card-header-title">
-					<span class="icon"><i class="fas fa-edit"></i></span>
-					<span id="problem-editor-title">Add New Problem</span>
-				</p>
-				<button 
-					class="card-header-icon button is-small is-text"
-					onclick={ templ.ComponentScript{Call: "cancelProblemEdit()"} }
-					title="Cancel">
-					<span class="icon"><i class="fas fa-times"></i></span>
-				</button>
-			</header>
-			<div class="card-content">
-				<div class="field">
-					<label class="label">Problem Description</label>
-					<div class="control">
-						<textarea 
-							class="textarea"
-							id="problem-description-editor"
-							placeholder="Describe the problem this agency needs to solve..."
-							rows="8"
-							style="font-family: monospace; font-size: 14px;"></textarea>
-					</div>
-					<p class="help">Provide a clear description of the problem. This will help define the agency's purpose.</p>
-				</div>
-			</div>
-			<footer class="card-footer">
-				<a 
-					class="card-footer-item has-text-primary"
-					onclick={ templ.ComponentScript{Call: "saveProblemFromEditor()"} }
-					id="save-problem-btn">
-					<span class="icon"><i class="fas fa-save"></i></span>
-					<span>Save</span>
-				</a>
-				<a 
-					class="card-footer-item has-text-grey"
-					onclick={ templ.ComponentScript{Call: "cancelProblemEdit()"} }
-					id="cancel-problem-btn">
-					<span class="icon"><i class="fas fa-times"></i></span>
-					<span>Cancel</span>
-				</a>
-			</footer>
-		</div>
-
-		<!-- Problems List Card -->
-		<div class="card m-0" id="problems-list-card">
-			<header class="card-header">
-
-				<button 
-					class="card-header-icon button is-small is-success"
-					onclick={ templ.ComponentScript{Call: "showProblemEditor('add')"} }
-					id="add-problem-btn"
-					title="Add New Problem">
-					<span class="icon"><i class="fas fa-plus"></i></span>
-					<span>Add</span>
-				</button>
-			</header>
-			<div class="card-content" style="padding: 0;">
-				<div id="problems-list" class="problems-list">
-					<!-- Problems will be loaded here dynamically -->
-					<div class="has-text-grey has-text-centered py-5">
-						<p><i class="fas fa-spinner fa-spin"></i> Loading problems...</p>
-					</div>
-				</div>
-			</div>
-		</div>
+		@ProblemEditorCard()
+		@ProblemsListCard()
 	</div>
 }
 
 // UnitsOfWorkContent shows the units of work section
 templ UnitsOfWorkContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		<!-- Unit of Work Editor Card (Hidden by default) -->
-		<div class="card mb-4 is-hidden" id="unit-editor-card">
-			<header class="card-header">
-				<p class="card-header-title">
-					<span class="icon"><i class="fas fa-edit"></i></span>
-					<span id="unit-editor-title">Add New Unit of Work</span>
-				</p>
-				<button 
-					class="card-header-icon button is-small is-text"
-					onclick={ templ.ComponentScript{Call: "cancelUnitEdit()"} }
-					title="Cancel">
-					<span class="icon"><i class="fas fa-times"></i></span>
-				</button>
-			</header>
-			<div class="card-content">
-				<div class="field">
-					<label class="label">Unit of Work Description</label>
-					<div class="control">
-						<textarea 
-							class="textarea"
-							id="unit-description-input"
-							placeholder="Describe the unit of work this agency needs to handle..."
-							rows="8"
-							style="font-family: monospace; font-size: 14px;"></textarea>
-					</div>
-					<p class="help">Provide a clear description of the unit of work. This will help define the agency's capabilities.</p>
-				</div>
-			</div>
-			<footer class="card-footer">
-				<a 
-					class="card-footer-item has-text-primary"
-					onclick={ templ.ComponentScript{Call: "saveUnitFromEditor()"} }
-					id="save-unit-btn">
-					<span class="icon"><i class="fas fa-save"></i></span>
-					<span>Save</span>
-				</a>
-				<a 
-					class="card-footer-item has-text-grey"
-					onclick={ templ.ComponentScript{Call: "cancelUnitEdit()"} }
-					id="cancel-unit-btn">
-					<span class="icon"><i class="fas fa-times"></i></span>
-					<span>Cancel</span>
-				</a>
-			</footer>
-		</div>
-
-		<!-- Units of Work List Card -->
-		<div class="card" id="units-list-card">
-			<header class="card-header">
-				<p class="card-header-title">
-					<span class="icon"><i class="fas fa-clipboard-list"></i></span>
-					<span>Units of Work</span>
-				</p>
-				<button 
-					class="card-header-icon button is-small is-success"
-					onclick={ templ.ComponentScript{Call: "showUnitEditor('add')"} }
-					id="add-unit-btn"
-					title="Add New Unit of Work">
-					<span class="icon"><i class="fas fa-plus"></i></span>
-					<span>Add</span>
-				</button>
-			</header>
-			<div class="card-content">
-				<div id="units-list" class="units-list">
-					<!-- Units will be loaded here dynamically -->
-					<div class="has-text-grey has-text-centered py-5">
-						<p><i class="fas fa-spinner fa-spin"></i> Loading units of work...</p>
-					</div>
-				</div>
-			</div>
-		</div>
+		@UnitOfWorkEditorCard()
+		@UnitsOfWorkListCard()
 	</div>
 }

@@ -1,0 +1,26 @@
+package agency_designer
+
+// ProblemsListCard renders the problems list card component
+templ ProblemsListCard() {
+	<!-- Problems List Card -->
+	<div class="card m-0" id="problems-list-card">
+		<header class="card-header">
+			<button 
+				class="card-header-icon button is-small is-success"
+				onclick="showProblemEditor('add')"
+				id="add-problem-btn"
+				title="Add New Problem">
+				<span class="icon"><i class="fas fa-plus"></i></span>
+				<span>Add</span>
+			</button>
+		</header>
+		<div class="card-content" style="padding: 0;">
+			<div id="problems-list" class="problems-list">
+				<!-- Problems will be loaded here dynamically -->
+				<div class="has-text-grey has-text-centered py-5">
+					<p><i class="fas fa-spinner fa-spin"></i> Loading problems...</p>
+				</div>
+			</div>
+		</div>
+	</div>
+}
