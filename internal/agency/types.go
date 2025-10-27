@@ -138,3 +138,23 @@ type UpdateProblemRequest struct {
 type UpdateOverviewRequest struct {
 	Introduction string `json:"introduction"`
 }
+
+// UnitOfWork represents a unit of work that needs to be completed by the agency
+type UnitOfWork struct {
+	Key         string    `json:"_key,omitempty"`
+	AgencyID    string    `json:"agency_id"`
+	Number      int       `json:"number"`      // Display order/number
+	Description string    `json:"description"` // The unit of work description
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// CreateUnitOfWorkRequest is the request body for creating a unit of work
+type CreateUnitOfWorkRequest struct {
+	Description string `json:"description" binding:"required"`
+}
+
+// UpdateUnitOfWorkRequest is the request body for updating a unit of work
+type UpdateUnitOfWorkRequest struct {
+	Description string `json:"description" binding:"required"`
+}

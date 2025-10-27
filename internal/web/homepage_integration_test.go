@@ -142,6 +142,27 @@ func (m *mockAgencyService) DeleteProblem(ctx context.Context, agencyID string, 
 	return nil
 }
 
+func (m *mockAgencyService) CreateUnitOfWork(ctx context.Context, agencyID string, description string) (*agency.UnitOfWork, error) {
+	return &agency.UnitOfWork{
+		Key:         "mock-unit-1",
+		AgencyID:    agencyID,
+		Number:      1,
+		Description: description,
+	}, nil
+}
+
+func (m *mockAgencyService) GetUnitsOfWork(ctx context.Context, agencyID string) ([]*agency.UnitOfWork, error) {
+	return []*agency.UnitOfWork{}, nil
+}
+
+func (m *mockAgencyService) UpdateUnitOfWork(ctx context.Context, agencyID string, unitKey string, description string) error {
+	return nil
+}
+
+func (m *mockAgencyService) DeleteUnitOfWork(ctx context.Context, agencyID string, unitKey string) error {
+	return nil
+}
+
 // setupTestRouter creates a test router with the homepage handlers and middleware
 func setupTestRouter(agencyService agency.Service) *gin.Engine {
 	gin.SetMode(gin.TestMode)

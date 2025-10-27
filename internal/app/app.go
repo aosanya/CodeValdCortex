@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
+	"github.com/aosanya/CodeValdCortex/internal/agency/services"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
@@ -119,13 +121,13 @@ func New(cfg *config.Config) *App {
 
 	// Initialize agency management
 	logger.Info("Initializing agency management service")
-	agencyRepo, err := agency.NewArangoRepository(dbClient.Client(), dbClient.Database())
+	agencyRepo, err := arangodb.New(dbClient.Client(), dbClient.Database())
 	if err != nil {
 		logger.WithError(err).Fatal("Failed to initialize agency repository")
 	}
 	agencyValidator := agency.NewValidator()
 	agencyDBInit := agency.NewDatabaseInitializer(dbClient.Client(), logger)
-	agencyService := agency.NewServiceWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
+	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
 	logger.Info("Agency management service initialized successfully")
 
 	// Initialize AI agency designer service (if configured)
@@ -353,6 +355,11 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/problems", agencyHandler.CreateProblem)
 		v1.PUT("/agencies/:id/problems/:problemKey", agencyHandler.UpdateProblem)
 		v1.DELETE("/agencies/:id/problems/:problemKey", agencyHandler.DeleteProblem)
+		v1.GET("/agencies/:id/units", agencyHandler.GetUnitsOfWork)
+		v1.GET("/agencies/:id/units/html", agencyHandler.GetUnitsOfWorkHTML)
+		v1.POST("/agencies/:id/units", agencyHandler.CreateUnitOfWork)
+		v1.PUT("/agencies/:id/units/:unitKey", agencyHandler.UpdateUnitOfWork)
+		v1.DELETE("/agencies/:id/units/:unitKey", agencyHandler.DeleteUnitOfWork)
 
 		// AI Agency Designer endpoints (if available)
 		if a.aiDesignerService != nil {

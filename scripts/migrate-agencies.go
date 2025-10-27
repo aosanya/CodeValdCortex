@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
+	"github.com/aosanya/CodeValdCortex/internal/agency/services"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
 )
@@ -31,14 +33,14 @@ func main() {
 	db := arangoClient.Database()
 
 	// Create repository
-	repo, err := agency.NewArangoRepository(arangoClient.Client(), db)
+	repo, err := arangodb.New(arangoClient.Client(), db)
 	if err != nil {
 		log.Fatalf("Failed to create repository: %v", err)
 	}
 
 	// Create service
 	validator := agency.NewValidator()
-	service := agency.NewService(repo, validator)
+	service := services.New(repo, validator)
 
 	// Discover use cases
 	usecasesDir := "/workspaces/CodeValdCortex/usecases"

@@ -22,6 +22,20 @@ applyTo: '**'
   - Better maintainability
   - Separation of concerns
 
+## CSS and Styling
+
+**Minimize custom CSS by leveraging Bulma CSS framework.**
+
+- Use Bulma's built-in classes whenever possible
+- Only create custom CSS when Bulma doesn't provide the needed styling
+- Keep custom CSS files minimal and focused
+- Prefer Bulma utility classes over custom styles
+- Benefits:
+  - Consistent design language
+  - Less CSS to maintain
+  - Faster development
+  - Better responsive design out of the box
+
 ## Task Management and Workflow
 
 ### Branch Management (MANDATORY)

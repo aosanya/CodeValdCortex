@@ -1,0 +1,57 @@
+package agency_designer
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// UnitItem renders a single unit of work item
+templ UnitItem(unit *agency.UnitOfWork) {
+	<div class="box unit-item" data-unit-key={ unit.Key }>
+		<div class="level is-mobile">
+			<div class="level-left">
+				<div class="level-item">
+					<span class="tag is-info is-light mr-2">{ fmt.Sprintf("%d", unit.Number) }</span>
+					<span class="unit-description">{ unit.Description }</span>
+				</div>
+			</div>
+			<div class="level-right">
+				<div class="level-item">
+					<div class="buttons has-addons">
+						<button 
+							class="button is-small is-info" 
+							onclick={ templ.ComponentScript{Call: fmt.Sprintf("showUnitEditor('edit', '%s', `%s`)", unit.Key, unit.Description)} }>
+							<span class="icon is-small">
+								<i class="fas fa-edit"></i>
+							</span>
+							<span>Edit</span>
+						</button>
+						<button 
+							class="button is-small is-danger" 
+							onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteUnit('%s', %d)", unit.Key, unit.Number)} }>
+							<span class="icon is-small">
+								<i class="fas fa-trash"></i>
+							</span>
+							<span>Delete</span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// UnitsList renders the list of all units of work or an empty state
+templ UnitsList(units []*agency.UnitOfWork) {
+	if len(units) == 0 {
+		<div class="notification is-info is-light">
+			<p class="has-text-centered">No units of work defined yet. Click "Add Unit" to get started.</p>
+		</div>
+	} else {
+		<div class="units-list">
+			for _, unit := range units {
+				@UnitItem(unit)
+			}
+		</div>
+	}
+}

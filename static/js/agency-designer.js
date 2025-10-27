@@ -236,6 +236,10 @@ window.showProblemEditor = showProblemEditor;
 window.saveProblemFromEditor = saveProblemFromEditor;
 window.cancelProblemEdit = cancelProblemEdit;
 window.deleteProblem = deleteProblem;
+window.showUnitEditor = showUnitEditor;
+window.saveUnitFromEditor = saveUnitFromEditor;
+window.cancelUnitEdit = cancelUnitEdit;
+window.deleteUnit = deleteUnit;
 
 // Handle overview section selection
 function selectOverviewSection(element, section) {
@@ -253,7 +257,7 @@ function selectOverviewSection(element, section) {
     const titles = {
         'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
         'problem-definition': '<span class="icon"><i class="fas fa-exclamation-triangle"></i></span><span>Problem Definition</span>',
-        'requirements': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Requirements</span>'
+        'units-of-work': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Units of Work</span>'
     };
 
     if (titles[section] && overviewTitle) {
@@ -278,6 +282,8 @@ function selectOverviewSection(element, section) {
             loadIntroductionEditor();
         } else if (section === 'problem-definition') {
             loadProblems();
+        } else if (section === 'units-of-work') {
+            loadUnits();
         }
     }
 
@@ -571,6 +577,171 @@ function deleteProblem(problemKey, problemNumber) {
         .catch(error => {
             console.error('Error deleting problem:', error);
             showNotification('Error deleting problem', 'error');
+        });
+}
+
+// ===========================
+// Units of Work Functions
+// ===========================
+
+// Load units of work from the server
+function loadUnits() {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        console.error('No agency ID found');
+        return;
+    }
+
+    fetch(`/api/v1/agencies/${agencyId}/units/html`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load units');
+            }
+            return response.text();
+        })
+        .then(html => {
+            const unitsListContainer = document.getElementById('units-list-container');
+            if (unitsListContainer) {
+                unitsListContainer.innerHTML = html;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading units:', error);
+            showNotification('Error loading units of work', 'error');
+        });
+}
+
+// Show unit editor (add or edit mode)
+function showUnitEditor(mode, unitKey = null, description = '') {
+    const editorCard = document.getElementById('unit-editor-card');
+    const listCard = document.getElementById('units-list-card');
+    const editorTitle = document.getElementById('unit-editor-title');
+    const descriptionInput = document.getElementById('unit-description-input');
+    const saveButton = document.getElementById('save-unit-button');
+
+    if (!editorCard || !listCard || !editorTitle || !descriptionInput || !saveButton) {
+        console.error('Unit editor elements not found');
+        return;
+    }
+
+    // Store editor state
+    window.unitEditorState = {
+        mode: mode,
+        unitKey: unitKey
+    };
+
+    // Update editor UI
+    if (mode === 'add') {
+        editorTitle.textContent = 'Add Unit of Work';
+        descriptionInput.value = '';
+        saveButton.textContent = 'Add Unit';
+    } else {
+        editorTitle.textContent = 'Edit Unit of Work';
+        descriptionInput.value = description;
+        saveButton.textContent = 'Save Changes';
+    }
+
+    // Show editor, hide list
+    editorCard.classList.remove('is-hidden');
+    listCard.classList.add('is-hidden');
+    descriptionInput.focus();
+}
+
+// Cancel unit editing
+function cancelUnitEdit() {
+    const editorCard = document.getElementById('unit-editor-card');
+    const listCard = document.getElementById('units-list-card');
+
+    if (editorCard && listCard) {
+        editorCard.classList.add('is-hidden');
+        listCard.classList.remove('is-hidden');
+    }
+
+    // Clear editor state
+    window.unitEditorState = null;
+}
+
+// Save unit from editor
+function saveUnitFromEditor() {
+    const descriptionInput = document.getElementById('unit-description-input');
+    const description = descriptionInput.value.trim();
+
+    if (!description) {
+        showNotification('Please enter a unit description', 'warning');
+        descriptionInput.focus();
+        return;
+    }
+
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        showNotification('Error: No agency selected', 'error');
+        return;
+    }
+
+    const editorState = window.unitEditorState;
+    if (!editorState) {
+        showNotification('Error: Editor state not found', 'error');
+        return;
+    }
+
+    const url = editorState.mode === 'add'
+        ? `/api/v1/agencies/${agencyId}/units`
+        : `/api/v1/agencies/${agencyId}/units/${editorState.unitKey}`;
+
+    const method = editorState.mode === 'add' ? 'POST' : 'PUT';
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ description: description })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to ${editorState.mode} unit`);
+            }
+            return response.json();
+        })
+        .then(() => {
+            showNotification(`Unit ${editorState.mode === 'add' ? 'added' : 'updated'} successfully!`, 'success');
+            cancelUnitEdit();
+            loadUnits(); // Reload the list
+        })
+        .catch(error => {
+            console.error(`Error ${editorState.mode}ing unit:`, error);
+            showNotification(`Error ${editorState.mode}ing unit`, 'error');
+        });
+}
+
+// Delete a unit of work
+function deleteUnit(unitKey, unitNumber) {
+    if (!confirm(`Are you sure you want to delete unit #${unitNumber}? This will renumber all subsequent units.`)) {
+        return;
+    }
+
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        showNotification('Error: No agency selected', 'error');
+        return;
+    }
+
+    fetch(`/api/v1/agencies/${agencyId}/units/${unitKey}`, {
+        method: 'DELETE'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete unit');
+            }
+            return response.json();
+        })
+        .then(() => {
+            showNotification('Unit deleted successfully!', 'success');
+            loadUnits(); // Reload the list
+        })
+        .catch(error => {
+            console.error('Error deleting unit:', error);
+            showNotification('Error deleting unit', 'error');
         });
 }
 

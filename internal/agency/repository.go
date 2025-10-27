@@ -24,4 +24,11 @@ type Repository interface {
 	GetProblem(ctx context.Context, agencyID string, key string) (*Problem, error)
 	UpdateProblem(ctx context.Context, problem *Problem) error
 	DeleteProblem(ctx context.Context, agencyID string, key string) error
+
+	// UnitOfWork methods
+	CreateUnitOfWork(ctx context.Context, unit *UnitOfWork) error
+	GetUnitsOfWork(ctx context.Context, agencyID string) ([]*UnitOfWork, error)
+	GetUnitOfWork(ctx context.Context, agencyID string, key string) (*UnitOfWork, error)
+	UpdateUnitOfWork(ctx context.Context, unit *UnitOfWork) error
+	DeleteUnitOfWork(ctx context.Context, agencyID string, key string) error
 }

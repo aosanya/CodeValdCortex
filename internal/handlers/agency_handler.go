@@ -387,3 +387,82 @@ func (h *AgencyHandler) DeleteProblem(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Problem deleted successfully"})
 }
+
+// GetUnitsOfWork handles GET /api/v1/agencies/:id/units
+func (h *AgencyHandler) GetUnitsOfWork(c *gin.Context) {
+	id := c.Param("id")
+
+	units, err := h.service.GetUnitsOfWork(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, units)
+}
+
+// GetUnitsOfWorkHTML handles GET /api/v1/agencies/:id/units/html
+func (h *AgencyHandler) GetUnitsOfWorkHTML(c *gin.Context) {
+	id := c.Param("id")
+
+	units, err := h.service.GetUnitsOfWork(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Render the units list template
+	c.Header("Content-Type", "text/html; charset=utf-8")
+	agency_designer.UnitsList(units).Render(c.Request.Context(), c.Writer)
+}
+
+// CreateUnitOfWork handles POST /api/v1/agencies/:id/units
+func (h *AgencyHandler) CreateUnitOfWork(c *gin.Context) {
+	id := c.Param("id")
+
+	var req agency.CreateUnitOfWorkRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	unit, err := h.service.CreateUnitOfWork(c.Request.Context(), id, req.Description)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, unit)
+}
+
+// UpdateUnitOfWork handles PUT /api/v1/agencies/:id/units/:unitKey
+func (h *AgencyHandler) UpdateUnitOfWork(c *gin.Context) {
+	id := c.Param("id")
+	unitKey := c.Param("unitKey")
+
+	var req agency.UpdateUnitOfWorkRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.service.UpdateUnitOfWork(c.Request.Context(), id, unitKey, req.Description); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Unit of work updated successfully"})
+}
+
+// DeleteUnitOfWork handles DELETE /api/v1/agencies/:id/units/:unitKey
+func (h *AgencyHandler) DeleteUnitOfWork(c *gin.Context) {
+	id := c.Param("id")
+	unitKey := c.Param("unitKey")
+
+	if err := h.service.DeleteUnitOfWork(c.Request.Context(), id, unitKey); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Unit of work deleted successfully"})
+}
