@@ -79,32 +79,32 @@ func (c *CompositeService) UpdateAgencyOverview(ctx context.Context, agencyID st
 	return c.OverviewService.UpdateAgencyOverview(ctx, agencyID, introduction)
 }
 
-func (c *CompositeService) CreateProblem(ctx context.Context, agencyID string, description string) (*agency.Problem, error) {
-	return c.ProblemService.CreateProblem(ctx, agencyID, description)
+func (c *CompositeService) CreateProblem(ctx context.Context, agencyID string, code string, description string) (*agency.Problem, error) {
+	return c.ProblemService.CreateProblem(ctx, agencyID, code, description)
 }
 
 func (c *CompositeService) GetProblems(ctx context.Context, agencyID string) ([]*agency.Problem, error) {
 	return c.ProblemService.GetProblems(ctx, agencyID)
 }
 
-func (c *CompositeService) UpdateProblem(ctx context.Context, agencyID string, key string, description string) error {
-	return c.ProblemService.UpdateProblem(ctx, agencyID, key, description)
+func (c *CompositeService) UpdateProblem(ctx context.Context, agencyID string, key string, code string, description string) error {
+	return c.ProblemService.UpdateProblem(ctx, agencyID, key, code, description)
 }
 
 func (c *CompositeService) DeleteProblem(ctx context.Context, agencyID string, key string) error {
 	return c.ProblemService.DeleteProblem(ctx, agencyID, key)
 }
 
-func (c *CompositeService) CreateUnitOfWork(ctx context.Context, agencyID string, description string) (*agency.UnitOfWork, error) {
-	return c.UnitOfWorkService.CreateUnitOfWork(ctx, agencyID, description)
+func (c *CompositeService) CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*agency.UnitOfWork, error) {
+	return c.UnitOfWorkService.CreateUnitOfWork(ctx, agencyID, code, description)
 }
 
 func (c *CompositeService) GetUnitsOfWork(ctx context.Context, agencyID string) ([]*agency.UnitOfWork, error) {
 	return c.UnitOfWorkService.GetUnitsOfWork(ctx, agencyID)
 }
 
-func (c *CompositeService) UpdateUnitOfWork(ctx context.Context, agencyID string, key string, description string) error {
-	return c.UnitOfWorkService.UpdateUnitOfWork(ctx, agencyID, key, description)
+func (c *CompositeService) UpdateUnitOfWork(ctx context.Context, agencyID string, key string, code string, description string) error {
+	return c.UnitOfWorkService.UpdateUnitOfWork(ctx, agencyID, key, code, description)
 }
 
 func (c *CompositeService) DeleteUnitOfWork(ctx context.Context, agencyID string, key string) error {

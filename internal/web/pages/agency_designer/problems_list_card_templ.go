@@ -30,7 +30,20 @@ func ProblemsListCard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Problems List Card --><div class=\"card m-0\" id=\"problems-list-card\"><header class=\"card-header\"><button class=\"card-header-icon button is-small is-success\" onclick=\"showProblemEditor('add')\" id=\"add-problem-btn\" title=\"Add New Problem\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Add</span></button></header><div class=\"card-content\" style=\"padding: 0;\"><div id=\"problems-list\" class=\"problems-list\"><!-- Problems will be loaded here dynamically --><div class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-spinner fa-spin\"></i> Loading problems...</p></div></div></div></div>")
+		templ_7745c5c3_Err = ListCard(ListCardConfig{
+			ID:             "problems-list-card",
+			Title:          "", // No title for problems card
+			Icon:           "",
+			AddButtonID:    "add-problem-btn",
+			AddFunction:    "showProblemEditor('add')",
+			AddButtonText:  "Add",
+			ListID:         "problems-list",
+			ListClass:      "problems-list",
+			TableBodyID:    "problems-table-body",
+			CodeColHeader:  "Code",
+			TitleColHeader: "Problem Title",
+			LoadingText:    "Loading problems...",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

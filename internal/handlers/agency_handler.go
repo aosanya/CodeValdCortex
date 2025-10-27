@@ -347,7 +347,7 @@ func (h *AgencyHandler) CreateProblem(c *gin.Context) {
 		return
 	}
 
-	problem, err := h.service.CreateProblem(c.Request.Context(), id, req.Description)
+	problem, err := h.service.CreateProblem(c.Request.Context(), id, req.Code, req.Description)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -367,7 +367,7 @@ func (h *AgencyHandler) UpdateProblem(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.UpdateProblem(c.Request.Context(), id, problemKey, req.Description); err != nil {
+	if err := h.service.UpdateProblem(c.Request.Context(), id, problemKey, req.Code, req.Description); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -407,13 +407,14 @@ func (h *AgencyHandler) GetUnitsOfWorkHTML(c *gin.Context) {
 
 	units, err := h.service.GetUnitsOfWork(c.Request.Context(), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.String(http.StatusInternalServerError, "Error loading units of work")
 		return
 	}
 
 	// Render the units list template
-	c.Header("Content-Type", "text/html; charset=utf-8")
-	agency_designer.UnitsList(units).Render(c.Request.Context(), c.Writer)
+	component := agency_designer.UnitsList(units)
+	c.Header("Content-Type", "text/html")
+	component.Render(c.Request.Context(), c.Writer)
 }
 
 // CreateUnitOfWork handles POST /api/v1/agencies/:id/units
@@ -426,7 +427,7 @@ func (h *AgencyHandler) CreateUnitOfWork(c *gin.Context) {
 		return
 	}
 
-	unit, err := h.service.CreateUnitOfWork(c.Request.Context(), id, req.Description)
+	unit, err := h.service.CreateUnitOfWork(c.Request.Context(), id, req.Code, req.Description)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -446,7 +447,7 @@ func (h *AgencyHandler) UpdateUnitOfWork(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.UpdateUnitOfWork(c.Request.Context(), id, unitKey, req.Description); err != nil {
+	if err := h.service.UpdateUnitOfWork(c.Request.Context(), id, unitKey, req.Code, req.Description); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -119,6 +119,7 @@ type Problem struct {
 	Key         string    `json:"_key,omitempty"`
 	AgencyID    string    `json:"agency_id"`
 	Number      int       `json:"number"`      // Display order/number
+	Code        string    `json:"code"`        // Problem code (e.g., P001, PROB-1)
 	Description string    `json:"description"` // The problem statement
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -126,11 +127,13 @@ type Problem struct {
 
 // CreateProblemRequest is the request body for creating a problem
 type CreateProblemRequest struct {
+	Code        string `json:"code" binding:"required"`
 	Description string `json:"description" binding:"required"`
 }
 
 // UpdateProblemRequest is the request body for updating a problem
 type UpdateProblemRequest struct {
+	Code        string `json:"code" binding:"required"`
 	Description string `json:"description" binding:"required"`
 }
 
@@ -144,6 +147,7 @@ type UnitOfWork struct {
 	Key         string    `json:"_key,omitempty"`
 	AgencyID    string    `json:"agency_id"`
 	Number      int       `json:"number"`      // Display order/number
+	Code        string    `json:"code"`        // Unit of work code (e.g., UOW001, WRK-1)
 	Description string    `json:"description"` // The unit of work description
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -151,10 +155,12 @@ type UnitOfWork struct {
 
 // CreateUnitOfWorkRequest is the request body for creating a unit of work
 type CreateUnitOfWorkRequest struct {
+	Code        string `json:"code" binding:"required"`
 	Description string `json:"description" binding:"required"`
 }
 
 // UpdateUnitOfWorkRequest is the request body for updating a unit of work
 type UpdateUnitOfWorkRequest struct {
+	Code        string `json:"code" binding:"required"`
 	Description string `json:"description" binding:"required"`
 }

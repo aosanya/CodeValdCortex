@@ -30,7 +30,20 @@ func UnitsOfWorkListCard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Units of Work List Card --><div class=\"card\" id=\"units-list-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-clipboard-list\"></i></span> <span>Units of Work</span></p><button class=\"card-header-icon button is-small is-success\" onclick=\"showUnitEditor('add')\" id=\"add-unit-btn\" title=\"Add New Unit of Work\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Add</span></button></header><div class=\"card-content\"><div id=\"units-list\" class=\"units-list\"><!-- Units will be loaded here dynamically --><div class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-spinner fa-spin\"></i> Loading units of work...</p></div></div></div></div>")
+		templ_7745c5c3_Err = ListCard(ListCardConfig{
+			ID:             "units-list-card",
+			Title:          "Units of Work",
+			Icon:           "fas fa-clipboard-list",
+			AddButtonID:    "add-unit-btn",
+			AddFunction:    "showUnitEditor('add')",
+			AddButtonText:  "Add",
+			ListID:         "units-list",
+			ListClass:      "units-list",
+			TableBodyID:    "units-table-body",
+			CodeColHeader:  "Code",
+			TitleColHeader: "Unit of Work Title",
+			LoadingText:    "Loading units of work...",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

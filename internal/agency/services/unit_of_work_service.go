@@ -20,7 +20,7 @@ func NewUnitOfWorkService(repo agency.Repository) *UnitOfWorkService {
 }
 
 // CreateUnitOfWork creates a new unit of work for an agency
-func (s *UnitOfWorkService) CreateUnitOfWork(ctx context.Context, agencyID string, description string) (*agency.UnitOfWork, error) {
+func (s *UnitOfWorkService) CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*agency.UnitOfWork, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -29,6 +29,7 @@ func (s *UnitOfWorkService) CreateUnitOfWork(ctx context.Context, agencyID strin
 
 	unit := &agency.UnitOfWork{
 		AgencyID:    agencyID,
+		Code:        code,
 		Description: description,
 	}
 
@@ -55,8 +56,8 @@ func (s *UnitOfWorkService) GetUnitsOfWork(ctx context.Context, agencyID string)
 	return units, nil
 }
 
-// UpdateUnitOfWork updates a unit of work's description
-func (s *UnitOfWorkService) UpdateUnitOfWork(ctx context.Context, agencyID string, key string, description string) error {
+// UpdateUnitOfWork updates a unit of work's code and description
+func (s *UnitOfWorkService) UpdateUnitOfWork(ctx context.Context, agencyID string, key string, code string, description string) error {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -69,7 +70,8 @@ func (s *UnitOfWorkService) UpdateUnitOfWork(ctx context.Context, agencyID strin
 		return fmt.Errorf("failed to get unit of work: %w", err)
 	}
 
-	// Update description
+	// Update code and description
+	unit.Code = code
 	unit.Description = description
 
 	// Save

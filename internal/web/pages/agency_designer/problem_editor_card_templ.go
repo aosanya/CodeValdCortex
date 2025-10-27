@@ -30,7 +30,22 @@ func ProblemEditorCard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Problem Editor Card (Hidden by default) --><div class=\"card mb-4 is-hidden\" id=\"problem-editor-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span id=\"problem-editor-title\">Add New Problem</span></p><button class=\"card-header-icon button is-small is-text\" onclick=\"cancelProblemEdit()\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><div class=\"field\"><label class=\"label\">Problem Description</label><div class=\"control\"><textarea class=\"textarea\" id=\"problem-description-editor\" placeholder=\"Describe the problem this agency needs to solve...\" rows=\"8\" style=\"font-family: monospace; font-size: 14px;\"></textarea></div><p class=\"help\">Provide a clear description of the problem. This will help define the agency's purpose.</p></div></div><footer class=\"card-footer\"><a class=\"card-footer-item has-text-primary\" onclick=\"saveProblemFromEditor()\" id=\"save-problem-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> <a class=\"card-footer-item has-text-grey\" onclick=\"cancelProblemEdit()\" id=\"cancel-problem-btn\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></a></footer></div>")
+		templ_7745c5c3_Err = EditorCard(EditorCardConfig{
+			CardID:          "problem-editor-card",
+			TitleID:         "problem-editor-title",
+			AddTitle:        "Add New Problem",
+			EditTitle:       "Edit Problem",
+			CancelFunction:  "cancelProblemEdit()",
+			SaveFunction:    "saveProblemFromEditor()",
+			CodeInputID:     "problem-code-editor",
+			CodeLabel:       "Problem Code",
+			CodePlaceholder: "e.g., P001, PROB-1, etc.",
+			CodeHelp:        "A unique code to identify this problem (e.g., P001, PROB-1).",
+			DescInputID:     "problem-description-editor",
+			DescLabel:       "Problem Description",
+			DescPlaceholder: "Describe the problem this agency needs to solve...",
+			DescHelp:        "Provide a clear description of the problem. This will help define the agency's purpose.",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

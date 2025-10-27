@@ -1,0 +1,121 @@
+package agency_designer
+
+import "fmt"
+
+// EditorCardConfig holds the configuration for an editor card
+type EditorCardConfig struct {
+	CardID          string // Card element ID
+	TitleID         string // Title element ID
+	AddTitle        string // Title when adding new item
+	EditTitle       string // Title when editing item
+	CancelFunction  string // JavaScript function to call on cancel
+	SaveFunction    string // JavaScript function to call on save
+	CodeInputID     string // Code input element ID
+	CodeLabel       string // Label for code field
+	CodePlaceholder string // Placeholder for code input
+	CodeHelp        string // Help text for code field
+	DescInputID     string // Description input element ID
+	DescLabel       string // Label for description field
+	DescPlaceholder string // Placeholder for description input
+	DescHelp        string // Help text for description field
+}
+
+// EditorCard renders a reusable editor card component
+templ EditorCard(config EditorCardConfig) {
+	<!-- Editor Card (Hidden by default) -->
+	<div class="card mb-4 is-hidden" id={ config.CardID }>
+		<header class="card-header">
+			<p class="card-header-title">
+				<span class="icon"><i class="fas fa-edit"></i></span>
+				<span id={ config.TitleID }>{ config.AddTitle }</span>
+			</p>
+			<button 
+				class="card-header-icon button is-small is-text"
+				onclick={ templ.ComponentScript{Call: config.CancelFunction} }
+				title="Cancel">
+				<span class="icon"><i class="fas fa-times"></i></span>
+			</button>
+		</header>
+		<div class="card-content">
+			<div class="field">
+				<label class="label">{ config.CodeLabel }</label>
+				<div class="control">
+					<input 
+						class="input"
+						type="text"
+						id={ config.CodeInputID }
+						placeholder={ config.CodePlaceholder }
+						maxlength="20">
+				</div>
+				<p class="help">{ config.CodeHelp }</p>
+			</div>
+
+			<div class="field">
+				<label class="label">{ config.DescLabel }</label>
+				<div class="control">
+					<textarea 
+						class="textarea"
+						id={ config.DescInputID }
+						placeholder={ config.DescPlaceholder }
+						rows="8"
+						style="font-family: monospace; font-size: 14px;"></textarea>
+				</div>
+				<p class="help">{ config.DescHelp }</p>
+			</div>
+		</div>
+		<footer class="card-footer">
+			<a 
+				class="card-footer-item has-text-primary"
+				onclick={ templ.ComponentScript{Call: config.SaveFunction} }>
+				<span class="icon"><i class="fas fa-save"></i></span>
+				<span>Save</span>
+			</a>
+			<a 
+				class="card-footer-item has-text-grey"
+				onclick={ templ.ComponentScript{Call: config.CancelFunction} }>
+				<span class="icon"><i class="fas fa-times"></i></span>
+				<span>Cancel</span>
+			</a>
+		</footer>
+	</div>
+}
+
+// TableItemConfig holds the configuration for a table item
+type TableItemConfig struct {
+	Key           string // Item key/ID
+	Code          string // Item code
+	Description   string // Item description
+	EditFunction  string // JavaScript function name for editing (without params)
+	DeleteFunction string // JavaScript function name for deleting (without params)
+	Number        int    // Item number for delete operations
+}
+
+// TableItem renders a reusable table item component
+templ TableItem(config TableItemConfig) {
+	<tr class="table-item" data-item-key={ config.Key }>
+		<td style="vertical-align: middle;">
+			<span class="tag is-primary">{ config.Code }</span>
+		</td>
+		<td class="item-description" style="vertical-align: middle;">
+			{ config.Description }
+		</td>
+		<td style="vertical-align: middle;">
+			<div class="buttons has-addons">
+				<button 
+					class="button is-small is-info" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("%s('edit', '%s', '%s', '%s')", config.EditFunction, config.Key, config.Code, templ.EscapeString(config.Description))} }
+					title="Edit">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+					<span>Edit</span>
+				</button>
+				<button 
+					class="button is-small is-danger" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("%s('%s', %d)", config.DeleteFunction, config.Key, config.Number)} }
+					title="Delete">
+					<span class="icon"><i class="fas fa-trash"></i></span>
+					<span>Delete</span>
+				</button>
+			</div>
+		</td>
+	</tr>
+}

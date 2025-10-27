@@ -121,11 +121,12 @@ func (m *mockAgencyService) UpdateAgencyOverview(ctx context.Context, id string,
 	return nil
 }
 
-func (m *mockAgencyService) CreateProblem(ctx context.Context, agencyID string, description string) (*agency.Problem, error) {
+func (m *mockAgencyService) CreateProblem(ctx context.Context, agencyID string, code string, description string) (*agency.Problem, error) {
 	return &agency.Problem{
 		Key:         "mock-problem-1",
 		AgencyID:    agencyID,
 		Number:      1,
+		Code:        code,
 		Description: description,
 	}, nil
 }
@@ -134,7 +135,7 @@ func (m *mockAgencyService) GetProblems(ctx context.Context, agencyID string) ([
 	return []*agency.Problem{}, nil
 }
 
-func (m *mockAgencyService) UpdateProblem(ctx context.Context, agencyID string, problemKey string, description string) error {
+func (m *mockAgencyService) UpdateProblem(ctx context.Context, agencyID string, problemKey string, code string, description string) error {
 	return nil
 }
 
@@ -142,11 +143,12 @@ func (m *mockAgencyService) DeleteProblem(ctx context.Context, agencyID string, 
 	return nil
 }
 
-func (m *mockAgencyService) CreateUnitOfWork(ctx context.Context, agencyID string, description string) (*agency.UnitOfWork, error) {
+func (m *mockAgencyService) CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*agency.UnitOfWork, error) {
 	return &agency.UnitOfWork{
 		Key:         "mock-unit-1",
 		AgencyID:    agencyID,
 		Number:      1,
+		Code:        code,
 		Description: description,
 	}, nil
 }
@@ -155,7 +157,7 @@ func (m *mockAgencyService) GetUnitsOfWork(ctx context.Context, agencyID string)
 	return []*agency.UnitOfWork{}, nil
 }
 
-func (m *mockAgencyService) UpdateUnitOfWork(ctx context.Context, agencyID string, unitKey string, description string) error {
+func (m *mockAgencyService) UpdateUnitOfWork(ctx context.Context, agencyID string, unitKey string, code string, description string) error {
 	return nil
 }
 

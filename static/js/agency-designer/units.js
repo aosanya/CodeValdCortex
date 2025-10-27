@@ -7,6 +7,7 @@ import { getCurrentAgencyId, showNotification } from './utils.js';
 let unitEditorState = {
     mode: 'add', // 'add' or 'edit'
     unitKey: null,
+    originalCode: '',
     originalDescription: ''
 };
 
@@ -18,14 +19,14 @@ export function loadUnits() {
         return;
     }
 
-    const unitsList = document.getElementById('units-list');
-    if (!unitsList) {
-        console.error('Units list container not found');
+    const unitsTableBody = document.getElementById('units-table-body');
+    if (!unitsTableBody) {
+        console.error('Units table body not found');
         return;
     }
 
     // Show loading state
-    unitsList.innerHTML = '<div class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading units of work...</p></div>';
+    unitsTableBody.innerHTML = '<tr><td colspan="3" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading units of work...</p></td></tr>';
 
     // Fetch units HTML from API
     fetch(`/api/v1/agencies/${agencyId}/units/html`)
@@ -36,26 +37,28 @@ export function loadUnits() {
             return response.text();
         })
         .then(html => {
-            unitsList.innerHTML = html;
+            unitsTableBody.innerHTML = html;
         })
         .catch(error => {
             console.error('Error loading units:', error);
-            unitsList.innerHTML = '<div class="has-text-danger has-text-centered py-5"><p>Error loading units of work</p></div>';
+            unitsTableBody.innerHTML = '<tr><td colspan="3" class="has-text-danger has-text-centered py-5"><p>Error loading units of work</p></td></tr>';
         });
 }
 
 // Show unit editor
-export function showUnitEditor(mode, unitKey = null, description = '') {
+export function showUnitEditor(mode, unitKey = null, code = '', description = '') {
     unitEditorState.mode = mode;
     unitEditorState.unitKey = unitKey;
+    unitEditorState.originalCode = code;
     unitEditorState.originalDescription = description;
 
     const editorCard = document.getElementById('unit-editor-card');
     const listCard = document.getElementById('units-list-card');
     const editorTitle = document.getElementById('unit-editor-title');
+    const codeEditor = document.getElementById('unit-code-input');
     const descriptionEditor = document.getElementById('unit-description-input');
 
-    if (!editorCard || !listCard || !editorTitle || !descriptionEditor) {
+    if (!editorCard || !listCard || !editorTitle || !codeEditor || !descriptionEditor) {
         console.error('Unit editor elements not found');
         return;
     }
@@ -63,9 +66,11 @@ export function showUnitEditor(mode, unitKey = null, description = '') {
     // Update editor title and content
     if (mode === 'add') {
         editorTitle.innerHTML = '<span class="icon"><i class="fas fa-plus"></i></span><span>Add New Unit of Work</span>';
+        codeEditor.value = '';
         descriptionEditor.value = '';
     } else {
         editorTitle.innerHTML = '<span class="icon"><i class="fas fa-edit"></i></span><span>Edit Unit of Work</span>';
+        codeEditor.value = code;
         descriptionEditor.value = description;
     }
 
@@ -85,13 +90,22 @@ export function saveUnitFromEditor() {
         return;
     }
 
+    const codeEditor = document.getElementById('unit-code-input');
     const descriptionEditor = document.getElementById('unit-description-input');
-    if (!descriptionEditor) {
-        console.error('Description editor not found');
+    if (!codeEditor || !descriptionEditor) {
+        console.error('Editor elements not found');
         return;
     }
 
+    const code = codeEditor.value.trim();
     const description = descriptionEditor.value.trim();
+
+    if (!code) {
+        showNotification('Please enter a unit code', 'warning');
+        codeEditor.focus();
+        return;
+    }
+
     if (!description) {
         showNotification('Please enter a unit description', 'warning');
         descriptionEditor.focus();
@@ -114,7 +128,10 @@ export function saveUnitFromEditor() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ description: description })
+        body: JSON.stringify({
+            code: code,
+            description: description
+        })
     })
         .then(response => {
             if (!response.ok) {
@@ -142,16 +159,19 @@ export function saveUnitFromEditor() {
 export function cancelUnitEdit() {
     const editorCard = document.getElementById('unit-editor-card');
     const listCard = document.getElementById('units-list-card');
+    const codeEditor = document.getElementById('unit-code-input');
     const descriptionEditor = document.getElementById('unit-description-input');
 
     if (editorCard) editorCard.classList.add('is-hidden');
     if (listCard) listCard.classList.remove('is-hidden');
+    if (codeEditor) codeEditor.value = '';
     if (descriptionEditor) descriptionEditor.value = '';
 
     // Reset state
     unitEditorState = {
         mode: 'add',
         unitKey: null,
+        originalCode: '',
         originalDescription: ''
     };
 }

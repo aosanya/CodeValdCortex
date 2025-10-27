@@ -20,7 +20,7 @@ func NewProblemService(repo agency.Repository) *ProblemService {
 }
 
 // CreateProblem creates a new problem for an agency
-func (s *ProblemService) CreateProblem(ctx context.Context, agencyID string, description string) (*agency.Problem, error) {
+func (s *ProblemService) CreateProblem(ctx context.Context, agencyID string, code string, description string) (*agency.Problem, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -29,6 +29,7 @@ func (s *ProblemService) CreateProblem(ctx context.Context, agencyID string, des
 
 	problem := &agency.Problem{
 		AgencyID:    agencyID,
+		Code:        code,
 		Description: description,
 	}
 
@@ -55,8 +56,8 @@ func (s *ProblemService) GetProblems(ctx context.Context, agencyID string) ([]*a
 	return problems, nil
 }
 
-// UpdateProblem updates a problem's description
-func (s *ProblemService) UpdateProblem(ctx context.Context, agencyID string, key string, description string) error {
+// UpdateProblem updates a problem's code and description
+func (s *ProblemService) UpdateProblem(ctx context.Context, agencyID string, key string, code string, description string) error {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -69,7 +70,8 @@ func (s *ProblemService) UpdateProblem(ctx context.Context, agencyID string, key
 		return fmt.Errorf("failed to get problem: %w", err)
 	}
 
-	// Update description
+	// Update code and description
+	problem.Code = code
 	problem.Description = description
 
 	// Save

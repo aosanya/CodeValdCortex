@@ -1,22 +1,77 @@
-package agency_designer
+package agency_designerpackage agency_designerpackage agency_designer
+
+
 
 // UnitOfWorkEditorCard renders the unit of work editor card component
+
 templ UnitOfWorkEditorCard() {
-	<!-- Unit of Work Editor Card (Hidden by default) -->
-	<div class="card mb-4 is-hidden" id="unit-editor-card">
-		<header class="card-header">
-			<p class="card-header-title">
-				<span class="icon"><i class="fas fa-edit"></i></span>
-				<span id="unit-editor-title">Add New Unit of Work</span>
-			</p>
-			<button 
-				class="card-header-icon button is-small is-text"
-				onclick="cancelUnitEdit()"
-				title="Cancel">
-				<span class="icon"><i class="fas fa-times"></i></span>
-			</button>
-		</header>
+
+	@EditorCard(EditorCardConfig{// UnitOfWorkEditorCard renders the unit of work editor card component// UnitOfWorkEditorCard renders the unit of work editor card component
+
+		CardID:          "unit-editor-card",
+
+		TitleID:         "unit-editor-title",templ UnitOfWorkEditorCard() {templ UnitOfWorkEditorCard() {
+
+		AddTitle:        "Add New Unit of Work",
+
+		EditTitle:       "Edit Unit of Work",	@EditorCard(EditorCardConfig{	@EditorCard(EditorCardConfig{
+
+		CancelFunction:  "cancelUnitEdit()",
+
+		SaveFunction:    "saveUnitFromEditor()",		CardID:          "unit-editor-card",		CardID:          "unit-editor-card",
+
+		CodeInputID:     "unit-code-input",
+
+		CodeLabel:       "Unit Code",		TitleID:         "unit-editor-title",		TitleID:         "unit-editor-title",
+
+		CodePlaceholder: "e.g., UOW001, WRK-1, etc.",
+
+		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",		AddTitle:        "Add New Unit of Work",		AddTitle:        "Add New Unit of Work",
+
+		DescInputID:     "unit-description-input",
+
+		DescLabel:       "Unit Description",		EditTitle:       "Edit Unit of Work",		EditTitle:       "Edit Unit of Work",
+
+		DescPlaceholder: "Describe what this unit of work accomplishes...",
+
+		DescHelp:        "Provide a clear description of what this unit of work does.",		CancelFunction:  "cancelUnitEdit()",		CancelFunction:  "cancelUnitEdit()",
+
+	})
+
+}		SaveFunction:    "saveUnitFromEditor()",		SaveFunction:    "saveUnitFromEditor()",
+
+		CodeInputID:     "unit-code-input",		CodeInputID:     "unit-code-input",
+
+		CodeLabel:       "Unit Code",		CodeLabel:       "Unit Code",
+
+		CodePlaceholder: "e.g., UOW001, WRK-1, etc.",		CodePlaceholder: "e.g., UOW001, WRK-1, etc.",
+
+		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",
+
+		DescInputID:     "unit-description-input",		DescInputID:     "unit-description-input",
+
+		DescLabel:       "Unit Description",		DescLabel:       "Unit Description",
+
+		DescPlaceholder: "Describe what this unit of work accomplishes...",		DescPlaceholder: "Describe what this unit of work accomplishes...",
+
+		DescHelp:        "Provide a clear description of what this unit of work does.",		DescHelp:        "Provide a clear description of what this unit of work does.",
+
+	})	})
+
+}}
 		<div class="card-content">
+			<div class="field">
+				<label class="label">Unit Code</label>
+				<div class="control">
+					<input 
+						class="input"
+						type="text"
+						id="unit-code-input"
+						placeholder="e.g., UOW001, WRK-1, etc."
+						maxlength="20">
+				</div>
+				<p class="help">A unique code to identify this unit of work (e.g., UOW001, WRK-1).</p>
+			</div>
 			<div class="field">
 				<label class="label">Unit of Work Description</label>
 				<div class="control">

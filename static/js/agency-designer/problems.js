@@ -7,6 +7,7 @@ import { getCurrentAgencyId, showNotification } from './utils.js';
 let problemEditorState = {
     mode: 'add', // 'add' or 'edit'
     problemKey: null,
+    originalCode: '',
     originalDescription: ''
 };
 
@@ -18,14 +19,14 @@ export function loadProblems() {
         return;
     }
 
-    const problemsList = document.getElementById('problems-list');
-    if (!problemsList) {
-        console.error('Problems list container not found');
+    const problemsTableBody = document.getElementById('problems-table-body');
+    if (!problemsTableBody) {
+        console.error('Problems table body not found');
         return;
     }
 
     // Show loading state
-    problemsList.innerHTML = '<div class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading problems...</p></div>';
+    problemsTableBody.innerHTML = '<tr><td colspan="3" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading problems...</p></td></tr>';
 
     // Fetch problems HTML from API
     fetch(`/api/v1/agencies/${agencyId}/problems/html`)
@@ -36,26 +37,28 @@ export function loadProblems() {
             return response.text();
         })
         .then(html => {
-            problemsList.innerHTML = html;
+            problemsTableBody.innerHTML = html;
         })
         .catch(error => {
             console.error('Error loading problems:', error);
-            problemsList.innerHTML = '<div class="has-text-danger has-text-centered py-5"><p>Error loading problems</p></div>';
+            problemsTableBody.innerHTML = '<tr><td colspan="3" class="has-text-danger has-text-centered py-5"><p>Error loading problems</p></td></tr>';
         });
 }
 
 // Show problem editor
-export function showProblemEditor(mode, problemKey = null, description = '') {
+export function showProblemEditor(mode, problemKey = null, code = '', description = '') {
     problemEditorState.mode = mode;
     problemEditorState.problemKey = problemKey;
+    problemEditorState.originalCode = code;
     problemEditorState.originalDescription = description;
 
     const editorCard = document.getElementById('problem-editor-card');
     const listCard = document.getElementById('problems-list-card');
     const editorTitle = document.getElementById('problem-editor-title');
+    const codeEditor = document.getElementById('problem-code-editor');
     const descriptionEditor = document.getElementById('problem-description-editor');
 
-    if (!editorCard || !listCard || !editorTitle || !descriptionEditor) {
+    if (!editorCard || !listCard || !editorTitle || !codeEditor || !descriptionEditor) {
         console.error('Problem editor elements not found');
         return;
     }
@@ -63,9 +66,11 @@ export function showProblemEditor(mode, problemKey = null, description = '') {
     // Update editor title and content
     if (mode === 'add') {
         editorTitle.innerHTML = '<span class="icon"><i class="fas fa-plus"></i></span><span>Add New Problem</span>';
+        codeEditor.value = '';
         descriptionEditor.value = '';
     } else {
         editorTitle.innerHTML = '<span class="icon"><i class="fas fa-edit"></i></span><span>Edit Problem</span>';
+        codeEditor.value = code;
         descriptionEditor.value = description;
     }
 
@@ -85,13 +90,22 @@ export function saveProblemFromEditor() {
         return;
     }
 
+    const codeEditor = document.getElementById('problem-code-editor');
     const descriptionEditor = document.getElementById('problem-description-editor');
-    if (!descriptionEditor) {
-        console.error('Description editor not found');
+    if (!codeEditor || !descriptionEditor) {
+        console.error('Editor elements not found');
         return;
     }
 
+    const code = codeEditor.value.trim();
     const description = descriptionEditor.value.trim();
+
+    if (!code) {
+        showNotification('Please enter a problem code', 'warning');
+        codeEditor.focus();
+        return;
+    }
+
     if (!description) {
         showNotification('Please enter a problem description', 'warning');
         descriptionEditor.focus();
@@ -114,7 +128,10 @@ export function saveProblemFromEditor() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ description: description })
+        body: JSON.stringify({
+            code: code,
+            description: description
+        })
     })
         .then(response => {
             if (!response.ok) {
@@ -142,16 +159,19 @@ export function saveProblemFromEditor() {
 export function cancelProblemEdit() {
     const editorCard = document.getElementById('problem-editor-card');
     const listCard = document.getElementById('problems-list-card');
+    const codeEditor = document.getElementById('problem-code-editor');
     const descriptionEditor = document.getElementById('problem-description-editor');
 
     if (editorCard) editorCard.classList.add('is-hidden');
     if (listCard) listCard.classList.remove('is-hidden');
+    if (codeEditor) codeEditor.value = '';
     if (descriptionEditor) descriptionEditor.value = '';
 
     // Reset state
     problemEditorState = {
         mode: 'add',
         problemKey: null,
+        originalCode: '',
         originalDescription: ''
     };
 }
