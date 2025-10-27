@@ -1,0 +1,404 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// OverviewContent renders the overview section with three navigation nodes
+templ OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	<!-- Left Sidebar: Overview Navigation -->
+	<aside class="sidebar-panel">
+		<header class="sidebar-header">
+			<h3 class="sidebar-title">
+				<span class="icon"><i class="fas fa-list"></i></span>
+				<span>Sections</span>
+			</h3>
+		</header>
+		<div class="sidebar-content">
+			@OverviewNavigationList()
+		</div>
+	</aside>
+	
+	<!-- Middle Panel: Overview Content -->
+	<main class="details-panel">
+		<header class="details-header">
+			<h3 class="details-title" id="overview-title">
+				<span class="icon"><i class="fas fa-info-circle"></i></span>
+				<span>Introduction</span>
+			</h3>
+		</header>
+		<div class="details-content" id="overview-content">
+			@IntroductionContent(currentAgency, conversation)
+		</div>
+	</main>
+}
+
+// OverviewNavigationList shows the three navigation nodes
+templ OverviewNavigationList() {
+	<div class="overview-nav-list">
+		<div 
+			class="overview-nav-item is-active"
+			data-section="introduction"
+			onclick="selectOverviewSection(this, 'introduction')">
+			<div class="nav-icon">
+				<i class="fas fa-info-circle"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">Introduction</div>
+				<div class="nav-description">Get started</div>
+			</div>
+		</div>
+		
+		<div 
+			class="overview-nav-item"
+			data-section="problem-definition"
+			onclick="selectOverviewSection(this, 'problem-definition')">
+			<div class="nav-icon">
+				<i class="fas fa-exclamation-triangle"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">Problem Definition</div>
+				<div class="nav-description">Define the challenge</div>
+			</div>
+		</div>
+		
+		<div 
+			class="overview-nav-item"
+			data-section="requirements"
+			onclick="selectOverviewSection(this, 'requirements')">
+			<div class="nav-icon">
+				<i class="fas fa-clipboard-list"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">Requirements</div>
+				<div class="nav-description">Specify needs</div>
+			</div>
+		</div>
+	</div>
+}
+
+// IntroductionContent shows the introduction section
+templ IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	<div class="overview-section">
+		<div class="section-hero">
+			<div class="hero-icon">
+				<i class="fas fa-rocket fa-3x"></i>
+			</div>
+			<h2 class="title is-3">Welcome to AI Agency Designer</h2>
+			<p class="subtitle is-5">Design intelligent multi-agent systems with AI assistance</p>
+		</div>
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-building"></i></span>
+				Current Agency
+			</h3>
+			<div class="section-content">
+				<div class="agency-info-card">
+					<h4 class="title is-4">{ currentAgency.Name }</h4>
+					if currentAgency.Description != "" {
+						<p class="mb-3">{ currentAgency.Description }</p>
+					}
+					<div class="agency-meta">
+						<span class="tag is-info">
+							<span class="icon"><i class="fas fa-tag"></i></span>
+							<span>{ currentAgency.Category }</span>
+						</span>
+						<span class="tag is-success">
+							<span class="icon"><i class="fas fa-circle"></i></span>
+							<span>{ string(currentAgency.Status) }</span>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-magic"></i></span>
+				What is this?
+			</h3>
+			<div class="section-content">
+				<p class="mb-3">
+					The AI Agency Designer helps you create sophisticated multi-agent architectures through a conversational interface. 
+					Our AI assistant guides you through the process of:
+				</p>
+				<ul class="content-list">
+					<li><strong>Understanding your requirements</strong> - Explore your use case and needs</li>
+					<li><strong>Designing agent types</strong> - Define specialized agents for different tasks</li>
+					<li><strong>Mapping relationships</strong> - Establish communication patterns between agents</li>
+					<li><strong>Validating the design</strong> - Review and refine the complete architecture</li>
+				</ul>
+			</div>
+		</div>
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-lightbulb"></i></span>
+				Getting Started
+			</h3>
+			<div class="section-content">
+				<div class="getting-started-steps">
+					<div class="step-card">
+						<div class="step-number">1</div>
+						<div class="step-content">
+							<h4 class="step-title">Define Your Problem</h4>
+							<p>Start by describing what you're trying to solve. Be as detailed as possible about your use case.</p>
+						</div>
+					</div>
+					
+					<div class="step-card">
+						<div class="step-number">2</div>
+						<div class="step-content">
+							<h4 class="step-title">Chat with AI</h4>
+							<p>Use the chat panel on the right to interact with the AI designer. It will ask clarifying questions.</p>
+						</div>
+					</div>
+					
+					<div class="step-card">
+						<div class="step-number">3</div>
+						<div class="step-content">
+							<h4 class="step-title">Review Agent Types</h4>
+							<p>Switch to the "Agent Types" view to see the designed agents and their relationships.</p>
+						</div>
+					</div>
+					
+					<div class="step-card">
+						<div class="step-number">4</div>
+						<div class="step-content">
+							<h4 class="step-title">Visualize Layout</h4>
+							<p>Use the "Layout" view to see a visual diagram of your agent architecture.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		if conversation != nil {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-tasks"></i></span>
+					Current Progress
+				</h3>
+				<div class="section-content">
+					<div class="progress-info">
+						<p><strong>Phase:</strong> { getPhaseDisplay(conversation.Phase) }</p>
+						if conversation.CurrentDesign != nil {
+							<p><strong>Agent Types Defined:</strong> { string(rune(len(conversation.CurrentDesign.AgentTypes))) }</p>
+							<p><strong>Relationships Mapped:</strong> { string(rune(len(conversation.CurrentDesign.Relationships))) }</p>
+						}
+						<p><strong>Messages Exchanged:</strong> { string(rune(len(conversation.Messages))) }</p>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+// ProblemDefinitionContent shows the problem definition section
+templ ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	<div class="overview-section">
+		<div class="section-hero">
+			<div class="hero-icon">
+				<i class="fas fa-exclamation-triangle fa-3x"></i>
+			</div>
+			<h2 class="title is-3">Problem Definition</h2>
+			<p class="subtitle is-5">Clearly define the challenge you're addressing</p>
+		</div>
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-question-circle"></i></span>
+				What Problem Are You Solving?
+			</h3>
+			<div class="section-content">
+				if conversation != nil && conversation.CurrentDesign != nil && conversation.CurrentDesign.Description != "" {
+					<div class="problem-statement">
+						<p>{ conversation.CurrentDesign.Description }</p>
+					</div>
+				} else {
+					<div class="empty-state">
+						<p class="has-text-grey">No problem defined yet. Start chatting with the AI to define your use case.</p>
+					</div>
+				}
+			</div>
+		</div>
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-book"></i></span>
+				Key Questions to Consider
+			</h3>
+			<div class="section-content">
+				<ul class="content-list">
+					<li>What is the main challenge or opportunity you're addressing?</li>
+					<li>Who are the stakeholders affected by this problem?</li>
+					<li>What are the current pain points or inefficiencies?</li>
+					<li>What would success look like for this solution?</li>
+					<li>Are there any constraints or limitations to consider?</li>
+				</ul>
+			</div>
+		</div>
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-lightbulb"></i></span>
+				Tips for Defining Your Problem
+			</h3>
+			<div class="section-content">
+				<div class="tips-grid">
+					<div class="tip-card">
+						<div class="tip-icon">
+							<i class="fas fa-check-circle"></i>
+						</div>
+						<div class="tip-content">
+							<h4>Be Specific</h4>
+							<p>Provide concrete examples and scenarios rather than abstract descriptions.</p>
+						</div>
+					</div>
+					
+					<div class="tip-card">
+						<div class="tip-icon">
+							<i class="fas fa-users"></i>
+						</div>
+						<div class="tip-content">
+							<h4>Identify Actors</h4>
+							<p>Mention all the people, systems, or entities involved in the process.</p>
+						</div>
+					</div>
+					
+					<div class="tip-card">
+						<div class="tip-icon">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<div class="tip-content">
+							<h4>Measure Success</h4>
+							<p>Think about what metrics or outcomes would indicate a successful solution.</p>
+						</div>
+					</div>
+					
+					<div class="tip-card">
+						<div class="tip-icon">
+							<i class="fas fa-exchange-alt"></i>
+						</div>
+						<div class="tip-content">
+							<h4>Map Workflows</h4>
+							<p>Describe the current process flow and where improvements are needed.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// RequirementsContent shows the requirements section
+templ RequirementsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	<div class="overview-section">
+		<div class="section-hero">
+			<div class="hero-icon">
+				<i class="fas fa-clipboard-list fa-3x"></i>
+			</div>
+			<h2 class="title is-3">Requirements</h2>
+			<p class="subtitle is-5">Specify the functional and non-functional needs</p>
+		</div>
+		
+		if conversation != nil && conversation.CurrentDesign != nil {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-list-check"></i></span>
+					Functional Requirements
+				</h3>
+				<div class="section-content">
+					if conversation.CurrentDesign.Description != "" {
+						<div class="requirements-list">
+							<p>{ conversation.CurrentDesign.Description }</p>
+						</div>
+					} else {
+						<div class="empty-state">
+							<p class="has-text-grey">No requirements captured yet. Discuss your needs with the AI assistant.</p>
+						</div>
+					}
+				</div>
+			</div>
+			
+			if len(conversation.CurrentDesign.AgentTypes) > 0 {
+				<div class="details-section">
+					<h3 class="section-title">
+						<span class="icon"><i class="fas fa-robot"></i></span>
+						Agent Requirements
+					</h3>
+					<div class="section-content">
+						<div class="agent-requirements-grid">
+							for _, agentType := range conversation.CurrentDesign.AgentTypes {
+								<div class="requirement-card">
+									<div class="req-header">
+										<span class="icon"><i class="fas fa-robot"></i></span>
+										<strong>{ agentType.Name }</strong>
+									</div>
+									<div class="req-capabilities">
+										if len(agentType.Capabilities) > 0 {
+											<p class="mb-2"><strong>Capabilities:</strong></p>
+											<div class="tags are-small">
+												for _, cap := range agentType.Capabilities {
+													<span class="tag is-info is-light">{ cap }</span>
+												}
+											</div>
+										}
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+		} else {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-comment-dots"></i></span>
+					No Requirements Yet
+				</h3>
+				<div class="section-content">
+					<div class="empty-state">
+						<p>Start a conversation with the AI designer to capture your requirements.</p>
+						<p class="mt-3">The AI will help you:</p>
+						<ul class="content-list mt-3">
+							<li>Identify functional requirements</li>
+							<li>Determine non-functional requirements</li>
+							<li>Map requirements to agent capabilities</li>
+							<li>Validate completeness</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		}
+		
+		<div class="details-section">
+			<h3 class="section-title">
+				<span class="icon"><i class="fas fa-shield-alt"></i></span>
+				Non-Functional Requirements
+			</h3>
+			<div class="section-content">
+				<div class="nfr-categories">
+					<div class="nfr-card">
+						<h4><i class="fas fa-tachometer-alt"></i> Performance</h4>
+						<p>Response time, throughput, scalability considerations</p>
+					</div>
+					<div class="nfr-card">
+						<h4><i class="fas fa-lock"></i> Security</h4>
+						<p>Authentication, authorization, data protection</p>
+					</div>
+					<div class="nfr-card">
+						<h4><i class="fas fa-sync"></i> Reliability</h4>
+						<p>Availability, fault tolerance, recovery mechanisms</p>
+					</div>
+					<div class="nfr-card">
+						<h4><i class="fas fa-expand-arrows-alt"></i> Scalability</h4>
+						<p>Horizontal and vertical scaling capabilities</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,286 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/ai"
+)
+
+// AgentTypesContent renders the agent types section with sidebar and details panel
+templ AgentTypesContent(conversation *ai.ConversationContext) {
+	<!-- Left Sidebar: Agent Types List -->
+	<aside class="sidebar-panel">
+		<header class="sidebar-header">
+			<h3 class="sidebar-title">
+				<span class="icon"><i class="fas fa-robot"></i></span>
+				<span>Agent Types</span>
+			</h3>
+		</header>
+		<div class="sidebar-content">
+			@AgentTypesList(conversation)
+		</div>
+	</aside>
+	
+	<!-- Middle Panel: Agent Type Details -->
+	<main class="details-panel">
+		<header class="details-header">
+			<h3 class="details-title" id="details-title">
+				<span class="icon"><i class="fas fa-info-circle"></i></span>
+				<span>Agent Details</span>
+			</h3>
+		</header>
+		<div class="details-content" id="agent-details">
+			@EmptyDetailsView()
+		</div>
+	</main>
+}
+
+// AgentTypesList shows the list of agent types in the sidebar
+templ AgentTypesList(conversation *ai.ConversationContext) {
+	if conversation != nil && conversation.CurrentDesign != nil && len(conversation.CurrentDesign.AgentTypes) > 0 {
+		<div class="agent-types-sidebar">
+			for idx, agentType := range conversation.CurrentDesign.AgentTypes {
+				<div 
+					class={ "agent-type-item", templ.KV("is-active", idx == 0) }
+					data-agent-index={ string(rune(idx)) }
+					onclick="selectAgentType(this)"
+					hx-get={ "/api/v1/conversations/" + conversation.ID + "/agents/" + agentType.ID }
+					hx-target="#agent-details"
+					hx-trigger="click">
+					<div class="agent-type-icon">
+						<i class="fas fa-robot"></i>
+					</div>
+					<div class="agent-type-info">
+						<div class="agent-type-name">{ agentType.Name }</div>
+						<div class="agent-type-category">{ agentType.Category }</div>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="sidebar-footer">
+			<div class="agent-count">
+				<span class="icon"><i class="fas fa-layer-group"></i></span>
+				<span>{ string(rune(len(conversation.CurrentDesign.AgentTypes))) } Agent Types</span>
+			</div>
+			if len(conversation.CurrentDesign.Relationships) > 0 {
+				<div class="relationship-count">
+					<span class="icon"><i class="fas fa-project-diagram"></i></span>
+					<span>{ string(rune(len(conversation.CurrentDesign.Relationships))) } Connections</span>
+				</div>
+			}
+		</div>
+	} else {
+		<div class="empty-sidebar">
+			<div class="empty-sidebar-content">
+				<span class="icon is-large has-text-grey-light">
+					<i class="fas fa-robot fa-2x"></i>
+				</span>
+				<p class="mt-3">No agent types yet</p>
+				<p class="is-size-7 has-text-grey">Chat with the AI to design your agents</p>
+			</div>
+		</div>
+	}
+}
+
+// EmptyDetailsView shows placeholder when no agent is selected
+templ EmptyDetailsView() {
+	<div class="empty-details">
+		<div class="empty-details-content">
+			<span class="icon is-large has-text-grey-light">
+				<i class="fas fa-hand-pointer fa-2x"></i>
+			</span>
+			<p class="title is-5 mt-4">Select an Agent Type</p>
+			<p class="subtitle is-6">Click on an agent type in the sidebar to view its details</p>
+		</div>
+	</div>
+}
+
+// AgentTypeDetails shows detailed information about a selected agent type
+templ AgentTypeDetails(agentType ai.AgentTypeSpec, relationships []ai.AgentRelationship) {
+	<div class="agent-details-view">
+		<!-- Header -->
+		<div class="details-section">
+			<div class="agent-header">
+				<div class="agent-icon-large">
+					<i class="fas fa-robot fa-2x"></i>
+				</div>
+				<div>
+					<h2 class="title is-4">{ agentType.Name }</h2>
+					if agentType.Category != "" {
+						<span class="tag is-info">{ agentType.Category }</span>
+					}
+				</div>
+			</div>
+		</div>
+		
+		<!-- Description -->
+		if agentType.Description != "" {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-align-left"></i></span>
+					Description
+				</h3>
+				<div class="section-content">
+					<p>{ agentType.Description }</p>
+				</div>
+			</div>
+		}
+		
+		<!-- Capabilities -->
+		if len(agentType.Capabilities) > 0 {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-bolt"></i></span>
+					Capabilities
+				</h3>
+				<div class="section-content">
+					<div class="tags">
+						for _, cap := range agentType.Capabilities {
+							<span class="tag is-info is-light is-medium">{ cap }</span>
+						}
+					</div>
+				</div>
+			</div>
+		}
+		
+		<!-- Schema Properties -->
+		if len(agentType.Schema) > 0 {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-cog"></i></span>
+					Configuration Schema
+				</h3>
+				<div class="section-content">
+					<div class="properties-list">
+						@RenderSchema(agentType.Schema)
+					</div>
+				</div>
+			</div>
+		}
+		
+		<!-- Relationships -->
+		if len(relationships) > 0 {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-network-wired"></i></span>
+					Relationships
+				</h3>
+				<div class="section-content">
+					<div class="relationships-grid">
+						for _, rel := range relationships {
+							<div class="relationship-card">
+								<div class="relationship-direction">
+									if rel.From == agentType.ID {
+										<span class="tag is-success">Outgoing</span>
+										<div class="relationship-path">
+											<span class="path-node">{ agentType.Name }</span>
+											<span class="icon"><i class="fas fa-arrow-right"></i></span>
+											<span class="path-node">{ rel.To }</span>
+										</div>
+									} else {
+										<span class="tag is-info">Incoming</span>
+										<div class="relationship-path">
+											<span class="path-node">{ rel.From }</span>
+											<span class="icon"><i class="fas fa-arrow-right"></i></span>
+											<span class="path-node">{ agentType.Name }</span>
+										</div>
+									}
+								</div>
+								<div class="relationship-meta">
+									<span class="rel-type">
+										<i class="fas fa-exchange-alt"></i> { rel.Type }
+									</span>
+									if len(rel.Topics) > 0 {
+										<span class="rel-topics">
+											<i class="fas fa-tag"></i> { rel.Topics[0] }
+										</span>
+									}
+								</div>
+								if rel.Description != "" {
+									<p class="relationship-description">{ rel.Description }</p>
+								}
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		}
+		
+		<!-- Default Config -->
+		if len(agentType.DefaultConfig) > 0 {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-sliders-h"></i></span>
+					Default Configuration
+				</h3>
+				<div class="section-content">
+					<div class="config-list">
+						@RenderConfig(agentType.DefaultConfig)
+					</div>
+				</div>
+			</div>
+		}
+		
+		<!-- Instance Count -->
+		if agentType.Count > 0 {
+			<div class="details-section">
+				<h3 class="section-title">
+					<span class="icon"><i class="fas fa-layer-group"></i></span>
+					Suggested Instance Count
+				</h3>
+				<div class="section-content">
+					<div class="instance-count">
+						<span class="count-badge">{ string(rune(agentType.Count)) }</span>
+						<span>instances recommended</span>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+// RenderSchema renders the schema properties in a readable format
+templ RenderSchema(schema map[string]interface{}) {
+	for key, value := range schema {
+		<div class="property-item">
+			<div class="property-key">
+				<code>{ key }</code>
+			</div>
+			<div class="property-value">
+				@RenderValue(value)
+			</div>
+		</div>
+	}
+}
+
+// RenderConfig renders configuration key-value pairs
+templ RenderConfig(config map[string]interface{}) {
+	for key, value := range config {
+		<div class="config-item">
+			<span class="config-key">{ key }:</span>
+			<span class="config-value">@RenderValue(value)</span>
+		</div>
+	}
+}
+
+// RenderValue renders a value based on its type
+templ RenderValue(value interface{}) {
+	switch v := value.(type) {
+		case string:
+			<span class="value-string">{ v }</span>
+		case int, int64, float64:
+			<span class="value-number">{ formatValue(v) }</span>
+		case bool:
+			<span class="value-boolean">{ formatValue(v) }</span>
+		case map[string]interface{}:
+			<div class="value-object">
+				@RenderConfig(v)
+			</div>
+		case []interface{}:
+			<div class="value-array">
+				for _, item := range v {
+					<div class="array-item">@RenderValue(item)</div>
+				}
+			</div>
+		default:
+			<span class="value-unknown">{ formatValue(v) }</span>
+	}
+}

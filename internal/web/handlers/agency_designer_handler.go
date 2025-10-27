@@ -5,7 +5,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
-	"github.com/aosanya/CodeValdCortex/internal/web/pages"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -49,7 +49,7 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 	var conversation *ai.ConversationContext
 
 	// Render the designer page
-	component := pages.AgencyDesignerPage(ag, conversation)
+	component := agency_designer.AgencyDesignerPage(ag, conversation)
 	err = component.Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agency designer page")
@@ -86,13 +86,59 @@ func (h *AgencyDesignerWebHandler) ShowConversation(c *gin.Context) {
 	}
 
 	// Render the designer page with the conversation
-	component := pages.AgencyDesignerPage(ag, conversation)
+	component := agency_designer.AgencyDesignerPage(ag, conversation)
 	err = component.Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agency designer page")
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Failed to render page",
 		})
+		return
+	}
+}
+
+// GetAgentTypeDetails returns the details for a specific agent type
+func (h *AgencyDesignerWebHandler) GetAgentTypeDetails(c *gin.Context) {
+	conversationID := c.Param("conversationId")
+	agentTypeID := c.Param("agentId")
+
+	// Get the conversation
+	conversation, err := h.designerService.GetConversation(conversationID)
+	if err != nil || conversation == nil {
+		h.logger.WithField("conversation_id", conversationID).Warn("Conversation not found")
+		c.String(http.StatusNotFound, "Conversation not found")
+		return
+	}
+
+	// Find the agent type
+	var agentType *ai.AgentTypeSpec
+	for i := range conversation.CurrentDesign.AgentTypes {
+		if conversation.CurrentDesign.AgentTypes[i].ID == agentTypeID {
+			agentType = &conversation.CurrentDesign.AgentTypes[i]
+			break
+		}
+	}
+
+	if agentType == nil {
+		h.logger.WithField("agent_id", agentTypeID).Warn("Agent type not found")
+		c.String(http.StatusNotFound, "Agent type not found")
+		return
+	}
+
+	// Find relationships involving this agent type
+	var relationships []ai.AgentRelationship
+	for _, rel := range conversation.CurrentDesign.Relationships {
+		if rel.From == agentType.ID || rel.To == agentType.ID {
+			relationships = append(relationships, rel)
+		}
+	}
+
+	// Render the agent type details
+	component := agency_designer.AgentTypeDetails(*agentType, relationships)
+	err = component.Render(c.Request.Context(), c.Writer)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to render agent type details")
+		c.String(http.StatusInternalServerError, "Failed to render details")
 		return
 	}
 }
@@ -104,4 +150,7 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 
 	// View specific conversation
 	router.GET("/agencies/:id/designer/conversations/:conversationId", h.ShowConversation)
+
+	// Get agent type details (HTMX endpoint)
+	router.GET("/api/v1/conversations/:conversationId/agents/:agentId", h.GetAgentTypeDetails)
 }

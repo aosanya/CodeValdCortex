@@ -100,7 +100,7 @@ func NavbarWithAgency(currentAgency *agency.Agency) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"navbar-item\"><span class=\"icon\"><i class=\"fas fa-brain\"></i></span> <span>AI Designer</span></a> <a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" class=\"navbar-item\"><span class=\"icon\"><i class=\"fas fa-brain\"></i></span> <span>Designer</span></a> <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,0 +1,220 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// AgencyDesignerPage renders the AI-powered agency designer interface with VS Code-like layout
+templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	@components.LayoutWithAgency("AI Agency Designer", currentAgency) {
+		<!-- Agency Designer Specific CSS -->
+		<link rel="stylesheet" href="/static/css/agency-designer.css"/>
+		
+		<!-- Agency Designer JavaScript -->
+		<script src="/static/js/agency-designer.js" defer></script>
+		
+		<div class="vscode-designer-container">
+			<!-- View Switcher at Top -->
+			<div class="top-toolbar">
+				@ViewSwitcher()
+			</div>
+			
+			<div class="designer-panels">
+				<!-- Overview View -->
+				<div class="view-content is-active" data-view-content="overview">
+					@OverviewContent(currentAgency, conversation)
+				</div>
+				
+				<!-- Agent Types View -->
+				<div class="view-content" data-view-content="agent-types">
+					@AgentTypesContent(conversation)
+				</div>
+				
+				<!-- Layout View -->
+				<div class="view-content" data-view-content="layout">
+					<div class="layout-panel">
+						<h2>Layout Diagram - Coming Soon</h2>
+					</div>
+				</div>
+				
+				<!-- Right Panel: AI Chat (Always Visible) -->
+				<aside class="chat-panel">
+					<header class="chat-header">
+						<div class="chat-header-content">
+							<span class="icon is-medium has-text-primary">
+								<i class="fas fa-comments"></i>
+							</span>
+							<div>
+								<h3 class="chat-title">Designer</h3>
+								<p class="chat-subtitle">{ currentAgency.Name }</p>
+							</div>
+						</div>
+					</header>
+					
+					<div class="chat-messages-container" id="chat-messages">
+						if conversation != nil && len(conversation.Messages) > 0 {
+							@ChatMessages(conversation.Messages)
+						} else {
+							@WelcomeMessage(currentAgency.Name)
+						}
+					</div>
+					
+					<!-- Typing Indicator -->
+					<div class="typing-indicator" id="typing-indicator" style="display: none;">
+						<div class="typing-bubble">
+							<span></span><span></span><span></span>
+						</div>
+					</div>
+					
+					<!-- Chat Input -->
+					<footer class="chat-input-container">
+						@ChatInput(currentAgency.ID, conversation)
+					</footer>
+				</aside>
+			</div>
+			
+			<!-- Action Bar at Bottom -->
+			if conversation != nil && conversation.Phase == ai.PhaseValidation {
+				<div class="bottom-action-bar">
+					<button 
+						class="button is-success is-medium"
+						hx-post={ "/api/v1/conversations/" + conversation.ID + "/generate" }
+						hx-target="#agent-details"
+						hx-indicator="#generate-spinner">
+						<span class="icon">
+							<i class="fas fa-check-circle"></i>
+						</span>
+						<span>Generate Final Design</span>
+					</button>
+					<span class="spinner" id="generate-spinner" style="display: none;">
+						<i class="fas fa-spinner fa-spin"></i>
+					</span>
+				</div>
+			}
+		</div>
+	}
+}
+
+// ViewSwitcher shows the different view options
+templ ViewSwitcher() {
+	<div class="view-switcher">
+		<div class="view-tab is-active" data-view="overview">
+			<span class="view-icon">📊</span>
+			<span class="view-label">Overview</span>
+		</div>
+		<div class="view-tab" data-view="agent-types">
+			<span class="view-icon">🤖</span>
+			<span class="view-label">Agent Types</span>
+		</div>
+		<div class="view-tab" data-view="layout">
+			<span class="view-icon">🔗</span>
+			<span class="view-label">Layout</span>
+		</div>
+	</div>
+}
+
+// WelcomeMessage displays the initial greeting
+templ WelcomeMessage(agencyName string) {
+	<div class="message ai-message welcome-message">
+		<div class="message-avatar">
+			<span class="icon is-large has-text-primary">
+				<i class="fas fa-robot fa-2x"></i>
+			</span>
+		</div>
+		<div class="message-content">
+			<div class="message-bubble">
+				<p><strong>Hi! I'm your AI Agency Designer.</strong> 🤖</p>
+				<p>I'll help you create a complete multi-agent architecture for <strong>{ agencyName }</strong>.</p>
+				<p>Let's start by understanding your use case:</p>
+				<ul>
+					<li>What problem are you trying to solve?</li>
+					<li>What are the main processes or workflows?</li>
+					<li>Who are the key actors or stakeholders?</li>
+				</ul>
+				<p class="mt-4"><em>💡 Tip: Be as detailed as you can - I'll help you refine the details as we go!</em></p>
+			</div>
+		</div>
+	</div>
+}
+
+// ChatMessages renders the conversation history
+templ ChatMessages(messages []ai.Message) {
+	for _, msg := range messages {
+		if msg.Role == "user" {
+			@UserMessage(msg)
+		} else {
+			@AIMessage(msg)
+		}
+	}
+}
+
+// UserMessage renders a user message bubble
+templ UserMessage(msg ai.Message) {
+	<div class="message user-message">
+		<div class="message-content">
+			<div class="message-bubble">
+				<p>{ msg.Content }</p>
+			</div>
+			<div class="message-time">
+				{ msg.Timestamp.Format("3:04 PM") }
+			</div>
+		</div>
+		<div class="message-avatar">
+			<span class="icon is-medium has-text-info">
+				<i class="fas fa-user"></i>
+			</span>
+		</div>
+	</div>
+}
+
+// AIMessage renders an AI assistant message bubble
+templ AIMessage(msg ai.Message) {
+	<div class="message ai-message">
+		<div class="message-avatar">
+			<span class="icon is-medium has-text-primary">
+				<i class="fas fa-robot"></i>
+			</span>
+		</div>
+		<div class="message-content">
+			<div class="message-bubble">
+				@templ.Raw(formatAIMessage(msg.Content))
+			</div>
+			<div class="message-time">
+				{ msg.Timestamp.Format("3:04 PM") }
+			</div>
+		</div>
+	</div>
+}
+
+// ChatInput renders the message input form
+templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
+	<form 
+		hx-post={ getMessageEndpoint(agencyID, conversation) }
+		hx-target="#chat-messages"
+		hx-swap="beforeend"
+		hx-indicator="#typing-indicator"
+		hx-on::after-request="document.getElementById('user-input').value = ''; document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;">
+		
+		<div class="field has-addons">
+			<div class="control is-expanded">
+				<input 
+					class="input" 
+					type="text" 
+					name="message"
+					id="user-input"
+					placeholder="Describe your requirements..."
+					required
+					autocomplete="off"/>
+			</div>
+			<div class="control">
+				<button class="button is-primary" type="submit">
+					<span class="icon">
+						<i class="fas fa-paper-plane"></i>
+					</span>
+				</button>
+			</div>
+		</div>
+	</form>
+}

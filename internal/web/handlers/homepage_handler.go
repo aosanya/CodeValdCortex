@@ -16,9 +16,7 @@ import (
 )
 
 const (
-	// Session keys
-	sessionKeyAgencyID = "agency_id"
-	cookieAgencyID     = "agency_id"
+	cookieAgencyID = "agency_id"
 )
 
 // HomepageHandler handles homepage and agency selection routes

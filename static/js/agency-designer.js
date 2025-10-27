@@ -1,9 +1,21 @@
-// AI Agency Designer - Chat Interactions
-// Handles real-time chat features and HTMX events
+// AI Agency Designer - VS Code Style Interactions
+// Handles chat, agent selection, and HTMX events
 
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('Agency Designer: Initializing...');
+
+    // Log initial active view
+    const activeView = document.querySelector('.view-content.is-active');
+    if (activeView) {
+        console.log('Initial active view:', activeView.getAttribute('data-view-content'));
+    }
+
     initializeChatScroll();
     initializeHTMXEvents();
+    initializeViewSwitcher();
+    initializeAgentSelection();
+
+    console.log('Agency Designer: Initialization complete');
 });
 
 // Initialize auto-scroll for chat messages
@@ -19,6 +31,104 @@ function initializeChatScroll() {
 function scrollToBottom(container) {
     if (container) {
         container.scrollTop = container.scrollHeight;
+    }
+}
+
+// Handle agent type selection in sidebar
+function selectAgentType(element) {
+    // Remove active class from all items
+    const allItems = document.querySelectorAll('.agent-type-item');
+    allItems.forEach(item => item.classList.remove('is-active'));
+
+    // Add active class to selected item
+    element.classList.add('is-active');
+
+    // Update details title
+    const agentName = element.querySelector('.agent-type-name')?.textContent || 'Agent Details';
+    const detailsTitle = document.getElementById('details-title');
+    if (detailsTitle) {
+        detailsTitle.innerHTML = `
+            <span class="icon"><i class="fas fa-robot"></i></span>
+            <span>${agentName}</span>
+        `;
+    }
+}
+
+// Initialize agent selection handlers
+function initializeAgentSelection() {
+    // Only auto-click first agent if we're already on the agent-types view
+    const agentTypesView = document.querySelector('.view-content[data-view-content="agent-types"]');
+    if (agentTypesView && agentTypesView.classList.contains('is-active')) {
+        const firstAgent = document.querySelector('.agent-type-item');
+        if (firstAgent) {
+            setTimeout(() => {
+                firstAgent.click();
+            }, 300);
+        }
+    }
+}
+
+// Initialize view switcher tabs
+function initializeViewSwitcher() {
+    console.log('Initializing view switcher...');
+    const viewTabs = document.querySelectorAll('.view-tab');
+
+    viewTabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            console.log('View tab clicked:', this.getAttribute('data-view'));
+
+            // Remove active class from all tabs
+            viewTabs.forEach(t => t.classList.remove('is-active'));
+
+            // Add active class to clicked tab
+            this.classList.add('is-active');
+
+            // Get the selected view
+            const view = this.getAttribute('data-view');
+
+            // Handle view switching
+            switchView(view);
+        });
+    });
+
+    console.log('View switcher initialized. Active views:');
+    document.querySelectorAll('.view-content').forEach(vc => {
+        console.log(`  - ${vc.getAttribute('data-view-content')}: ${vc.classList.contains('is-active') ? 'ACTIVE' : 'inactive'}`);
+    });
+}
+
+// Switch between different views
+function switchView(view) {
+    console.log('Switching to view:', view);
+
+    // Remove is-active from all view content containers
+    const allViewContents = document.querySelectorAll('.view-content');
+    allViewContents.forEach(content => content.classList.remove('is-active'));
+
+    // Add is-active to the selected view content
+    const selectedViewContent = document.querySelector(`.view-content[data-view-content="${view}"]`);
+    if (selectedViewContent) {
+        selectedViewContent.classList.add('is-active');
+    }
+
+    // Handle specific view logic
+    switch (view) {
+        case 'overview':
+            console.log('Showing overview');
+            // Overview is always available
+            break;
+        case 'agent-types':
+            console.log('Showing agent types');
+            // Re-select first agent if needed
+            const firstAgent = document.querySelector('.agent-type-item');
+            if (firstAgent && !document.querySelector('.agent-type-item.is-active')) {
+                firstAgent.click();
+            }
+            break;
+        case 'layout':
+            console.log('Showing layout diagram');
+            // Layout diagram will be rendered here
+            break;
     }
 }
 
@@ -41,14 +151,19 @@ function initializeHTMXEvents() {
     // Hide typing indicator and scroll when new message arrives
     document.body.addEventListener('htmx:afterSwap', function (evt) {
         const indicator = document.getElementById('typing-indicator');
-        if (indicator) {
+        if (indicator && evt.detail.target.id === 'chat-messages') {
             indicator.style.display = 'none';
         }
 
         // Scroll to bottom to show new message
         const chatContainer = document.getElementById('chat-messages');
-        if (chatContainer) {
+        if (chatContainer && evt.detail.target.id === 'chat-messages') {
             setTimeout(() => scrollToBottom(chatContainer), 100);
+        }
+
+        // Re-initialize agent selection if sidebar was updated
+        if (evt.detail.target.closest('.sidebar-content')) {
+            initializeAgentSelection();
         }
     });
 
@@ -60,8 +175,18 @@ function initializeHTMXEvents() {
         }
 
         // Show error message
-        console.error('Chat request failed:', evt.detail);
-        alert('Failed to send message. Please try again.');
+        console.error('Request failed:', evt.detail);
+
+        // Show error in UI
+        const target = evt.detail.target;
+        if (target) {
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'notification is-danger is-light';
+            errorMsg.textContent = 'Request failed. Please try again.';
+            target.appendChild(errorMsg);
+
+            setTimeout(() => errorMsg.remove(), 3000);
+        }
     });
 
     // Clear input after successful send
@@ -75,27 +200,53 @@ function initializeHTMXEvents() {
         }
     });
 
-    // Auto-resize textarea (if we switch to textarea later)
-    const messageInputs = document.querySelectorAll('textarea[name="message"]');
-    messageInputs.forEach(input => {
-        input.addEventListener('input', function () {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-    });
-
-    // Handle Enter key to submit (without Shift)
+    // Handle Enter key to submit
     document.body.addEventListener('keydown', function (evt) {
         const input = evt.target;
         if (input.matches('input[name="message"]') && evt.key === 'Enter' && !evt.shiftKey) {
             evt.preventDefault();
             const form = input.closest('form');
-            if (form) {
+            if (form && typeof htmx !== 'undefined') {
                 // Trigger HTMX submit
                 htmx.trigger(form, 'submit');
             }
         }
     });
+}
+
+// Export for use in templates
+window.selectAgentType = selectAgentType;
+window.selectOverviewSection = selectOverviewSection;
+
+// Handle overview section selection
+function selectOverviewSection(element, section) {
+    // Remove active class from all overview nav items
+    const allItems = document.querySelectorAll('.overview-nav-item');
+    allItems.forEach(item => item.classList.remove('is-active'));
+
+    // Add active class to selected item
+    element.classList.add('is-active');
+
+    // Update the content area
+    const overviewContent = document.getElementById('overview-content');
+    const overviewTitle = document.getElementById('overview-title');
+
+    if (!overviewContent || !overviewTitle) return;
+
+    // Update title based on section
+    const titles = {
+        'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
+        'problem-definition': '<span class="icon"><i class="fas fa-exclamation-triangle"></i></span><span>Problem Definition</span>',
+        'requirements': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Requirements</span>'
+    };
+
+    if (titles[section]) {
+        overviewTitle.innerHTML = titles[section];
+    }
+
+    // Trigger HTMX to load the section content
+    // For now, we'll handle this with a simple fetch or keep content static
+    console.log('Selected overview section:', section);
 }
 
 // Handle design preview updates
