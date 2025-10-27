@@ -17,7 +17,7 @@ type DashboardStats struct {
 }
 
 templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *agency.Agency) {
-	@components.Layout("Dashboard") {
+	@components.LayoutWithAgency("Dashboard", currentAgency) {
 		<div x-data="dashboard()" x-init="init()">
 		<!-- Current Agency Indicator -->
 		if currentAgency != nil {

@@ -25,7 +25,7 @@ func NewAgencyDesignerHandler(service *AgencyDesignerService, logger *logrus.Log
 
 // RegisterRoutes registers the agency designer routes
 func (h *AgencyDesignerHandler) RegisterRoutes(router *gin.RouterGroup) {
-	designer := router.Group("/agencies/:agencyId/designer")
+	designer := router.Group("/agencies/:id/designer")
 	{
 		designer.POST("/conversations", h.StartConversation)
 		designer.POST("/conversations/:conversationId/messages", h.SendMessage)
@@ -34,9 +34,9 @@ func (h *AgencyDesignerHandler) RegisterRoutes(router *gin.RouterGroup) {
 	}
 }
 
-// StartConversation handles POST /agencies/:agencyId/designer/conversations
+// StartConversation handles POST /agencies/:id/designer/conversations
 func (h *AgencyDesignerHandler) StartConversation(c *gin.Context) {
-	agencyID := c.Param("agencyId")
+	agencyID := c.Param("id")
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()

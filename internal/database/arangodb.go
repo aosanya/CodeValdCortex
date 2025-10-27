@@ -110,7 +110,14 @@ func (ac *ArangoClient) GetDatabase(ctx context.Context, dbName string) (driver.
 	}
 
 	if !exists {
-		return nil, fmt.Errorf("database %s does not exist", dbName)
+		// Create the database if it doesn't exist
+		log.WithField("database", dbName).Info("Creating new database")
+		db, err := ac.client.CreateDatabase(ctx, dbName, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create database %s: %w", dbName, err)
+		}
+		log.WithField("database", dbName).Info("Database created successfully")
+		return db, nil
 	}
 
 	db, err := ac.client.Database(ctx, dbName)

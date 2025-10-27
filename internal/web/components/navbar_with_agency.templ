@@ -39,6 +39,12 @@ templ NavbarWithAgency(currentAgency *agency.Agency) {
 						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/dashboard") } class="navbar-item">
 							Dashboard
 						</a>
+						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/designer") } class="navbar-item">
+							<span class="icon">
+								<i class="fas fa-brain"></i>
+							</span>
+							<span>AI Designer</span>
+						</a>
 						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/agents") } class="navbar-item">
 							Agents
 						</a>
