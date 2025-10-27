@@ -89,9 +89,9 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		Icon:        icon,
 		Status:      agency.AgencyStatusActive,
 		// Database field will be set by service with proper prefix
-		Metadata:    metadata,
-		Settings:    settings,
-		CreatedBy:   "system", // TODO: Get from auth context
+		Metadata:  metadata,
+		Settings:  settings,
+		CreatedBy: "system", // TODO: Get from auth context
 	}
 
 	if err := h.service.CreateAgency(c.Request.Context(), newAgency); err != nil {

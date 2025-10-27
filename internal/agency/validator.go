@@ -44,10 +44,10 @@ func (v *validator) ValidateAgency(agency *Agency) error {
 	if !strings.HasPrefix(agency.ID, "agency_") {
 		return fmt.Errorf("agency ID must start with 'agency_' prefix")
 	}
-	
+
 	// Extract the UUID part after the prefix
 	uuidPart := strings.TrimPrefix(agency.ID, "agency_")
-	
+
 	// Validate the UUID part (32 hex characters without hyphens)
 	if len(uuidPart) == 32 {
 		// Without hyphens - validate it's all hex

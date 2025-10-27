@@ -60,7 +60,7 @@ func (s *service) CreateAgency(ctx context.Context, agency *Agency) error {
 		agency.Status = AgencyStatusActive
 	}
 
-	// Set database field if not provided 
+	// Set database field if not provided
 	// Database name uses the agency ID directly (which already has "agency_" prefix)
 	if agency.Database == "" {
 		agency.Database = agency.ID

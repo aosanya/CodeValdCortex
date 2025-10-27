@@ -13,6 +13,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
+	"github.com/aosanya/CodeValdCortex/internal/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
@@ -39,6 +40,7 @@ type App struct {
 	runtimeManager      *runtime.Manager
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
+	aiDesignerService   *ai.AgencyDesignerService
 }
 
 // New creates a new application instance
@@ -126,6 +128,30 @@ func New(cfg *config.Config) *App {
 	agencyService := agency.NewServiceWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
 	logger.Info("Agency management service initialized successfully")
 
+	// Initialize AI agency designer service (if configured)
+	var aiDesignerService *ai.AgencyDesignerService
+	if cfg.AI.Provider != "" && cfg.AI.APIKey != "" {
+		logger.WithField("provider", cfg.AI.Provider).Info("Initializing AI agency designer service")
+		aiConfig := &ai.LLMConfig{
+			Provider:    ai.Provider(cfg.AI.Provider),
+			APIKey:      cfg.AI.APIKey,
+			Model:       cfg.AI.Model,
+			BaseURL:     cfg.AI.BaseURL,
+			Temperature: cfg.AI.Temperature,
+			MaxTokens:   cfg.AI.MaxTokens,
+			Timeout:     cfg.AI.Timeout,
+		}
+		llmClient, err := ai.NewLLMClient(aiConfig)
+		if err != nil {
+			logger.WithError(err).Warn("Failed to initialize LLM client, AI designer will not be available")
+		} else {
+			aiDesignerService = ai.NewAgencyDesignerService(llmClient, logger)
+			logger.Info("AI agency designer service initialized successfully")
+		}
+	} else {
+		logger.Info("AI configuration not provided, AI designer will not be available")
+	}
+
 	return &App{
 		config:              cfg,
 		logger:              logger,
@@ -138,6 +164,7 @@ func New(cfg *config.Config) *App {
 		runtimeManager:      runtimeManager,
 		messageService:      messageService,
 		pubSubService:       pubSubService,
+		aiDesignerService:   aiDesignerService,
 	}
 }
 
@@ -235,6 +262,13 @@ func (a *App) setupServer() error {
 	// Initialize homepage handler
 	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.runtimeManager, a.dbClient, a.registry, a.logger)
 
+	// Initialize AI agency designer web handler (if service available)
+	var aiDesignerWebHandler *webhandlers.AgencyDesignerWebHandler
+	if a.aiDesignerService != nil {
+		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
+		a.logger.Info("AI Agency Designer web handler initialized")
+	}
+
 	// Agency middleware
 	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger)
 
@@ -254,6 +288,12 @@ func (a *App) setupServer() error {
 	// Agency-specific dashboard (with middleware to inject agency context)
 	router.GET("/agencies/:id/dashboard", agencyMiddleware.InjectAgencyContext(), homepageHandler.ShowAgencyDashboard)
 	router.GET("/agencies/switch", homepageHandler.ShowAgencySwitcher)
+
+	// AI Agency Designer web routes (if available)
+	if aiDesignerWebHandler != nil {
+		aiDesignerWebHandler.RegisterRoutes(router.Group(""))
+		a.logger.Info("AI Agency Designer web routes registered")
+	}
 
 	// Main dashboard route with agency context injection
 	router.GET("/dashboard", agencyMiddleware.InjectAgencyContext(), dashboardHandler.ShowDashboard)
@@ -306,6 +346,13 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/activate", agencyHandler.ActivateAgency)
 		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
 		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
+
+		// AI Agency Designer endpoints (if available)
+		if a.aiDesignerService != nil {
+			aiDesignerHandler := ai.NewAgencyDesignerHandler(a.aiDesignerService, a.logger)
+			aiDesignerHandler.RegisterRoutes(v1)
+			a.logger.Info("AI Agency Designer endpoints registered")
+		}
 
 		v1.GET("/status", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{

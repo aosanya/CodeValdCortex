@@ -25,6 +25,9 @@ type Config struct {
 
 	// Agent configuration
 	Agent AgentConfig `mapstructure:"agent"`
+
+	// AI configuration
+	AI AIConfig `mapstructure:"ai"`
 }
 
 // ServerConfig holds server-related configuration
@@ -62,6 +65,17 @@ type AgentConfig struct {
 	DefaultResources map[string]string `mapstructure:"default_resources"`
 	MaxInstances     int               `mapstructure:"max_instances"`
 	HealthCheckPath  string            `mapstructure:"health_check_path"`
+}
+
+// AIConfig holds AI/LLM configuration
+type AIConfig struct {
+	Provider    string  `mapstructure:"provider"`    // "openai", "claude", "local", "custom"
+	APIKey      string  `mapstructure:"api_key"`     // API key for provider
+	Model       string  `mapstructure:"model"`       // Model to use
+	BaseURL     string  `mapstructure:"base_url"`    // Custom base URL
+	Temperature float32 `mapstructure:"temperature"` // Default temperature
+	MaxTokens   int     `mapstructure:"max_tokens"`  // Default max tokens
+	Timeout     int     `mapstructure:"timeout"`     // Request timeout in seconds
 }
 
 // Load loads configuration from file and environment variables
@@ -140,6 +154,15 @@ func Load(configPath string) (*Config, error) {
 	viper.BindEnv("database.database", "CVXC_DATABASE_DATABASE")
 	viper.BindEnv("database.username", "CVXC_DATABASE_USERNAME")
 	viper.BindEnv("database.password", "CVXC_DATABASE_PASSWORD")
+
+	// AI configuration bindings
+	viper.BindEnv("ai.provider", "CVXC_AI_PROVIDER")
+	viper.BindEnv("ai.api_key", "CVXC_AI_API_KEY")
+	viper.BindEnv("ai.model", "CVXC_AI_MODEL")
+	viper.BindEnv("ai.base_url", "CVXC_AI_BASE_URL")
+	viper.BindEnv("ai.temperature", "CVXC_AI_TEMPERATURE")
+	viper.BindEnv("ai.max_tokens", "CVXC_AI_MAX_TOKENS")
+	viper.BindEnv("ai.timeout", "CVXC_AI_TIMEOUT")
 
 	// Read config file if it exists
 	if err := viper.ReadInConfig(); err != nil {

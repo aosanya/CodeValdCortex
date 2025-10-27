@@ -21,3 +21,13 @@ agent:
   default_resources:
     cpu: "100m"
     memory: "128Mi"
+
+# AI configuration for AI Agency Designer (MVP-025)
+ai:
+  provider: ""           # openai, claude, local, or custom (empty = disabled)
+  api_key: ""            # API key (use environment variable for security)
+  model: ""              # Model name (uses provider default if empty)
+  base_url: ""           # Custom base URL (uses provider default if empty)
+  temperature: 0.7       # 0.0 to 2.0
+  max_tokens: 4096       # Maximum tokens in response
+  timeout: 60            # Request timeout in seconds
