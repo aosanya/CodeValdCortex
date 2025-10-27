@@ -18,48 +18,52 @@ type ListCardConfig struct {
 
 // ListCard renders a reusable list card component
 templ ListCard(config ListCardConfig) {
-	<!-- List Card -->
-	<div 
-		class={ "card", templ.KV("m-0", config.Title == "") }
-		id={ config.ID }>
-		<header class="card-header">
-			if config.Title != "" {
-				<p class="card-header-title">
-					if config.Icon != "" {
-						<span class="icon"><i class={ config.Icon }></i></span>
-					}
-					<span>{ config.Title }</span>
-				</p>
-			}
-			<button 
-				class="card-header-icon button is-small is-success"
-				onclick={ templ.ComponentScript{Call: config.AddFunction} }
-				id={ config.AddButtonID }
-				title={ "Add New " + config.AddButtonText }>
-				<span class="icon"><i class="fas fa-plus"></i></span>
-				<span>{ config.AddButtonText }</span>
-			</button>
-		</header>
-		<div class="card-content" style="padding: 0;">
-			<div id={ config.ListID } class={ config.ListClass }>
-				<table class="table is-fullwidth is-striped is-hoverable">
-					<thead>
-						<tr>
-							<th style="width: 15%;">{ config.CodeColHeader }</th>
-							<th style="width: 65%;">{ config.TitleColHeader }</th>
-							<th style="width: 20%;">Actions</th>
-						</tr>
-					</thead>
-					<tbody id={ config.TableBodyID }>
-						<!-- Items will be loaded here dynamically -->
-						<tr>
-							<td colspan="3" class="has-text-grey has-text-centered py-5">
-								<p><i class="fas fa-spinner fa-spin"></i> { config.LoadingText }</p>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+	<div class="box" id={ config.ID }>
+		<div class="level is-mobile mb-4">
+			<div class="level-left">
+				if config.Title != "" {
+					<div class="level-item">
+						<h5 class="title is-5">
+							if config.Icon != "" {
+								<span class="icon"><i class={ config.Icon }></i></span>
+							}
+							<span>{ config.Title }</span>
+						</h5>
+					</div>
+				}
 			</div>
+			<div class="level-right">
+				<div class="level-item">
+					<button 
+						class="button is-small is-success"
+						onclick={ templ.ComponentScript{Call: config.AddFunction} }
+						id={ config.AddButtonID }
+						title={ "Add New " + config.AddButtonText }>
+						<span class="icon"><i class="fas fa-plus"></i></span>
+						<span>{ config.AddButtonText }</span>
+					</button>
+				</div>
+			</div>
+		</div>
+		
+		<div id={ config.ListID } class={ config.ListClass }>
+			<table class="table is-fullwidth is-striped is-hoverable">
+				<thead>
+					<tr>
+						<th style="width: 15%;">{ config.CodeColHeader }</th>
+						<th style="width: 65%;">{ config.TitleColHeader }</th>
+						<th style="width: 20%;">Actions</th>
+					</tr>
+				</thead>
+				<tbody id={ config.TableBodyID }>
+					<!-- Items will be loaded here dynamically -->
+					<tr>
+						<td colspan="3" class="has-text-grey has-text-centered py-5">
+							<p><i class="fas fa-spinner fa-spin"></i> { config.LoadingText }</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 	</div>
 }

@@ -32,7 +32,7 @@ func UnitsOfWorkListCard() templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		templ_7745c5c3_Err = ListCard(ListCardConfig{
 			ID:             "units-list-card",
-			Title:          "Units of Work",
+			Title:          "",
 			Icon:           "fas fa-clipboard-list",
 			AddButtonID:    "add-unit-btn",
 			AddFunction:    "showUnitEditor('add')",
