@@ -5,9 +5,11 @@ package agency_designer
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
+import "github.com/a-h/templ"
+import templruntime "github.com/a-h/templ/runtime"
+
 import (
-	"github.com/a-h/templ"
-	templruntime "github.com/a-h/templ/runtime"
+	"fmt"
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
 )
@@ -42,7 +44,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></aside><!-- Middle Panel: Overview Content --><main class=\"details-panel\"><header class=\"details-header\"><h3 class=\"details-title\" id=\"overview-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></h3></header><div class=\"details-content\" id=\"overview-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></aside><!-- Middle Panel: Overview Content --><main class=\"details-panel\"><header class=\"details-header\"><h3 class=\"details-title\" id=\"overview-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></h3></header><div class=\"details-content\" id=\"overview-content\"><!-- All section contents pre-rendered, toggled by JavaScript --><div id=\"content-introduction\" class=\"overview-content-section is-active\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +52,23 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div id=\"content-problem-definition\" class=\"overview-content-section\" style=\"display: none;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ProblemDefinitionContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"content-requirements\" class=\"overview-content-section\" style=\"display: none;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = RequirementsContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -80,7 +98,7 @@ func OverviewNavigationList() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"problem-definition\" onclick=\"selectOverviewSection(this, 'problem-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-exclamation-triangle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Problem Definition</div><div class=\"nav-description\">Define the challenge</div></div></div><div class=\"overview-nav-item\" data-section=\"requirements\" onclick=\"selectOverviewSection(this, 'requirements')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Requirements</div><div class=\"nav-description\">Specify needs</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"problem-definition\" onclick=\"selectOverviewSection(this, 'problem-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-exclamation-triangle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Problem Definition</div><div class=\"nav-description\">Define the challenge</div></div></div><div class=\"overview-nav-item\" data-section=\"requirements\" onclick=\"selectOverviewSection(this, 'requirements')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Requirements</div><div class=\"nav-description\">Specify needs</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -110,13 +128,13 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"overview-section\"><div class=\"card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></p></header><div class=\"card-content\"><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"overview-section\"><div class=\"card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></p></header><div class=\"card-content\"><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if currentAgency.ID != "" {
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><footer class=\"card-footer\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><footer class=\"card-footer\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -124,7 +142,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -133,7 +151,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -141,7 +159,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,7 +168,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></a></footer></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></a></footer></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -180,37 +198,219 @@ func ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.Con
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-exclamation-triangle fa-3x\"></i></div><h2 class=\"title is-3\">Problem Definition</h2><p class=\"subtitle is-5\">Clearly define the challenge you're addressing</p></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-question-circle\"></i></span> What Problem Are You Solving?</h3><div class=\"section-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"overview-section\"><!-- Problem Editor Card (Hidden by default) --><div class=\"card mb-4\" id=\"problem-editor-card\" style=\"display: none;\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span id=\"problem-editor-title\">Add New Problem</span></p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if conversation != nil && conversation.CurrentDesign != nil && conversation.CurrentDesign.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"problem-statement\"><p>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 148, Col: 49}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p></div>")
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "cancelProblemEdit()"})
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<button class=\"card-header-icon button is-small is-text\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 templ.ComponentScript = templ.ComponentScript{Call: "cancelProblemEdit()"}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><div class=\"field\"><label class=\"label\">Problem Description</label><div class=\"control\"><textarea class=\"textarea\" id=\"problem-description-editor\" placeholder=\"Describe the problem this agency needs to solve...\" rows=\"8\" style=\"font-family: monospace; font-size: 14px;\"></textarea></div><p class=\"help\">Provide a clear description of the problem. This will help define the agency's purpose.</p></div></div><footer class=\"card-footer\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "saveProblemFromEditor()"})
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 templ.ComponentScript = templ.ComponentScript{Call: "saveProblemFromEditor()"}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" id=\"save-problem-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "cancelProblemEdit()"})
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 templ.ComponentScript = templ.ComponentScript{Call: "cancelProblemEdit()"}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" id=\"cancel-problem-btn\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></a></footer></div><!-- Problems List Card --><div class=\"card\" id=\"problems-list-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-exclamation-triangle\"></i></span> <span>Problem Definitions</span></p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "showProblemEditor('add')"})
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button class=\"card-header-icon button is-small is-success\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 templ.ComponentScript = templ.ComponentScript{Call: "showProblemEditor('add')"}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" id=\"add-problem-btn\" title=\"Add New Problem\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Add</span></button></header><div class=\"card-content\"><div id=\"problems-list\" class=\"problems-list\"><!-- Problems will be loaded here dynamically --><div class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-spinner fa-spin\"></i> Loading problems...</p></div></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// ProblemItem renders a single problem in the list
+func ProblemItem(problem *agency.Problem) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var11 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var11 == nil {
+			templ_7745c5c3_Var11 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"box problem-item\" data-problem-key=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(problem.Key)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 218, Col: 61}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><div class=\"columns is-mobile is-vcentered\"><div class=\"column is-narrow\"><span class=\"tag is-primary is-medium\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var13 string
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", problem.Number))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 221, Col: 78}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</span></div><div class=\"column problem-description\"><p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var14 string
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(problem.Description)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 224, Col: 28}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</p></div><div class=\"column is-narrow\"><div class=\"buttons has-addons\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: fmt.Sprintf("showProblemEditor('edit', '%s', '%s')", problem.Key, templ.EscapeString(problem.Description))})
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<button class=\"button is-small is-info\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var15 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("showProblemEditor('edit', '%s', '%s')", problem.Key, templ.EscapeString(problem.Description))}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" title=\"Edit\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span>Edit</span></button> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: fmt.Sprintf("deleteProblem('%s', %d)", problem.Key, problem.Number)})
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<button class=\"button is-small is-danger\" onclick=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("deleteProblem('%s', %d)", problem.Key, problem.Number)}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" title=\"Delete\"><span class=\"icon\"><i class=\"fas fa-trash\"></i></span> <span>Delete</span></button></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// ProblemsList renders all problems
+func ProblemsList(problems []*agency.Problem) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var17 == nil {
+			templ_7745c5c3_Var17 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		if len(problems) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-info-circle\"></i> No problems defined yet. Click the + button to add one.</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"empty-state\"><p class=\"has-text-grey\">No problem defined yet. Start chatting with the AI to define your use case.</p></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			for _, problem := range problems {
+				templ_7745c5c3_Err = ProblemItem(problem).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-book\"></i></span> Key Questions to Consider</h3><div class=\"section-content\"><ul class=\"content-list\"><li>What is the main challenge or opportunity you're addressing?</li><li>Who are the stakeholders affected by this problem?</li><li>What are the current pain points or inefficiencies?</li><li>What would success look like for this solution?</li><li>Are there any constraints or limitations to consider?</li></ul></div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> Tips for Defining Your Problem</h3><div class=\"section-content\"><div class=\"tips-grid\"><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-check-circle\"></i></div><div class=\"tip-content\"><h4>Be Specific</h4><p>Provide concrete examples and scenarios rather than abstract descriptions.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-users\"></i></div><div class=\"tip-content\"><h4>Identify Actors</h4><p>Mention all the people, systems, or entities involved in the process.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-chart-line\"></i></div><div class=\"tip-content\"><h4>Measure Success</h4><p>Think about what metrics or outcomes would indicate a successful solution.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-exchange-alt\"></i></div><div class=\"tip-content\"><h4>Map Workflows</h4><p>Describe the current process flow and where improvements are needed.</p></div></div></div></div></div></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
 		}
 		return nil
 	})
@@ -233,117 +433,117 @@ func RequirementsContent(currentAgency *agency.Agency, conversation *ai.Conversa
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var18 == nil {
+			templ_7745c5c3_Var18 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-clipboard-list fa-3x\"></i></div><h2 class=\"title is-3\">Requirements</h2><p class=\"subtitle is-5\">Specify the functional and non-functional needs</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-clipboard-list fa-3x\"></i></div><h2 class=\"title is-3\">Requirements</h2><p class=\"subtitle is-5\">Specify the functional and non-functional needs</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if conversation != nil && conversation.CurrentDesign != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-list-check\"></i></span> Functional Requirements</h3><div class=\"section-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-list-check\"></i></span> Functional Requirements</h3><div class=\"section-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if conversation.CurrentDesign.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"requirements-list\"><p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div class=\"requirements-list\"><p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
+				var templ_7745c5c3_Var19 string
+				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 246, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 281, Col: 50}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</p></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"empty-state\"><p class=\"has-text-grey\">No requirements captured yet. Discuss your needs with the AI assistant.</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<div class=\"empty-state\"><p class=\"has-text-grey\">No requirements captured yet. Discuss your needs with the AI assistant.</p></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(conversation.CurrentDesign.AgentTypes) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> Agent Requirements</h3><div class=\"section-content\"><div class=\"agent-requirements-grid\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> Agent Requirements</h3><div class=\"section-content\"><div class=\"agent-requirements-grid\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, agentType := range conversation.CurrentDesign.AgentTypes {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"requirement-card\"><div class=\"req-header\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <strong>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"requirement-card\"><div class=\"req-header\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <strong>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var10 string
-					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(agentType.Name)
+					var templ_7745c5c3_Var20 string
+					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(agentType.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 268, Col: 34}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 303, Col: 34}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</strong></div><div class=\"req-capabilities\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</strong></div><div class=\"req-capabilities\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					if len(agentType.Capabilities) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<p class=\"mb-2\"><strong>Capabilities:</strong></p><div class=\"tags are-small\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<p class=\"mb-2\"><strong>Capabilities:</strong></p><div class=\"tags are-small\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						for _, cap := range agentType.Capabilities {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<span class=\"tag is-info is-light\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<span class=\"tag is-info is-light\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							var templ_7745c5c3_Var11 string
-							templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(cap)
+							var templ_7745c5c3_Var21 string
+							templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(cap)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 275, Col: 53}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 310, Col: 53}
 							}
-							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-comment-dots\"></i></span> No Requirements Yet</h3><div class=\"section-content\"><div class=\"empty-state\"><p>Start a conversation with the AI designer to capture your requirements.</p><p class=\"mt-3\">The AI will help you:</p><ul class=\"content-list mt-3\"><li>Identify functional requirements</li><li>Determine non-functional requirements</li><li>Map requirements to agent capabilities</li><li>Validate completeness</li></ul></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-comment-dots\"></i></span> No Requirements Yet</h3><div class=\"section-content\"><div class=\"empty-state\"><p>Start a conversation with the AI designer to capture your requirements.</p><p class=\"mt-3\">The AI will help you:</p><ul class=\"content-list mt-3\"><li>Identify functional requirements</li><li>Determine non-functional requirements</li><li>Map requirements to agent capabilities</li><li>Validate completeness</li></ul></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-shield-alt\"></i></span> Non-Functional Requirements</h3><div class=\"section-content\"><div class=\"nfr-categories\"><div class=\"nfr-card\"><h4><i class=\"fas fa-tachometer-alt\"></i> Performance</h4><p>Response time, throughput, scalability considerations</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-lock\"></i> Security</h4><p>Authentication, authorization, data protection</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-sync\"></i> Reliability</h4><p>Availability, fault tolerance, recovery mechanisms</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-expand-arrows-alt\"></i> Scalability</h4><p>Horizontal and vertical scaling capabilities</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-shield-alt\"></i></span> Non-Functional Requirements</h3><div class=\"section-content\"><div class=\"nfr-categories\"><div class=\"nfr-card\"><h4><i class=\"fas fa-tachometer-alt\"></i> Performance</h4><p>Response time, throughput, scalability considerations</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-lock\"></i> Security</h4><p>Authentication, authorization, data protection</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-sync\"></i> Reliability</h4><p>Availability, fault tolerance, recovery mechanisms</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-expand-arrows-alt\"></i> Scalability</h4><p>Horizontal and vertical scaling capabilities</p></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

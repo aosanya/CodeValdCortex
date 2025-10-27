@@ -110,6 +110,38 @@ func (m *mockAgencyService) GetAgencyStatistics(ctx context.Context, id string) 
 	}, nil
 }
 
+func (m *mockAgencyService) GetAgencyOverview(ctx context.Context, id string) (*agency.Overview, error) {
+	return &agency.Overview{
+		AgencyID:     id,
+		Introduction: "Mock introduction",
+	}, nil
+}
+
+func (m *mockAgencyService) UpdateAgencyOverview(ctx context.Context, id string, introduction string) error {
+	return nil
+}
+
+func (m *mockAgencyService) CreateProblem(ctx context.Context, agencyID string, description string) (*agency.Problem, error) {
+	return &agency.Problem{
+		Key:         "mock-problem-1",
+		AgencyID:    agencyID,
+		Number:      1,
+		Description: description,
+	}, nil
+}
+
+func (m *mockAgencyService) GetProblems(ctx context.Context, agencyID string) ([]*agency.Problem, error) {
+	return []*agency.Problem{}, nil
+}
+
+func (m *mockAgencyService) UpdateProblem(ctx context.Context, agencyID string, problemKey string, description string) error {
+	return nil
+}
+
+func (m *mockAgencyService) DeleteProblem(ctx context.Context, agencyID string, problemKey string) error {
+	return nil
+}
+
 // setupTestRouter creates a test router with the homepage handlers and middleware
 func setupTestRouter(agencyService agency.Service) *gin.Engine {
 	gin.SetMode(gin.TestMode)
@@ -119,7 +151,7 @@ func setupTestRouter(agencyService agency.Service) *gin.Engine {
 	logger.SetLevel(logrus.ErrorLevel) // Reduce noise in tests
 
 	// Create handlers and middleware
-	homepageHandler := handlers.NewHomepageHandler(agencyService, logger)
+	homepageHandler := handlers.NewHomepageHandler(agencyService, nil, nil, nil, logger)
 	agencyMiddleware := middleware.NewAgencyMiddleware(agencyService, logger)
 
 	// Add middleware

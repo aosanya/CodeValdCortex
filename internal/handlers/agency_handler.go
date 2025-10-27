@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 )
 
@@ -283,7 +284,7 @@ func (h *AgencyHandler) UpdateOverview(c *gin.Context) {
 	id := c.Param("id")
 
 	var req struct {
-		Introduction string `json:"introduction" binding:"required"`
+		Introduction string `json:"introduction"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -304,4 +305,85 @@ func (h *AgencyHandler) UpdateOverview(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, overview)
+}
+
+// GetProblems handles GET /api/v1/agencies/:id/problems
+func (h *AgencyHandler) GetProblems(c *gin.Context) {
+	id := c.Param("id")
+
+	problems, err := h.service.GetProblems(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, problems)
+}
+
+// GetProblemsHTML handles GET /api/v1/agencies/:id/problems/html
+// Returns rendered HTML fragment for HTMX/JavaScript rendering
+func (h *AgencyHandler) GetProblemsHTML(c *gin.Context) {
+	id := c.Param("id")
+
+	problems, err := h.service.GetProblems(c.Request.Context(), id)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error loading problems")
+		return
+	}
+
+	// Render the problems list template
+	component := agency_designer.ProblemsList(problems)
+	c.Header("Content-Type", "text/html")
+	component.Render(c.Request.Context(), c.Writer)
+}
+
+// CreateProblem handles POST /api/v1/agencies/:id/problems
+func (h *AgencyHandler) CreateProblem(c *gin.Context) {
+	id := c.Param("id")
+
+	var req agency.CreateProblemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	problem, err := h.service.CreateProblem(c.Request.Context(), id, req.Description)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, problem)
+}
+
+// UpdateProblem handles PUT /api/v1/agencies/:id/problems/:problemKey
+func (h *AgencyHandler) UpdateProblem(c *gin.Context) {
+	id := c.Param("id")
+	problemKey := c.Param("problemKey")
+
+	var req agency.UpdateProblemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	if err := h.service.UpdateProblem(c.Request.Context(), id, problemKey, req.Description); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Problem updated successfully"})
+}
+
+// DeleteProblem handles DELETE /api/v1/agencies/:id/problems/:problemKey
+func (h *AgencyHandler) DeleteProblem(c *gin.Context) {
+	id := c.Param("id")
+	problemKey := c.Param("problemKey")
+
+	if err := h.service.DeleteProblem(c.Request.Context(), id, problemKey); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Problem deleted successfully"})
 }

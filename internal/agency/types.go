@@ -114,6 +114,26 @@ type Overview struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+// Problem represents a problem statement that the agency is solving
+type Problem struct {
+	Key         string    `json:"_key,omitempty"`
+	AgencyID    string    `json:"agency_id"`
+	Number      int       `json:"number"`      // Display order/number
+	Description string    `json:"description"` // The problem statement
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// CreateProblemRequest is the request body for creating a problem
+type CreateProblemRequest struct {
+	Description string `json:"description" binding:"required"`
+}
+
+// UpdateProblemRequest is the request body for updating a problem
+type UpdateProblemRequest struct {
+	Description string `json:"description" binding:"required"`
+}
+
 // UpdateOverviewRequest is the request body for updating overview
 type UpdateOverviewRequest struct {
 	Introduction string `json:"introduction"`

@@ -17,4 +17,11 @@ type Repository interface {
 	// Overview methods
 	GetOverview(ctx context.Context, agencyID string) (*Overview, error)
 	UpdateOverview(ctx context.Context, overview *Overview) error
+
+	// Problem methods
+	CreateProblem(ctx context.Context, problem *Problem) error
+	GetProblems(ctx context.Context, agencyID string) ([]*Problem, error)
+	GetProblem(ctx context.Context, agencyID string, key string) (*Problem, error)
+	UpdateProblem(ctx context.Context, problem *Problem) error
+	DeleteProblem(ctx context.Context, agencyID string, key string) error
 }

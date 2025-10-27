@@ -1,6 +1,7 @@
 package agency_designer
 
 import (
+	"fmt"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 )
@@ -29,7 +30,16 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 			</h3>
 		</header>
 		<div class="details-content" id="overview-content">
-			@IntroductionContent(currentAgency, conversation)
+			<!-- All section contents pre-rendered, toggled by JavaScript -->
+			<div id="content-introduction" class="overview-content-section is-active">
+				@IntroductionContent(currentAgency, conversation)
+			</div>
+			<div id="content-problem-definition" class="overview-content-section" style="display: none;">
+				@ProblemDefinitionContent(currentAgency, conversation)
+			</div>
+			<div id="content-requirements" class="overview-content-section" style="display: none;">
+				@RequirementsContent(currentAgency, conversation)
+			</div>
 		</div>
 	</main>
 }
@@ -129,98 +139,123 @@ templ IntroductionContent(currentAgency *agency.Agency, conversation *ai.Convers
 // ProblemDefinitionContent shows the problem definition section
 templ ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		<div class="section-hero">
-			<div class="hero-icon">
-				<i class="fas fa-exclamation-triangle fa-3x"></i>
+		<!-- Problem Editor Card (Hidden by default) -->
+		<div class="card mb-4" id="problem-editor-card" style="display: none;">
+			<header class="card-header">
+				<p class="card-header-title">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+					<span id="problem-editor-title">Add New Problem</span>
+				</p>
+				<button 
+					class="card-header-icon button is-small is-text"
+					onclick={ templ.ComponentScript{Call: "cancelProblemEdit()"} }
+					title="Cancel">
+					<span class="icon"><i class="fas fa-times"></i></span>
+				</button>
+			</header>
+			<div class="card-content">
+				<div class="field">
+					<label class="label">Problem Description</label>
+					<div class="control">
+						<textarea 
+							class="textarea"
+							id="problem-description-editor"
+							placeholder="Describe the problem this agency needs to solve..."
+							rows="8"
+							style="font-family: monospace; font-size: 14px;"></textarea>
+					</div>
+					<p class="help">Provide a clear description of the problem. This will help define the agency's purpose.</p>
+				</div>
 			</div>
-			<h2 class="title is-3">Problem Definition</h2>
-			<p class="subtitle is-5">Clearly define the challenge you're addressing</p>
+			<footer class="card-footer">
+				<a 
+					class="card-footer-item has-text-primary"
+					onclick={ templ.ComponentScript{Call: "saveProblemFromEditor()"} }
+					id="save-problem-btn">
+					<span class="icon"><i class="fas fa-save"></i></span>
+					<span>Save</span>
+				</a>
+				<a 
+					class="card-footer-item has-text-grey"
+					onclick={ templ.ComponentScript{Call: "cancelProblemEdit()"} }
+					id="cancel-problem-btn">
+					<span class="icon"><i class="fas fa-times"></i></span>
+					<span>Cancel</span>
+				</a>
+			</footer>
 		</div>
-		
-		<div class="details-section">
-			<h3 class="section-title">
-				<span class="icon"><i class="fas fa-question-circle"></i></span>
-				What Problem Are You Solving?
-			</h3>
-			<div class="section-content">
-				if conversation != nil && conversation.CurrentDesign != nil && conversation.CurrentDesign.Description != "" {
-					<div class="problem-statement">
-						<p>{ conversation.CurrentDesign.Description }</p>
-					</div>
-				} else {
-					<div class="empty-state">
-						<p class="has-text-grey">No problem defined yet. Start chatting with the AI to define your use case.</p>
-					</div>
-				}
-			</div>
-		</div>
-		
-		<div class="details-section">
-			<h3 class="section-title">
-				<span class="icon"><i class="fas fa-book"></i></span>
-				Key Questions to Consider
-			</h3>
-			<div class="section-content">
-				<ul class="content-list">
-					<li>What is the main challenge or opportunity you're addressing?</li>
-					<li>Who are the stakeholders affected by this problem?</li>
-					<li>What are the current pain points or inefficiencies?</li>
-					<li>What would success look like for this solution?</li>
-					<li>Are there any constraints or limitations to consider?</li>
-				</ul>
-			</div>
-		</div>
-		
-		<div class="details-section">
-			<h3 class="section-title">
-				<span class="icon"><i class="fas fa-lightbulb"></i></span>
-				Tips for Defining Your Problem
-			</h3>
-			<div class="section-content">
-				<div class="tips-grid">
-					<div class="tip-card">
-						<div class="tip-icon">
-							<i class="fas fa-check-circle"></i>
-						</div>
-						<div class="tip-content">
-							<h4>Be Specific</h4>
-							<p>Provide concrete examples and scenarios rather than abstract descriptions.</p>
-						</div>
-					</div>
-					
-					<div class="tip-card">
-						<div class="tip-icon">
-							<i class="fas fa-users"></i>
-						</div>
-						<div class="tip-content">
-							<h4>Identify Actors</h4>
-							<p>Mention all the people, systems, or entities involved in the process.</p>
-						</div>
-					</div>
-					
-					<div class="tip-card">
-						<div class="tip-icon">
-							<i class="fas fa-chart-line"></i>
-						</div>
-						<div class="tip-content">
-							<h4>Measure Success</h4>
-							<p>Think about what metrics or outcomes would indicate a successful solution.</p>
-						</div>
-					</div>
-					
-					<div class="tip-card">
-						<div class="tip-icon">
-							<i class="fas fa-exchange-alt"></i>
-						</div>
-						<div class="tip-content">
-							<h4>Map Workflows</h4>
-							<p>Describe the current process flow and where improvements are needed.</p>
-						</div>
+
+		<!-- Problems List Card -->
+		<div class="card" id="problems-list-card">
+			<header class="card-header">
+				<p class="card-header-title">
+					<span class="icon"><i class="fas fa-exclamation-triangle"></i></span>
+					<span>Problem Definitions</span>
+				</p>
+				<button 
+					class="card-header-icon button is-small is-success"
+					onclick={ templ.ComponentScript{Call: "showProblemEditor('add')"} }
+					id="add-problem-btn"
+					title="Add New Problem">
+					<span class="icon"><i class="fas fa-plus"></i></span>
+					<span>Add</span>
+				</button>
+			</header>
+			<div class="card-content">
+				<div id="problems-list" class="problems-list">
+					<!-- Problems will be loaded here dynamically -->
+					<div class="has-text-grey has-text-centered py-5">
+						<p><i class="fas fa-spinner fa-spin"></i> Loading problems...</p>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+}
+
+// ProblemItem renders a single problem in the list
+templ ProblemItem(problem *agency.Problem) {
+	<div class="box problem-item" data-problem-key={ problem.Key }>
+		<div class="columns is-mobile is-vcentered">
+			<div class="column is-narrow">
+				<span class="tag is-primary is-medium">{ fmt.Sprintf("%d", problem.Number) }</span>
+			</div>
+			<div class="column problem-description">
+				<p>{ problem.Description }</p>
+			</div>
+			<div class="column is-narrow">
+				<div class="buttons has-addons">
+					<button 
+						class="button is-small is-info" 
+						onclick={ templ.ComponentScript{Call: fmt.Sprintf("showProblemEditor('edit', '%s', '%s')", problem.Key, templ.EscapeString(problem.Description))} }
+						title="Edit">
+						<span class="icon"><i class="fas fa-edit"></i></span>
+						<span>Edit</span>
+					</button>
+					<button 
+						class="button is-small is-danger" 
+						onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteProblem('%s', %d)", problem.Key, problem.Number)} }
+						title="Delete">
+						<span class="icon"><i class="fas fa-trash"></i></span>
+						<span>Delete</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// ProblemsList renders all problems
+templ ProblemsList(problems []*agency.Problem) {
+	if len(problems) == 0 {
+		<div class="has-text-grey has-text-centered py-5">
+			<p><i class="fas fa-info-circle"></i> No problems defined yet. Click the + button to add one.</p>
+		</div>
+	} else {
+		for _, problem := range problems {
+			@ProblemItem(problem)
+		}
+	}
 }
 
 // RequirementsContent shows the requirements section

@@ -348,6 +348,11 @@ func (a *App) setupServer() error {
 		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
 		v1.GET("/agencies/:id/overview", agencyHandler.GetOverview)
 		v1.PUT("/agencies/:id/overview", agencyHandler.UpdateOverview)
+		v1.GET("/agencies/:id/problems", agencyHandler.GetProblems)
+		v1.GET("/agencies/:id/problems/html", agencyHandler.GetProblemsHTML)
+		v1.POST("/agencies/:id/problems", agencyHandler.CreateProblem)
+		v1.PUT("/agencies/:id/problems/:problemKey", agencyHandler.UpdateProblem)
+		v1.DELETE("/agencies/:id/problems/:problemKey", agencyHandler.DeleteProblem)
 
 		// AI Agency Designer endpoints (if available)
 		if a.aiDesignerService != nil {

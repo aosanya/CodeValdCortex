@@ -20,6 +20,12 @@ type Service interface {
 	// Overview methods
 	GetAgencyOverview(ctx context.Context, agencyID string) (*Overview, error)
 	UpdateAgencyOverview(ctx context.Context, agencyID string, introduction string) error
+
+	// Problem methods
+	CreateProblem(ctx context.Context, agencyID string, description string) (*Problem, error)
+	GetProblems(ctx context.Context, agencyID string) ([]*Problem, error)
+	UpdateProblem(ctx context.Context, agencyID string, key string, description string) error
+	DeleteProblem(ctx context.Context, agencyID string, key string) error
 }
 
 // service implements the Service interface
@@ -240,7 +246,9 @@ func (s *service) UpdateAgencyOverview(ctx context.Context, agencyID string, int
 		}
 	} else {
 		// Update existing overview
-		overview.Introduction = introduction
+		if introduction != "" {
+			overview.Introduction = introduction
+		}
 		overview.UpdatedAt = time.Now()
 	}
 
@@ -248,6 +256,82 @@ func (s *service) UpdateAgencyOverview(ctx context.Context, agencyID string, int
 	err = s.repo.UpdateOverview(ctx, overview)
 	if err != nil {
 		return fmt.Errorf("failed to update overview: %w", err)
+	}
+
+	return nil
+}
+
+// CreateProblem creates a new problem for an agency
+func (s *service) CreateProblem(ctx context.Context, agencyID string, description string) (*Problem, error) {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	problem := &Problem{
+		AgencyID:    agencyID,
+		Description: description,
+	}
+
+	if err := s.repo.CreateProblem(ctx, problem); err != nil {
+		return nil, fmt.Errorf("failed to create problem: %w", err)
+	}
+
+	return problem, nil
+}
+
+// GetProblems retrieves all problems for an agency
+func (s *service) GetProblems(ctx context.Context, agencyID string) ([]*Problem, error) {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	problems, err := s.repo.GetProblems(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get problems: %w", err)
+	}
+
+	return problems, nil
+}
+
+// UpdateProblem updates a problem's description
+func (s *service) UpdateProblem(ctx context.Context, agencyID string, key string, description string) error {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	// Get the problem
+	problem, err := s.repo.GetProblem(ctx, agencyID, key)
+	if err != nil {
+		return fmt.Errorf("failed to get problem: %w", err)
+	}
+
+	// Update description
+	problem.Description = description
+
+	// Save
+	if err := s.repo.UpdateProblem(ctx, problem); err != nil {
+		return fmt.Errorf("failed to update problem: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteProblem deletes a problem
+func (s *service) DeleteProblem(ctx context.Context, agencyID string, key string) error {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	if err := s.repo.DeleteProblem(ctx, agencyID, key); err != nil {
+		return fmt.Errorf("failed to delete problem: %w", err)
 	}
 
 	return nil

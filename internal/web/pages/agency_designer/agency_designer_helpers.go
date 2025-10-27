@@ -122,23 +122,3 @@ func getMessageEndpoint(agencyID string, conversation *ai.ConversationContext) s
 func formatValue(value interface{}) string {
 	return fmt.Sprintf("%v", value)
 }
-
-// getPhaseDisplay returns a human-readable phase name
-func getPhaseDisplay(phase ai.DesignPhase) string {
-	switch phase {
-	case ai.PhaseInitial:
-		return "Initial"
-	case ai.PhaseRequirements:
-		return "Requirements Gathering"
-	case ai.PhaseAgentBrainstorm:
-		return "Agent Brainstorming"
-	case ai.PhaseRelationshipMapping:
-		return "Relationship Mapping"
-	case ai.PhaseValidation:
-		return "Validation"
-	case ai.PhaseComplete:
-		return "Complete"
-	default:
-		return "Unknown"
-	}
-}

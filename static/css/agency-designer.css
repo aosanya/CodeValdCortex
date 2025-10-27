@@ -1210,3 +1210,41 @@
     color: var(--vscode-text-muted);
     margin: 0;
 }
+
+/* Problems List Styles */
+.problems-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.problem-item {
+    background: var(--vscode-panel-bg);
+    border: 1px solid var(--vscode-border);
+    border-radius: 4px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+}
+
+.problem-item:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.problem-description {
+    flex: 1;
+}
+
+.problem-description p {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--vscode-text);
+}
+
+.problem-item .tag {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.problem-item .buttons {
+    margin-bottom: 0;
+}
