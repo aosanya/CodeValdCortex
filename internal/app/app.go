@@ -119,7 +119,7 @@ func New(cfg *config.Config) *App {
 
 	// Initialize agency management
 	logger.Info("Initializing agency management service")
-	agencyRepo, err := agency.NewArangoRepository(dbClient.Database())
+	agencyRepo, err := agency.NewArangoRepository(dbClient.Client(), dbClient.Database())
 	if err != nil {
 		logger.WithError(err).Fatal("Failed to initialize agency repository")
 	}
@@ -346,6 +346,8 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/activate", agencyHandler.ActivateAgency)
 		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
 		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
+		v1.GET("/agencies/:id/overview", agencyHandler.GetOverview)
+		v1.PUT("/agencies/:id/overview", agencyHandler.UpdateOverview)
 
 		// AI Agency Designer endpoints (if available)
 		if a.aiDesignerService != nil {

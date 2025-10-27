@@ -81,118 +81,48 @@ templ OverviewNavigationList() {
 // IntroductionContent shows the introduction section
 templ IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		<div class="section-hero">
-			<div class="hero-icon">
-				<i class="fas fa-rocket fa-3x"></i>
-			</div>
-			<h2 class="title is-3">Welcome to AI Agency Designer</h2>
-			<p class="subtitle is-5">Design intelligent multi-agent systems with AI assistance</p>
-		</div>
-		
-		<div class="details-section">
-			<h3 class="section-title">
-				<span class="icon"><i class="fas fa-building"></i></span>
-				Current Agency
-			</h3>
-			<div class="section-content">
-				<div class="agency-info-card">
-					<h4 class="title is-4">{ currentAgency.Name }</h4>
-					if currentAgency.Description != "" {
-						<p class="mb-3">{ currentAgency.Description }</p>
-					}
-					<div class="agency-meta">
-						<span class="tag is-info">
-							<span class="icon"><i class="fas fa-tag"></i></span>
-							<span>{ currentAgency.Category }</span>
-						</span>
-						<span class="tag is-success">
-							<span class="icon"><i class="fas fa-circle"></i></span>
-							<span>{ string(currentAgency.Status) }</span>
-						</span>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<div class="details-section">
-			<h3 class="section-title">
-				<span class="icon"><i class="fas fa-magic"></i></span>
-				What is this?
-			</h3>
-			<div class="section-content">
-				<p class="mb-3">
-					The AI Agency Designer helps you create sophisticated multi-agent architectures through a conversational interface. 
-					Our AI assistant guides you through the process of:
+		<div class="card">
+			<header class="card-header">
+				<p class="card-header-title">
+					<span class="icon"><i class="fas fa-info-circle"></i></span>
+					<span>Introduction</span>
 				</p>
-				<ul class="content-list">
-					<li><strong>Understanding your requirements</strong> - Explore your use case and needs</li>
-					<li><strong>Designing agent types</strong> - Define specialized agents for different tasks</li>
-					<li><strong>Mapping relationships</strong> - Establish communication patterns between agents</li>
-					<li><strong>Validating the design</strong> - Review and refine the complete architecture</li>
-				</ul>
-			</div>
-		</div>
-		
-		<div class="details-section">
-			<h3 class="section-title">
-				<span class="icon"><i class="fas fa-lightbulb"></i></span>
-				Getting Started
-			</h3>
-			<div class="section-content">
-				<div class="getting-started-steps">
-					<div class="step-card">
-						<div class="step-number">1</div>
-						<div class="step-content">
-							<h4 class="step-title">Define Your Problem</h4>
-							<p>Start by describing what you're trying to solve. Be as detailed as possible about your use case.</p>
-						</div>
-					</div>
-					
-					<div class="step-card">
-						<div class="step-number">2</div>
-						<div class="step-content">
-							<h4 class="step-title">Chat with AI</h4>
-							<p>Use the chat panel on the right to interact with the AI designer. It will ask clarifying questions.</p>
-						</div>
-					</div>
-					
-					<div class="step-card">
-						<div class="step-number">3</div>
-						<div class="step-content">
-							<h4 class="step-title">Review Agent Types</h4>
-							<p>Switch to the "Agent Types" view to see the designed agents and their relationships.</p>
-						</div>
-					</div>
-					
-					<div class="step-card">
-						<div class="step-number">4</div>
-						<div class="step-content">
-							<h4 class="step-title">Visualize Layout</h4>
-							<p>Use the "Layout" view to see a visual diagram of your agent architecture.</p>
-						</div>
+			</header>
+			<div class="card-content">
+				<div class="field">
+					<div class="control">
+						<textarea 
+							class="textarea"
+							id="introduction-editor"
+							placeholder="Enter introduction text for this agency..."
+							rows="20"
+							style="font-family: monospace; font-size: 14px;">
+							// Get introduction from agency overview if available
+							if currentAgency.ID != "" {
+								// Introduction will be loaded via HTMX
+							}
+						</textarea>
 					</div>
 				</div>
+				<p class="help">Use this section to provide an overview and introduction to your agency.</p>
 			</div>
+			<footer class="card-footer">
+				<a 
+					class="card-footer-item has-text-primary"
+					onclick={ templ.ComponentScript{Call: "saveOverviewIntroduction()"} }
+					id="save-introduction-btn">
+					<span class="icon"><i class="fas fa-save"></i></span>
+					<span>Save</span>
+				</a>
+				<a 
+					class="card-footer-item has-text-grey"
+					onclick={ templ.ComponentScript{Call: "undoOverviewIntroduction()"} }
+					id="undo-introduction-btn">
+					<span class="icon"><i class="fas fa-undo"></i></span>
+					<span>Undo</span>
+				</a>
+			</footer>
 		</div>
-		
-		if conversation != nil {
-			<div class="details-section">
-				<h3 class="section-title">
-					<span class="icon"><i class="fas fa-tasks"></i></span>
-					Current Progress
-				</h3>
-				<div class="section-content">
-					<div class="progress-info">
-						<p><strong>Phase:</strong> { getPhaseDisplay(conversation.Phase) }</p>
-						if conversation.CurrentDesign != nil {
-							<p><strong>Agent Types Defined:</strong> { string(rune(len(conversation.CurrentDesign.AgentTypes))) }</p>
-							<p><strong>Relationships Mapped:</strong> { string(rune(len(conversation.CurrentDesign.Relationships))) }</p>
-						}
-						<p><strong>Messages Exchanged:</strong> { string(rune(len(conversation.Messages))) }</p>
-					</div>
-				</div>
-			</div>
-		}
 	</div>
 }
 

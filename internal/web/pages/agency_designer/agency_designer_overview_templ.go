@@ -5,10 +5,9 @@ package agency_designer
 
 //lint:file-ignore SA4006 This context is only used if a nested component is present.
 
-import "github.com/a-h/templ"
-import templruntime "github.com/a-h/templ/runtime"
-
 import (
+	"github.com/a-h/templ"
+	templruntime "github.com/a-h/templ/runtime"
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
 )
@@ -111,141 +110,47 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-rocket fa-3x\"></i></div><h2 class=\"title is-3\">Welcome to AI Agency Designer</h2><p class=\"subtitle is-5\">Design intelligent multi-agent systems with AI assistance</p></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-building\"></i></span> Current Agency</h3><div class=\"section-content\"><div class=\"agency-info-card\"><h4 class=\"title is-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"overview-section\"><div class=\"card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></p></header><div class=\"card-content\"><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 99, Col: 48}
+		if currentAgency.ID != "" {
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><footer class=\"card-footer\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</h4>")
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "saveOverviewIntroduction()"})
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if currentAgency.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<p class=\"mb-3\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Description)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 101, Col: 49}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"agency-meta\"><span class=\"tag is-info\"><span class=\"icon\"><i class=\"fas fa-tag\"></i></span> <span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<a class=\"card-footer-item has-text-primary\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Category)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 106, Col: 37}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		var templ_7745c5c3_Var4 templ.ComponentScript = templ.ComponentScript{Call: "saveOverviewIntroduction()"}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</span></span> <span class=\"tag is-success\"><span class=\"icon\"><i class=\"fas fa-circle\"></i></span> <span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(currentAgency.Status))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 110, Col: 43}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: "undoOverviewIntroduction()"})
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span></span></div></div></div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> What is this?</h3><div class=\"section-content\"><p class=\"mb-3\">The AI Agency Designer helps you create sophisticated multi-agent architectures through a conversational interface.  Our AI assistant guides you through the process of:</p><ul class=\"content-list\"><li><strong>Understanding your requirements</strong> - Explore your use case and needs</li><li><strong>Designing agent types</strong> - Define specialized agents for different tasks</li><li><strong>Mapping relationships</strong> - Establish communication patterns between agents</li><li><strong>Validating the design</strong> - Review and refine the complete architecture</li></ul></div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> Getting Started</h3><div class=\"section-content\"><div class=\"getting-started-steps\"><div class=\"step-card\"><div class=\"step-number\">1</div><div class=\"step-content\"><h4 class=\"step-title\">Define Your Problem</h4><p>Start by describing what you're trying to solve. Be as detailed as possible about your use case.</p></div></div><div class=\"step-card\"><div class=\"step-number\">2</div><div class=\"step-content\"><h4 class=\"step-title\">Chat with AI</h4><p>Use the chat panel on the right to interact with the AI designer. It will ask clarifying questions.</p></div></div><div class=\"step-card\"><div class=\"step-number\">3</div><div class=\"step-content\"><h4 class=\"step-title\">Review Agent Types</h4><p>Switch to the \"Agent Types\" view to see the designed agents and their relationships.</p></div></div><div class=\"step-card\"><div class=\"step-number\">4</div><div class=\"step-content\"><h4 class=\"step-title\">Visualize Layout</h4><p>Use the \"Layout\" view to see a visual diagram of your agent architecture.</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<a class=\"card-footer-item has-text-grey\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if conversation != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-tasks\"></i></span> Current Progress</h3><div class=\"section-content\"><div class=\"progress-info\"><p><strong>Phase:</strong> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(getPhaseDisplay(conversation.Phase))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 186, Col: 70}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if conversation.CurrentDesign != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<p><strong>Agent Types Defined:</strong> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(string(rune(len(conversation.CurrentDesign.AgentTypes))))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 188, Col: 106}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</p><p><strong>Relationships Mapped:</strong> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var10 string
-				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(string(rune(len(conversation.CurrentDesign.Relationships))))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 189, Col: 110}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</p>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<p><strong>Messages Exchanged:</strong> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(string(rune(len(conversation.Messages))))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 191, Col: 88}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</p></div></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var5 templ.ComponentScript = templ.ComponentScript{Call: "undoOverviewIntroduction()"}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></a></footer></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -270,40 +175,40 @@ func ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.Con
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var12 == nil {
-			templ_7745c5c3_Var12 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-exclamation-triangle fa-3x\"></i></div><h2 class=\"title is-3\">Problem Definition</h2><p class=\"subtitle is-5\">Clearly define the challenge you're addressing</p></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-question-circle\"></i></span> What Problem Are You Solving?</h3><div class=\"section-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-exclamation-triangle fa-3x\"></i></div><h2 class=\"title is-3\">Problem Definition</h2><p class=\"subtitle is-5\">Clearly define the challenge you're addressing</p></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-question-circle\"></i></span> What Problem Are You Solving?</h3><div class=\"section-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if conversation != nil && conversation.CurrentDesign != nil && conversation.CurrentDesign.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"problem-statement\"><p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"problem-statement\"><p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 218, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 148, Col: 49}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"empty-state\"><p class=\"has-text-grey\">No problem defined yet. Start chatting with the AI to define your use case.</p></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"empty-state\"><p class=\"has-text-grey\">No problem defined yet. Start chatting with the AI to define your use case.</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-book\"></i></span> Key Questions to Consider</h3><div class=\"section-content\"><ul class=\"content-list\"><li>What is the main challenge or opportunity you're addressing?</li><li>Who are the stakeholders affected by this problem?</li><li>What are the current pain points or inefficiencies?</li><li>What would success look like for this solution?</li><li>Are there any constraints or limitations to consider?</li></ul></div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> Tips for Defining Your Problem</h3><div class=\"section-content\"><div class=\"tips-grid\"><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-check-circle\"></i></div><div class=\"tip-content\"><h4>Be Specific</h4><p>Provide concrete examples and scenarios rather than abstract descriptions.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-users\"></i></div><div class=\"tip-content\"><h4>Identify Actors</h4><p>Mention all the people, systems, or entities involved in the process.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-chart-line\"></i></div><div class=\"tip-content\"><h4>Measure Success</h4><p>Think about what metrics or outcomes would indicate a successful solution.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-exchange-alt\"></i></div><div class=\"tip-content\"><h4>Map Workflows</h4><p>Describe the current process flow and where improvements are needed.</p></div></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-book\"></i></span> Key Questions to Consider</h3><div class=\"section-content\"><ul class=\"content-list\"><li>What is the main challenge or opportunity you're addressing?</li><li>Who are the stakeholders affected by this problem?</li><li>What are the current pain points or inefficiencies?</li><li>What would success look like for this solution?</li><li>Are there any constraints or limitations to consider?</li></ul></div></div><div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> Tips for Defining Your Problem</h3><div class=\"section-content\"><div class=\"tips-grid\"><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-check-circle\"></i></div><div class=\"tip-content\"><h4>Be Specific</h4><p>Provide concrete examples and scenarios rather than abstract descriptions.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-users\"></i></div><div class=\"tip-content\"><h4>Identify Actors</h4><p>Mention all the people, systems, or entities involved in the process.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-chart-line\"></i></div><div class=\"tip-content\"><h4>Measure Success</h4><p>Think about what metrics or outcomes would indicate a successful solution.</p></div></div><div class=\"tip-card\"><div class=\"tip-icon\"><i class=\"fas fa-exchange-alt\"></i></div><div class=\"tip-content\"><h4>Map Workflows</h4><p>Describe the current process flow and where improvements are needed.</p></div></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -328,117 +233,117 @@ func RequirementsContent(currentAgency *agency.Agency, conversation *ai.Conversa
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-clipboard-list fa-3x\"></i></div><h2 class=\"title is-3\">Requirements</h2><p class=\"subtitle is-5\">Specify the functional and non-functional needs</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"overview-section\"><div class=\"section-hero\"><div class=\"hero-icon\"><i class=\"fas fa-clipboard-list fa-3x\"></i></div><h2 class=\"title is-3\">Requirements</h2><p class=\"subtitle is-5\">Specify the functional and non-functional needs</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if conversation != nil && conversation.CurrentDesign != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-list-check\"></i></span> Functional Requirements</h3><div class=\"section-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-list-check\"></i></span> Functional Requirements</h3><div class=\"section-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if conversation.CurrentDesign.Description != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"requirements-list\"><p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"requirements-list\"><p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var15 string
-				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(conversation.CurrentDesign.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 316, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 246, Col: 50}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</p></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"empty-state\"><p class=\"has-text-grey\">No requirements captured yet. Discuss your needs with the AI assistant.</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"empty-state\"><p class=\"has-text-grey\">No requirements captured yet. Discuss your needs with the AI assistant.</p></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(conversation.CurrentDesign.AgentTypes) > 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> Agent Requirements</h3><div class=\"section-content\"><div class=\"agent-requirements-grid\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> Agent Requirements</h3><div class=\"section-content\"><div class=\"agent-requirements-grid\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, agentType := range conversation.CurrentDesign.AgentTypes {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"requirement-card\"><div class=\"req-header\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <strong>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<div class=\"requirement-card\"><div class=\"req-header\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <strong>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var16 string
-					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(agentType.Name)
+					var templ_7745c5c3_Var10 string
+					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(agentType.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 338, Col: 34}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 268, Col: 34}
 					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</strong></div><div class=\"req-capabilities\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</strong></div><div class=\"req-capabilities\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					if len(agentType.Capabilities) > 0 {
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<p class=\"mb-2\"><strong>Capabilities:</strong></p><div class=\"tags are-small\">")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<p class=\"mb-2\"><strong>Capabilities:</strong></p><div class=\"tags are-small\">")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						for _, cap := range agentType.Capabilities {
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<span class=\"tag is-info is-light\">")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<span class=\"tag is-info is-light\">")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							var templ_7745c5c3_Var17 string
-							templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(cap)
+							var templ_7745c5c3_Var11 string
+							templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(cap)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 345, Col: 53}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 275, Col: 53}
 							}
-							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
-							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</span>")
+							templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</span>")
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
 							}
 						}
-						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div>")
+						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div></div></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-comment-dots\"></i></span> No Requirements Yet</h3><div class=\"section-content\"><div class=\"empty-state\"><p>Start a conversation with the AI designer to capture your requirements.</p><p class=\"mt-3\">The AI will help you:</p><ul class=\"content-list mt-3\"><li>Identify functional requirements</li><li>Determine non-functional requirements</li><li>Map requirements to agent capabilities</li><li>Validate completeness</li></ul></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-comment-dots\"></i></span> No Requirements Yet</h3><div class=\"section-content\"><div class=\"empty-state\"><p>Start a conversation with the AI designer to capture your requirements.</p><p class=\"mt-3\">The AI will help you:</p><ul class=\"content-list mt-3\"><li>Identify functional requirements</li><li>Determine non-functional requirements</li><li>Map requirements to agent capabilities</li><li>Validate completeness</li></ul></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-shield-alt\"></i></span> Non-Functional Requirements</h3><div class=\"section-content\"><div class=\"nfr-categories\"><div class=\"nfr-card\"><h4><i class=\"fas fa-tachometer-alt\"></i> Performance</h4><p>Response time, throughput, scalability considerations</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-lock\"></i> Security</h4><p>Authentication, authorization, data protection</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-sync\"></i> Reliability</h4><p>Availability, fault tolerance, recovery mechanisms</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-expand-arrows-alt\"></i> Scalability</h4><p>Horizontal and vertical scaling capabilities</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"details-section\"><h3 class=\"section-title\"><span class=\"icon\"><i class=\"fas fa-shield-alt\"></i></span> Non-Functional Requirements</h3><div class=\"section-content\"><div class=\"nfr-categories\"><div class=\"nfr-card\"><h4><i class=\"fas fa-tachometer-alt\"></i> Performance</h4><p>Response time, throughput, scalability considerations</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-lock\"></i> Security</h4><p>Authentication, authorization, data protection</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-sync\"></i> Reliability</h4><p>Availability, fault tolerance, recovery mechanisms</p></div><div class=\"nfr-card\"><h4><i class=\"fas fa-expand-arrows-alt\"></i> Scalability</h4><p>Horizontal and vertical scaling capabilities</p></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

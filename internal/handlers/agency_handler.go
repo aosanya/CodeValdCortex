@@ -34,6 +34,8 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.POST("/:id/activate", h.ActivateAgency)
 		agencies.GET("/active", h.GetActiveAgency)
 		agencies.GET("/:id/statistics", h.GetAgencyStatistics)
+		agencies.GET("/:id/overview", h.GetOverview)
+		agencies.PUT("/:id/overview", h.UpdateOverview)
 	}
 }
 
@@ -261,4 +263,45 @@ func (h *AgencyHandler) GetAgencyStatistics(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, stats)
+}
+
+// GetOverview handles GET /api/v1/agencies/:id/overview
+func (h *AgencyHandler) GetOverview(c *gin.Context) {
+	id := c.Param("id")
+
+	overview, err := h.service.GetAgencyOverview(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, overview)
+}
+
+// UpdateOverview handles PUT /api/v1/agencies/:id/overview
+func (h *AgencyHandler) UpdateOverview(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Introduction string `json:"introduction" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	if err := h.service.UpdateAgencyOverview(c.Request.Context(), id, req.Introduction); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return updated overview
+	overview, err := h.service.GetAgencyOverview(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, overview)
 }

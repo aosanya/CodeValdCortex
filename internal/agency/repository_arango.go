@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/arangodb/go-driver"
 )
@@ -15,12 +16,13 @@ const (
 
 // arangoRepository implements Repository using ArangoDB
 type arangoRepository struct {
+	client     driver.Client
 	db         driver.Database
 	collection driver.Collection
 }
 
 // NewArangoRepository creates a new ArangoDB repository for agencies
-func NewArangoRepository(db driver.Database) (Repository, error) {
+func NewArangoRepository(client driver.Client, db driver.Database) (Repository, error) {
 	// Ensure collection exists
 	collection, err := ensureCollection(db)
 	if err != nil {
@@ -28,6 +30,7 @@ func NewArangoRepository(db driver.Database) (Repository, error) {
 	}
 
 	return &arangoRepository{
+		client:     client,
 		db:         db,
 		collection: collection,
 	}, nil
@@ -282,4 +285,128 @@ func buildListQuery(filters AgencyFilters) (string, map[string]interface{}) {
 	query += " RETURN agency"
 
 	return query, bindVars
+}
+
+// GetOverview retrieves the overview document for an agency
+func (r *arangoRepository) GetOverview(ctx context.Context, agencyID string) (*Overview, error) {
+	// Get the agency-specific database
+	agency, err := r.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get agency: %w", err)
+	}
+
+	// Use agency ID as database name if not set
+	dbName := agency.Database
+	if dbName == "" {
+		dbName = agency.ID
+	}
+
+	// Get connection to agency's database
+	agencyDB, err := r.client.Database(ctx, dbName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to agency database: %w", err)
+	}
+
+	// Ensure overview collection exists
+	overviewColl, err := ensureOverviewCollection(ctx, agencyDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to ensure overview collection: %w", err)
+	}
+
+	// Try to read the overview document (using "main" as the key)
+	var overview Overview
+	_, err = overviewColl.ReadDocument(ctx, "main", &overview)
+	if err != nil {
+		if driver.IsNotFound(err) {
+			// Create a default overview if it doesn't exist
+			overview = Overview{
+				Key:          "main",
+				AgencyID:     agencyID,
+				Introduction: "",
+				UpdatedAt:    time.Now(),
+			}
+			_, err = overviewColl.CreateDocument(ctx, &overview)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create default overview: %w", err)
+			}
+			return &overview, nil
+		}
+		return nil, fmt.Errorf("failed to read overview: %w", err)
+	}
+
+	return &overview, nil
+}
+
+// UpdateOverview updates the overview document for an agency
+func (r *arangoRepository) UpdateOverview(ctx context.Context, overview *Overview) error {
+	// Get the agency-specific database
+	agency, err := r.GetByID(ctx, overview.AgencyID)
+	if err != nil {
+		return fmt.Errorf("failed to get agency: %w", err)
+	}
+
+	// Use agency ID as database name if not set
+	dbName := agency.Database
+	if dbName == "" {
+		dbName = agency.ID
+	}
+
+	// Get connection to agency's database
+	agencyDB, err := r.client.Database(ctx, dbName)
+	if err != nil {
+		return fmt.Errorf("failed to connect to agency database: %w", err)
+	}
+
+	// Ensure overview collection exists
+	overviewColl, err := ensureOverviewCollection(ctx, agencyDB)
+	if err != nil {
+		return fmt.Errorf("failed to ensure overview collection: %w", err)
+	}
+
+	// Set the key and updated timestamp
+	overview.Key = "main"
+	overview.UpdatedAt = time.Now()
+
+	// Update or create the document
+	_, err = overviewColl.UpdateDocument(ctx, overview.Key, overview)
+	if err != nil {
+		if driver.IsNotFound(err) {
+			// Create if it doesn't exist
+			_, err = overviewColl.CreateDocument(ctx, overview)
+			if err != nil {
+				return fmt.Errorf("failed to create overview: %w", err)
+			}
+			return nil
+		}
+		return fmt.Errorf("failed to update overview: %w", err)
+	}
+
+	return nil
+}
+
+// ensureOverviewCollection ensures the overview collection exists in an agency database
+func ensureOverviewCollection(ctx context.Context, db driver.Database) (driver.Collection, error) {
+	const collectionName = "overview"
+
+	// Check if collection exists
+	exists, err := db.CollectionExists(ctx, collectionName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check collection existence: %w", err)
+	}
+
+	var collection driver.Collection
+	if !exists {
+		// Create collection
+		collection, err = db.CreateCollection(ctx, collectionName, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create collection: %w", err)
+		}
+	} else {
+		collection, err = db.Collection(ctx, collectionName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get collection: %w", err)
+		}
+	}
+
+	return collection, nil
 }

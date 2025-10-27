@@ -13,4 +13,8 @@ type Repository interface {
 	Delete(ctx context.Context, id string) error
 	GetStatistics(ctx context.Context, id string) (*AgencyStatistics, error)
 	Exists(ctx context.Context, id string) (bool, error)
+
+	// Overview methods
+	GetOverview(ctx context.Context, agencyID string) (*Overview, error)
+	UpdateOverview(ctx context.Context, overview *Overview) error
 }

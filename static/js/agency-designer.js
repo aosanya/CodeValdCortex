@@ -14,9 +14,22 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeHTMXEvents();
     initializeViewSwitcher();
     initializeAgentSelection();
+    initializeOverview();
 
     console.log('Agency Designer: Initialization complete');
 });
+
+// Initialize overview section
+function initializeOverview() {
+    // Check if we're on the overview view and introduction is active
+    const overviewView = document.querySelector('.view-content[data-view-content="overview"]');
+    const introEditor = document.getElementById('introduction-editor');
+
+    if (overviewView && overviewView.classList.contains('is-active') && introEditor) {
+        // Load introduction data
+        loadIntroductionEditor();
+    }
+}
 
 // Initialize auto-scroll for chat messages
 function initializeChatScroll() {
@@ -217,6 +230,8 @@ function initializeHTMXEvents() {
 // Export for use in templates
 window.selectAgentType = selectAgentType;
 window.selectOverviewSection = selectOverviewSection;
+window.saveOverviewIntroduction = saveOverviewIntroduction;
+window.undoOverviewIntroduction = undoOverviewIntroduction;
 
 // Handle overview section selection
 function selectOverviewSection(element, section) {
@@ -244,9 +259,158 @@ function selectOverviewSection(element, section) {
         overviewTitle.innerHTML = titles[section];
     }
 
-    // Trigger HTMX to load the section content
-    // For now, we'll handle this with a simple fetch or keep content static
+    // Load the section content based on section type
+    if (section === 'introduction') {
+        loadIntroductionEditor();
+    }
+
     console.log('Selected overview section:', section);
+}
+
+// Load introduction editor and data
+// Store original introduction for undo
+let originalIntroduction = '';
+
+function loadIntroductionEditor() {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        console.error('No agency ID found');
+        return;
+    }
+
+    // Fetch the current overview/introduction
+    fetch(`/api/v1/agencies/${agencyId}/overview`)
+        .then(response => {
+            if (!response.ok) {
+                // If 404 or error, just show empty editor
+                return { introduction: '' };
+            }
+            return response.json();
+        })
+        .then(data => {
+            const editor = document.getElementById('introduction-editor');
+            if (editor) {
+                const introText = data.introduction || '';
+                editor.value = introText;
+                // Store original value for undo
+                originalIntroduction = introText;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading introduction:', error);
+        });
+}
+
+// Save overview introduction
+function saveOverviewIntroduction() {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        console.error('No agency ID found');
+        showNotification('Error: No agency selected', 'error');
+        return;
+    }
+
+    const editor = document.getElementById('introduction-editor');
+    if (!editor) {
+        console.error('Introduction editor not found');
+        return;
+    }
+
+    const introduction = editor.value;
+    const saveBtn = document.getElementById('save-introduction-btn');
+
+    // Disable button while saving
+    if (saveBtn) {
+        saveBtn.classList.add('is-loading');
+        saveBtn.disabled = true;
+    }
+
+    fetch(`/api/v1/agencies/${agencyId}/overview`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ introduction: introduction })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to save introduction');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Introduction saved successfully:', data);
+            showNotification('Introduction saved successfully!', 'success');
+            // Update original value after successful save
+            originalIntroduction = editor.value;
+        })
+        .catch(error => {
+            console.error('Error saving introduction:', error);
+            showNotification('Error saving introduction', 'error');
+        })
+        .finally(() => {
+            // Re-enable button
+            if (saveBtn) {
+                saveBtn.classList.remove('is-loading');
+                saveBtn.disabled = false;
+            }
+        });
+}
+
+// Undo changes to overview introduction
+function undoOverviewIntroduction() {
+    const editor = document.getElementById('introduction-editor');
+    if (!editor) {
+        console.error('Introduction editor not found');
+        return;
+    }
+
+    // Restore original value
+    editor.value = originalIntroduction;
+    showNotification('Changes reverted', 'info');
+}
+
+// Get current agency ID from URL or context
+function getCurrentAgencyId() {
+    // Try to get from URL path /agencies/:id/designer
+    const pathMatch = window.location.pathname.match(/\/agencies\/([^\/]+)/);
+    if (pathMatch && pathMatch[1]) {
+        return pathMatch[1];
+    }
+    return null;
+}
+
+// Show notification to user
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification is-${type}`;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+    notification.innerHTML = `
+        <button class="delete"></button>
+        ${message}
+    `;
+
+    document.body.appendChild(notification);
+
+    // Add delete functionality
+    const deleteBtn = notification.querySelector('.delete');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            notification.remove();
+        });
+    }
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 // Handle design preview updates

@@ -31,7 +31,7 @@ func main() {
 	db := arangoClient.Database()
 
 	// Create repository
-	repo, err := agency.NewArangoRepository(db)
+	repo, err := agency.NewArangoRepository(arangoClient.Client(), db)
 	if err != nil {
 		log.Fatalf("Failed to create repository: %v", err)
 	}
