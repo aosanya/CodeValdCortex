@@ -14,7 +14,7 @@ import (
 )
 
 // IntroductionCard renders the introduction card component
-func IntroductionCard(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func IntroductionCard(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,13 +35,22 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></p></header><div class=\"card-content\"><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"box\"><div class=\"content\"><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if currentAgency.ID != "" {
+		if overview != nil {
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(overview.Introduction)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 21, Col: 30}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><footer class=\"card-footer\"><a class=\"card-footer-item has-text-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> <a class=\"card-footer-item has-text-grey\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></a></footer></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><div class=\"buttons is-right\"><button class=\"button is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button> <button class=\"button\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

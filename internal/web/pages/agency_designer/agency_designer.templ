@@ -7,7 +7,7 @@ import (
 )
 
 // AgencyDesignerPage renders the AI-powered agency designer interface with VS Code-like layout
-templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
 	@components.LayoutWithAgency("AI Agency Designer", currentAgency) {
 		<!-- Agency Designer Specific CSS -->
 		<link rel="stylesheet" href="/static/css/agency-designer.css"/>
@@ -24,7 +24,7 @@ templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversa
 			<div class="designer-panels">
 				<!-- Overview View -->
 				<div class="view-content is-active" data-view-content="overview">
-					@OverviewContent(currentAgency, conversation)
+					@OverviewContent(currentAgency, conversation, overview)
 				</div>
 				
 				<!-- Agent Types View -->

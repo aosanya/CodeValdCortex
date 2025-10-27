@@ -14,7 +14,7 @@ import (
 )
 
 // OverviewContent renders the overview section with three navigation nodes
-func OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -47,7 +47,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = IntroductionContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = IntroductionContent(currentAgency, conversation, overview).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -106,7 +106,7 @@ func OverviewNavigationList() templ.Component {
 }
 
 // IntroductionContent shows the introduction section
-func IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -131,7 +131,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = IntroductionCard(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = IntroductionCard(currentAgency, conversation, overview).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

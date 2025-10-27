@@ -1,105 +1,21 @@
-package agency_designerpackage agency_designerpackage agency_designer
-
-
+package agency_designer
 
 // UnitOfWorkEditorCard renders the unit of work editor card component
-
 templ UnitOfWorkEditorCard() {
-
-	@EditorCard(EditorCardConfig{// UnitOfWorkEditorCard renders the unit of work editor card component// UnitOfWorkEditorCard renders the unit of work editor card component
-
+	@EditorCard(EditorCardConfig{
 		CardID:          "unit-editor-card",
-
-		TitleID:         "unit-editor-title",templ UnitOfWorkEditorCard() {templ UnitOfWorkEditorCard() {
-
+		TitleID:         "unit-editor-title",
 		AddTitle:        "Add New Unit of Work",
-
-		EditTitle:       "Edit Unit of Work",	@EditorCard(EditorCardConfig{	@EditorCard(EditorCardConfig{
-
+		EditTitle:       "Edit Unit of Work",
 		CancelFunction:  "cancelUnitEdit()",
-
-		SaveFunction:    "saveUnitFromEditor()",		CardID:          "unit-editor-card",		CardID:          "unit-editor-card",
-
+		SaveFunction:    "saveUnitFromEditor()",
 		CodeInputID:     "unit-code-input",
-
-		CodeLabel:       "Unit Code",		TitleID:         "unit-editor-title",		TitleID:         "unit-editor-title",
-
+		CodeLabel:       "Unit Code",
 		CodePlaceholder: "e.g., UOW001, WRK-1, etc.",
-
-		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",		AddTitle:        "Add New Unit of Work",		AddTitle:        "Add New Unit of Work",
-
+		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",
 		DescInputID:     "unit-description-input",
-
-		DescLabel:       "Unit Description",		EditTitle:       "Edit Unit of Work",		EditTitle:       "Edit Unit of Work",
-
+		DescLabel:       "Unit Description",
 		DescPlaceholder: "Describe what this unit of work accomplishes...",
-
-		DescHelp:        "Provide a clear description of what this unit of work does.",		CancelFunction:  "cancelUnitEdit()",		CancelFunction:  "cancelUnitEdit()",
-
+		DescHelp:        "Provide a clear description of what this unit of work does.",
 	})
-
-}		SaveFunction:    "saveUnitFromEditor()",		SaveFunction:    "saveUnitFromEditor()",
-
-		CodeInputID:     "unit-code-input",		CodeInputID:     "unit-code-input",
-
-		CodeLabel:       "Unit Code",		CodeLabel:       "Unit Code",
-
-		CodePlaceholder: "e.g., UOW001, WRK-1, etc.",		CodePlaceholder: "e.g., UOW001, WRK-1, etc.",
-
-		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",		CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",
-
-		DescInputID:     "unit-description-input",		DescInputID:     "unit-description-input",
-
-		DescLabel:       "Unit Description",		DescLabel:       "Unit Description",
-
-		DescPlaceholder: "Describe what this unit of work accomplishes...",		DescPlaceholder: "Describe what this unit of work accomplishes...",
-
-		DescHelp:        "Provide a clear description of what this unit of work does.",		DescHelp:        "Provide a clear description of what this unit of work does.",
-
-	})	})
-
-}}
-		<div class="card-content">
-			<div class="field">
-				<label class="label">Unit Code</label>
-				<div class="control">
-					<input 
-						class="input"
-						type="text"
-						id="unit-code-input"
-						placeholder="e.g., UOW001, WRK-1, etc."
-						maxlength="20">
-				</div>
-				<p class="help">A unique code to identify this unit of work (e.g., UOW001, WRK-1).</p>
-			</div>
-			<div class="field">
-				<label class="label">Unit of Work Description</label>
-				<div class="control">
-					<textarea 
-						class="textarea"
-						id="unit-description-input"
-						placeholder="Describe the unit of work this agency needs to handle..."
-						rows="8"
-						style="font-family: monospace; font-size: 14px;"></textarea>
-				</div>
-				<p class="help">Provide a clear description of the unit of work. This will help define the agency's capabilities.</p>
-			</div>
-		</div>
-		<footer class="card-footer">
-			<a 
-				class="card-footer-item has-text-primary"
-				onclick="saveUnitFromEditor()"
-				id="save-unit-btn">
-				<span class="icon"><i class="fas fa-save"></i></span>
-				<span>Save</span>
-			</a>
-			<a 
-				class="card-footer-item has-text-grey"
-				onclick="cancelUnitEdit()"
-				id="cancel-unit-btn">
-				<span class="icon"><i class="fas fa-times"></i></span>
-				<span>Cancel</span>
-			</a>
-		</footer>
-	</div>
 }

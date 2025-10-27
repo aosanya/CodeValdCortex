@@ -30,7 +30,22 @@ func UnitOfWorkEditorCard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Unit of Work Editor Card (Hidden by default) --><div class=\"card mb-4 is-hidden\" id=\"unit-editor-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span id=\"unit-editor-title\">Add New Unit of Work</span></p><button class=\"card-header-icon button is-small is-text\" onclick=\"cancelUnitEdit()\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><div class=\"field\"><label class=\"label\">Unit Code</label><div class=\"control\"><input class=\"input\" type=\"text\" id=\"unit-code-input\" placeholder=\"e.g., UOW001, WRK-1, etc.\" maxlength=\"20\"></div><p class=\"help\">A unique code to identify this unit of work (e.g., UOW001, WRK-1).</p></div><div class=\"field\"><label class=\"label\">Unit of Work Description</label><div class=\"control\"><textarea class=\"textarea\" id=\"unit-description-input\" placeholder=\"Describe the unit of work this agency needs to handle...\" rows=\"8\" style=\"font-family: monospace; font-size: 14px;\"></textarea></div><p class=\"help\">Provide a clear description of the unit of work. This will help define the agency's capabilities.</p></div></div><footer class=\"card-footer\"><a class=\"card-footer-item has-text-primary\" onclick=\"saveUnitFromEditor()\" id=\"save-unit-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></a> <a class=\"card-footer-item has-text-grey\" onclick=\"cancelUnitEdit()\" id=\"cancel-unit-btn\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></a></footer></div>")
+		templ_7745c5c3_Err = EditorCard(EditorCardConfig{
+			CardID:          "unit-editor-card",
+			TitleID:         "unit-editor-title",
+			AddTitle:        "Add New Unit of Work",
+			EditTitle:       "Edit Unit of Work",
+			CancelFunction:  "cancelUnitEdit()",
+			SaveFunction:    "saveUnitFromEditor()",
+			CodeInputID:     "unit-code-input",
+			CodeLabel:       "Unit Code",
+			CodePlaceholder: "e.g., UOW001, WRK-1, etc.",
+			CodeHelp:        "A unique code to identify this unit of work (e.g., UOW001, WRK-1).",
+			DescInputID:     "unit-description-input",
+			DescLabel:       "Unit Description",
+			DescPlaceholder: "Describe what this unit of work accomplishes...",
+			DescHelp:        "Provide a clear description of what this unit of work does.",
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

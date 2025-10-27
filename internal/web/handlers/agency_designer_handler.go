@@ -48,8 +48,14 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 	// For now, we'll start fresh each time. Later we can add conversation persistence
 	var conversation *ai.ConversationContext
 
-	// Render the designer page
-	component := agency_designer.AgencyDesignerPage(ag, conversation)
+	// Try to load the overview so we can pre-fill the introduction editor server-side
+	var overview *agency.Overview
+	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
+		overview = ov
+	}
+
+	// Render the designer page (pass overview so introduction is pre-filled)
+	component := agency_designer.AgencyDesignerPage(ag, conversation, overview)
 	err = component.Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agency designer page")
@@ -85,8 +91,14 @@ func (h *AgencyDesignerWebHandler) ShowConversation(c *gin.Context) {
 		return
 	}
 
-	// Render the designer page with the conversation
-	component := agency_designer.AgencyDesignerPage(ag, conversation)
+	// Try to load the overview so we can pre-fill the introduction editor server-side
+	var overview *agency.Overview
+	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
+		overview = ov
+	}
+
+	// Render the designer page with the conversation (pass overview)
+	component := agency_designer.AgencyDesignerPage(ag, conversation, overview)
 	err = component.Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agency designer page")

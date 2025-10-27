@@ -6,47 +6,40 @@ import (
 )
 
 // IntroductionCard renders the introduction card component
-templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
-	<div class="card">
-		<header class="card-header">
-			<p class="card-header-title">
-				<span class="icon"><i class="fas fa-info-circle"></i></span>
-				<span>Introduction</span>
-			</p>
-		</header>
-		<div class="card-content">
+templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
+	<div class="box">
+		<div class="content">
 			<div class="field">
 				<div class="control">
-					<textarea 
+					<textarea
 						class="textarea"
 						id="introduction-editor"
 						placeholder="Enter introduction text for this agency..."
 						rows="20"
 						style="font-family: monospace; font-size: 14px;">
-						// Get introduction from agency overview if available
-						if currentAgency.ID != "" {
-							// Introduction will be loaded via HTMX
+						if overview != nil {
+							{ overview.Introduction }
 						}
 					</textarea>
 				</div>
 			</div>
 			<p class="help">Use this section to provide an overview and introduction to your agency.</p>
 		</div>
-		<footer class="card-footer">
-			<a 
-				class="card-footer-item has-text-primary"
+		<div class="buttons is-right">
+			<button
+				class="button is-primary"
 				onclick="saveOverviewIntroduction()"
 				id="save-introduction-btn">
 				<span class="icon"><i class="fas fa-save"></i></span>
 				<span>Save</span>
-			</a>
-			<a 
-				class="card-footer-item has-text-grey"
+			</button>
+			<button
+				class="button"
 				onclick="undoOverviewIntroduction()"
 				id="undo-introduction-btn">
 				<span class="icon"><i class="fas fa-undo"></i></span>
 				<span>Undo</span>
-			</a>
-		</footer>
+			</button>
+		</div>
 	</div>
 }
