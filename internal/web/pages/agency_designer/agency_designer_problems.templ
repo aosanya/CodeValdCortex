@@ -1,0 +1,51 @@
+package agency_designer
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// ProblemItem renders a single problem in the list
+templ ProblemItem(problem *agency.Problem) {
+	<div class="box problem-item" data-problem-key={ problem.Key }>
+		<div class="columns is-mobile is-vcentered">
+			<div class="column is-narrow">
+				<span class="tag is-primary is-medium">{ fmt.Sprintf("%d", problem.Number) }</span>
+			</div>
+			<div class="column problem-description">
+				<p>{ problem.Description }</p>
+			</div>
+			<div class="column is-narrow">
+				<div class="buttons has-addons">
+					<button 
+						class="button ml-1 mr-1 is-small is-info" 
+						onclick={ templ.ComponentScript{Call: fmt.Sprintf("showProblemEditor('edit', '%s', '%s')", problem.Key, templ.EscapeString(problem.Description))} }
+						title="Edit">
+						<span class="icon"><i class="fas fa-edit"></i></span>
+						<span>Edit</span>
+					</button>
+					<button 
+						class="button ml-1 mr-1 is-small is-danger" 
+						onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteProblem('%s', %d)", problem.Key, problem.Number)} }
+						title="Delete">
+						<span class="icon"><i class="fas fa-trash"></i></span>
+						<span>Delete</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// ProblemsList renders all problems
+templ ProblemsList(problems []*agency.Problem) {
+	if len(problems) == 0 {
+		<div class="has-text-grey has-text-centered py-5">
+			<p><i class="fas fa-info-circle"></i> No problems defined yet. Click the + button to add one.</p>
+		</div>
+	} else {
+		for _, problem := range problems {
+			@ProblemItem(problem)
+		}
+	}
+}
