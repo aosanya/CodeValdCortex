@@ -23,6 +23,10 @@ import {
     cancelUnitEdit,
     deleteUnit
 } from './units.js';
+import {
+    refineCurrentDesign,
+    requestAlternativeDesign
+} from './refine.js';
 import { getCurrentAgencyId, showNotification } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -57,3 +61,5 @@ window.showUnitEditor = showUnitEditor;
 window.saveUnitFromEditor = saveUnitFromEditor;
 window.cancelUnitEdit = cancelUnitEdit;
 window.deleteUnit = deleteUnit;
+window.refineCurrentDesign = refineCurrentDesign;
+window.requestAlternativeDesign = requestAlternativeDesign;

@@ -50,7 +50,7 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><div class=\"buttons is-right\"><button class=\"button is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button> <button class=\"button\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p></div><div class=\"buttons is-right\"><button class=\"button is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-info\" onclick=\"triggerAISparkle()\" id=\"ai-sparkle-btn\" title=\"Refine with AI\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> <span>Refine</span></button> <button class=\"button\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
