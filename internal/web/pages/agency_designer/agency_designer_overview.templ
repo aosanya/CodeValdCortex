@@ -7,40 +7,42 @@ import (
 
 // OverviewContent renders the overview section with three navigation nodes
 templ OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
-	<!-- Left Sidebar: Overview Navigation -->
-	<aside class="sidebar-panel">
-		<header class="sidebar-header">
-			<h3 class="sidebar-title">
-				<span class="icon"><i class="fas fa-list"></i></span>
-				<span>Sections</span>
-			</h3>
-		</header>
-		<div class="sidebar-content">
-			@OverviewNavigationList()
-		</div>
-	</aside>
-	
-	<!-- Middle Panel: Overview Content -->
-	<main class="details-panel">
-		<header class="details-header">
-			<h3 class="details-title" id="overview-title">
-				<span class="icon"><i class="fas fa-info-circle"></i></span>
-				<span>Introduction</span>
-			</h3>
-		</header>
-		<div class="details-content" id="overview-content">
-			<!-- All section contents pre-rendered, toggled by JavaScript -->
-			<div id="content-introduction" class="overview-content-section is-active">
-				@IntroductionContent(currentAgency, conversation, overview)
+	<div class="overview-layout">
+		<!-- Left Sidebar: Overview Navigation -->
+		<aside class="sidebar-panel">
+			<header class="sidebar-header">
+				<h3 class="sidebar-title">
+					<span class="icon"><i class="fas fa-list"></i></span>
+					<span>Sections</span>
+				</h3>
+			</header>
+			<div class="sidebar-content">
+				@OverviewNavigationList()
 			</div>
-			<div id="content-problem-definition" class="overview-content-section" style="display: none;">
-				@ProblemDefinitionContent(currentAgency, conversation)
+		</aside>
+		
+		<!-- Main Panel: Overview Content -->
+		<main class="details-panel">
+			<header class="details-header">
+				<h3 class="details-title" id="overview-title">
+					<span class="icon"><i class="fas fa-info-circle"></i></span>
+					<span>Introduction</span>
+				</h3>
+			</header>
+			<div class="details-content" id="overview-content">
+				<!-- All section contents pre-rendered, toggled by JavaScript -->
+				<div id="content-introduction" class="overview-content-section is-active">
+					@IntroductionContent(currentAgency, conversation, overview)
+				</div>
+				<div id="content-problem-definition" class="overview-content-section" style="display: none;">
+					@ProblemDefinitionContent(currentAgency, conversation)
+				</div>
+				<div id="content-units-of-work" class="overview-content-section" style="display: none;">
+					@UnitsOfWorkContent(currentAgency, conversation)
+				</div>
 			</div>
-			<div id="content-units-of-work" class="overview-content-section" style="display: none;">
-				@UnitsOfWorkContent(currentAgency, conversation)
-			</div>
-		</div>
-	</main>
+		</main>
+	</div>
 }
 
 // OverviewNavigationList shows the three navigation nodes

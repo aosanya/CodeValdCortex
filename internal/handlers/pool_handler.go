@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/aosanya/CodeValdCortex/internal/pool"
+	"github.com/gin-gonic/gin"
 )
 
 // PoolHandler handles HTTP requests for pool management
@@ -22,31 +23,31 @@ func NewPoolHandler(poolManager *pool.Manager) *PoolHandler {
 
 // CreatePoolRequest represents a request to create a new pool
 type CreatePoolRequest struct {
-	Name                  string                        `json:"name"`
-	Description           string                        `json:"description"`
-	LoadBalancingStrategy pool.LoadBalancingStrategy    `json:"load_balancing_strategy"`
-	MinAgents             int                           `json:"min_agents"`
-	MaxAgents             int                           `json:"max_agents"`
-	HealthCheckInterval   int64                         `json:"health_check_interval_ms"`
-	ResourceLimits        pool.ResourceLimits           `json:"resource_limits"`
-	AutoScaling           pool.AutoScalingConfig        `json:"auto_scaling"`
+	Name                  string                     `json:"name"`
+	Description           string                     `json:"description"`
+	LoadBalancingStrategy pool.LoadBalancingStrategy `json:"load_balancing_strategy"`
+	MinAgents             int                        `json:"min_agents"`
+	MaxAgents             int                        `json:"max_agents"`
+	HealthCheckInterval   int64                      `json:"health_check_interval_ms"`
+	ResourceLimits        pool.ResourceLimits        `json:"resource_limits"`
+	AutoScaling           pool.AutoScalingConfig     `json:"auto_scaling"`
 }
 
 // PoolResponse represents a pool in API responses
 type PoolResponse struct {
-	ID                    string                        `json:"id"`
-	Name                  string                        `json:"name"`
-	Description           string                        `json:"description"`
-	LoadBalancingStrategy pool.LoadBalancingStrategy    `json:"load_balancing_strategy"`
-	MinAgents             int                           `json:"min_agents"`
-	MaxAgents             int                           `json:"max_agents"`
-	HealthCheckInterval   int64                         `json:"health_check_interval_ms"`
-	ResourceLimits        pool.ResourceLimits           `json:"resource_limits"`
-	AutoScaling           pool.AutoScalingConfig        `json:"auto_scaling"`
-	Status                pool.PoolStatus               `json:"status"`
-	Metrics               *pool.PoolMetrics             `json:"metrics,omitempty"`
-	CreatedAt             time.Time                     `json:"created_at"`
-	UpdatedAt             time.Time                     `json:"updated_at"`
+	ID                    string                     `json:"id"`
+	Name                  string                     `json:"name"`
+	Description           string                     `json:"description"`
+	LoadBalancingStrategy pool.LoadBalancingStrategy `json:"load_balancing_strategy"`
+	MinAgents             int                        `json:"min_agents"`
+	MaxAgents             int                        `json:"max_agents"`
+	HealthCheckInterval   int64                      `json:"health_check_interval_ms"`
+	ResourceLimits        pool.ResourceLimits        `json:"resource_limits"`
+	AutoScaling           pool.AutoScalingConfig     `json:"auto_scaling"`
+	Status                pool.PoolStatus            `json:"status"`
+	Metrics               *pool.PoolMetrics          `json:"metrics,omitempty"`
+	CreatedAt             time.Time                  `json:"created_at"`
+	UpdatedAt             time.Time                  `json:"updated_at"`
 }
 
 // CreatePool handles POST /api/v1/pools
@@ -209,7 +210,7 @@ func (ph *PoolHandler) poolToResponse(p *pool.AgentPool, includeMetrics bool) Po
 	}
 
 	if includeMetrics {
-		response.Metrics = p.GetMetrics(nil)
+		response.Metrics = p.GetMetrics(context.TODO())
 	}
 
 	return response

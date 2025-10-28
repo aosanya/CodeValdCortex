@@ -43,6 +43,7 @@ type App struct {
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
 	aiDesignerService   *ai.AgencyDesignerService
+	introductionRefiner *ai.IntroductionRefiner
 }
 
 // New creates a new application instance
@@ -132,6 +133,7 @@ func New(cfg *config.Config) *App {
 
 	// Initialize AI agency designer service (if configured)
 	var aiDesignerService *ai.AgencyDesignerService
+	var introductionRefiner *ai.IntroductionRefiner
 	if cfg.AI.Provider != "" && cfg.AI.APIKey != "" {
 		logger.WithField("provider", cfg.AI.Provider).Info("Initializing AI agency designer service")
 		aiConfig := &ai.LLMConfig{
@@ -148,6 +150,7 @@ func New(cfg *config.Config) *App {
 			logger.WithError(err).Warn("Failed to initialize LLM client, AI designer will not be available")
 		} else {
 			aiDesignerService = ai.NewAgencyDesignerService(llmClient, logger)
+			introductionRefiner = ai.NewIntroductionRefiner(llmClient, logger)
 			logger.Info("AI agency designer service initialized successfully")
 		}
 	} else {
@@ -167,6 +170,7 @@ func New(cfg *config.Config) *App {
 		messageService:      messageService,
 		pubSubService:       pubSubService,
 		aiDesignerService:   aiDesignerService,
+		introductionRefiner: introductionRefiner,
 	}
 }
 
@@ -360,6 +364,13 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/units", agencyHandler.CreateUnitOfWork)
 		v1.PUT("/agencies/:id/units/:unitKey", agencyHandler.UpdateUnitOfWork)
 		v1.DELETE("/agencies/:id/units/:unitKey", agencyHandler.DeleteUnitOfWork)
+
+		// AI Refine endpoints (if AI services are available)
+		if a.introductionRefiner != nil {
+			aiRefineHandler := webhandlers.NewAIRefineHandler(a.agencyService, a.introductionRefiner, a.aiDesignerService, a.logger)
+			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
+			a.logger.Info("AI Refine endpoints registered")
+		}
 
 		// AI Agency Designer endpoints (if available)
 		if a.aiDesignerService != nil {

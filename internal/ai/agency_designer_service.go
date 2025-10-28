@@ -48,13 +48,8 @@ func (s *AgencyDesignerService) StartConversation(ctx context.Context, agencyID 
 		Timestamp: time.Now(),
 	})
 
-	// Get initial AI greeting
-	initialGreeting := s.getInitialGreeting()
-	conversation.Messages = append(conversation.Messages, Message{
-		Role:      "assistant",
-		Content:   initialGreeting,
-		Timestamp: time.Now(),
-	})
+	// Note: We don't add an initial AI greeting here because the UI shows a welcome message
+	// when there are no conversation messages
 
 	s.conversations[conversationID] = conversation
 
@@ -121,6 +116,42 @@ func (s *AgencyDesignerService) GetConversation(conversationID string) (*Convers
 	return conversation, nil
 }
 
+// AddMessage adds a message to an existing conversation without AI processing
+func (s *AgencyDesignerService) AddMessage(conversationID string, role string, content string) error {
+	conversation, exists := s.conversations[conversationID]
+	if !exists {
+		return fmt.Errorf("conversation not found: %s", conversationID)
+	}
+
+	conversation.Messages = append(conversation.Messages, Message{
+		Role:      role,
+		Content:   content,
+		Timestamp: time.Now(),
+	})
+	conversation.UpdatedAt = time.Now()
+
+	return nil
+}
+
+// GetConversationByAgencyID finds the most recent conversation for an agency
+func (s *AgencyDesignerService) GetConversationByAgencyID(agencyID string) (*ConversationContext, error) {
+	var latestConversation *ConversationContext
+
+	for _, conversation := range s.conversations {
+		if conversation.AgencyID == agencyID {
+			if latestConversation == nil || conversation.UpdatedAt.After(latestConversation.UpdatedAt) {
+				latestConversation = conversation
+			}
+		}
+	}
+
+	if latestConversation == nil {
+		return nil, fmt.Errorf("no conversation found for agency: %s", agencyID)
+	}
+
+	return latestConversation, nil
+}
+
 // GenerateAgencyDesign creates the final agency design from conversation
 func (s *AgencyDesignerService) GenerateAgencyDesign(ctx context.Context, conversationID string) (*AgencyDesign, error) {
 	conversation, exists := s.conversations[conversationID]
@@ -174,11 +205,11 @@ func (s *AgencyDesignerService) extractInformation(conversation *ConversationCon
 
 	state := conversation.State
 
-	// Extract business domain
+	// Extract business domain from user message and AI response
 	if state["domain"] == nil {
 		keywords := []string{"warehouse", "logistics", "healthcare", "water", "infrastructure", "agriculture"}
 		for _, keyword := range keywords {
-			if contains(userMsg, keyword) {
+			if contains(userMsg, keyword) || contains(aiMsg, keyword) {
 				state["domain"] = keyword
 				break
 			}
@@ -191,11 +222,8 @@ func (s *AgencyDesignerService) extractInformation(conversation *ConversationCon
 	}
 	agentTypes := state["agent_types"].([]string)
 
-	// Look for agent type patterns in AI response
-	if contains(aiMsg, "Agent") || contains(aiMsg, "agent") {
-		// Extract agent types (simplified)
-		// In production, use better NLP or structured output
-	}
+	// TODO: Implement agent type extraction from AI response
+	// For now, agent types will be managed separately
 
 	state["agent_types"] = agentTypes
 }

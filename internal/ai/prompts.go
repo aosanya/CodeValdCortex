@@ -1,5 +1,7 @@
 package ai
 
+import "fmt"
+
 // System prompts for different conversation phases
 
 // getSystemPrompt returns the system prompt for a given phase
@@ -18,22 +20,30 @@ func (s *AgencyDesignerService) getSystemPrompt(phase DesignPhase) string {
 	}
 }
 
-// getInitialGreeting returns the initial AI greeting
-func (s *AgencyDesignerService) getInitialGreeting() string {
-	return `Hi! I'm your AI Agency Designer. I'll help you create a complete multi-agent architecture for your use case. 
-
-I'll guide you through designing your agency by:
-1. 🎯 Understanding your business problem and requirements
-2. 🤖 Brainstorming the agent types you'll need
-3. 🔗 Mapping out how agents communicate
-4. ✅ Validating the complete architecture
-
-Let's start! Tell me about the system you want to build. What problem are you trying to solve?`
-}
-
 // getDesignGenerationPrompt creates the prompt for final design generation
 func (s *AgencyDesignerService) getDesignGenerationPrompt(conversation *ConversationContext) string {
-	return `Based on our entire conversation, please generate the complete agency design specification in JSON format.
+	var contextInfo string
+
+	// Extract context information from conversation state
+	if conversation != nil && conversation.State != nil {
+		if domain, ok := conversation.State["domain"]; ok && domain != nil {
+			contextInfo += fmt.Sprintf("Business Domain: %v\n", domain)
+		}
+		if agentTypes, ok := conversation.State["agent_types"]; ok && agentTypes != nil {
+			contextInfo += fmt.Sprintf("Mentioned Agent Types: %v\n", agentTypes)
+		}
+		if phase := conversation.Phase; phase != "" {
+			contextInfo += fmt.Sprintf("Current Phase: %s\n", phase)
+		}
+	}
+
+	prompt := `Based on our entire conversation, please generate the complete agency design specification in JSON format.`
+
+	if contextInfo != "" {
+		prompt += fmt.Sprintf("\n\nContext from our conversation:\n%s", contextInfo)
+	}
+
+	prompt += `
 
 Include:
 1. Agency name, description, and category
@@ -81,6 +91,8 @@ Format your response as a JSON object with this structure:
 }
 
 Please provide ONLY the JSON, no additional text.`
+
+	return prompt
 }
 
 const requirementsSystemPrompt = `You are an expert AI system architect and agency designer for the CodeValdCortex multi-agent platform.

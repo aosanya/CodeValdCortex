@@ -1,0 +1,91 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// AIRefineResponse renders the response after AI refinement of introduction
+templ AIRefineResponse(response *ai.RefineIntroductionResponse, currentAgency *agency.Agency, overview *agency.Overview) {
+	<div class="ai-refine-response" 
+		hx-trigger="load delay:500ms" 
+		hx-get={ "/agencies/" + currentAgency.ID + "/chat-messages?agencyName=" + currentAgency.Name }
+		hx-target="#chat-messages" 
+		hx-swap="innerHTML">
+		if response.WasChanged {
+			<!-- Introduction was refined -->
+			<div class="notification is-success is-light mb-4">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-success mr-2">
+						<i class="fas fa-magic"></i>
+					</span>
+					<span><strong>Introduction refined by AI and saved automatically</strong></span>
+				</div>
+			</div>
+		} else {
+			<!-- Introduction was already good -->
+			<div class="notification is-info is-light mb-4">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-info mr-2">
+						<i class="fas fa-check-circle"></i>
+					</span>
+					<span><strong>Introduction looks great!</strong></span>
+				</div>
+			</div>
+		}
+		
+		<!-- Updated introduction content -->
+		<div class="field">
+			<div class="control">
+				<textarea
+					class="textarea"
+					id="introduction-editor"
+					placeholder="Enter introduction text for this agency..."
+					rows="20"
+					style="font-family: monospace; font-size: 14px;">{ response.RefinedIntroduction }</textarea>
+			</div>
+		</div>
+		<p class="help">Use this section to provide an overview and introduction to your agency.</p>
+		
+		<!-- Action buttons -->
+		<div class="buttons is-right mt-4">
+			<button
+				class="button is-primary"
+				onclick="saveOverviewIntroduction()"
+				id="save-introduction-btn">
+				<span class="icon"><i class="fas fa-save"></i></span>
+				<span>Save</span>
+			</button>
+			<!-- AI Refine / Sparkle button (triggers AI refine flow) -->
+			<button
+				class="button is-info"
+				hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/overview/refine" }
+				hx-target="#introduction-content"
+				hx-indicator="#ai-refine-loading"
+				id="ai-sparkle-btn"
+				title="Refine with AI">
+				<span class="icon"><i class="fas fa-magic"></i></span>
+				<span>Refine</span>
+			</button>
+			<button
+				class="button"
+				onclick="undoOverviewIntroduction()"
+				id="undo-introduction-btn">
+				<span class="icon"><i class="fas fa-undo"></i></span>
+				<span>Undo</span>
+			</button>
+		</div>
+		
+		<!-- Loading indicator for AI refine -->
+		<div id="ai-refine-loading" class="htmx-indicator">
+			<div class="notification is-info is-light">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-info mr-2">
+						<i class="fas fa-spinner fa-spin"></i>
+					</span>
+					<span>AI is refining your introduction...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+}

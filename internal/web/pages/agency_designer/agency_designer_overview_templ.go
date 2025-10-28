@@ -35,7 +35,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Left Sidebar: Overview Navigation --><aside class=\"sidebar-panel\"><header class=\"sidebar-header\"><h3 class=\"sidebar-title\"><span class=\"icon\"><i class=\"fas fa-list\"></i></span> <span>Sections</span></h3></header><div class=\"sidebar-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"overview-layout\"><!-- Left Sidebar: Overview Navigation --><aside class=\"sidebar-panel\"><header class=\"sidebar-header\"><h3 class=\"sidebar-title\"><span class=\"icon\"><i class=\"fas fa-list\"></i></span> <span>Sections</span></h3></header><div class=\"sidebar-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -43,7 +43,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></aside><!-- Middle Panel: Overview Content --><main class=\"details-panel\"><header class=\"details-header\"><h3 class=\"details-title\" id=\"overview-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></h3></header><div class=\"details-content\" id=\"overview-content\"><!-- All section contents pre-rendered, toggled by JavaScript --><div id=\"content-introduction\" class=\"overview-content-section is-active\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div></aside><!-- Main Panel: Overview Content --><main class=\"details-panel\"><header class=\"details-header\"><h3 class=\"details-title\" id=\"overview-title\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>Introduction</span></h3></header><div class=\"details-content\" id=\"overview-content\"><!-- All section contents pre-rendered, toggled by JavaScript --><div id=\"content-introduction\" class=\"overview-content-section is-active\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +67,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></main></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,5 +1,12 @@
 /* Agency Designer - VS Code Style Layout */
 
+/* Prevent page scrolling */
+html,
+body {
+    overflow: hidden;
+    height: 100%;
+}
+
 /* Override Bulma's default section and container padding/margin */
 .section:has(.vscode-designer-container) {
     padding: 0 !important;
@@ -26,11 +33,34 @@
 
 /* Main Container */
 .vscode-designer-container {
-    display: flex;
-    flex-direction: column;
     height: 100vh;
     background: var(--vscode-bg);
     color: var(--vscode-text);
+}
+
+/* Bulma Columns Override for Full Height */
+.vscode-designer-container .columns {
+    margin: 0;
+    height: calc(100vh - 60px);
+    /* Account for top toolbar */
+}
+
+.vscode-designer-container .column {
+    padding: 0;
+    height: 100%;
+}
+
+/* Left Column - Designer Content */
+.vscode-designer-container .column.is-two-thirds {
+    border-right: 1px solid var(--vscode-border);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Right Column - Chat */
+.vscode-designer-container .column.is-one-third {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Top Toolbar */
@@ -128,9 +158,8 @@
     color: var(--vscode-accent);
 }
 
-/* Three Panel Layout */
+/* Designer Panels */
 .designer-panels {
-    display: flex;
     flex: 1;
     overflow: hidden;
     position: relative;
@@ -141,16 +170,25 @@
     display: none;
     flex: 1;
     overflow: hidden;
+    flex-direction: column;
 }
 
 .view-content.is-active {
     display: flex !important;
     flex: 1;
+    flex-direction: column;
 }
 
 /* Overview View */
 .view-content[data-view-content="overview"].is-active {
     display: flex;
+}
+
+/* Overview Layout Container */
+.overview-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
 }
 
 /* Overview and Layout Panels */
@@ -509,14 +547,28 @@
 
 /* Right Panel - Chat */
 .chat-panel {
-    width: 380px;
     background: var(--vscode-sidebar-bg);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
+    /* Use CSS Grid for reliable layout. Use minmax(0,1fr) so the middle row can
+         properly shrink (prevents flexbox/grid overflow pushing the footer out).
+         This is a common fix when a child with 1fr causes the container to grow. */
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+        "header"
+        "messages"
+        "input";
+    /* Use full available height and width in the column */
+    height: 100%;
+    width: 100%;
+    /* Allow the panel to shrink below 300px when needed to avoid pushing the page */
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    /* For absolute positioning of overlays */
 }
 
 .chat-header {
+    grid-area: header;
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--vscode-border);
     background: var(--vscode-sidebar-bg);
@@ -543,10 +595,14 @@
 
 /* Chat Messages */
 .chat-messages-container {
-    flex: 1;
+    grid-area: messages;
     overflow-y: auto;
     padding: 0.75rem;
     background: var(--vscode-panel-bg);
+    /* Ensure proper scrolling behavior inside a grid child */
+    min-height: 0;
+    /* Prevent the messages container from expanding beyond grid space */
+    max-height: 100%;
 }
 
 .message {
@@ -692,12 +748,61 @@
     }
 }
 
+/* AI Process Status Bar */
+.ai-process-status {
+    background: var(--vscode-sidebar-bg);
+    border-top: 1px solid var(--vscode-border);
+    padding: 0.5rem 0.75rem;
+    /* Position as overlay above the input when shown */
+    position: absolute;
+    bottom: 3.5rem;
+    /* Height of input footer */
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.process-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.process-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.process-text {
+    font-size: 0.85rem;
+    color: var(--vscode-text);
+    font-weight: 500;
+}
+
+.ai-process-status .button {
+    background: transparent;
+    border-color: #e74c3c;
+    color: #e74c3c;
+    font-size: 0.75rem;
+}
+
+.ai-process-status .button:hover {
+    background: #e74c3c;
+    color: white;
+}
+
 /* Chat Input */
 .chat-input-container {
+    grid-area: input;
     padding: 0.5rem 0.75rem;
     background: var(--vscode-sidebar-bg);
     border-top: 1px solid var(--vscode-border);
-    flex-shrink: 0;
+    /* Keep footer in normal flow (grid row) so it's always visible and not part of the scroll */
+    position: relative;
+    z-index: 20;
 }
 
 .chat-input-container .field {

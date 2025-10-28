@@ -45,8 +45,10 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 	}
 
 	// Check if there's an active conversation for this agency
-	// For now, we'll start fresh each time. Later we can add conversation persistence
 	var conversation *ai.ConversationContext
+	if existingConv, err := h.designerService.GetConversationByAgencyID(agencyID); err == nil {
+		conversation = existingConv
+	}
 
 	// Try to load the overview so we can pre-fill the introduction editor server-side
 	var overview *agency.Overview
@@ -155,6 +157,40 @@ func (h *AgencyDesignerWebHandler) GetAgentTypeDetails(c *gin.Context) {
 	}
 }
 
+// GetChatMessages renders just the chat messages for an agency (HTMX endpoint)
+func (h *AgencyDesignerWebHandler) GetChatMessages(c *gin.Context) {
+	agencyID := c.Param("id")
+
+	// Try to get the most recent conversation for this agency
+	conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
+	if err != nil {
+		// No conversation exists, render welcome message
+		agencyName := c.Query("agencyName")
+		if agencyName == "" {
+			agencyName = "Agency"
+		}
+
+		component := agency_designer.WelcomeMessage(agencyName)
+		c.Header("Content-Type", "text/html")
+		err = component.Render(c.Request.Context(), c.Writer)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to render welcome message")
+			c.String(http.StatusInternalServerError, "Failed to render chat")
+		}
+		return
+	}
+
+	// Render the chat messages
+	component := agency_designer.ChatMessages(conversation.Messages)
+	c.Header("Content-Type", "text/html")
+	err = component.Render(c.Request.Context(), c.Writer)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to render chat messages")
+		c.String(http.StatusInternalServerError, "Failed to render chat")
+		return
+	}
+}
+
 // RegisterRoutes registers the web routes
 func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 	// Main designer page (starts new conversation)
@@ -165,4 +201,7 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 
 	// Get agent type details (HTMX endpoint)
 	router.GET("/api/v1/conversations/:conversationId/agents/:agentId", h.GetAgentTypeDetails)
+
+	// Get chat messages for an agency (HTMX endpoint)
+	router.GET("/agencies/:id/chat-messages", h.GetChatMessages)
 }

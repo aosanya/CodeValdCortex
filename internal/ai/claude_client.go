@@ -18,7 +18,7 @@ type claudeClient struct {
 // NewClaudeClient creates a new Claude (Anthropic) client
 func NewClaudeClient(config *LLMConfig) (LLMClient, error) {
 	if config.APIKey == "" {
-		return nil, fmt.Errorf("Claude API key is required")
+		return nil, fmt.Errorf("claude api key is required")
 	}
 
 	if config.BaseURL == "" {
