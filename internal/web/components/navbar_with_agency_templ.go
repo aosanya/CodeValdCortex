@@ -33,12 +33,12 @@ func NavbarWithAgency(currentAgency *agency.Agency) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"navbar\" role=\"navigation\" aria-label=\"main navigation\"><div class=\"container\"><div class=\"navbar-brand\"><a href=\"/\" class=\"navbar-item\"><svg style=\"width: 2rem; height: 2rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z\"></path></svg> <span class=\"ml-2 has-text-weight-bold is-size-5\">CodeValdCortex</span></a> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav class=\"navbar\" role=\"navigation\" aria-label=\"main navigation\"><div class=\"container\"><div class=\"navbar-brand\" style=\"margin-left: -5rem;\"><a href=\"/\" class=\"navbar-item\"><svg style=\"width: 2rem; height: 2rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z\"></path></svg> <span class=\"ml-2 has-text-weight-bold is-size-5\">CodeValdCortex</span></a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if currentAgency != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"navbar-item current-agency-badge is-hidden-mobile\"><span class=\"icon is-medium\" style=\"font-size: 1.5rem;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"is-flex is-align-items-center ml-4 is-hidden-mobile\" style=\"opacity: 0.8;\"><span class=\"icon is-small\" style=\"font-size: 1rem;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -51,25 +51,25 @@ func NavbarWithAgency(currentAgency *agency.Agency) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span> <span class=\"ml-2\"><strong>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span> <span class=\"ml-2 is-size-6 has-text-grey-dark\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/navbar_with_agency.templ`, Line: 24, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/navbar_with_agency.templ`, Line: 24, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</strong></span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a role=\"button\" class=\"navbar-burger\" aria-label=\"menu\" aria-expanded=\"false\" data-target=\"navbarMenu\"><span aria-hidden=\"true\"></span> <span aria-hidden=\"true\"></span> <span aria-hidden=\"true\"></span></a></div><div id=\"navbarMenu\" class=\"navbar-menu\"><div class=\"navbar-start\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<a role=\"button\" class=\"navbar-burger\" aria-label=\"menu\" aria-expanded=\"false\" data-target=\"navbarMenu\"><span aria-hidden=\"true\"></span> <span aria-hidden=\"true\"></span> <span aria-hidden=\"true\"></span></a></div><div id=\"navbarMenu\" class=\"navbar-menu ml-5 pl-5\"><div class=\"navbar-start\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -113,53 +113,27 @@ func NavbarWithAgency(currentAgency *agency.Agency) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"navbar-item\">Agents</a> <a href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 templ.SafeURL
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/agencies/" + currentAgency.ID + "/pools"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/navbar_with_agency.templ`, Line: 51, Col: 73}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"navbar-item\">Pools</a> <a href=\"/agent-types\" class=\"navbar-item\">Agent Types</a> <a href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 templ.SafeURL
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/agencies/" + currentAgency.ID + "/visualizer"))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/navbar_with_agency.templ`, Line: 57, Col: 78}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"navbar-item\">Visualizer</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"navbar-item\">Agents</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<a href=\"/dashboard\" class=\"navbar-item\">Dashboard</a> <a href=\"/dashboard/agents\" class=\"navbar-item\">Agents</a> <a href=\"/dashboard/pools\" class=\"navbar-item\">Pools</a> <a href=\"/agent-types\" class=\"navbar-item\">Agent Types</a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a href=\"/dashboard\" class=\"navbar-item\">Dashboard</a> <a href=\"/dashboard/agents\" class=\"navbar-item\">Agents</a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><div class=\"navbar-end\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div class=\"navbar-end\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if currentAgency != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<a id=\"switch-agency-button\" class=\"navbar-item\" href=\"/\"><span class=\"icon\"><svg style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4\"></path></svg></span> <span>Switch Agency</span></a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<a id=\"switch-agency-button\" class=\"navbar-item\" href=\"/\"><span class=\"icon\"><svg style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4\"></path></svg></span> <span>Switch Agency</span></a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"navbar-item\"><div class=\"buttons\"><!-- Theme Switcher --><div class=\"navbar-item has-dropdown\" x-data=\"themeSwitcher()\" :class=\"{ 'is-active': isOpen }\"><a class=\"navbar-link\" @click=\"toggleDropdown()\"><span class=\"icon\"><svg style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V5z\"></path></svg></span> <span x-text=\"getCurrentThemeName()\"></span></a><div class=\"navbar-dropdown is-right\"><a class=\"navbar-item\" @click=\"selectTheme('light')\" :class=\"{ 'is-active': currentTheme === 'light' }\"><span class=\"theme-preview\" style=\"background-color: #ffffff; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Light</strong><br><small>Clean and bright</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('midnight-coral')\" :class=\"{ 'is-active': currentTheme === 'midnight-coral' }\"><span class=\"theme-preview\" style=\"background-color: #FF6B6B; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Midnight Coral</strong><br><small>Professional with vibrant accents</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('slate-purple')\" :class=\"{ 'is-active': currentTheme === 'slate-purple' }\"><span class=\"theme-preview\" style=\"background-color: #8b5cf6; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Slate Purple</strong><br><small>Bold and tech-forward</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('charcoal-emerald')\" :class=\"{ 'is-active': currentTheme === 'charcoal-emerald' }\"><span class=\"theme-preview\" style=\"background-color: #10b981; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Charcoal Emerald</strong><br><small>Fresh and trustworthy</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('navy-orange')\" :class=\"{ 'is-active': currentTheme === 'navy-orange' }\"><span class=\"theme-preview\" style=\"background-color: #f97316; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Navy Orange</strong><br><small>Energetic and confident</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('obsidian-cyan')\" :class=\"{ 'is-active': currentTheme === 'obsidian-cyan' }\"><span class=\"theme-preview\" style=\"background-color: #06b6d4; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Obsidian Cyan</strong><br><small>Sleek and minimalist</small></span></a><hr class=\"navbar-divider\"><a class=\"navbar-item\" @click=\"selectTheme('dark')\" :class=\"{ 'is-active': currentTheme === 'dark' }\"><span class=\"theme-preview\" style=\"background-color: #121212; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Dark Mode</strong><br><small>Easy on the eyes</small></span></a></div></div></div></div></div></div></div></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"navbar-item\"><div class=\"buttons\"><!-- Theme Switcher --><div class=\"navbar-item has-dropdown\" x-data=\"themeSwitcher()\" :class=\"{ 'is-active': isOpen }\"><a class=\"navbar-link\" @click=\"toggleDropdown()\"><span class=\"icon\"><svg style=\"width: 1.25rem; height: 1.25rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V5z\"></path></svg></span> <span x-text=\"getCurrentThemeName()\"></span></a><div class=\"navbar-dropdown is-right\"><a class=\"navbar-item\" @click=\"selectTheme('light')\" :class=\"{ 'is-active': currentTheme === 'light' }\"><span class=\"theme-preview\" style=\"background-color: #ffffff; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Light</strong><br><small>Clean and bright</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('midnight-coral')\" :class=\"{ 'is-active': currentTheme === 'midnight-coral' }\"><span class=\"theme-preview\" style=\"background-color: #FF6B6B; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Midnight Coral</strong><br><small>Professional with vibrant accents</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('slate-purple')\" :class=\"{ 'is-active': currentTheme === 'slate-purple' }\"><span class=\"theme-preview\" style=\"background-color: #8b5cf6; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Slate Purple</strong><br><small>Bold and tech-forward</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('charcoal-emerald')\" :class=\"{ 'is-active': currentTheme === 'charcoal-emerald' }\"><span class=\"theme-preview\" style=\"background-color: #10b981; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Charcoal Emerald</strong><br><small>Fresh and trustworthy</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('navy-orange')\" :class=\"{ 'is-active': currentTheme === 'navy-orange' }\"><span class=\"theme-preview\" style=\"background-color: #f97316; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Navy Orange</strong><br><small>Energetic and confident</small></span></a> <a class=\"navbar-item\" @click=\"selectTheme('obsidian-cyan')\" :class=\"{ 'is-active': currentTheme === 'obsidian-cyan' }\"><span class=\"theme-preview\" style=\"background-color: #06b6d4; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Obsidian Cyan</strong><br><small>Sleek and minimalist</small></span></a><hr class=\"navbar-divider\"><a class=\"navbar-item\" @click=\"selectTheme('dark')\" :class=\"{ 'is-active': currentTheme === 'dark' }\"><span class=\"theme-preview\" style=\"background-color: #121212; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);\"></span> <span><strong>Dark Mode</strong><br><small>Easy on the eyes</small></span></a></div></div></div></div></div></div></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

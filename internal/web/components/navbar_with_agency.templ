@@ -7,7 +7,7 @@ import (
 templ NavbarWithAgency(currentAgency *agency.Agency) {
 	<nav class="navbar" role="navigation" aria-label="main navigation">
 		<div class="container">
-			<div class="navbar-brand">
+			<div class="navbar-brand" style="margin-left: -5rem;">
 				<a href="/" class="navbar-item">
 					<svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
@@ -16,12 +16,12 @@ templ NavbarWithAgency(currentAgency *agency.Agency) {
 				</a>
 				
 				if currentAgency != nil {
-					<div class="navbar-item current-agency-badge is-hidden-mobile">
-						<span class="icon is-medium" style="font-size: 1.5rem;">
+					<div class="is-flex is-align-items-center ml-4 is-hidden-mobile" style="opacity: 0.8;">
+						<span class="icon is-small" style="font-size: 1rem;">
 							{ currentAgency.Icon }
 						</span>
-						<span class="ml-2">
-							<strong>{ currentAgency.Name }</strong>
+						<span class="ml-2 is-size-6 has-text-grey-dark">
+							{ currentAgency.Name }
 						</span>
 					</div>
 				}
@@ -33,7 +33,7 @@ templ NavbarWithAgency(currentAgency *agency.Agency) {
 				</a>
 			</div>
 			
-			<div id="navbarMenu" class="navbar-menu">
+			<div id="navbarMenu" class="navbar-menu ml-5 pl-5">
 				<div class="navbar-start">
 					if currentAgency != nil {
 						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/dashboard") } class="navbar-item">
@@ -48,27 +48,12 @@ templ NavbarWithAgency(currentAgency *agency.Agency) {
 						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/agents") } class="navbar-item">
 							Agents
 						</a>
-						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/pools") } class="navbar-item">
-							Pools
-						</a>
-						<a href="/agent-types" class="navbar-item">
-							Agent Types
-						</a>
-						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/visualizer") } class="navbar-item">
-							Visualizer
-						</a>
 					} else {
 						<a href="/dashboard" class="navbar-item">
 							Dashboard
 						</a>
 						<a href="/dashboard/agents" class="navbar-item">
 							Agents
-						</a>
-						<a href="/dashboard/pools" class="navbar-item">
-							Pools
-						</a>
-						<a href="/agent-types" class="navbar-item">
-							Agent Types
 						</a>
 					}
 				</div>
