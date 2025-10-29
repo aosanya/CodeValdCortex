@@ -25,8 +25,9 @@ echo "✓ Alpine.js downloaded"
 
 # Download Chart.js
 echo "Downloading Chart.js v4.4.1..."
-curl -L https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js -o static/js/chart.min.js
-echo "✓ Chart.js downloaded"
+curl -L https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js -o static/js/chart.umd.min.js
+curl -L https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js.map -o static/js/chart.umd.js.map
+echo "✓ Chart.js and source map downloaded"
 
 echo ""
 echo "================================================"
@@ -38,5 +39,4 @@ ls -lh static/js/
 
 echo ""
 echo "Next steps:"
-echo "  1. Run: make assets-build    (to build Tailwind CSS)"
-echo "  2. Run: make assets-verify   (to verify all assets)"
+echo "  1. Run: make assets-verify   (to verify all assets)"
