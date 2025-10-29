@@ -70,8 +70,18 @@ git branch -d feature/MVP-XXX_description
    - Add completed task to summary table in `mvp_done.md` with completion date
    - Remove completed task from active `mvp.md` file
    - Update any dependent task references
+   - **Update README.md roadmap**: For milestone/major feature completion, update the roadmap section with brief, concise progress notes (move items from planned to completed, update current focus)
    - Merge feature branch to main (see Branch Management above)
 4. **Dependencies**: Ensure prerequisite tasks are completed before starting dependent work
+
+### README.md Update Guidelines
+- **When to Update**: Major milestones, completed feature groups, significant architecture changes
+- **Keep Changes Brief**: Update roadmap status, current focus, and key capabilities only
+- **Areas to Update**: 
+  - Roadmap section (✅ completed items, 🔄 current focus)
+  - Key Features (if new major capabilities added)
+  - Current development focus and next milestones
+- **Avoid**: Detailed technical changes, minor bug fixes, work-in-progress updates
 
 ### Repository Structure
 ```

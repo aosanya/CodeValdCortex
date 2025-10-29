@@ -443,3 +443,47 @@ By keeping use cases as pure configuration, we achieve:
 - Framework-driven best practices
 
 The framework is powerful and complete - use it, don't reinvent it.
+
+## Integration with Agency Operations Framework
+
+Use cases within CodeValdCortex agencies should be designed with the Agency Operations Framework in mind. Each use case should consider:
+
+### Problem Definition Integration
+- **Problem Mapping**: Each use case should map to one or more defined problems in the agency's Problem Definition Module
+- **Solution Scope**: Use case configuration should align with the problem scope and success metrics
+- **Traceability**: Clear links between use case agents and the problems they help solve
+
+### Work Items (WI) Implementation
+- **Work Package Alignment**: Use case agent types should support the defined Work Items
+- **Agent Capabilities**: Agent capabilities in JSON configuration should match WI requirements
+- **Deliverable Support**: Agent schemas should capture data needed for WI deliverables
+
+### RACI Matrix Considerations
+When configuring use case agents, consider the RACI matrix requirements:
+- **Responsible Agents**: Agent types that execute work (R roles)
+- **Accountable Agents**: Agent types that verify completion and approve results (A roles)  
+- **Consulted Agents**: Agent types that provide input and expertise (C roles)
+- **Informed Agents**: Agent types that receive status updates and notifications (I roles)
+
+### Example: Financial Risk Analysis Use Case with RACI
+
+```json
+{
+    "id": "risk_analyzer",
+    "name": "Financial Risk Analyzer",
+    "description": "Responsible for executing risk analysis calculations",
+    "raci_roles": ["R"],
+    "capabilities": [
+        "calculate_ratios",
+        "analyze_trends",
+        "detect_anomalies"
+    ],
+    "reports_to": ["risk_supervisor"],
+    "consults_with": ["market_data_agent", "regulatory_agent"],
+    "informs": ["stakeholder_notification_agent"]
+}
+```
+
+This integration ensures that use case configurations support the broader agency operational framework and RACI-based responsibility assignments.
+
+For detailed information about the Agency Operations Framework, see [agency-operations-framework.md](agency-operations-framework.md).

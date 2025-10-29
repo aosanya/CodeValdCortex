@@ -8,12 +8,17 @@ CodeValdCortex is an enterprise-grade multi-agent AI orchestration platform desi
 
 ### Core Capabilities
 - **Multi-Agent Orchestration**: Coordinate thousands of AI agents with intelligent workload distribution
+- **Agency Operations Framework**: Structured problem definition, work items, and RACI responsibility management
 - **Cloud-Native Architecture**: Kubernetes-native deployment with horizontal auto-scaling
 - **Enterprise Security**: Zero-trust architecture with comprehensive audit trails and RBAC
 - **Real-Time Coordination**: Sub-100ms agent communication with Go's channel-based messaging
 - **Multi-Model Database**: ArangoDB integration for flexible data storage and graph relationships
 
 ### Advanced Features
+- **Agency Designer**: Visual interface for creating and managing multi-agent agencies
+- **AI-Powered Agent Creation**: Conversational interface for agent configuration through natural language
+- **Graph Relationships**: Problem-to-work-item mapping with impact analysis and coverage tracking
+- **RACI Matrix Management**: Visual editor for responsibility assignment with validation and templates
 - **Dynamic Scaling**: Automatic agent pool scaling based on workload demands
 - **Cross-Region Deployment**: Multi-cluster orchestration with data replication
 - **Workflow Engine**: Visual workflow designer with conditional logic and error handling
@@ -24,9 +29,9 @@ CodeValdCortex is an enterprise-grade multi-agent AI orchestration platform desi
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Management    │    │   API Gateway   │    │  Agent Pools    │
-│   Interface     │◄──►│   (Auth/Rate)   │◄──►│   (Workers)     │
-│  (React/TS)     │    │                 │    │                 │
+│  Agency Designer│    │   API Gateway   │    │  Agent Pools    │
+│ (Problem/Work   │◄──►│   (Auth/Rate)   │◄──►│   (Workers)     │
+│  Item/RACI)     │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
@@ -39,17 +44,62 @@ CodeValdCortex is an enterprise-grade multi-agent AI orchestration platform desi
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   ArangoDB      │    │   Monitoring    │    │   Security      │
-│  (Multi-Model)  │    │ (Prometheus/    │    │  (Auth/RBAC)    │
-│                 │    │  Grafana)       │    │                 │
+│ (Graph Database │    │ (Prometheus/    │    │  (Auth/RBAC)    │
+│ Problems/Work)  │    │  Grafana)       │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+### Agency Operations Framework Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Agency Designer Interface                     │
+├─────────────────────────────────────────────────────────────────────┤
+│  Problem Definition  │  Work Items Mgmt  │  RACI Matrix Editor      │
+│                      │                   │                          │
+│  • Problem CRUD      │  • Work Item CRUD │  • Visual Matrix         │
+│  • Success Metrics   │  • Deliverables   │  • Role Assignment       │
+│  • Auto-numbering    │  • Dependencies   │  • Validation Rules      │
+│                      │                   │  • Templates             │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     ArangoDB Graph Database                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│   ┌─────────────┐    ┌─────────────────────┐    ┌─────────────┐     │
+│   │  Problems   │    │   Relationships     │    │ Work Items  │     │
+│   │ Collection  │◄──►│   (Graph Edges)     │◄──►│ Collection  │     │
+│   │             │    │                     │    │             │     │
+│   │ • Code      │    │ • solves           │    │ • Code      │     │
+│   │ • Scope     │    │ • supports         │    │ • RACI      │     │
+│   │ • Metrics   │    │ • enables          │    │ • Delivs    │     │
+│   └─────────────┘    │ • mitigates        │    └─────────────┘     │
+│                      └─────────────────────┘                       │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Analytics & Reporting                           │
+├─────────────────────────────────────────────────────────────────────┤
+│  Graph Visualization │  Coverage Analysis │  Impact Analysis        │
+│                      │                    │                         │
+│  • Interactive Graph │  • Unaddressed     │  • Multi-problem        │
+│  • Node/Edge Types   │    Problems        │    Work Items          │
+│  • Layout Algorithms │  • Solution Gaps   │  • RACI Distribution    │
+│                      │                    │  • Workload Analysis    │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ## 🛠️ Technology Stack
 
 ### Backend
 - **Go 1.21+**: Native concurrency with goroutines and channels
+- **Templ**: Type-safe HTML templating for server-side rendering
+- **HTMX**: Modern frontend interactions without JavaScript frameworks
 - **Kubernetes**: Container orchestration and service mesh
-- **ArangoDB**: Multi-model database for agent state and coordination
+- **ArangoDB**: Multi-model graph database for problems, work items, and relationships
 - **Redis**: Distributed caching and message persistence
 - **gRPC**: High-performance service communication
 
@@ -91,9 +141,11 @@ CodeValdCortex/
 ### Key Documents
 - **[Problem Definition](documents/1-SoftwareRequirements/introduction/problem-definition.md)**: Market analysis and solution overview
 - **[Functional Requirements](documents/1-SoftwareRequirements/requirements/functional-requirements.md)**: Core system capabilities and features
+- **[Agency Operations Framework](documents/2-SoftwareDesignAndArchitecture/agency-operations-framework.md)**: Problem definition, work items, and RACI matrix management
 - **[General Architecture](documents/2-SoftwareDesignAndArchitecture/2-general-architecture.md)**: High-level system design
 - **[Backend Architecture](documents/2-SoftwareDesignAndArchitecture/backend-architecture.md)**: Go-based backend implementation
 - **[Core Features](documents/3-SofwareDevelopment/core-systems/agent-lifecycle.md)**: Agent lifecycle management
+- **[MVP Tasks](documents/3-SofwareDevelopment/mvp.md)**: Current development roadmap and task breakdown
 - **[Infrastructure Setup](documents/3-SofwareDevelopment/infrastructure/)**: Kubernetes, ArangoDB, and monitoring setup
 
 ## 🚀 Quick Start
@@ -224,11 +276,17 @@ See [QA Documentation](documents/4-QA/README.md) for detailed testing instructio
 
 ## 🎯 Use Cases
 
+### Agency Operations Management
+- **Consulting Firms**: Problem breakdown with structured work items and clear RACI responsibilities
+- **Project Management**: Multi-project coordination with problem-solution mapping and accountability tracking
+- **Research Organizations**: Research problem definition with deliverable tracking and role assignments
+- **Government Agencies**: Policy implementation with stakeholder responsibility matrices
+
 ### Enterprise Integration
-- **Financial Services**: Risk assessment agents with regulatory compliance
-- **Healthcare**: Patient data processing with HIPAA compliance
-- **Manufacturing**: Supply chain optimization with real-time coordination
-- **Telecommunications**: Network optimization and anomaly detection
+- **Financial Services**: Risk assessment agents with regulatory compliance and structured problem analysis
+- **Healthcare**: Patient data processing with HIPAA compliance and care coordination workflows
+- **Manufacturing**: Supply chain optimization with real-time coordination and problem-solving frameworks
+- **Telecommunications**: Network optimization and anomaly detection with operational excellence methodologies
 
 ### Technical Applications
 - **Data Processing**: Distributed ETL pipelines with intelligent load balancing
@@ -310,38 +368,67 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 
 ## 🗺️ Roadmap
 
-### ✅ Completed (MVP-001)
-- ✅ Core project infrastructure
-- ✅ Go application with HTTP server
+### ✅ Completed Foundation (MVP-001 to MVP-013)
+- ✅ Core project infrastructure and Go application
 - ✅ Environment-based configuration system
 - ✅ Docker Compose development environment
-- ✅ Prometheus monitoring setup
-- ✅ Comprehensive QA testing framework
+- ✅ Prometheus monitoring and QA testing framework
 - ✅ Health and status endpoints
+- ✅ Agent runtime environment and registry system
+- ✅ Agent lifecycle management and communication
+- ✅ Memory management and PubSub messaging
+- ✅ REST API layer and basic orchestration
+- ✅ Agency Management with Templ+HTMX interface
 
-### 🔄 In Progress
-- 🔄 Agent runtime environment (MVP-002)
-- 🔄 Agent registry system (MVP-003)
-- 🔄 Agent lifecycle management (MVP-004)
+### 🔄 In Progress (Current Sprint)
+- 🔄 Management Dashboard with real-time monitoring (MVP-015)
+- � Agency Designer enhancements and user experience improvements
 
-### � Planned (v1.0 MVP)
-- 📋 Agent communication system
-- 📋 Agent memory management
-- 📋 Multi-agent orchestration
-- � REST API layer
-- 📋 Kubernetes deployment
-- 📋 Management dashboard
+### 📋 Planned - Agency Operations Framework (v1.0 MVP)
+- 📋 **MVP-029**: Problem Definition Module - Structured problem cataloging with CRUD operations
+- 📋 **MVP-030**: Work Items Basic Management - Core work breakdown structure with deliverables
+- 📋 **MVP-033**: RACI Matrix Editor - Visual responsibility assignment with validation and templates
+- 📋 **MVP-031**: Graph Relationships System - ArangoDB graph mapping between problems and work items
+- 📋 **MVP-032**: Agency Operations Analytics - Coverage analysis, impact visualization, and reporting
+
+### 🚀 Advanced Features (v1.0 MVP)
+- 📋 **MVP-023**: AI Agent Creator - Conversational interface for natural language agent configuration
+- 📋 **MVP-014**: Kubernetes Deployment - Production-ready containerized deployment
+- 📋 **MVP-016-020**: Agent Property Broadcasting - Real-time agent state sharing with UC-TRACK-001 implementation
+
+### 🔐 Security & Enterprise (v1.0 MVP)
+- 📋 **MVP-026**: Basic User Authentication - Registration, login, and session management
+- 📋 **MVP-027**: Security Implementation - Input validation, HTTPS, and security headers
+- 📋 **MVP-028**: Access Control System - Role-based access control for agent operations
 
 ### Future Releases (v1.1+)
-- 📋 Advanced workflow engine
-- 📋 Multi-region deployment
-- 📋 Machine learning integration
-- 📋 Visual workflow designer
-- 📋 Advanced analytics dashboard
-- 📋 Third-party integrations
+- 📋 Advanced workflow engine with visual designer
+- 📋 Multi-region deployment and cluster federation
+- 📋 Machine learning integration and intelligent agent optimization
+- 📋 Advanced analytics dashboard with predictive insights
+- 📋 Third-party integrations (Slack, Teams, Jira, ServiceNow)
+- 📋 Mobile applications for agency management
+- 📋 API marketplace and plugin ecosystem
 
-**Current Status**: Foundation Phase - MVP-001 Complete ✅  
-**Next Milestone**: Agent Runtime Environment (MVP-002)
+### Current Development Focus
+
+**Phase**: Agency Operations Framework Implementation  
+**Active Milestone**: MVP-029 (Problem Definition Module)  
+**Next Milestones**: MVP-030 → MVP-033 → MVP-031 → MVP-032
+
+**Key Deliverables for Q4 2025**:
+1. Complete Agency Operations Framework (Problems, Work Items, RACI)
+2. Graph database relationships and analytics
+3. AI-powered agent creation interface
+4. Production Kubernetes deployment
+5. Real-time agent property broadcasting system
+
+**Success Metrics**:
+- ✅ Agency Designer operational with full CRUD capabilities
+- ✅ Problem-to-work-item relationship mapping functional
+- ✅ RACI matrix validation and templates working
+- ✅ Graph analytics providing actionable insights
+- ✅ AI agent creator passing user acceptance tests
 
 ---
 

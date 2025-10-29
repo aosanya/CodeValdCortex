@@ -12,6 +12,7 @@ This directory contains the comprehensive software design and architecture docum
 - **[backend-architecture.md](backend-architecture.md)**: Detailed backend system design and Go implementation patterns
 - **[frontend-architecture.md](frontend-architecture.md)**: Management interface architecture and React/TypeScript implementation
 - **[usecase-architecture.md](usecase-architecture.md)**: **Use case design principles - configuration-only approach (no custom code)**
+- **[agency-operations-framework.md](agency-operations-framework.md)**: **Agency problem definition, work items, and RACI matrix framework**
 
 ## Architectural Principles
 

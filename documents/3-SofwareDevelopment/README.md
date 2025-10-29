@@ -20,6 +20,11 @@ The CodeValdCortex software development documentation has been organized into fo
 - **[future-features.md](future-features.md)**: Post-MVP roadmap and advanced features *(pending)*
 - **[maintenance.md](maintenance.md)**: Ongoing maintenance and operational procedures *(pending)*
 
+### Agency Operations Framework
+- **[Problem Definition](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#problem-definition-module)**: Structured approach to defining problems that agencies solve
+- **[Work Items](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#work-items-wi)**: Discrete work packages with clear deliverables and dependencies  
+- **[RACI Matrix](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#raci-matrix-for-work-items)**: Role and responsibility assignments for each work item
+
 ## Architecture Overview
 
 CodeValdCortex is built as an enterprise-grade multi-agent AI orchestration platform with the following key components:

@@ -23,7 +23,12 @@
 | ------- | --------------------- | ---------------------------------------------------------------------------------- | ----------- | -------- | ------ | ----------------------- | ------------ |
 | MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-010      |
 | MVP-015 | Management Dashboard  | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | In Progress | P1       | Medium | Go, Frontend Dev, Templ | MVP-013      |
-| MVP-023 | AI Agent Creator      | Implement AI-powered conversational interface for creating agents. AI asks questions, resolves details, and generates complete agent configurations through natural language dialogue | Not Started | P1       | Medium | Go, Templ, AI/LLM, Frontend Dev | MVP-022      |
+| MVP-023 | AI Agent Creator      | Implement AI-powered conversational interface for creating agents. AI asks questions, resolves details, and generates complete agent configurations through natural language dialogue | Not Started | P1       | Medium | Go, Templ, AI/LLM, Frontend Dev | MVP-025      |
+| MVP-029 | Problem Definition Module | Implement Problem Definition CRUD operations, data models, and UI in Agency Designer | Not Started | P1       | Medium | Go, Templ, ArangoDB | MVP-025      |
+| MVP-030 | Work Items Basic Management | Implement Work Items CRUD operations, data models, and basic UI in Agency Designer | Not Started | P1       | Low    | Go, Templ, ArangoDB | MVP-029      |
+| MVP-033 | RACI Matrix Editor | Implement visual RACI matrix editor with role assignments, validation, and templates | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-030      |
+| MVP-031 | Graph Relationships System | Implement ArangoDB graph collections and relationship mapping between Problems and Work Items | Not Started | P1       | Medium | Go, ArangoDB, Graph DB | MVP-033      |
+| MVP-032 | Agency Operations Analytics | Implement graph visualization, coverage analysis, and relationship analytics | Not Started | P1       | Low    | Go, Frontend Dev, Graph Viz | MVP-031      |
 
 ## Authentication & Security Tasks (P2 - Important)
 
@@ -405,6 +410,450 @@ POST /api/v1/agencies/{agency_id}/agents/create
 - Multi-language support
 - AI-powered agent optimization suggestions
 - Learning from user corrections and preferences
+
+---
+
+### MVP-029: Problem Definition Module
+
+**Objective**: Implement the Problem Definition Module as the foundation for agency operational framework, enabling structured problem cataloging and management.
+
+**Key Deliverables**:
+
+1. **Data Models**:
+   ```go
+   type Problem struct {
+       Key            string    `json:"_key,omitempty"`
+       ID             string    `json:"_id,omitempty"`
+       AgencyID       string    `json:"agency_id"`
+       Number         int       `json:"number"`
+       Code           string    `json:"code"`
+       Description    string    `json:"description"`
+       Scope          string    `json:"scope"`
+       SuccessMetrics []string  `json:"success_metrics"`
+       CreatedAt      time.Time `json:"created_at"`
+       UpdatedAt      time.Time `json:"updated_at"`
+   }
+   ```
+
+2. **Backend Services**:
+   - `ProblemService` interface and implementation
+   - CRUD operations with validation
+   - Agency-scoped data access
+   - Auto-numbering for problem sequences
+   - Duplicate code prevention
+
+3. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/problems
+   POST   /api/v1/agencies/{id}/problems
+   PUT    /api/v1/agencies/{id}/problems/{problemKey}
+   DELETE /api/v1/agencies/{id}/problems/{problemKey}
+   GET    /api/v1/agencies/{id}/problems/html   # HTML for HTMX
+   ```
+
+4. **User Interface**:
+   - Problem definition form with validation
+   - Problems list with search and filtering
+   - Problem editor with rich text support
+   - Integration with Agency Designer layout
+   - Success metrics management
+
+5. **Database Schema**:
+   - ArangoDB `problems` collection
+   - Proper indexing for agency queries
+   - Data validation rules
+   - Migration scripts
+
+**Acceptance Criteria**:
+- [ ] Users can create, edit, and delete problems
+- [ ] Problem codes are unique within agency
+- [ ] Auto-numbering works correctly
+- [ ] Search and filtering functional
+- [ ] Form validation prevents invalid data
+- [ ] Agency-scoped security implemented
+
+**Dependencies**: MVP-025 (Agency Designer foundation)
+
+---
+
+### MVP-030: Work Items Basic Management
+
+**Objective**: Implement basic Work Items management with CRUD operations and core data structures, laying the foundation for the RACI matrix functionality.
+
+**Key Deliverables**:
+
+1. **Data Models**:
+   ```go
+   type WorkItem struct {
+       Key          string      `json:"_key,omitempty"`
+       ID           string      `json:"_id,omitempty"`
+       AgencyID     string      `json:"agency_id"`
+       Number       int         `json:"number"`
+       Code         string      `json:"code"`
+       Description  string      `json:"description"`
+       Deliverables []string    `json:"deliverables"`
+       Dependencies []string    `json:"dependencies"`
+       CreatedAt    time.Time   `json:"created_at"`
+       UpdatedAt    time.Time   `json:"updated_at"`
+   }
+   ```
+
+2. **Backend Services**:
+   - `WorkItemService` interface and implementation
+   - CRUD operations with validation
+   - Agency-scoped data access
+   - Auto-numbering for work item sequences
+   - Duplicate code prevention
+
+3. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/work-items
+   POST   /api/v1/agencies/{id}/work-items
+   PUT    /api/v1/agencies/{id}/work-items/{workItemKey}
+   DELETE /api/v1/agencies/{id}/work-items/{workItemKey}
+   GET    /api/v1/agencies/{id}/work-items/html   # HTML for HTMX
+   ```
+
+4. **Basic User Interface**:
+   - Work items list with search and filtering
+   - Work item creation/editing form
+   - Deliverables management (add/remove)
+   - Dependencies selection interface
+   - Integration with Agency Designer layout
+
+5. **Database Schema**:
+   - ArangoDB `work_items` collection
+   - Proper indexing for agency queries
+   - Data validation rules
+   - Migration scripts
+
+**Acceptance Criteria**:
+- [ ] Users can create, edit, and delete work items
+- [ ] Work item codes are unique within agency
+- [ ] Auto-numbering works correctly
+- [ ] Search and filtering functional
+- [ ] Form validation prevents invalid data
+- [ ] Deliverables and dependencies can be managed
+- [ ] Agency-scoped security implemented
+
+**Dependencies**: MVP-029 (Problem Definition Module)
+
+---
+
+### MVP-033: RACI Matrix Editor
+
+**Objective**: Implement a comprehensive visual RACI matrix editor with role assignments, validation rules, and templates for work items.
+
+**Key Deliverables**:
+
+1. **RACI Data Models**:
+   ```go
+   type RACIMatrix struct {
+       WorkItemKey string         `json:"work_item_key"`
+       Activities  []RACIActivity `json:"activities"`
+       CreatedAt   time.Time      `json:"created_at"`
+       UpdatedAt   time.Time      `json:"updated_at"`
+   }
+
+   type RACIActivity struct {
+       ID          string              `json:"id"`
+       Name        string              `json:"name"`
+       Description string              `json:"description"`
+       Assignments map[string]RACIRole `json:"assignments"` // role_name -> RACI role
+   }
+
+   type RACIRole string
+   const (
+       Responsible RACIRole = "R"
+       Accountable RACIRole = "A"
+       Consulted   RACIRole = "C"
+       Informed    RACIRole = "I"
+   )
+   ```
+
+2. **Visual RACI Matrix Editor**:
+   - Interactive table/grid interface
+   - Role columns (Agency Lead, Technical Lead, Subject Matter Expert, etc.)
+   - Activity rows with descriptions
+   - Click-to-assign RACI roles
+   - Color-coded role assignments
+   - Drag-and-drop for reordering activities
+
+3. **RACI Validation Engine**:
+   - Each activity must have exactly one Accountable (A) role
+   - Each activity must have at least one Responsible (R) role
+   - Warn about activities with no Consulted (C) or Informed (I) roles
+   - Validation error display with specific guidance
+   - Real-time validation as user makes changes
+
+4. **Role Templates**:
+   - Predefined RACI templates for common work item types
+   - Templates: "Software Development", "Research & Analysis", "Deployment", "Testing"
+   - Template application with customization options
+   - Save custom templates for agency reuse
+
+5. **Backend Services**:
+   - `RACIService` interface and implementation
+   - RACI matrix CRUD operations
+   - Template management service
+   - Validation service with detailed error reporting
+
+6. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/work-items/{workItemKey}/raci
+   POST   /api/v1/agencies/{id}/work-items/{workItemKey}/raci
+   PUT    /api/v1/agencies/{id}/work-items/{workItemKey}/raci
+   DELETE /api/v1/agencies/{id}/work-items/{workItemKey}/raci
+   GET    /api/v1/agencies/{id}/raci-templates
+   POST   /api/v1/agencies/{id}/raci-templates
+   ```
+
+7. **Advanced Features**:
+   - Activity templates library
+   - Role responsibility descriptions
+   - RACI matrix export to PDF/Excel
+   - Activity dependency mapping
+   - Role workload analysis
+
+**UI Components**:
+```html
+<!-- RACI Matrix Editor -->
+<div class="raci-matrix-editor">
+  <div class="matrix-toolbar">
+    <button class="button is-primary" onclick="addActivity()">
+      <span class="icon">➕</span>
+      <span>Add Activity</span>
+    </button>
+    <div class="dropdown">
+      <div class="dropdown-trigger">
+        <button class="button">
+          <span>Templates</span>
+          <span class="icon">🔽</span>
+        </button>
+      </div>
+      <div class="dropdown-menu">
+        <div class="dropdown-content">
+          <a class="dropdown-item" onclick="loadTemplate('software-dev')">
+            Software Development
+          </a>
+          <a class="dropdown-item" onclick="loadTemplate('research')">
+            Research & Analysis
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="matrix-container">
+    <table class="table is-striped is-hoverable raci-table">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Agency Lead</th>
+          <th>Technical Lead</th>
+          <th>Subject Matter Expert</th>
+          <th>Quality Assurance</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="raci-activities">
+        <!-- Activities populated dynamically -->
+        <tr class="activity-row" data-activity-id="act-1">
+          <td class="activity-description">
+            <strong>Requirements Gathering</strong>
+            <p class="help">Collect and document functional requirements</p>
+          </td>
+          <td class="role-assignment">
+            <div class="raci-selector">
+              <button class="raci-btn active" data-role="A">A</button>
+              <button class="raci-btn" data-role="R">R</button>
+              <button class="raci-btn" data-role="C">C</button>
+              <button class="raci-btn" data-role="I">I</button>
+            </div>
+          </td>
+          <td class="role-assignment">
+            <div class="raci-selector">
+              <button class="raci-btn" data-role="A">A</button>
+              <button class="raci-btn active" data-role="R">R</button>
+              <button class="raci-btn" data-role="C">C</button>
+              <button class="raci-btn" data-role="I">I</button>
+            </div>
+          </td>
+          <!-- More role columns -->
+          <td class="activity-actions">
+            <button class="button is-small" onclick="editActivity('act-1')">
+              ✏️
+            </button>
+            <button class="button is-small" onclick="deleteActivity('act-1')">
+              🗑️
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="validation-summary">
+    <div class="notification is-warning" id="validation-warnings">
+      <strong>⚠️ Validation Issues:</strong>
+      <ul>
+        <li>Activity "Testing" has no Accountable role assigned</li>
+        <li>Activity "Deployment" has multiple Accountable roles</li>
+      </ul>
+    </div>
+  </div>
+</div>
+```
+
+**Acceptance Criteria**:
+- [ ] Visual RACI matrix editor works smoothly
+- [ ] RACI validation rules enforced in real-time
+- [ ] Templates can be applied and customized
+- [ ] Role assignments save and persist correctly
+- [ ] Export functionality generates proper RACI documentation
+- [ ] User can manage activities (add/edit/delete/reorder)
+- [ ] Interface is intuitive and responsive
+- [ ] Integration with work items seamless
+
+**Dependencies**: MVP-030 (Work Items Basic Management)
+
+---
+
+### MVP-031: Graph Relationships System
+
+**Objective**: Implement ArangoDB graph collections and relationship mapping between Problems and Work Items with rich metadata.
+
+**Key Deliverables**:
+
+1. **Graph Database Schema**:
+   - `problems` collection (already from MVP-029)
+   - `work_items` collection (already from MVP-030)
+   - `problem_work_item_relationships` edge collection
+   - Proper graph indices and constraints
+
+2. **Relationship Data Model**:
+   ```go
+   type ProblemWorkItemRelationship struct {
+       Key                     string           `json:"_key,omitempty"`
+       ID                      string           `json:"_id,omitempty"`
+       From                    string           `json:"_from"` // problems/{problem_key}
+       To                      string           `json:"_to"`   // work_items/{work_item_key}
+       RelationshipType        RelationshipType `json:"relationship_type"`
+       ContributionDescription string           `json:"contribution_description"`
+       ImpactLevel            ImpactLevel      `json:"impact_level"`
+       CreatedAt              time.Time        `json:"created_at"`
+       UpdatedAt              time.Time        `json:"updated_at"`
+   }
+   ```
+
+3. **Relationship Types**:
+   - `solves` - Work item directly addresses the problem
+   - `supports` - Work item contributes to solving the problem
+   - `enables` - Work item creates prerequisites for the problem
+   - `mitigates` - Work item reduces impact/likelihood of the problem
+
+4. **Graph Services**:
+   - `RelationshipService` for edge management
+   - Graph traversal queries using AQL
+   - Relationship validation (ensure nodes exist)
+   - Bulk relationship operations
+
+5. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/relationships
+   POST   /api/v1/agencies/{id}/relationships
+   PUT    /api/v1/agencies/{id}/relationships/{relationshipKey}
+   DELETE /api/v1/agencies/{id}/relationships/{relationshipKey}
+   GET    /api/v1/agencies/{id}/problems/{problemKey}/work-items
+   GET    /api/v1/agencies/{id}/work-items/{workItemKey}/problems
+   ```
+
+6. **Relationship Interface**:
+   - Visual relationship editor
+   - Problem/Work Item selection dropdowns
+   - Relationship type and impact level selectors
+   - Contribution description editor with templates
+   - Validation and duplicate prevention
+
+**Acceptance Criteria**:
+- [ ] Graph collections created and indexed
+- [ ] Relationships can be created between problems and work items
+- [ ] Graph traversal queries work efficiently
+- [ ] Relationship validation prevents invalid references
+- [ ] Users can manage relationships through UI
+- [ ] Relationship metadata is properly stored
+
+**Dependencies**: MVP-033 (RACI Matrix Editor)
+
+---
+
+### MVP-032: Agency Operations Analytics
+
+**Objective**: Implement graph visualization, coverage analysis, and relationship analytics to provide insights into agency operations.
+
+**Key Deliverables**:
+
+1. **Graph Visualization**:
+   - Interactive graph diagram showing problem-work item relationships
+   - Node types: Problems (circles), Work Items (squares)
+   - Edge types: Different colors/styles for relationship types
+   - Zoom, pan, and selection functionality
+   - Graph layout algorithms (force-directed, hierarchical)
+
+2. **Analytics Queries**:
+   ```aql
+   // Coverage Analysis - Problems without work items
+   FOR p IN problems
+     FILTER p.agency_id == @agencyId
+     LET work_items = (
+       FOR v IN 1..1 OUTBOUND p._id problem_work_item_relationships
+         RETURN v
+     )
+     FILTER LENGTH(work_items) == 0
+     RETURN p
+
+   // Impact Analysis - Work items affecting multiple problems  
+   FOR wi IN work_items
+     FILTER wi.agency_id == @agencyId
+     LET problems = (
+       FOR v IN 1..1 INBOUND wi._id problem_work_item_relationships
+         RETURN v
+     )
+     FILTER LENGTH(problems) > 1
+     RETURN {work_item: wi, problem_count: LENGTH(problems)}
+   ```
+
+3. **Analytics Dashboard**:
+   - Coverage metrics (problems without solutions)
+   - Impact metrics (work items solving multiple problems)
+   - Relationship type distribution
+   - RACI role distribution across work items
+   - Agency operations health score
+
+4. **Export Functionality**:
+   - Generate PDF reports with RACI matrices
+   - Export relationship mappings to CSV
+   - Generate problem-solution documentation
+   - Export graph visualizations as images
+
+5. **API Endpoints**:
+   ```
+   GET /api/v1/agencies/{id}/analytics/coverage
+   GET /api/v1/agencies/{id}/analytics/impact  
+   GET /api/v1/agencies/{id}/analytics/graph
+   GET /api/v1/agencies/{id}/analytics/raci-summary
+   POST /api/v1/agencies/{id}/export/documentation
+   ```
+
+**Acceptance Criteria**:
+- [ ] Graph visualization displays correctly
+- [ ] Coverage analysis identifies unaddressed problems
+- [ ] Impact analysis shows multi-problem work items
+- [ ] Export functionality generates proper documentation
+- [ ] Analytics provide actionable insights
+- [ ] Performance is acceptable for typical agency sizes
+
+**Dependencies**: MVP-031 (Graph Relationships System)
 
 ---
 
