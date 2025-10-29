@@ -63,7 +63,7 @@ func ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationContex
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Typing Indicator --><div class=\"typing-indicator\" id=\"typing-indicator\" style=\"display: none;\"><div class=\"typing-bubble\"><span></span><span></span><span></span></div></div><!-- AI Processing Indicator for Chat --><div class=\"chat-loading-indicator htmx-indicator\" id=\"chat-loading-indicator\" style=\"display: none;\"><div class=\"message ai-message\"><div class=\"message-avatar\"><span class=\"icon is-medium has-text-primary\"><i class=\"fas fa-robot\"></i></span></div><div class=\"message-content\"><div class=\"message-bubble\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-info mr-2\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>AI is refining your introduction...</span></div></div></div></div></div><!-- AI Process Status Bar (above input) --><div class=\"ai-process-status htmx-indicator\" id=\"ai-process-status\" style=\"display: none;\"><div class=\"process-content\"><div class=\"process-info\"><span class=\"icon has-text-info\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span class=\"process-text\">AI is refining your introduction...</span></div><button class=\"button is-small is-danger is-outlined\" id=\"stop-ai-process\" title=\"Stop AI processing\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button></div></div><!-- Chat Input (Independent) --><div class=\"chat-input-container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Typing Indicator --><div class=\"typing-indicator\" id=\"typing-indicator\" style=\"display: none;\"><div class=\"typing-bubble\"><span></span><span></span><span></span></div></div><!-- Chat Input (Independent) --><div class=\"chat-input-container\"><!-- AI Process Status Bar (inside input panel) --><div class=\"ai-process-status htmx-indicator\" id=\"ai-process-status\" style=\"display: none;\"><div class=\"process-content\"><div class=\"process-info\"><span class=\"icon has-text-info\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span class=\"process-text\" id=\"ai-status-message\">AI is working on your request...</span></div><button class=\"button is-small is-danger is-outlined\" id=\"stop-ai-process\" title=\"Stop AI processing\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,7 +108,7 @@ func WelcomeMessage(agencyName string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(agencyName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 95, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 74, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -194,7 +194,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 125, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 104, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -207,7 +207,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 128, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 107, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -258,7 +258,7 @@ func AIMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 152, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 131, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -301,7 +301,7 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getMessageEndpoint(agencyID, conversation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 161, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 140, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

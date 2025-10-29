@@ -35,47 +35,26 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 			</div>
 		</div>
 		
-		<!-- AI Processing Indicator for Chat -->
-		<div class="chat-loading-indicator htmx-indicator" id="chat-loading-indicator" style="display: none;">
-			<div class="message ai-message">
-				<div class="message-avatar">
-					<span class="icon is-medium has-text-primary">
-						<i class="fas fa-robot"></i>
-					</span>
-				</div>
-				<div class="message-content">
-					<div class="message-bubble">
-						<div class="is-flex is-align-items-center">
-							<span class="icon has-text-info mr-2">
-								<i class="fas fa-spinner fa-spin"></i>
-							</span>
-							<span>AI is refining your introduction...</span>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<!-- AI Process Status Bar (above input) -->
-		<div class="ai-process-status htmx-indicator" id="ai-process-status" style="display: none;">
-			<div class="process-content">
-				<div class="process-info">
-					<span class="icon has-text-info">
-						<i class="fas fa-spinner fa-spin"></i>
-					</span>
-					<span class="process-text">AI is refining your introduction...</span>
-				</div>
-				<button class="button is-small is-danger is-outlined" id="stop-ai-process" title="Stop AI processing">
-					<span class="icon is-small">
-						<i class="fas fa-stop"></i>
-					</span>
-					<span>Stop</span>
-				</button>
-			</div>
-		</div>
-		
 		<!-- Chat Input (Independent) -->
 		<div class="chat-input-container">
+			<!-- AI Process Status Bar (inside input panel) -->
+			<div class="ai-process-status htmx-indicator" id="ai-process-status" style="display: none;">
+				<div class="process-content">
+					<div class="process-info">
+						<span class="icon has-text-info">
+							<i class="fas fa-spinner fa-spin"></i>
+						</span>
+						<span class="process-text" id="ai-status-message">AI is working on your request...</span>
+					</div>
+					<button class="button is-small is-danger is-outlined" id="stop-ai-process" title="Stop AI processing">
+						<span class="icon is-small">
+							<i class="fas fa-stop"></i>
+						</span>
+						<span>Stop</span>
+					</button>
+				</div>
+			</div>
+			
 			@ChatInput(currentAgency.ID, conversation)
 		</div>
 	</aside>

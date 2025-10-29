@@ -42,7 +42,7 @@ func Layout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - CodeValdCortex</title><!-- Bulma CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/css/bulma.min.css\"><!-- Custom styles --><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><!-- HTMX (self-hosted) --><script src=\"/static/js/htmx.min.js\"></script><!-- Alpine.js (self-hosted) --><script defer src=\"/static/js/alpine.min.js\"></script><!-- Chart.js (self-hosted) --><script src=\"/static/js/chart.min.js\"></script><!-- Custom Alpine components --><script src=\"/static/js/alpine-components.js\"></script><!-- Progress bar for HTMX requests --><div id=\"htmx-progress\"></div></head><body>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - CodeValdCortex</title><!-- Bulma CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/css/bulma.min.css\"><!-- Custom styles --><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><!-- HTMX (self-hosted) --><script src=\"/static/js/htmx.min.js\"></script><!-- Alpine.js (self-hosted) --><script defer src=\"/static/js/alpine.min.js\"></script><!-- Chart.js (self-hosted) --><script src=\"/static/js/chart.umd.min.js\"></script><!-- Custom Alpine components --><script src=\"/static/js/alpine-components.js\"></script><!-- Progress bar for HTMX requests --><div id=\"htmx-progress\"></div></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

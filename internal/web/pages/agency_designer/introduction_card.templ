@@ -41,7 +41,21 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 					hx-include="#introduction-editor"
 					hx-target="#introduction-content"
 					hx-indicator="#ai-process-status"
+					hx-on::after-request="
+						console.log('🏁 HTMX request completed, hiding status...');
+						if (window.hideAIProcessStatus) {
+							window.hideAIProcessStatus();
+						} else {
+							console.log('❌ hideAIProcessStatus not available');
+							const status = document.getElementById('ai-process-status');
+							if (status) {
+								status.style.display = 'none';
+								console.log('✅ Status hidden manually');
+							}
+						}
+					"
 					id="ai-sparkle-btn"
+					onclick="window.handleRefineClick && window.handleRefineClick()"
 					title="Refine with AI">
 					<span class="icon"><i class="fas fa-magic"></i></span>
 					<span>Refine</span>
