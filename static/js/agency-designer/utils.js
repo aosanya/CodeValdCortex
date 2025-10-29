@@ -27,8 +27,6 @@ export function getCurrentAgencyId() {
 
 // Show notification message
 export function showNotification(message, type = 'info') {
-    console.log(`Notification [${type}]:`, message);
-
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification is-${type} is-light`;

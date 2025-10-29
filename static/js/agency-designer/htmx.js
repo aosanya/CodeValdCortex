@@ -8,14 +8,39 @@ import { initializeAgentSelection } from './agents.js';
 export function initializeHTMXEvents() {
     // Show typing indicator when request starts
     document.body.addEventListener('htmx:beforeRequest', function (evt) {
+
         const indicator = document.getElementById('typing-indicator');
         if (indicator && evt.detail.elt.matches('form[hx-post*="conversations"]')) {
             indicator.style.display = 'block';
+
+            // Show AI process status for chat requests
+            if (window.showAIProcessStatus) {
+                window.showAIProcessStatus('AI is processing your message...');
+            }
 
             // Scroll to show typing indicator
             const chatContainer = document.getElementById('chat-messages');
             if (chatContainer) {
                 setTimeout(() => scrollToBottom(chatContainer), 100);
+            }
+        }
+
+        // Handle other AI operations
+        if (evt.detail.elt.matches('[hx-post*="refine"]')) {
+            if (window.showAIProcessStatus) {
+                window.showAIProcessStatus('AI is refining the design...');
+            }
+        }
+
+        if (evt.detail.elt.matches('[hx-post*="generate"]')) {
+            if (window.showAIProcessStatus) {
+                window.showAIProcessStatus('AI is generating the final design...');
+            }
+        }
+
+        if (evt.detail.elt.matches('[hx-post*="introduction"]')) {
+            if (window.showAIProcessStatus) {
+                window.showAIProcessStatus('AI is updating the introduction...');
             }
         }
     });
@@ -25,6 +50,21 @@ export function initializeHTMXEvents() {
         const indicator = document.getElementById('typing-indicator');
         if (indicator && evt.detail.target.id === 'chat-messages') {
             indicator.style.display = 'none';
+        }
+
+        // Hide AI process status only for specific targets that indicate completion
+        const shouldHideStatus = (
+            evt.detail.target.id === 'chat-messages' ||
+            evt.detail.target.id === 'design-preview' ||
+            evt.detail.target.id === 'introduction-content' ||
+            evt.detail.target.classList.contains('introduction-content') ||
+            evt.detail.target.closest('.details-content')
+        );
+
+        if (shouldHideStatus) {
+            if (window.hideAIProcessStatus) {
+                window.hideAIProcessStatus();
+            }
         }
 
         // Scroll to bottom to show new message
@@ -54,9 +94,12 @@ export function initializeHTMXEvents() {
             indicator.style.display = 'none';
         }
 
-        // Show error message
-        console.error('Request failed:', evt.detail);
+        // Hide AI process status on error
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
 
+        // Show error message
         // Show error in UI
         const target = evt.detail.target;
         if (target) {

@@ -61,7 +61,5 @@ export function selectOverviewSection(element, section) {
         } else if (section === 'units-of-work') {
             loadUnits();
         }
-
-        console.log('Selected overview section:', section);
     }
 }

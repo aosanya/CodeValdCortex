@@ -750,16 +750,15 @@ body {
 
 /* AI Process Status Bar */
 .ai-process-status {
-    background: var(--vscode-sidebar-bg);
-    border-top: 1px solid var(--vscode-border);
+    background: var(--vscode-panel-bg);
+    border: 1px solid var(--vscode-border);
+    border-radius: 4px;
     padding: 0.5rem 0.75rem;
-    /* Position as overlay above the input when shown */
-    position: absolute;
-    bottom: 3.5rem;
-    /* Height of input footer */
-    left: 0;
-    right: 0;
-    z-index: 10;
+    display: none;
+    /* Hidden by default */
+    /* Position within the input container, not as overlay */
+    margin-bottom: 0.5rem;
+    /* Space above the input field */
 }
 
 .process-content {

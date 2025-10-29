@@ -1,13 +1,94 @@
 // Agency Designer - Modular Version Entry Point
 // This file loads the modular agency designer components
 
+// Add HTMX event listeners directly here as a fallback
+
+// HTMX afterSwap event listener - direct implementation
+document.body.addEventListener('htmx:afterSwap', function (evt) {
+    // Hide AI process status for introduction content updates
+    const shouldHideStatus = (
+        evt.detail.target.id === 'chat-messages' ||
+        evt.detail.target.id === 'design-preview' ||
+        evt.detail.target.id === 'introduction-content' ||
+        evt.detail.target.classList.contains('introduction-content') ||
+        evt.detail.target.closest('.details-content')
+    );
+
+    if (shouldHideStatus) {
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        } else {
+            const status = document.getElementById('ai-process-status');
+            if (status) {
+                status.style.display = 'none';
+            }
+        }
+    }
+});
+
+// Add global manual hide function for debugging
+window.manualHideStatus = function () {
+
+    // Try multiple possible status elements
+    const possibleIds = [
+        'ai-process-status',
+        'ai-status',
+        'process-status',
+        'chat-loading-indicator',
+        'ai-refine-loading'
+    ];
+
+    let found = false;
+
+    possibleIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.style.display = 'none';
+            element.style.visibility = 'hidden';
+            found = true;
+        }
+    });
+
+    // Also try class-based selectors
+    const possibleClasses = [
+        '.ai-process-status',
+        '.htmx-indicator',
+        '.process-status',
+        '.ai-status'
+    ];
+
+    possibleClasses.forEach(className => {
+        const elements = document.querySelectorAll(className);
+        if (elements.length > 0) {
+            elements.forEach((element, index) => {
+                element.style.display = 'none';
+                element.style.visibility = 'hidden';
+                found = true;
+            });
+        }
+    });
+
+    if (!found) {
+        // List all visible elements that might be the status
+        const allVisible = document.querySelectorAll('*:not([style*="display: none"]):not([style*="display:none"])');
+    }
+
+    return found;
+};
+
+// Add handleRefineClick function for the button
+window.handleRefineClick = function () {
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus('AI is refining your introduction...');
+    }
+};
+
 // Since browsers don't fully support ES6 modules without bundling,
 // we'll create a simple loader that imports all functionality
 
 // Import main module which coordinates everything
-import('./agency-designer/main.js').then(() => {
-    console.log('Agency Designer modules loaded successfully');
+import('./agency-designer/main.js').then((module) => {
+    // Module loaded successfully
 }).catch(error => {
-    console.error('Error loading Agency Designer modules:', error);
-    console.error('Make sure all module files are present in the agency-designer/ directory');
+    // Error loading modules
 });

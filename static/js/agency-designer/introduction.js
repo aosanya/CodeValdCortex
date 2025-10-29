@@ -75,7 +75,6 @@ export function saveOverviewIntroduction() {
             return response.json();
         })
         .then(data => {
-            console.log('Introduction saved successfully:', data);
             showNotification('Introduction saved successfully!', 'success');
             // Update original value after successful save
             originalIntroduction = editor.value;

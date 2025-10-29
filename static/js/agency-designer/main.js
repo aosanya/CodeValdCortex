@@ -23,35 +23,34 @@ import {
     cancelUnitEdit,
     deleteUnit
 } from './units.js';
-import {
-    refineCurrentDesign,
-    requestAlternativeDesign
-} from './refine.js';
 import { getCurrentAgencyId, showNotification } from './utils.js';
 
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('Agency Designer: Initializing...');
+// Check if DOM is already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAgencyDesigner);
+} else {
+    initializeAgencyDesigner();
+}
 
-    // Log initial active view
-    const activeView = document.querySelector('.view-content.is-active');
-    if (activeView) {
-        console.log('Initial active view:', activeView.getAttribute('data-view-content'));
+function initializeAgencyDesigner() {
+    try {
+        // Initialize all modules
+        initializeChatScroll();
+        initializeHTMXEvents();
+        initializeViewSwitcher();
+        initializeAgentSelection();
+        initializeOverview();
+        initializeAIProcessControls();
+    } catch (error) {
+        console.error('❌ Error during initialization:', error);
+        console.error('Error stack:', error.stack);
     }
-
-    // Initialize all modules
-    initializeChatScroll();
-    initializeHTMXEvents();
-    initializeViewSwitcher();
-    initializeAgentSelection();
-    initializeOverview();
-    initializeAIProcessControls();
-
-    console.log('Agency Designer: Initialization complete');
-});
+}
 
 // Initialize AI process controls (stop button, etc.)
 function initializeAIProcessControls() {
     const stopButton = document.getElementById('stop-ai-process');
+
     if (stopButton) {
         stopButton.addEventListener('click', function () {
             stopAIProcess();
@@ -61,13 +60,8 @@ function initializeAIProcessControls() {
 
 // Stop AI processing
 function stopAIProcess() {
-    console.log('Stopping AI process...');
-
     // Hide the AI process status bar
-    const processStatus = document.getElementById('ai-process-status');
-    if (processStatus) {
-        processStatus.style.display = 'none';
-    }
+    hideAIProcessStatus();
 
     // Try to abort any ongoing HTMX requests
     if (window.htmx) {
@@ -81,7 +75,44 @@ function stopAIProcess() {
     }
 
     // Show notification
-    showNotification('AI process stopped', 'warning');
+    if (window.showNotification) {
+        showNotification('AI process stopped', 'warning');
+    }
+}
+
+// Show AI process status with custom message
+function showAIProcessStatus(message = 'AI is working on your request...') {
+    const processStatus = document.getElementById('ai-process-status');
+    const statusMessage = document.getElementById('ai-status-message');
+
+    // Update message text
+    if (statusMessage) {
+        statusMessage.textContent = message;
+    }
+
+    // Show the process status bar
+    if (processStatus) {
+        processStatus.style.display = 'flex';
+        processStatus.style.visibility = 'visible';
+        // Remove htmx-indicator class temporarily to prevent HTMX from hiding it
+        processStatus.classList.remove('htmx-indicator');
+
+        // Add fallback timeout to hide status after 15 seconds
+        setTimeout(() => {
+            hideAIProcessStatus();
+        }, 15000);
+    }
+}
+
+// Hide AI process status
+function hideAIProcessStatus() {
+    const processStatus = document.getElementById('ai-process-status');
+
+    if (processStatus) {
+        processStatus.style.display = 'none';
+        // Add htmx-indicator class back
+        processStatus.classList.add('htmx-indicator');
+    }
 }
 
 // Export functions to global scope for onclick handlers
@@ -97,6 +128,8 @@ window.showUnitEditor = showUnitEditor;
 window.saveUnitFromEditor = saveUnitFromEditor;
 window.cancelUnitEdit = cancelUnitEdit;
 window.deleteUnit = deleteUnit;
-window.refineCurrentDesign = refineCurrentDesign;
-window.requestAlternativeDesign = requestAlternativeDesign;
+
+// Export AI process control functions
+window.showAIProcessStatus = showAIProcessStatus;
+window.hideAIProcessStatus = hideAIProcessStatus;
 window.stopAIProcess = stopAIProcess;

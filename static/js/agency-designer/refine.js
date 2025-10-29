@@ -31,10 +31,10 @@ export function requestAlternativeDesign() {
 
 // Helper function to send chat messages programmatically
 function sendChatMessage(message) {
-    const agencyId = getCurrentAgencyId();
+
     const userInput = document.getElementById('user-input');
     const chatForm = userInput.closest('form');
-    
+
     if (!userInput || !chatForm) {
         console.error('Chat form not found');
         return;
@@ -42,10 +42,8 @@ function sendChatMessage(message) {
 
     // Set the message in the input
     userInput.value = message;
-    
+
     // Trigger the form submission
     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
     chatForm.dispatchEvent(submitEvent);
-    
-    console.log('Refinement message sent:', message);
 }
