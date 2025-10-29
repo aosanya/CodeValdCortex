@@ -21,6 +21,7 @@ templ LayoutWithAgency(title string, currentAgency *agency.Agency) {
 			<!-- Custom styles -->
 			<link rel="stylesheet" href="/static/css/styles.css"/>
 			<link rel="stylesheet" href="/static/css/agencies.css"/>
+			<link rel="stylesheet" href="/static/css/themes.css"/>
 			
 			<!-- HTMX (self-hosted) -->
 			<script src="/static/js/htmx.min.js"></script>
@@ -34,8 +35,8 @@ templ LayoutWithAgency(title string, currentAgency *agency.Agency) {
 			<!-- Custom Alpine components -->
 			<script src="/static/js/alpine-components.js"></script>
 			
-			<!-- Agency switcher -->
-			<script src="/static/js/agency-switcher.js"></script>
+			<!-- Theme manager -->
+			<script src="/static/js/theme-manager.js"></script>
 			
 			<!-- Progress bar for HTMX requests -->
 			<div id="htmx-progress"></div>

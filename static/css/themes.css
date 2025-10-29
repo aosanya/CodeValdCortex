@@ -1,0 +1,327 @@
+/* Theme System for CodeValdCortex */
+
+/* Theme Variables */
+:root {
+    /* Default Theme - Light */
+    --theme-navbar-bg: #ffffff;
+    --theme-navbar-text: #363636;
+    --theme-primary: #3273dc;
+    --theme-primary-hover: #2366d1;
+    --theme-text: #4a4a4a;
+    --theme-text-light: #7a7a7a;
+    --theme-background: #ffffff;
+    --theme-background-secondary: #f5f5f5;
+    --theme-border: #dbdbdb;
+    --theme-shadow: rgba(10, 10, 10, 0.1);
+    --theme-card-bg: #ffffff;
+    --theme-success: #48c774;
+    --theme-warning: #ffdd57;
+    --theme-danger: #f14668;
+    --theme-info: #3298dc;
+}
+
+/* Midnight Blue & Coral Theme */
+[data-theme="midnight-coral"] {
+    --theme-navbar-bg: #1a1f36;
+    --theme-navbar-text: #ffffff;
+    --theme-primary: #FF6B6B;
+    --theme-primary-hover: #ff5252;
+    --theme-text: #2d3748;
+    --theme-text-light: #4a5568;
+    --theme-background: #f7fafc;
+    --theme-background-secondary: #edf2f7;
+    --theme-border: #e2e8f0;
+    --theme-shadow: rgba(0, 0, 0, 0.1);
+    --theme-card-bg: #ffffff;
+    --theme-success: #48bb78;
+    --theme-warning: #ed8936;
+    --theme-danger: #f56565;
+    --theme-info: #4299e1;
+}
+
+/* Dark Slate & Electric Purple Theme */
+[data-theme="slate-purple"] {
+    --theme-navbar-bg: #0f172a;
+    --theme-navbar-text: #ffffff;
+    --theme-primary: #8b5cf6;
+    --theme-primary-hover: #7c3aed;
+    --theme-text: #1e293b;
+    --theme-text-light: #475569;
+    --theme-background: #f8fafc;
+    --theme-background-secondary: #f1f5f9;
+    --theme-border: #e0e7ff;
+    --theme-shadow: rgba(0, 0, 0, 0.1);
+    --theme-card-bg: #ffffff;
+    --theme-success: #22c55e;
+    --theme-warning: #f59e0b;
+    --theme-danger: #ef4444;
+    --theme-info: #3b82f6;
+}
+
+/* Charcoal & Emerald Theme */
+[data-theme="charcoal-emerald"] {
+    --theme-navbar-bg: #1c1c1c;
+    --theme-navbar-text: #ffffff;
+    --theme-primary: #10b981;
+    --theme-primary-hover: #059669;
+    --theme-text: #1f2937;
+    --theme-text-light: #4b5563;
+    --theme-background: #f9fafb;
+    --theme-background-secondary: #f3f4f6;
+    --theme-border: #d1fae5;
+    --theme-shadow: rgba(0, 0, 0, 0.1);
+    --theme-card-bg: #ffffff;
+    --theme-success: #10b981;
+    --theme-warning: #f59e0b;
+    --theme-danger: #ef4444;
+    --theme-info: #06b6d4;
+}
+
+/* Deep Navy & Sunset Orange Theme */
+[data-theme="navy-orange"] {
+    --theme-navbar-bg: #0a1929;
+    --theme-navbar-text: #ffffff;
+    --theme-primary: #f97316;
+    --theme-primary-hover: #ea580c;
+    --theme-text: #1e293b;
+    --theme-text-light: #475569;
+    --theme-background: #f8fafc;
+    --theme-background-secondary: #f1f5f9;
+    --theme-border: #ffedd5;
+    --theme-shadow: rgba(0, 0, 0, 0.1);
+    --theme-card-bg: #ffffff;
+    --theme-success: #22c55e;
+    --theme-warning: #f59e0b;
+    --theme-danger: #ef4444;
+    --theme-info: #0ea5e9;
+}
+
+/* Obsidian & Cyan Theme */
+[data-theme="obsidian-cyan"] {
+    --theme-navbar-bg: #18181b;
+    --theme-navbar-text: #ffffff;
+    --theme-primary: #06b6d4;
+    --theme-primary-hover: #0891b2;
+    --theme-text: #27272a;
+    --theme-text-light: #52525b;
+    --theme-background: #fafafa;
+    --theme-background-secondary: #f4f4f5;
+    --theme-border: #cffafe;
+    --theme-shadow: rgba(0, 0, 0, 0.1);
+    --theme-card-bg: #ffffff;
+    --theme-success: #22c55e;
+    --theme-warning: #f59e0b;
+    --theme-danger: #ef4444;
+    --theme-info: #06b6d4;
+}
+
+/* Dark Mode Theme */
+[data-theme="dark"] {
+    --theme-navbar-bg: #1e1e1e;
+    --theme-navbar-text: #ffffff;
+    --theme-primary: #4dabf7;
+    --theme-primary-hover: #339af0;
+    --theme-text: #e9ecef;
+    --theme-text-light: #adb5bd;
+    --theme-background: #121212;
+    --theme-background-secondary: #1e1e1e;
+    --theme-border: #333333;
+    --theme-shadow: rgba(0, 0, 0, 0.3);
+    --theme-card-bg: #1e1e1e;
+    --theme-success: #51cf66;
+    --theme-warning: #ffd43b;
+    --theme-danger: #ff6b6b;
+    --theme-info: #4dabf7;
+}
+
+/* Apply theme variables to elements */
+body {
+    background-color: var(--theme-background);
+    color: var(--theme-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navbar theming */
+.navbar {
+    background-color: var(--theme-navbar-bg) !important;
+    border-bottom: 1px solid var(--theme-border);
+    box-shadow: 0 2px 4px var(--theme-shadow);
+}
+
+.navbar-item,
+.navbar-link {
+    color: var(--theme-navbar-text) !important;
+}
+
+.navbar-item:hover,
+.navbar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--theme-navbar-text) !important;
+}
+
+/* Specific styling for navbar start items (main navigation) */
+.navbar-start .navbar-item {
+    color: var(--theme-navbar-text) !important;
+}
+
+.navbar-start .navbar-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--theme-navbar-text) !important;
+}
+
+/* Button theming */
+.button.is-primary {
+    background-color: var(--theme-primary) !important;
+    border-color: var(--theme-primary) !important;
+}
+
+.button.is-primary:hover {
+    background-color: var(--theme-primary-hover) !important;
+    border-color: var(--theme-primary-hover) !important;
+}
+
+.button.is-light {
+    background-color: var(--theme-background-secondary) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+.button.is-light:hover {
+    background-color: var(--theme-border) !important;
+}
+
+/* Card theming */
+.card {
+    background-color: var(--theme-card-bg) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: 0 2px 4px var(--theme-shadow) !important;
+}
+
+.card-header,
+.card-footer {
+    background-color: var(--theme-background-secondary) !important;
+    border-color: var(--theme-border) !important;
+}
+
+/* Form element theming */
+.input,
+.textarea,
+.select select {
+    background-color: var(--theme-card-bg) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+.input:focus,
+.textarea:focus,
+.select select:focus {
+    border-color: var(--theme-primary) !important;
+}
+
+/* Modal theming */
+.modal-card {
+    background-color: var(--theme-card-bg) !important;
+}
+
+.modal-card-head,
+.modal-card-foot {
+    background-color: var(--theme-background-secondary) !important;
+    border-color: var(--theme-border) !important;
+}
+
+/* Table theming */
+.table {
+    background-color: var(--theme-card-bg) !important;
+    color: var(--theme-text) !important;
+}
+
+.table th {
+    background-color: var(--theme-background-secondary) !important;
+    color: var(--theme-text) !important;
+    border-color: var(--theme-border) !important;
+}
+
+.table td {
+    border-color: var(--theme-border) !important;
+}
+
+.table tr:hover {
+    background-color: var(--theme-background-secondary) !important;
+}
+
+/* Tag theming */
+.tag {
+    background-color: var(--theme-background-secondary) !important;
+    color: var(--theme-text) !important;
+}
+
+.tag.is-primary {
+    background-color: var(--theme-primary) !important;
+    color: white !important;
+}
+
+/* Notification theming */
+.notification {
+    background-color: var(--theme-card-bg) !important;
+    color: var(--theme-text) !important;
+}
+
+.notification.is-success {
+    background-color: var(--theme-success) !important;
+}
+
+.notification.is-warning {
+    background-color: var(--theme-warning) !important;
+}
+
+.notification.is-danger {
+    background-color: var(--theme-danger) !important;
+}
+
+.notification.is-info {
+    background-color: var(--theme-info) !important;
+}
+
+/* Dropdown theming */
+.navbar-dropdown {
+    background-color: var(--theme-card-bg) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: 0 2px 8px var(--theme-shadow) !important;
+}
+
+.navbar-dropdown .navbar-item {
+    color: var(--theme-text) !important;
+    background-color: transparent !important;
+}
+
+.navbar-dropdown .navbar-item:hover {
+    background-color: var(--theme-background-secondary) !important;
+    color: var(--theme-text) !important;
+}
+
+.navbar-dropdown .navbar-item.is-active {
+    background-color: var(--theme-primary) !important;
+    color: white !important;
+}
+
+/* Override any conflicting Bulma styles for dropdown items */
+.navbar-dropdown a.navbar-item {
+    color: var(--theme-text) !important;
+}
+
+.navbar-dropdown a.navbar-item:hover {
+    background-color: var(--theme-background-secondary) !important;
+    color: var(--theme-text) !important;
+}
+
+/* Ensure navbar links maintain proper color in all themes */
+.navbar-menu .navbar-item,
+.navbar-brand .navbar-item {
+    color: var(--theme-navbar-text) !important;
+}
+
+.navbar-menu .navbar-item:hover,
+.navbar-brand .navbar-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: var(--theme-navbar-text) !important;
+}

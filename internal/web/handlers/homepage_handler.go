@@ -261,27 +261,3 @@ func (h *HomepageHandler) GetActiveAgency(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ag)
 }
-
-// ShowAgencySwitcher renders the agency switcher modal
-func (h *HomepageHandler) ShowAgencySwitcher(c *gin.Context) {
-	// List all agencies
-	filters := agency.AgencyFilters{}
-	agencies, err := h.agencyService.ListAgencies(c.Request.Context(), filters)
-	if err != nil {
-		h.logger.Errorf("Failed to list agencies: %v", err)
-		c.String(http.StatusInternalServerError, "Failed to load agencies")
-		return
-	}
-
-	// Get current agency
-	currentAgency, _ := h.agencyService.GetActiveAgency(c.Request.Context())
-
-	// Render agency switcher modal
-	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err = pages.AgencySwitcherModal(agencies, currentAgency).Render(c.Request.Context(), c.Writer)
-	if err != nil {
-		h.logger.Errorf("Failed to render agency switcher: %v", err)
-		c.String(http.StatusInternalServerError, "Failed to render modal")
-		return
-	}
-}

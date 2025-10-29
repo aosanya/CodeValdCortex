@@ -108,35 +108,6 @@
     }
 }
 
-/* Agency Switcher Modal */
-.modal-card {
-    max-width: 800px;
-}
-
-.agency-switcher-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1rem;
-    max-height: 60vh;
-    overflow-y: auto;
-}
-
-.agency-switcher-card {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 2px solid transparent;
-}
-
-.agency-switcher-card:hover {
-    border-color: #3273dc;
-    transform: scale(1.02);
-}
-
-.agency-switcher-card.is-active {
-    border-color: #48c774;
-    background-color: #f5fdf7;
-}
-
 /* Current Agency Badge in Header */
 .current-agency-badge {
     display: inline-flex;

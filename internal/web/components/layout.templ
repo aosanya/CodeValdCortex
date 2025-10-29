@@ -13,6 +13,7 @@ templ Layout(title string) {
 			
 			<!-- Custom styles -->
 			<link rel="stylesheet" href="/static/css/styles.css"/>
+			<link rel="stylesheet" href="/static/css/themes.css"/>
 			
 			<!-- HTMX (self-hosted) -->
 			<script src="/static/js/htmx.min.js"></script>
@@ -25,6 +26,9 @@ templ Layout(title string) {
 			
 			<!-- Custom Alpine components -->
 			<script src="/static/js/alpine-components.js"></script>
+			
+			<!-- Theme manager -->
+			<script src="/static/js/theme-manager.js"></script>
 			
 			<!-- Progress bar for HTMX requests -->
 			<div id="htmx-progress"></div>
@@ -66,7 +70,7 @@ templ Layout(title string) {
 }
 
 templ Navbar() {
-	<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+	<nav class="navbar" role="navigation" aria-label="main navigation">
 		<div class="container">
 			<div class="navbar-brand">
 				<a href="/dashboard" class="navbar-item">
@@ -102,33 +106,77 @@ templ Navbar() {
 				<div class="navbar-end">
 					<div class="navbar-item">
 						<div class="buttons">
-							<button 
-								@click="darkMode = !darkMode"
-								class="button is-light"
-								x-data="{ darkMode: false }"
-								x-init="darkMode = localStorage.getItem('darkMode') === 'true'; $watch('darkMode', val => { localStorage.setItem('darkMode', val); document.documentElement.classList.toggle('dark', val); })"
-							>
-								<span class="icon" x-show="!darkMode">
-									<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-									</svg>
-								</span>
-								<span class="icon" x-show="darkMode">
-									<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-									</svg>
-								</span>
-							</button>
-							
-							<button 
-								@click="$dispatch('open-create-modal')"
-								class="button is-primary"
-							>
-								<span class="icon">
-									<i class="fas fa-plus"></i>
-								</span>
-								<span>Create Agent</span>
-							</button>
+							<!-- Theme Switcher -->
+							<div class="navbar-item has-dropdown" x-data="themeSwitcher()" :class="{ 'is-active': isOpen }">
+								<a class="navbar-link" @click="toggleDropdown()">
+									<span class="icon">
+										<svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V5z"></path>
+										</svg>
+									</span>
+									<span x-text="getCurrentThemeName()"></span>
+								</a>
+								
+								<div class="navbar-dropdown is-right">
+									<a class="navbar-item" @click="selectTheme('light')" :class="{ 'is-active': currentTheme === 'light' }">
+										<span class="theme-preview" style="background-color: #ffffff; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Light</strong>
+											<br/>
+											<small>Clean and bright</small>
+										</span>
+									</a>
+									<a class="navbar-item" @click="selectTheme('midnight-coral')" :class="{ 'is-active': currentTheme === 'midnight-coral' }">
+										<span class="theme-preview" style="background-color: #FF6B6B; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Midnight Coral</strong>
+											<br/>
+											<small>Professional with vibrant accents</small>
+										</span>
+									</a>
+									<a class="navbar-item" @click="selectTheme('slate-purple')" :class="{ 'is-active': currentTheme === 'slate-purple' }">
+										<span class="theme-preview" style="background-color: #8b5cf6; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Slate Purple</strong>
+											<br/>
+											<small>Bold and tech-forward</small>
+										</span>
+									</a>
+									<a class="navbar-item" @click="selectTheme('charcoal-emerald')" :class="{ 'is-active': currentTheme === 'charcoal-emerald' }">
+										<span class="theme-preview" style="background-color: #10b981; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Charcoal Emerald</strong>
+											<br/>
+											<small>Fresh and trustworthy</small>
+										</span>
+									</a>
+									<a class="navbar-item" @click="selectTheme('navy-orange')" :class="{ 'is-active': currentTheme === 'navy-orange' }">
+										<span class="theme-preview" style="background-color: #f97316; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Navy Orange</strong>
+											<br/>
+											<small>Energetic and confident</small>
+										</span>
+									</a>
+									<a class="navbar-item" @click="selectTheme('obsidian-cyan')" :class="{ 'is-active': currentTheme === 'obsidian-cyan' }">
+										<span class="theme-preview" style="background-color: #06b6d4; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Obsidian Cyan</strong>
+											<br/>
+											<small>Sleek and minimalist</small>
+										</span>
+									</a>
+									<hr class="navbar-divider"/>
+									<a class="navbar-item" @click="selectTheme('dark')" :class="{ 'is-active': currentTheme === 'dark' }">
+										<span class="theme-preview" style="background-color: #121212; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+										<span>
+											<strong>Dark Mode</strong>
+											<br/>
+											<small>Easy on the eyes</small>
+										</span>
+									</a>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

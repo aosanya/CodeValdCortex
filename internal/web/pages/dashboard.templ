@@ -182,17 +182,6 @@ templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *agen
 							</svg>
 							<h3 class="subtitle is-5 mt-4">No agents</h3>
 							<p class="has-text-grey">Get started by creating a new agent.</p>
-							<div class="mt-5">
-								<button 
-									@click="$dispatch('open-create-modal')"
-									class="button is-primary"
-								>
-									<span class="icon">
-										<i class="fas fa-plus"></i>
-									</span>
-									<span>Create Agent</span>
-								</button>
-							</div>
 						</div>
 					</div>
 				}

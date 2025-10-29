@@ -293,7 +293,6 @@ func (a *App) setupServer() error {
 
 	// Agency-specific dashboard (with middleware to inject agency context)
 	router.GET("/agencies/:id/dashboard", agencyMiddleware.InjectAgencyContext(), homepageHandler.ShowAgencyDashboard)
-	router.GET("/agencies/switch", homepageHandler.ShowAgencySwitcher)
 
 	// AI Agency Designer web routes (if available)
 	if aiDesignerWebHandler != nil {
