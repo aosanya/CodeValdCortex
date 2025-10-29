@@ -361,10 +361,11 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 - **Training**: Technical training and certification programs
 
 ### Contact Information
-- **Repository**: [GitHub - CodeValdCortex](https://github.com/your-org/CodeValdCortex)
-- **Issues**: [GitHub Issues](https://github.com/your-org/CodeValdCortex/issues)
+- **Repository**: [GitHub - CodeValdCortex](https://github.com/aosanya/CodeValdCortex)
+- **Issues**: [GitHub Issues](https://github.com/aosanya/CodeValdCortex/issues)
 - **Documentation**: Available in the `documents/` directory
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/CodeValdCortex/discussions)
+- **Discussions**: [GitHub Discussions](https://github.com/aosanya/CodeValdCortex/discussions)
+- **Sponsors**: [Support the Project](https://github.com/sponsors/aosanya) - Help fund development and maintenance
 
 ## 🗺️ Roadmap
 
