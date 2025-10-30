@@ -21,7 +21,7 @@ type ListCardConfig struct {
 
 // ListCard renders a reusable list card component
 templ ListCard(config ListCardConfig) {
-	<div class="box" id={ config.ID }>
+	<div class="box m-0 p-0" id={ config.ID }>
 		<div class="level is-mobile mb-4">
 			<div class="level-left">
 				if config.Title != "" {

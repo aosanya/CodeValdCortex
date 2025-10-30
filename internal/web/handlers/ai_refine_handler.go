@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -35,6 +36,15 @@ func NewAIRefineHandler(
 		designerService:     designerService,
 		logger:              logger,
 	}
+}
+
+// getMapKeys returns the keys of a map as a slice for logging
+func getMapKeys(m map[string]interface{}) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 // RefineIntroduction handles POST /api/v1/agencies/:id/overview/refine
@@ -156,9 +166,9 @@ func (h *AIRefineHandler) RefineIntroduction(c *gin.Context) {
 	if conversation != nil {
 		chatMessage := refinedResult.Explanation
 		if refinedResult.WasChanged {
-			chatMessage = "✨ **Introduction Refined & Saved**\n\n" + refinedResult.Explanation
+			chatMessage = "✨ **Introduction Refined & Saved**\n\n" + chatMessage
 		} else {
-			chatMessage = "✅ **Introduction Review Complete**\n\n" + refinedResult.Explanation
+			chatMessage = "✅ **Introduction Review Complete**\n\n" + chatMessage
 		}
 
 		if addErr := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); addErr != nil {
@@ -700,35 +710,80 @@ func (h *AIRefineHandler) ProcessAIGoalRequest(c *gin.Context) {
 
 	// Process each operation
 	for _, operation := range req.Operations {
+		h.logger.Info("Processing operation", "operation", operation, "agencyID", agencyID)
+
 		switch operation {
 		case "create":
 			// Generate new goals based on introduction
-			if overview.Introduction != "" {
-				genReq := &ai.GenerateGoalRequest{
-					AgencyID:      agencyID,
-					AgencyContext: ag,
-					ExistingGoals: existingGoals,
-					UnitsOfWork:   unitsOfWork,
-					UserInput:     "Based on the agency introduction: " + overview.Introduction,
-				}
+			if overview.Introduction == "" {
+				h.logger.Warn("No introduction found for goal generation", "agencyID", agencyID)
+				results["create_error"] = "No introduction found. Please add an introduction first."
+				continue
+			}
 
-				result, err := h.goalRefiner.GenerateGoal(ctx, genReq)
+			h.logger.Info("Starting multiple goal generation from introduction",
+				"agencyID", agencyID,
+				"introductionLength", len(overview.Introduction),
+				"existingGoalsCount", len(existingGoals))
+
+			// Generate multiple goals in one AI call
+			genReq := &ai.GenerateGoalRequest{
+				AgencyID:      agencyID,
+				AgencyContext: ag,
+				ExistingGoals: existingGoals,
+				UnitsOfWork:   unitsOfWork,
+				UserInput:     "Based on the agency introduction: " + overview.Introduction,
+			}
+
+			h.logger.Info("Calling AI to generate multiple goals", "agencyID", agencyID)
+
+			result, err := h.goalRefiner.GenerateGoals(ctx, genReq)
+			if err != nil {
+				h.logger.Error("Failed to generate goals from AI", "agencyID", agencyID, "error", err)
+				results["create_error"] = err.Error()
+				continue
+			}
+
+			h.logger.Info("AI generated goals successfully",
+				"agencyID", agencyID,
+				"goalsCount", len(result.Goals),
+				"explanation", result.Explanation)
+
+			// Save each generated goal to database
+			for i, goalData := range result.Goals {
+				h.logger.Info("Saving generated goal to database",
+					"agencyID", agencyID,
+					"goalIndex", i+1,
+					"goalCode", goalData.SuggestedCode,
+					"descriptionLength", len(goalData.Description))
+
+				goal, err := h.agencyService.CreateGoal(ctx, agencyID, goalData.SuggestedCode, goalData.Description)
 				if err != nil {
-					h.logger.Error("Failed to generate goals", "error", err)
-					results["create_error"] = err.Error()
+					h.logger.Error("Failed to save generated goal",
+						"agencyID", agencyID,
+						"goalIndex", i+1,
+						"goalCode", goalData.SuggestedCode,
+						"error", err)
+					// Continue with other goals even if one fails
 					continue
 				}
 
-				// Create the goal
-				goal, err := h.agencyService.CreateGoal(ctx, agencyID, result.SuggestedCode, result.Description)
-				if err != nil {
-					h.logger.Error("Failed to save generated goal", "error", err)
-					results["create_error"] = err.Error()
-					continue
-				}
+				h.logger.Info("Goal saved successfully",
+					"agencyID", agencyID,
+					"goalKey", goal.Key,
+					"goalCode", goal.Code,
+					"goalNumber", goal.Number)
 
 				createdGoals = append(createdGoals, goal)
 			}
+
+			h.logger.Info("Completed creating multiple goals",
+				"agencyID", agencyID,
+				"totalCreated", len(createdGoals),
+				"requested", len(result.Goals))
+
+			results["create_success"] = fmt.Sprintf("Created %d goals", len(createdGoals))
+			results["ai_explanation"] = result.Explanation
 
 		case "enhance":
 			// TODO: Implement goal enhancement logic
@@ -740,6 +795,61 @@ func (h *AIRefineHandler) ProcessAIGoalRequest(c *gin.Context) {
 			// For now, return placeholder
 			results["consolidate_message"] = "Consolidation feature coming soon"
 		}
+	}
+
+	// Add AI explanation to chat conversation if goals were created
+	if len(createdGoals) > 0 {
+		h.logger.Info("Attempting to add AI explanation to chat",
+			"agencyID", agencyID,
+			"createdGoalsCount", len(createdGoals),
+			"resultsKeys", fmt.Sprintf("%v", getMapKeys(results)))
+
+		explanation, hasExplanation := results["ai_explanation"].(string)
+		h.logger.Info("Explanation check",
+			"agencyID", agencyID,
+			"hasExplanation", hasExplanation,
+			"explanationLength", len(explanation))
+
+		if hasExplanation && explanation != "" {
+			// Get or create conversation
+			conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
+			if err != nil {
+				h.logger.Warn("No conversation exists, creating new one",
+					"agencyID", agencyID,
+					"error", err)
+				// No conversation exists, create one
+				conversation, err = h.designerService.StartConversation(ctx, agencyID)
+				if err != nil {
+					h.logger.WithError(err).Error("Failed to create conversation for AI goal generation message")
+				}
+			}
+
+			if conversation != nil {
+				chatMessage := fmt.Sprintf("✨ **Created %d Goals**\n\n%s", len(createdGoals), explanation)
+				h.logger.Info("Adding message to chat",
+					"agencyID", agencyID,
+					"conversationID", conversation.ID,
+					"messageLength", len(chatMessage))
+
+				if addErr := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); addErr != nil {
+					h.logger.WithError(addErr).Error("Failed to add goal generation explanation to chat")
+				} else {
+					h.logger.Info("Successfully added AI explanation to chat",
+						"agencyID", agencyID,
+						"conversationID", conversation.ID)
+				}
+			} else {
+				h.logger.Error("Conversation is nil after creation attempt", "agencyID", agencyID)
+			}
+		} else {
+			h.logger.Warn("No explanation to add to chat",
+				"agencyID", agencyID,
+				"hasExplanation", hasExplanation,
+				"explanation", explanation)
+		}
+	} else {
+		h.logger.Info("No goals were created, skipping chat message",
+			"agencyID", agencyID)
 	}
 
 	// Build response

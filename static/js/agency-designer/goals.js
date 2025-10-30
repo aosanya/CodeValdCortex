@@ -324,11 +324,13 @@ export function processAIGoalRequest() {
         return;
     }
 
-    const processBtn = document.getElementById('process-ai-btn');
-    const status = document.getElementById('ai-generate-status');
+    // Close the modal immediately
+    closeGenerateGoalModal();
 
-    if (processBtn) processBtn.classList.add('is-loading');
-    if (status) status.style.display = 'block';
+    // Show AI processing status in the chat area
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus('AI is generating goals from your introduction...');
+    }
 
     // Build request with selected operations
     const operations = [];
@@ -353,10 +355,10 @@ export function processAIGoalRequest() {
             return response.json();
         })
         .then(data => {
-            if (processBtn) processBtn.classList.remove('is-loading');
-            if (status) status.style.display = 'none';
-
-            closeGenerateGoalModal();
+            // Hide AI processing status
+            if (window.hideAIProcessStatus) {
+                window.hideAIProcessStatus();
+            }
 
             // Show success message with what was done
             const operationText = operations.map(op => {
@@ -375,8 +377,12 @@ export function processAIGoalRequest() {
         })
         .catch(error => {
             console.error('Error processing AI goal request:', error);
-            if (processBtn) processBtn.classList.remove('is-loading');
-            if (status) status.style.display = 'none';
+            
+            // Hide AI processing status
+            if (window.hideAIProcessStatus) {
+                window.hideAIProcessStatus();
+            }
+            
             showNotification('Error processing AI goal request', 'error');
         });
 }
@@ -566,7 +572,6 @@ export function generateGoalWithAI() {
         });
 }
 
-// Make functions globally available
 // Make functions globally available
 window.showGenerateGoalModal = showGenerateGoalModal;
 window.closeGenerateGoalModal = closeGenerateGoalModal;

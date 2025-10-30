@@ -364,7 +364,7 @@ body {
 .details-content {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.5rem;
 }
 
 /* Empty Details View */
@@ -1069,7 +1069,10 @@ body {
 
 /* Overview Section Content */
 .overview-section {
-    padding: 1.5rem;
+    padding: 0;
+    margin: 0;
+    padding-bottom: 2rem;
+    /* Add bottom padding so last items are visible */
 }
 
 .section-hero {

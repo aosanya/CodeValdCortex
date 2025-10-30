@@ -26,14 +26,14 @@ func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *GoalRefiner {
 
 // RefineGoalRequest contains the context for refining a goal
 type RefineGoalRequest struct {
-	AgencyID         string               `json:"agency_id"`
-	CurrentGoal   *agency.Goal      `json:"current_goal"`
-	Description      string               `json:"description"`
-	Scope            string               `json:"scope"`
-	SuccessMetrics   []string             `json:"success_metrics"`
-	ExistingGoals []*agency.Goal    `json:"existing_goals"`
-	UnitsOfWork      []*agency.UnitOfWork `json:"units_of_work"`
-	AgencyContext    *agency.Agency       `json:"agency_context"`
+	AgencyID       string               `json:"agency_id"`
+	CurrentGoal    *agency.Goal         `json:"current_goal"`
+	Description    string               `json:"description"`
+	Scope          string               `json:"scope"`
+	SuccessMetrics []string             `json:"success_metrics"`
+	ExistingGoals  []*agency.Goal       `json:"existing_goals"`
+	UnitsOfWork    []*agency.UnitOfWork `json:"units_of_work"`
+	AgencyContext  *agency.Agency       `json:"agency_context"`
 }
 
 // RefineGoalResponse contains the AI-refined goal
@@ -62,11 +62,11 @@ type aiGoalRefinementResponse struct {
 
 // GenerateGoalRequest contains the context for generating a new goal
 type GenerateGoalRequest struct {
-	AgencyID         string               `json:"agency_id"`
-	AgencyContext    *agency.Agency       `json:"agency_context"`
-	ExistingGoals []*agency.Goal    `json:"existing_goals"`
-	UnitsOfWork      []*agency.UnitOfWork `json:"units_of_work"`
-	UserInput        string               `json:"user_input"`
+	AgencyID      string               `json:"agency_id"`
+	AgencyContext *agency.Agency       `json:"agency_context"`
+	ExistingGoals []*agency.Goal       `json:"existing_goals"`
+	UnitsOfWork   []*agency.UnitOfWork `json:"units_of_work"`
+	UserInput     string               `json:"user_input"`
 }
 
 // GenerateGoalResponse contains the AI-generated goal
@@ -79,6 +79,38 @@ type GenerateGoalResponse struct {
 	SuggestedCategory string   `json:"suggested_category"`
 	SuggestedTags     []string `json:"suggested_tags"`
 	Explanation       string   `json:"explanation"`
+}
+
+// GenerateGoalsResponse contains multiple AI-generated goals
+type GenerateGoalsResponse struct {
+	Goals       []GenerateGoalResponse `json:"goals"`
+	Explanation string                 `json:"explanation"`
+}
+
+// stripMarkdownFences removes markdown code fences from JSON responses
+// Some LLMs wrap JSON in ```json ... ``` blocks which need to be removed
+func stripMarkdownFences(content string) string {
+	// Remove leading/trailing whitespace
+	content = strings.TrimSpace(content)
+
+	// Check for markdown code fence with optional language specifier
+	if strings.HasPrefix(content, "```") {
+		// Find the end of the first line (language specifier)
+		firstNewline := strings.Index(content, "\n")
+		if firstNewline != -1 {
+			content = content[firstNewline+1:]
+		} else {
+			// No newline after ```, just remove the prefix
+			content = strings.TrimPrefix(content, "```json")
+			content = strings.TrimPrefix(content, "```")
+		}
+
+		// Remove trailing fence
+		content = strings.TrimSuffix(content, "```")
+		content = strings.TrimSpace(content)
+	}
+
+	return content
 }
 
 // RefineGoal uses AI to refine a goal definition based on all available context
@@ -108,8 +140,9 @@ func (r *GoalRefiner) RefineGoal(ctx context.Context, req *RefineGoalRequest) (*
 	}
 
 	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
 	var aiResponse aiGoalRefinementResponse
-	if err := json.Unmarshal([]byte(response.Content), &aiResponse); err != nil {
+	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
 	}
@@ -164,8 +197,9 @@ func (r *GoalRefiner) GenerateGoal(ctx context.Context, req *GenerateGoalRequest
 	}
 
 	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
 	var aiResponse GenerateGoalResponse
-	if err := json.Unmarshal([]byte(response.Content), &aiResponse); err != nil {
+	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
 	}
@@ -176,6 +210,48 @@ func (r *GoalRefiner) GenerateGoal(ctx context.Context, req *GenerateGoalRequest
 		"scope":       len(aiResponse.Scope),
 		"metrics":     len(aiResponse.SuccessMetrics),
 	}).Info("AI goal generation completed")
+
+	return &aiResponse, nil
+}
+
+// GenerateGoals uses AI to generate multiple goals from user input
+func (r *GoalRefiner) GenerateGoals(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalsResponse, error) {
+	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI multiple goals generation")
+
+	// Build the prompt for goals generation
+	prompt := r.buildGoalsGenerationPrompt(req)
+
+	// Make the LLM request
+	response, err := r.llmClient.Chat(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: goalsGenerationSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Error("Failed to get AI response for goals generation")
+		return nil, fmt.Errorf("AI generation failed: %w", err)
+	}
+
+	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
+	var aiResponse GenerateGoalsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
+		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
+		return nil, fmt.Errorf("failed to parse AI response: %w", err)
+	}
+
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":   req.AgencyID,
+		"goals_count": len(aiResponse.Goals),
+	}).Info("AI goals generation completed")
 
 	return &aiResponse, nil
 }
@@ -253,6 +329,33 @@ func (r *GoalRefiner) buildGoalGenerationPrompt(req *GenerateGoalRequest) string
 	return builder.String()
 }
 
+// buildGoalsGenerationPrompt creates the prompt for multiple goals generation
+func (r *GoalRefiner) buildGoalsGenerationPrompt(req *GenerateGoalRequest) string {
+	var builder strings.Builder
+
+	// Agency context
+	builder.WriteString(fmt.Sprintf("Agency: %s (%s)\n", req.AgencyContext.DisplayName, req.AgencyContext.Category))
+	builder.WriteString(fmt.Sprintf("Description: %s\n\n", req.AgencyContext.Description))
+
+	// User input (typically the introduction)
+	builder.WriteString(fmt.Sprintf("Context/Input: %s\n\n", req.UserInput))
+
+	// Existing goals for context and to avoid duplicates
+	if len(req.ExistingGoals) > 0 {
+		builder.WriteString("Existing Goals (to avoid duplication):\n")
+		for i, goal := range req.ExistingGoals {
+			if i < 10 {
+				builder.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
+			}
+		}
+		builder.WriteString("\n")
+	}
+
+	builder.WriteString("Based on the agency context and input, generate 3-5 well-defined goals. Each goal should be specific to this agency type, avoid duplicating existing goals, and include measurable success metrics. Suggest appropriate goal codes (P001, P002, etc.), priorities, categories, and tags for each.")
+
+	return builder.String()
+}
+
 // System prompts for AI goal handling
 const goalRefinementSystemPrompt = `You are an expert business analyst and goal definition specialist. Your role is to help refine and improve goal definitions for multi-agent systems and organizations.
 
@@ -277,6 +380,48 @@ Respond with JSON in this exact format:
 }
 
 Focus on making goals actionable, measurable, and aligned with the agency's mission.`
+
+const goalsGenerationSystemPrompt = `You are an expert business analyst and goal definition specialist. Your role is to help generate multiple well-defined goals for multi-agent systems and organizations based on their introduction and context.
+
+When generating goals, you should:
+1. Create 3-5 clear, specific goal descriptions
+2. Define appropriate scope boundaries for each
+3. Suggest concrete, measurable success metrics
+4. Generate unique goal codes (follow pattern like P001, P002, P003, etc.)
+5. Recommend priority level (High, Medium, Low) for each
+6. Suggest category (Operational, Strategic, Technical, Financial, etc.)
+7. Recommend relevant tags
+8. Avoid duplicating existing goals
+9. Ensure goals are complementary and cover different aspects of the agency's mission
+
+Respond with JSON in this exact format:
+{
+  "goals": [
+    {
+      "description": "Clear, specific goal description",
+      "scope": "Well-defined scope boundaries",
+      "success_metrics": ["Metric 1", "Metric 2", "Metric 3"],
+      "suggested_code": "P001",
+      "suggested_priority": "High/Medium/Low",
+      "suggested_category": "Category name",
+      "suggested_tags": ["tag1", "tag2", "tag3"],
+      "explanation": "Brief explanation of this specific goal"
+    },
+    {
+      "description": "Another goal...",
+      "scope": "...",
+      "success_metrics": ["..."],
+      "suggested_code": "P002",
+      "suggested_priority": "...",
+      "suggested_category": "...",
+      "suggested_tags": ["..."],
+      "explanation": "..."
+    }
+  ],
+  "explanation": "Overall explanation of how these goals work together to support the agency's mission"
+}
+
+Focus on creating goals that are actionable, measurable, diverse, and aligned with the agency's mission.`
 
 const goalGenerationSystemPrompt = `You are an expert business analyst and goal definition specialist. Your role is to help generate well-defined goals for multi-agent systems and organizations based on user input.
 
