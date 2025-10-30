@@ -48,11 +48,20 @@ build-all: ## Build for all platforms
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o bin/$(BINARY_NAME)-windows-amd64.exe ./cmd
 
 .PHONY: run
-run: build ## Build and run the application
+run: ## Build and run the application
 	@echo "Generating templates..."
 	templ generate
+	@echo "Building $(BINARY_NAME)..."
+	@mkdir -p bin
+	CGO_ENABLED=0 GOOS=linux $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BINARY_PATH) ./cmd
 	@echo "Running $(BINARY_NAME)..."
 	./$(BINARY_PATH)
+
+.PHONY: kill
+kill: ## Stop any running instances
+	@echo "Stopping any running instances..."
+	@pkill -f "./bin/codevaldcortex" || true
+	@sleep 1
 
 .PHONY: run-dev
 run-dev: ## Run the application in development mode

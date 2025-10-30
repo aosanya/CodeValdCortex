@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout Test - Agency Designer Structure</title>
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Agency Designer CSS -->
+    <link rel="stylesheet" href="/static/css/agency-designer.css?v=20251030-test">
+    <!-- Status Bar CSS -->
+    <link rel="stylesheet" href="/static/css/vscode-status-bar.css">
+    <style>
+        /* Adjust container height to account for navbar */
+        .vscode-designer-container {
+            height: calc(100vh - 52px);
+            /* Subtract navbar height */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand" style="margin-left: -5rem;">
+                <a href="/" class="navbar-item">
+                    <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                        </path>
+                    </svg>
+                    <span class="ml-2 has-text-weight-bold is-size-5">CodeValdCortex</span>
+                </a>
+
+                <div class="is-flex is-align-items-center ml-4 is-hidden-mobile" style="opacity: 0.8;">
+                    <span class="icon is-small" style="font-size: 1rem;">
+                        🏗️
+                    </span>
+                    <span class="ml-2 is-size-6 has-text-grey-dark">
+                        Layout Test
+                    </span>
+                </div>
+
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="navbarMenu" class="navbar-menu ml-5 pl-5">
+                <div class="navbar-start">
+                    <a href="/dashboard" class="navbar-item">
+                        Dashboard
+                    </a>
+                    <a href="#" class="navbar-item is-active">
+                        <span class="icon">
+                            <i class="fas fa-brain"></i>
+                        </span>
+                        <span>Designer</span>
+                    </a>
+                    <a href="/dashboard/agents" class="navbar-item">
+                        Agents
+                    </a>
+                </div>
+
+                <div class="navbar-end">
+                    <a href="/" class="navbar-item">
+                        <span class="icon">
+                            <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
+                        </span>
+                        <span>Switch Agency</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="vscode-designer-container">
+        <!-- Main Content Area with Columns -->
+        <div class="columns is-gapless vscode-main-content">
+            <!-- Left Column: Designer Panels -->
+            <div class="column is-two-thirds">
+                <!-- View Switcher at Top -->
+                <div class="top-toolbar">
+                    <div class="view-switcher">
+                        <div class="view-tab is-active">
+                            <span class="view-icon">📊</span>
+                            <span class="view-label">Overview</span>
+                        </div>
+                        <div class="view-tab">
+                            <span class="view-icon">🤖</span>
+                            <span class="view-label">Agent Types</span>
+                        </div>
+                        <div class="view-tab">
+                            <span class="view-icon">🔗</span>
+                            <span class="view-label">Layout</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="designer-panels">
+                    <!-- Overview View -->
+                    <div class="view-content is-active">
+                        <div class="overview-layout">
+                            <!-- Left Sidebar: Overview Navigation -->
+                            <aside class="sidebar-panel">
+                                <header class="sidebar-header">
+                                    <h3 class="sidebar-title">
+                                        <span class="icon"><i class="fas fa-list"></i></span>
+                                        <span>Sections</span>
+                                    </h3>
+                                </header>
+                                <div class="sidebar-content">
+                                    <div class="overview-nav-list">
+                                        <div class="overview-nav-item is-active">
+                                            <div class="nav-icon"><i class="fas fa-info-circle"></i></div>
+                                            <div class="nav-info">
+                                                <div class="nav-name">Introduction</div>
+                                                <div class="nav-description">Define agency basics</div>
+                                            </div>
+                                        </div>
+                                        <div class="overview-nav-item">
+                                            <div class="nav-icon"><i class="fas fa-bullseye"></i></div>
+                                            <div class="nav-info">
+                                                <div class="nav-name">Goals</div>
+                                                <div class="nav-description">45 goals defined</div>
+                                            </div>
+                                        </div>
+                                        <div class="overview-nav-item">
+                                            <div class="nav-icon"><i class="fas fa-tasks"></i></div>
+                                            <div class="nav-info">
+                                                <div class="nav-name">Units of Work</div>
+                                                <div class="nav-description">3 units defined</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </aside>
+
+                            <!-- Main Panel: Overview Content -->
+                            <main class="details-panel">
+                                <header class="details-header">
+                                    <h3 class="details-title">
+                                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                                        <span>Introduction</span>
+                                    </h3>
+                                </header>
+                                <div class="details-content">
+                                    <div class="overview-content-section is-active">
+                                        <div class="overview-section">
+                                            <div class="notification is-warning">
+                                                <strong>SCROLL TEST:</strong> This section contains 45 goals. Scroll to
+                                                see them all!
+                                            </div>
+
+                                            <h3 class="title is-4">Test Agency</h3>
+                                            <div class="box">
+                                                <p><strong>Description:</strong> This is a test to demonstrate scrolling
+                                                    behavior.</p>
+                                            </div>
+
+                                            <h3 class="title is-4 mt-5">Goals (45 total - Scroll to see all)</h3>
+                                            <div class="box">Goal 1: Test goal with description...</div>
+                                            <div class="box">Goal 2: Test goal with description...</div>
+                                            <div class="box">Goal 3: Test goal with description...</div>
+                                            <div class="box">Goal 4: Test goal with description...</div>
+                                            <div class="box">Goal 5: Test goal with description...</div>
+                                            <div class="box">Goal 6: Test goal with description...</div>
+                                            <div class="box">Goal 7: Test goal with description...</div>
+                                            <div class="box">Goal 8: Test goal with description...</div>
+                                            <div class="box">Goal 9: Test goal with description...</div>
+                                            <div class="box">Goal 10: Test goal with description...</div>
+                                            <div class="box">Goal 11: Test goal with description...</div>
+                                            <div class="box">Goal 12: Test goal with description...</div>
+                                            <div class="box">Goal 13: Test goal with description...</div>
+                                            <div class="box">Goal 14: Test goal with description...</div>
+                                            <div class="box">Goal 15: Test goal with description...</div>
+                                            <div class="box">Goal 16: Test goal with description...</div>
+                                            <div class="box">Goal 17: Test goal with description...</div>
+                                            <div class="box">Goal 18: Test goal with description...</div>
+                                            <div class="box">Goal 19: Test goal with description...</div>
+                                            <div class="box">Goal 20: Test goal with description...</div>
+                                            <div class="box">Goal 21: Test goal with description...</div>
+                                            <div class="box">Goal 22: Test goal with description...</div>
+                                            <div class="box">Goal 23: Test goal with description...</div>
+                                            <div class="box">Goal 24: Test goal with description...</div>
+                                            <div class="box">Goal 25: Test goal with description...</div>
+                                            <div class="box">Goal 26: Test goal with description...</div>
+                                            <div class="box">Goal 27: Test goal with description...</div>
+                                            <div class="box">Goal 28: Test goal with description...</div>
+                                            <div class="box">Goal 29: Test goal with description...</div>
+                                            <div class="box">Goal 30: Test goal with description...</div>
+                                            <div class="box">Goal 31: Test goal with description...</div>
+                                            <div class="box">Goal 32: Test goal with description...</div>
+                                            <div class="box">Goal 33: Test goal with description...</div>
+                                            <div class="box">Goal 34: Test goal with description...</div>
+                                            <div class="box">Goal 35: Test goal with description...</div>
+                                            <div class="box">Goal 36: Test goal with description...</div>
+                                            <div class="box">Goal 37: Test goal with description...</div>
+                                            <div class="box">Goal 38: Test goal with description...</div>
+                                            <div class="box">Goal 39: Test goal with description...</div>
+                                            <div class="box">Goal 40: Test goal with description...</div>
+                                            <div class="box">Goal 41: Test goal with description...</div>
+                                            <div class="box">Goal 42: Test goal with description...</div>
+                                            <div class="box">Goal 43: Test goal with description...</div>
+                                            <div class="box">Goal 44: Test goal with description...</div>
+                                            <div class="box">Goal 45: Test goal with description (LAST ONE!)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: AI Chat -->
+            <div class="column is-one-third">
+                <div class="chat-panel">
+                    <div class="chat-header">
+                        <div class="chat-header-content">
+                            <span class="icon"><i class="fas fa-comments"></i></span>
+                            <div>
+                                <h4 class="chat-title">AI Assistant</h4>
+                                <p class="chat-subtitle">Ready to help</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-messages-container">
+                        <div class="notification is-info">
+                            <strong>SCROLL TEST:</strong> Chat messages scroll independently!
+                        </div>
+                        <div class="message ai-message">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">
+                                <div class="message-bubble">Welcome! I can help you design your agency.</div>
+                                <div class="message-time">10:00 AM</div>
+                            </div>
+                        </div>
+                        <div class="message ai-message">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">
+                                <div class="message-bubble">Your agency has 45 goals defined.</div>
+                                <div class="message-time">10:01 AM</div>
+                            </div>
+                        </div>
+                        <div class="message ai-message">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">
+                                <div class="message-bubble">Would you like to refine any goals?</div>
+                                <div class="message-time">10:02 AM</div>
+                            </div>
+                        </div>
+                        <div class="message ai-message">
+                            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                            <div class="message-content">
+                                <div class="message-bubble">Scroll up to see earlier messages!</div>
+                                <div class="message-time">10:15 AM</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <div class="field has-addons">
+                            <div class="control is-expanded">
+                                <input class="input" type="text" placeholder="Type your message...">
+                            </div>
+                            <div class="control">
+                                <button class="button is-primary">
+                                    <span class="icon"><i class="fas fa-paper-plane"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar at Bottom (VS Code style) -->
+        <div class="vscode-status-bar">
+            <div class="status-bar-left">
+                <span class="status-item">
+                    <i class="fas fa-network-wired"></i>
+                    <span class="status-text">Test Agency</span>
+                </span>
+                <span class="status-item status-separator">|</span>
+                <span class="status-item">
+                    <i class="fas fa-comments"></i>
+                    <span class="status-text">Goal Definition</span>
+                </span>
+            </div>
+            <div class="status-bar-right">
+                <span class="status-item">✅ Ready</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar burger menu script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get all "navbar-burger" elements
+            const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+            // Add a click event on each of them
+            $navbarBurgers.forEach(el => {
+                el.addEventListener('click', () => {
+                    // Get the target from the "data-target" attribute
+                    const target = el.dataset.target;
+                    const $target = document.getElementById(target);
+
+                    // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+                    el.classList.toggle('is-active');
+                    $target.classList.toggle('is-active');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 /* Agency Designer - VS Code Style Layout */
-/* CACHE BUST: v2025-10-30-14:00 - DEBUG VERSION WITH COLORED BORDERS */
+/* CACHE BUST: v2025-10-30-17:00 - Themed Status Bar */
+/* Note: vscode-status-bar.css is loaded separately in the template */
 
 /* Prevent page scrolling */
 html,
@@ -32,23 +33,42 @@ body {
     --vscode-accent-hover: #005a9e;
 }
 
-/* Main Container */
+/* Main Container - Use CSS Grid like VS Code */
 .vscode-designer-container {
-    height: 100vh;
+    height: calc(100vh - 52px);
+    /* Subtract navbar height (52px) */
     background: var(--vscode-bg);
     color: var(--vscode-text);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "main"
+        "status";
+    overflow: hidden;
+}
+
+/* Main Content Area */
+.vscode-main-content {
+    grid-area: main;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    height: 100%;
 }
 
 /* Bulma Columns Override for Full Height */
 .vscode-designer-container .columns {
     margin: 0;
-    height: calc(100vh - 60px);
-    /* Account for top toolbar */
+    height: 100%;
+    min-height: 0;
 }
 
 .vscode-designer-container .column {
     padding: 0;
     height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Left Column - Designer Content */
@@ -56,10 +76,24 @@ body {
     border-right: 1px solid var(--vscode-border);
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Right Column - Chat */
 .vscode-designer-container .column.is-one-third {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Designer Panels */
+.designer-panels {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -159,20 +193,15 @@ body {
     color: var(--vscode-accent);
 }
 
-/* Designer Panels */
-.designer-panels {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-}
-
 /* View Content Containers */
 .view-content {
     display: none;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-direction: column;
     min-height: 0;
+    height: 100%;
     /* CRITICAL: Allow flex child to shrink */
 }
 
@@ -180,7 +209,10 @@ body {
     display: flex !important;
     flex: 1;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
     min-height: 0;
+    height: 100%;
     /* CRITICAL: Allow flex child to shrink */
 }
 
@@ -193,8 +225,9 @@ body {
 .overview-layout {
     display: flex;
     width: 100%;
-    height: 100%;
+    flex: 1;
     min-height: 0;
+    height: 100%;
     /* CRITICAL: Allow flex child to shrink */
 }
 
@@ -350,6 +383,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     min-height: 0;
+    height: 100%;
     /* CRITICAL: Allow flex child to shrink */
 }
 
@@ -376,7 +410,8 @@ body {
     grid-template-rows: minmax(0, 1fr);
     overflow: hidden;
     padding: 0;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
 /* Empty Details View */
@@ -860,27 +895,35 @@ body {
 /* Scrollbar Styling */
 .sidebar-content::-webkit-scrollbar,
 .details-content::-webkit-scrollbar,
-.chat-messages-container::-webkit-scrollbar {
-    width: 8px;
+.chat-messages-container::-webkit-scrollbar,
+.view-content::-webkit-scrollbar,
+.overview-section::-webkit-scrollbar {
+    width: 12px;
 }
 
 .sidebar-content::-webkit-scrollbar-track,
 .details-content::-webkit-scrollbar-track,
-.chat-messages-container::-webkit-scrollbar-track {
+.chat-messages-container::-webkit-scrollbar-track,
+.view-content::-webkit-scrollbar-track,
+.overview-section::-webkit-scrollbar-track {
     background: var(--vscode-sidebar-bg);
 }
 
 .sidebar-content::-webkit-scrollbar-thumb,
 .details-content::-webkit-scrollbar-thumb,
-.chat-messages-container::-webkit-scrollbar-thumb {
-    background: var(--vscode-border);
-    border-radius: 4px;
+.chat-messages-container::-webkit-scrollbar-thumb,
+.view-content::-webkit-scrollbar-thumb,
+.overview-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
 }
 
 .sidebar-content::-webkit-scrollbar-thumb:hover,
 .details-content::-webkit-scrollbar-thumb:hover,
-.chat-messages-container::-webkit-scrollbar-thumb:hover {
-    background: #c0c0c0;
+.chat-messages-container::-webkit-scrollbar-thumb:hover,
+.view-content::-webkit-scrollbar-thumb:hover,
+.overview-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* Tags Override for Light Theme */
@@ -1086,8 +1129,6 @@ body {
     min-height: 0;
     /* Critical: allows flex child to shrink below content size */
     overflow: hidden;
-    border: 5px solid blue !important;
-    /* DEBUG */
 }
 
 .overview-content-section.is-active {
@@ -1099,14 +1140,14 @@ body {
 
 /* Overview Section Content - Make entire section scrollable */
 .overview-section {
-    overflow-y: auto;
+    overflow-y: scroll !important;
     overflow-x: hidden;
     padding: 1rem;
     padding-bottom: 2rem;
     min-height: 0;
+    max-height: 100%;
+    height: 100%;
     /* Critical: allows flex child to be scrollable */
-    background: yellow !important;
-    /* DEBUG: Make scrollable area visible */
 }
 
 .overview-section::-webkit-scrollbar {

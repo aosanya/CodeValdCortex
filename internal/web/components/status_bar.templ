@@ -1,0 +1,72 @@
+package components
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// StatusBar renders the VS Code-style status bar at the bottom of the page
+templ StatusBar(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	<div class="vscode-status-bar">
+		<div class="status-bar-left">
+			<span class="status-item">
+				<i class="fas fa-network-wired"></i>
+				<span class="status-text">
+					if currentAgency != nil {
+						Current Agency: { currentAgency.Name }
+					} else {
+						Current Agency: None
+					}
+				</span>
+			</span>
+			if conversation != nil {
+				<span class="status-item status-separator">|</span>
+				<span class="status-item">
+					<i class="fas fa-comments"></i>
+					<span class="status-text">{ string(conversation.Phase) }</span>
+				</span>
+			}
+		</div>
+		<div class="status-bar-right">
+			if conversation != nil && conversation.Phase == ai.PhaseValidation {
+				<button 
+					class="button is-success is-small status-action-btn"
+					hx-post={ "/api/v1/conversations/" + conversation.ID + "/generate" }
+					hx-target="#agent-details"
+					hx-indicator="#generate-spinner">
+					<span class="icon is-small">
+						<i class="fas fa-check-circle"></i>
+					</span>
+					<span>Generate Final Design</span>
+				</button>
+			}
+		</div>
+	</div>
+}
+
+// StatusBarSimple renders a simpler status bar without conversation info
+templ StatusBarSimple(currentAgency *agency.Agency, leftItems ...string) {
+	<div class="vscode-status-bar">
+		<div class="status-bar-left">
+			<span class="status-item">
+				<i class="fas fa-network-wired"></i>
+				<span class="status-text">
+					if currentAgency != nil {
+						Current Agency: { currentAgency.Name }
+					} else {
+						Current Agency: None
+					}
+				</span>
+			</span>
+			for _, item := range leftItems {
+				<span class="status-item status-separator">|</span>
+				<span class="status-item">
+					<span class="status-text">{ item }</span>
+				</span>
+			}
+		</div>
+		<div class="status-bar-right">
+			<!-- Right side items can be added as needed -->
+		</div>
+	</div>
+}
