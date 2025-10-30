@@ -1,0 +1,22 @@
+package agency_designer
+
+// GoalsListCard renders the goals list card component
+templ GoalsListCard() {
+	@ListCard(ListCardConfig{
+		ID:             "goals-list-card",
+		Title:          "", // No title for goals card
+		Icon:           "",
+		AddButtonID:    "add-goal-btn",
+		AddFunction:    "showGoalEditor('add')",
+		AddButtonText:  "Add",
+		AIButtonID:     "ai-generate-goal-btn",
+		AIFunction:     "showGenerateGoalModal()",
+		AIButtonText:   "Generate with AI",
+		ListID:         "goals-list",
+		ListClass:      "goals-list",
+		TableBodyID:    "goals-table-body",
+		CodeColHeader:  "Code",
+		TitleColHeader: "Goal Title",
+		LoadingText:    "Loading goals...",
+	})
+}

@@ -12,11 +12,11 @@ import {
     undoOverviewIntroduction
 } from './introduction.js';
 import {
-    showProblemEditor,
-    saveProblemFromEditor,
-    cancelProblemEdit,
-    deleteProblem
-} from './problems.js';
+    showGoalEditor,
+    saveGoalFromEditor,
+    cancelGoalEdit,
+    deleteGoal
+} from './goals.js';
 import {
     showUnitEditor,
     saveUnitFromEditor,
@@ -120,10 +120,10 @@ window.selectAgentType = selectAgentType;
 window.selectOverviewSection = selectOverviewSection;
 window.saveOverviewIntroduction = saveOverviewIntroduction;
 window.undoOverviewIntroduction = undoOverviewIntroduction;
-window.showProblemEditor = showProblemEditor;
-window.saveProblemFromEditor = saveProblemFromEditor;
-window.cancelProblemEdit = cancelProblemEdit;
-window.deleteProblem = deleteProblem;
+window.showGoalEditor = showGoalEditor;
+window.saveGoalFromEditor = saveGoalFromEditor;
+window.cancelGoalEdit = cancelGoalEdit;
+window.deleteGoal = deleteGoal;
 window.showUnitEditor = showUnitEditor;
 window.saveUnitFromEditor = saveUnitFromEditor;
 window.cancelUnitEdit = cancelUnitEdit;

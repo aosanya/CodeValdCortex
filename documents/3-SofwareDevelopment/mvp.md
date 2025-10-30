@@ -24,11 +24,18 @@
 | MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-010      |
 | MVP-015 | Management Dashboard  | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | In Progress | P1       | Medium | Go, Frontend Dev, Templ | MVP-013      |
 | MVP-023 | AI Agent Creator      | Implement AI-powered conversational interface for creating agents. AI asks questions, resolves details, and generates complete agent configurations through natural language dialogue | Not Started | P1       | Medium | Go, Templ, AI/LLM, Frontend Dev | MVP-025      |
-| MVP-029 | Problem Definition Module | Implement Problem Definition CRUD operations, data models, and UI in Agency Designer | Not Started | P1       | Medium | Go, Templ, ArangoDB | MVP-025      |
-| MVP-030 | Work Items Basic Management | Implement Work Items CRUD operations, data models, and basic UI in Agency Designer | Not Started | P1       | Low    | Go, Templ, ArangoDB | MVP-029      |
-| MVP-033 | RACI Matrix Editor | Implement visual RACI matrix editor with role assignments, validation, and templates | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-030      |
-| MVP-031 | Graph Relationships System | Implement ArangoDB graph collections and relationship mapping between Problems and Work Items | Not Started | P1       | Medium | Go, ArangoDB, Graph DB | MVP-033      |
-| MVP-032 | Agency Operations Analytics | Implement graph visualization, coverage analysis, and relationship analytics | Not Started | P1       | Low    | Go, Frontend Dev, Graph Viz | MVP-031      |
+| MVP-030 | Work Items Core Schema & Registry | Implement work item types registry, JSON schemas, and extend agent types with taxonomy fields (autonomy, budget, safety, identity) | Not Started | P1       | Medium | Go, ArangoDB, JSON Schema | MVP-029      |
+| MVP-031 | Work Items Lifecycle & SLA | Implement state machine, timers, breach handlers, and SLA/SLO enforcement for work items | Not Started | P1       | Medium | Go, ArangoDB, Backend Dev | MVP-030      |
+| MVP-032 | Work Items Assignment & Routing | Build declarative routing rules engine, skill matching, and agent selection algorithms | Not Started | P1       | Medium | Go, ArangoDB, Backend Dev | MVP-031      |
+| MVP-033 | Agent Lifecycle FSM | Implement agent lifecycle states (Registered, Scheduled, Starting, Healthy, Degraded, Backoff, Draining, Quarantined, Stopped, Retired) with transitions, guards, and health probes | Not Started | P1       | High   | Go, Backend Dev, Health Checks | MVP-032      |
+| MVP-034 | Run Execution FSM | Implement run states (Pending, Running, Waiting I/O, Waiting HITL, Succeeded, Failed, Compensating, Compensated, Orphaned) with retry/backoff logic | Not Started | P1       | High   | Go, Backend Dev, State Machine | MVP-033      |
+| MVP-035 | Health & Circuit Breakers | Implement health probe framework (HTTP, TCP, exec, gRPC), circuit breaker integration, and degradation detection | Not Started | P1       | Medium | Go, Backend Dev, Monitoring | MVP-034      |
+| MVP-036 | Quarantine System | Implement quarantine triggers, evidence capture, triage workflow, and re-enablement approval process | Not Started | P1       | Medium | Go, Security, Backend Dev | MVP-035      |
+| MVP-037 | Deployment Rollouts | Implement blue-green, canary, and progressive delivery strategies with SLO-based rollback | Not Started | P1       | High   | Go, DevOps, Deployment | MVP-036      |
+| MVP-038 | Namespace Isolation | Implement namespace hierarchy, resource quotas, network policies, and noisy neighbor protections | Not Started | P1       | High   | Go, Kubernetes, Networking | MVP-037      |
+| MVP-039 | Organization & RBAC | Build org/BU/project hierarchy, role matrix, permission system, and approval chain engine | Not Started | P1       | High   | Go, Security, Backend Dev | MVP-038      |
+| MVP-040 | Billing & Metering | Implement metering for all billing dimensions (agent-hours, storage, network, audit), cost allocation, and budget tracking | Not Started | P1       | Medium | Go, Backend Dev, Analytics | MVP-039      |
+| MVP-041 | Multi-tenancy Hardening | Add advanced isolation (dedicated nodes, encryption), data residency controls, and compliance reporting | Not Started | P2       | Medium | Go, Security, Compliance | MVP-040      |
 
 ## Authentication & Security Tasks (P2 - Important)
 
@@ -413,130 +420,1070 @@ POST /api/v1/agencies/{agency_id}/agents/create
 
 ---
 
-### MVP-029: Problem Definition Module
+### MVP-030: Work Items Core Schema & Registry
 
-**Objective**: Implement the Problem Definition Module as the foundation for agency operational framework, enabling structured problem cataloging and management.
+**Objective**: Implement work item types registry, JSON schemas for 6 work item types (Task, Job, Investigation, Change, Remediation, Experiment), and extend agent types schema with taxonomy fields from the comprehensive specifications.
 
 **Key Deliverables**:
 
-1. **Data Models**:
+1. **Work Item Type Registry**:
    ```go
-   type Problem struct {
-       Key            string    `json:"_key,omitempty"`
-       ID             string    `json:"_id,omitempty"`
-       AgencyID       string    `json:"agency_id"`
-       Number         int       `json:"number"`
-       Code           string    `json:"code"`
-       Description    string    `json:"description"`
-       Scope          string    `json:"scope"`
-       SuccessMetrics []string  `json:"success_metrics"`
-       CreatedAt      time.Time `json:"created_at"`
-       UpdatedAt      time.Time `json:"updated_at"`
+   type WorkItemType struct {
+       TypeID          string                 `json:"type_id"`
+       Name            string                 `json:"name"`
+       Description     string                 `json:"description"`
+       Schema          JSONSchema             `json:"schema"`
+       DefaultValues   map[string]interface{} `json:"default_values"`
+       RequiredFields  []string               `json:"required_fields"`
+       AllowedStates   []string               `json:"allowed_states"`
+       Version         string                 `json:"version"`
    }
    ```
 
-2. **Backend Services**:
-   - `ProblemService` interface and implementation
-   - CRUD operations with validation
-   - Agency-scoped data access
-   - Auto-numbering for problem sequences
-   - Duplicate code prevention
+2. **JSON Schemas for Work Item Types**:
+   - **Task**: Short-lived, single-agent execution (hours to days)
+   - **Job**: Multi-agent orchestration (days to weeks)
+   - **Investigation**: Root cause analysis and evidence gathering
+   - **Change**: Infrastructure/config changes with approvals
+   - **Remediation**: Incident response and recovery actions
+   - **Experiment**: A/B testing and hypothesis validation
 
-3. **API Endpoints**:
+3. **Agent Type Taxonomy Extension**:
+   ```go
+   type AgentType struct {
+       TypeID           string           `json:"type_id"`
+       Name             string           `json:"name"`
+       Category         AgentCategory    `json:"category"`
+       SkillsContract   SkillsContract   `json:"skills_contract"`
+       AutonomyLevel    AutonomyLevel    `json:"autonomy_level"`
+       Budget           BudgetLimits     `json:"budget"`
+       DataBoundaries   DataBoundaries   `json:"data_boundaries"`
+       SafetyConstraints SafetyConstraints `json:"safety_constraints"`
+       Identity         IdentityConfig   `json:"identity"`
+       TenantIsolation  IsolationPolicy  `json:"tenant_isolation"`
+   }
    ```
-   GET    /api/v1/agencies/{id}/problems
-   POST   /api/v1/agencies/{id}/problems
-   PUT    /api/v1/agencies/{id}/problems/{problemKey}
-   DELETE /api/v1/agencies/{id}/problems/{problemKey}
-   GET    /api/v1/agencies/{id}/problems/html   # HTML for HTMX
+
+4. **ArangoDB Collections**:
+   - `work_item_types` collection
+   - `agent_types` collection (extend existing)
+   - `work_item_templates` collection
+   - Create indexes and validation rules
+
+5. **Backend Services**:
+   - `WorkItemTypeRegistry` service
+   - `AgentTypeRegistry` service (extend existing)
+   - Schema validation service
+   - Template management service
+
+6. **API Endpoints**:
    ```
-
-4. **User Interface**:
-   - Problem definition form with validation
-   - Problems list with search and filtering
-   - Problem editor with rich text support
-   - Integration with Agency Designer layout
-   - Success metrics management
-
-5. **Database Schema**:
-   - ArangoDB `problems` collection
-   - Proper indexing for agency queries
-   - Data validation rules
-   - Migration scripts
+   GET    /api/v1/work-item-types
+   GET    /api/v1/work-item-types/{typeId}
+   POST   /api/v1/work-item-types
+   PUT    /api/v1/work-item-types/{typeId}
+   GET    /api/v1/agent-types
+   GET    /api/v1/agent-types/{typeId}
+   PUT    /api/v1/agent-types/{typeId}
+   ```
 
 **Acceptance Criteria**:
-- [ ] Users can create, edit, and delete problems
-- [ ] Problem codes are unique within agency
-- [ ] Auto-numbering works correctly
-- [ ] Search and filtering functional
-- [ ] Form validation prevents invalid data
-- [ ] Agency-scoped security implemented
+- [ ] All 6 work item types defined with complete JSON schemas
+- [ ] Agent types extended with taxonomy fields (7 agent types)
+- [ ] Registry services functional with CRUD operations
+- [ ] Schema validation prevents invalid work item creation
+- [ ] Default values and templates available
+- [ ] Migration scripts for existing data structures
+- [ ] Documentation for all schemas
 
-**Dependencies**: MVP-025 (Agency Designer foundation)
+**Dependencies**: MVP-029 (Goals Module)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items.md` and `agent-types-taxonomy.md`
 
 ---
 
-### MVP-030: Work Items Basic Management
+### MVP-031: Work Items Lifecycle & SLA
 
-**Objective**: Implement basic Work Items management with CRUD operations and core data structures, laying the foundation for the RACI matrix functionality.
+**Objective**: Implement complete lifecycle state machine, timers, breach handlers, and SLA/SLO enforcement for work items.
 
 **Key Deliverables**:
 
-1. **Data Models**:
+1. **State Machine Implementation**:
+   - States: Planned, In-Progress, Waiting, Review, Done, Failed, Rolled-back
+   - Transition validation and guards
+   - State history tracking
+   - Allowed transitions matrix
+
+2. **SLA/SLO Fields & Enforcement**:
    ```go
-   type WorkItem struct {
-       Key          string      `json:"_key,omitempty"`
-       ID           string      `json:"_id,omitempty"`
-       AgencyID     string      `json:"agency_id"`
-       Number       int         `json:"number"`
-       Code         string      `json:"code"`
-       Description  string      `json:"description"`
-       Deliverables []string    `json:"deliverables"`
-       Dependencies []string    `json:"dependencies"`
-       CreatedAt    time.Time   `json:"created_at"`
-       UpdatedAt    time.Time   `json:"updated_at"`
+   type WorkItemSLA struct {
+       ResponseTimeMinutes   int       `json:"response_time_minutes"`
+       CompletionTimeHours   int       `json:"completion_time_hours"`
+       EscalationPolicy      Escalation `json:"escalation_policy"`
+       BreachActions         []Action   `json:"breach_actions"`
+       CreatedAt             time.Time  `json:"created_at"`
+       FirstResponseAt       *time.Time `json:"first_response_at"`
+       CompletedAt           *time.Time `json:"completed_at"`
    }
    ```
 
-2. **Backend Services**:
+3. **Timer Service**:
+   - Background timer for SLA monitoring
+   - Breach detection and alerting
+   - Escalation trigger execution
+   - Timeout handling for waiting states
+
+4. **Breach Actions**:
+   - Auto-escalate to higher priority
+   - Auto-retry with backoff
+   - Trigger remediation work item
+   - Notify stakeholders
+
+5. **API Endpoints**:
+   ```
+   POST   /api/v1/work-items/{id}/transition
+   GET    /api/v1/work-items/{id}/state-history
+   GET    /api/v1/work-items/sla-breaches
+   POST   /api/v1/work-items/{id}/escalate
+   ```
+
+**Acceptance Criteria**:
+- [ ] State machine enforces valid transitions
+- [ ] SLA timers track response and completion times
+- [ ] Breach detection triggers configured actions
+- [ ] Escalation policies execute correctly
+- [ ] State history is complete and queryable
+- [ ] Metrics collected for SLA compliance
+
+**Dependencies**: MVP-030 (Work Items Core Schema & Registry)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items.md` Section 3
+
+---
+
+### MVP-032: Work Items Assignment & Routing
+
+**Objective**: Build declarative routing rules engine with skill matching, cost optimization, and agent selection algorithms.
+
+**Key Deliverables**:
+
+1. **Routing Rules Engine**:
+   ```go
+   type RoutingRule struct {
+       RuleID      string            `json:"rule_id"`
+       WorkItemType string           `json:"work_item_type"`
+       Conditions  []Condition       `json:"conditions"`
+       AgentSelection AgentSelection `json:"agent_selection"`
+       Priority    int               `json:"priority"`
+   }
+   ```
+
+2. **Agent Selection Algorithms**:
+   - Skills-based matching
+   - Cost budget optimization
+   - Data residency compliance
+   - Load balancing across agents
+   - Round-robin and least-loaded strategies
+
+3. **Skill Matching**:
+   ```go
+   type SkillMatcher struct {
+       RequiredSkills []Skill
+       OptionalSkills []Skill
+       SkillWeights   map[string]float64
+   }
+   ```
+
+4. **Assignment Service**:
+   - `WorkItemAssignmentService`
+   - Rule evaluation engine
+   - Agent availability checking
+   - Fallback and retry logic
+
+5. **API Endpoints**:
+   ```
+   POST   /api/v1/work-items/{id}/assign
+   GET    /api/v1/work-items/{id}/candidate-agents
+   POST   /api/v1/work-items/{id}/reassign
+   GET    /api/v1/routing-rules
+   POST   /api/v1/routing-rules
+   ```
+
+**Acceptance Criteria**:
+- [ ] Routing rules evaluate correctly
+- [ ] Skills matching finds qualified agents
+- [ ] Cost budgets are respected
+- [ ] Data residency rules enforced
+- [ ] Load balancing works across agents
+- [ ] Fallback mechanisms handle no-match scenarios
+
+**Dependencies**: MVP-031 (Work Items Lifecycle & SLA)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items.md` Section 4
+
+---
+
+### MVP-033: Agent Lifecycle FSM
+
+**Objective**: Implement comprehensive agent lifecycle finite state machine with 10 states, transitions, guards, timeouts, and health probes.
+
+**Key Deliverables**:
+
+1. **Agent Lifecycle States**:
+   - Registered, Scheduled, Starting, Healthy, Degraded, Backoff, Draining, Quarantined, Stopped, Retired
+   - State metadata and duration tracking
+   - State transition validation
+
+2. **Health Probes**:
+   ```go
+   type HealthProbe struct {
+       Type            ProbeType   `json:"type"` // liveness, readiness
+       Method          ProbeMethod `json:"method"` // http, tcp, exec, grpc
+       Config          ProbeConfig `json:"config"`
+       InitialDelay    int         `json:"initial_delay_ms"`
+       Interval        int         `json:"interval_ms"`
+       Timeout         int         `json:"timeout_ms"`
+       SuccessThreshold int        `json:"success_threshold"`
+       FailureThreshold int        `json:"failure_threshold"`
+   }
+   ```
+
+3. **Timeouts & Heartbeats**:
+   - Startup timeout configuration
+   - Heartbeat monitoring
+   - Drain timeout handling
+   - Exponential backoff calculation
+
+4. **Transition Guards**:
+   - Validate preconditions before transitions
+   - Check resource availability
+   - Enforce approval requirements
+   - Block invalid state changes
+
+5. **API Endpoints**:
+   ```
+   GET    /api/v1/agents/{id}/state
+   POST   /api/v1/agents/{id}/transition
+   GET    /api/v1/agents/{id}/state-history
+   GET    /api/v1/agents/{id}/health
+   POST   /api/v1/agents/{id}/heartbeat
+   ```
+
+**Acceptance Criteria**:
+- [ ] All 10 lifecycle states implemented
+- [ ] State transitions follow FSM rules
+- [ ] Health probes work for all probe types
+- [ ] Timeouts trigger appropriate actions
+- [ ] Heartbeat monitoring detects failures
+- [ ] Guards prevent invalid transitions
+
+**Dependencies**: MVP-032 (Work Items Assignment & Routing)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-states-fsm.md` Section 1
+
+---
+
+### MVP-034: Run Execution FSM
+
+**Objective**: Implement run/task execution finite state machine with 9 states, retry/backoff logic, waiting states, and orphan recovery.
+
+**Key Deliverables**:
+
+1. **Run States**:
+   - Pending, Running, Waiting I/O, Waiting HITL, Succeeded, Failed, Compensating, Compensated, Orphaned
+   - Run metadata and execution context
+   - State duration and timing metrics
+
+2. **Retry & Backoff Logic**:
+   ```go
+   type RetryPolicy struct {
+       MaxAttempts      int            `json:"max_attempts"`
+       BackoffStrategy  string         `json:"backoff_strategy"` // fixed, exponential
+       InitialDelay     int            `json:"initial_delay_ms"`
+       MaxDelay         int            `json:"max_delay_ms"`
+       Multiplier       float64        `json:"multiplier"`
+       Jitter           bool           `json:"jitter"`
+       RetryOn          []ErrorCategory `json:"retry_on"`
+       DoNotRetryOn     []string       `json:"do_not_retry_on"`
+   }
+   ```
+
+3. **Wait Conditions**:
+   - I/O wait (external API, database)
+   - HITL wait (human approval)
+   - Dependency wait (other work items)
+   - Rate limit wait
+
+4. **Orphan Recovery**:
+   - Heartbeat-based detection
+   - State recovery from checkpoints
+   - Idempotent operation retry
+   - Manual review escalation
+
+5. **Compensation/Saga Support**:
+   ```go
+   type CompensationPlan struct {
+       CompensationSteps []CompensationStep `json:"compensation_steps"`
+       Strategy          string             `json:"strategy"` // sequential, parallel
+   }
+   ```
+
+6. **API Endpoints**:
+   ```
+   GET    /api/v1/runs/{id}/state
+   POST   /api/v1/runs/{id}/transition
+   POST   /api/v1/runs/{id}/retry
+   POST   /api/v1/runs/{id}/compensate
+   GET    /api/v1/runs/orphaned
+   POST   /api/v1/runs/{id}/recover
+   ```
+
+**Acceptance Criteria**:
+- [ ] All 9 run states implemented
+- [ ] Retry policy with exponential backoff works
+- [ ] Wait states handle timeouts correctly
+- [ ] Orphan detection and recovery functional
+- [ ] Compensation steps execute in order
+- [ ] Run history and metrics collected
+
+**Dependencies**: MVP-033 (Agent Lifecycle FSM)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-states-fsm.md` Section 2
+
+---
+
+### MVP-035: Health & Circuit Breakers
+
+**Objective**: Implement health probe framework for multiple probe types and circuit breaker integration for external dependencies.
+
+**Key Deliverables**:
+
+1. **Health Probe Framework**:
+   - HTTP probe (status endpoint)
+   - TCP probe (port connectivity)
+   - Exec probe (command execution)
+   - gRPC probe (gRPC health check protocol)
+
+2. **Circuit Breaker Service**:
+   ```go
+   type CircuitBreaker struct {
+       Name       string          `json:"name"`
+       State      CircuitState    `json:"state"` // closed, open, half_open
+       Thresholds Thresholds      `json:"thresholds"`
+       Timings    Timings         `json:"timings"`
+       Metrics    CircuitMetrics  `json:"metrics"`
+   }
+   ```
+
+3. **Degradation Detection**:
+   - Performance degradation monitoring
+   - Error rate threshold checking
+   - Automatic transition to Degraded state
+   - Recovery detection and restoration
+
+4. **Integration Points**:
+   - Database connection pools
+   - External API clients
+   - Message queue connections
+   - Cache connections
+
+5. **Monitoring Dashboard**:
+   - Real-time circuit breaker status
+   - Health probe results visualization
+   - Degradation alerts and notifications
+
+**Acceptance Criteria**:
+- [ ] All 4 probe types functional
+- [ ] Circuit breaker opens on threshold breach
+- [ ] Half-open state tests recovery
+- [ ] Degradation detection works correctly
+- [ ] Agent transitions to Degraded when circuit opens
+- [ ] Monitoring dashboard displays status
+
+**Dependencies**: MVP-034 (Run Execution FSM)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-states-fsm.md` Sections 1.4-1.5
+
+---
+
+### MVP-036: Quarantine System
+
+**Objective**: Implement comprehensive quarantine system with triggers, evidence capture, triage workflow, and re-enablement process.
+
+**Key Deliverables**:
+
+1. **Quarantine Triggers**:
+   - Security violations (unauthorized access, credential exposure)
+   - Policy violations (compliance breaches)
+   - Anomaly detection (behavioral anomaly scores)
+   - Resource abuse (CPU/memory/network)
+   - Repeated failures (excessive error rates)
+
+2. **Evidence Capture**:
+   ```go
+   type QuarantineEvidence struct {
+       EvidenceID       string          `json:"evidence_id"`
+       AgentState       AgentStateSnapshot `json:"agent_state"`
+       RecentLogs       []LogEntry      `json:"recent_logs"`
+       PerformanceMetrics Metrics       `json:"performance_metrics"`
+       SecurityEvents   []SecurityEvent `json:"security_events"`
+       StorageLocation  string          `json:"storage_location"`
+   }
+   ```
+
+3. **Triage Workflow**:
+   - Automated analysis and classification
+   - Assignment to triage team
+   - Manual investigation tools
+   - Root cause determination
+   - Remediation decision tracking
+
+4. **Re-enablement Process**:
+   - Checklist validation (root cause, remediation, testing, approvals)
+   - Security and compliance approvals
+   - Gradual rollout with monitoring
+   - Rollback triggers for issues
+
+5. **SLA Tracking**:
+   - Response time by severity (Critical: 15min, High: 1hr, Medium: 4hr, Low: 24hr)
+   - Resolution targets
+   - Escalation automation
+
+6. **API Endpoints**:
+   ```
+   POST   /api/v1/agents/{id}/quarantine
+   GET    /api/v1/agents/{id}/quarantine/evidence
+   POST   /api/v1/agents/{id}/quarantine/triage
+   POST   /api/v1/agents/{id}/quarantine/re-enable
+   GET    /api/v1/quarantine/dashboard
+   ```
+
+**Acceptance Criteria**:
+- [ ] Quarantine triggers isolate agents correctly
+- [ ] Evidence capture includes all required data
+- [ ] Triage workflow assigns and tracks investigations
+- [ ] Re-enablement requires all approvals
+- [ ] SLA tracking monitors response times
+- [ ] Post-mortem documentation generated
+
+**Dependencies**: MVP-035 (Health & Circuit Breakers)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-states-fsm.md` Section 3
+
+---
+
+### MVP-037: Deployment Rollouts
+
+**Objective**: Implement multiple deployment strategies (blue-green, canary, progressive delivery) with SLO-based automatic rollback.
+
+**Key Deliverables**:
+
+1. **Blue-Green Deployment**:
+   - Instant traffic switchover
+   - Warmup period for new version
+   - Health check validation
+   - Instant rollback capability
+
+2. **Canary Deployment**:
+   ```go
+   type CanaryStage struct {
+       Name            string          `json:"name"`
+       Percentage      int             `json:"percentage"` // % traffic
+       Duration        int             `json:"duration_ms"`
+       SuccessCriteria SuccessCriteria `json:"success_criteria"`
+   }
+   ```
+
+3. **Progressive Delivery**:
+   - Start at 1% traffic
+   - Increment by 10% every 5 minutes
+   - Pause on error detection
+   - Auto-rollback on failure
+
+4. **SLO-Based Rollback**:
+   ```go
+   type RollbackTrigger struct {
+       Metric           string  `json:"metric"`
+       Operator         string  `json:"operator"`
+       Threshold        float64 `json:"threshold"`
+       EvaluationWindow int     `json:"evaluation_window_ms"`
+   }
+   ```
+
+5. **Error Budget Integration**:
+   - Track error budget consumption
+   - Pause rollout when budget warning threshold reached
+   - Auto-rollback when budget critical threshold reached
+
+6. **Deployment Metrics**:
+   - Error rate monitoring
+   - Latency P95/P99 tracking
+   - Success rate calculation
+   - Custom metric evaluation
+
+7. **API Endpoints**:
+   ```
+   POST   /api/v1/agents/{id}/deploy
+   GET    /api/v1/deployments/{id}/status
+   POST   /api/v1/deployments/{id}/promote
+   POST   /api/v1/deployments/{id}/rollback
+   GET    /api/v1/deployments/{id}/metrics
+   ```
+
+**Acceptance Criteria**:
+- [ ] Blue-green deployments switch instantly
+- [ ] Canary stages progress automatically
+- [ ] Progressive delivery increments correctly
+- [ ] Rollback triggers fire on threshold breach
+- [ ] Error budget tracking prevents issues
+- [ ] All deployment types support instant rollback
+
+**Dependencies**: MVP-036 (Quarantine System)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-states-fsm.md` Section 4
+
+---
+
+### MVP-038: Namespace Isolation
+
+**Objective**: Implement namespace hierarchy, resource quotas, network policies, and noisy neighbor protections for multi-tenant isolation.
+
+**Key Deliverables**:
+
+1. **Namespace Architecture**:
+   ```go
+   type Namespace struct {
+       NamespaceID      string          `json:"namespace_id"`
+       Type             NamespaceType   `json:"type"` // org, business_unit, project, environment
+       OrganizationID   string          `json:"organization_id"`
+       BusinessUnitID   string          `json:"business_unit_id,omitempty"`
+       ProjectID        string          `json:"project_id,omitempty"`
+       IsolationPolicy  IsolationPolicy `json:"isolation"`
+       Quotas           ResourceQuotas  `json:"quotas"`
+       NetworkPolicy    NetworkPolicy   `json:"network_policy"`
+   }
+   ```
+
+2. **Resource Quotas**:
+   - Compute: max agents, CPU cores, memory, GPUs
+   - Storage: database size, artifact storage, backups
+   - Network: egress/ingress bandwidth, connections
+   - Work Items: active items, daily creation limit
+   - API: rate limits, daily quotas
+
+3. **Network Policies**:
+   - Ingress rules (source namespaces, IPs, service accounts)
+   - Egress rules (destination namespaces, IPs, domains)
+   - DNS policy (allowed/blocked domains, DNSSEC)
+   - Default allow/deny behavior
+
+4. **Noisy Neighbor Protection**:
+   ```go
+   type NoisyNeighborProtection struct {
+       Detection   DetectionConfig  `json:"detection"`
+       Throttling  ThrottlingConfig `json:"throttling"`
+       Fairness    FairnessPolicy   `json:"fairness"`
+   }
+   ```
+
+5. **Quota Enforcement**:
+   - Soft limits (warnings at 80%)
+   - Hard limits (blocking at 100%)
+   - Spillover to alternate namespaces
+   - Alert notifications
+
+6. **API Endpoints**:
+   ```
+   GET    /api/v1/namespaces
+   POST   /api/v1/namespaces
+   GET    /api/v1/namespaces/{id}/quotas
+   PUT    /api/v1/namespaces/{id}/quotas
+   GET    /api/v1/namespaces/{id}/network-policy
+   PUT    /api/v1/namespaces/{id}/network-policy
+   ```
+
+**Acceptance Criteria**:
+- [ ] Namespace hierarchy enforced
+- [ ] Resource quotas prevent overuse
+- [ ] Network policies block unauthorized access
+- [ ] Noisy neighbor detection functional
+- [ ] Throttling limits resource abuse
+- [ ] Quota dashboard displays utilization
+
+**Dependencies**: MVP-037 (Deployment Rollouts)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/multi-tenancy-org-model.md` Section 1
+
+---
+
+### MVP-039: Organization & RBAC
+
+**Objective**: Build organizational hierarchy (Org → BU → Project → Environment), role-based access control with 8 standard roles, and multi-step approval chains.
+
+**Key Deliverables**:
+
+1. **Organizational Hierarchy**:
+   ```go
+   type Organization struct {
+       OrganizationID  string         `json:"organization_id"`
+       Name            string         `json:"name"`
+       Domain          string         `json:"domain"`
+       BusinessUnits   []BusinessUnit `json:"business_units"`
+       Settings        OrgSettings    `json:"settings"`
+       BillingAccount  BillingAccount `json:"billing_account"`
+   }
+   ```
+
+2. **Role Matrix** (8 Standard Roles):
+   - Organization Owner (full control)
+   - Business Unit Lead (manage BU and projects)
+   - Project Owner (full project control)
+   - Developer (build and deploy agents)
+   - Operator (operate and monitor)
+   - Auditor (review and audit)
+   - Risk Manager (manage risk policies)
+   - Viewer (read-only access)
+
+3. **Permission System**:
+   ```go
+   type Permission struct {
+       Resource   ResourceType `json:"resource"`
+       Actions    []Action     `json:"actions"`
+       Conditions []Condition  `json:"conditions,omitempty"`
+   }
+   ```
+
+4. **Approval Chains**:
+   - Multi-step approval workflow
+   - Role-based approvers
+   - Dynamic approver resolution
+   - Timeout and escalation
+   - Veto rights for specific roles
+
+5. **API Endpoints**:
+   ```
+   GET    /api/v1/organizations
+   POST   /api/v1/organizations
+   GET    /api/v1/organizations/{id}/business-units
+   POST   /api/v1/organizations/{id}/business-units
+   GET    /api/v1/projects
+   POST   /api/v1/projects
+   GET    /api/v1/roles
+   POST   /api/v1/roles
+   GET    /api/v1/approval-chains
+   POST   /api/v1/approval-chains
+   ```
+
+**Acceptance Criteria**:
+- [ ] Org hierarchy creation and management works
+- [ ] All 8 roles implemented with correct permissions
+- [ ] Permission checks enforce access control
+- [ ] Approval chains execute multi-step workflows
+- [ ] Timeout and escalation functional
+- [ ] Role inheritance works across hierarchy
+
+**Dependencies**: MVP-038 (Namespace Isolation)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/multi-tenancy-org-model.md` Section 2
+
+---
+
+### MVP-040: Billing & Metering
+
+**Objective**: Implement comprehensive metering for all billing dimensions, cost allocation/chargebacks, and budget tracking with alerts.
+
+**Key Deliverables**:
+
+1. **Billing Dimensions**:
+   - Agent-hours by agent type
+   - CPU/memory/GPU hours
+   - Storage (database, artifacts, backups, archive)
+   - Network (egress/ingress by region)
+   - Audit retention (logs, traces, metrics)
+
+2. **Metering Service**:
+   ```go
+   type BillingDimensions struct {
+       OrganizationID string         `json:"organization_id"`
+       BillingPeriod  BillingPeriod  `json:"billing_period"`
+       Compute        ComputeCosts   `json:"compute"`
+       Storage        StorageCosts   `json:"storage"`
+       Network        NetworkCosts   `json:"network"`
+       Audit          AuditCosts     `json:"audit"`
+       TotalCost      Cost           `json:"total_cost"`
+   }
+   ```
+
+3. **Cost Allocation**:
+   - By business unit
+   - By project
+   - By environment
+   - By tags
+   - Shared cost allocation (equal, proportional, weighted)
+
+4. **Budget System**:
+   ```go
+   type Budget struct {
+       BudgetID       string        `json:"budget_id"`
+       Scope          BudgetScope   `json:"scope"`
+       Amount         float64       `json:"amount"`
+       Period         string        `json:"period"`
+       Alerts         []BudgetAlert `json:"alerts"`
+       Actions        []BudgetAction `json:"actions"`
+       CurrentSpend   float64       `json:"current_spend"`
+       ForecastedSpend float64      `json:"forecasted_spend"`
+   }
+   ```
+
+5. **Pricing Models**:
+   - OSS: Virtual "CodeVald Credits" for cost visibility
+   - Commercial: Actual billing with tiered pricing
+
+6. **Chargeback Reports**:
+   - Executive summary
+   - Detailed breakdown by hierarchy
+   - Cost optimization recommendations
+   - Export to CSV/PDF
+
+7. **API Endpoints**:
+   ```
+   GET    /api/v1/billing/metrics
+   GET    /api/v1/billing/allocation
+   GET    /api/v1/budgets
+   POST   /api/v1/budgets
+   GET    /api/v1/budgets/{id}/alerts
+   GET    /api/v1/billing/reports/chargeback
+   ```
+
+**Acceptance Criteria**:
+- [ ] All billing dimensions metered accurately
+- [ ] Cost allocation works for all hierarchy levels
+- [ ] Budget alerts trigger at thresholds
+- [ ] Budget actions execute (throttle, block)
+- [ ] Chargeback reports generate correctly
+- [ ] OSS credit system displays costs
+
+**Dependencies**: MVP-039 (Organization & RBAC)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/multi-tenancy-org-model.md` Section 3
+
+---
+
+### MVP-041: Multi-tenancy Hardening
+
+**Objective**: Add advanced isolation features, data residency controls, tenant migration tools, and compliance reporting dashboards.
+
+**Key Deliverables**:
+
+1. **Advanced Isolation**:
+   - Dedicated compute nodes per tenant
+   - CPU pinning and memory reservation
+   - Dedicated storage volumes
+   - Encryption at rest for all tenant data
+   - Isolated backup storage
+
+2. **Data Residency Controls**:
+   ```go
+   type DataResidency struct {
+       AllowedRegions    []string `json:"allowed_regions"`
+       PrimaryRegion     string   `json:"primary_region"`
+       BackupRegions     []string `json:"backup_regions"`
+       CrossBorderPolicy string   `json:"cross_border_policy"`
+   }
+   ```
+
+3. **Tenant Migration Tools**:
+   - Export tenant data
+   - Import tenant data
+   - Namespace migration
+   - Zero-downtime migration
+   - Migration validation
+
+4. **Compliance Reporting**:
+   - SOC2 compliance dashboard
+   - HIPAA compliance dashboard
+   - GDPR compliance dashboard
+   - Audit trail reports
+   - Data access logs
+
+5. **API Endpoints**:
+   ```
+   POST   /api/v1/tenants/{id}/export
+   POST   /api/v1/tenants/{id}/import
+   POST   /api/v1/tenants/{id}/migrate
+   GET    /api/v1/compliance/reports
+   GET    /api/v1/compliance/{framework}/status
+   ```
+
+**Acceptance Criteria**:
+- [ ] Dedicated nodes isolate tenant workloads
+- [ ] Data residency rules enforced
+- [ ] Tenant migration completes successfully
+- [ ] Compliance dashboards show status
+- [ ] Audit trails complete and queryable
+- [ ] Encryption at rest functional
+
+**Dependencies**: MVP-040 (Billing & Metering)
+
+**Reference**: See `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/multi-tenancy-org-model.md` Section 4
+
+---
+
+**Note**: The original MVP-030, MVP-031, MVP-032, and MVP-033 task descriptions have been superseded by comprehensive specifications documented in:
+- `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items.md`
+- `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-types-taxonomy.md`
+- `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-states-fsm.md`
+- `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/multi-tenancy-org-model.md`
+- `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/goals-specification.md`
+
+The new MVP tasks (MVP-030 through MVP-041) implement these comprehensive specifications with proper phasing and dependencies.
+
+---
+
+## Agent Property Broadcasting Feature (P1 - Critical)
+
+*Enables UC-TRACK-001 (Safiri Salama) and other real-time tracking/monitoring use cases*
+
+| Task ID | Title                                    | Description                                                                                                      | Status      | Priority | Effort | Skills Required            | Dependencies |
+| ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | -------------------------- | ------------ |
+| MVP-016 | Core Broadcasting Infrastructure         | Implement BroadcastConfiguration, PropertyBroadcaster service, ContextEvaluator, and integration with PubSub    | Not Started | P1       | High   | Go, Backend Dev, PubSub    | MVP-013      |
+| MVP-017 | Subscription Management                  | Build SubscriptionManager, subscriber filtering, favorite functionality, and subscription API endpoints          | Not Started | P1       | Medium | Go, Backend Dev, REST API  | MVP-016      |
+| MVP-018 | Privacy & Security Controls              | Implement geofencing, property masking, permission model, audit logging, and encryption for sensitive properties | Not Started | P1       | Medium | Security, Backend Dev      | MVP-017      |
+| MVP-019 | Performance Optimization & Scale         | Performance tuning, caching, load balancing for broadcasters, message broker optimization, monitoring & alerting | Not Started | P1       | Medium | Performance, DevOps        | MVP-018      |
+| MVP-020 | UC-TRACK-001 Integration & Testing       | Implement Vehicle & Passenger agents, build mobile/web UI, SACCO management portal, end-to-end testing          | Not Started | P1       | High   | Full-stack, Mobile Dev     | MVP-019      |
+
+**Note**: Detailed task specifications for MVP-016 through MVP-020 are available in `/documents/3-SofwareDevelopment/core-systems/agent-property-broadcasting.md`
+
+---
+
+## Authentication & Security Tasks (P2 - Important)
+   - **Work Breakdown Structure**: AI automatically breaks down complex work into manageable items
+   - **Deliverable Generation**: AI suggests specific, measurable deliverables
+   - **Dependency Mapping**: AI identifies and suggests dependencies between work items
+   - **Effort Estimation**: AI provides effort estimates based on similar work items
+   - **Work Item Templates**: AI-generated templates based on work type and industry
+
+3. **AI Work Item Creation Flow**:
+   ```
+   User: "We need to improve our customer portal"
+   
+   AI: "Great! I'll help you break this down into specific work items.
+        
+        For a customer portal improvement, I typically see these areas:
+        
+        🎨 User Interface/Experience
+        ⚙️ Backend/API Development  
+        🔐 Security & Authentication
+        📱 Mobile Responsiveness
+        📊 Analytics & Reporting
+        🧪 Testing & QA
+        
+        Which aspects are most important for your project?"
+   
+   User: "Focus on UI improvements and mobile responsiveness"
+   
+   AI: "Perfect! I'll create focused work items:
+        
+        ✓ Work Item 1: UI/UX Design Audit & Redesign
+          Deliverables:
+          - Current UI assessment report
+          - New design mockups and prototypes
+          - User testing results
+          
+        ✓ Work Item 2: Mobile Responsive Implementation  
+          Deliverables:
+          - Mobile-first CSS framework
+          - Cross-device testing results
+          - Performance optimization report
+          
+        Dependencies: Work Item 2 depends on Work Item 1
+        Estimated Effort: 3-4 weeks total
+        
+        Should I add more specific work items or refine these further?"
+   ```
+
+4. **AI Work Item Refinement Features**:
+   - **Work Item Decomposition**: Break large work items into smaller, manageable tasks
+   - **Deliverable Refinement**: AI suggests specific, measurable deliverables
+   - **Dependency Analysis**: AI maps dependencies and suggests optimal sequencing
+   - **Resource Estimation**: AI estimates time, effort, and resource requirements
+   - **Risk Assessment**: AI identifies potential risks and mitigation strategies
+   - **Quality Criteria**: AI suggests acceptance criteria and quality standards
+
+5. **Backend Services**:
    - `WorkItemService` interface and implementation
+   - `AIWorkItemService` for AI-powered features
    - CRUD operations with validation
    - Agency-scoped data access
    - Auto-numbering for work item sequences
    - Duplicate code prevention
+   - Work item template management
+   - Dependency validation and cycle detection
 
-3. **API Endpoints**:
+6. **API Endpoints**:
    ```
    GET    /api/v1/agencies/{id}/work-items
    POST   /api/v1/agencies/{id}/work-items
    PUT    /api/v1/agencies/{id}/work-items/{workItemKey}
    DELETE /api/v1/agencies/{id}/work-items/{workItemKey}
-   GET    /api/v1/agencies/{id}/work-items/html   # HTML for HTMX
+   GET    /api/v1/agencies/{id}/work-items/html                      # HTML for HTMX
+   POST   /api/v1/agencies/{id}/work-items/{workItemKey}/refine      # AI refine endpoint (like overview/refine)
+   POST   /api/v1/agencies/{id}/work-items/generate                  # AI generate from scratch
+   POST   /api/v1/agencies/{id}/work-items/breakdown                 # AI work breakdown
+   GET    /api/v1/agencies/{id}/work-items/ai/templates             # AI-generated templates
    ```
 
-4. **Basic User Interface**:
-   - Work items list with search and filtering
-   - Work item creation/editing form
-   - Deliverables management (add/remove)
-   - Dependencies selection interface
-   - Integration with Agency Designer layout
+7. **Enhanced User Interface with AI Refine Pattern**:
+   - **Work Item Definition Form**: Standard textarea with AI Sparkle button
+   - **AI Refine Button**: HTMX-powered refinement following introduction_card pattern
+   - **Work Items List**: Enhanced with AI generation and breakdown options
+   - **Template Selector**: AI-generated work item templates
+   - **Dependency Mapper**: Visual dependency mapping with AI suggestions
 
-5. **Database Schema**:
-   - ArangoDB `work_items` collection
-   - Proper indexing for agency queries
-   - Data validation rules
-   - Migration scripts
+8. **AI Refine Implementation (Following Introduction Card Pattern)**:
+   ```html
+   <!-- Work Item Definition Card -->
+   <div class="box">
+     <div id="workitem-content">
+       <div class="content">
+         <div class="field">
+           <label class="label">Work Item Description</label>
+           <div class="control">
+             <textarea
+               class="textarea"
+               id="workitem-editor"
+               placeholder="Describe the work item and its objectives..."
+               rows="12"
+               style="font-family: monospace; font-size: 14px;">
+               { workItem.Description }
+             </textarea>
+           </div>
+         </div>
+         
+         <div class="field">
+           <label class="label">Deliverables</label>
+           <div class="control">
+             <textarea
+               class="textarea"
+               id="deliverables-editor"
+               placeholder="List specific deliverables and outcomes..."
+               rows="8">
+               { strings.Join(workItem.Deliverables, "\n") }
+             </textarea>
+           </div>
+         </div>
+         
+         <div class="field">
+           <label class="label">Dependencies</label>
+           <div class="control">
+             <textarea
+               class="textarea"
+               id="dependencies-editor"
+               placeholder="List dependencies and prerequisites..."
+               rows="5">
+               { strings.Join(workItem.Dependencies, "\n") }
+             </textarea>
+           </div>
+         </div>
+       </div>
+       
+       <div class="buttons is-right">
+         <button
+           class="button is-primary"
+           onclick="saveWorkItemDefinition()"
+           id="save-workitem-btn">
+           <span class="icon"><i class="fas fa-save"></i></span>
+           <span>Save</span>
+         </button>
+         
+         <!-- AI Refine / Sparkle button (following introduction_card pattern) -->
+         <button
+           class="button is-info"
+           hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/work-items/" + workItem.Key + "/refine" }
+           hx-include="#workitem-editor, #deliverables-editor, #dependencies-editor"
+           hx-target="#workitem-content"
+           hx-indicator="#ai-process-status"
+           hx-on::after-request="
+             console.log('🏁 HTMX request completed, hiding status...');
+             if (window.hideAIProcessStatus) {
+               window.hideAIProcessStatus();
+             } else {
+               console.log('❌ hideAIProcessStatus not available');
+               const status = document.getElementById('ai-process-status');
+               if (status) {
+                 status.style.display = 'none';
+                 console.log('✅ Status hidden manually');
+               }
+             }
+           "
+           id="ai-sparkle-btn"
+           onclick="window.handleRefineClick && window.handleRefineClick()"
+           title="Refine with AI">
+           <span class="icon"><i class="fas fa-magic"></i></span>
+           <span>Refine</span>
+         </button>
+         
+         <!-- AI Breakdown button for complex work items -->
+         <button
+           class="button is-warning"
+           hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/work-items/breakdown" }
+           hx-include="#workitem-editor"
+           hx-target="#workitem-content"
+           hx-indicator="#ai-process-status"
+           title="Break down into smaller work items">
+           <span class="icon"><i class="fas fa-sitemap"></i></span>
+           <span>Breakdown</span>
+         </button>
+         
+         <button
+           class="button"
+           onclick="undoWorkItemDefinition()"
+           id="undo-workitem-btn">
+           <span class="icon"><i class="fas fa-undo"></i></span>
+           <span>Undo</span>
+         </button>
+       </div>
+       
+       <!-- Loading indicator for AI refine (same as introduction_card) -->
+       <div id="ai-refine-loading" class="htmx-indicator">
+         <div class="notification is-info is-light">
+           <div class="is-flex is-align-items-center">
+             <span class="icon has-text-info mr-2">
+               <i class="fas fa-spinner fa-spin"></i>
+             </span>
+             <span>AI is refining your work item...</span>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+   ```
+
+9. **AI-Enhanced Features**:
+   - **Smart Templates**: Context-aware work item templates
+   - **Dependency Prediction**: AI predicts likely dependencies based on work type
+   - **Resource Optimization**: AI suggests resource allocation and scheduling
+   - **Risk Identification**: AI flags potential risks and bottlenecks
+   - **Quality Assurance**: AI suggests testing and validation approaches
+   - **Progress Tracking**: AI-enhanced progress monitoring and reporting
 
 **Acceptance Criteria**:
 - [ ] Users can create, edit, and delete work items
+- [ ] AI can generate work items from high-level descriptions
+- [ ] AI provides intelligent work breakdown suggestions
+- [ ] Work item templates are generated based on context
+- [ ] Deliverables are automatically suggested and refined
+- [ ] Dependencies are intelligently mapped and validated
+- [ ] Effort estimation is provided with AI assistance
 - [ ] Work item codes are unique within agency
 - [ ] Auto-numbering works correctly
-- [ ] Search and filtering functional
+- [ ] Search and filtering functional with AI-enhanced search
 - [ ] Form validation prevents invalid data
 - [ ] Deliverables and dependencies can be managed
 - [ ] Agency-scoped security implemented
+- [ ] AI conversation history is maintained per work item
 
-**Dependencies**: MVP-029 (Problem Definition Module)
+**Dependencies**: MVP-029 (Goals Module)
 
 ---
 

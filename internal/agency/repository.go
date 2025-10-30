@@ -18,12 +18,12 @@ type Repository interface {
 	GetOverview(ctx context.Context, agencyID string) (*Overview, error)
 	UpdateOverview(ctx context.Context, overview *Overview) error
 
-	// Problem methods
-	CreateProblem(ctx context.Context, problem *Problem) error
-	GetProblems(ctx context.Context, agencyID string) ([]*Problem, error)
-	GetProblem(ctx context.Context, agencyID string, key string) (*Problem, error)
-	UpdateProblem(ctx context.Context, problem *Problem) error
-	DeleteProblem(ctx context.Context, agencyID string, key string) error
+	// Goal methods
+	CreateGoal(ctx context.Context, goal *Goal) error
+	GetGoals(ctx context.Context, agencyID string) ([]*Goal, error)
+	GetGoal(ctx context.Context, agencyID string, key string) (*Goal, error)
+	UpdateGoal(ctx context.Context, goal *Goal) error
+	DeleteGoal(ctx context.Context, agencyID string, key string) error
 
 	// UnitOfWork methods
 	CreateUnitOfWork(ctx context.Context, unit *UnitOfWork) error

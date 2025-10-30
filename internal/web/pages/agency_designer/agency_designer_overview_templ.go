@@ -51,11 +51,11 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div id=\"content-problem-definition\" class=\"overview-content-section\" style=\"display: none;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div id=\"content-goal-definition\" class=\"overview-content-section\" style=\"display: none;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ProblemDefinitionContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = GoalDefinitionContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -97,7 +97,7 @@ func OverviewNavigationList() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"problem-definition\" onclick=\"selectOverviewSection(this, 'problem-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-exclamation-triangle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Problem Definition</div><div class=\"nav-description\">Define the challenge</div></div></div><div class=\"overview-nav-item\" data-section=\"units-of-work\" onclick=\"selectOverviewSection(this, 'units-of-work')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Units of Work</div><div class=\"nav-description\">Define work items</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"units-of-work\" onclick=\"selectOverviewSection(this, 'units-of-work')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Units of Work</div><div class=\"nav-description\">Define work items</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,8 +143,8 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 	})
 }
 
-// ProblemDefinitionContent shows the problem definition section
-func ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+// GoalDefinitionContent shows the goal definition section
+func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -169,11 +169,11 @@ func ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.Con
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ProblemEditorCard().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = GoalEditorCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ProblemsListCard().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = GoalsListCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,0 +1,32 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// GoalItem renders a single goal in the list as a table row
+templ GoalItem(goal *agency.Goal) {
+	@TableItem(TableItemConfig{
+		Key:            goal.Key,
+		Code:           goal.Code,
+		Description:    goal.Description,
+		EditFunction:   "showGoalEditor",
+		DeleteFunction: "deleteGoal",
+		Number:         goal.Number,
+	})
+}
+
+// GoalsList renders all goals as table rows
+templ GoalsList(goals []*agency.Goal) {
+	if len(goals) == 0 {
+		<tr>
+			<td colspan="3" class="has-text-grey has-text-centered py-5">
+				<p><i class="fas fa-info-circle"></i> No goals defined yet. Click the + button to add one.</p>
+			</td>
+		</tr>
+	} else {
+		for _, goal := range goals {
+			@GoalItem(goal)
+		}
+	}
+}

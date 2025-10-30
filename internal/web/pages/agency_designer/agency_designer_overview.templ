@@ -34,8 +34,8 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 				<div id="content-introduction" class="overview-content-section is-active">
 					@IntroductionContent(currentAgency, conversation, overview)
 				</div>
-				<div id="content-problem-definition" class="overview-content-section" style="display: none;">
-					@ProblemDefinitionContent(currentAgency, conversation)
+				<div id="content-goal-definition" class="overview-content-section" style="display: none;">
+					@GoalDefinitionContent(currentAgency, conversation)
 				</div>
 				<div id="content-units-of-work" class="overview-content-section" style="display: none;">
 					@UnitsOfWorkContent(currentAgency, conversation)
@@ -63,14 +63,14 @@ templ OverviewNavigationList() {
 		
 		<div 
 			class="overview-nav-item"
-			data-section="problem-definition"
-			onclick="selectOverviewSection(this, 'problem-definition')">
+			data-section="goal-definition"
+			onclick="selectOverviewSection(this, 'goal-definition')">
 			<div class="nav-icon">
-				<i class="fas fa-exclamation-triangle"></i>
+				<i class="fas fa-bullseye"></i>
 			</div>
 			<div class="nav-info">
-				<div class="nav-name">Problem Definition</div>
-				<div class="nav-description">Define the challenge</div>
+				<div class="nav-name">Goal Definition</div>
+				<div class="nav-description">Define objectives</div>
 			</div>
 		</div>
 		
@@ -96,11 +96,11 @@ templ IntroductionContent(currentAgency *agency.Agency, conversation *ai.Convers
 	</div>
 }
 
-// ProblemDefinitionContent shows the problem definition section
-templ ProblemDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+// GoalDefinitionContent shows the goal definition section
+templ GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		@ProblemEditorCard()
-		@ProblemsListCard()
+		@GoalEditorCard()
+		@GoalsListCard()
 	</div>
 }
 

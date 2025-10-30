@@ -8,6 +8,9 @@ type ListCardConfig struct {
 	AddButtonID     string // Add button ID
 	AddFunction     string // JavaScript function to call on add
 	AddButtonText   string // Add button text
+	AIButtonID      string // AI button ID (optional)
+	AIFunction      string // JavaScript function to call for AI (optional)
+	AIButtonText    string // AI button text (optional)
 	ListID          string // List container ID
 	ListClass       string // List container class
 	TableBodyID     string // Table body ID
@@ -34,6 +37,16 @@ templ ListCard(config ListCardConfig) {
 			</div>
 			<div class="level-right">
 				<div class="level-item">
+					if config.AIButtonID != "" && config.AIFunction != "" {
+						<button 
+							class="button is-small is-info mr-2"
+							onclick={ templ.ComponentScript{Call: config.AIFunction} }
+							id={ config.AIButtonID }
+							title={ config.AIButtonText }>
+							<span class="icon"><i class="fas fa-magic"></i></span>
+							<span>{ config.AIButtonText }</span>
+						</button>
+					}
 					<button 
 						class="button is-small is-success"
 						onclick={ templ.ComponentScript{Call: config.AddFunction} }

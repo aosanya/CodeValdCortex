@@ -114,27 +114,53 @@ type Overview struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-// Problem represents a problem statement that the agency is solving
-type Problem struct {
-	Key         string    `json:"_key,omitempty"`
-	AgencyID    string    `json:"agency_id"`
-	Number      int       `json:"number"`      // Display order/number
-	Code        string    `json:"code"`        // Problem code (e.g., P001, PROB-1)
-	Description string    `json:"description"` // The problem statement
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+// Goal represents a goal statement that the agency is solving
+type Goal struct {
+	Key            string    `json:"_key,omitempty"`
+	ID             string    `json:"_id,omitempty"`
+	AgencyID       string    `json:"agency_id"`
+	Number         int       `json:"number"`
+	Code           string    `json:"code"`
+	Description    string    `json:"description"`
+	Scope          string    `json:"scope"`
+	SuccessMetrics []string  `json:"success_metrics"`
+	Priority       string    `json:"priority"` // High, Medium, Low
+	Status         string    `json:"status"`   // Draft, Active, Resolved, Archived
+	Category       string    `json:"category"` // Operational, Strategic, Technical, etc.
+	Tags           []string  `json:"tags"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-// CreateProblemRequest is the request body for creating a problem
-type CreateProblemRequest struct {
-	Code        string `json:"code" binding:"required"`
-	Description string `json:"description" binding:"required"`
+// CreateGoalRequest is the request body for creating a goal
+type CreateGoalRequest struct {
+	Code           string   `json:"code" binding:"required"`
+	Description    string   `json:"description" binding:"required"`
+	Scope          string   `json:"scope"`
+	SuccessMetrics []string `json:"success_metrics"`
+	Priority       string   `json:"priority"` // High, Medium, Low
+	Status         string   `json:"status"`   // Draft, Active, Resolved, Archived
+	Category       string   `json:"category"` // Operational, Strategic, Technical, etc.
+	Tags           []string `json:"tags"`
 }
 
-// UpdateProblemRequest is the request body for updating a problem
-type UpdateProblemRequest struct {
-	Code        string `json:"code" binding:"required"`
-	Description string `json:"description" binding:"required"`
+// UpdateGoalRequest is the request body for updating a goal
+type UpdateGoalRequest struct {
+	Code           string   `json:"code" binding:"required"`
+	Description    string   `json:"description" binding:"required"`
+	Scope          string   `json:"scope"`
+	SuccessMetrics []string `json:"success_metrics"`
+	Priority       string   `json:"priority"` // High, Medium, Low
+	Status         string   `json:"status"`   // Draft, Active, Resolved, Archived
+	Category       string   `json:"category"` // Operational, Strategic, Technical, etc.
+	Tags           []string `json:"tags"`
+}
+
+// GoalRefineRequest is the request body for AI goal refinement
+type GoalRefineRequest struct {
+	Description    string   `json:"description" binding:"required"`
+	Scope          string   `json:"scope"`
+	SuccessMetrics []string `json:"success_metrics"`
 }
 
 // UpdateOverviewRequest is the request body for updating overview
