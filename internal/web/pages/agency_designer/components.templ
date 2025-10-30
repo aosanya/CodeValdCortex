@@ -64,18 +64,22 @@ templ EditorCard(config EditorCardConfig) {
 			</div>
 		</div>
 		<footer class="card-footer">
-			<a 
-				class="card-footer-item has-text-primary"
-				onclick={ templ.ComponentScript{Call: config.SaveFunction} }>
-				<span class="icon"><i class="fas fa-save"></i></span>
-				<span>Save</span>
-			</a>
-			<a 
-				class="card-footer-item has-text-grey"
-				onclick={ templ.ComponentScript{Call: config.CancelFunction} }>
-				<span class="icon"><i class="fas fa-times"></i></span>
-				<span>Cancel</span>
-			</a>
+			<div class="card-footer-item">
+				<button 
+					class="button is-small is-primary"
+					onclick={ templ.ComponentScript{Call: config.SaveFunction} }>
+					<span class="icon"><i class="fas fa-save"></i></span>
+					<span>Save</span>
+				</button>
+			</div>
+			<div class="card-footer-item">
+				<button 
+					class="button is-small"
+					onclick={ templ.ComponentScript{Call: config.CancelFunction} }>
+					<span class="icon"><i class="fas fa-times"></i></span>
+					<span>Cancel</span>
+				</button>
+			</div>
 		</footer>
 	</div>
 }

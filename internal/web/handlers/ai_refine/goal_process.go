@@ -3,6 +3,7 @@ package ai_refine
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
@@ -18,6 +19,7 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 	// Parse request body
 	var req struct {
 		Operations []string `json:"operations" binding:"required"`
+		GoalKeys   []string `json:"goal_keys"` // Optional: specific goals to enhance/consolidate
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Error("Failed to parse AI process request", "error", err)
@@ -28,6 +30,7 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 	h.logger.WithFields(logrus.Fields{
 		"agency_id":  agencyID,
 		"operations": req.Operations,
+		"goal_keys":  req.GoalKeys,
 	}).Info("Processing AI goal operations")
 
 	// Validate agency exists and get context
@@ -53,6 +56,26 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 		existingGoals = []*agency.Goal{}
 	}
 
+	// Filter goals if specific keys were provided
+	var goalsToProcess []*agency.Goal
+	if len(req.GoalKeys) > 0 {
+		goalKeyMap := make(map[string]bool)
+		for _, key := range req.GoalKeys {
+			goalKeyMap[key] = true
+		}
+		for _, goal := range existingGoals {
+			if goalKeyMap[goal.Key] {
+				goalsToProcess = append(goalsToProcess, goal)
+			}
+		}
+		h.logger.Info("Filtered goals for processing",
+			"agencyID", agencyID,
+			"requestedKeys", len(req.GoalKeys),
+			"foundGoals", len(goalsToProcess))
+	} else {
+		goalsToProcess = existingGoals
+	}
+
 	// Get units of work for context
 	unitsOfWork, err := h.agencyService.GetUnitsOfWork(ctx, agencyID)
 	if err != nil {
@@ -73,10 +96,9 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 		case "create":
 			h.processCreateOperation(c, agencyID, ag, overview, existingGoals, unitsOfWork, results, &createdGoals)
 		case "enhance":
-			// TODO: Implement goal enhancement logic
-			results["enhance_message"] = "Enhancement feature coming soon"
+			h.processEnhanceOperation(c, agencyID, ag, goalsToProcess, unitsOfWork, results, &enhancedGoals)
 		case "consolidate":
-			h.processConsolidateOperation(c, agencyID, ag, existingGoals, unitsOfWork, results, &createdGoals)
+			h.processConsolidateOperation(c, agencyID, ag, goalsToProcess, unitsOfWork, results, &createdGoals)
 		}
 	}
 
@@ -201,6 +223,116 @@ func (h *Handler) processCreateOperation(
 	results["ai_explanation"] = result.Explanation
 }
 
+func (h *Handler) processEnhanceOperation(
+	c *gin.Context,
+	agencyID string,
+	ag *agency.Agency,
+	existingGoals []*agency.Goal,
+	unitsOfWork []*agency.UnitOfWork,
+	results map[string]interface{},
+	enhancedGoals *[]*agency.Goal,
+) {
+	// Check if there are goals to enhance
+	if len(existingGoals) == 0 {
+		h.logger.Warn("No goals to enhance", "agencyID", agencyID)
+		results["enhance_error"] = "No goals found. Please create goals first."
+		return
+	}
+
+	h.logger.Info("Starting goal enhancement",
+		"agencyID", agencyID,
+		"goalsCount", len(existingGoals))
+
+	var enhancementResults []string
+	changedCount := 0
+
+	// Enhance each goal individually
+	for i, goal := range existingGoals {
+		h.logger.Info("Enhancing goal",
+			"agencyID", agencyID,
+			"goalIndex", i+1,
+			"goalKey", goal.Key,
+			"goalCode", goal.Code)
+
+		// Build refinement request
+		refineReq := &ai.RefineGoalRequest{
+			AgencyID:       agencyID,
+			CurrentGoal:    goal,
+			Description:    goal.Description,
+			Scope:          goal.Scope,
+			SuccessMetrics: goal.SuccessMetrics,
+			ExistingGoals:  existingGoals,
+			UnitsOfWork:    unitsOfWork,
+			AgencyContext:  ag,
+		}
+
+		// Call AI to refine the goal
+		refinedResult, err := h.goalRefiner.RefineGoal(c.Request.Context(), refineReq)
+		if err != nil {
+			h.logger.Error("Failed to enhance goal",
+				"agencyID", agencyID,
+				"goalKey", goal.Key,
+				"error", err)
+			enhancementResults = append(enhancementResults, fmt.Sprintf("Failed to enhance %s: %s", goal.Code, err.Error()))
+			continue
+		}
+
+		// Only update if the AI made changes
+		if refinedResult.WasChanged {
+			h.logger.Info("Goal was enhanced by AI, updating...",
+				"agencyID", agencyID,
+				"goalKey", goal.Key,
+				"goalCode", goal.Code,
+				"explanation", refinedResult.Explanation)
+
+			// Update the goal with refined content
+			goal.Description = refinedResult.RefinedDescription
+			goal.Scope = refinedResult.RefinedScope
+			goal.SuccessMetrics = refinedResult.RefinedMetrics
+
+			// For now, just update description using the existing UpdateGoal method
+			// TODO: Extend UpdateGoal to support scope and metrics
+			err := h.agencyService.UpdateGoal(c.Request.Context(), agencyID, goal.Key, goal.Code, refinedResult.RefinedDescription)
+			if err != nil {
+				h.logger.Error("Failed to save enhanced goal",
+					"agencyID", agencyID,
+					"goalKey", goal.Key,
+					"error", err)
+				enhancementResults = append(enhancementResults, fmt.Sprintf("Failed to save %s: %s", goal.Code, err.Error()))
+				continue
+			}
+
+			changedCount++
+			*enhancedGoals = append(*enhancedGoals, goal)
+			enhancementResults = append(enhancementResults, fmt.Sprintf("Enhanced %s: %s", goal.Code, refinedResult.Explanation))
+
+			h.logger.Info("Goal enhanced successfully",
+				"agencyID", agencyID,
+				"goalKey", goal.Key,
+				"goalCode", goal.Code)
+		} else {
+			h.logger.Info("Goal did not need enhancement",
+				"agencyID", agencyID,
+				"goalKey", goal.Key,
+				"goalCode", goal.Code)
+			enhancementResults = append(enhancementResults, fmt.Sprintf("%s: No changes needed", goal.Code))
+		}
+	}
+
+	h.logger.Info("Completed goal enhancement",
+		"agencyID", agencyID,
+		"totalProcessed", len(existingGoals),
+		"changedCount", changedCount)
+
+	// Build explanation from all enhancement results
+	explanation := strings.Join(enhancementResults, ". ")
+
+	results["enhance_success"] = fmt.Sprintf("Enhanced %d of %d goals", changedCount, len(existingGoals))
+	results["ai_explanation"] = explanation
+	results["changed_count"] = changedCount
+	results["unchanged_count"] = len(existingGoals) - changedCount
+}
+
 func (h *Handler) processConsolidateOperation(
 	c *gin.Context,
 	agencyID string,
@@ -211,9 +343,9 @@ func (h *Handler) processConsolidateOperation(
 	createdGoals *[]*agency.Goal,
 ) {
 	// Consolidate goals into a lean, strategic list
-	if len(existingGoals) < 5 {
+	if len(existingGoals) < 2 {
 		h.logger.Warn("Too few goals to consolidate", "count", len(existingGoals))
-		results["consolidate_error"] = "Need at least 5 goals to consolidate"
+		results["consolidate_error"] = "Need at least 2 goals to consolidate"
 		return
 	}
 
@@ -236,15 +368,44 @@ func (h *Handler) processConsolidateOperation(
 		return
 	}
 
-	h.logger.Info("AI consolidated goals successfully",
+	h.logger.Info("AI consolidation analysis complete",
 		"agencyID", agencyID,
 		"originalCount", len(existingGoals),
 		"consolidatedCount", len(consolidationResult.ConsolidatedGoals),
 		"removedCount", len(consolidationResult.RemovedGoals))
 
-	// Delete all goals that should be removed
-	for _, removedGoalKey := range consolidationResult.RemovedGoals {
-		h.logger.Info("Deleting removed goal",
+	// Check if AI decided no consolidation is needed
+	if len(consolidationResult.ConsolidatedGoals) == 0 {
+		h.logger.Info("AI determined no consolidation needed - goals are already distinct",
+			"agencyID", agencyID,
+			"goalCount", len(existingGoals))
+
+		results["consolidate_success"] = "No consolidation needed - goals are already well-defined and distinct"
+		results["consolidation_summary"] = consolidationResult.Summary
+		results["ai_explanation"] = consolidationResult.Explanation
+		results["removed_count"] = 0
+		results["new_count"] = 0
+		return
+	}
+
+	// Determine which goals to delete
+	goalsToDelete := consolidationResult.RemovedGoals
+
+	// If AI didn't specify which goals to remove, delete all input goals that were consolidated
+	if len(consolidationResult.RemovedGoals) == 0 && len(consolidationResult.ConsolidatedGoals) > 0 {
+		h.logger.Warn("AI did not specify which goals to remove, will delete all input goals",
+			"agencyID", agencyID,
+			"originalCount", len(existingGoals))
+
+		// Delete all the goals that were sent for consolidation
+		for _, goal := range existingGoals {
+			goalsToDelete = append(goalsToDelete, goal.Key)
+		}
+	}
+
+	// Delete goals that were merged/consolidated
+	for _, removedGoalKey := range goalsToDelete {
+		h.logger.Info("Deleting consolidated goal",
 			"agencyID", agencyID,
 			"goalKey", removedGoalKey)
 
@@ -304,6 +465,29 @@ func (h *Handler) processConsolidateOperation(
 	}
 }
 
+func (h *Handler) formatExplanationAsBullets(explanation string) string {
+	// Split by common sentence delimiters or line breaks
+	sentences := strings.Split(explanation, ". ")
+
+	var bullets []string
+	for _, sentence := range sentences {
+		sentence = strings.TrimSpace(sentence)
+		if sentence == "" {
+			continue
+		}
+
+		// Add period back if it was removed by split
+		if !strings.HasSuffix(sentence, ".") && !strings.HasSuffix(sentence, "!") && !strings.HasSuffix(sentence, "?") {
+			sentence += "."
+		}
+
+		// Format as bullet point
+		bullets = append(bullets, "• "+sentence)
+	}
+
+	return strings.Join(bullets, "\n")
+}
+
 func (h *Handler) addExplanationToChat(c *gin.Context, agencyID string, explanation string, createdGoalsCount int) {
 	h.logger.Info("Attempting to add AI explanation to chat",
 		"agencyID", agencyID,
@@ -328,12 +512,15 @@ func (h *Handler) addExplanationToChat(c *gin.Context, agencyID string, explanat
 		return
 	}
 
+	// Format explanation as bullet points
+	formattedExplanation := h.formatExplanationAsBullets(explanation)
+
 	// Build appropriate message based on whether goals were created
 	var chatMessage string
 	if createdGoalsCount > 0 {
-		chatMessage = fmt.Sprintf("✨ **Created %d Goals**\n\n%s", createdGoalsCount, explanation)
+		chatMessage = fmt.Sprintf("✨ **Created %d Goals**\n\n%s", createdGoalsCount, formattedExplanation)
 	} else {
-		chatMessage = fmt.Sprintf("✨ **Goal Analysis**\n\n%s", explanation)
+		chatMessage = fmt.Sprintf("✨ **Goal Analysis**\n\n%s", formattedExplanation)
 	}
 
 	h.logger.Info("Adding message to chat",

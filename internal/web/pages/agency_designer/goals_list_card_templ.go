@@ -8,7 +8,7 @@ package agency_designer
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// GoalsListCard renders the goals list card component
+// GoalsListCard renders the goals list card component with selection checkboxes
 func GoalsListCard() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -30,23 +30,7 @@ func GoalsListCard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ListCard(ListCardConfig{
-			ID:             "goals-list-card",
-			Title:          "", // No title for goals card
-			Icon:           "",
-			AddButtonID:    "add-goal-btn",
-			AddFunction:    "showGoalEditor('add')",
-			AddButtonText:  "Add",
-			AIButtonID:     "ai-generate-goal-btn",
-			AIFunction:     "showGenerateGoalModal()",
-			AIButtonText:   "Generate with AI",
-			ListID:         "goals-list",
-			ListClass:      "goals-list",
-			TableBodyID:    "goals-table-body",
-			CodeColHeader:  "Code",
-			TitleColHeader: "Goal Title",
-			LoadingText:    "Loading goals...",
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"box m-0 p-0\" id=\"goals-list-card\"><div class=\"level is-mobile mb-4\"><div class=\"level-left\"></div><div class=\"level-right\"><div class=\"level-item\"><button class=\"button is-small is-success\" onclick=\"showGoalEditor('add')\" id=\"add-goal-btn\" title=\"Add New Goal\"><span class=\"icon\"><i class=\"fas fa-plus\"></i></span> <span>Add</span></button></div></div></div><div id=\"goals-list\" class=\"goals-list\"><table class=\"table is-fullwidth is-striped is-hoverable\"><thead><tr><th style=\"width: 50px; text-align: center;\"><label class=\"checkbox\"><input type=\"checkbox\" id=\"select-all-goals\" onchange=\"toggleAllGoals(this.checked)\" title=\"Select/Deselect All\"></label></th><th style=\"width: 120px;\">Code</th><th>Goal Title</th><th style=\"width: 180px;\">Actions</th></tr></thead> <tbody id=\"goals-table-body\"><!-- Items will be loaded here dynamically --><tr><td colspan=\"4\" class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-spinner fa-spin\"></i> Loading goals...</p></td></tr></tbody></table></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

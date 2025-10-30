@@ -165,7 +165,7 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-section\"><!-- AI Goal Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><p class=\"has-text-weight-semibold\">AI Goal Operations:</p></div></div><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIGoalOperation(['create'])\" id=\"ai-create-goals-btn\" title=\"Generate new goals from introduction\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create Goals</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIGoalOperation(['enhance'])\" id=\"ai-enhance-goals-btn\" title=\"Select goals to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance Goals</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIGoalOperation(['consolidate'])\" id=\"ai-consolidate-goals-btn\" title=\"Select goals to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate Goals</span></button></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

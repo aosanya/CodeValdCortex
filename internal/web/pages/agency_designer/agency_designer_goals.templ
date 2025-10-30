@@ -1,26 +1,55 @@
 package agency_designer
 
 import (
+	"fmt"
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 )
 
-// GoalItem renders a single goal in the list as a table row
+// GoalItem renders a single goal in the list as a table row with selection checkbox
 templ GoalItem(goal *agency.Goal) {
-	@TableItem(TableItemConfig{
-		Key:            goal.Key,
-		Code:           goal.Code,
-		Description:    goal.Description,
-		EditFunction:   "showGoalEditor",
-		DeleteFunction: "deleteGoal",
-		Number:         goal.Number,
-	})
+	<tr class="table-item" data-item-key={ goal.Key }>
+		<td style="vertical-align: middle; width: 40px;">
+			<label class="checkbox">
+				<input 
+					type="checkbox" 
+					class="goal-checkbox" 
+					data-goal-key={ goal.Key }
+					onchange="updateGoalSelectionButtons()"
+				/>
+			</label>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class="tag is-primary">{ goal.Code }</span>
+		</td>
+		<td class="item-description" style="vertical-align: middle;">
+			{ goal.Description }
+		</td>
+		<td style="vertical-align: middle;">
+			<div class="buttons has-addons">
+				<button 
+					class="button is-small is-info" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("showGoalEditor('edit', '%s', '%s', '%s')", goal.Key, goal.Code, templ.EscapeString(goal.Description))} }
+					title="Edit">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+					<span>Edit</span>
+				</button>
+				<button 
+					class="button is-small is-danger" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteGoal(%d)", goal.Number)} }
+					title="Delete">
+					<span class="icon"><i class="fas fa-trash"></i></span>
+					<span>Delete</span>
+				</button>
+			</div>
+		</td>
+	</tr>
 }
 
 // GoalsList renders all goals as table rows
 templ GoalsList(goals []*agency.Goal) {
 	if len(goals) == 0 {
 		<tr>
-			<td colspan="3" class="has-text-grey has-text-centered py-5">
+			<td colspan="4" class="has-text-grey has-text-centered py-5">
 				<p><i class="fas fa-info-circle"></i> No goals defined yet. Click the + button to add one.</p>
 			</td>
 		</tr>

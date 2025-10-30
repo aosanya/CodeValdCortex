@@ -630,10 +630,228 @@ export function generateGoalWithAI() {
         });
 }
 
+// Process AI Goal Operation - Direct operation without modal
+export function processAIGoalOperation(operations) {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        showNotification('Error: No agency selected', 'error');
+        return;
+    }
+
+    // Validate operations array
+    if (!operations || operations.length === 0) {
+        showNotification('Error: No operation specified', 'error');
+        return;
+    }
+
+    // Get selected goal keys for enhance/consolidate operations
+    const selectedGoalKeys = (operations.includes('enhance') || operations.includes('consolidate'))
+        ? getSelectedGoalKeys()
+        : [];
+
+    // Validate selection for enhance/consolidate
+    if ((operations.includes('enhance') || operations.includes('consolidate')) && selectedGoalKeys.length === 0) {
+        showNotification('Please select goals first', 'warning');
+        return;
+    }
+
+    // Determine the appropriate status message based on operations
+    let statusMessage = 'AI is processing your request...';
+    if (operations.length === 1) {
+        switch (operations[0]) {
+            case 'create':
+                statusMessage = 'AI is generating goals from your introduction...';
+                break;
+            case 'enhance':
+                statusMessage = `AI is enhancing ${selectedGoalKeys.length} selected goal(s)...`;
+                break;
+            case 'consolidate':
+                statusMessage = `AI is consolidating ${selectedGoalKeys.length} selected goal(s) into a lean, strategic list...`;
+                break;
+        }
+    } else if (operations.length > 1) {
+        statusMessage = `AI is performing ${operations.length} operations on your goals...`;
+    }
+
+    // Show AI processing status in the chat area
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus(statusMessage);
+    }
+
+    // Call AI endpoint with operations and selected goal keys
+    fetch(`/api/v1/agencies/${agencyId}/goals/ai-process`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            operations: operations,
+            goal_keys: selectedGoalKeys
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to process AI goal request');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide AI process status
+            if (window.hideAIProcessStatus) {
+                window.hideAIProcessStatus();
+            }
+
+            // Show success message with what was done
+            const operationText = operations.map(op => {
+                switch (op) {
+                    case 'create': return 'created new goals';
+                    case 'enhance': return 'enhanced existing goals';
+                    case 'consolidate': return 'consolidated goals';
+                    default: return op;
+                }
+            }).join(', ');
+
+            showNotification(`AI successfully ${operationText}!`, 'success');
+
+            // Reload goals list to show changes
+            loadGoals();
+
+            // Clear selections and update buttons after reload
+            setTimeout(() => {
+                document.querySelectorAll('.goal-checkbox:checked').forEach(cb => cb.checked = false);
+                updateGoalSelectionButtons();
+            }, 500);
+
+            // Reload chat messages to show the AI explanation
+            if (window.location.pathname.includes('/designer')) {
+                const agencyId = getCurrentAgencyId();
+                const chatMessages = document.getElementById('chat-messages');
+
+                if (chatMessages && agencyId) {
+                    // Fetch updated chat messages
+                    fetch(`/agencies/${agencyId}/chat-messages`)
+                        .then(response => response.text())
+                        .then(html => {
+                            chatMessages.innerHTML = html;
+                            // Scroll to bottom to show new message
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        })
+                        .catch(error => {
+                            console.error('Error reloading chat messages:', error);
+                        });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error processing AI goal operation:', error);
+
+            // Hide AI process status
+            if (window.hideAIProcessStatus) {
+                window.hideAIProcessStatus();
+            }
+
+            showNotification('Failed to process AI goal operation. Please try again.', 'error');
+        });
+}
+
 // Make functions globally available
 window.showGenerateGoalModal = showGenerateGoalModal;
 window.closeGenerateGoalModal = closeGenerateGoalModal;
 window.processAIGoalRequest = processAIGoalRequest;
+window.processAIGoalOperation = processAIGoalOperation;
 window.selectAIGoalOption = selectAIGoalOption;
 window.closeCreateGoalDialog = closeCreateGoalDialog;
 window.generateGoalWithAI = generateGoalWithAI;
+
+// Goal selection management
+function getSelectedGoalKeys() {
+    const checkboxes = document.querySelectorAll('.goal-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.dataset.goalKey);
+}
+
+function updateGoalSelectionButtons() {
+    const selectedKeys = getSelectedGoalKeys();
+    const hasSelection = selectedKeys.length > 0;
+
+    // Update "Select All" checkbox state
+    const selectAllCheckbox = document.getElementById('select-all-goals');
+    const allCheckboxes = document.querySelectorAll('.goal-checkbox');
+    if (selectAllCheckbox && allCheckboxes.length > 0) {
+        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+        const someChecked = Array.from(allCheckboxes).some(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    // Enable/disable Enhance and Consolidate buttons
+    const enhanceBtn = document.getElementById('ai-enhance-goals-btn');
+    const consolidateBtn = document.getElementById('ai-consolidate-goals-btn');
+
+    if (enhanceBtn) {
+        if (hasSelection) {
+            enhanceBtn.disabled = false;
+            enhanceBtn.classList.remove('is-static');
+            enhanceBtn.title = `Enhance ${selectedKeys.length} selected goal(s)`;
+        } else {
+            enhanceBtn.disabled = true;
+            enhanceBtn.classList.add('is-static');
+            enhanceBtn.title = 'Select goals to enhance';
+        }
+    }
+
+    if (consolidateBtn) {
+        if (hasSelection) {
+            consolidateBtn.disabled = false;
+            consolidateBtn.classList.remove('is-static');
+            consolidateBtn.title = `Consolidate ${selectedKeys.length} selected goal(s)`;
+        } else {
+            consolidateBtn.disabled = true;
+            consolidateBtn.classList.add('is-static');
+            consolidateBtn.title = 'Select goals to consolidate';
+        }
+    }
+
+    // Update selection count display
+    updateSelectionCount(selectedKeys.length);
+}
+
+function toggleAllGoals(checked) {
+    const checkboxes = document.querySelectorAll('.goal-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = checked;
+    });
+    updateGoalSelectionButtons();
+}
+
+function updateSelectionCount(count) {
+    let countDisplay = document.getElementById('goal-selection-count');
+    if (!countDisplay && count > 0) {
+        // Create count display if it doesn't exist
+        const toolbar = document.querySelector('#ai-create-goals-btn').closest('.buttons');
+        if (toolbar) {
+            countDisplay = document.createElement('span');
+            countDisplay.id = 'goal-selection-count';
+            countDisplay.className = 'tag is-info is-light ml-2';
+            countDisplay.style.alignSelf = 'center';
+            toolbar.parentElement.insertBefore(countDisplay, toolbar);
+        }
+    }
+
+    if (countDisplay) {
+        if (count > 0) {
+            countDisplay.textContent = `${count} goal(s) selected`;
+            countDisplay.style.display = 'inline-block';
+        } else {
+            countDisplay.style.display = 'none';
+        }
+    }
+}
+
+// Initialize button states on page load
+document.addEventListener('DOMContentLoaded', function () {
+    updateGoalSelectionButtons();
+});
+
+window.getSelectedGoalKeys = getSelectedGoalKeys;
+window.updateGoalSelectionButtons = updateGoalSelectionButtons;
+window.toggleAllGoals = toggleAllGoals;

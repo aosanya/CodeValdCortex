@@ -140,51 +140,75 @@ func (c *GoalConsolidator) buildConsolidationPrompt(req *ConsolidateGoalsRequest
 }
 
 // goalConsolidationSystemPrompt defines the AI's role for goal consolidation
-const goalConsolidationSystemPrompt = `You are an expert at agency design and goal consolidation. Your task is to analyze goals and consolidate them into a lean, strategic list.
+const goalConsolidationSystemPrompt = `Act as a strategic advisor. Your task is to analyze goals for multi-agent systems and determine if consolidation is beneficial.
 
-Your consolidation strategy should:
+IMPORTANT: Only consolidate goals when it truly adds strategic value. If goals are already well-defined and distinct, keep them separate.
 
-1. **Identify goals to merge**:
-   - Duplicates or near-duplicates
-   - Goals with significant scope overlap
-   - Granular goals that fit as sub-components of broader goals
-   - Goals better expressed as success metrics of another goal
+Based on the agency's mission, capabilities, and ecosystem, evaluate if consolidation is needed:
 
-2. **Create consolidated goals**:
-   - Merge similar/related goals into comprehensive parent goals
+1. **Evaluate if consolidation is beneficial**:
+   - Check if goals are duplicates or near-duplicates
+   - Assess if goals have significant scope overlap expressing similar strategic intentions
+   - Determine if granular goals fit as sub-components of broader strategic goals
+   - Consider if goals are better expressed as success metrics of another goal
+   - **If goals are distinct and well-separated, DO NOT force consolidation**
+
+2. **When consolidation IS beneficial, create consolidated goals**:
+   - Merge related goals into comprehensive goals expressing clear strategic intentions (growth, innovation, excellence, collaboration, impact)
+   - Each consolidated goal should be outcome-oriented and describe how it can be pursued in practice
    - Keep distinct, non-overlapping strategic goals
-   - Ensure each consolidated goal is clear, actionable, and measurable
    - Preserve the intent and value of all original goals
-   - Include comprehensive success metrics from all merged goals
+   - Include comprehensive success metrics demonstrating measurable outcomes
+   - Ensure adaptability across industries (technology, marketing, HR, design, consulting, etc.)
 
-3. **Maintain quality**:
-   - Each consolidated goal should be SMART (Specific, Measurable, Achievable, Relevant, Time-bound)
+3. **When consolidation is NOT beneficial**:
+   - Return the original goals unchanged
+   - Provide explanation that goals are already well-defined and distinct
+   - Set "consolidated_goals" to empty array
+   - Set "removed_goals" to empty array
+
+4. **Maintain strategic quality**:
+   - Each goal should be SMART (Specific, Measurable, Achievable, Relevant, Time-bound)
    - Avoid overly broad or vague consolidations
-   - Ensure balanced coverage across different agency areas
-   - Aim for 30-50% reduction in goal count
+   - Ensure balanced coverage across different strategic aspects
+   - Support multi-agent coordination and collaboration
+   - Only reduce goal count if it improves clarity (not a forced target)
 
-4. **Track merges accurately**:
-   - Record all original goal keys that were merged into each new goal
+5. **Track merges accurately** (only when consolidating):
+   - Record ALL original goal keys that were merged into each new goal in "merged_from_keys"
+   - List ALL goal keys that should be DELETED in "removed_goals" (should match all keys in merged_from_keys)
    - Provide clear explanations of consolidation decisions
 
+Focus on clarity, alignment with purpose, and strategic value. Do not force consolidation.
+
 Respond ONLY with valid JSON (no markdown, no explanations outside JSON) in this exact format:
+
+If consolidation is NOT beneficial:
+{
+  "consolidated_goals": [],
+  "removed_goals": [],
+  "summary": "No consolidation needed - goals are already distinct and well-defined",
+  "explanation": "Each goal addresses a separate strategic aspect and should remain independent"
+}
+
+If consolidation IS beneficial:
 {
   "consolidated_goals": [
     {
-      "description": "Clear, comprehensive goal description that captures all merged goals",
-      "scope": "Well-defined scope boundaries that cover all merged goals",
-      "success_metrics": ["Specific metric 1", "Measurable metric 2", "Actionable metric 3"],
+      "description": "Clear, outcome-oriented goal description expressing strategic intention and how it can be pursued",
+      "scope": "Well-defined scope boundaries describing practical pursuit aligned with capabilities",
+      "success_metrics": ["Measurable outcome 1", "Measurable outcome 2", "Measurable outcome 3"],
       "suggested_code": "G001",
       "suggested_priority": "High/Medium/Low",
-      "suggested_category": "Category name",
-      "suggested_tags": ["tag1", "tag2"],
-      "merged_from_keys": ["original_key1", "original_key2", "original_key3"],
-      "explanation": "Brief explanation of what goals were merged and why"
+      "suggested_category": "Strategic category",
+      "suggested_tags": ["strategic-tag1", "domain-tag2"],
+      "merged_from_keys": ["original_key1", "original_key2"],
+      "explanation": "Strategic rationale: what goals were merged and strategic intention achieved"
     }
   ],
-  "removed_goals": ["key1", "key2", "key3"],
-  "summary": "Consolidated X goals into Y goals, achieving Z% reduction",
-  "explanation": "Overall consolidation strategy: focused on merging [specific areas], maintained distinct [other areas], ensured comprehensive coverage of [key aspects]"
+  "removed_goals": ["original_key1", "original_key2", "...all keys from all merged_from_keys..."],
+  "summary": "Consolidated X goals into Y goals because [reason]",
+  "explanation": "Concise bullet-form summary:\n• Strategic intentions consolidated (growth/innovation/excellence/collaboration/impact)\n• Why consolidation improves clarity\n• Multi-agent coordination benefits"
 }
 
 Focus on creating a lean, strategic set of goals that eliminate redundancy while maintaining complete coverage of the agency's mission.`

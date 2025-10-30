@@ -28,7 +28,7 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 			</div>
 			<div class="buttons is-right">
 				<button
-					class="button is-primary"
+					class="button is-small is-primary"
 					onclick="saveOverviewIntroduction()"
 					id="save-introduction-btn">
 					<span class="icon"><i class="fas fa-save"></i></span>
@@ -36,7 +36,7 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 				</button>
 				<!-- AI Refine / Sparkle button (triggers AI refine flow) -->
 				<button
-					class="button is-info"
+					class="button is-small is-info"
 					hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/overview/refine" }
 					hx-include="#introduction-editor"
 					hx-target="#introduction-content"
@@ -61,7 +61,7 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 					<span>Refine</span>
 				</button>
 				<button
-					class="button"
+					class="button is-small"
 					onclick="undoOverviewIntroduction()"
 					id="undo-introduction-btn">
 					<span class="icon"><i class="fas fa-undo"></i></span>

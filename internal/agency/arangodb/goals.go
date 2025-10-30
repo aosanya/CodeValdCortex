@@ -96,8 +96,8 @@ func (r *Repository) GetGoals(ctx context.Context, agencyID string) ([]*agency.G
 		return nil, fmt.Errorf("failed to ensure goals collection: %w", err)
 	}
 
-	// Query all goals for this agency, ordered by number
-	query := "FOR p IN @@collection FILTER p.agency_id == @agencyId SORT p.number ASC RETURN p"
+	// Query all goals for this agency, ordered by code
+	query := "FOR p IN @@collection FILTER p.agency_id == @agencyId SORT p.code ASC RETURN p"
 	bindVars := map[string]interface{}{
 		"@collection": goalsColl.Name(),
 		"agencyId":    agencyID,
