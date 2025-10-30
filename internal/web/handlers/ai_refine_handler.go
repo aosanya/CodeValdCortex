@@ -38,15 +38,6 @@ func NewAIRefineHandler(
 	}
 }
 
-// getMapKeys returns the keys of a map as a slice for logging
-func getMapKeys(m map[string]interface{}) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 // RefineIntroduction handles POST /api/v1/agencies/:id/overview/refine
 // Refines the agency introduction using AI with full context
 func (h *AIRefineHandler) RefineIntroduction(c *gin.Context) {
@@ -818,59 +809,57 @@ func (h *AIRefineHandler) ProcessAIGoalRequest(c *gin.Context) {
 		}
 	}
 
-	// Add AI explanation to chat conversation if goals were created
-	if len(createdGoals) > 0 {
+	// Add AI explanation to chat conversation if there's an explanation (even if no goals were created)
+	explanation, hasExplanation := results["ai_explanation"].(string)
+	if hasExplanation && explanation != "" {
 		h.logger.Info("Attempting to add AI explanation to chat",
 			"agencyID", agencyID,
 			"createdGoalsCount", len(createdGoals),
-			"resultsKeys", fmt.Sprintf("%v", getMapKeys(results)))
-
-		explanation, hasExplanation := results["ai_explanation"].(string)
-		h.logger.Info("Explanation check",
-			"agencyID", agencyID,
 			"hasExplanation", hasExplanation,
 			"explanationLength", len(explanation))
 
-		if hasExplanation && explanation != "" {
-			// Get or create conversation
-			conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
+		// Get or create conversation
+		conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
+		if err != nil {
+			h.logger.Warn("No conversation exists, creating new one",
+				"agencyID", agencyID,
+				"error", err)
+			// No conversation exists, create one
+			conversation, err = h.designerService.StartConversation(ctx, agencyID)
 			if err != nil {
-				h.logger.Warn("No conversation exists, creating new one",
-					"agencyID", agencyID,
-					"error", err)
-				// No conversation exists, create one
-				conversation, err = h.designerService.StartConversation(ctx, agencyID)
-				if err != nil {
-					h.logger.WithError(err).Error("Failed to create conversation for AI goal generation message")
-				}
+				h.logger.WithError(err).Error("Failed to create conversation for AI goal generation message")
+			}
+		}
+
+		if conversation != nil {
+			// Build appropriate message based on whether goals were created
+			var chatMessage string
+			if len(createdGoals) > 0 {
+				chatMessage = fmt.Sprintf("✨ **Created %d Goals**\n\n%s", len(createdGoals), explanation)
+			} else {
+				chatMessage = fmt.Sprintf("✨ **Goal Analysis**\n\n%s", explanation)
 			}
 
-			if conversation != nil {
-				chatMessage := fmt.Sprintf("✨ **Created %d Goals**\n\n%s", len(createdGoals), explanation)
-				h.logger.Info("Adding message to chat",
-					"agencyID", agencyID,
-					"conversationID", conversation.ID,
-					"messageLength", len(chatMessage))
+			h.logger.Info("Adding message to chat",
+				"agencyID", agencyID,
+				"conversationID", conversation.ID,
+				"messageLength", len(chatMessage))
 
-				if addErr := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); addErr != nil {
-					h.logger.WithError(addErr).Error("Failed to add goal generation explanation to chat")
-				} else {
-					h.logger.Info("Successfully added AI explanation to chat",
-						"agencyID", agencyID,
-						"conversationID", conversation.ID)
-				}
+			if addErr := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); addErr != nil {
+				h.logger.WithError(addErr).Error("Failed to add goal generation explanation to chat")
 			} else {
-				h.logger.Error("Conversation is nil after creation attempt", "agencyID", agencyID)
+				h.logger.Info("Successfully added AI explanation to chat",
+					"agencyID", agencyID,
+					"conversationID", conversation.ID)
 			}
 		} else {
-			h.logger.Warn("No explanation to add to chat",
-				"agencyID", agencyID,
-				"hasExplanation", hasExplanation,
-				"explanation", explanation)
+			h.logger.Error("Conversation is nil after creation attempt", "agencyID", agencyID)
 		}
 	} else {
-		h.logger.Info("No goals were created, skipping chat message",
-			"agencyID", agencyID)
+		h.logger.Warn("No explanation to add to chat",
+			"agencyID", agencyID,
+			"hasExplanation", hasExplanation,
+			"createdGoalsCount", len(createdGoals))
 	}
 
 	// Build response

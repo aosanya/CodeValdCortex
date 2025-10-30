@@ -384,17 +384,27 @@ Focus on making goals actionable, measurable, and aligned with the agency's miss
 const goalsGenerationSystemPrompt = `You are an expert business analyst and goal definition specialist. Your role is to help generate multiple well-defined goals for multi-agent systems and organizations based on their introduction and context.
 
 When generating goals, you should:
-1. Create 3-5 clear, specific goal descriptions
-2. Define appropriate scope boundaries for each
-3. Suggest concrete, measurable success metrics
-4. Generate unique goal codes (follow pattern like P001, P002, P003, etc.)
-5. Recommend priority level (High, Medium, Low) for each
-6. Suggest category (Operational, Strategic, Technical, Financial, etc.)
-7. Recommend relevant tags
-8. Avoid duplicating existing goals
-9. Ensure goals are complementary and cover different aspects of the agency's mission
+1. FIRST, check if existing goals are already comprehensive and well-defined
+2. If existing goals are sufficient, return an empty goals array with explanation "No action needed - existing goals are comprehensive"
+3. If new goals are needed, create 3-5 clear, specific goal descriptions
+4. Define appropriate scope boundaries for each
+5. Suggest concrete, measurable success metrics
+6. Generate unique goal codes (follow pattern like P001, P002, P003, etc.)
+7. Recommend priority level (High, Medium, Low) for each
+8. Suggest category (Operational, Strategic, Technical, Financial, etc.)
+9. Recommend relevant tags
+10. Avoid duplicating existing goals
+11. Ensure goals are complementary and cover different aspects of the agency's mission
 
 Respond with JSON in this exact format:
+
+If existing goals are comprehensive:
+{
+  "goals": [],
+  "explanation": "No action needed - existing goals are comprehensive and cover all key areas"
+}
+
+If new goals should be created:
 {
   "goals": [
     {
@@ -418,10 +428,10 @@ Respond with JSON in this exact format:
       "explanation": "..."
     }
   ],
-  "explanation": "Overall explanation of how these goals work together to support the agency's mission"
+  "explanation": "Concise bullet-form summary (3-5 bullets) of what was done and why. Focus on: goals created, key themes covered, strategic approach. Format: • Bullet 1\n• Bullet 2\n• Bullet 3"
 }
 
-Focus on creating goals that are actionable, measurable, diverse, and aligned with the agency's mission.`
+Focus on creating goals that are actionable, measurable, diverse, and aligned with the agency's mission. Keep the overall explanation SHORT, in bullet format, and focused on describing what actions were taken. IMPORTANT: If existing goals already cover the agency's needs comprehensively, do NOT create redundant goals.`
 
 const goalGenerationSystemPrompt = `You are an expert business analyst and goal definition specialist. Your role is to help generate well-defined goals for multi-agent systems and organizations based on user input.
 

@@ -1,4 +1,5 @@
 /* Agency Designer - VS Code Style Layout */
+/* CACHE BUST: v2025-10-30-14:00 - DEBUG VERSION WITH COLORED BORDERS */
 
 /* Prevent page scrolling */
 html,
@@ -171,12 +172,16 @@ body {
     flex: 1;
     overflow: hidden;
     flex-direction: column;
+    min-height: 0;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 .view-content.is-active {
     display: flex !important;
     flex: 1;
     flex-direction: column;
+    min-height: 0;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 /* Overview View */
@@ -189,6 +194,8 @@ body {
     display: flex;
     width: 100%;
     height: 100%;
+    min-height: 0;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 /* Overview and Layout Panels */
@@ -342,6 +349,8 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 .details-header {
@@ -362,9 +371,12 @@ body {
 }
 
 .details-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem;
+    /* Use CSS Grid like chat panel for reliable height constraints */
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+    padding: 0;
+    height: 100%;
 }
 
 /* Empty Details View */
@@ -1067,12 +1079,52 @@ body {
     color: var(--vscode-text-muted);
 }
 
-/* Overview Section Content */
+/* Overview content section containers */
+.overview-content-section {
+    flex: 1;
+    display: none;
+    min-height: 0;
+    /* Critical: allows flex child to shrink below content size */
+    overflow: hidden;
+    border: 5px solid blue !important;
+    /* DEBUG */
+}
+
+.overview-content-section.is-active {
+    /* Use CSS Grid like chat panel for reliable height constraints */
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+}
+
+/* Overview Section Content - Make entire section scrollable */
 .overview-section {
-    padding: 0;
-    margin: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
     padding-bottom: 2rem;
-    /* Add bottom padding so last items are visible */
+    min-height: 0;
+    /* Critical: allows flex child to be scrollable */
+    background: yellow !important;
+    /* DEBUG: Make scrollable area visible */
+}
+
+.overview-section::-webkit-scrollbar {
+    width: 10px;
+}
+
+.overview-section::-webkit-scrollbar-track {
+    background: var(--vscode-scrollbar-track-bg, #f5f5f5);
+    border-radius: 4px;
+}
+
+.overview-section::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbar-thumb-bg, #c0c0c0);
+    border-radius: 4px;
+}
+
+.overview-section::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbar-thumb-hover-bg, #a0a0a0);
 }
 
 .section-hero {

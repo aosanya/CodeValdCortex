@@ -49,6 +49,8 @@ build-all: ## Build for all platforms
 
 .PHONY: run
 run: build ## Build and run the application
+	@echo "Generating templates..."
+	templ generate
 	@echo "Running $(BINARY_NAME)..."
 	./$(BINARY_PATH)
 
