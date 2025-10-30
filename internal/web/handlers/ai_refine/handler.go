@@ -11,6 +11,7 @@ type Handler struct {
 	agencyService       agency.Service
 	introductionRefiner *ai.IntroductionRefiner
 	goalRefiner         *ai.GoalRefiner
+	goalConsolidator    *ai.GoalConsolidator
 	designerService     *ai.AgencyDesignerService
 	logger              *logrus.Logger
 }
@@ -20,6 +21,7 @@ func NewHandler(
 	agencyService agency.Service,
 	introductionRefiner *ai.IntroductionRefiner,
 	goalRefiner *ai.GoalRefiner,
+	goalConsolidator *ai.GoalConsolidator,
 	designerService *ai.AgencyDesignerService,
 	logger *logrus.Logger,
 ) *Handler {
@@ -27,6 +29,7 @@ func NewHandler(
 		agencyService:       agencyService,
 		introductionRefiner: introductionRefiner,
 		goalRefiner:         goalRefiner,
+		goalConsolidator:    goalConsolidator,
 		designerService:     designerService,
 		logger:              logger,
 	}

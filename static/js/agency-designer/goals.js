@@ -222,7 +222,7 @@ export function showGenerateGoalModal() {
                     <span class="icon has-text-info">
                         <i class="fas fa-magic"></i>
                     </span>
-                    <span>AI Goal Assistant</span>
+                    <span>AI Goals Assistant</span>
                 </p>
                 <button class="delete" aria-label="close" onclick="closeGenerateGoalModal()"></button>
             </header>
@@ -327,16 +327,34 @@ export function processAIGoalRequest() {
     // Close the modal immediately
     closeGenerateGoalModal();
 
-    // Show AI processing status in the chat area
-    if (window.showAIProcessStatus) {
-        window.showAIProcessStatus('AI is generating goals from your introduction...');
-    }
-
     // Build request with selected operations
     const operations = [];
     if (createChecked) operations.push('create');
     if (enhanceChecked) operations.push('enhance');
     if (consolidateChecked) operations.push('consolidate');
+
+    // Determine the appropriate status message based on operations
+    let statusMessage = 'AI is processing your request...';
+    if (operations.length === 1) {
+        switch (operations[0]) {
+            case 'create':
+                statusMessage = 'AI is generating goals from your introduction...';
+                break;
+            case 'enhance':
+                statusMessage = 'AI is enhancing your existing goals...';
+                break;
+            case 'consolidate':
+                statusMessage = 'AI is consolidating your goals into a lean, strategic list...';
+                break;
+        }
+    } else if (operations.length > 1) {
+        statusMessage = `AI is performing ${operations.length} operations on your goals...`;
+    }
+
+    // Show AI processing status in the chat area
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus(statusMessage);
+    }
 
     // Call AI endpoint with consolidated request
     fetch(`/api/v1/agencies/${agencyId}/goals/ai-process`, {
