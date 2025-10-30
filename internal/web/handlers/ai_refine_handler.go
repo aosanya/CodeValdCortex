@@ -154,12 +154,20 @@ func (h *AIRefineHandler) RefineIntroduction(c *gin.Context) {
 
 	// Add the AI refinement explanation to the chat conversation
 	// Create conversation if it doesn't exist
+	h.logger.Info("Attempting to add introduction refinement to chat",
+		"agencyID", agencyID,
+		"wasChanged", refinedResult.WasChanged,
+		"explanationLength", len(refinedResult.Explanation))
+
 	conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
 	if err != nil {
+		h.logger.Warn("No conversation exists for introduction refine, creating new one",
+			"agencyID", agencyID,
+			"error", err)
 		// No conversation exists, create one
 		conversation, err = h.designerService.StartConversation(c.Request.Context(), agencyID)
 		if err != nil {
-			h.logger.WithError(err).Warn("Failed to create conversation for AI refinement message")
+			h.logger.WithError(err).Error("Failed to create conversation for AI refinement message")
 		}
 	}
 
@@ -171,9 +179,22 @@ func (h *AIRefineHandler) RefineIntroduction(c *gin.Context) {
 			chatMessage = "✅ **Introduction Review Complete**\n\n" + chatMessage
 		}
 
+		h.logger.Info("Adding introduction refinement message to chat",
+			"agencyID", agencyID,
+			"conversationID", conversation.ID,
+			"messageLength", len(chatMessage),
+			"wasChanged", refinedResult.WasChanged)
+
 		if addErr := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); addErr != nil {
-			h.logger.WithError(addErr).Warn("Failed to add refinement explanation to chat")
+			h.logger.WithError(addErr).Error("Failed to add refinement explanation to chat")
+		} else {
+			h.logger.Info("Successfully added introduction refinement to chat",
+				"agencyID", agencyID,
+				"conversationID", conversation.ID)
 		}
+	} else {
+		h.logger.Error("Conversation is nil after creation attempt for introduction refine",
+			"agencyID", agencyID)
 	}
 
 	// Update overview object for template rendering

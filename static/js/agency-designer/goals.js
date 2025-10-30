@@ -355,11 +355,6 @@ export function processAIGoalRequest() {
             return response.json();
         })
         .then(data => {
-            // Hide AI processing status
-            if (window.hideAIProcessStatus) {
-                window.hideAIProcessStatus();
-            }
-
             // Show success message with what was done
             const operationText = operations.map(op => {
                 switch (op) {
@@ -374,15 +369,60 @@ export function processAIGoalRequest() {
 
             // Reload goals list to show changes
             loadGoals();
+
+            // Reload chat messages to show the AI explanation
+            if (window.location.pathname.includes('/designer')) {
+                const agencyId = getCurrentAgencyId();
+                const chatMessages = document.getElementById('chat-messages');
+
+                if (chatMessages && agencyId) {
+                    // Fetch updated chat messages
+                    fetch(`/agencies/${agencyId}/chat-messages`)
+                        .then(response => response.text())
+                        .then(html => {
+                            // Replace chat content with new messages
+                            chatMessages.innerHTML = html;
+
+                            // Scroll to bottom and hide status after a delay to ensure smooth transition
+                            setTimeout(() => {
+                                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                                // Hide AI processing status after chat is fully reloaded and scrolled
+                                setTimeout(() => {
+                                    if (window.hideAIProcessStatus) {
+                                        window.hideAIProcessStatus();
+                                    }
+                                }, 300);
+                            }, 100);
+                        })
+                        .catch(err => {
+                            console.error('Failed to reload chat:', err);
+                            // Hide status even if reload fails
+                            if (window.hideAIProcessStatus) {
+                                window.hideAIProcessStatus();
+                            }
+                        });
+                } else {
+                    // No chat to reload, just hide the status
+                    if (window.hideAIProcessStatus) {
+                        window.hideAIProcessStatus();
+                    }
+                }
+            } else {
+                // Not on designer page, just hide the status
+                if (window.hideAIProcessStatus) {
+                    window.hideAIProcessStatus();
+                }
+            }
         })
         .catch(error => {
             console.error('Error processing AI goal request:', error);
-            
+
             // Hide AI processing status
             if (window.hideAIProcessStatus) {
                 window.hideAIProcessStatus();
             }
-            
+
             showNotification('Error processing AI goal request', 'error');
         });
 }
