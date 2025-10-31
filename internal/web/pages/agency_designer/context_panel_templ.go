@@ -32,7 +32,7 @@ func ContextPanel() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"box context-panel\"><header class=\"level is-mobile mb-3\"><div class=\"level-left\"><div class=\"level-item\"><h5 class=\"title is-6\"><span class=\"icon has-text-info\"><i class=\"fas fa-layer-group\"></i></span> <span>Context</span></h5></div></div><div class=\"level-right\"><div class=\"level-item\"><button class=\"button is-small is-text\" onclick=\"window.ContextManager.clearAllContexts()\" title=\"Clear all contexts\"><span class=\"icon is-small\"><i class=\"fas fa-trash\"></i></span> <span>Clear All</span></button></div></div></header><div class=\"context-help notification is-light is-info p-3 mb-3\"><p class=\"is-size-7\"><strong>💡 Tip:</strong> Highlight any text from goals, units, or introduction to add it as context for your AI conversations.</p></div><div id=\"context-container\" class=\"context-list\"><!-- Contexts will be dynamically rendered here --><div class=\"has-text-grey has-text-centered py-3\"><p><i class=\"fas fa-info-circle\"></i> No contexts selected</p><p class=\"is-size-7 mt-2\">Highlight text from goals, units, or other items to add context</p></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"box context-panel\"><header class=\"level is-mobile mb-3\"><div class=\"level-left\"><div class=\"level-item\"><h5 class=\"title is-6\"><span class=\"icon has-text-info\"><i class=\"fas fa-layer-group\"></i></span> <span>Context</span></h5></div></div><div class=\"level-right\"><div class=\"level-item\"><button class=\"button is-small is-text\" onclick=\"window.ContextManager.clearAllContexts()\" title=\"Clear all contexts\"><span class=\"icon is-small\"><i class=\"fas fa-trash\"></i></span> <span>Clear All</span></button></div></div></header><div id=\"context-container\" class=\"context-list\"><!-- Contexts will be dynamically rendered here --><div class=\"has-text-grey has-text-centered py-3\"><p><i class=\"fas fa-info-circle\"></i> No contexts selected</p><p class=\"is-size-7 mt-2\">Highlight text from goals, units, or other items to add context</p></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +70,7 @@ func ContextBadge(count int) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d contexts selected", count))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/context_panel.templ`, Line: 53, Col: 101}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/context_panel.templ`, Line: 47, Col: 101}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -83,7 +83,7 @@ func ContextBadge(count int) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", count))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/context_panel.templ`, Line: 57, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/context_panel.templ`, Line: 51, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {

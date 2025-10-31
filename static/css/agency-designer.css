@@ -599,10 +599,11 @@ body {
          properly shrink (prevents flexbox/grid overflow pushing the footer out).
          This is a common fix when a child with 1fr causes the container to grow. */
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas:
         "header"
         "messages"
+        "context"
         "input";
     /* Use full available height and width in the column */
     height: 100%;
@@ -656,7 +657,8 @@ body {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 0.75rem;
-    animation: fadeIn 0.3s ease;
+    /* animation: fadeIn 0.3s ease; */
+    /* TEMPORARILY DISABLED FOR DEBUGGING */
 }
 
 @keyframes fadeIn {
@@ -1581,13 +1583,47 @@ body {
 
 /* Chat Context Section */
 .chat-context-section {
+    grid-area: context;
+    border-top: 1px solid var(--vscode-border);
     border-bottom: 1px solid var(--vscode-border);
-    margin-bottom: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
 }
 
-/* Adjust chat messages container when context panel is present */
-.chat-panel:has(.chat-context-section) .chat-messages-container {
-    max-height: calc(100% - 450px);
+/* Hide context section only when it contains the empty state message */
+.chat-context-section:has(.has-text-grey.has-text-centered) {
+    display: none;
+}
+
+/* Show context section when it has actual context items */
+.chat-context-section:has(.context-item) {
+    display: block;
+}
+
+/* Make the context panel more compact */
+.context-panel {
+    margin: 0 !important;
+    padding: 0.5rem !important;
+}
+
+.context-panel .level {
+    margin-bottom: 0.5rem !important;
+}
+
+.context-panel .title {
+    font-size: 0.75rem !important;
+    margin-bottom: 0 !important;
+}
+
+.context-panel .context-help {
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.context-panel .context-help p {
+    font-size: 0.7rem !important;
+    margin: 0;
 }
 
 /* Context button in action buttons */

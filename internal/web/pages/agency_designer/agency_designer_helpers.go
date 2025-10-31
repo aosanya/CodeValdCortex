@@ -111,11 +111,11 @@ func convertMarkdownLists(content string) string {
 // getMessageEndpoint returns the appropriate API endpoint for sending messages
 func getMessageEndpoint(agencyID string, conversation *ai.ConversationContext) string {
 	if conversation == nil || conversation.ID == "" {
-		// Start new conversation
-		return fmt.Sprintf("/api/v1/agencies/%s/designer/conversations", agencyID)
+		// Start new conversation (use web endpoint for HTML responses)
+		return fmt.Sprintf("/api/v1/agencies/%s/designer/conversations/web", agencyID)
 	}
-	// Continue existing conversation
-	return fmt.Sprintf("/api/v1/conversations/%s/messages", conversation.ID)
+	// Continue existing conversation (use web endpoint for HTML responses)
+	return fmt.Sprintf("/api/v1/conversations/%s/messages/web", conversation.ID)
 }
 
 // formatValue formats a value for display

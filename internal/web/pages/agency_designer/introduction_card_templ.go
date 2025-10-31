@@ -76,14 +76,14 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p></div><div class=\"buttons is-right\"><button class=\"button is-small is-light\" onclick=\"window.ContextManager.addIntroductionContext(document.getElementById('introduction-editor').value)\" title=\"Add entire introduction as context\"><span class=\"icon\"><i class=\"fas fa-layer-group\"></i></span> <span>Add to Context</span></button> <button class=\"button is-small is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-small is-info\" hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p></div><div class=\"buttons is-right\"><button class=\"button is-small is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-small is-info\" hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("/api/v1/agencies/" + currentAgency.ID + "/overview/refine")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 59, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 52, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

@@ -279,8 +279,10 @@ func (a *App) setupServer() error {
 
 	// Initialize AI agency designer web handler (if service available)
 	var aiDesignerWebHandler *webhandlers.AgencyDesignerWebHandler
+	var chatHandler *webhandlers.ChatHandler
 	if a.aiDesignerService != nil {
 		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	}
 
@@ -307,6 +309,14 @@ func (a *App) setupServer() error {
 	if aiDesignerWebHandler != nil {
 		aiDesignerWebHandler.RegisterRoutes(router.Group(""))
 		a.logger.Info("AI Agency Designer web routes registered")
+	}
+
+	// Chat routes for web interface (if available)
+	if chatHandler != nil {
+		// Web-specific chat routes (return HTML instead of JSON)
+		router.POST("/api/v1/conversations/:conversationId/messages/web", chatHandler.SendMessage)
+		router.POST("/api/v1/agencies/:id/designer/conversations/web", chatHandler.StartConversation)
+		a.logger.Info("Web chat routes registered")
 	}
 
 	// Main dashboard route with agency context injection

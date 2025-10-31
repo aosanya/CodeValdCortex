@@ -247,6 +247,7 @@ export function removeSelection(index) {
 export function clearAllContexts() {
     const previousCount = contextState.contexts.length;
     contextState.contexts = [];
+    contextState.selections = []; // Also clear selections
     contextState.nextId = 1;
     logContextStateChange('CLEARED_ALL');
     updateContextDisplay();
@@ -300,34 +301,7 @@ function updateContextDisplay() {
 
     // Render pending selections first (if any)
     if (contextState.selections.length > 0) {
-        html += `
-            <div class="mb-3">
-                <div class="level is-mobile mb-2">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <p class="has-text-weight-semibold is-size-7 has-text-grey-dark">
-                                <span class="icon is-small">
-                                    <i class="fas fa-clipboard-list"></i>
-                                </span>
-                                <span>Pending Selections (${contextState.selections.length})</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="level-right">
-                        <div class="level-item">
-                            <button 
-                                class="button is-text is-small has-text-danger"
-                                onclick="window.ContextManager.clearSelections(); window.ContextManager.updateDisplay()"
-                                title="Clear pending selections">
-                                <span class="icon is-small">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                                <span>Clear</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-        `;
+        html += `<div class="mb-3">`;
 
         contextState.selections.forEach((sel, index) => {
             const typeColor = getContextTypeColor(sel.type);

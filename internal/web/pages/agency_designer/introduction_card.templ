@@ -40,13 +40,6 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 			</div>
 			<div class="buttons is-right">
 				<button
-					class="button is-small is-light"
-					onclick="window.ContextManager.addIntroductionContext(document.getElementById('introduction-editor').value)"
-					title="Add entire introduction as context">
-					<span class="icon"><i class="fas fa-layer-group"></i></span>
-					<span>Add to Context</span>
-				</button>
-				<button
 					class="button is-small is-primary"
 					onclick="saveOverviewIntroduction()"
 					id="save-introduction-btn">

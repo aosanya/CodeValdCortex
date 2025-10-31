@@ -127,6 +127,12 @@ vet: ## Run go vet
 .PHONY: check
 check: fmt vet lint test ## Run all checks (format, vet, lint, test)
 
+.PHONY: audit
+audit: ## Audit JavaScript code for console.log statements
+	@echo "Auditing JavaScript code..."
+	@chmod +x scripts/lint-console-logs.sh
+	@scripts/lint-console-logs.sh
+
 .PHONY: docker-build
 docker-build: ## Build Docker image
 	@echo "Building Docker image..."
