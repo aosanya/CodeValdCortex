@@ -7,7 +7,12 @@ import (
 
 // GoalItem renders a single goal in the list as a table row with selection checkbox
 templ GoalItem(goal *agency.Goal) {
-	<tr class="table-item" data-item-key={ goal.Key }>
+	<tr 
+		class="table-item context-selectable" 
+		data-item-key={ goal.Key }
+		data-goal-code={ goal.Code }
+		data-goal-description={ goal.Description }
+		title="Highlight text to add as context">
 		<td style="vertical-align: middle; width: 40px;">
 			<label class="checkbox">
 				<input 
@@ -22,10 +27,16 @@ templ GoalItem(goal *agency.Goal) {
 			<span class="tag is-primary">{ goal.Code }</span>
 		</td>
 		<td class="item-description" style="vertical-align: middle;">
-			{ goal.Description }
+			<span class="selectable-text">{ goal.Description }</span>
 		</td>
 		<td style="vertical-align: middle;">
 			<div class="buttons has-addons">
+				<button 
+					class="button is-small is-light"
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("window.ContextManager.addGoalContext('%s', '%s')", goal.Code, templ.EscapeString(goal.Description))} }
+					title="Add to context">
+					<span class="icon"><i class="fas fa-layer-group"></i></span>
+				</button>
 				<button 
 					class="button is-small is-info" 
 					onclick={ templ.ComponentScript{Call: fmt.Sprintf("showGoalEditor('edit', '%s', '%s', '%s')", goal.Key, goal.Code, templ.EscapeString(goal.Description))} }

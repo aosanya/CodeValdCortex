@@ -37,6 +37,11 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 		
 		<!-- Chat Input (Independent) -->
 		<div class="chat-input-container">
+			<!-- Context Panel (above input) -->
+			<div class="chat-context-section">
+				@ContextPanel()
+			</div>
+			
 			<!-- AI Process Status Bar (inside input panel) -->
 			<div class="ai-process-status htmx-indicator" id="ai-process-status" style="display: none;">
 				<div class="process-content">
@@ -141,7 +146,17 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 		hx-target="#chat-messages"
 		hx-swap="beforeend"
 		hx-indicator="#typing-indicator"
-		hx-on::after-request="document.getElementById('user-input').value = ''; document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;">
+		hx-on::before-request="
+			const input = document.getElementById('user-input');
+			const contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';
+			if (contexts) {
+				input.value = input.value + contexts;
+			}
+		"
+		hx-on::after-request="
+			document.getElementById('user-input').value = ''; 
+			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+		">
 		
 		<div class="field has-addons">
 			<div class="control is-expanded">
@@ -160,6 +175,18 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 						<i class="fas fa-paper-plane"></i>
 					</span>
 				</button>
+			</div>
+		</div>
+		
+		<!-- Context indicator -->
+		<div id="context-indicator" class="mt-2" style="display: none;">
+			<div class="tags">
+				<span class="tag is-info is-light">
+					<span class="icon is-small">
+						<i class="fas fa-layer-group"></i>
+					</span>
+					<span id="context-count">0 contexts</span>
+				</span>
 			</div>
 		</div>
 	</form>

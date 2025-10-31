@@ -63,7 +63,15 @@ func ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationContex
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Typing Indicator --><div class=\"typing-indicator\" id=\"typing-indicator\" style=\"display: none;\"><div class=\"typing-bubble\"><span></span><span></span><span></span></div></div><!-- Chat Input (Independent) --><div class=\"chat-input-container\"><!-- AI Process Status Bar (inside input panel) --><div class=\"ai-process-status htmx-indicator\" id=\"ai-process-status\" style=\"display: none;\"><div class=\"process-content\"><div class=\"process-info\"><span class=\"icon has-text-info\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span class=\"process-text\" id=\"ai-status-message\">AI is working on your request...</span></div><button class=\"button is-small is-danger is-outlined\" id=\"stop-ai-process\" title=\"Stop AI processing\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Typing Indicator --><div class=\"typing-indicator\" id=\"typing-indicator\" style=\"display: none;\"><div class=\"typing-bubble\"><span></span><span></span><span></span></div></div><!-- Chat Input (Independent) --><div class=\"chat-input-container\"><!-- Context Panel (above input) --><div class=\"chat-context-section\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = ContextPanel().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><!-- AI Process Status Bar (inside input panel) --><div class=\"ai-process-status htmx-indicator\" id=\"ai-process-status\" style=\"display: none;\"><div class=\"process-content\"><div class=\"process-info\"><span class=\"icon has-text-info\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span class=\"process-text\" id=\"ai-status-message\">AI is working on your request...</span></div><button class=\"button is-small is-danger is-outlined\" id=\"stop-ai-process\" title=\"Stop AI processing\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -71,7 +79,7 @@ func ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationContex
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -101,20 +109,20 @@ func WelcomeMessage(agencyName string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"message ai-message welcome-message\"><div class=\"message-avatar\"><span class=\"icon is-large has-text-primary\"><i class=\"fas fa-robot fa-2x\"></i></span></div><div class=\"message-content\"><div class=\"message-bubble\"><p><strong>Hi! I'm your AI Agency Designer.</strong> 🤖</p><p>I'll help you create a complete multi-agent architecture for <strong>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"message ai-message welcome-message\"><div class=\"message-avatar\"><span class=\"icon is-large has-text-primary\"><i class=\"fas fa-robot fa-2x\"></i></span></div><div class=\"message-content\"><div class=\"message-bubble\"><p><strong>Hi! I'm your AI Agency Designer.</strong> 🤖</p><p>I'll help you create a complete multi-agent architecture for <strong>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(agencyName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 74, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 79, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</strong>.</p><p>Let's start by understanding your use case:</p><ul><li>What problem are you trying to solve?</li><li>What are the main processes or workflows?</li><li>Who are the key actors or stakeholders?</li></ul><p class=\"mt-4\"><em>💡 Tip: Be as detailed as you can - I'll help you refine the details as we go!</em></p></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</strong>.</p><p>Let's start by understanding your use case:</p><ul><li>What problem are you trying to solve?</li><li>What are the main processes or workflows?</li><li>Who are the key actors or stakeholders?</li></ul><p class=\"mt-4\"><em>💡 Tip: Be as detailed as you can - I'll help you refine the details as we go!</em></p></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -156,7 +164,7 @@ func ChatMessages(messages []ai.Message) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -187,33 +195,33 @@ func UserMessage(msg ai.Message) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"message user-message\"><div class=\"message-content\"><div class=\"message-bubble\"><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"message user-message\"><div class=\"message-content\"><div class=\"message-bubble\"><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 104, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 109, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</p></div><div class=\"message-time\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p></div><div class=\"message-time\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 107, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 112, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><div class=\"message-avatar\"><span class=\"icon is-medium has-text-info\"><i class=\"fas fa-user\"></i></span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div><div class=\"message-avatar\"><span class=\"icon is-medium has-text-info\"><i class=\"fas fa-user\"></i></span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -243,7 +251,7 @@ func AIMessage(msg ai.Message) templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"message ai-message\"><div class=\"message-avatar\"><span class=\"icon is-medium has-text-primary\"><i class=\"fas fa-robot\"></i></span></div><div class=\"message-content\"><div class=\"message-bubble\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"message ai-message\"><div class=\"message-avatar\"><span class=\"icon is-medium has-text-primary\"><i class=\"fas fa-robot\"></i></span></div><div class=\"message-content\"><div class=\"message-bubble\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -251,20 +259,20 @@ func AIMessage(msg ai.Message) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div><div class=\"message-time\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><div class=\"message-time\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 131, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 136, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -294,20 +302,20 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<form hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<form hx-post=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getMessageEndpoint(agencyID, conversation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 140, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 145, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-target=\"#chat-messages\" hx-swap=\"beforeend\" hx-indicator=\"#typing-indicator\" hx-on::after-request=\"document.getElementById('user-input').value = ''; document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Describe your requirements...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-primary\" type=\"submit\"><span class=\"icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-target=\"#chat-messages\" hx-swap=\"beforeend\" hx-indicator=\"#typing-indicator\" hx-on::before-request=\"\n\t\t\tconst input = document.getElementById('user-input');\n\t\t\tconst contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';\n\t\t\tif (contexts) {\n\t\t\t\tinput.value = input.value + contexts;\n\t\t\t}\n\t\t\" hx-on::after-request=\"\n\t\t\tdocument.getElementById('user-input').value = ''; \n\t\t\tdocument.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;\n\t\t\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Describe your requirements...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-primary\" type=\"submit\"><span class=\"icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><!-- Context indicator --><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

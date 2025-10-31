@@ -24,6 +24,7 @@ import {
     deleteUnit
 } from './units.js';
 import { getCurrentAgencyId, showNotification } from './utils.js';
+import { initializeContextSelection } from './context.js';
 
 // Check if DOM is already loaded
 if (document.readyState === 'loading') {
@@ -41,6 +42,7 @@ function initializeAgencyDesigner() {
         initializeAgentSelection();
         initializeOverview();
         initializeAIProcessControls();
+        initializeContextSelection(); // Initialize context selection system
     } catch (error) {
         console.error('❌ Error during initialization:', error);
         console.error('Error stack:', error.stack);

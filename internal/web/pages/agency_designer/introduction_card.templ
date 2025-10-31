@@ -12,21 +12,40 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 			<div class="content">
 				<div class="field">
 					<div class="control">
-						<textarea
-							class="textarea"
-							id="introduction-editor"
-							placeholder="Enter introduction text for this agency..."
-							rows="20"
-							style="font-family: monospace; font-size: 14px;">
-							if overview != nil {
+						if overview != nil && overview.Introduction != "" {
+							<textarea
+								class="textarea context-selectable"
+								id="introduction-editor"
+								placeholder="Enter introduction text for this agency..."
+								rows="20"
+								style="font-family: monospace; font-size: 14px;"
+								data-intro-text={ overview.Introduction }
+								title="Highlight text to add as context">
 								{ overview.Introduction }
-							}
-						</textarea>
+							</textarea>
+						} else {
+							<textarea
+								class="textarea context-selectable"
+								id="introduction-editor"
+								placeholder="Enter introduction text for this agency..."
+								rows="20"
+								style="font-family: monospace; font-size: 14px;"
+								data-intro-text=""
+								title="Highlight text to add as context">
+							</textarea>
+						}
 					</div>
 				</div>
-				<p class="help">Use this section to provide an overview and introduction to your agency.</p>
+				<p class="help">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p>
 			</div>
 			<div class="buttons is-right">
+				<button
+					class="button is-small is-light"
+					onclick="window.ContextManager.addIntroductionContext(document.getElementById('introduction-editor').value)"
+					title="Add entire introduction as context">
+					<span class="icon"><i class="fas fa-layer-group"></i></span>
+					<span>Add to Context</span>
+				</button>
 				<button
 					class="button is-small is-primary"
 					onclick="saveOverviewIntroduction()"
