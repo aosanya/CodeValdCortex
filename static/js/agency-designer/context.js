@@ -3,15 +3,48 @@
 
 import { showNotification } from './utils.js';
 
-// Global context state - accessible via window.contextSelections
+/**
+ * @typedef {Object} ContextMetadata
+ * @property {number} [selectionCount] - Number of selections combined
+ * @property {Selection[]} [selections] - Array of individual selections
+ */
+
+/**
+ * @typedef {Object} Context
+ * @property {number} id - Unique context ID
+ * @property {string} type - Context type (Introduction, Goal Definition, etc.)
+ * @property {string} code - Item code (G001, INTRO, etc.)
+ * @property {string} content - The selected text content
+ * @property {string} timestamp - ISO timestamp of creation
+ * @property {ContextMetadata} metadata - Additional metadata
+ */
+
+/**
+ * @typedef {Object} Selection
+ * @property {string} text - Selected text
+ * @property {string} type - Context type
+ * @property {string} code - Item code
+ * @property {string} timestamp - ISO timestamp
+ */
+
+/**
+ * @typedef {Object} ContextState
+ * @property {Context[]} contexts - Array of context objects
+ * @property {number} nextId - Next available context ID
+ * @property {Selection[]} selections - Array of selections being accumulated
+ */
+
+/** @type {ContextState} */
 let contextState = {
     contexts: [], // Array of context objects
-    nextId: 1
+    nextId: 1,
+    selections: [] // Array of selections being accumulated
 };
 
-// Make contexts globally available
+// Make arrays globally available
 if (typeof window !== 'undefined') {
     window.contextSelections = contextState.contexts;
+    window.selections = contextState.selections;
 }
 
 /**
@@ -54,12 +87,13 @@ export const ContextType = {
  * @param {string} type - Context type (from ContextType enum)
  * @param {string} code - Item code (e.g., G001, U001)
  * @param {string} content - Selected text content
- * @param {object} metadata - Additional metadata (optional)
- * @returns {object} Context object
+ * @param {ContextMetadata} [metadata={}] - Additional metadata (optional)
+ * @returns {Context} Context object
  */
 export function createContext(type, code, content, metadata = {}) {
     console.log('🔨 Creating context:', { type, code, contentLength: content.length });
 
+    /** @type {Context} */
     const context = {
         id: contextState.nextId++,
         type: type,
@@ -187,6 +221,27 @@ export function removeContext(contextId) {
 }
 
 /**
+ * Remove selection by index
+ * @param {number} index - Selection index to remove
+ */
+export function removeSelection(index) {
+    if (index >= 0 && index < contextState.selections.length) {
+        const removed = contextState.selections.splice(index, 1)[0];
+        console.log('🗑️ Selection removed:', {
+            index,
+            removed: {
+                type: removed.type,
+                code: removed.code,
+                text: removed.text.substring(0, 50) + '...'
+            },
+            remaining: contextState.selections.length
+        });
+        updateContextDisplay();
+        showNotification(`Selection removed: ${removed.type} ${removed.code}`, 'info');
+    }
+}
+
+/**
  * Clear all contexts
  */
 export function clearAllContexts() {
@@ -231,51 +286,134 @@ function updateContextDisplay() {
     const contextContainer = document.getElementById('context-container');
     if (!contextContainer) return;
 
-    if (contextState.contexts.length === 0) {
+    if (contextState.contexts.length === 0 && contextState.selections.length === 0) {
         contextContainer.innerHTML = `
             <div class="has-text-grey has-text-centered py-3">
                 <p><i class="fas fa-info-circle"></i> No contexts selected</p>
-                <p class="is-size-7 mt-2">Select text from goals, units, or other items to add context</p>
+                <p class="is-size-7 mt-2">Highlight text from goals, units, or introduction to add context</p>
             </div>
         `;
         return;
     }
 
-    // Render contexts
     let html = '';
-    contextState.contexts.forEach(ctx => {
-        const typeColor = getContextTypeColor(ctx.type);
-        const truncatedContent = ctx.content.length > 100
-            ? ctx.content.substring(0, 100) + '...'
-            : ctx.content;
 
+    // Render pending selections first (if any)
+    if (contextState.selections.length > 0) {
         html += `
-            <div class="context-item box p-3 mb-2" data-context-id="${ctx.id}">
-                <div class="level is-mobile">
+            <div class="mb-3">
+                <div class="level is-mobile mb-2">
                     <div class="level-left">
                         <div class="level-item">
-                            <span class="tag ${typeColor}">${ctx.type}</span>
-                        </div>
-                        <div class="level-item">
-                            <strong class="has-text-weight-semibold">${ctx.code}</strong>
+                            <p class="has-text-weight-semibold is-size-7 has-text-grey-dark">
+                                <span class="icon is-small">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </span>
+                                <span>Pending Selections (${contextState.selections.length})</span>
+                            </p>
                         </div>
                     </div>
                     <div class="level-right">
                         <div class="level-item">
                             <button 
-                                class="delete is-small" 
-                                onclick="window.AgencyDesigner.removeContext(${ctx.id})"
-                                title="Remove context"
-                            ></button>
+                                class="button is-text is-small has-text-danger"
+                                onclick="window.ContextManager.clearSelections(); window.ContextManager.updateDisplay()"
+                                title="Clear pending selections">
+                                <span class="icon is-small">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Clear</span>
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class="content is-small mt-2">
-                    <p class="context-content">${escapeHtml(truncatedContent)}</p>
-                </div>
-            </div>
         `;
-    });
+
+        contextState.selections.forEach((sel, index) => {
+            const typeColor = getContextTypeColor(sel.type);
+            const truncatedText = sel.text.length > 80
+                ? sel.text.substring(0, 80) + '...'
+                : sel.text;
+
+            html += `
+                <div class="box p-2 mb-2 has-background-warning-light" data-selection-index="${index}">
+                    <div class="level is-mobile">
+                        <div class="level-left" style="flex-shrink: 1; min-width: 0;">
+                            <div class="level-item">
+                                <span class="tag is-small ${typeColor}">${sel.type}</span>
+                            </div>
+                            <div class="level-item">
+                                <strong class="is-size-7">${sel.code}</strong>
+                            </div>
+                        </div>
+                        <div class="level-right" style="flex-shrink: 0;">
+                            <div class="level-item">
+                                <button 
+                                    class="delete is-small" 
+                                    onclick="window.ContextManager.removeSelection(${index})"
+                                    title="Remove selection"
+                                ></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content is-small mt-1">
+                        <p class="is-size-7" style="word-break: break-word;">${escapeHtml(truncatedText)}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `</div>`;
+    }
+
+    // Render finalized contexts (if any)
+    if (contextState.contexts.length > 0) {
+        if (contextState.selections.length > 0) {
+            html += `
+                <hr class="my-3">
+                <p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2">
+                    <span class="icon is-small">
+                        <i class="fas fa-layer-group"></i>
+                    </span>
+                    <span>Finalized Contexts (${contextState.contexts.length})</span>
+                </p>
+            `;
+        }
+
+        contextState.contexts.forEach(ctx => {
+            const typeColor = getContextTypeColor(ctx.type);
+            const truncatedContent = ctx.content.length > 100
+                ? ctx.content.substring(0, 100) + '...'
+                : ctx.content;
+
+            html += `
+                <div class="context-item box p-3 mb-2" data-context-id="${ctx.id}">
+                    <div class="level is-mobile">
+                        <div class="level-left">
+                            <div class="level-item">
+                                <span class="tag ${typeColor}">${ctx.type}</span>
+                            </div>
+                            <div class="level-item">
+                                <strong class="has-text-weight-semibold">${ctx.code}</strong>
+                            </div>
+                        </div>
+                        <div class="level-right">
+                            <div class="level-item">
+                                <button 
+                                    class="delete is-small" 
+                                    onclick="window.AgencyDesigner.removeContext(${ctx.id})"
+                                    title="Remove context"
+                                ></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content is-small mt-2">
+                        <p class="context-content">${escapeHtml(truncatedContent)}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
 
     contextContainer.innerHTML = html;
 }
@@ -318,7 +456,11 @@ export function initializeContextSelection() {
     console.log('🚀 Context manager initialized');
     console.log('📋 Initial context state:', {
         contexts: contextState.contexts,
-        globalAccess: 'window.contextSelections'
+        selections: contextState.selections,
+        globalAccess: {
+            contexts: 'window.contextSelections',
+            selections: 'window.selections'
+        }
     });
 
     // Listen for text selection (mouseup event)
@@ -399,6 +541,28 @@ function handleTextSelection(event) {
             position: { top: rect.bottom, left: rect.left }
         });
 
+        // Automatically add selection to pending array
+        contextState.selections.push({
+            text: selectedText,
+            type: contextType,
+            code: code,
+            timestamp: new Date().toISOString()
+        });
+
+        console.log('📋 Selection automatically added:', {
+            count: contextState.selections.length,
+            selections: contextState.selections.map((s, i) => ({
+                index: i,
+                type: s.type,
+                code: s.code,
+                text: s.text.substring(0, 50) + (s.text.length > 50 ? '...' : '')
+            })),
+            globalAccess: 'window.selections'
+        });
+
+        // Update display to show the new selection
+        updateContextDisplay();
+
         // Show context menu near the selection
         showContextMenu(rect, selectedText, contextType, code);
     } else {
@@ -424,17 +588,25 @@ function showContextMenu(rect, selectedText, contextType, code) {
     // Remove existing menu if any
     hideContextMenu();
 
-    // Create context menu
+    // Create context menu with single button
     const menu = document.createElement('div');
     menu.className = 'context-menu';
+
+    const pendingCount = contextState.selections.length;
+
     menu.innerHTML = `
-        <button class="button is-small is-info context-add-button">
+        <button class="button is-small is-info create-context-button" title="Create context with ${pendingCount} accumulated selection${pendingCount !== 1 ? 's' : ''}">
             <span class="icon is-small">
                 <i class="fas fa-layer-group"></i>
             </span>
-            <span>Add to Context</span>
+            <span>Create Context (${pendingCount})</span>
         </button>
     `;
+
+    console.log('🎨 Context menu rendered:', {
+        pendingCount,
+        buttonText: `Create Context (${pendingCount})`
+    });
 
     // Position the menu near the selection
     menu.style.position = 'fixed';
@@ -442,25 +614,43 @@ function showContextMenu(rect, selectedText, contextType, code) {
     menu.style.left = `${rect.left + window.scrollX}px`;
     menu.style.zIndex = '9999';
 
-    // Add click handler
-    menu.querySelector('.context-add-button').addEventListener('click', function (e) {
+    // Create context button - creates context with all selections
+    menu.querySelector('.create-context-button').addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
-        console.log('➕ Adding context:', {
-            type: contextType,
-            code: code,
-            text: selectedText.substring(0, 50) + '...'
+        console.log('🔨 Creating context with all selections:', {
+            selectionCount: contextState.selections.length,
+            selections: contextState.selections.map(s => ({
+                type: s.type,
+                code: s.code,
+                text: s.text.substring(0, 30) + '...'
+            }))
         });
 
-        // Create context based on type
-        createContext(contextType, code, selectedText);
+        // Combine all selections
+        const combinedText = contextState.selections.map(s => s.text).join('\n\n---\n\n');
 
-        // Clear selection and hide menu
-        window.getSelection().removeAllRanges();
+        // Create context with combined text (use first selection's type and code)
+        const firstSelection = contextState.selections[0];
+        createContext(firstSelection.type, firstSelection.code, combinedText, {
+            selectionCount: contextState.selections.length,
+            selections: contextState.selections
+        });
+
+        // Clear pending selections
+        contextState.selections = [];
+        if (typeof window !== 'undefined') {
+            window.selections = contextState.selections;
+        }
+
+        // Update display
+        updateContextDisplay();
+
+        // Hide menu
         hideContextMenu();
 
-        console.log('✅ Context added and menu hidden');
+        console.log('✅ Context created with multiple selections, selections cleared');
     });
 
     // Add to document
@@ -479,6 +669,7 @@ function hideContextMenu() {
 
 // Export for global access
 if (typeof window !== 'undefined') {
+    // Primary export as ContextManager
     window.ContextManager = {
         createContext,
         addGoalContext,
@@ -486,10 +677,31 @@ if (typeof window !== 'undefined') {
         addUnitContext,
         addAgentContext,
         removeContext,
+        removeSelection,
         clearAllContexts,
         getAllContexts,
         getFormattedContexts,
         initializeContextSelection,
-        ContextType
+        updateDisplay: updateContextDisplay,
+        ContextType,
+        getSelections: () => contextState.selections,
+        clearSelections: () => {
+            contextState.selections = [];
+            console.log('🗑️ Selections cleared');
+            updateContextDisplay();
+        }
     };
+
+    // Also export as AgencyDesigner for backward compatibility
+    if (!window.AgencyDesigner) {
+        window.AgencyDesigner = {};
+    }
+    window.AgencyDesigner.removeContext = removeContext;
+    window.AgencyDesigner.clearAllContexts = clearAllContexts;
+
+    // Export direct array references
+    window.contextSelections = contextState.contexts;
+    window.selections = contextState.selections;
+
+    console.log('✅ Context Manager exported globally');
 }

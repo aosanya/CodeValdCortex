@@ -48,13 +48,14 @@ build-all: ## Build for all platforms
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o bin/$(BINARY_NAME)-windows-amd64.exe ./cmd
 
 .PHONY: run
-run: ## Build and run the application
+run: ## Build and run the application 
 	@echo "Generating templates..."
 	templ generate
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p bin
 	CGO_ENABLED=0 GOOS=linux $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BINARY_PATH) ./cmd
 	@echo "Running $(BINARY_NAME)..."
+	@echo "💡 Tip: Hard refresh browser (Ctrl+Shift+R or Cmd+Shift+R) to reload cached JavaScript"
 	./$(BINARY_PATH)
 
 .PHONY: kill
