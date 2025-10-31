@@ -4,6 +4,22 @@ applyTo: '**'
 
 # Code Structure Rules
 
+## Design Reference
+
+**Main design concepts and styling reference:**
+
+- **Location**: `/workspaces/CodeValdCortex/internal/web/designs/version1/`
+- This directory contains HTML/CSS design references that show:
+  - Complete page layouts and structure
+  - Bulma CSS class usage patterns
+  - Custom CSS implementations
+  - Component hierarchy and organization
+  - FontAwesome icon usage
+  - Theme-related CSS classes
+- Use these files as visual and structural references when implementing `.templ` templates
+- **Note**: These are styling references only - do not copy JavaScript functionality
+- Follow the template-first architecture when converting designs to `.templ` files
+
 ## Template-First Architecture
 
 **Always prefer `.templ` files over Go/JavaScript for HTML generation.**
