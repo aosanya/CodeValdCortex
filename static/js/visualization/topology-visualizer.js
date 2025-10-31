@@ -79,21 +79,12 @@ class TopologyVisualizer {
             mapLib: maplibregl,
             mapStyle: 'https://tiles.openfreemap.org/styles/liberty'
         });
-
-        console.log('Topology Visualizer initialized with MapLibre + OpenStreetMap');
     }
 
     /**
      * Load data and render
      */
     async loadData(agents, edges) {
-        console.log(`Loading ${agents.length} agents, ${edges.length} edges`);
-
-        // Log first agent to see structure
-        if (agents.length > 0) {
-            console.log('First agent structure:', JSON.stringify(agents[0], null, 2));
-        }
-
         // Transform agents to nodes
         this.nodes = agents.map(agent => {
             const metadata = agent.metadata || {};
@@ -124,13 +115,6 @@ class TopologyVisualizer {
                 position: position
             };
         });
-
-        // Log sample of parsed nodes
-        const nodesWithCoords = this.nodes.filter(n => n.position !== null);
-        console.log(`Parsed: ${nodesWithCoords.length}/${this.nodes.length} nodes have coordinates`);
-        if (nodesWithCoords.length > 0) {
-            console.log('Sample node:', nodesWithCoords[0]);
-        }
 
         // Transform edges
         this.edges = edges.map(edge => ({
@@ -168,12 +152,6 @@ class TopologyVisualizer {
                     node.position = [0, 0];
                 }
             });
-
-            console.log(`Geographic layout: ${coordCount} nodes with coordinates, ${noCoordCount} without`);
-            if (coordCount > 0) {
-                const positions = this.nodes.filter(n => n.position[0] !== 0 || n.position[1] !== 0).map(n => n.position);
-                console.log('Sample positions:', positions.slice(0, 5));
-            }
         } else if (this.config.layoutAlgorithm === 'hierarchical') {
             // Use d3-hierarchy for tree layout
             const positions = this.layoutEngine.computeHierarchical(this.nodes, this.edges);

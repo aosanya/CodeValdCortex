@@ -8,14 +8,13 @@ function dashboard() {
         healthFilter: 'all',
 
         init() {
-            console.log('Dashboard initialized');
             this.setupEventListeners();
         },
 
         setupEventListeners() {
             // Listen for HTMX events
             document.body.addEventListener('htmx:afterSwap', (e) => {
-                console.log('Content updated', e.detail);
+                // Content updated
             });
 
             document.body.addEventListener('htmx:responseError', (e) => {
@@ -146,8 +145,6 @@ function logViewer() {
             const params = new URLSearchParams();
             if (this.level !== 'all') params.append('level', this.level);
             if (this.search) params.append('search', this.search);
-
-            console.log('Filtering logs:', params.toString());
         },
 
         scrollToBottom() {
@@ -165,5 +162,3 @@ function logViewer() {
 window.dashboard = dashboard;
 window.metricsChart = metricsChart;
 window.logViewer = logViewer;
-
-console.log('Alpine.js components loaded');

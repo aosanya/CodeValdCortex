@@ -1,4 +1,29 @@
 <!doctype html>
+<!--
+    Agency Designer - Design Reference
+    
+    This is a STYLING REFERENCE file showing the complete HTML structure and Bulma CSS classes
+    used in the Agency Designer interface. It demonstrates the layout, component hierarchy,
+    and styling patterns.
+    
+    Last Updated: 2025-10-31
+    Changes:
+    - Added Context Panel between chat messages and input for text selection
+    - Added context-selectable class to introduction textarea
+    - Updated help text to mention context highlighting
+    - Added context indicator in chat input form
+    - Added agency-designer.js reference for context selection functionality
+    - Added example chat conversation with multiple messages (user and AI)
+    - Updated context panel to use correct box-based design with warning-light background
+    - Context items now use level layout with tags and delete buttons
+    - Each context shows truncated text with ellipsis and data-selection-index
+    - AI Process Status now includes id attributes and proper visibility state
+    - Form now includes proper HTMX attributes for API integration
+    - Context indicator hidden by default (display: none)
+    
+    NOTE: This is a design reference only. The actual implementation uses .templ files.
+    Do not copy JavaScript functionality from this file - use server-side rendering and HTMX.
+-->
 <html lang="en">
 
 <head>
@@ -16,6 +41,8 @@
     <!-- Agency Designer Specific CSS -->
     <link rel="stylesheet" href="../../../../static/css/vscode-status-bar.css">
     <link rel="stylesheet" href="../../../../static/css/agency-designer.css">
+    <!-- Agency Designer JavaScript (for context selection and other features) -->
+    <script src="../../../../static/js/agency-designer.js" type="module" defer></script>
 </head>
 
 <body>
@@ -235,15 +262,17 @@
                                                             <div class="content">
                                                                 <div class="field">
                                                                     <div class="control">
-                                                                        <textarea class="textarea"
+                                                                        <textarea class="textarea context-selectable"
                                                                             id="introduction-editor"
                                                                             placeholder="Enter introduction text for this agency..."
                                                                             rows="20"
-                                                                            style="font-family: monospace; font-size: 14px;">Tumaini is a donation management agency that streamlines the entire donation lifecycle from collection to delivery. The agency addresses two critical challenges in charitable operations: maintaining accurate records of donor contributions and facilitating meaningful gratitude exchanges between recipients and donors. Through automated donation collection, intelligent sorting and organization, and coordinated pickup logistics, Tumaini ensures donations reach their intended recipients efficiently while fostering lasting connections between donors and beneficiaries. This comprehensive approach transforms traditional donation processes into a transparent, trackable, and relationship-building system that benefits all stakeholders in the charitable ecosystem.</textarea>
+                                                                            style="font-family: monospace; font-size: 14px;"
+                                                                            title="Highlight text to add as context">Tumaini is a donation management agency that streamlines the entire donation lifecycle from collection to delivery. The agency addresses two critical challenges in charitable operations: maintaining accurate records of donor contributions and facilitating meaningful gratitude exchanges between recipients and donors. Through automated donation collection, intelligent sorting and organization, and coordinated pickup logistics, Tumaini ensures donations reach their intended recipients efficiently while fostering lasting connections between donors and beneficiaries. This comprehensive approach transforms traditional donation processes into a transparent, trackable, and relationship-building system that benefits all stakeholders in the charitable ecosystem.</textarea>
                                                                     </div>
                                                                 </div>
                                                                 <p class="help">Use this section to provide an overview
-                                                                    and introduction to your agency.</p>
+                                                                    and introduction to your agency. Highlight text to
+                                                                    add it as context.</p>
                                                             </div>
                                                             <div class="buttons is-right">
                                                                 <button class="button is-small is-primary">
@@ -614,6 +643,7 @@
                                 </div>
                             </header>
                             <div class="chat-messages-container" id="chat-messages">
+                                <!-- AI Welcome Message -->
                                 <div class="message ai-message welcome-message">
                                     <div class="message-avatar">
                                         <span class="icon is-large has-text-primary">
@@ -642,6 +672,106 @@
                                                     as we go!</em>
                                             </p>
                                         </div>
+                                        <div class="message-time">2:30 PM</div>
+                                    </div>
+                                </div>
+
+                                <!-- User Message Example -->
+                                <div class="message user-message">
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p>I need help designing an agency for a donation management system. The
+                                                agency should handle collecting donations, organizing them, and
+                                                coordinating pickups with donors and recipients.</p>
+                                        </div>
+                                        <div class="message-time">2:32 PM</div>
+                                    </div>
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-info">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- AI Response with Analysis -->
+                                <div class="message ai-message">
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-primary">
+                                            <i class="fas fa-robot"></i>
+                                        </span>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p><strong>Great!</strong> I can help you design a comprehensive donation
+                                                management agency. Based on your description, I can see several key
+                                                areas:</p>
+                                            <ul>
+                                                <li><strong>Donation Collection</strong> - Receiving and recording
+                                                    donations from donors</li>
+                                                <li><strong>Inventory Management</strong> - Organizing and categorizing
+                                                    donated items</li>
+                                                <li><strong>Logistics Coordination</strong> - Scheduling and managing
+                                                    pickups/deliveries</li>
+                                                <li><strong>Communication</strong> - Keeping donors and recipients
+                                                    informed</li>
+                                            </ul>
+                                            <p class="mt-3">Let me help you refine the introduction section first. Would
+                                                you like me to help create agent types for each of these areas?</p>
+                                        </div>
+                                        <div class="message-time">2:33 PM</div>
+                                    </div>
+                                </div>
+
+                                <!-- User Message with Context Reference -->
+                                <div class="message user-message">
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p>Yes, that sounds good. Can you help me define specific goals for the
+                                                donation collection process?</p>
+                                            <div class="message-context mt-2">
+                                                <div class="tag is-info is-light">
+                                                    <span class="icon is-small"><i
+                                                            class="fas fa-layer-group"></i></span>
+                                                    <span>1 context included</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="message-time">2:35 PM</div>
+                                    </div>
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-info">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- AI Response with Detailed Goals -->
+                                <div class="message ai-message">
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-primary">
+                                            <i class="fas fa-robot"></i>
+                                        </span>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p><strong>Absolutely!</strong> Here are some key goals for your donation
+                                                collection process:</p>
+                                            <ol>
+                                                <li><strong>Accurate Record Keeping</strong> - Maintain detailed records
+                                                    of all donor contributions including donor information, donation
+                                                    type, quantity, and condition</li>
+                                                <li><strong>Efficient Intake Process</strong> - Streamline the donation
+                                                    acceptance workflow to minimize donor wait time and maximize
+                                                    throughput</li>
+                                                <li><strong>Quality Assessment</strong> - Ensure donations meet quality
+                                                    standards and are suitable for distribution to recipients</li>
+                                                <li><strong>Donor Recognition</strong> - Generate appropriate receipts
+                                                    and acknowledgments for tax purposes and relationship building</li>
+                                            </ol>
+                                            <p class="mt-3">Would you like me to create these goals in the Goal
+                                                Definition section?</p>
+                                        </div>
+                                        <div class="message-time">2:36 PM</div>
                                     </div>
                                 </div>
                             </div>
@@ -653,19 +783,106 @@
                                     <span></span>
                                 </div>
                             </div>
-                            <!-- Chat Input (Static Display) -->
+                            <!-- Context Panel (between messages and input) -->
+                            <div class="chat-context-section">
+                                <div class="box context-panel">
+                                    <header class="level is-mobile mb-3">
+                                        <div class="level-left">
+                                            <div class="level-item">
+                                                <h5 class="title is-6">
+                                                    <span class="icon has-text-info">
+                                                        <i class="fas fa-layer-group"></i>
+                                                    </span>
+                                                    <span>Context</span>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div class="level-right">
+                                            <div class="level-item">
+                                                <button class="button is-small is-text"
+                                                    onclick="window.ContextManager.clearAllContexts()"
+                                                    title="Clear all contexts">
+                                                    <span class="icon is-small">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                    <span>Clear All</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+
+                                    <div id="context-container" class="context-list">
+                                        <!-- Example of populated contexts -->
+                                        <div class="mb-3">
+                                            <div class="box p-2 mb-2 has-background-warning-light"
+                                                data-selection-index="0">
+                                                <div class="level is-mobile">
+                                                    <div class="level-left" style="flex-shrink: 1; min-width: 0;">
+                                                        <div class="level-item">
+                                                            <span class="tag is-small is-info">Introduction</span>
+                                                        </div>
+                                                        <div class="level-item">
+                                                            <strong class="is-size-7">INTRO</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-right" style="flex-shrink: 0;">
+                                                        <div class="level-item">
+                                                            <button class="delete is-small"
+                                                                onclick="window.ContextManager.removeSelection(0)"
+                                                                title="Remove selection"></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="content is-small mt-1">
+                                                    <p class="is-size-7" style="word-break: break-word;">transforms
+                                                        traditional donation processes into a transparent, trackable,
+                                                        and rel...</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="box p-2 mb-2 has-background-warning-light"
+                                                data-selection-index="1">
+                                                <div class="level is-mobile">
+                                                    <div class="level-left" style="flex-shrink: 1; min-width: 0;">
+                                                        <div class="level-item">
+                                                            <span class="tag is-small is-info">Introduction</span>
+                                                        </div>
+                                                        <div class="level-item">
+                                                            <strong class="is-size-7">INTRO</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-right" style="flex-shrink: 0;">
+                                                        <div class="level-item">
+                                                            <button class="delete is-small"
+                                                                onclick="window.ContextManager.removeSelection(1)"
+                                                                title="Remove selection"></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="content is-small mt-1">
+                                                    <p class="is-size-7" style="word-break: break-word;">ion, and
+                                                        coordinated pickup logistics, Tumaini ensures donations reach
+                                                        their int...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Chat Input (Independent) -->
                             <div class="chat-input-container">
                                 <!-- AI Process Status Bar (inside input panel) -->
-                                <div class="ai-process-status htmx-indicator" style="display: none;">
+                                <div class="ai-process-status htmx-indicator" id="ai-process-status"
+                                    style="display: none; visibility: visible;">
                                     <div class="process-content">
                                         <div class="process-info">
                                             <span class="icon has-text-info">
                                                 <i class="fas fa-spinner fa-spin"></i>
                                             </span>
-                                            <span class="process-text">AI is working on your
-                                                request...</span>
+                                            <span class="process-text" id="ai-status-message">AI is processing your
+                                                message...</span>
                                         </div>
-                                        <button class="button is-small is-danger is-outlined"
+                                        <button class="button is-small is-danger is-outlined" id="stop-ai-process"
                                             title="Stop AI processing">
                                             <span class="icon is-small">
                                                 <i class="fas fa-stop"></i>
@@ -674,11 +891,24 @@
                                         </button>
                                     </div>
                                 </div>
-                                <form>
+                                <form hx-post="/api/v1/agencies/UC-CHAR-001/designer/conversations/web"
+                                    hx-target="#chat-messages" hx-swap="innerHTML" hx-indicator="#typing-indicator"
+                                    hx-on::before-request="
+			const input = document.getElementById('user-input');
+			const contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';
+			if (contexts) {
+				input.value = input.value + contexts;
+			}
+		" hx-on::after-request="
+			document.getElementById('user-input').value = ''; 
+			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+		" hx-on::response-error="
+			console.error('CHAT: Response error:', event.detail);
+		">
                                     <div class="field has-addons">
                                         <div class="control is-expanded">
-                                            <input class="input" type="text" name="message"
-                                                placeholder="Describe your requirements..." autocomplete="off">
+                                            <input class="input" type="text" name="message" id="user-input"
+                                                placeholder="Describe your requirements..." required autocomplete="off">
                                         </div>
                                         <div class="control">
                                             <button class="button is-primary" type="submit">
@@ -686,6 +916,18 @@
                                                     <i class="fas fa-paper-plane"></i>
                                                 </span>
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Context indicator -->
+                                    <div id="context-indicator" class="mt-2" style="display: none;">
+                                        <div class="tags">
+                                            <span class="tag is-info is-light">
+                                                <span class="icon is-small">
+                                                    <i class="fas fa-layer-group"></i>
+                                                </span>
+                                                <span id="context-count">0 contexts</span>
+                                            </span>
                                         </div>
                                     </div>
                                 </form>

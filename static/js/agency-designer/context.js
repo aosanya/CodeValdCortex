@@ -51,22 +51,6 @@ if (typeof window !== 'undefined') {
  * Log context state changes
  */
 function logContextStateChange(action, context = null) {
-    console.log('🔄 Context State Changed:', {
-        action: action,
-        totalContexts: contextState.contexts.length,
-        contexts: contextState.contexts.map(ctx => ({
-            id: ctx.id,
-            type: ctx.type,
-            code: ctx.code,
-            contentPreview: ctx.content.substring(0, 50) + '...'
-        })),
-        newContext: context ? {
-            id: context.id,
-            type: context.type,
-            code: context.code
-        } : null
-    });
-
     // Update global reference
     if (typeof window !== 'undefined') {
         window.contextSelections = [...contextState.contexts];
@@ -91,8 +75,6 @@ export const ContextType = {
  * @returns {Context} Context object
  */
 export function createContext(type, code, content, metadata = {}) {
-    console.log('🔨 Creating context:', { type, code, contentLength: content.length });
-
     /** @type {Context} */
     const context = {
         id: contextState.nextId++,
@@ -227,15 +209,6 @@ export function removeContext(contextId) {
 export function removeSelection(index) {
     if (index >= 0 && index < contextState.selections.length) {
         const removed = contextState.selections.splice(index, 1)[0];
-        console.log('🗑️ Selection removed:', {
-            index,
-            removed: {
-                type: removed.type,
-                code: removed.code,
-                text: removed.text.substring(0, 50) + '...'
-            },
-            remaining: contextState.selections.length
-        });
         updateContextDisplay();
         showNotification(`Selection removed: ${removed.type} ${removed.code}`, 'info');
     }
@@ -427,16 +400,6 @@ function escapeHtml(text) {
  * Initialize context selection listeners
  */
 export function initializeContextSelection() {
-    console.log('🚀 Context manager initialized');
-    console.log('📋 Initial context state:', {
-        contexts: contextState.contexts,
-        selections: contextState.selections,
-        globalAccess: {
-            contexts: 'window.contextSelections',
-            selections: 'window.selections'
-        }
-    });
-
     // Listen for text selection (mouseup event)
     document.addEventListener('mouseup', handleTextSelection);
 
@@ -446,8 +409,6 @@ export function initializeContextSelection() {
             hideContextMenu();
         }
     });
-
-    console.log('✅ Context selection listeners attached');
 }/**
  * Handle text selection
  * @param {Event} event - Mouse up event
@@ -456,15 +417,8 @@ function handleTextSelection(event) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
-    console.log('🔍 Text selection detected:', {
-        selectedText: selectedText,
-        length: selectedText.length,
-        target: event.target.tagName
-    });
-
     // Only proceed if there's actual text selected
     if (selectedText.length === 0) {
-        console.log('⚠️ No text selected, hiding context menu');
         hideContextMenu();
         return;
     }
@@ -475,13 +429,6 @@ function handleTextSelection(event) {
     const unitItem = target.closest('[data-unit-code]');
     const agentItem = target.closest('[data-agent-code]');
     const introCard = target.closest('[data-intro-text]');
-
-    console.log('📍 Context area detection:', {
-        isGoal: !!goalItem,
-        isUnit: !!unitItem,
-        isAgent: !!agentItem,
-        isIntro: !!introCard
-    });
 
     if (goalItem || unitItem || agentItem || introCard) {
         // Get the selection range and position
@@ -508,13 +455,6 @@ function handleTextSelection(event) {
             fullText = introCard.getAttribute('data-intro-text');
         }
 
-        console.log('✅ Showing context menu:', {
-            type: contextType,
-            code: code,
-            selectedText: selectedText.substring(0, 50) + '...',
-            position: { top: rect.bottom, left: rect.left }
-        });
-
         // Automatically add selection to pending array
         contextState.selections.push({
             text: selectedText,
@@ -523,24 +463,12 @@ function handleTextSelection(event) {
             timestamp: new Date().toISOString()
         });
 
-        console.log('📋 Selection automatically added:', {
-            count: contextState.selections.length,
-            selections: contextState.selections.map((s, i) => ({
-                index: i,
-                type: s.type,
-                code: s.code,
-                text: s.text.substring(0, 50) + (s.text.length > 50 ? '...' : '')
-            })),
-            globalAccess: 'window.selections'
-        });
-
         // Update display to show the new selection
         updateContextDisplay();
 
         // Show context menu near the selection
         showContextMenu(rect, selectedText, contextType, code);
     } else {
-        console.log('❌ Selection not in a context-selectable area');
         hideContextMenu();
     }
 }
@@ -552,13 +480,6 @@ function handleTextSelection(event) {
  * @param {string} code - Context code
  */
 function showContextMenu(rect, selectedText, contextType, code) {
-    console.log('🎯 Creating context menu:', {
-        type: contextType,
-        code: code,
-        textLength: selectedText.length,
-        position: { top: rect.bottom, left: rect.left }
-    });
-
     // Remove existing menu if any
     hideContextMenu();
 
@@ -577,11 +498,6 @@ function showContextMenu(rect, selectedText, contextType, code) {
         </button>
     `;
 
-    console.log('🎨 Context menu rendered:', {
-        pendingCount,
-        buttonText: `Create Context (${pendingCount})`
-    });
-
     // Position the menu near the selection
     menu.style.position = 'fixed';
     menu.style.top = `${rect.bottom + window.scrollY + 5}px`;
@@ -592,15 +508,6 @@ function showContextMenu(rect, selectedText, contextType, code) {
     menu.querySelector('.create-context-button').addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-
-        console.log('🔨 Creating context with all selections:', {
-            selectionCount: contextState.selections.length,
-            selections: contextState.selections.map(s => ({
-                type: s.type,
-                code: s.code,
-                text: s.text.substring(0, 30) + '...'
-            }))
-        });
 
         // Combine all selections
         const combinedText = contextState.selections.map(s => s.text).join('\n\n---\n\n');
@@ -623,8 +530,6 @@ function showContextMenu(rect, selectedText, contextType, code) {
 
         // Hide menu
         hideContextMenu();
-
-        console.log('✅ Context created with multiple selections, selections cleared');
     });
 
     // Add to document
@@ -661,7 +566,6 @@ if (typeof window !== 'undefined') {
         getSelections: () => contextState.selections,
         clearSelections: () => {
             contextState.selections = [];
-            console.log('🗑️ Selections cleared');
             updateContextDisplay();
         }
     };
@@ -676,6 +580,4 @@ if (typeof window !== 'undefined') {
     // Export direct array references
     window.contextSelections = contextState.contexts;
     window.selections = contextState.selections;
-
-    console.log('✅ Context Manager exported globally');
 }

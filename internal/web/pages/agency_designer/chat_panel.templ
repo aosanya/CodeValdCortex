@@ -151,66 +151,19 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 		}
 		hx-indicator="#typing-indicator"
 		hx-on::before-request="
-			console.log('🚀 CHAT: Sending message...');
-			console.log('📍 CHAT: Target:', '#chat-messages');
-			console.log('🔄 CHAT: Swap strategy:', event.target.getAttribute('hx-swap'));
 			const input = document.getElementById('user-input');
-			console.log('💬 CHAT: Message:', input.value);
 			const contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';
 			if (contexts) {
-				console.log('📎 CHAT: Adding contexts:', contexts);
 				input.value = input.value + contexts;
 			}
 		"
 		hx-on::after-request="
-			console.log('✅ CHAT: Response received');
-			console.log('📦 CHAT: Response status:', event.detail.xhr.status);
-			console.log('📄 CHAT: Response length:', event.detail.xhr.responseText.length);
-			console.log('📝 CHAT: Response HTML:', event.detail.xhr.responseText);
-			const target = document.getElementById('chat-messages');
-			console.log('🎯 CHAT: Target element:', target);
-			console.log('🔍 CHAT: Target innerHTML before swap:', target.innerHTML.substring(0, 200));
-			console.log('📐 CHAT: Container dimensions:', {
-				height: target.offsetHeight,
-				scrollHeight: target.scrollHeight,
-				clientHeight: target.clientHeight,
-				display: window.getComputedStyle(target).display,
-				overflow: window.getComputedStyle(target).overflow
-			});
 			document.getElementById('user-input').value = ''; 
-			target.scrollTop = target.scrollHeight;
-			// Check messages after a brief delay to let HTMX complete
-			setTimeout(() => {
-				const messages = target.querySelectorAll('.message');
-				console.log('💬 CHAT: Message count:', messages.length);
-				if (messages.length > 0) {
-					const firstMsg = messages[0];
-					const styles = window.getComputedStyle(firstMsg);
-					console.log('👁️ CHAT: First message styles:', {
-						display: styles.display,
-						opacity: styles.opacity,
-						visibility: styles.visibility,
-						height: firstMsg.offsetHeight,
-						classes: firstMsg.className
-					});
-				}
-			}, 100);
-		"
-		hx-on::after-swap="
-			console.log('🔄 CHAT: Content swapped successfully');
-			const chatMessages = document.getElementById('chat-messages');
-			console.log('📊 CHAT: Messages in container:', chatMessages.children.length);
-			console.log('🔍 CHAT: Target innerHTML after swap:', chatMessages.innerHTML.substring(0, 200));
-			console.log('💡 CHAT: All children:', Array.from(chatMessages.children).map(c => c.className));
+			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
 		"
 		hx-on::response-error="
-			console.error('❌ CHAT: Response error:', event.detail);
-		"
-		hx-on::before-swap="
-			console.log('🔀 CHAT: About to swap content');
-			console.log('🔀 CHAT: Swap style:', event.detail.shouldSwap);
-			console.log('🔀 CHAT: Target:', event.detail.target);
-		">>>
+			console.error('CHAT: Response error:', event.detail);
+		">
 		
 		<div class="field has-addons">
 			<div class="control is-expanded">
