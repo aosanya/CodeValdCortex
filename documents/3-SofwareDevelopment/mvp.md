@@ -45,6 +45,15 @@
 | MVP-027 | Security Implementation   | Add input validation, HTTPS, and basic security headers    | Not Started | P2       | Medium | Security, Backend Dev | MVP-026      |
 | MVP-028 | Access Control System     | Implement role-based access control for agent operations   | Not Started | P2       | Low    | Backend Dev, Security | MVP-027      |
 
+## Agency Designer (P1 - Critical)
+
+| Task ID | Title                     | Description                                                | Status      | Priority | Effort | Skills Required       | Dependencies |
+| ------- | ------------------------- | ---------------------------------------------------------- | ----------- | -------- | ------ | --------------------- | ------------ |
+| MVP-043 | Work Items UI Module      | Build complete Work Items management UI with CRUD operations, AI refinement, templates, deliverables/dependencies management, and filtering | Not Started | P1       | Medium | Go, Templ, Frontend Dev, HTMX | MVP-029      |
+| MVP-044 | Agent Types UI Module     | Build Agent Types definition and management UI with type catalog, capability specification, taxonomy fields, and templates | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-043      |
+| MVP-045 | RACI Matrix UI Editor     | Build interactive RACI matrix editor with role assignments, validation, templates, and visual matrix interface | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-044      |
+| MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (introduction, goals, work items, agent types, RACI), and batch AI generation | Not Started | P1       | High   | Go, Templ, AI/LLM, Frontend Dev | MVP-045      |
+
 ## Agency Management Feature (P1 - Critical)
 
 *All agency management tasks completed. See `mvp_done.md` for details.*
@@ -2047,6 +2056,866 @@ The new MVP tasks (MVP-030 through MVP-041) implement these comprehensive specif
 2. **Matatu Pilot**: 1-2 SACCOs, 10-15 vehicles, 500-1000 passengers
 3. **Duration**: 4 weeks
 4. **Success Metrics**: >70% active usage, <5% error rate, positive feedback
+
+---
+
+### MVP-043: Work Items UI Module
+
+**Objective**: Build a complete Work Items management interface in the Agency Designer with CRUD operations, AI-powered refinement, smart templates, deliverables and dependencies management, and advanced filtering capabilities.
+
+**Key Deliverables**:
+
+1. **Work Items Data Model**:
+   ```go
+   type WorkItem struct {
+       Key             string            `json:"key"`              // e.g., "WI-001"
+       AgencyID        string            `json:"agency_id"`
+       Title           string            `json:"title"`
+       Description     string            `json:"description"`
+       Type            WorkItemType      `json:"type"`             // Task, Feature, Epic, etc.
+       Priority        Priority          `json:"priority"`         // P0, P1, P2, P3
+       Status          WorkItemStatus    `json:"status"`           // Not Started, In Progress, Done
+       Deliverables    []string          `json:"deliverables"`
+       Dependencies    []string          `json:"dependencies"`     // References to other work item keys
+       EstimatedEffort string            `json:"estimated_effort"` // e.g., "2 weeks", "40 hours"
+       AssignedTo      string            `json:"assigned_to,omitempty"`
+       Tags            []string          `json:"tags,omitempty"`
+       CreatedAt       time.Time         `json:"created_at"`
+       UpdatedAt       time.Time         `json:"updated_at"`
+   }
+   ```
+
+2. **Work Items List View**:
+   - Table/card view of all work items
+   - Filtering by status, priority, type, tags
+   - Search functionality
+   - Sortable columns (priority, status, created date)
+   - Bulk operations (delete, update status)
+   - Quick actions (edit, delete, duplicate)
+   - Color coding by priority and status
+
+3. **Work Item Editor (Modal/Form)**:
+   - Title and description fields
+   - Type selector (Task, Feature, Epic, Bug, Research)
+   - Priority selector (P0-P3)
+   - Status selector with workflow
+   - Deliverables list editor (add/remove/reorder)
+   - Dependencies selector (dropdown of existing work items)
+   - Estimated effort input
+   - Tags input (multi-select or comma-separated)
+   - Auto-generate work item key (WI-001, WI-002, etc.)
+
+4. **AI Refinement Integration** (Following Introduction Card Pattern):
+   ```html
+   <!-- Work Item Editor with AI Sparkle Button -->
+   <div class="box" id="workitem-editor-box">
+     <div id="workitem-content">
+       <div class="field">
+         <label class="label">Description</label>
+         <textarea id="workitem-description" class="textarea" rows="4"></textarea>
+       </div>
+       
+       <div class="field">
+         <label class="label">Deliverables</label>
+         <textarea id="workitem-deliverables" class="textarea" rows="3"></textarea>
+       </div>
+       
+       <div class="buttons is-right">
+         <button class="button is-primary" onclick="saveWorkItem()">
+           <span class="icon"><i class="fas fa-save"></i></span>
+           <span>Save</span>
+         </button>
+         
+         <!-- AI Refine Button (HTMX powered) -->
+         <button class="button is-info"
+                 hx-post="/api/v1/agencies/{id}/work-items/{key}/refine"
+                 hx-include="#workitem-description, #workitem-deliverables"
+                 hx-target="#workitem-content"
+                 hx-indicator="#ai-process-status">
+           <span class="icon"><i class="fas fa-magic"></i></span>
+           <span>Refine with AI</span>
+         </button>
+       </div>
+     </div>
+   </div>
+   ```
+
+5. **Dependencies Visualization**:
+   - Visual dependency graph
+   - Dependency validation (prevent circular dependencies)
+   - Highlight blocking work items
+   - Suggest logical sequencing
+
+6. **Backend Services**:
+   - `WorkItemService` interface and implementation
+   - CRUD operations with agency-scoped access
+   - Auto-numbering for work item keys
+   - Dependency cycle detection
+   - Work item templates management
+
+7. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/work-items
+   POST   /api/v1/agencies/{id}/work-items
+   PUT    /api/v1/agencies/{id}/work-items/{key}
+   DELETE /api/v1/agencies/{id}/work-items/{key}
+   POST   /api/v1/agencies/{id}/work-items/{key}/refine      # AI refinement
+   GET    /api/v1/agencies/{id}/work-items/templates         # Work item templates
+   POST   /api/v1/agencies/{id}/work-items/validate-deps     # Validate dependencies
+   ```
+
+8. **Template System**:
+   - Predefined work item templates by type
+   - Templates include suggested deliverables
+   - Context-aware template suggestions
+   - Save custom templates
+
+**Acceptance Criteria**:
+- [ ] Users can create, edit, and delete work items
+- [ ] Work item keys auto-generate uniquely (WI-001, WI-002, etc.)
+- [ ] Filtering and search work correctly
+- [ ] Dependencies can be added and validated
+- [ ] AI refinement improves descriptions and suggests deliverables
+- [ ] No circular dependencies allowed
+- [ ] Deliverables are editable as list items
+- [ ] Work items are agency-scoped
+- [ ] Real-time validation feedback
+- [ ] Export work items list to CSV/PDF
+
+**Dependencies**: MVP-029 (Goals Module - provides foundation patterns)
+
+---
+
+### MVP-044: Agent Types UI Module
+
+**Objective**: Build a comprehensive Agent Types definition and management interface allowing users to define, categorize, and configure different types of agents that will be used in their agency.
+
+**Key Deliverables**:
+
+1. **Agent Type Data Model**:
+   ```go
+   type AgentType struct {
+       Key              string            `json:"key"`               // e.g., "AT-001"
+       AgencyID         string            `json:"agency_id"`
+       Name             string            `json:"name"`              // e.g., "Sensor Agent"
+       Category         string            `json:"category"`          // Monitor, Controller, Analyzer, etc.
+       Description      string            `json:"description"`
+       Capabilities     []string          `json:"capabilities"`      // List of what this agent can do
+       AutonomyLevel    AutonomyLevel     `json:"autonomy_level"`   // Manual, SemiAutomated, FullyAutomated
+       RequiredSkills   []string          `json:"required_skills,omitempty"`
+       Configuration    map[string]string `json:"configuration,omitempty"` // Key-value config params
+       Icon             string            `json:"icon,omitempty"`    // Font Awesome icon or emoji
+       Color            string            `json:"color,omitempty"`   // For UI visualization
+       CreatedAt        time.Time         `json:"created_at"`
+       UpdatedAt        time.Time         `json:"updated_at"`
+   }
+   
+   type AutonomyLevel string
+   const (
+       ManualControl      AutonomyLevel = "manual"
+       SemiAutomated      AutonomyLevel = "semi_automated"
+       FullyAutomated     AutonomyLevel = "fully_automated"
+   )
+   ```
+
+2. **Agent Types Catalog View**:
+   - Grid/card layout of agent types
+   - Visual representation with icons and colors
+   - Category grouping
+   - Search and filter by category
+   - Quick view of capabilities
+   - Add new agent type button
+
+3. **Agent Type Editor Form**:
+   - Name and description fields
+   - Category selector (Monitor, Controller, Analyzer, Coordinator, Reporter)
+   - Autonomy level selector (Manual, Semi-Automated, Fully Automated)
+   - Capabilities list editor (add/remove capabilities)
+   - Required skills multi-select
+   - Configuration parameters (key-value pairs editor)
+   - Icon picker (emoji or Font Awesome)
+   - Color picker for visual identification
+   - Preview of agent type card
+
+4. **Agent Type Templates**:
+   - Predefined templates for common agent types:
+     * Sensor Agent (monitoring, data collection)
+     * Controller Agent (actuation, control logic)
+     * Analyzer Agent (data analysis, pattern detection)
+     * Coordinator Agent (workflow orchestration)
+     * Reporter Agent (reporting, dashboards)
+   - Template application with customization
+   - Industry-specific templates (water, logistics, healthcare, etc.)
+
+5. **Capability Management**:
+   - Predefined capability library
+   - Custom capability creation
+   - Capability descriptions and examples
+   - Capability validation
+
+6. **Backend Services**:
+   - `AgentTypeService` interface and implementation
+   - CRUD operations with agency-scoped access
+   - Auto-numbering for agent type keys
+   - Template management
+   - Capability library management
+
+7. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/agent-types
+   POST   /api/v1/agencies/{id}/agent-types
+   PUT    /api/v1/agencies/{id}/agent-types/{key}
+   DELETE /api/v1/agencies/{id}/agent-types/{key}
+   GET    /api/v1/agencies/{id}/agent-types/templates       # Agent type templates
+   GET    /api/v1/capabilities                              # Capability library
+   ```
+
+8. **UI Components**:
+   ```html
+   <!-- Agent Type Card in Catalog -->
+   <div class="card agent-type-card" style="border-left: 4px solid {color}">
+     <div class="card-content">
+       <div class="media">
+         <div class="media-left">
+           <span class="icon is-large">{icon}</span>
+         </div>
+         <div class="media-content">
+           <p class="title is-5">{name}</p>
+           <p class="subtitle is-6">{category}</p>
+         </div>
+       </div>
+       <div class="content">
+         <p>{description}</p>
+         <div class="tags">
+           {#each capabilities}
+             <span class="tag is-info">{capability}</span>
+           {/each}
+         </div>
+         <p class="is-size-7">
+           <span class="tag is-light">{autonomy_level}</span>
+         </p>
+       </div>
+     </div>
+     <footer class="card-footer">
+       <a class="card-footer-item" onclick="editAgentType('{key}')">Edit</a>
+       <a class="card-footer-item" onclick="duplicateAgentType('{key}')">Duplicate</a>
+       <a class="card-footer-item has-text-danger" onclick="deleteAgentType('{key}')">Delete</a>
+     </footer>
+   </div>
+   ```
+
+**Acceptance Criteria**:
+- [ ] Users can create, edit, and delete agent types
+- [ ] Agent type keys auto-generate uniquely (AT-001, AT-002, etc.)
+- [ ] Category filtering and search work correctly
+- [ ] Templates can be applied and customized
+- [ ] Capabilities can be added from library or custom created
+- [ ] Icon and color pickers functional
+- [ ] Visual catalog displays agent types clearly
+- [ ] Agent types are agency-scoped
+- [ ] Export agent types catalog to PDF
+- [ ] Validation prevents duplicate names
+
+**Dependencies**: MVP-043 (Work Items UI Module)
+
+---
+
+### MVP-045: RACI Matrix UI Editor
+
+**Objective**: Build an interactive RACI (Responsible, Accountable, Consulted, Informed) matrix editor with visual role assignments, validation rules, templates, and integration with work items.
+
+**Key Deliverables**:
+
+1. **RACI Data Models**:
+   ```go
+   type RACIMatrix struct {
+       Key          string           `json:"key"`
+       AgencyID     string           `json:"agency_id"`
+       WorkItemKey  string           `json:"work_item_key,omitempty"`  // Optional: link to specific work item
+       Name         string           `json:"name"`
+       Activities   []RACIActivity   `json:"activities"`
+       Roles        []string         `json:"roles"`          // List of role names
+       CreatedAt    time.Time        `json:"created_at"`
+       UpdatedAt    time.Time        `json:"updated_at"`
+   }
+
+   type RACIActivity struct {
+       ID          string              `json:"id"`
+       Name        string              `json:"name"`
+       Description string              `json:"description"`
+       Assignments map[string]RACIRole `json:"assignments"` // role_name -> RACI role
+   }
+
+   type RACIRole string
+   const (
+       Responsible RACIRole = "R"  // Does the work
+       Accountable RACIRole = "A"  // Ultimately answerable
+       Consulted   RACIRole = "C"  // Provides input
+       Informed    RACIRole = "I"  // Kept in the loop
+   )
+   ```
+
+2. **Visual RACI Matrix Editor**:
+   ```html
+   <!-- Interactive RACI Matrix -->
+   <div class="raci-matrix-container">
+     <table class="table is-striped is-hoverable is-fullwidth raci-table">
+       <thead>
+         <tr>
+           <th style="width: 30%">Activity</th>
+           <th>Project Manager</th>
+           <th>Tech Lead</th>
+           <th>Developer</th>
+           <th>QA Engineer</th>
+           <th style="width: 80px">Actions</th>
+         </tr>
+       </thead>
+       <tbody>
+         <tr class="activity-row">
+           <td>
+             <strong>Requirements Gathering</strong>
+             <p class="help is-size-7">Define project requirements</p>
+           </td>
+           <td class="role-cell">
+             <div class="raci-selector">
+               <button class="raci-btn" data-role="R">R</button>
+               <button class="raci-btn active" data-role="A">A</button>
+               <button class="raci-btn" data-role="C">C</button>
+               <button class="raci-btn" data-role="I">I</button>
+               <button class="raci-btn-clear" title="Clear">✕</button>
+             </div>
+           </td>
+           <td class="role-cell">
+             <div class="raci-selector">
+               <button class="raci-btn" data-role="R">R</button>
+               <button class="raci-btn" data-role="A">A</button>
+               <button class="raci-btn active" data-role="C">C</button>
+               <button class="raci-btn" data-role="I">I</button>
+               <button class="raci-btn-clear" title="Clear">✕</button>
+             </div>
+           </td>
+           <!-- More role cells -->
+           <td>
+             <div class="buttons are-small">
+               <button class="button is-small" title="Edit"><i class="fas fa-edit"></i></button>
+               <button class="button is-small" title="Delete"><i class="fas fa-trash"></i></button>
+             </div>
+           </td>
+         </tr>
+       </tbody>
+     </table>
+     
+     <div class="buttons">
+       <button class="button is-primary" onclick="addActivity()">
+         <span class="icon"><i class="fas fa-plus"></i></span>
+         <span>Add Activity</span>
+       </button>
+       <button class="button" onclick="addRole()">
+         <span class="icon"><i class="fas fa-user-plus"></i></span>
+         <span>Add Role</span>
+       </button>
+     </div>
+   </div>
+   ```
+
+3. **RACI Validation Engine**:
+   - **Rule 1**: Each activity must have exactly ONE Accountable (A)
+   - **Rule 2**: Each activity must have at least ONE Responsible (R)
+   - **Rule 3**: Warn if no Consulted (C) or Informed (I) roles
+   - Real-time validation with visual feedback
+   - Validation error display with specific guidance
+   - Prevent saving invalid RACI matrices
+
+4. **Role Management**:
+   - Add/remove roles dynamically
+   - Rename roles
+   - Role descriptions
+   - Default roles template (Project Manager, Tech Lead, Developer, QA, etc.)
+
+5. **Activity Management**:
+   - Add/remove activities
+   - Edit activity name and description
+   - Reorder activities (drag-and-drop)
+   - Activity templates by work item type
+   - Import activities from work items
+
+6. **RACI Templates**:
+   - Predefined templates for common scenarios:
+     * Software Development Project
+     * Research & Analysis
+     * Infrastructure Deployment
+     * Testing & QA
+     * Change Management
+   - Template application with customization
+   - Save custom templates for reuse
+
+7. **Backend Services**:
+   - `RACIService` interface and implementation
+   - CRUD operations for RACI matrices
+   - Validation service with detailed error reporting
+   - Template management service
+   - Export service (PDF, Excel)
+
+8. **API Endpoints**:
+   ```
+   GET    /api/v1/agencies/{id}/raci-matrices
+   POST   /api/v1/agencies/{id}/raci-matrices
+   PUT    /api/v1/agencies/{id}/raci-matrices/{key}
+   DELETE /api/v1/agencies/{id}/raci-matrices/{key}
+   POST   /api/v1/agencies/{id}/raci-matrices/{key}/validate # Validate matrix
+   GET    /api/v1/agencies/{id}/raci-templates               # RACI templates
+   POST   /api/v1/agencies/{id}/raci-matrices/{key}/export   # Export to PDF/Excel
+   ```
+
+9. **Validation Feedback UI**:
+   ```html
+   <!-- Validation Summary -->
+   <div class="notification is-warning" id="raci-validation-warnings">
+     <p class="has-text-weight-bold">⚠️ RACI Validation Issues:</p>
+     <ul>
+       <li>Activity "Design Architecture" has no Accountable (A) role assigned</li>
+       <li>Activity "Code Review" has multiple Accountable (A) roles</li>
+       <li>Activity "Testing" has no Responsible (R) role</li>
+     </ul>
+     <p class="help mt-2">
+       Fix these issues before saving. Each activity must have exactly one Accountable 
+       and at least one Responsible role.
+     </p>
+   </div>
+   ```
+
+10. **Export Functionality**:
+    - Export to PDF with formatted table
+    - Export to Excel/CSV
+    - Include validation status in export
+    - Professional formatting
+
+**Acceptance Criteria**:
+- [ ] Users can create and edit RACI matrices
+- [ ] Click-to-assign RACI roles works smoothly
+- [ ] Real-time validation enforces RACI rules
+- [ ] Visual feedback for validation errors
+- [ ] Activities and roles can be added/removed dynamically
+- [ ] Templates can be applied and customized
+- [ ] Export to PDF and Excel works correctly
+- [ ] RACI matrices can be linked to work items
+- [ ] Role descriptions are editable
+- [ ] Drag-and-drop reordering of activities
+- [ ] RACI matrices are agency-scoped
+- [ ] Color coding for different RACI roles
+
+**Dependencies**: MVP-044 (Agent Types UI Module)
+
+---
+
+### MVP-042: AI-Powered Agency Creator
+
+**Objective**: Implement a comprehensive AI-driven agency creation flow that allows users to upload text documents (RFPs, SOWs, specifications), select which agency design areas to generate, and batch-generate complete agency designs including introduction, goals, work items, agent types, and RACI matrices.
+
+**Key Deliverables**:
+
+1. **Text Upload & Parsing**:
+   - File upload interface (PDF, DOCX, TXT, MD)
+   - Text extraction and preprocessing
+   - Document structure analysis
+   - Context extraction for AI prompts
+   ```go
+   type SourceDocument struct {
+       DocumentID   string    `json:"document_id"`
+       Filename     string    `json:"filename"`
+       ContentType  string    `json:"content_type"`
+       TextContent  string    `json:"text_content"`
+       UploadedAt   time.Time `json:"uploaded_at"`
+       ProcessedAt  time.Time `json:"processed_at"`
+   }
+   ```
+
+2. **Generation Selection Interface**:
+   - Checkbox-based selection for generation areas:
+     * ☑️ Introduction (background, purpose, scope)
+     * ☑️ Goals (structured goal catalog with SMART format)
+     * ☑️ Work Items (breakdown with deliverables, dependencies)
+     * ☑️ Agent Types (roles, capabilities, specifications)
+     * ☑️ RACI Matrix (responsibility assignments)
+   - Preview available source text
+   - Configure generation parameters (detail level, formality, etc.)
+   - Batch or individual generation modes
+
+3. **AI Generation Engine**:
+   ```go
+   type GenerationRequest struct {
+       AgencyID     string              `json:"agency_id"`
+       SourceText   string              `json:"source_text"`
+       Areas        []GenerationArea    `json:"areas"`
+       Options      GenerationOptions   `json:"options"`
+   }
+
+   type GenerationArea string
+   const (
+       AreaIntroduction GenerationArea = "introduction"
+       AreaGoals        GenerationArea = "goals"
+       AreaWorkItems    GenerationArea = "work_items"
+       AreaAgentTypes   GenerationArea = "agent_types"
+       AreaRACIMatrix   GenerationArea = "raci_matrix"
+   )
+
+   type GenerationOptions struct {
+       DetailLevel  string `json:"detail_level"` // brief, standard, detailed
+       Formality    string `json:"formality"`    // casual, professional, formal
+       AgencyType   string `json:"agency_type"`  // context for generation
+   }
+   ```
+
+4. **Batch AI Processing**:
+   - Parallel generation of selected areas
+   - Progress tracking for each area
+   - Error handling and retry logic
+   - Streaming results as they complete
+   - Validation of generated content
+
+5. **Generated Content Review & Edit**:
+   - Side-by-side view: Source text | Generated content
+   - Edit generated content before saving
+   - Regenerate individual sections
+   - Accept/reject individual items
+   - Bulk operations (accept all, reject all)
+
+6. **Agency Design Organization**:
+   - Separate tabs/sections in Agency Designer:
+     * 📄 Introduction
+     * 🎯 Goals
+     * 📋 Work Items
+     * 🤖 Agent Types
+     * 📊 RACI Matrix
+   - Navigation between sections
+   - Completion indicators per section
+   - Save progress at any point
+
+7. **Integration with Existing Modules**:
+   - Reuse Introduction module (MVP-025 - completed)
+   - Reuse Goals module (MVP-029 - completed)
+   - Integrate with Work Items module (MVP-030)
+   - Connect to Agent Types system
+   - Link to RACI Matrix editor (MVP-033)
+
+8. **API Endpoints**:
+   ```
+   POST   /api/v1/agencies/{id}/upload-document
+   POST   /api/v1/agencies/{id}/generate/batch
+   GET    /api/v1/agencies/{id}/generation-status
+   POST   /api/v1/agencies/{id}/generate/introduction
+   POST   /api/v1/agencies/{id}/generate/goals
+   POST   /api/v1/agencies/{id}/generate/work-items
+   POST   /api/v1/agencies/{id}/generate/agent-types
+   POST   /api/v1/agencies/{id}/generate/raci-matrix
+   ```
+
+**UI Components**:
+
+```html
+<!-- Agency Creation Wizard -->
+<div class="agency-creator-wizard">
+  <!-- Step 1: Upload Source Document -->
+  <div class="wizard-step" id="step-upload">
+    <h2 class="title is-4">Step 1: Upload Source Document</h2>
+    <div class="file has-name is-fullwidth">
+      <label class="file-label">
+        <input class="file-input" type="file" 
+               accept=".pdf,.doc,.docx,.txt,.md"
+               id="source-document">
+        <span class="file-cta">
+          <span class="file-icon">📁</span>
+          <span class="file-label">Choose a file…</span>
+        </span>
+        <span class="file-name" id="filename">
+          No file selected
+        </span>
+      </label>
+    </div>
+    <div class="notification is-info is-light mt-4">
+      <p><strong>Tip:</strong> Upload an RFP, SOW, specification document, 
+         or any text describing your agency's purpose and requirements.</p>
+    </div>
+    
+    <!-- Document Preview -->
+    <div class="box mt-4" id="document-preview" style="display: none;">
+      <h3 class="subtitle is-6">Document Preview</h3>
+      <div class="content preview-text" style="max-height: 300px; overflow-y: auto;">
+        <!-- Extracted text shown here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Select Generation Areas -->
+  <div class="wizard-step" id="step-select">
+    <h2 class="title is-4">Step 2: Select What to Generate</h2>
+    <div class="box">
+      <label class="checkbox is-block mb-3">
+        <input type="checkbox" name="areas" value="introduction" checked>
+        <strong>📄 Introduction</strong>
+        <p class="help">Generate agency background, purpose, and scope</p>
+      </label>
+      
+      <label class="checkbox is-block mb-3">
+        <input type="checkbox" name="areas" value="goals" checked>
+        <strong>🎯 Goals</strong>
+        <p class="help">Generate structured SMART goals catalog</p>
+      </label>
+      
+      <label class="checkbox is-block mb-3">
+        <input type="checkbox" name="areas" value="work_items" checked>
+        <strong>📋 Work Items</strong>
+        <p class="help">Generate work breakdown with deliverables and dependencies</p>
+      </label>
+      
+      <label class="checkbox is-block mb-3">
+        <input type="checkbox" name="areas" value="agent_types">
+        <strong>🤖 Agent Types</strong>
+        <p class="help">Generate agent roles and specifications</p>
+      </label>
+      
+      <label class="checkbox is-block mb-3">
+        <input type="checkbox" name="areas" value="raci_matrix">
+        <strong>📊 RACI Matrix</strong>
+        <p class="help">Generate responsibility assignments</p>
+      </label>
+    </div>
+    
+    <!-- Generation Options -->
+    <div class="box mt-4">
+      <h3 class="subtitle is-6">Generation Options</h3>
+      <div class="field">
+        <label class="label">Detail Level</label>
+        <div class="control">
+          <div class="select">
+            <select name="detail_level">
+              <option value="brief">Brief</option>
+              <option value="standard" selected>Standard</option>
+              <option value="detailed">Detailed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label class="label">Formality</label>
+        <div class="control">
+          <div class="select">
+            <select name="formality">
+              <option value="casual">Casual</option>
+              <option value="professional" selected>Professional</option>
+              <option value="formal">Formal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Generation Progress -->
+  <div class="wizard-step" id="step-generate">
+    <h2 class="title is-4">Step 3: Generating Your Agency Design</h2>
+    
+    <div class="generation-progress">
+      <!-- Introduction -->
+      <div class="box generation-item" data-area="introduction">
+        <div class="level">
+          <div class="level-left">
+            <div class="level-item">
+              <span class="icon"><i class="fas fa-file-alt"></i></span>
+            </div>
+            <div class="level-item">
+              <strong>Introduction</strong>
+            </div>
+          </div>
+          <div class="level-right">
+            <div class="level-item">
+              <span class="tag is-warning">In Progress</span>
+              <span class="icon ml-2">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <progress class="progress is-small is-primary" value="65" max="100">65%</progress>
+      </div>
+      
+      <!-- Goals -->
+      <div class="box generation-item" data-area="goals">
+        <div class="level">
+          <div class="level-left">
+            <div class="level-item">
+              <span class="icon"><i class="fas fa-bullseye"></i></span>
+            </div>
+            <div class="level-item">
+              <strong>Goals</strong>
+            </div>
+          </div>
+          <div class="level-right">
+            <div class="level-item">
+              <span class="tag is-success">Complete</span>
+              <span class="icon ml-2 has-text-success">
+                <i class="fas fa-check-circle"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Work Items -->
+      <div class="box generation-item" data-area="work_items">
+        <div class="level">
+          <div class="level-left">
+            <div class="level-item">
+              <span class="icon"><i class="fas fa-tasks"></i></span>
+            </div>
+            <div class="level-item">
+              <strong>Work Items</strong>
+            </div>
+          </div>
+          <div class="level-right">
+            <div class="level-item">
+              <span class="tag is-light">Waiting</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Review & Edit -->
+  <div class="wizard-step" id="step-review">
+    <h2 class="title is-4">Step 4: Review & Edit Generated Content</h2>
+    
+    <div class="tabs is-boxed">
+      <ul>
+        <li class="is-active"><a data-tab="introduction">📄 Introduction</a></li>
+        <li><a data-tab="goals">🎯 Goals</a></li>
+        <li><a data-tab="work-items">📋 Work Items</a></li>
+        <li><a data-tab="agent-types">🤖 Agent Types</a></li>
+        <li><a data-tab="raci">📊 RACI Matrix</a></li>
+      </ul>
+    </div>
+    
+    <div class="tab-content">
+      <div class="columns">
+        <div class="column">
+          <h3 class="subtitle is-6">Source Text</h3>
+          <div class="box source-text" style="max-height: 500px; overflow-y: auto;">
+            <!-- Original text shown here -->
+          </div>
+        </div>
+        <div class="column">
+          <h3 class="subtitle is-6">Generated Content</h3>
+          <div class="box generated-content" style="max-height: 500px; overflow-y: auto;">
+            <!-- Generated content shown here (editable) -->
+            <div class="buttons">
+              <button class="button is-small is-primary">
+                <span class="icon"><i class="fas fa-save"></i></span>
+                <span>Save Changes</span>
+              </button>
+              <button class="button is-small is-warning">
+                <span class="icon"><i class="fas fa-sync"></i></span>
+                <span>Regenerate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wizard Navigation -->
+  <div class="wizard-navigation buttons is-right mt-5">
+    <button class="button" id="btn-prev">
+      <span class="icon"><i class="fas fa-arrow-left"></i></span>
+      <span>Previous</span>
+    </button>
+    <button class="button is-primary" id="btn-next">
+      <span>Next</span>
+      <span class="icon"><i class="fas fa-arrow-right"></i></span>
+    </button>
+    <button class="button is-success" id="btn-finish" style="display: none;">
+      <span class="icon"><i class="fas fa-check"></i></span>
+      <span>Finish & Save Agency</span>
+    </button>
+  </div>
+</div>
+```
+
+**Backend Services**:
+
+```go
+// AIAgencyGeneratorService
+type AIAgencyGeneratorService interface {
+    UploadDocument(ctx context.Context, agencyID string, file io.Reader, filename string) (*SourceDocument, error)
+    GenerateBatch(ctx context.Context, req GenerationRequest) (*GenerationResult, error)
+    GenerateIntroduction(ctx context.Context, agencyID, sourceText string, opts GenerationOptions) (string, error)
+    GenerateGoals(ctx context.Context, agencyID, sourceText string, opts GenerationOptions) ([]Goal, error)
+    GenerateWorkItems(ctx context.Context, agencyID, sourceText string, opts GenerationOptions) ([]WorkItem, error)
+    GenerateAgentTypes(ctx context.Context, agencyID, sourceText string, opts GenerationOptions) ([]AgentType, error)
+    GenerateRACIMatrix(ctx context.Context, agencyID, sourceText string, workItems []WorkItem, opts GenerationOptions) (*RACIMatrix, error)
+    GetGenerationStatus(ctx context.Context, agencyID, generationID string) (*GenerationStatus, error)
+}
+
+// Document processing utilities
+type DocumentProcessor interface {
+    ExtractText(file io.Reader, contentType string) (string, error)
+    AnalyzeStructure(text string) (*DocumentStructure, error)
+    ChunkForAI(text string, maxTokens int) ([]string, error)
+}
+```
+
+**AI Prompt Templates**:
+
+Each generation area should have specialized prompts:
+
+1. **Introduction Generation**:
+   - Extract background, purpose, scope
+   - Identify stakeholders
+   - Determine success criteria
+
+2. **Goals Generation**:
+   - Extract objectives from source
+   - Structure as SMART goals
+   - Categorize by type (Efficiency, Quality, Innovation, etc.)
+
+3. **Work Items Generation**:
+   - Break down into actionable items
+   - Generate deliverables per item
+   - Identify dependencies
+   - Estimate effort
+
+4. **Agent Types Generation**:
+   - Identify required roles
+   - Define capabilities per role
+   - Specify autonomy levels
+   - Determine communication patterns
+
+5. **RACI Matrix Generation**:
+   - Map work items to activities
+   - Assign roles to activities
+   - Ensure RACI validation rules
+
+**Acceptance Criteria**:
+- [ ] Document upload supports PDF, DOCX, TXT, MD formats
+- [ ] Text extraction works correctly for all formats
+- [ ] Checkbox selection allows any combination of areas
+- [ ] Batch generation processes multiple areas in parallel
+- [ ] Progress tracking shows real-time status
+- [ ] Generated content is editable before saving
+- [ ] Regeneration of individual areas works
+- [ ] Side-by-side comparison view functional
+- [ ] All generated content validates against schemas
+- [ ] Agency Designer organized into clear sections
+- [ ] Navigation between sections smooth
+- [ ] Integration with existing modules seamless
+- [ ] Error handling and retry logic robust
+- [ ] Generation completes within reasonable time (<2 min per area)
+
+**Dependencies**: MVP-029 (Goals Module - completed)
+
+**Reference**: See existing introduction and goals modules for integration patterns
 
 ---
 
