@@ -37,8 +37,8 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 				<div id="content-goal-definition" class="overview-content-section" style="display: none;">
 					@GoalDefinitionContent(currentAgency, conversation)
 				</div>
-				<div id="content-units-of-work" class="overview-content-section" style="display: none;">
-					@UnitsOfWorkContent(currentAgency, conversation)
+				<div id="content-work-items" class="overview-content-section" style="display: none;">
+					@WorkItemsContent(currentAgency, conversation)
 				</div>
 			</div>
 		</main>
@@ -77,12 +77,12 @@ templ OverviewNavigationList() {
 		<div 
 			class="overview-nav-item"
 			data-section="units-of-work"
-			onclick="selectOverviewSection(this, 'units-of-work')">
+			onclick="selectOverviewSection(this, 'work-items')">
 			<div class="nav-icon">
 				<i class="fas fa-clipboard-list"></i>
 			</div>
 			<div class="nav-info">
-				<div class="nav-name">Units of Work</div>
+				<div class="nav-name">Work Items</div>
 				<div class="nav-description">Define work items</div>
 			</div>
 		</div>
@@ -147,10 +147,53 @@ templ GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conve
 	</div>
 }
 
-// UnitsOfWorkContent shows the units of work section
-templ UnitsOfWorkContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+// WorkItemsContent shows the work items section
+templ WorkItemsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		@UnitOfWorkEditorCard()
-		@UnitsOfWorkListCard()
+		<!-- AI Work Item Operations Toolbar -->
+		<div class="box mb-4 p-4">
+			<div class="level is-mobile">
+				<div class="level-left">
+					<div class="level-item">
+						<p class="has-text-weight-semibold">AI Work Item Operations:</p>
+					</div>
+				</div>
+				<div class="level-right">
+					<div class="level-item">
+						<div class="buttons">
+							<button 
+								class="button is-small is-info"
+								onclick="processAIWorkItemOperation(['create'])"
+								id="ai-create-work-items-btn"
+								title="Generate work items from goals">
+								<span class="icon"><i class="fas fa-sparkles"></i></span>
+								<span>Create Work Items</span>
+							</button>
+							<button 
+								class="button is-small is-link is-static"
+								onclick="processAIWorkItemOperation(['enhance'])"
+								id="ai-enhance-work-items-btn"
+								title="Select work items to enhance"
+								disabled>
+								<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+								<span>Enhance Work Items</span>
+							</button>
+							<button 
+								class="button is-small is-warning is-static"
+								onclick="processAIWorkItemOperation(['consolidate'])"
+								id="ai-consolidate-work-items-btn"
+								title="Select work items to consolidate"
+								disabled>
+								<span class="icon"><i class="fas fa-compress"></i></span>
+								<span>Consolidate Work Items</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		@WorkItemEditorCard()
+		@WorkItemsListCard()
 	</div>
 }

@@ -23,15 +23,6 @@ templ WorkItemItem(workItem *agency.WorkItem) {
 			<span class="tag is-light">{ getWorkItemTypeLabel(workItem.Type) }</span>
 		</td>
 		<td style="vertical-align: middle;">
-			<span class={ getPriorityClass(workItem.Priority) }>{ string(workItem.Priority) }</span>
-		</td>
-		<td style="vertical-align: middle;">
-			<span class={ getStatusClass(workItem.Status) }>{ getStatusLabel(workItem.Status) }</span>
-		</td>
-		<td style="vertical-align: middle;">
-			<span class="has-text-grey-dark">{ workItem.EstimatedEffort }</span>
-		</td>
-		<td style="vertical-align: middle;">
 			<div class="buttons">
 				<button 
 					class="button is-small is-light is-fullwidth"
@@ -63,7 +54,7 @@ templ WorkItemItem(workItem *agency.WorkItem) {
 templ WorkItemsList(workItems []*agency.WorkItem) {
 	if len(workItems) == 0 {
 		<tr>
-			<td colspan="7" class="has-text-grey has-text-centered py-5">
+			<td colspan="4" class="has-text-grey has-text-centered py-5">
 				<p><i class="fas fa-info-circle"></i> No work items defined yet. Click the + button to add one.</p>
 			</td>
 		</tr>

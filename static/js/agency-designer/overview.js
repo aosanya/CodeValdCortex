@@ -33,7 +33,7 @@ export function selectOverviewSection(element, section) {
     const titles = {
         'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
         'goal-definition': '<span class="icon"><i class="fas fa-bullseye"></i></span><span>Goal Definition</span>',
-        'units-of-work': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Units of Work</span>'
+        'work-items': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Work Items</span>'
     };
 
     if (titles[section] && overviewTitle) {
