@@ -378,6 +378,14 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/goals/:goalKey", agencyHandler.UpdateGoal)
 		v1.DELETE("/agencies/:id/goals/:goalKey", agencyHandler.DeleteGoal)
 
+		// Work Items endpoints
+		v1.GET("/agencies/:id/work-items", agencyHandler.GetWorkItems)
+		v1.GET("/agencies/:id/work-items/html", agencyHandler.GetWorkItemsHTML)
+		v1.POST("/agencies/:id/work-items", agencyHandler.CreateWorkItem)
+		v1.PUT("/agencies/:id/work-items/:key", agencyHandler.UpdateWorkItem)
+		v1.DELETE("/agencies/:id/work-items/:key", agencyHandler.DeleteWorkItem)
+		v1.POST("/agencies/:id/work-items/validate-deps", agencyHandler.ValidateWorkItemDependencies)
+
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {
 			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.aiDesignerService, a.logger)
