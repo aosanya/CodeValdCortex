@@ -1,0 +1,137 @@
+package agency_designer
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// WorkItemItem renders a single work item in the list as a table row
+templ WorkItemItem(workItem *agency.WorkItem) {
+	<tr 
+		class="table-item" 
+		data-item-key={ workItem.Key }
+		data-type={ string(workItem.Type) }
+		data-priority={ string(workItem.Priority) }
+		data-status={ string(workItem.Status) }>
+		<td style="vertical-align: middle;">
+			<span class="tag is-info">{ workItem.Key }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class="has-text-weight-semibold">{ workItem.Title }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class="tag is-light">{ getWorkItemTypeLabel(workItem.Type) }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class={ getPriorityClass(workItem.Priority) }>{ string(workItem.Priority) }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class={ getStatusClass(workItem.Status) }>{ getStatusLabel(workItem.Status) }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class="has-text-grey-dark">{ workItem.EstimatedEffort }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<div class="buttons">
+				<button 
+					class="button is-small is-light is-fullwidth"
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("window.ContextManager.addWorkItemContext('%s', '%s')", workItem.Key, templ.EscapeString(workItem.Title))} }
+					title="Add to context">
+					<span class="icon"><i class="fas fa-layer-group"></i></span>
+					<span>Context</span>
+				</button>
+				<button 
+					class="button is-small is-info is-fullwidth" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("showWorkItemEditor('edit', '%s')", workItem.Key)} }
+					title="Edit">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+					<span>Edit</span>
+				</button>
+				<button 
+					class="button is-small is-danger is-fullwidth" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteWorkItem('%s')", workItem.Key)} }
+					title="Delete">
+					<span class="icon"><i class="fas fa-trash"></i></span>
+					<span>Delete</span>
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// WorkItemsList renders all work items as table rows
+templ WorkItemsList(workItems []*agency.WorkItem) {
+	if len(workItems) == 0 {
+		<tr>
+			<td colspan="7" class="has-text-grey has-text-centered py-5">
+				<p><i class="fas fa-info-circle"></i> No work items defined yet. Click the + button to add one.</p>
+			</td>
+		</tr>
+	} else {
+		for _, workItem := range workItems {
+			@WorkItemItem(workItem)
+		}
+	}
+}
+
+// Helper function to get work item type label
+func getWorkItemTypeLabel(workItemType agency.WorkItemType) string {
+	switch workItemType {
+	case agency.WorkItemTypeTask:
+		return "Task"
+	case agency.WorkItemTypeFeature:
+		return "Feature"
+	case agency.WorkItemTypeEpic:
+		return "Epic"
+	case agency.WorkItemTypeBug:
+		return "Bug"
+	case agency.WorkItemTypeResearch:
+		return "Research"
+	default:
+		return string(workItemType)
+	}
+}
+
+// Helper function to get priority badge class
+func getPriorityClass(priority agency.WorkItemPriority) string {
+	switch priority {
+	case agency.WorkItemPriorityP0:
+		return "tag is-danger"
+	case agency.WorkItemPriorityP1:
+		return "tag is-warning"
+	case agency.WorkItemPriorityP2:
+		return "tag is-info"
+	case agency.WorkItemPriorityP3:
+		return "tag is-light"
+	default:
+		return "tag is-light"
+	}
+}
+
+// Helper function to get status badge class
+func getStatusClass(status agency.WorkItemStatus) string {
+	switch status {
+	case agency.WorkItemStatusNotStarted:
+		return "tag is-light"
+	case agency.WorkItemStatusInProgress:
+		return "tag is-link"
+	case agency.WorkItemStatusDone:
+		return "tag is-success"
+	default:
+		return "tag is-light"
+	}
+}
+
+// Helper function to get status label
+func getStatusLabel(status agency.WorkItemStatus) string {
+	switch status {
+	case agency.WorkItemStatusNotStarted:
+		return "Not Started"
+	case agency.WorkItemStatusInProgress:
+		return "In Progress"
+	case agency.WorkItemStatusDone:
+		return "Done"
+	default:
+		return string(status)
+	}
+}

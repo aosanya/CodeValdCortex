@@ -27,6 +27,7 @@ func NewAgencyHandler(service agency.Service) *AgencyHandler {
 func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 	agencies := router.Group("/agencies")
 	{
+		// Core agency routes
 		agencies.GET("", h.ListAgencies)
 		agencies.POST("", h.CreateAgency)
 		agencies.GET("/:id", h.GetAgency)
@@ -35,8 +36,32 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.POST("/:id/activate", h.ActivateAgency)
 		agencies.GET("/active", h.GetActiveAgency)
 		agencies.GET("/:id/statistics", h.GetAgencyStatistics)
+
+		// Overview routes
 		agencies.GET("/:id/overview", h.GetOverview)
 		agencies.PUT("/:id/overview", h.UpdateOverview)
+
+		// Goals routes
+		agencies.GET("/:id/goals", h.GetGoals)
+		agencies.GET("/:id/goals/html", h.GetGoalsHTML)
+		agencies.POST("/:id/goals", h.CreateGoal)
+		agencies.PUT("/:id/goals/:goalKey", h.UpdateGoal)
+		agencies.DELETE("/:id/goals/:goalKey", h.DeleteGoal)
+
+		// Units of work routes (legacy, being replaced by work items)
+		agencies.GET("/:id/units", h.GetUnitsOfWork)
+		agencies.GET("/:id/units/html", h.GetUnitsOfWorkHTML)
+		agencies.POST("/:id/units", h.CreateUnitOfWork)
+		agencies.PUT("/:id/units/:unitKey", h.UpdateUnitOfWork)
+		agencies.DELETE("/:id/units/:unitKey", h.DeleteUnitOfWork)
+
+		// Work items routes (new)
+		agencies.GET("/:id/work-items", h.GetWorkItems)
+		agencies.GET("/:id/work-items/html", h.GetWorkItemsHTML)
+		agencies.POST("/:id/work-items", h.CreateWorkItem)
+		agencies.PUT("/:id/work-items/:key", h.UpdateWorkItem)
+		agencies.DELETE("/:id/work-items/:key", h.DeleteWorkItem)
+		agencies.POST("/:id/work-items/validate-deps", h.ValidateWorkItemDependencies)
 	}
 }
 
