@@ -38,11 +38,11 @@ func (h *Handler) ConsolidateGoals(c *gin.Context) {
 		return
 	}
 
-	// Get units of work for context
-	units, err := h.agencyService.GetUnitsOfWork(c.Request.Context(), agencyID)
+	// Get work items for context
+	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Warn("Failed to get units of work, continuing without them")
-		units = []*agency.UnitOfWork{}
+		h.logger.WithError(err).Warn("Failed to get work items, continuing without them")
+		workItems = []*agency.WorkItem{}
 	}
 
 	// Perform consolidation
@@ -50,7 +50,7 @@ func (h *Handler) ConsolidateGoals(c *gin.Context) {
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		CurrentGoals:  goals,
-		UnitsOfWork:   units,
+		WorkItems:     workItems,
 	}
 
 	result, err := h.goalConsolidator.ConsolidateGoals(c.Request.Context(), consolidationReq)

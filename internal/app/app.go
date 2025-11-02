@@ -377,11 +377,6 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/goals", agencyHandler.CreateGoal)
 		v1.PUT("/agencies/:id/goals/:goalKey", agencyHandler.UpdateGoal)
 		v1.DELETE("/agencies/:id/goals/:goalKey", agencyHandler.DeleteGoal)
-		v1.GET("/agencies/:id/units", agencyHandler.GetUnitsOfWork)
-		v1.GET("/agencies/:id/units/html", agencyHandler.GetUnitsOfWorkHTML)
-		v1.POST("/agencies/:id/units", agencyHandler.CreateUnitOfWork)
-		v1.PUT("/agencies/:id/units/:unitKey", agencyHandler.UpdateUnitOfWork)
-		v1.DELETE("/agencies/:id/units/:unitKey", agencyHandler.DeleteUnitOfWork)
 
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {

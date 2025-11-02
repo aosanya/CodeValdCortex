@@ -111,7 +111,7 @@ func (h *AgencyHandler) ValidateWorkItemDependencies(c *gin.Context) {
 	}
 
 	err := h.service.ValidateWorkItemDependencies(c.Request.Context(), id, req.WorkItemKey, req.Dependencies)
-	
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"valid": false,
@@ -119,7 +119,7 @@ func (h *AgencyHandler) ValidateWorkItemDependencies(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"valid": true,
 	})

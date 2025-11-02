@@ -33,11 +33,4 @@ type Repository interface {
 	UpdateWorkItem(ctx context.Context, workItem *WorkItem) error
 	DeleteWorkItem(ctx context.Context, agencyID string, key string) error
 	ValidateDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error
-
-	// UnitOfWork methods
-	CreateUnitOfWork(ctx context.Context, unit *UnitOfWork) error
-	GetUnitsOfWork(ctx context.Context, agencyID string) ([]*UnitOfWork, error)
-	GetUnitOfWork(ctx context.Context, agencyID string, key string) (*UnitOfWork, error)
-	UpdateUnitOfWork(ctx context.Context, unit *UnitOfWork) error
-	DeleteUnitOfWork(ctx context.Context, agencyID string, key string) error
 }

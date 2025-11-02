@@ -26,11 +26,11 @@ func NewIntroductionRefiner(llmClient LLMClient, logger *logrus.Logger) *Introdu
 
 // RefineIntroductionRequest contains the context for refining an introduction
 type RefineIntroductionRequest struct {
-	AgencyID      string               `json:"agency_id"`
-	CurrentIntro  string               `json:"current_introduction"`
-	Goals         []*agency.Goal       `json:"goals"`
-	UnitsOfWork   []*agency.UnitOfWork `json:"units_of_work"`
-	AgencyContext *agency.Agency       `json:"agency_context"`
+	AgencyID      string             `json:"agency_id"`
+	CurrentIntro  string             `json:"current_introduction"`
+	Goals         []*agency.Goal     `json:"goals"`
+	WorkItems     []*agency.WorkItem `json:"work_items"`
+	AgencyContext *agency.Agency     `json:"agency_context"`
 }
 
 // RefineIntroductionResponse contains the AI-refined introduction
@@ -53,7 +53,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 		"agency_id":           req.AgencyID,
 		"current_intro_chars": len(req.CurrentIntro),
 		"goals_count":         len(req.Goals),
-		"units_count":         len(req.UnitsOfWork),
+		"work_items_count":    len(req.WorkItems),
 	}).Info("Starting introduction refinement")
 
 	// Build comprehensive prompt with all context
@@ -159,13 +159,13 @@ func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionReque
 	}
 	prompt.WriteString("\n")
 
-	// Units of work
-	prompt.WriteString("**UNITS OF WORK:**\n")
-	if len(req.UnitsOfWork) == 0 {
-		prompt.WriteString("(No units of work defined yet)\n")
+	// Work items
+	prompt.WriteString("**WORK ITEMS:**\n")
+	if len(req.WorkItems) == 0 {
+		prompt.WriteString("(No work items defined yet)\n")
 	} else {
-		for i, unit := range req.UnitsOfWork {
-			prompt.WriteString(fmt.Sprintf("%d. **%s**: %s\n", i+1, unit.Code, unit.Description))
+		for i, workItem := range req.WorkItems {
+			prompt.WriteString(fmt.Sprintf("%d. **%s**: %s\n", i+1, workItem.Code, workItem.Title))
 		}
 	}
 	prompt.WriteString("\n")

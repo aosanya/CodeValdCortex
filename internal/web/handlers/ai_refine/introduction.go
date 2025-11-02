@@ -64,10 +64,10 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	// Get all units of work for context
-	unitsOfWork, err := h.agencyService.GetUnitsOfWork(c.Request.Context(), agencyID)
+	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch units of work, continuing without them")
-		unitsOfWork = []*agency.UnitOfWork{}
+		workItems = []*agency.WorkItem{}
 	}
 
 	// Build refinement request
@@ -75,7 +75,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		AgencyID:      agencyID,
 		CurrentIntro:  currentIntroduction,
 		Goals:         goals,
-		UnitsOfWork:   unitsOfWork,
+		WorkItems:   workItems,
 		AgencyContext: ag,
 	}
 

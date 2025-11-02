@@ -26,14 +26,14 @@ func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *GoalRefiner {
 
 // RefineGoalRequest contains the context for refining a goal
 type RefineGoalRequest struct {
-	AgencyID       string               `json:"agency_id"`
-	CurrentGoal    *agency.Goal         `json:"current_goal"`
-	Description    string               `json:"description"`
-	Scope          string               `json:"scope"`
-	SuccessMetrics []string             `json:"success_metrics"`
-	ExistingGoals  []*agency.Goal       `json:"existing_goals"`
-	UnitsOfWork    []*agency.UnitOfWork `json:"units_of_work"`
-	AgencyContext  *agency.Agency       `json:"agency_context"`
+	AgencyID       string             `json:"agency_id"`
+	CurrentGoal    *agency.Goal       `json:"current_goal"`
+	Description    string             `json:"description"`
+	Scope          string             `json:"scope"`
+	SuccessMetrics []string           `json:"success_metrics"`
+	ExistingGoals  []*agency.Goal     `json:"existing_goals"`
+	WorkItems      []*agency.WorkItem `json:"work_items"`
+	AgencyContext  *agency.Agency     `json:"agency_context"`
 }
 
 // RefineGoalResponse contains the AI-refined goal
@@ -62,11 +62,11 @@ type aiGoalRefinementResponse struct {
 
 // GenerateGoalRequest contains the context for generating a new goal
 type GenerateGoalRequest struct {
-	AgencyID      string               `json:"agency_id"`
-	AgencyContext *agency.Agency       `json:"agency_context"`
-	ExistingGoals []*agency.Goal       `json:"existing_goals"`
-	UnitsOfWork   []*agency.UnitOfWork `json:"units_of_work"`
-	UserInput     string               `json:"user_input"`
+	AgencyID      string             `json:"agency_id"`
+	AgencyContext *agency.Agency     `json:"agency_context"`
+	ExistingGoals []*agency.Goal     `json:"existing_goals"`
+	WorkItems     []*agency.WorkItem `json:"work_items"`
+	UserInput     string             `json:"user_input"`
 }
 
 // GenerateGoalResponse contains the AI-generated goal
@@ -286,12 +286,12 @@ func (r *GoalRefiner) buildGoalRefinementPrompt(req *RefineGoalRequest) string {
 		builder.WriteString("\n")
 	}
 
-	// Units of work for context
-	if len(req.UnitsOfWork) > 0 {
+	// Work items for context
+	if len(req.WorkItems) > 0 {
 		builder.WriteString("Existing Work Items in Agency:\n")
-		for i, unit := range req.UnitsOfWork {
+		for i, workItem := range req.WorkItems {
 			if i < 5 { // Limit to avoid token overflow
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", unit.Code, unit.Description))
+				builder.WriteString(fmt.Sprintf("- %s: %s\n", workItem.Code, workItem.Title))
 			}
 		}
 		builder.WriteString("\n")

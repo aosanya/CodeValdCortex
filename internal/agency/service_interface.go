@@ -25,12 +25,6 @@ type Service interface {
 	UpdateGoal(ctx context.Context, agencyID string, key string, code string, description string) error
 	DeleteGoal(ctx context.Context, agencyID string, key string) error
 
-	// UnitOfWork methods (compat shim during UnitOfWork -> WorkItem migration)
-	CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*UnitOfWork, error)
-	GetUnitsOfWork(ctx context.Context, agencyID string) ([]*UnitOfWork, error)
-	UpdateUnitOfWork(ctx context.Context, agencyID string, unitKey string, code string, description string) error
-	DeleteUnitOfWork(ctx context.Context, agencyID string, unitKey string) error
-
 	// WorkItem methods
 	CreateWorkItem(ctx context.Context, agencyID string, req CreateWorkItemRequest) (*WorkItem, error)
 	GetWorkItems(ctx context.Context, agencyID string) ([]*WorkItem, error)

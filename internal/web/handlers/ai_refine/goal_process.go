@@ -77,10 +77,10 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 	}
 
 	// Get units of work for context
-	unitsOfWork, err := h.agencyService.GetUnitsOfWork(ctx, agencyID)
+	workItems, err := h.agencyService.GetWorkItems(ctx, agencyID)
 	if err != nil {
 		h.logger.Warn("Failed to get units of work", "agencyID", agencyID, "error", err)
-		unitsOfWork = []*agency.UnitOfWork{}
+		workItems = []*agency.WorkItem{}
 	}
 
 	results := make(map[string]interface{})
@@ -94,11 +94,11 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 
 		switch operation {
 		case "create":
-			h.processCreateOperation(c, agencyID, ag, overview, existingGoals, unitsOfWork, results, &createdGoals)
+			h.processCreateOperation(c, agencyID, ag, overview, existingGoals, workItems, results, &createdGoals)
 		case "enhance":
-			h.processEnhanceOperation(c, agencyID, ag, goalsToProcess, unitsOfWork, results, &enhancedGoals)
+			h.processEnhanceOperation(c, agencyID, ag, goalsToProcess, workItems, results, &enhancedGoals)
 		case "consolidate":
-			h.processConsolidateOperation(c, agencyID, ag, goalsToProcess, unitsOfWork, results, &createdGoals)
+			h.processConsolidateOperation(c, agencyID, ag, goalsToProcess, workItems, results, &createdGoals)
 		}
 	}
 
@@ -147,7 +147,7 @@ func (h *Handler) processCreateOperation(
 	ag *agency.Agency,
 	overview *agency.Overview,
 	existingGoals []*agency.Goal,
-	unitsOfWork []*agency.UnitOfWork,
+	workItems []*agency.WorkItem,
 	results map[string]interface{},
 	createdGoals *[]*agency.Goal,
 ) {
@@ -168,7 +168,7 @@ func (h *Handler) processCreateOperation(
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		ExistingGoals: existingGoals,
-		UnitsOfWork:   unitsOfWork,
+		WorkItems:   workItems,
 		UserInput:     "Based on the agency introduction: " + overview.Introduction,
 	}
 
@@ -228,7 +228,7 @@ func (h *Handler) processEnhanceOperation(
 	agencyID string,
 	ag *agency.Agency,
 	existingGoals []*agency.Goal,
-	unitsOfWork []*agency.UnitOfWork,
+	workItems []*agency.WorkItem,
 	results map[string]interface{},
 	enhancedGoals *[]*agency.Goal,
 ) {
@@ -262,7 +262,7 @@ func (h *Handler) processEnhanceOperation(
 			Scope:          goal.Scope,
 			SuccessMetrics: goal.SuccessMetrics,
 			ExistingGoals:  existingGoals,
-			UnitsOfWork:    unitsOfWork,
+			WorkItems:    workItems,
 			AgencyContext:  ag,
 		}
 
@@ -338,7 +338,7 @@ func (h *Handler) processConsolidateOperation(
 	agencyID string,
 	ag *agency.Agency,
 	existingGoals []*agency.Goal,
-	unitsOfWork []*agency.UnitOfWork,
+	workItems []*agency.WorkItem,
 	results map[string]interface{},
 	createdGoals *[]*agency.Goal,
 ) {
@@ -358,7 +358,7 @@ func (h *Handler) processConsolidateOperation(
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		CurrentGoals:  existingGoals,
-		UnitsOfWork:   unitsOfWork,
+		WorkItems:   workItems,
 	}
 
 	consolidationResult, err := h.goalConsolidator.ConsolidateGoals(c.Request.Context(), consolidationReq)

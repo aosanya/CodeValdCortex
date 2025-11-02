@@ -26,10 +26,10 @@ func NewGoalConsolidator(llmClient LLMClient, logger *logrus.Logger) *GoalConsol
 
 // ConsolidateGoalsRequest contains the context for consolidating goals
 type ConsolidateGoalsRequest struct {
-	AgencyID      string               `json:"agency_id"`
-	AgencyContext *agency.Agency       `json:"agency_context"`
-	CurrentGoals  []*agency.Goal       `json:"current_goals"`
-	UnitsOfWork   []*agency.UnitOfWork `json:"units_of_work"`
+	AgencyID      string             `json:"agency_id"`
+	AgencyContext *agency.Agency     `json:"agency_context"`
+	CurrentGoals  []*agency.Goal     `json:"current_goals"`
+	WorkItems     []*agency.WorkItem `json:"work_items"`
 }
 
 // ConsolidateGoalsResponse contains the consolidated goals
@@ -124,12 +124,12 @@ func (c *GoalConsolidator) buildConsolidationPrompt(req *ConsolidateGoalsRequest
 		}
 	}
 
-	// Units of work for context
-	if len(req.UnitsOfWork) > 0 {
+	// Work items for context
+	if len(req.WorkItems) > 0 {
 		builder.WriteString("\n\nExisting Work Items:\n")
-		for i, unit := range req.UnitsOfWork {
+		for i, workItem := range req.WorkItems {
 			if i < 10 { // Limit to avoid token overflow
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", unit.Code, unit.Description))
+				builder.WriteString(fmt.Sprintf("- %s: %s\n", workItem.Code, workItem.Title))
 			}
 		}
 	}
