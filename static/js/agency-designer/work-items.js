@@ -12,40 +12,51 @@ let workItemEditorState = {
 
 // Load work items list
 export function loadWorkItems() {
+    console.log('[Work Items] loadWorkItems() called');
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
-        console.error('No agency ID found');
+        console.error('[Work Items] No agency ID found');
         return;
     }
+    console.log('[Work Items] Agency ID:', agencyId);
 
     const workItemsTableBody = document.getElementById('work-items-table-body');
     if (!workItemsTableBody) {
-        console.error('Work items table body not found');
+        console.error('[Work Items] Work items table body not found');
         return;
     }
+    console.log('[Work Items] Table body element found');
 
     // Show loading state
     workItemsTableBody.innerHTML = '<tr><td colspan="4" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
 
     // Fetch work items HTML from API
-    fetch(`/api/v1/agencies/${agencyId}/work-items/html`)
+    const url = `/api/v1/agencies/${agencyId}/work-items/html`;
+    console.log('[Work Items] Fetching from URL:', url);
+
+    fetch(url)
         .then(response => {
+            console.log('[Work Items] Response status:', response.status);
             if (!response.ok) {
                 throw new Error('Failed to load work items');
             }
             return response.text();
         })
         .then(html => {
+            console.log('[Work Items] Received HTML, length:', html.length);
             workItemsTableBody.innerHTML = html;
+            console.log('[Work Items] Table updated successfully');
         })
         .catch(error => {
-            console.error('Error loading work items:', error);
+            console.error('[Work Items] Error loading work items:', error);
             workItemsTableBody.innerHTML = '<tr><td colspan="4" class="has-text-danger has-text-centered py-5"><p>Error loading work items</p></td></tr>';
         });
 }
 
 // Show work item editor
 export function showWorkItemEditor(mode, workItemKey = null) {
+    console.log('[Work Items] showWorkItemEditor() called with mode:', mode, 'key:', workItemKey);
+
     workItemEditorState.mode = mode;
     workItemEditorState.workItemKey = workItemKey;
 
@@ -53,30 +64,48 @@ export function showWorkItemEditor(mode, workItemKey = null) {
     const listCard = document.getElementById('work-items-list-card');
     const editorTitle = document.getElementById('work-item-editor-title');
 
+    console.log('[Work Items] Editor elements found:', {
+        editorCard: !!editorCard,
+        listCard: !!listCard,
+        editorTitle: !!editorTitle
+    });
+
     if (!editorCard || !listCard || !editorTitle) {
-        console.error('Work item editor elements not found');
+        console.error('[Work Items] Work item editor elements not found:', {
+            editorCard: editorCard,
+            listCard: listCard,
+            editorTitle: editorTitle
+        });
         return;
     }
 
     if (mode === 'add') {
+        console.log('[Work Items] Setting up ADD mode');
         // Clear form for new work item
         editorTitle.textContent = 'Add New Work Item';
         clearWorkItemForm();
     } else if (mode === 'edit') {
+        console.log('[Work Items] Setting up EDIT mode for key:', workItemKey);
         // Load existing work item data
         editorTitle.textContent = 'Edit Work Item';
         loadWorkItemData(workItemKey);
     }
 
     // Show editor, hide list
+    console.log('[Work Items] Toggling visibility: showing editor, hiding list');
     editorCard.classList.remove('is-hidden');
     listCard.classList.add('is-hidden');
 
     // Focus on title field
     const titleEditor = document.getElementById('work-item-title-editor');
     if (titleEditor) {
+        console.log('[Work Items] Focusing on title editor');
         titleEditor.focus();
+    } else {
+        console.warn('[Work Items] Title editor not found for focus');
     }
+
+    console.log('[Work Items] Editor should now be visible');
 }
 
 // Load work item data for editing
@@ -155,11 +184,15 @@ function clearWorkItemForm() {
 
 // Save work item from editor
 export function saveWorkItemFromEditor() {
+    console.log('[Work Items] saveWorkItemFromEditor() called');
+
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
+        console.error('[Work Items] No agency ID found');
         showNotification('Error: No agency selected', 'error');
         return;
     }
+    console.log('[Work Items] Agency ID:', agencyId);
 
     // Get form values
     const title = document.getElementById('work-item-title-editor')?.value.trim();
@@ -181,14 +214,28 @@ export function saveWorkItemFromEditor() {
         .map(t => t.trim())
         .filter(t => t.length > 0);
 
+    console.log('[Work Items] Form values:', {
+        title,
+        type,
+        priority,
+        status,
+        descriptionLength: description?.length || 0,
+        deliverablesCount: deliverables?.length || 0,
+        dependenciesCount: dependencies?.length || 0,
+        effort,
+        tagsCount: tags?.length || 0
+    });
+
     // Validation
     if (!title) {
+        console.warn('[Work Items] Validation failed: no title');
         showNotification('Please enter a work item title', 'warning');
         document.getElementById('work-item-title-editor')?.focus();
         return;
     }
 
     if (!description) {
+        console.warn('[Work Items] Validation failed: no description');
         showNotification('Please enter a work item description', 'warning');
         document.getElementById('work-item-description-editor')?.focus();
         return;
@@ -199,6 +246,12 @@ export function saveWorkItemFromEditor() {
         ? `/api/v1/agencies/${agencyId}/work-items`
         : `/api/v1/agencies/${agencyId}/work-items/${workItemEditorState.workItemKey}`;
     const method = isAddMode ? 'POST' : 'PUT';
+
+    console.log('[Work Items] Sending request:', {
+        mode: workItemEditorState.mode,
+        method,
+        url
+    });
 
     const requestBody = {
         title,
@@ -212,6 +265,8 @@ export function saveWorkItemFromEditor() {
         tags
     };
 
+    console.log('[Work Items] Request body:', requestBody);
+
     fetch(url, {
         method: method,
         headers: {
@@ -220,29 +275,39 @@ export function saveWorkItemFromEditor() {
         body: JSON.stringify(requestBody)
     })
         .then(response => {
+            console.log('[Work Items] Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`Failed to ${isAddMode ? 'create' : 'update'} work item`);
             }
             return response.json();
         })
-        .then(() => {
+        .then(data => {
+            console.log('[Work Items] Success! Response data:', data);
             showNotification(`Work item ${isAddMode ? 'added' : 'updated'} successfully!`, 'success');
             cancelWorkItemEdit();
             loadWorkItems();
         })
         .catch(error => {
-            console.error(`Error ${isAddMode ? 'creating' : 'updating'} work item:`, error);
+            console.error(`[Work Items] Error ${isAddMode ? 'creating' : 'updating'} work item:`, error);
             showNotification(`Error ${isAddMode ? 'adding' : 'updating'} work item`, 'error');
         });
 }
 
 // Cancel work item edit
 export function cancelWorkItemEdit() {
+    console.log('[Work Items] cancelWorkItemEdit() called');
+
     const editorCard = document.getElementById('work-item-editor-card');
     const listCard = document.getElementById('work-items-list-card');
 
-    if (editorCard) editorCard.classList.add('is-hidden');
-    if (listCard) listCard.classList.remove('is-hidden');
+    if (editorCard) {
+        console.log('[Work Items] Hiding editor card');
+        editorCard.classList.add('is-hidden');
+    }
+    if (listCard) {
+        console.log('[Work Items] Showing list card');
+        listCard.classList.remove('is-hidden');
+    }
 
     clearWorkItemForm();
 
@@ -252,6 +317,8 @@ export function cancelWorkItemEdit() {
         workItemKey: null,
         originalData: {}
     };
+
+    console.log('[Work Items] Editor cancelled, state reset');
 }
 
 // Delete work item
