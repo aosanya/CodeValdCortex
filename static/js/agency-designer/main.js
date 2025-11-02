@@ -18,6 +18,13 @@ import {
     deleteGoal
 } from './goals.js';
 import {
+    showWorkItemEditor,
+    saveWorkItemFromEditor,
+    cancelWorkItemEdit,
+    deleteWorkItem,
+    filterWorkItems
+} from './work-items.js';
+import {
     showUnitEditor,
     saveUnitFromEditor,
     cancelUnitEdit,

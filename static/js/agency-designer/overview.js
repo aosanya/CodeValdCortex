@@ -3,6 +3,7 @@
 
 import { loadIntroductionEditor } from './introduction.js';
 import { loadGoals } from './goals.js';
+import { loadWorkItems } from './work-items.js';
 import { loadUnits } from './units.js';
 
 // Initialize overview section
@@ -58,8 +59,8 @@ export function selectOverviewSection(element, section) {
             loadIntroductionEditor();
         } else if (section === 'goal-definition') {
             loadGoals();
-        } else if (section === 'units-of-work') {
-            loadUnits();
+        } else if (section === 'work-items') {
+            loadWorkItems();
         }
     }
 }
