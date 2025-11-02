@@ -322,9 +322,43 @@ export function processAIWorkItemOperation(operations) {
         return;
     }
 
-    // For now, show a placeholder notification
-    // This will be implemented when the AI refinement handler is created
-    showNotification('AI Work Item operations coming soon!', 'info');
+    // Validate operations array
+    if (!operations || operations.length === 0) {
+        showNotification('Error: No operation specified', 'error');
+        return;
+    }
+
+    // Determine the appropriate status message based on operations
+    let statusMessage = 'AI is processing your request...';
+    if (operations.length === 1) {
+        switch (operations[0]) {
+            case 'create':
+                statusMessage = 'AI is generating work items from your goals...';
+                break;
+            case 'enhance':
+                statusMessage = 'AI is enhancing work items...';
+                break;
+            case 'consolidate':
+                statusMessage = 'AI is consolidating work items...';
+                break;
+        }
+    } else if (operations.length > 1) {
+        statusMessage = `AI is performing ${operations.length} operations on your work items...`;
+    }
+
+    // Show AI processing status in the chat area
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus(statusMessage);
+    }
+
+    // For now, just show placeholder since backend endpoint doesn't exist yet
+    // TODO: Create /api/v1/agencies/:id/work-items/ai-process endpoint
+    setTimeout(() => {
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+        showNotification('AI Work Item operations will be available soon!', 'info');
+    }, 1000);
 
     console.log('AI Work Item operations requested:', operations);
 }
