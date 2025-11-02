@@ -1,0 +1,89 @@
+/* VS Code Status Bar - Reusable Component */
+
+/* VS Code Status Bar */
+.vscode-status-bar {
+    grid-area: status;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--theme-status-bar-bg, #007acc) !important;
+    color: var(--theme-status-bar-text, white);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    height: 32px !important;
+    border-top: 1px solid var(--theme-status-bar-border, #005a9e) !important;
+    flex-shrink: 0;
+    z-index: 9999 !important;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.status-bar-left,
+.status-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0 0.5rem;
+    cursor: default;
+}
+
+.status-item i {
+    font-size: 0.7rem;
+}
+
+.status-text {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+.status-separator {
+    opacity: 0.5;
+    padding: 0 0.25rem;
+}
+
+.status-action-btn {
+    height: 18px;
+    font-size: 0.7rem;
+    padding: 0 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.status-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.status-action-btn .icon {
+    margin-right: 0.25rem;
+}
+
+/* Grid layout helper for pages using status bar */
+.page-with-status-bar {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "main"
+        "status";
+    overflow: hidden;
+}
+
+.page-main-content {
+    grid-area: main;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.page-status-bar {
+    grid-area: status;
+}

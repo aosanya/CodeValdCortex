@@ -21,7 +21,7 @@ The CodeValdCortex software development documentation has been organized into fo
 - **[maintenance.md](maintenance.md)**: Ongoing maintenance and operational procedures *(pending)*
 
 ### Agency Operations Framework
-- **[Problem Definition](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#problem-definition-module)**: Structured approach to defining problems that agencies solve
+- **[Goals](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#goals-module)**: Structured approach to defining goals that agencies achieve
 - **[Work Items](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#work-items-wi)**: Discrete work packages with clear deliverables and dependencies  
 - **[RACI Matrix](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#raci-matrix-for-work-items)**: Role and responsibility assignments for each work item
 

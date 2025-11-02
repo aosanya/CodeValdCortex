@@ -48,9 +48,21 @@ build-all: ## Build for all platforms
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o bin/$(BINARY_NAME)-windows-amd64.exe ./cmd
 
 .PHONY: run
-run: build ## Build and run the application
+run: ## Build and run the application 
+	@echo "Generating templates..."
+	templ generate
+	@echo "Building $(BINARY_NAME)..."
+	@mkdir -p bin
+	CGO_ENABLED=0 GOOS=linux $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BINARY_PATH) ./cmd
 	@echo "Running $(BINARY_NAME)..."
+	@echo "💡 Tip: Hard refresh browser (Ctrl+Shift+R or Cmd+Shift+R) to reload cached JavaScript"
 	./$(BINARY_PATH)
+
+.PHONY: kill
+kill: ## Stop any running instances
+	@echo "Stopping any running instances..."
+	@pkill -f "./bin/codevaldcortex" || true
+	@sleep 1
 
 .PHONY: run-dev
 run-dev: ## Run the application in development mode
@@ -114,6 +126,12 @@ vet: ## Run go vet
 
 .PHONY: check
 check: fmt vet lint test ## Run all checks (format, vet, lint, test)
+
+.PHONY: audit
+audit: ## Audit JavaScript code for console.log statements
+	@echo "Auditing JavaScript code..."
+	@chmod +x scripts/lint-console-logs.sh
+	@scripts/lint-console-logs.sh
 
 .PHONY: docker-build
 docker-build: ## Build Docker image

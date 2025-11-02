@@ -10,14 +10,15 @@ import (
 templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
 	@components.LayoutWithAgency("AI Agency Designer", currentAgency) {
 		<!-- Agency Designer Specific CSS -->
-		<link rel="stylesheet" href="/static/css/agency-designer.css"/>
+		<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
+		<link rel="stylesheet" href="/static/css/agency-designer.css?v=20251031-context"/>
 		
 		<!-- Agency Designer JavaScript -->
-		<script src="/static/js/agency-designer.js" type="module" defer></script>
+		<script src="/static/js/agency-designer.js?v=20251031-context" type="module" defer></script>
 		
 		<div class="vscode-designer-container">
 			<!-- Main Content Area with Columns -->
-			<div class="columns is-gapless">
+			<div class="columns is-gapless vscode-main-content">
 				<!-- Left Column: Designer Panels -->
 				<div class="column is-two-thirds">
 					<!-- View Switcher at Top -->
@@ -50,24 +51,8 @@ templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversa
 				</div>
 			</div>
 			
-			<!-- Action Bar at Bottom -->
-			if conversation != nil && conversation.Phase == ai.PhaseValidation {
-				<div class="bottom-action-bar">
-					<button 
-						class="button is-success is-medium"
-						hx-post={ "/api/v1/conversations/" + conversation.ID + "/generate" }
-						hx-target="#agent-details"
-						hx-indicator="#generate-spinner">
-						<span class="icon">
-							<i class="fas fa-check-circle"></i>
-						</span>
-						<span>Generate Final Design</span>
-					</button>
-					<span class="spinner" id="generate-spinner" style="display: none;">
-						<i class="fas fa-spinner fa-spin"></i>
-					</span>
-				</div>
-			}
+			<!-- Status Bar at Bottom (VS Code style) -->
+			@components.StatusBar(currentAgency, conversation)
 		</div>
 	}
 }

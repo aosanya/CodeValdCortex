@@ -2,7 +2,7 @@
 // Handles overview navigation and section switching
 
 import { loadIntroductionEditor } from './introduction.js';
-import { loadProblems } from './problems.js';
+import { loadGoals } from './goals.js';
 import { loadUnits } from './units.js';
 
 // Initialize overview section
@@ -32,7 +32,7 @@ export function selectOverviewSection(element, section) {
     // Update title based on section
     const titles = {
         'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
-        'problem-definition': '<span class="icon"><i class="fas fa-exclamation-triangle"></i></span><span>Problem Definition</span>',
+        'goal-definition': '<span class="icon"><i class="fas fa-bullseye"></i></span><span>Goal Definition</span>',
         'units-of-work': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Units of Work</span>'
     };
 
@@ -56,8 +56,8 @@ export function selectOverviewSection(element, section) {
         // Load data if needed
         if (section === 'introduction') {
             loadIntroductionEditor();
-        } else if (section === 'problem-definition') {
-            loadProblems();
+        } else if (section === 'goal-definition') {
+            loadGoals();
         } else if (section === 'units-of-work') {
             loadUnits();
         }

@@ -28,7 +28,7 @@ func NewIntroductionRefiner(llmClient LLMClient, logger *logrus.Logger) *Introdu
 type RefineIntroductionRequest struct {
 	AgencyID      string               `json:"agency_id"`
 	CurrentIntro  string               `json:"current_introduction"`
-	Problems      []*agency.Problem    `json:"problems"`
+	Goals         []*agency.Goal       `json:"goals"`
 	UnitsOfWork   []*agency.UnitOfWork `json:"units_of_work"`
 	AgencyContext *agency.Agency       `json:"agency_context"`
 }
@@ -52,7 +52,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":           req.AgencyID,
 		"current_intro_chars": len(req.CurrentIntro),
-		"problems_count":      len(req.Problems),
+		"goals_count":         len(req.Goals),
 		"units_count":         len(req.UnitsOfWork),
 	}).Info("Starting introduction refinement")
 
@@ -102,8 +102,8 @@ func (r *IntroductionRefiner) getSystemPrompt() string {
 Your task is to refine agency introductions to be:
 1. **Clear and concise** - Easy to understand for both technical and non-technical stakeholders
 2. **Comprehensive** - Covers the purpose, scope, and key capabilities
-3. **Well-structured** - Logical flow from problem to solution to benefits
-4. **Context-aware** - Incorporates all available information about problems and units of work
+3. **Well-structured** - Logical flow from goal to solution to benefits
+4. **Context-aware** - Incorporates all available information about goals and units of work
 5. **Professional** - Appropriate tone for technical documentation
 
 IMPORTANT GUIDELINES:
@@ -111,7 +111,7 @@ IMPORTANT GUIDELINES:
 - Only suggest significant changes if the introduction lacks important context or has quality issues
 - Always explain your reasoning for changes (or lack thereof)
 - Focus on substance over style - content improvements over minor wording changes
-- Ensure the refined introduction accurately reflects the defined problems and units of work
+- Ensure the refined introduction accurately reflects the defined goals and units of work
 
 CRITICAL: Respond with ONLY valid JSON in the exact format below. Do not include any other text before or after the JSON.
 
@@ -148,13 +148,13 @@ func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionReque
 	}
 	prompt.WriteString("\n\n")
 
-	// Problem definitions
-	prompt.WriteString("**DEFINED PROBLEMS:**\n")
-	if len(req.Problems) == 0 {
-		prompt.WriteString("(No problems defined yet)\n")
+	// Goal definitions
+	prompt.WriteString("**DEFINED GOALS:**\n")
+	if len(req.Goals) == 0 {
+		prompt.WriteString("(No goals defined yet)\n")
 	} else {
-		for i, problem := range req.Problems {
-			prompt.WriteString(fmt.Sprintf("%d. **%s**: %s\n", i+1, problem.Code, problem.Description))
+		for i, goal := range req.Goals {
+			prompt.WriteString(fmt.Sprintf("%d. **%s**: %s\n", i+1, goal.Code, goal.Description))
 		}
 	}
 	prompt.WriteString("\n")
@@ -172,7 +172,7 @@ func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionReque
 
 	prompt.WriteString("Based on this context, please refine the introduction to ensure it:\n")
 	prompt.WriteString("- Accurately reflects the agency's purpose and scope\n")
-	prompt.WriteString("- References the key problems being addressed\n")
+	prompt.WriteString("- References the key goals being addressed\n")
 	prompt.WriteString("- Aligns with the defined units of work\n")
 	prompt.WriteString("- Maintains appropriate technical depth\n")
 	prompt.WriteString("- Is well-structured and professional\n\n")

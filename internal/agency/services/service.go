@@ -10,7 +10,7 @@ import (
 type CompositeService struct {
 	*AgencyService
 	*OverviewService
-	*ProblemService
+	*GoalService
 	*UnitOfWorkService
 }
 
@@ -19,7 +19,7 @@ func New(repo agency.Repository, validator agency.Validator) agency.Service {
 	return &CompositeService{
 		AgencyService:     NewAgencyService(repo, validator, nil),
 		OverviewService:   NewOverviewService(repo),
-		ProblemService:    NewProblemService(repo),
+		GoalService:       NewGoalService(repo),
 		UnitOfWorkService: NewUnitOfWorkService(repo),
 	}
 }
@@ -29,7 +29,7 @@ func NewWithDBInit(repo agency.Repository, validator agency.Validator, dbInit ag
 	return &CompositeService{
 		AgencyService:     NewAgencyService(repo, validator, dbInit),
 		OverviewService:   NewOverviewService(repo),
-		ProblemService:    NewProblemService(repo),
+		GoalService:       NewGoalService(repo),
 		UnitOfWorkService: NewUnitOfWorkService(repo),
 	}
 }
@@ -79,20 +79,24 @@ func (c *CompositeService) UpdateAgencyOverview(ctx context.Context, agencyID st
 	return c.OverviewService.UpdateAgencyOverview(ctx, agencyID, introduction)
 }
 
-func (c *CompositeService) CreateProblem(ctx context.Context, agencyID string, code string, description string) (*agency.Problem, error) {
-	return c.ProblemService.CreateProblem(ctx, agencyID, code, description)
+func (c *CompositeService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*agency.Goal, error) {
+	return c.GoalService.CreateGoal(ctx, agencyID, code, description)
 }
 
-func (c *CompositeService) GetProblems(ctx context.Context, agencyID string) ([]*agency.Problem, error) {
-	return c.ProblemService.GetProblems(ctx, agencyID)
+func (c *CompositeService) GetGoals(ctx context.Context, agencyID string) ([]*agency.Goal, error) {
+	return c.GoalService.GetGoals(ctx, agencyID)
 }
 
-func (c *CompositeService) UpdateProblem(ctx context.Context, agencyID string, key string, code string, description string) error {
-	return c.ProblemService.UpdateProblem(ctx, agencyID, key, code, description)
+func (c *CompositeService) GetGoal(ctx context.Context, agencyID string, key string) (*agency.Goal, error) {
+	return c.GoalService.GetGoal(ctx, agencyID, key)
 }
 
-func (c *CompositeService) DeleteProblem(ctx context.Context, agencyID string, key string) error {
-	return c.ProblemService.DeleteProblem(ctx, agencyID, key)
+func (c *CompositeService) UpdateGoal(ctx context.Context, agencyID string, key string, code string, description string) error {
+	return c.GoalService.UpdateGoal(ctx, agencyID, key, code, description)
+}
+
+func (c *CompositeService) DeleteGoal(ctx context.Context, agencyID string, key string) error {
+	return c.GoalService.DeleteGoal(ctx, agencyID, key)
 }
 
 func (c *CompositeService) CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*agency.UnitOfWork, error) {

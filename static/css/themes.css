@@ -18,6 +18,9 @@
     --theme-warning: #ffdd57;
     --theme-danger: #f14668;
     --theme-info: #3298dc;
+    --theme-status-bar-bg: #007acc;
+    --theme-status-bar-border: #005a9e;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Midnight Blue & Coral Theme */
@@ -37,6 +40,9 @@
     --theme-warning: #ed8936;
     --theme-danger: #f56565;
     --theme-info: #4299e1;
+    --theme-status-bar-bg: #FF6B6B;
+    --theme-status-bar-border: #ff5252;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Dark Slate & Electric Purple Theme */
@@ -56,6 +62,9 @@
     --theme-warning: #f59e0b;
     --theme-danger: #ef4444;
     --theme-info: #3b82f6;
+    --theme-status-bar-bg: #8b5cf6;
+    --theme-status-bar-border: #7c3aed;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Charcoal & Emerald Theme */
@@ -75,6 +84,9 @@
     --theme-warning: #f59e0b;
     --theme-danger: #ef4444;
     --theme-info: #06b6d4;
+    --theme-status-bar-bg: #10b981;
+    --theme-status-bar-border: #059669;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Deep Navy & Sunset Orange Theme */
@@ -94,6 +106,9 @@
     --theme-warning: #f59e0b;
     --theme-danger: #ef4444;
     --theme-info: #0ea5e9;
+    --theme-status-bar-bg: #f97316;
+    --theme-status-bar-border: #ea580c;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Obsidian & Cyan Theme */
@@ -113,6 +128,9 @@
     --theme-warning: #f59e0b;
     --theme-danger: #ef4444;
     --theme-info: #06b6d4;
+    --theme-status-bar-bg: #06b6d4;
+    --theme-status-bar-border: #0891b2;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Dark Mode Theme */
@@ -132,6 +150,9 @@
     --theme-warning: #ffd43b;
     --theme-danger: #ff6b6b;
     --theme-info: #4dabf7;
+    --theme-status-bar-bg: #4dabf7;
+    --theme-status-bar-border: #339af0;
+    --theme-status-bar-text: #ffffff;
 }
 
 /* Apply theme variables to elements */

@@ -18,11 +18,12 @@ type Service interface {
 	GetAgencyOverview(ctx context.Context, agencyID string) (*Overview, error)
 	UpdateAgencyOverview(ctx context.Context, agencyID string, introduction string) error
 
-	// Problem methods
-	CreateProblem(ctx context.Context, agencyID string, code string, description string) (*Problem, error)
-	GetProblems(ctx context.Context, agencyID string) ([]*Problem, error)
-	UpdateProblem(ctx context.Context, agencyID string, key string, code string, description string) error
-	DeleteProblem(ctx context.Context, agencyID string, key string) error
+	// Goal methods
+	CreateGoal(ctx context.Context, agencyID string, code string, description string) (*Goal, error)
+	GetGoals(ctx context.Context, agencyID string) ([]*Goal, error)
+	GetGoal(ctx context.Context, agencyID string, key string) (*Goal, error)
+	UpdateGoal(ctx context.Context, agencyID string, key string, code string, description string) error
+	DeleteGoal(ctx context.Context, agencyID string, key string) error
 
 	// UnitOfWork methods
 	CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*UnitOfWork, error)

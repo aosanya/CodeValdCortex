@@ -12,23 +12,35 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 			<div class="content">
 				<div class="field">
 					<div class="control">
-						<textarea
-							class="textarea"
-							id="introduction-editor"
-							placeholder="Enter introduction text for this agency..."
-							rows="20"
-							style="font-family: monospace; font-size: 14px;">
-							if overview != nil {
+						if overview != nil && overview.Introduction != "" {
+							<textarea
+								class="textarea context-selectable"
+								id="introduction-editor"
+								placeholder="Enter introduction text for this agency..."
+								rows="20"
+								style="font-family: monospace; font-size: 14px;"
+								data-intro-text={ overview.Introduction }
+								title="Highlight text to add as context">
 								{ overview.Introduction }
-							}
-						</textarea>
+							</textarea>
+						} else {
+							<textarea
+								class="textarea context-selectable"
+								id="introduction-editor"
+								placeholder="Enter introduction text for this agency..."
+								rows="20"
+								style="font-family: monospace; font-size: 14px;"
+								data-intro-text=""
+								title="Highlight text to add as context">
+							</textarea>
+						}
 					</div>
 				</div>
-				<p class="help">Use this section to provide an overview and introduction to your agency.</p>
+				<p class="help">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p>
 			</div>
 			<div class="buttons is-right">
 				<button
-					class="button is-primary"
+					class="button is-small is-primary"
 					onclick="saveOverviewIntroduction()"
 					id="save-introduction-btn">
 					<span class="icon"><i class="fas fa-save"></i></span>
@@ -36,32 +48,29 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 				</button>
 				<!-- AI Refine / Sparkle button (triggers AI refine flow) -->
 				<button
-					class="button is-info"
+					class="button is-small is-info"
 					hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/overview/refine" }
 					hx-include="#introduction-editor"
-					hx-target="#introduction-content"
-					hx-indicator="#ai-process-status"
-					hx-on::after-request="
-						console.log('🏁 HTMX request completed, hiding status...');
-						if (window.hideAIProcessStatus) {
-							window.hideAIProcessStatus();
-						} else {
-							console.log('❌ hideAIProcessStatus not available');
-							const status = document.getElementById('ai-process-status');
-							if (status) {
-								status.style.display = 'none';
-								console.log('✅ Status hidden manually');
-							}
+				hx-target="#introduction-content"
+				hx-indicator="#ai-process-status"
+				hx-on::after-request="
+					if (window.hideAIProcessStatus) {
+						window.hideAIProcessStatus();
+					} else {
+						const status = document.getElementById('ai-process-status');
+						if (status) {
+							status.style.display = 'none';
 						}
-					"
-					id="ai-sparkle-btn"
-					onclick="window.handleRefineClick && window.handleRefineClick()"
+					}
+				"
+				id="ai-sparkle-btn"
+				onclick="window.handleRefineClick && window.handleRefineClick()"
 					title="Refine with AI">
 					<span class="icon"><i class="fas fa-magic"></i></span>
 					<span>Refine</span>
 				</button>
 				<button
-					class="button"
+					class="button is-small"
 					onclick="undoOverviewIntroduction()"
 					id="undo-introduction-btn">
 					<span class="icon"><i class="fas fa-undo"></i></span>

@@ -10,6 +10,7 @@ This directory contains comprehensive software requirements documentation for Co
 - **[problem-definition.md](introduction/problem-definition.md)**: Core problem statement and market need analysis
 - **[stakeholders.md](introduction/stakeholders.md)**: Key stakeholders and their roles in the project
 - **[high-level-features.md](introduction/high-level-features.md)**: Executive summary of platform capabilities
+- **[goals-specification.md](introduction/goals-specification.md)**: Comprehensive Goals system specification (schema, lifecycle, prioritization, dependencies, impact analysis, traceability)
 
 ### 📁 Requirements (`requirements/`)
 - **[functional-requirements.md](requirements/functional-requirements.md)**: Detailed functional specifications and user stories

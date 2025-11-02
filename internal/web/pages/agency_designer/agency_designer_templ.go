@@ -48,7 +48,7 @@ func AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversat
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Agency Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/agency-designer.css\"><!-- Agency Designer JavaScript --> <script src=\"/static/js/agency-designer.js\" type=\"module\" defer></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns --><div class=\"columns is-gapless\"><!-- Left Column: Designer Panels --><div class=\"column is-two-thirds\"><!-- View Switcher at Top --><div class=\"top-toolbar\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Agency Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><!-- Agency Designer JavaScript --> <script src=\"/static/js/agency-designer.js?v=20251031-context\" type=\"module\" defer></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns --><div class=\"columns is-gapless vscode-main-content\"><!-- Left Column: Designer Panels --><div class=\"column is-two-thirds\"><!-- View Switcher at Top --><div class=\"top-toolbar\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -80,30 +80,15 @@ func AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversat
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><!-- Action Bar at Bottom -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><!-- Status Bar at Bottom (VS Code style) -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if conversation != nil && conversation.Phase == ai.PhaseValidation {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"bottom-action-bar\"><button class=\"button is-success is-medium\" hx-post=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var3 string
-				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("/api/v1/conversations/" + conversation.ID + "/generate")
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer.templ`, Line: 58, Col: 72}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-target=\"#agent-details\" hx-indicator=\"#generate-spinner\"><span class=\"icon\"><i class=\"fas fa-check-circle\"></i></span> <span>Generate Final Design</span></button> <span class=\"spinner\" id=\"generate-spinner\" style=\"display: none;\"><i class=\"fas fa-spinner fa-spin\"></i></span></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			templ_7745c5c3_Err = components.StatusBar(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -134,12 +119,12 @@ func ViewSwitcher() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"view-switcher\"><div class=\"view-tab is-active\" data-view=\"overview\"><span class=\"view-icon\">📊</span> <span class=\"view-label\">Overview</span></div><div class=\"view-tab\" data-view=\"agent-types\"><span class=\"view-icon\">🤖</span> <span class=\"view-label\">Agent Types</span></div><div class=\"view-tab\" data-view=\"layout\"><span class=\"view-icon\">🔗</span> <span class=\"view-label\">Layout</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"view-switcher\"><div class=\"view-tab is-active\" data-view=\"overview\"><span class=\"view-icon\">📊</span> <span class=\"view-label\">Overview</span></div><div class=\"view-tab\" data-view=\"agent-types\"><span class=\"view-icon\">🤖</span> <span class=\"view-label\">Agent Types</span></div><div class=\"view-tab\" data-view=\"layout\"><span class=\"view-icon\">🔗</span> <span class=\"view-label\">Layout</span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

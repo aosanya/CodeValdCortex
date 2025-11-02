@@ -448,8 +448,8 @@ The framework is powerful and complete - use it, don't reinvent it.
 
 Use cases within CodeValdCortex agencies should be designed with the Agency Operations Framework in mind. Each use case should consider:
 
-### Problem Definition Integration
-- **Problem Mapping**: Each use case should map to one or more defined problems in the agency's Problem Definition Module
+### Goals Integration
+- **Goal Mapping**: Each use case should map to one or more defined goals in the agency's Goals Module
 - **Solution Scope**: Use case configuration should align with the problem scope and success metrics
 - **Traceability**: Clear links between use case agents and the problems they help solve
 

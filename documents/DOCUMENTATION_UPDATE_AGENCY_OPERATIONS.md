@@ -4,7 +4,7 @@
 
 This update introduces comprehensive documentation for the Agency Operations Framework, which includes:
 
-1. **Problem Definition Module**: Structured approach to defining and cataloging problems
+1. **Goals Module**: Structured approach to defining and cataloging goals
 2. **Work Items (WI)**: Discrete work packages with clear deliverables  
 3. **RACI Matrix Framework**: Role and responsibility assignments for each work item
 
@@ -29,7 +29,7 @@ This update introduces comprehensive documentation for the Agency Operations Fra
 
 ## Key Features Documented
 
-### Problem Definition Module
+### Goals Module
 - **Purpose**: Foundation for agency operational framework
 - **Structure**: Problem codes, descriptions, scope, and success metrics
 - **Integration**: Links to Units of Work and agent capabilities

@@ -1,4 +1,6 @@
 /* Agency Designer - VS Code Style Layout */
+/* CACHE BUST: v2025-10-30-17:00 - Themed Status Bar */
+/* Note: vscode-status-bar.css is loaded separately in the template */
 
 /* Prevent page scrolling */
 html,
@@ -31,23 +33,42 @@ body {
     --vscode-accent-hover: #005a9e;
 }
 
-/* Main Container */
+/* Main Container - Use CSS Grid like VS Code */
 .vscode-designer-container {
-    height: 100vh;
+    height: calc(100vh - 52px);
+    /* Subtract navbar height (52px) */
     background: var(--vscode-bg);
     color: var(--vscode-text);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "main"
+        "status";
+    overflow: hidden;
+}
+
+/* Main Content Area */
+.vscode-main-content {
+    grid-area: main;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    height: 100%;
 }
 
 /* Bulma Columns Override for Full Height */
 .vscode-designer-container .columns {
     margin: 0;
-    height: calc(100vh - 60px);
-    /* Account for top toolbar */
+    height: 100%;
+    min-height: 0;
 }
 
 .vscode-designer-container .column {
     padding: 0;
     height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Left Column - Designer Content */
@@ -55,10 +76,24 @@ body {
     border-right: 1px solid var(--vscode-border);
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* Right Column - Chat */
 .vscode-designer-container .column.is-one-third {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Designer Panels */
+.designer-panels {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -158,25 +193,27 @@ body {
     color: var(--vscode-accent);
 }
 
-/* Designer Panels */
-.designer-panels {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-}
-
 /* View Content Containers */
 .view-content {
     display: none;
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 .view-content.is-active {
     display: flex !important;
     flex: 1;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    height: 100%;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 /* Overview View */
@@ -188,7 +225,10 @@ body {
 .overview-layout {
     display: flex;
     width: 100%;
+    flex: 1;
+    min-height: 0;
     height: 100%;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 /* Overview and Layout Panels */
@@ -342,6 +382,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
+    height: 100%;
+    /* CRITICAL: Allow flex child to shrink */
 }
 
 .details-header {
@@ -362,9 +405,13 @@ body {
 }
 
 .details-content {
+    /* Use CSS Grid like chat panel for reliable height constraints */
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+    padding: 0;
     flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
+    min-height: 0;
 }
 
 /* Empty Details View */
@@ -552,10 +599,11 @@ body {
          properly shrink (prevents flexbox/grid overflow pushing the footer out).
          This is a common fix when a child with 1fr causes the container to grow. */
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas:
         "header"
         "messages"
+        "context"
         "input";
     /* Use full available height and width in the column */
     height: 100%;
@@ -609,7 +657,8 @@ body {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 0.75rem;
-    animation: fadeIn 0.3s ease;
+    /* animation: fadeIn 0.3s ease; */
+    /* TEMPORARILY DISABLED FOR DEBUGGING */
 }
 
 @keyframes fadeIn {
@@ -848,27 +897,35 @@ body {
 /* Scrollbar Styling */
 .sidebar-content::-webkit-scrollbar,
 .details-content::-webkit-scrollbar,
-.chat-messages-container::-webkit-scrollbar {
-    width: 8px;
+.chat-messages-container::-webkit-scrollbar,
+.view-content::-webkit-scrollbar,
+.overview-section::-webkit-scrollbar {
+    width: 12px;
 }
 
 .sidebar-content::-webkit-scrollbar-track,
 .details-content::-webkit-scrollbar-track,
-.chat-messages-container::-webkit-scrollbar-track {
+.chat-messages-container::-webkit-scrollbar-track,
+.view-content::-webkit-scrollbar-track,
+.overview-section::-webkit-scrollbar-track {
     background: var(--vscode-sidebar-bg);
 }
 
 .sidebar-content::-webkit-scrollbar-thumb,
 .details-content::-webkit-scrollbar-thumb,
-.chat-messages-container::-webkit-scrollbar-thumb {
-    background: var(--vscode-border);
-    border-radius: 4px;
+.chat-messages-container::-webkit-scrollbar-thumb,
+.view-content::-webkit-scrollbar-thumb,
+.overview-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
 }
 
 .sidebar-content::-webkit-scrollbar-thumb:hover,
 .details-content::-webkit-scrollbar-thumb:hover,
-.chat-messages-container::-webkit-scrollbar-thumb:hover {
-    background: #c0c0c0;
+.chat-messages-container::-webkit-scrollbar-thumb:hover,
+.view-content::-webkit-scrollbar-thumb:hover,
+.overview-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* Tags Override for Light Theme */
@@ -1067,9 +1124,50 @@ body {
     color: var(--vscode-text-muted);
 }
 
-/* Overview Section Content */
+/* Overview content section containers */
+.overview-content-section {
+    flex: 1;
+    display: none;
+    min-height: 0;
+    /* Critical: allows flex child to shrink below content size */
+    overflow: hidden;
+}
+
+.overview-content-section.is-active {
+    /* Use CSS Grid like chat panel for reliable height constraints */
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+}
+
+/* Overview Section Content - Make entire section scrollable */
 .overview-section {
-    padding: 1.5rem;
+    overflow-y: scroll !important;
+    overflow-x: hidden;
+    padding: 1rem;
+    padding-bottom: 2rem;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+    /* Critical: allows flex child to be scrollable */
+}
+
+.overview-section::-webkit-scrollbar {
+    width: 10px;
+}
+
+.overview-section::-webkit-scrollbar-track {
+    background: var(--vscode-scrollbar-track-bg, #f5f5f5);
+    border-radius: 4px;
+}
+
+.overview-section::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbar-thumb-bg, #c0c0c0);
+    border-radius: 4px;
+}
+
+.overview-section::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbar-thumb-hover-bg, #a0a0a0);
 }
 
 .section-hero {
@@ -1351,4 +1449,207 @@ body {
 
 .problem-item .buttons {
     margin-bottom: 0;
+}
+
+/* ===================================
+   CONTEXT SELECTION SYSTEM
+   =================================== */
+
+/* Context Panel */
+.context-panel {
+    margin-bottom: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.context-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.context-item {
+    cursor: default;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.context-item:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.context-content {
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-size: 0.875rem;
+    color: var(--vscode-text-muted);
+    line-height: 1.4;
+}
+
+.context-help {
+    font-size: 0.75rem;
+}
+
+/* Context Selectable Elements */
+.context-selectable {
+    cursor: text;
+    user-select: text;
+    transition: background-color 0.2s ease;
+}
+
+.context-selectable:hover {
+    background-color: rgba(0, 122, 204, 0.05);
+}
+
+.context-selectable.selected-for-context {
+    background-color: rgba(0, 122, 204, 0.1);
+    border-left: 3px solid var(--vscode-accent);
+}
+
+.selectable-text {
+    cursor: text;
+    user-select: text;
+}
+
+/* Context Menu (appears on text selection) */
+.context-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid var(--vscode-border);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.25rem;
+    z-index: 9999;
+    animation: context-menu-appear 0.15s ease;
+}
+
+@keyframes context-menu-appear {
+    0% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.context-menu .context-add-button {
+    white-space: nowrap;
+    font-size: 0.875rem;
+}
+
+/* Dark theme support for context menu */
+.theme-dark .context-menu {
+    background: #2d2d30;
+    border-color: #3e3e42;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Context Badge */
+.context-badge {
+    cursor: default;
+}
+
+/* Context Indicator in Chat Input */
+#context-indicator {
+    padding: 0.5rem 0;
+}
+
+#context-indicator .tag {
+    font-size: 0.75rem;
+}
+
+/* Context selection animation */
+@keyframes context-added {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+        background-color: rgba(0, 122, 204, 0.2);
+    }
+
+    100% {
+        transform: scale(1);
+        background-color: transparent;
+    }
+}
+
+.context-added-animation {
+    animation: context-added 0.5s ease;
+}
+
+/* Chat Context Section */
+.chat-context-section {
+    grid-area: context;
+    border-top: 1px solid var(--vscode-border);
+    border-bottom: 1px solid var(--vscode-border);
+    max-height: 200px;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+/* Hide context section only when it contains the empty state message */
+.chat-context-section:has(.has-text-grey.has-text-centered) {
+    display: none;
+}
+
+/* Show context section when it has actual context items */
+.chat-context-section:has(.context-item) {
+    display: block;
+}
+
+/* Make the context panel more compact */
+.context-panel {
+    margin: 0 !important;
+    padding: 0.5rem !important;
+}
+
+.context-panel .level {
+    margin-bottom: 0.5rem !important;
+}
+
+.context-panel .title {
+    font-size: 0.75rem !important;
+    margin-bottom: 0 !important;
+}
+
+.context-panel .context-help {
+    padding: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.context-panel .context-help p {
+    font-size: 0.7rem !important;
+    margin: 0;
+}
+
+/* Context button in action buttons */
+.buttons .button.is-light {
+    transition: all 0.2s ease;
+}
+
+.buttons .button.is-light:hover {
+    background-color: var(--vscode-hover);
+    border-color: var(--vscode-accent);
+}
+
+/* Scrollbar styling for context list */
+.context-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.context-list::-webkit-scrollbar-track {
+    background: var(--vscode-panel-bg);
+}
+
+.context-list::-webkit-scrollbar-thumb {
+    background: var(--vscode-border);
+    border-radius: 3px;
+}
+
+.context-list::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-text-muted);
 }

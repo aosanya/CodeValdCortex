@@ -1,0 +1,73 @@
+package agency_designer
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+)
+
+// GoalItem renders a single goal in the list as a table row with selection checkbox
+templ GoalItem(goal *agency.Goal) {
+	<tr 
+		class="table-item context-selectable" 
+		data-item-key={ goal.Key }
+		data-goal-code={ goal.Code }
+		data-goal-description={ goal.Description }
+		title="Highlight text to add as context">
+		<td style="vertical-align: middle; width: 40px;">
+			<label class="checkbox">
+				<input 
+					type="checkbox" 
+					class="goal-checkbox" 
+					data-goal-key={ goal.Key }
+					onchange="updateGoalSelectionButtons()"
+				/>
+			</label>
+		</td>
+		<td style="vertical-align: middle;">
+			<span class="tag is-primary">{ goal.Code }</span>
+		</td>
+		<td class="item-description" style="vertical-align: middle;">
+			<span class="selectable-text">{ goal.Description }</span>
+		</td>
+		<td style="vertical-align: middle;">
+			<div class="buttons">
+				<button 
+					class="button is-small is-light is-fullwidth"
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("window.ContextManager.addGoalContext('%s', '%s')", goal.Code, templ.EscapeString(goal.Description))} }
+					title="Add to context">
+					<span class="icon"><i class="fas fa-layer-group"></i></span>
+					<span>Context</span>
+				</button>
+				<button 
+					class="button is-small is-info is-fullwidth" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("showGoalEditor('edit', '%s', '%s', '%s')", goal.Key, goal.Code, templ.EscapeString(goal.Description))} }
+					title="Edit">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+					<span>Edit</span>
+				</button>
+				<button 
+					class="button is-small is-danger is-fullwidth" 
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteGoal(%d)", goal.Number)} }
+					title="Delete">
+					<span class="icon"><i class="fas fa-trash"></i></span>
+					<span>Delete</span>
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// GoalsList renders all goals as table rows
+templ GoalsList(goals []*agency.Goal) {
+	if len(goals) == 0 {
+		<tr>
+			<td colspan="4" class="has-text-grey has-text-centered py-5">
+				<p><i class="fas fa-info-circle"></i> No goals defined yet. Click the + button to add one.</p>
+			</td>
+		</tr>
+	} else {
+		for _, goal := range goals {
+			@GoalItem(goal)
+		}
+	}
+}

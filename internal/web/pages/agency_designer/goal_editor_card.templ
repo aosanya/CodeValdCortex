@@ -1,0 +1,21 @@
+package agency_designer
+
+// GoalEditorCard renders the goal editor card component
+templ GoalEditorCard() {
+	@EditorCard(EditorCardConfig{
+		CardID:          "goal-editor-card",
+		TitleID:         "goal-editor-title",
+		AddTitle:        "Add New Goal",
+		EditTitle:       "Edit Goal",
+		CancelFunction:  "cancelGoalEdit()",
+		SaveFunction:    "saveGoalFromEditor()",
+		CodeInputID:     "goal-code-editor",
+		CodeLabel:       "Goal Code",
+		CodePlaceholder: "e.g., P001, PROB-1, etc.",
+		CodeHelp:        "A unique code to identify this goal (e.g., P001, PROB-1).",
+		DescInputID:     "goal-description-editor",
+		DescLabel:       "Goal Description",
+		DescPlaceholder: "Describe the goal this agency needs to solve...",
+		DescHelp:        "Provide a clear description of the goal. This will help define the agency's purpose.",
+	})
+}

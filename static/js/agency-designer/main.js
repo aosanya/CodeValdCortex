@@ -12,11 +12,11 @@ import {
     undoOverviewIntroduction
 } from './introduction.js';
 import {
-    showProblemEditor,
-    saveProblemFromEditor,
-    cancelProblemEdit,
-    deleteProblem
-} from './problems.js';
+    showGoalEditor,
+    saveGoalFromEditor,
+    cancelGoalEdit,
+    deleteGoal
+} from './goals.js';
 import {
     showUnitEditor,
     saveUnitFromEditor,
@@ -24,6 +24,7 @@ import {
     deleteUnit
 } from './units.js';
 import { getCurrentAgencyId, showNotification } from './utils.js';
+import { initializeContextSelection } from './context.js';
 
 // Check if DOM is already loaded
 if (document.readyState === 'loading') {
@@ -41,6 +42,7 @@ function initializeAgencyDesigner() {
         initializeAgentSelection();
         initializeOverview();
         initializeAIProcessControls();
+        initializeContextSelection(); // Initialize context selection system
     } catch (error) {
         console.error('❌ Error during initialization:', error);
         console.error('Error stack:', error.stack);
@@ -120,10 +122,10 @@ window.selectAgentType = selectAgentType;
 window.selectOverviewSection = selectOverviewSection;
 window.saveOverviewIntroduction = saveOverviewIntroduction;
 window.undoOverviewIntroduction = undoOverviewIntroduction;
-window.showProblemEditor = showProblemEditor;
-window.saveProblemFromEditor = saveProblemFromEditor;
-window.cancelProblemEdit = cancelProblemEdit;
-window.deleteProblem = deleteProblem;
+window.showGoalEditor = showGoalEditor;
+window.saveGoalFromEditor = saveGoalFromEditor;
+window.cancelGoalEdit = cancelGoalEdit;
+window.deleteGoal = deleteGoal;
 window.showUnitEditor = showUnitEditor;
 window.saveUnitFromEditor = saveUnitFromEditor;
 window.cancelUnitEdit = cancelUnitEdit;

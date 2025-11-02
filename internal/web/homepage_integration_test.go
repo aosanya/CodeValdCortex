@@ -121,9 +121,9 @@ func (m *mockAgencyService) UpdateAgencyOverview(ctx context.Context, id string,
 	return nil
 }
 
-func (m *mockAgencyService) CreateProblem(ctx context.Context, agencyID string, code string, description string) (*agency.Problem, error) {
-	return &agency.Problem{
-		Key:         "mock-problem-1",
+func (m *mockAgencyService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*agency.Goal, error) {
+	return &agency.Goal{
+		Key:         "mock-goal-1",
 		AgencyID:    agencyID,
 		Number:      1,
 		Code:        code,
@@ -131,15 +131,25 @@ func (m *mockAgencyService) CreateProblem(ctx context.Context, agencyID string, 
 	}, nil
 }
 
-func (m *mockAgencyService) GetProblems(ctx context.Context, agencyID string) ([]*agency.Problem, error) {
-	return []*agency.Problem{}, nil
+func (m *mockAgencyService) GetGoals(ctx context.Context, agencyID string) ([]*agency.Goal, error) {
+	return []*agency.Goal{}, nil
 }
 
-func (m *mockAgencyService) UpdateProblem(ctx context.Context, agencyID string, problemKey string, code string, description string) error {
+func (m *mockAgencyService) GetGoal(ctx context.Context, agencyID string, key string) (*agency.Goal, error) {
+	return &agency.Goal{
+		Key:         key,
+		AgencyID:    agencyID,
+		Number:      1,
+		Code:        "GOAL-1",
+		Description: "Mock goal",
+	}, nil
+}
+
+func (m *mockAgencyService) UpdateGoal(ctx context.Context, agencyID string, goalKey string, code string, description string) error {
 	return nil
 }
 
-func (m *mockAgencyService) DeleteProblem(ctx context.Context, agencyID string, problemKey string) error {
+func (m *mockAgencyService) DeleteGoal(ctx context.Context, agencyID string, goalKey string) error {
 	return nil
 }
 

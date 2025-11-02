@@ -1,0 +1,953 @@
+<!doctype html>
+<!--
+    Agency Designer - Design Reference
+    
+    This is a STYLING REFERENCE file showing the complete HTML structure and Bulma CSS classes
+    used in the Agency Designer interface. It demonstrates the layout, component hierarchy,
+    and styling patterns.
+    
+    Last Updated: 2025-10-31
+    Changes:
+    - Added Context Panel between chat messages and input for text selection
+    - Added context-selectable class to introduction textarea
+    - Updated help text to mention context highlighting
+    - Added context indicator in chat input form
+    - Added agency-designer.js reference for context selection functionality
+    - Added example chat conversation with multiple messages (user and AI)
+    - Updated context panel to use correct box-based design with warning-light background
+    - Context items now use level layout with tags and delete buttons
+    - Each context shows truncated text with ellipsis and data-selection-index
+    - AI Process Status now includes id attributes and proper visibility state
+    - Form now includes proper HTMX attributes for API integration
+    - Context indicator hidden by default (display: none)
+    
+    NOTE: This is a design reference only. The actual implementation uses .templ files.
+    Do not copy JavaScript functionality from this file - use server-side rendering and HTMX.
+-->
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agency Designer - CodeValdCortex (Styling Reference)</title>
+    <!-- Bulma CSS (self-hosted) -->
+    <link rel="stylesheet" href="../../../../static/css/bulma.min.css">
+    <!-- FontAwesome CSS (self-hosted) -->
+    <link rel="stylesheet" href="../../../../static/fontawesome/css/all.min.css">
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="../../../../static/css/styles.css">
+    <link rel="stylesheet" href="../../../../static/css/agencies.css">
+    <link rel="stylesheet" href="../../../../static/css/themes.css">
+    <!-- Agency Designer Specific CSS -->
+    <link rel="stylesheet" href="../../../../static/css/vscode-status-bar.css">
+    <link rel="stylesheet" href="../../../../static/css/agency-designer.css">
+    <!-- Agency Designer JavaScript (for context selection and other features) -->
+    <script src="../../../../static/js/agency-designer.js" type="module" defer></script>
+</head>
+
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="container">
+            <div class="navbar-brand" style="margin-left: -5rem;">
+                <a href="/" class="navbar-item">
+                    <svg style="width: 2rem; height: 2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                        </path>
+                    </svg>
+                    <span class="ml-2 has-text-weight-bold is-size-5">CodeValdCortex</span>
+                </a>
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+            <div id="navbarMenu" class="navbar-menu ml-5 pl-5">
+                <div class="navbar-start">
+                    <a href="/agencies/UC-CHAR-001/dashboard" class="navbar-item">Dashboard</a>
+                    <a href="/agencies/UC-CHAR-001/designer" class="navbar-item">
+                        <span class="icon">
+                            <i class="fas fa-brain"></i>
+                        </span>
+                        <span>Designer</span>
+                    </a>
+                    <a href="/agencies/UC-CHAR-001/agents" class="navbar-item">Agents</a>
+                </div>
+                <div class="navbar-end">
+                    <a class="navbar-item" href="/">
+                        <span class="icon">
+                            <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
+                        </span>
+                        <span>Switch Agency</span>
+                    </a>
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <!-- Theme Switcher (Static Display) -->
+                            <div class="navbar-item has-dropdown">
+                                <a class="navbar-link">
+                                    <span class="icon">
+                                        <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v6a2 2 0 002 2h4a2 2 0 002-2V5z">
+                                            </path>
+                                        </svg>
+                                    </span>
+                                    <span>Light</span>
+                                </a>
+                                <div class="navbar-dropdown is-right">
+                                    <a class="navbar-item is-active">
+                                        <span class="theme-preview"
+                                            style="background-color: #ffffff; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Light</strong>
+                                            <br>
+                                            <small>Clean and bright</small>
+                                        </span>
+                                    </a>
+                                    <a class="navbar-item">
+                                        <span class="theme-preview"
+                                            style="background-color: #FF6B6B; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Midnight Coral</strong>
+                                            <br>
+                                            <small>Professional with vibrant accents</small>
+                                        </span>
+                                    </a>
+                                    <a class="navbar-item">
+                                        <span class="theme-preview"
+                                            style="background-color: #8b5cf6; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Slate Purple</strong>
+                                            <br>
+                                            <small>Bold and tech-forward</small>
+                                        </span>
+                                    </a>
+                                    <a class="navbar-item">
+                                        <span class="theme-preview"
+                                            style="background-color: #10b981; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Charcoal Emerald</strong>
+                                            <br>
+                                            <small>Fresh and trustworthy</small>
+                                        </span>
+                                    </a>
+                                    <a class="navbar-item">
+                                        <span class="theme-preview"
+                                            style="background-color: #f97316; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Navy Orange</strong>
+                                            <br>
+                                            <small>Energetic and confident</small>
+                                        </span>
+                                    </a>
+                                    <a class="navbar-item">
+                                        <span class="theme-preview"
+                                            style="background-color: #06b6d4; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Obsidian Cyan</strong>
+                                            <br>
+                                            <small>Sleek and minimalist</small>
+                                        </span>
+                                    </a>
+                                    <hr class="navbar-divider">
+                                    <a class="navbar-item">
+                                        <span class="theme-preview"
+                                            style="background-color: #121212; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; border: 1px solid rgba(0, 0, 0, 0.2);"></span>
+                                        <span>
+                                            <strong>Dark Mode</strong>
+                                            <br>
+                                            <small>Easy on the eyes</small>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main class="section">
+        <div class="container">
+            <div class="vscode-designer-container">
+                <!-- Main Content Area with Columns -->
+                <div class="columns is-gapless vscode-main-content">
+                    <!-- Left Column: Designer Panels -->
+                    <div class="column is-two-thirds">
+                        <!-- View Switcher at Top -->
+                        <div class="top-toolbar">
+                            <div class="view-switcher">
+                                <div class="view-tab is-active" data-view="overview">
+                                    <span class="view-icon">📊</span>
+                                    <span class="view-label">Overview</span>
+                                </div>
+                                <div class="view-tab" data-view="agent-types">
+                                    <span class="view-icon">🤖</span>
+                                    <span class="view-label">Agent Types</span>
+                                </div>
+                                <div class="view-tab" data-view="layout">
+                                    <span class="view-icon">🔗</span>
+                                    <span class="view-label">Layout</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="designer-panels">
+                            <!-- Overview View -->
+                            <div class="view-content is-active" data-view-content="overview">
+                                <div class="overview-layout">
+                                    <!-- Left Sidebar: Overview Navigation -->
+                                    <aside class="sidebar-panel">
+                                        <header class="sidebar-header">
+                                            <h3 class="sidebar-title">
+                                                <span class="icon">
+                                                    <i class="fas fa-list"></i>
+                                                </span>
+                                                <span>Sections</span>
+                                            </h3>
+                                        </header>
+                                        <div class="sidebar-content">
+                                            <div class="overview-nav-list">
+                                                <div class="overview-nav-item is-active" data-section="introduction">
+                                                    <div class="nav-icon">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </div>
+                                                    <div class="nav-info">
+                                                        <div class="nav-name">Introduction</div>
+                                                        <div class="nav-description">Get started</div>
+                                                    </div>
+                                                </div>
+                                                <div class="overview-nav-item" data-section="goal-definition">
+                                                    <div class="nav-icon">
+                                                        <i class="fas fa-bullseye"></i>
+                                                    </div>
+                                                    <div class="nav-info">
+                                                        <div class="nav-name">Goal Definition</div>
+                                                        <div class="nav-description">Define objectives</div>
+                                                    </div>
+                                                </div>
+                                                <div class="overview-nav-item" data-section="units-of-work">
+                                                    <div class="nav-icon">
+                                                        <i class="fas fa-clipboard-list"></i>
+                                                    </div>
+                                                    <div class="nav-info">
+                                                        <div class="nav-name">Units of Work</div>
+                                                        <div class="nav-description">Define work items</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </aside>
+                                    <!-- Main Panel: Overview Content -->
+                                    <main class="details-panel">
+                                        <header class="details-header">
+                                            <h3 class="details-title" id="overview-title">
+                                                <span class="icon">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </span>
+                                                <span>Introduction</span>
+                                            </h3>
+                                        </header>
+                                        <div class="details-content" id="overview-content">
+                                            <!-- All section contents pre-rendered, toggled by JavaScript -->
+                                            <div id="content-introduction" class="overview-content-section is-active">
+                                                <div class="overview-section">
+                                                    <div class="box">
+                                                        <div id="introduction-content">
+                                                            <div class="content">
+                                                                <div class="field">
+                                                                    <div class="control">
+                                                                        <textarea class="textarea context-selectable"
+                                                                            id="introduction-editor"
+                                                                            placeholder="Enter introduction text for this agency..."
+                                                                            rows="20"
+                                                                            style="font-family: monospace; font-size: 14px;"
+                                                                            title="Highlight text to add as context">Tumaini is a donation management agency that streamlines the entire donation lifecycle from collection to delivery. The agency addresses two critical challenges in charitable operations: maintaining accurate records of donor contributions and facilitating meaningful gratitude exchanges between recipients and donors. Through automated donation collection, intelligent sorting and organization, and coordinated pickup logistics, Tumaini ensures donations reach their intended recipients efficiently while fostering lasting connections between donors and beneficiaries. This comprehensive approach transforms traditional donation processes into a transparent, trackable, and relationship-building system that benefits all stakeholders in the charitable ecosystem.</textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <p class="help">Use this section to provide an overview
+                                                                    and introduction to your agency. Highlight text to
+                                                                    add it as context.</p>
+                                                            </div>
+                                                            <div class="buttons is-right">
+                                                                <button class="button is-small is-primary">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-save"></i>
+                                                                    </span>
+                                                                    <span>Save</span>
+                                                                </button>
+                                                                <!-- AI Refine / Sparkle button -->
+                                                                <button class="button is-small is-info"
+                                                                    title="Refine with AI">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-magic"></i>
+                                                                    </span>
+                                                                    <span>Refine</span>
+                                                                </button>
+                                                                <button class="button is-small">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-undo"></i>
+                                                                    </span>
+                                                                    <span>Undo</span>
+                                                                </button>
+                                                            </div>
+                                                            <!-- Loading indicator for AI refine -->
+                                                            <div id="ai-refine-loading" class="htmx-indicator">
+                                                                <div class="notification is-info is-light">
+                                                                    <div class="is-flex is-align-items-center">
+                                                                        <span class="icon has-text-info mr-2">
+                                                                            <i class="fas fa-spinner fa-spin"></i>
+                                                                        </span>
+                                                                        <span>AI is refining your introduction...</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="content-goal-definition" class="overview-content-section"
+                                                style="display: none;">
+                                                <div class="overview-section">
+                                                    <!-- AI Goal Operations Toolbar -->
+                                                    <div class="box mb-4 p-4">
+                                                        <div class="level is-mobile">
+                                                            <div class="level-left">
+                                                                <div class="level-item">
+                                                                    <p class="has-text-weight-semibold">AI Goal
+                                                                        Operations:</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="level-right">
+                                                                <div class="level-item">
+                                                                    <div class="buttons">
+                                                                        <button class="button is-small is-info"
+                                                                            title="Generate new goals from introduction">
+                                                                            <span class="icon">
+                                                                                <i class="fas fa-sparkles"></i>
+                                                                            </span>
+                                                                            <span>Create Goals</span>
+                                                                        </button>
+                                                                        <button
+                                                                            class="button is-small is-link is-static"
+                                                                            title="Select goals to enhance" disabled>
+                                                                            <span class="icon">
+                                                                                <i
+                                                                                    class="fas fa-wand-magic-sparkles"></i>
+                                                                            </span>
+                                                                            <span>Enhance Goals</span>
+                                                                        </button>
+                                                                        <button
+                                                                            class="button is-small is-warning is-static"
+                                                                            title="Select goals to consolidate"
+                                                                            disabled>
+                                                                            <span class="icon">
+                                                                                <i class="fas fa-compress"></i>
+                                                                            </span>
+                                                                            <span>Consolidate Goals</span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Editor Card (Hidden by default) -->
+                                                    <div class="card mb-4 is-hidden" id="goal-editor-card">
+                                                        <header class="card-header">
+                                                            <p class="card-header-title">
+                                                                <span class="icon">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </span>
+                                                                <span>Add New Goal</span>
+                                                            </p>
+                                                            <button class="card-header-icon button is-small is-text"
+                                                                title="Cancel">
+                                                                <span class="icon">
+                                                                    <i class="fas fa-times"></i>
+                                                                </span>
+                                                            </button>
+                                                        </header>
+                                                        <div class="card-content">
+                                                            <div class="field">
+                                                                <label class="label">Goal Code</label>
+                                                                <div class="control">
+                                                                    <input class="input" type="text"
+                                                                        id="goal-code-editor"
+                                                                        placeholder="e.g., P001, PROB-1, etc."
+                                                                        maxlength="20">
+                                                                </div>
+                                                                <p class="help">A unique code to identify this goal
+                                                                    (e.g., P001, PROB-1).</p>
+                                                            </div>
+                                                            <div class="field">
+                                                                <label class="label">Goal Description</label>
+                                                                <div class="control">
+                                                                    <textarea class="textarea"
+                                                                        id="goal-description-editor"
+                                                                        placeholder="Describe the goal this agency needs to solve..."
+                                                                        rows="8"
+                                                                        style="font-family: monospace; font-size: 14px;"></textarea>
+                                                                </div>
+                                                                <p class="help">Provide a clear description of the goal.
+                                                                    This will help define the agency&#39;s purpose.</p>
+                                                            </div>
+                                                        </div>
+                                                        <footer class="card-footer">
+                                                            <div class="card-footer-item">
+                                                                <button class="button is-small is-primary">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-save"></i>
+                                                                    </span>
+                                                                    <span>Save</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="card-footer-item">
+                                                                <button class="button is-small">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-times"></i>
+                                                                    </span>
+                                                                    <span>Cancel</span>
+                                                                </button>
+                                                            </div>
+                                                        </footer>
+                                                    </div>
+                                                    <div class="box m-0 p-0" id="goals-list-card">
+                                                        <div class="level is-mobile mb-4">
+                                                            <div class="level-left"></div>
+                                                            <div class="level-right">
+                                                                <div class="level-item">
+                                                                    <button class="button is-small is-success"
+                                                                        title="Add New Goal">
+                                                                        <span class="icon">
+                                                                            <i class="fas fa-plus"></i>
+                                                                        </span>
+                                                                        <span>Add</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="goals-list" class="goals-list">
+                                                            <table class="table is-fullwidth is-striped is-hoverable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 50px; text-align: center;">
+                                                                            <label class="checkbox">
+                                                                                <input type="checkbox"
+                                                                                    title="Select/Deselect All">
+                                                                            </label>
+                                                                        </th>
+                                                                        <th style="width: 120px;">Code</th>
+                                                                        <th>Goal Title</th>
+                                                                        <th style="width: 180px;">Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="goals-table-body">
+                                                                    <!-- Items will be loaded here dynamically -->
+                                                                    <tr>
+                                                                        <td colspan="4"
+                                                                            class="has-text-grey has-text-centered py-5">
+                                                                            <p>
+                                                                                <i class="fas fa-spinner fa-spin"></i>
+                                                                                Loading goals...
+                                                                            </p>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="content-units-of-work" class="overview-content-section"
+                                                style="display: none;">
+                                                <div class="overview-section">
+                                                    <!-- Editor Card (Hidden by default) -->
+                                                    <div class="card mb-4 is-hidden" id="unit-editor-card">
+                                                        <header class="card-header">
+                                                            <p class="card-header-title">
+                                                                <span class="icon">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </span>
+                                                                <span>Add New Unit of Work</span>
+                                                            </p>
+                                                            <button class="card-header-icon button is-small is-text"
+                                                                title="Cancel">
+                                                                <span class="icon">
+                                                                    <i class="fas fa-times"></i>
+                                                                </span>
+                                                            </button>
+                                                        </header>
+                                                        <div class="card-content">
+                                                            <div class="field">
+                                                                <label class="label">Unit Code</label>
+                                                                <div class="control">
+                                                                    <input class="input" type="text"
+                                                                        id="unit-code-input"
+                                                                        placeholder="e.g., UOW001, WRK-1, etc."
+                                                                        maxlength="20">
+                                                                </div>
+                                                                <p class="help">A unique code to identify this unit of
+                                                                    work (e.g., UOW001, WRK-1).</p>
+                                                            </div>
+                                                            <div class="field">
+                                                                <label class="label">Unit Description</label>
+                                                                <div class="control">
+                                                                    <textarea class="textarea"
+                                                                        id="unit-description-input"
+                                                                        placeholder="Describe what this unit of work accomplishes..."
+                                                                        rows="8"
+                                                                        style="font-family: monospace; font-size: 14px;"></textarea>
+                                                                </div>
+                                                                <p class="help">Provide a clear description of what this
+                                                                    unit of work does.</p>
+                                                            </div>
+                                                        </div>
+                                                        <footer class="card-footer">
+                                                            <div class="card-footer-item">
+                                                                <button class="button is-small is-primary">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-save"></i>
+                                                                    </span>
+                                                                    <span>Save</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="card-footer-item">
+                                                                <button class="button is-small">
+                                                                    <span class="icon">
+                                                                        <i class="fas fa-times"></i>
+                                                                    </span>
+                                                                    <span>Cancel</span>
+                                                                </button>
+                                                            </div>
+                                                        </footer>
+                                                    </div>
+                                                    <div class="box m-0 p-0" id="units-list-card">
+                                                        <div class="level is-mobile mb-4">
+                                                            <div class="level-left"></div>
+                                                            <div class="level-right">
+                                                                <div class="level-item">
+                                                                    <button class="button is-small is-success"
+                                                                        title="Add New Unit">
+                                                                        <span class="icon">
+                                                                            <i class="fas fa-plus"></i>
+                                                                        </span>
+                                                                        <span>Add</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div id="units-list" class="units-list">
+                                                            <table class="table is-fullwidth is-striped is-hoverable">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 15%;">Code</th>
+                                                                        <th style="width: 65%;">Unit of Work Title</th>
+                                                                        <th style="width: 20%;">Actions</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="units-table-body">
+                                                                    <!-- Items will be loaded here dynamically -->
+                                                                    <tr>
+                                                                        <td colspan="3"
+                                                                            class="has-text-grey has-text-centered py-5">
+                                                                            <p>
+                                                                                <i class="fas fa-spinner fa-spin"></i>
+                                                                                Loading units of work...
+                                                                            </p>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </main>
+                                </div>
+                            </div>
+                            <!-- Agent Types View -->
+                            <div class="view-content" data-view-content="agent-types">
+                                <!-- Left Sidebar: Agent Types List -->
+                                <aside class="sidebar-panel">
+                                    <header class="sidebar-header">
+                                        <h3 class="sidebar-title">
+                                            <span class="icon">
+                                                <i class="fas fa-robot"></i>
+                                            </span>
+                                            <span>Agent Types</span>
+                                        </h3>
+                                    </header>
+                                    <div class="sidebar-content">
+                                        <div class="empty-sidebar">
+                                            <div class="empty-sidebar-content">
+                                                <span class="icon is-large has-text-grey-light">
+                                                    <i class="fas fa-robot fa-2x"></i>
+                                                </span>
+                                                <p class="mt-3">No agent types yet</p>
+                                                <p class="is-size-7 has-text-grey">Chat with the AI to design your
+                                                    agents</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </aside>
+                                <!-- Middle Panel: Agent Type Details -->
+                                <main class="details-panel">
+                                    <header class="details-header">
+                                        <h3 class="details-title" id="details-title">
+                                            <span class="icon">
+                                                <i class="fas fa-info-circle"></i>
+                                            </span>
+                                            <span>Agent Details</span>
+                                        </h3>
+                                    </header>
+                                    <div class="details-content" id="agent-details">
+                                        <div class="empty-details">
+                                            <div class="empty-details-content">
+                                                <span class="icon is-large has-text-grey-light">
+                                                    <i class="fas fa-hand-pointer fa-2x"></i>
+                                                </span>
+                                                <p class="title is-5 mt-4">Select an Agent Type</p>
+                                                <p class="subtitle is-6">Click on an agent type in the sidebar to view
+                                                    its details</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </main>
+                            </div>
+                            <!-- Layout View -->
+                            <div class="view-content" data-view-content="layout">
+                                <div class="layout-panel">
+                                    <h2>Layout Diagram - Coming Soon</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right Column: AI Chat (Always Visible) -->
+                    <div class="column is-one-third">
+                        <aside class="chat-panel">
+                            <header class="chat-header">
+                                <div class="chat-header-content">
+                                    <span class="icon is-medium has-text-primary">
+                                        <i class="fas fa-comments"></i>
+                                    </span>
+                                    <div>
+                                        <h3 class="chat-title">Designer</h3>
+                                        <p class="chat-subtitle">Tumaini</p>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="chat-messages-container" id="chat-messages">
+                                <!-- AI Welcome Message -->
+                                <div class="message ai-message welcome-message">
+                                    <div class="message-avatar">
+                                        <span class="icon is-large has-text-primary">
+                                            <i class="fas fa-robot fa-2x"></i>
+                                        </span>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p>
+                                                <strong>Hi! I'm your AI Agency Designer.</strong>
+                                                🤖
+                                            </p>
+                                            <p>
+                                                I'll help you create a complete multi-agent architecture for
+                                                <strong>Tumaini</strong>
+                                                .
+                                            </p>
+                                            <p>Let's start by understanding your use case:</p>
+                                            <ul>
+                                                <li>What problem are you trying to solve?</li>
+                                                <li>What are the main processes or workflows?</li>
+                                                <li>Who are the key actors or stakeholders?</li>
+                                            </ul>
+                                            <p class="mt-4">
+                                                <em>💡 Tip: Be as detailed as you can - I'll help you refine the details
+                                                    as we go!</em>
+                                            </p>
+                                        </div>
+                                        <div class="message-time">2:30 PM</div>
+                                    </div>
+                                </div>
+
+                                <!-- User Message Example -->
+                                <div class="message user-message">
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p>I need help designing an agency for a donation management system. The
+                                                agency should handle collecting donations, organizing them, and
+                                                coordinating pickups with donors and recipients.</p>
+                                        </div>
+                                        <div class="message-time">2:32 PM</div>
+                                    </div>
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-info">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- AI Response with Analysis -->
+                                <div class="message ai-message">
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-primary">
+                                            <i class="fas fa-robot"></i>
+                                        </span>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p><strong>Great!</strong> I can help you design a comprehensive donation
+                                                management agency. Based on your description, I can see several key
+                                                areas:</p>
+                                            <ul>
+                                                <li><strong>Donation Collection</strong> - Receiving and recording
+                                                    donations from donors</li>
+                                                <li><strong>Inventory Management</strong> - Organizing and categorizing
+                                                    donated items</li>
+                                                <li><strong>Logistics Coordination</strong> - Scheduling and managing
+                                                    pickups/deliveries</li>
+                                                <li><strong>Communication</strong> - Keeping donors and recipients
+                                                    informed</li>
+                                            </ul>
+                                            <p class="mt-3">Let me help you refine the introduction section first. Would
+                                                you like me to help create agent types for each of these areas?</p>
+                                        </div>
+                                        <div class="message-time">2:33 PM</div>
+                                    </div>
+                                </div>
+
+                                <!-- User Message with Context Reference -->
+                                <div class="message user-message">
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p>Yes, that sounds good. Can you help me define specific goals for the
+                                                donation collection process?</p>
+                                            <div class="message-context mt-2">
+                                                <div class="tag is-info is-light">
+                                                    <span class="icon is-small"><i
+                                                            class="fas fa-layer-group"></i></span>
+                                                    <span>1 context included</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="message-time">2:35 PM</div>
+                                    </div>
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-info">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- AI Response with Detailed Goals -->
+                                <div class="message ai-message">
+                                    <div class="message-avatar">
+                                        <span class="icon is-medium has-text-primary">
+                                            <i class="fas fa-robot"></i>
+                                        </span>
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-bubble">
+                                            <p><strong>Absolutely!</strong> Here are some key goals for your donation
+                                                collection process:</p>
+                                            <ol>
+                                                <li><strong>Accurate Record Keeping</strong> - Maintain detailed records
+                                                    of all donor contributions including donor information, donation
+                                                    type, quantity, and condition</li>
+                                                <li><strong>Efficient Intake Process</strong> - Streamline the donation
+                                                    acceptance workflow to minimize donor wait time and maximize
+                                                    throughput</li>
+                                                <li><strong>Quality Assessment</strong> - Ensure donations meet quality
+                                                    standards and are suitable for distribution to recipients</li>
+                                                <li><strong>Donor Recognition</strong> - Generate appropriate receipts
+                                                    and acknowledgments for tax purposes and relationship building</li>
+                                            </ol>
+                                            <p class="mt-3">Would you like me to create these goals in the Goal
+                                                Definition section?</p>
+                                        </div>
+                                        <div class="message-time">2:36 PM</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Typing Indicator -->
+                            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                                <div class="typing-bubble">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                            <!-- Context Panel (between messages and input) -->
+                            <div class="chat-context-section">
+                                <div class="box context-panel">
+                                    <header class="level is-mobile mb-3">
+                                        <div class="level-left">
+                                            <div class="level-item">
+                                                <h5 class="title is-6">
+                                                    <span class="icon has-text-info">
+                                                        <i class="fas fa-layer-group"></i>
+                                                    </span>
+                                                    <span>Context</span>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <div class="level-right">
+                                            <div class="level-item">
+                                                <button class="button is-small is-text"
+                                                    onclick="window.ContextManager.clearAllContexts()"
+                                                    title="Clear all contexts">
+                                                    <span class="icon is-small">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                    <span>Clear All</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+
+                                    <div id="context-container" class="context-list">
+                                        <!-- Example of populated contexts -->
+                                        <div class="mb-3">
+                                            <div class="box p-2 mb-2 has-background-warning-light"
+                                                data-selection-index="0">
+                                                <div class="level is-mobile">
+                                                    <div class="level-left" style="flex-shrink: 1; min-width: 0;">
+                                                        <div class="level-item">
+                                                            <span class="tag is-small is-info">Introduction</span>
+                                                        </div>
+                                                        <div class="level-item">
+                                                            <strong class="is-size-7">INTRO</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-right" style="flex-shrink: 0;">
+                                                        <div class="level-item">
+                                                            <button class="delete is-small"
+                                                                onclick="window.ContextManager.removeSelection(0)"
+                                                                title="Remove selection"></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="content is-small mt-1">
+                                                    <p class="is-size-7" style="word-break: break-word;">transforms
+                                                        traditional donation processes into a transparent, trackable,
+                                                        and rel...</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="box p-2 mb-2 has-background-warning-light"
+                                                data-selection-index="1">
+                                                <div class="level is-mobile">
+                                                    <div class="level-left" style="flex-shrink: 1; min-width: 0;">
+                                                        <div class="level-item">
+                                                            <span class="tag is-small is-info">Introduction</span>
+                                                        </div>
+                                                        <div class="level-item">
+                                                            <strong class="is-size-7">INTRO</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="level-right" style="flex-shrink: 0;">
+                                                        <div class="level-item">
+                                                            <button class="delete is-small"
+                                                                onclick="window.ContextManager.removeSelection(1)"
+                                                                title="Remove selection"></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="content is-small mt-1">
+                                                    <p class="is-size-7" style="word-break: break-word;">ion, and
+                                                        coordinated pickup logistics, Tumaini ensures donations reach
+                                                        their int...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Chat Input (Independent) -->
+                            <div class="chat-input-container">
+                                <!-- AI Process Status Bar (inside input panel) -->
+                                <div class="ai-process-status htmx-indicator" id="ai-process-status"
+                                    style="display: none; visibility: visible;">
+                                    <div class="process-content">
+                                        <div class="process-info">
+                                            <span class="icon has-text-info">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            </span>
+                                            <span class="process-text" id="ai-status-message">AI is processing your
+                                                message...</span>
+                                        </div>
+                                        <button class="button is-small is-danger is-outlined" id="stop-ai-process"
+                                            title="Stop AI processing">
+                                            <span class="icon is-small">
+                                                <i class="fas fa-stop"></i>
+                                            </span>
+                                            <span>Stop</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form hx-post="/api/v1/agencies/UC-CHAR-001/designer/conversations/web"
+                                    hx-target="#chat-messages" hx-swap="innerHTML" hx-indicator="#typing-indicator"
+                                    hx-on::before-request="
+			const input = document.getElementById('user-input');
+			const contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';
+			if (contexts) {
+				input.value = input.value + contexts;
+			}
+		" hx-on::after-request="
+			document.getElementById('user-input').value = ''; 
+			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+		" hx-on::response-error="
+			console.error('CHAT: Response error:', event.detail);
+		">
+                                    <div class="field has-addons">
+                                        <div class="control is-expanded">
+                                            <input class="input" type="text" name="message" id="user-input"
+                                                placeholder="Describe your requirements..." required autocomplete="off">
+                                        </div>
+                                        <div class="control">
+                                            <button class="button is-primary" type="submit">
+                                                <span class="icon">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Context indicator -->
+                                    <div id="context-indicator" class="mt-2" style="display: none;">
+                                        <div class="tags">
+                                            <span class="tag is-info is-light">
+                                                <span class="icon is-small">
+                                                    <i class="fas fa-layer-group"></i>
+                                                </span>
+                                                <span id="context-count">0 contexts</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+                <!-- Status Bar at Bottom (VS Code style) -->
+                <div class="vscode-status-bar">
+                    <div class="status-bar-left">
+                        <span class="status-item">
+                            <i class="fas fa-network-wired"></i>
+                            <span class="status-text">Current Agency: Tumaini</span>
+                        </span>
+                    </div>
+                    <div class="status-bar-right"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

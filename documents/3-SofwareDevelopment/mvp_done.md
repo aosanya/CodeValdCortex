@@ -25,6 +25,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-022 | Agency Selection Homepage    | Build homepage UI for selecting and switching between agencies with agency-specific database integration. Implement multi-database architecture where each agency operates with its own isolated ArangoDB database | 2025-10-25     | `feature/MVP-022_agency-selection-homepage`   | ~6 hours   | ✅ Complete |
 | MVP-024 | Create Agency Form    | Implement simplified agency creation form with only Agency Name field. UUID-based identification with "agency_" prefix for ArangoDB compatibility. Automatic database initialization with standard collections. AI Designer (MVP-025) handles advanced configuration | 2025-10-25     | `feature/MVP-024_create-agency-form`   | ~5 hours   | ✅ Complete |
 | MVP-025 | AI Agency Designer    | Advanced AI-driven agency design tool that brainstorms agency structure, creates agent types, defines relationships, and generates complete agency architecture through intelligent conversation | 2025-10-29     | `feature/MVP-025_ai-agency-designer`   | ~8 hours   | ✅ Complete |
+| MVP-029 | Goals Module | Implement Goals CRUD operations, AI-powered goal generation/refinement from natural language, data models, templ templates, and UI in Agency Designer with database persistence | 2025-10-30     | `feature/MVP-029_problem-definition-module`   | ~6 hours   | ✅ Complete |
 
 ---
 
@@ -2052,8 +2053,87 @@ DELETE /agencies/{id}/units/{id}      # Delete unit
 - Code quality measures and production readiness checklist
 
 #### Next Tasks
+**MVP-029**: Goals Module - Implement structured goal cataloging with AI generation
 **MVP-014**: Kubernetes Deployment - Create deployment manifests for production
-**MVP-026**: Basic User Authentication - Implement user management system
+
+---
+
+### MVP-029: Goals Module
+**Completed**: October 30, 2025  
+**Branch**: `feature/MVP-029_problem-definition-module`  
+**Status**: ✅ Complete
+
+#### Objectives Achieved
+- ✅ Renamed "Problem Definition" to "Goals" across entire codebase (20+ files)
+- ✅ Implemented Goals CRUD operations (Create, Read, Update, Delete)
+- ✅ Built AI-powered goal refinement with database persistence
+- ✅ Created AI-powered goal generation from natural language input
+- ✅ Developed templ templates for goal management UI
+- ✅ Implemented JavaScript frontend with modal dialogs
+- ✅ Integrated HTMX for seamless server interactions
+- ✅ Extended ListCard component to support AI buttons
+
+#### Key Deliverables
+1. **Data Models**
+   - `Goal` struct with comprehensive fields (Code, Description, Scope, SuccessMetrics, Priority, Status, Category, Tags)
+   - Request types: `CreateGoalRequest`, `UpdateGoalRequest`, `GoalRefineRequest`
+   - Auto-numbering and unique code validation
+
+2. **Backend Services**
+   - `GoalService`: CRUD operations with agency-scoped access
+   - `GoalRefiner`: AI-powered refinement and generation using LLM
+   - Repository layer: ArangoDB persistence in `goals` collection
+
+3. **API Endpoints**
+   ```
+   GET    /api/v1/agencies/:id/goals          # List all goals
+   POST   /api/v1/agencies/:id/goals          # Create goal
+   PUT    /api/v1/agencies/:id/goals/:key     # Update goal
+   DELETE /api/v1/agencies/:id/goals/:key     # Delete goal
+   GET    /api/v1/agencies/:id/goals/html     # HTML for HTMX
+   POST   /api/v1/agencies/:id/goals/:goalKey/refine  # AI refine
+   POST   /api/v1/agencies/:id/goals/generate         # AI generate
+   ```
+
+4. **Frontend Components**
+   - `GoalsListCard`: Displays goals table with "Generate with AI" button
+   - `GoalEditorCard`: Form for creating/editing goals
+   - `goals.js`: JavaScript module with modal dialogs and AJAX calls
+   - AI generation modal with natural language input
+
+5. **AI Integration**
+   - **Goal Refinement**: Analyzes existing goal, suggests improvements to description, scope, and success metrics
+   - **Goal Generation**: Creates structured goal from natural language user input
+   - Context-aware: Uses agency information and existing goals for better suggestions
+   - Database persistence: Automatically saves refined/generated goals
+
+#### Technical Highlights
+- **Template-First Architecture**: All HTML in `.templ` files, zero HTML strings in Go code
+- **HTMX Pattern**: Follows established `RefineIntroduction` pattern for consistency
+- **Functional JavaScript**: Pure functions with minimal side effects for testability
+- **Database-First**: Generated goals saved immediately to prevent data loss
+
+#### Challenges Overcome
+1. **Templ File Regeneration**: Fixed stale references by regenerating all templ files
+2. **Method Signature Mismatch**: Corrected `CreateGoal` call to match actual service interface
+3. **JavaScript Syntax**: Fixed duplicate code and missing braces
+4. **Unused Variables**: Cleaned up unused variables flagged by compiler
+
+#### Code Quality
+- File size: 644 lines in `ai_refine_handler.go` (near limit, flagged for refactoring)
+- Function size: Most functions under 50 lines
+- Test coverage: Manual testing completed, automated tests pending
+- Documentation: Comprehensive coding session doc created
+
+#### Documentation
+- Session: `documents/3-SofwareDevelopment/coding_sessions/MVP-029_goals-module.md`
+- Complete implementation details with code examples
+- Challenges and solutions documented
+- Performance and security considerations
+
+#### Next Tasks
+**MVP-030**: Work Items Core Schema & Registry - Build on Goals foundation
+**MVP-031**: Graph Relationships System - Connect goals to work items
 
 ---
 

@@ -307,85 +307,85 @@ func (h *AgencyHandler) UpdateOverview(c *gin.Context) {
 	c.JSON(http.StatusOK, overview)
 }
 
-// GetProblems handles GET /api/v1/agencies/:id/problems
-func (h *AgencyHandler) GetProblems(c *gin.Context) {
+// GetGoals handles GET /api/v1/agencies/:id/goals
+func (h *AgencyHandler) GetGoals(c *gin.Context) {
 	id := c.Param("id")
 
-	problems, err := h.service.GetProblems(c.Request.Context(), id)
+	goals, err := h.service.GetGoals(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, problems)
+	c.JSON(http.StatusOK, goals)
 }
 
-// GetProblemsHTML handles GET /api/v1/agencies/:id/problems/html
+// GetGoalsHTML handles GET /api/v1/agencies/:id/goals/html
 // Returns rendered HTML fragment for HTMX/JavaScript rendering
-func (h *AgencyHandler) GetProblemsHTML(c *gin.Context) {
+func (h *AgencyHandler) GetGoalsHTML(c *gin.Context) {
 	id := c.Param("id")
 
-	problems, err := h.service.GetProblems(c.Request.Context(), id)
+	goals, err := h.service.GetGoals(c.Request.Context(), id)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error loading problems")
+		c.String(http.StatusInternalServerError, "Error loading goals")
 		return
 	}
 
-	// Render the problems list template
-	component := agency_designer.ProblemsList(problems)
+	// Render the goals list template
+	component := agency_designer.GoalsList(goals)
 	c.Header("Content-Type", "text/html")
 	component.Render(c.Request.Context(), c.Writer)
 }
 
-// CreateProblem handles POST /api/v1/agencies/:id/problems
-func (h *AgencyHandler) CreateProblem(c *gin.Context) {
+// CreateGoal handles POST /api/v1/agencies/:id/goals
+func (h *AgencyHandler) CreateGoal(c *gin.Context) {
 	id := c.Param("id")
 
-	var req agency.CreateProblemRequest
+	var req agency.CreateGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
 	}
 
-	problem, err := h.service.CreateProblem(c.Request.Context(), id, req.Code, req.Description)
+	goal, err := h.service.CreateGoal(c.Request.Context(), id, req.Code, req.Description)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, problem)
+	c.JSON(http.StatusCreated, goal)
 }
 
-// UpdateProblem handles PUT /api/v1/agencies/:id/problems/:problemKey
-func (h *AgencyHandler) UpdateProblem(c *gin.Context) {
+// UpdateGoal handles PUT /api/v1/agencies/:id/goals/:goalKey
+func (h *AgencyHandler) UpdateGoal(c *gin.Context) {
 	id := c.Param("id")
-	problemKey := c.Param("problemKey")
+	goalKey := c.Param("goalKey")
 
-	var req agency.UpdateProblemRequest
+	var req agency.UpdateGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
 	}
 
-	if err := h.service.UpdateProblem(c.Request.Context(), id, problemKey, req.Code, req.Description); err != nil {
+	if err := h.service.UpdateGoal(c.Request.Context(), id, goalKey, req.Code, req.Description); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Problem updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Goal updated successfully"})
 }
 
-// DeleteProblem handles DELETE /api/v1/agencies/:id/problems/:problemKey
-func (h *AgencyHandler) DeleteProblem(c *gin.Context) {
+// DeleteGoal handles DELETE /api/v1/agencies/:id/goals/:goalKey
+func (h *AgencyHandler) DeleteGoal(c *gin.Context) {
 	id := c.Param("id")
-	problemKey := c.Param("problemKey")
+	goalKey := c.Param("goalKey")
 
-	if err := h.service.DeleteProblem(c.Request.Context(), id, problemKey); err != nil {
+	if err := h.service.DeleteGoal(c.Request.Context(), id, goalKey); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Problem deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Goal deleted successfully"})
 }
 
 // GetUnitsOfWork handles GET /api/v1/agencies/:id/units

@@ -35,6 +35,11 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 			</div>
 		</div>
 		
+		<!-- Context Panel (between messages and input) -->
+		<div class="chat-context-section">
+			@ContextPanel()
+		</div>
+		
 		<!-- Chat Input (Independent) -->
 		<div class="chat-input-container">
 			<!-- AI Process Status Bar (inside input panel) -->
@@ -139,9 +144,26 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 	<form 
 		hx-post={ getMessageEndpoint(agencyID, conversation) }
 		hx-target="#chat-messages"
-		hx-swap="beforeend"
+		if conversation == nil || len(conversation.Messages) == 0 {
+			hx-swap="innerHTML"
+		} else {
+			hx-swap="beforeend"
+		}
 		hx-indicator="#typing-indicator"
-		hx-on::after-request="document.getElementById('user-input').value = ''; document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;">
+		hx-on::before-request="
+			const input = document.getElementById('user-input');
+			const contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';
+			if (contexts) {
+				input.value = input.value + contexts;
+			}
+		"
+		hx-on::after-request="
+			document.getElementById('user-input').value = ''; 
+			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+		"
+		hx-on::response-error="
+			console.error('CHAT: Response error:', event.detail);
+		">
 		
 		<div class="field has-addons">
 			<div class="control is-expanded">
@@ -160,6 +182,18 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 						<i class="fas fa-paper-plane"></i>
 					</span>
 				</button>
+			</div>
+		</div>
+		
+		<!-- Context indicator -->
+		<div id="context-indicator" class="mt-2" style="display: none;">
+			<div class="tags">
+				<span class="tag is-info is-light">
+					<span class="icon is-small">
+						<i class="fas fa-layer-group"></i>
+					</span>
+					<span id="context-count">0 contexts</span>
+				</span>
 			</div>
 		</div>
 	</form>
