@@ -79,6 +79,16 @@ templ WorkItemsListCard() {
 			<table class="table is-fullwidth is-striped is-hoverable">
 				<thead>
 					<tr>
+						<th style="width: 50px; text-align: center;">
+							<label class="checkbox">
+								<input 
+									type="checkbox" 
+									id="select-all-work-items"
+									onchange="toggleAllWorkItems(this.checked)"
+									title="Select/Deselect All"
+								/>
+							</label>
+						</th>
 						<th style="width: 120px;">Code</th>
 						<th>Title</th>
 						<th style="width: 150px;">Type</th>
@@ -88,7 +98,7 @@ templ WorkItemsListCard() {
 				<tbody id="work-items-table-body">
 					<!-- Items will be loaded here dynamically -->
 					<tr>
-						<td colspan="4" class="has-text-grey has-text-centered py-5">
+						<td colspan="5" class="has-text-grey has-text-centered py-5">
 							<p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p>
 						</td>
 					</tr>

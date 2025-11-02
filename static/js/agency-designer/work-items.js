@@ -110,27 +110,51 @@ export function showWorkItemEditor(mode, workItemKey = null) {
 
 // Load work item data for editing
 function loadWorkItemData(workItemKey) {
+    console.log('[Work Items] loadWorkItemData() called with key:', workItemKey);
+
     const agencyId = getCurrentAgencyId();
-    if (!agencyId || !workItemKey) return;
+    if (!agencyId || !workItemKey) {
+        console.error('[Work Items] Missing agencyId or workItemKey:', { agencyId, workItemKey });
+        return;
+    }
+
+    console.log('[Work Items] Fetching work items for agency:', agencyId);
 
     // Fetch work item data
     fetch(`/api/v1/agencies/${agencyId}/work-items`)
-        .then(response => response.json())
+        .then(response => {
+            console.log('[Work Items] Fetch response status:', response.status);
+            return response.json();
+        })
         .then(workItems => {
-            const workItem = workItems.find(wi => wi.key === workItemKey);
+            console.log('[Work Items] Received work items:', workItems.length);
+            console.log('[Work Items] Looking for key:', workItemKey);
+            console.log('[Work Items] Sample work item structure:', workItems[0]);
+
+            // The key field comes as "_key" from JSON
+            const workItem = workItems.find(wi => wi._key === workItemKey || wi.key === workItemKey);
+
+            console.log('[Work Items] Found work item:', workItem);
+
             if (workItem) {
                 populateWorkItemForm(workItem);
                 workItemEditorState.originalData = workItem;
+                console.log('[Work Items] Form populated successfully');
+            } else {
+                console.error('[Work Items] Work item not found with key:', workItemKey);
+                showNotification('Work item not found', 'error');
             }
         })
         .catch(error => {
-            console.error('Error loading work item:', error);
+            console.error('[Work Items] Error loading work item:', error);
             showNotification('Error loading work item data', 'error');
         });
 }
 
 // Populate form with work item data
 function populateWorkItemForm(workItem) {
+    console.log('[Work Items] populateWorkItemForm() called with:', workItem);
+
     const fields = {
         'work-item-title-editor': workItem.title || '',
         'work-item-type-editor': workItem.type || 'task',
@@ -143,12 +167,19 @@ function populateWorkItemForm(workItem) {
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
     };
 
+    console.log('[Work Items] Field values to populate:', fields);
+
     for (const [id, value] of Object.entries(fields)) {
         const element = document.getElementById(id);
         if (element) {
             element.value = value;
+            console.log(`[Work Items] Set ${id} = ${value.substring ? value.substring(0, 50) : value}`);
+        } else {
+            console.warn(`[Work Items] Element not found: ${id}`);
         }
     }
+
+    console.log('[Work Items] Form population complete');
 }
 
 // Clear work item form
@@ -382,7 +413,10 @@ export function filterWorkItems() {
 }
 
 // AI Work Item Operations
-export function processAIWorkItemOperation(operations) {
+export async function processAIWorkItemOperation(operations) {
+    console.log('[Work Items] AI operation called - this is for AI-GENERATED work items, not manual creation');
+    console.log('[Work Items] To manually create a work item, click the green "Add" button instead');
+
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
         showNotification('Error: No agency selected', 'error');
@@ -395,7 +429,17 @@ export function processAIWorkItemOperation(operations) {
         return;
     }
 
-    // Determine the appropriate status message based on operations
+    // For enhance/consolidate operations, get selected work items
+    let selectedWorkItemKeys = [];
+    if (operations.includes('enhance') || operations.includes('consolidate')) {
+        selectedWorkItemKeys = getSelectedWorkItemKeys();
+        if (selectedWorkItemKeys.length === 0) {
+            showNotification('Please select work items first', 'warning');
+            return;
+        }
+    }
+
+    console.log('[Work Items] AI Work Item operations requested:', operations);
     let statusMessage = 'AI is processing your request...';
     if (operations.length === 1) {
         switch (operations[0]) {
@@ -403,10 +447,10 @@ export function processAIWorkItemOperation(operations) {
                 statusMessage = 'AI is generating work items from your goals...';
                 break;
             case 'enhance':
-                statusMessage = 'AI is enhancing work items...';
+                statusMessage = `AI is enhancing ${selectedWorkItemKeys.length} work item(s)...`;
                 break;
             case 'consolidate':
-                statusMessage = 'AI is consolidating work items...';
+                statusMessage = `AI is consolidating ${selectedWorkItemKeys.length} work item(s)...`;
                 break;
         }
     } else if (operations.length > 1) {
@@ -418,16 +462,58 @@ export function processAIWorkItemOperation(operations) {
         window.showAIProcessStatus(statusMessage);
     }
 
-    // For now, just show placeholder since backend endpoint doesn't exist yet
-    // TODO: Create /api/v1/agencies/:id/work-items/ai-process endpoint
-    setTimeout(() => {
+    try {
+        const requestBody = { operations };
+
+        // Include selected work item keys if applicable
+        if (selectedWorkItemKeys.length > 0) {
+            requestBody.work_item_keys = selectedWorkItemKeys;
+        }
+
+        const response = await fetch(`/api/v1/agencies/${agencyId}/work-items/ai-process`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to process AI work item operations: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('[Work Items] AI processing result:', data);
+
+        // Hide AI processing status
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();
         }
-        showNotification('AI Work Item operations will be available soon!', 'info');
-    }, 1000);
 
-    console.log('AI Work Item operations requested:', operations);
+        // Show success message with results
+        if (data.created_count > 0) {
+            showNotification(`Successfully created ${data.created_count} work items!`, 'success');
+        } else if (data.enhanced_count > 0) {
+            showNotification(`Successfully enhanced ${data.enhanced_count} work items!`, 'success');
+        } else if (data.results && data.results.consolidate_success) {
+            showNotification(data.results.consolidate_success, 'success');
+        } else {
+            showNotification('AI operations completed!', 'success');
+        }
+
+        // Reload work items to show updates
+        await loadWorkItems();
+
+    } catch (error) {
+        console.error('[Work Items] AI processing error:', error);
+
+        // Hide AI processing status
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+
+        showNotification(`AI processing failed: ${error.message}`, 'danger');
+    }
 }
 
 // Refine work item description with AI
@@ -470,6 +556,87 @@ export function validateWorkItemDependencies(dependencies) {
         });
 }
 
+// Get selected work item keys from checkboxes
+function getSelectedWorkItemKeys() {
+    const checkboxes = document.querySelectorAll('.work-item-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.dataset.workItemKey);
+}
+
+// Update selection buttons based on checkbox state
+function updateWorkItemSelectionButtons() {
+    const selectedKeys = getSelectedWorkItemKeys();
+    const hasSelection = selectedKeys.length > 0;
+
+    // Update "Select All" checkbox state
+    const selectAllCheckbox = document.getElementById('select-all-work-items');
+    const allCheckboxes = document.querySelectorAll('.work-item-checkbox');
+    if (selectAllCheckbox && allCheckboxes.length > 0) {
+        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+        const someChecked = Array.from(allCheckboxes).some(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked && !allChecked;
+    }
+
+    // Enable/disable Enhance and Consolidate buttons
+    const enhanceBtn = document.getElementById('ai-enhance-work-items-btn');
+    const consolidateBtn = document.getElementById('ai-consolidate-work-items-btn');
+
+    if (enhanceBtn) {
+        if (hasSelection) {
+            enhanceBtn.disabled = false;
+            enhanceBtn.classList.remove('is-static');
+            enhanceBtn.title = `Enhance ${selectedKeys.length} selected work item(s)`;
+        } else {
+            enhanceBtn.disabled = true;
+            enhanceBtn.classList.add('is-static');
+            enhanceBtn.title = 'Select work items to enhance';
+        }
+    }
+
+    if (consolidateBtn) {
+        if (hasSelection) {
+            consolidateBtn.disabled = false;
+            consolidateBtn.classList.remove('is-static');
+            consolidateBtn.title = `Consolidate ${selectedKeys.length} selected work item(s)`;
+        } else {
+            consolidateBtn.disabled = true;
+            consolidateBtn.classList.add('is-static');
+            consolidateBtn.title = 'Select work items to consolidate';
+        }
+    }
+
+    // Update selection count display
+    updateWorkItemSelectionCount(selectedKeys.length);
+}
+
+// Toggle all work item checkboxes
+function toggleAllWorkItems(checked) {
+    const checkboxes = document.querySelectorAll('.work-item-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = checked;
+    });
+    updateWorkItemSelectionButtons();
+}
+
+// Update selection count display
+function updateWorkItemSelectionCount(count) {
+    const countDisplay = document.getElementById('work-item-selection-count');
+
+    if (countDisplay) {
+        if (count > 0) {
+            countDisplay.textContent = `${count} selected`;
+            countDisplay.style.display = 'inline-block';
+        } else {
+            countDisplay.style.display = 'none';
+        }
+    }
+}
+
+// Initialize button states on page load
+document.addEventListener('DOMContentLoaded', function () {
+    updateWorkItemSelectionButtons();
+});
+
 // Make functions available globally
 window.loadWorkItems = loadWorkItems;
 window.showWorkItemEditor = showWorkItemEditor;
@@ -480,3 +647,6 @@ window.filterWorkItems = filterWorkItems;
 window.processAIWorkItemOperation = processAIWorkItemOperation;
 window.refineWorkItemDescription = refineWorkItemDescription;
 window.validateWorkItemDependencies = validateWorkItemDependencies;
+window.getSelectedWorkItemKeys = getSelectedWorkItemKeys;
+window.updateWorkItemSelectionButtons = updateWorkItemSelectionButtons;
+window.toggleAllWorkItems = toggleAllWorkItems;

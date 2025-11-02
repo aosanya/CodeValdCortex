@@ -31,22 +31,24 @@ import (
 
 // App represents the main application
 type App struct {
-	config              *config.Config
-	server              *http.Server
-	logger              *logrus.Logger
-	dbClient            *database.ArangoClient
-	registry            *registry.Repository
-	agentTypeService    registry.AgentTypeService
-	agentTypeRepository registry.AgentTypeRepository
-	agencyService       agency.Service
-	agencyRepository    agency.Repository
-	runtimeManager      *runtime.Manager
-	messageService      *communication.MessageService
-	pubSubService       *communication.PubSubService
-	aiDesignerService   *ai.AgencyDesignerService
-	introductionRefiner *ai.IntroductionRefiner
-	goalRefiner         *ai.GoalRefiner
-	goalConsolidator    *ai.GoalConsolidator
+	config               *config.Config
+	server               *http.Server
+	logger               *logrus.Logger
+	dbClient             *database.ArangoClient
+	registry             *registry.Repository
+	agentTypeService     registry.AgentTypeService
+	agentTypeRepository  registry.AgentTypeRepository
+	agencyService        agency.Service
+	agencyRepository     agency.Repository
+	runtimeManager       *runtime.Manager
+	messageService       *communication.MessageService
+	pubSubService        *communication.PubSubService
+	aiDesignerService    *ai.AgencyDesignerService
+	introductionRefiner  *ai.IntroductionRefiner
+	goalRefiner          *ai.GoalRefiner
+	goalConsolidator     *ai.GoalConsolidator
+	workItemRefiner      *ai.WorkItemRefiner
+	workItemConsolidator *ai.WorkItemConsolidator
 }
 
 // New creates a new application instance
@@ -139,6 +141,8 @@ func New(cfg *config.Config) *App {
 	var introductionRefiner *ai.IntroductionRefiner
 	var goalRefiner *ai.GoalRefiner
 	var goalConsolidator *ai.GoalConsolidator
+	var workItemRefiner *ai.WorkItemRefiner
+	var workItemConsolidator *ai.WorkItemConsolidator
 	if cfg.AI.Provider != "" && cfg.AI.APIKey != "" {
 		logger.WithField("provider", cfg.AI.Provider).Info("Initializing AI agency designer service")
 		aiConfig := &ai.LLMConfig{
@@ -158,6 +162,8 @@ func New(cfg *config.Config) *App {
 			introductionRefiner = ai.NewIntroductionRefiner(llmClient, logger)
 			goalRefiner = ai.NewGoalRefiner(llmClient, logger)
 			goalConsolidator = ai.NewGoalConsolidator(llmClient, logger)
+			workItemRefiner = ai.NewWorkItemRefiner(llmClient, logger)
+			workItemConsolidator = ai.NewWorkItemConsolidator(llmClient, logger)
 			logger.Info("AI agency designer service initialized successfully")
 		}
 	} else {
@@ -165,21 +171,23 @@ func New(cfg *config.Config) *App {
 	}
 
 	return &App{
-		config:              cfg,
-		logger:              logger,
-		dbClient:            dbClient,
-		registry:            reg,
-		agentTypeRepository: agentTypeRepo,
-		agentTypeService:    agentTypeService,
-		agencyService:       agencyService,
-		agencyRepository:    agencyRepo,
-		runtimeManager:      runtimeManager,
-		messageService:      messageService,
-		pubSubService:       pubSubService,
-		aiDesignerService:   aiDesignerService,
-		introductionRefiner: introductionRefiner,
-		goalRefiner:         goalRefiner,
-		goalConsolidator:    goalConsolidator,
+		config:               cfg,
+		logger:               logger,
+		dbClient:             dbClient,
+		registry:             reg,
+		agentTypeRepository:  agentTypeRepo,
+		agentTypeService:     agentTypeService,
+		agencyService:        agencyService,
+		agencyRepository:     agencyRepo,
+		runtimeManager:       runtimeManager,
+		messageService:       messageService,
+		pubSubService:        pubSubService,
+		aiDesignerService:    aiDesignerService,
+		introductionRefiner:  introductionRefiner,
+		goalRefiner:          goalRefiner,
+		goalConsolidator:     goalConsolidator,
+		workItemRefiner:      workItemRefiner,
+		workItemConsolidator: workItemConsolidator,
 	}
 }
 
@@ -388,7 +396,7 @@ func (a *App) setupServer() error {
 
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {
-			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.aiDesignerService, a.logger)
+			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.workItemRefiner, a.workItemConsolidator, a.aiDesignerService, a.logger)
 			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
 			if a.goalRefiner != nil {
 				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineGoal)
@@ -397,6 +405,9 @@ func (a *App) setupServer() error {
 			}
 			if a.goalConsolidator != nil {
 				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoals)
+			}
+			if a.workItemRefiner != nil {
+				v1.POST("/agencies/:id/work-items/ai-process", aiRefineHandler.ProcessAIWorkItemRequest)
 			}
 			a.logger.Info("AI Refine endpoints registered")
 		}

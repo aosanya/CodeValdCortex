@@ -824,22 +824,11 @@ function toggleAllGoals(checked) {
 }
 
 function updateSelectionCount(count) {
-    let countDisplay = document.getElementById('goal-selection-count');
-    if (!countDisplay && count > 0) {
-        // Create count display if it doesn't exist
-        const toolbar = document.querySelector('#ai-create-goals-btn').closest('.buttons');
-        if (toolbar) {
-            countDisplay = document.createElement('span');
-            countDisplay.id = 'goal-selection-count';
-            countDisplay.className = 'tag is-info is-light ml-2';
-            countDisplay.style.alignSelf = 'center';
-            toolbar.parentElement.insertBefore(countDisplay, toolbar);
-        }
-    }
+    const countDisplay = document.getElementById('goal-selection-count');
 
     if (countDisplay) {
         if (count > 0) {
-            countDisplay.textContent = `${count} goal(s) selected`;
+            countDisplay.textContent = `${count} selected`;
             countDisplay.style.display = 'inline-block';
         } else {
             countDisplay.style.display = 'none';

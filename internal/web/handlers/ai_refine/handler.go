@@ -8,12 +8,14 @@ import (
 
 // Handler handles AI refinement requests for agency components
 type Handler struct {
-	agencyService       agency.Service
-	introductionRefiner *ai.IntroductionRefiner
-	goalRefiner         *ai.GoalRefiner
-	goalConsolidator    *ai.GoalConsolidator
-	designerService     *ai.AgencyDesignerService
-	logger              *logrus.Logger
+	agencyService        agency.Service
+	introductionRefiner  *ai.IntroductionRefiner
+	goalRefiner          *ai.GoalRefiner
+	goalConsolidator     *ai.GoalConsolidator
+	workItemRefiner      *ai.WorkItemRefiner
+	workItemConsolidator *ai.WorkItemConsolidator
+	designerService      *ai.AgencyDesignerService
+	logger               *logrus.Logger
 }
 
 // NewHandler creates a new AI refine handler
@@ -22,15 +24,19 @@ func NewHandler(
 	introductionRefiner *ai.IntroductionRefiner,
 	goalRefiner *ai.GoalRefiner,
 	goalConsolidator *ai.GoalConsolidator,
+	workItemRefiner *ai.WorkItemRefiner,
+	workItemConsolidator *ai.WorkItemConsolidator,
 	designerService *ai.AgencyDesignerService,
 	logger *logrus.Logger,
 ) *Handler {
 	return &Handler{
-		agencyService:       agencyService,
-		introductionRefiner: introductionRefiner,
-		goalRefiner:         goalRefiner,
-		goalConsolidator:    goalConsolidator,
-		designerService:     designerService,
-		logger:              logger,
+		agencyService:        agencyService,
+		introductionRefiner:  introductionRefiner,
+		goalRefiner:          goalRefiner,
+		goalConsolidator:     goalConsolidator,
+		workItemRefiner:      workItemRefiner,
+		workItemConsolidator: workItemConsolidator,
+		designerService:      designerService,
+		logger:               logger,
 	}
 }
