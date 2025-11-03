@@ -48,7 +48,7 @@ func AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversat
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Agency Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><!-- Agency Designer JavaScript --> <script src=\"/static/js/agency-designer.js?v=20251102-workitems\" type=\"module\" defer></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns --><div class=\"columns is-gapless vscode-main-content\"><!-- Left Column: Designer Panels --><div class=\"column is-two-thirds\"><!-- View Switcher at Top --><div class=\"top-toolbar\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Agency Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><!-- Agency Designer JavaScript --> <script src=\"/static/js/agency-designer.js?v=20251102-workitems\" type=\"module\" defer></script> <script src=\"/static/js/agency-designer/raci.js?v=20251103\" defer></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns --><div class=\"columns is-gapless vscode-main-content\"><!-- Left Column: Designer Panels --><div class=\"column is-two-thirds\"><!-- View Switcher at Top --><div class=\"top-toolbar\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -5,133 +5,182 @@ let raciState = {
     agencyId: null,
     roles: [], // array of role objects: {key, name, ...}
     workItems: [], // array of work item objects: {key, name, type, ...}
-    assignments: {} // workItemKey -> roleKey -> 'R'|'A'|'C'|'I'
+    assignments: {} // workItemKey -> roleKey -> {raci: 'R'|'A'|'C'|'I', objective: string}
 };
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function () {
-    initializeRACIMatrix();
-});
-
-function initializeRACIMatrix() {
-    // Extract agency ID from URL path: /agencies/{id}/raci
-    const pathParts = window.location.pathname.split('/');
-    const agenciesIndex = pathParts.indexOf('agencies');
-    if (agenciesIndex !== -1 && pathParts[agenciesIndex + 1]) {
-        raciState.agencyId = pathParts[agenciesIndex + 1];
-        loadRACIMatrix();
-    } else {
-        showError('Unable to determine agency ID from URL');
+// Get agency ID from URL or context
+function getAgencyId() {
+    // Try to get from URL path (e.g., /agencies/UC-CHAR-001/designer)
+    const pathMatch = window.location.pathname.match(/\/agencies\/([^\/]+)/);
+    if (pathMatch) {
+        return pathMatch[1];
     }
+
+    // Try to get from data attribute
+    const designerElement = document.querySelector('[data-agency-id]');
+    if (designerElement) {
+        return designerElement.getAttribute('data-agency-id');
+    }
+
+    return null;
 }
 
-async function loadRACIMatrix() {
-    showLoading(true);
-
-    try {
-        // Load roles and work items in parallel
-        const [roles, workItems] = await Promise.all([
-            fetchRoles(),
-            fetchWorkItems()
-        ]);
-
-        raciState.roles = roles || [];
-        raciState.workItems = workItems || [];
-
-        // Show work items immediately even if no assignments yet
-        renderRACITable();
-        showLoading(false);
-
-        // Load existing RACI assignments in the background
-        await loadExistingAssignments();
-
-        // Re-render with assignments
-        renderRACITable();
-
-    } catch (error) {
-        console.error('Error loading RACI matrix:', error);
-        showError('Failed to load RACI matrix data');
-        showLoading(false);
-    }
-}
-
-async function fetchRoles() {
-    try {
-        const response = await fetch(`/api/v1/agencies/${raciState.agencyId}/roles`);
-        if (!response.ok) throw new Error('Failed to fetch roles');
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching roles:', error);
-        return [];
-    }
-}
-
-async function fetchWorkItems() {
-    try {
-        const response = await fetch(`/api/v1/agencies/${raciState.agencyId}/work-items`);
-        if (!response.ok) throw new Error('Failed to fetch work items');
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching work items:', error);
-        return [];
-    }
-}
-
-async function loadExistingAssignments() {
-    try {
-        const response = await fetch(`/api/v1/agencies/${raciState.agencyId}/raci-matrix`);
-        if (response.ok) {
-            const data = await response.json();
-            raciState.assignments = data.assignments || {};
+// Make loadRACIMatrix available globally for overview.js to call
+window.loadRACIMatrix = function () {
+    console.log('[RACI] loadRACIMatrix called');
+    
+    // Get agency ID if not already set
+    if (!raciState.agencyId) {
+        raciState.agencyId = getAgencyId();
+        console.log('[RACI] Agency ID:', raciState.agencyId);
+        if (!raciState.agencyId) {
+            console.error('[RACI] Unable to determine agency ID');
+            return;
         }
-    } catch (error) {
-        console.error('Error loading RACI assignments:', error);
-        // Start with empty assignments
-        raciState.assignments = {};
     }
+
+    const tableBody = document.getElementById('raci-matrix-body');
+    if (!tableBody) {
+        console.error('[RACI] Table body element not found');
+        return;
+    }
+    
+    console.log('[RACI] Table body found, loading data...');
+
+    // Show simple loading state in table
+    tableBody.innerHTML = '<tr><td colspan="3" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
+
+    // Fetch work items first
+    const workItemsUrl = `/api/v1/agencies/${raciState.agencyId}/work-items`;
+    console.log('[RACI] Fetching work items from:', workItemsUrl);
+    
+    fetch(workItemsUrl)
+        .then(response => {
+            console.log('[RACI] Work items response status:', response.status);
+            if (!response.ok) throw new Error('Failed to fetch work items');
+            return response.json();
+        })
+        .then(workItems => {
+            console.log('[RACI] Work items received:', workItems ? workItems.length : 0);
+            raciState.workItems = workItems || [];
+
+            // Fetch roles
+            const rolesUrl = `/api/v1/agencies/${raciState.agencyId}/roles`;
+            console.log('[RACI] Fetching roles from:', rolesUrl);
+            return fetch(rolesUrl);
+        })
+        .then(response => {
+            console.log('[RACI] Roles response status:', response.status);
+            if (!response.ok) throw new Error('Failed to fetch roles');
+            return response.json();
+        })
+        .then(roles => {
+            console.log('[RACI] Roles received:', roles ? roles.length : 0);
+            raciState.roles = roles || [];
+
+            // Render work items immediately
+            console.log('[RACI] Rendering RACI table...');
+            renderRACITable();
+
+            // Load RACI assignments in background
+            console.log('[RACI] Loading existing assignments...');
+            loadExistingAssignments();
+        })
+        .catch(error => {
+            console.error('[RACI] Error loading RACI matrix:', error);
+            tableBody.innerHTML = '<tr><td colspan="3" class="has-text-danger has-text-centered py-5"><p>Error loading work items</p></td></tr>';
+        });
+}
+
+function loadExistingAssignments() {
+    console.log('[RACI] Loading existing assignments...');
+    // Load RACI assignments and re-render when complete
+    fetch(`/api/v1/agencies/${raciState.agencyId}/raci-matrix`)
+        .then(response => {
+            console.log('[RACI] Assignments response status:', response.status);
+            if (response.ok) {
+                return response.json();
+            }
+            return { assignments: {} };
+        })
+        .then(data => {
+            console.log('[RACI] Assignments data:', data);
+            raciState.assignments = data.assignments || {};
+            // Re-render table with assignments
+            console.log('[RACI] Re-rendering table with assignments');
+            renderRACITable();
+        })
+        .catch(error => {
+            console.error('[RACI] Error loading RACI assignments:', error);
+            raciState.assignments = {};
+        });
 }
 
 function renderRACITable() {
+    console.log('[RACI] renderRACITable called');
+    console.log('[RACI] Work items count:', raciState.workItems ? raciState.workItems.length : 0);
+    
     const tableBody = document.getElementById('raci-matrix-body');
     const emptyState = document.getElementById('raci-empty-state');
     const tableContainer = document.getElementById('raci-matrix-table');
 
-    // Check if we have work items
-    if (!raciState.workItems || raciState.workItems.length === 0) {
-        tableContainer.style.display = 'none';
-        emptyState.style.display = 'block';
+    if (!tableBody) {
+        console.error('[RACI] Table body not found in renderRACITable');
         return;
     }
 
-    tableContainer.style.display = 'block';
-    emptyState.style.display = 'none';
+    // Check if we have work items
+    if (!raciState.workItems || raciState.workItems.length === 0) {
+        console.log('[RACI] No work items, showing empty state');
+        if (tableContainer) tableContainer.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'block';
+        return;
+    }
 
-    // Render work item rows with role assignments
+    console.log('[RACI] Rendering', raciState.workItems.length, 'work items');
+    if (tableContainer) tableContainer.style.display = 'block';
+    if (emptyState) emptyState.style.display = 'none';
+
+    // Render work item rows with collapsible role assignments
     tableBody.innerHTML = raciState.workItems.map(workItem => {
         const workItemKey = workItem.key || workItem.id;
         const assignments = raciState.assignments[workItemKey] || {};
+        const assignmentCount = Object.keys(assignments).length;
 
         return `
             <tr data-work-item="${workItemKey}">
-                <td class="is-vcentered">
-                    <div class="mb-2">
-                        <strong>${escapeHtml(workItem.name || workItem.title)}</strong>
-                        <span class="tag is-info is-light ml-2">${escapeHtml(workItem.type || 'Task')}</span>
-                    </div>
-                    ${workItem.description ? `<p class="help is-size-7">${escapeHtml(workItem.description)}</p>` : ''}
-                </td>
-                <td class="is-vcentered">
-                    <div id="roles-list-${workItemKey}" class="mb-2">
-                        ${renderAssignedRoles(workItemKey, assignments)}
-                    </div>
-                    <button class="button is-small is-primary is-light" onclick="addRoleToWorkItem('${workItemKey}')">
-                        <span class="icon"><i class="fas fa-plus"></i></span>
-                        <span>Add Role</span>
-                    </button>
-                </td>
-                <td>
-                    <div id="objectives-${workItemKey}">
-                        ${renderRoleObjectives(workItemKey, assignments)}
+                <td colspan="3" class="p-0">
+                    <div class="box mb-0">
+                        <!-- Work Item Header (always visible) -->
+                        <div class="level is-mobile mb-0" style="cursor: pointer;" onclick="toggleAssignments('${workItemKey}')">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <span class="icon">
+                                        <i id="toggle-icon-${workItemKey}" class="fas fa-chevron-right"></i>
+                                    </span>
+                                </div>
+                                <div class="level-item">
+                                    <div>
+                                        <strong>${escapeHtml(workItem.name || workItem.title)}</strong>
+                                        <span class="tag is-info is-light ml-2">${escapeHtml(workItem.type || 'Task')}</span>
+                                        ${workItem.description ? `<p class="help is-size-7 mt-1">${escapeHtml(workItem.description)}</p>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="level-right">
+                                <div class="level-item">
+                                    <span class="tag ${assignmentCount > 0 ? 'is-primary' : 'is-light'}">
+                                        <span class="icon"><i class="fas fa-users"></i></span>
+                                        <span>${assignmentCount} role${assignmentCount !== 1 ? 's' : ''}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible Assignments Panel -->
+                        <div id="assignments-${workItemKey}" style="display: none;" class="mt-4 pt-4" style="border-top: 1px solid #dbdbdb;">
+                            ${renderAssignmentsPanel(workItemKey, assignments)}
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -139,83 +188,93 @@ function renderRACITable() {
     }).join('');
 }
 
-function renderAssignedRoles(workItemKey, assignments) {
-    const roles = Object.entries(assignments);
-    if (roles.length === 0) {
-        return '<p class="help is-size-7 has-text-grey">No roles assigned yet</p>';
+function toggleAssignments(workItemKey) {
+    const panel = document.getElementById(`assignments-${workItemKey}`);
+    const icon = document.getElementById(`toggle-icon-${workItemKey}`);
+
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        icon.classList.remove('fa-chevron-right');
+        icon.classList.add('fa-chevron-down');
+    } else {
+        panel.style.display = 'none';
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-right');
     }
-
-    return roles.map(([roleKey, data]) => {
-        const role = raciState.roles.find(r => (r.key || r.id) === roleKey);
-        const roleName = role ? (role.name || role.key) : roleKey;
-        const raciType = data.raci || 'R';
-        const raciColors = {
-            'R': 'is-info',
-            'A': 'is-success',
-            'C': 'is-warning',
-            'I': 'is-light'
-        };
-
-        return `
-            <div class="tags has-addons mb-2">
-                <span class="tag ${raciColors[raciType]}">${raciType}</span>
-                <span class="tag">${escapeHtml(roleName)}</span>
-                <a class="tag is-delete" onclick="removeRoleFromWorkItem('${workItemKey}', '${roleKey}')"></a>
-            </div>
-        `;
-    }).join('');
 }
 
-function renderRoleObjectives(workItemKey, assignments) {
+function renderAssignmentsPanel(workItemKey, assignments) {
     const roles = Object.entries(assignments);
+
+    let html = `
+        <div class="buttons mb-3">
+            <button class="button is-small is-primary" onclick="addRoleToWorkItem('${workItemKey}')">
+                <span class="icon"><i class="fas fa-plus"></i></span>
+                <span>Add Role</span>
+            </button>
+        </div>
+    `;
+
     if (roles.length === 0) {
-        return '<p class="help is-size-7 has-text-grey">Add roles to define their objectives</p>';
-    }
+        html += '<p class="help has-text-grey">No roles assigned yet. Click "Add Role" to assign responsibilities.</p>';
+    } else {
+        html += '<div class="columns is-multiline">';
+        roles.forEach(([roleKey, data]) => {
+            const role = raciState.roles.find(r => (r.key || r.id) === roleKey);
+            const roleName = role ? (role.name || role.key) : roleKey;
+            const raciType = data.raci || 'R';
+            const objective = data.objective || '';
+            const raciColors = {
+                'R': 'is-info',
+                'A': 'is-success',
+                'C': 'is-warning',
+                'I': 'is-light'
+            };
 
-    return roles.map(([roleKey, data]) => {
-        const role = raciState.roles.find(r => (r.key || r.id) === roleKey);
-        const roleName = role ? (role.name || role.key) : roleKey;
-        const objective = data.objective || '';
-        const raciType = data.raci || 'R';
-
-        return `
-            <div class="box p-3 mb-2">
-                <div class="level is-mobile mb-2">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <span class="tag is-${raciType === 'R' ? 'info' : raciType === 'A' ? 'success' : raciType === 'C' ? 'warning' : 'light'} mr-2">
-                                ${raciType}
-                            </span>
-                            <strong class="is-size-7">${escapeHtml(roleName)}</strong>
+            html += `
+                <div class="column is-half">
+                    <div class="box">
+                        <div class="level is-mobile mb-2">
+                            <div class="level-left">
+                                <div class="level-item">
+                                    <div class="tags has-addons mb-0">
+                                        <span class="tag ${raciColors[raciType]}">${raciType}</span>
+                                        <span class="tag is-dark">${escapeHtml(roleName)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="level-right">
+                                <div class="level-item">
+                                    <div class="buttons">
+                                        <button class="button is-small is-light" onclick="updateRoleRaci('${workItemKey}', '${roleKey}')">
+                                            <span class="icon"><i class="fas fa-exchange-alt"></i></span>
+                                        </button>
+                                        <button class="button is-small is-danger is-light" onclick="removeRoleFromWorkItem('${workItemKey}', '${roleKey}')">
+                                            <span class="icon"><i class="fas fa-times"></i></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="level-right">
-                        <div class="level-item">
-                            <div class="select is-small">
-                                <select onchange="updateRoleRaci('${workItemKey}', '${roleKey}', this.value)">
-                                    <option value="R" ${raciType === 'R' ? 'selected' : ''}>Responsible</option>
-                                    <option value="A" ${raciType === 'A' ? 'selected' : ''}>Accountable</option>
-                                    <option value="C" ${raciType === 'C' ? 'selected' : ''}>Consulted</option>
-                                    <option value="I" ${raciType === 'I' ? 'selected' : ''}>Informed</option>
-                                </select>
+                        <div class="field">
+                            <label class="label is-small">Objective</label>
+                            <div class="control">
+                                <textarea 
+                                    class="textarea is-small" 
+                                    placeholder="Define the objective for this role in this work item..."
+                                    rows="2"
+                                    onchange="updateRoleObjective('${workItemKey}', '${roleKey}', this.value)"
+                                >${escapeHtml(objective)}</textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="field">
-                    <label class="label is-size-7">Objective</label>
-                    <div class="control">
-                        <textarea 
-                            class="textarea is-small" 
-                            rows="2"
-                            placeholder="Define what this role needs to achieve for this work item..."
-                            onblur="updateRoleObjective('${workItemKey}', '${roleKey}', this.value)"
-                        >${escapeHtml(objective)}</textarea>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        });
+        html += '</div>';
+    }
+
+    return html;
 }
 
 window.addRoleToWorkItem = function (workItemKey) {

@@ -269,36 +269,6 @@ templ OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Conver
 // RACIMatrixContent shows the RACI matrix section in the overview
 templ RACIMatrixContent(currentAgency *agency.Agency) {
 	<div class="overview-section">
-		<!-- RACI Legend -->
-		<div class="box mb-4 p-4">
-			<div class="content">
-				<h5 class="title is-6 mb-3">
-					<span class="icon-text">
-						<span class="icon"><i class="fas fa-info-circle"></i></span>
-						<span>RACI Roles Explained</span>
-					</span>
-				</h5>
-				<div class="columns">
-					<div class="column">
-						<span class="tag is-info mr-2">R</span>
-						<strong>Responsible:</strong> Does the work to complete the task
-					</div>
-					<div class="column">
-						<span class="tag is-success mr-2">A</span>
-						<strong>Accountable:</strong> Ultimately answerable for the task completion
-					</div>
-					<div class="column">
-						<span class="tag is-warning mr-2">C</span>
-						<strong>Consulted:</strong> Provides input and expertise
-					</div>
-					<div class="column">
-						<span class="tag is-light mr-2">I</span>
-						<strong>Informed:</strong> Kept updated on progress
-					</div>
-				</div>
-			</div>
-		</div>
-
 		<!-- Validation Messages -->
 		<div id="raci-validation-messages"></div>
 
@@ -342,19 +312,12 @@ templ RACIMatrixContent(currentAgency *agency.Agency) {
 					<span>Loading role assignments...</span>
 				</div>
 
-				<!-- Matrix Table -->
-				<div id="raci-matrix-table" style="display: table;">
+				<!-- Work Items List -->
+				<div id="raci-matrix-table" style="display: block;">
 					<div class="table-container">
-						<table class="table is-fullwidth is-bordered raci-table">
-							<thead>
-								<tr>
-									<th style="width: 30%">Work Item</th>
-									<th style="width: 15%">Assigned Roles</th>
-									<th style="width: 55%">Role Objectives</th>
-								</tr>
-							</thead>
+						<table class="table is-fullwidth is-borderless raci-table">
 							<tbody id="raci-matrix-body">
-								<!-- Work item rows will be dynamically inserted -->
+								<!-- Work item rows with collapsible assignments will be dynamically inserted -->
 							</tbody>
 						</table>
 					</div>
