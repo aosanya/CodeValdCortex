@@ -42,20 +42,18 @@ func (s *DefaultRoleService) RegisterType(ctx context.Context, agentType *Role) 
 			return fmt.Errorf("failed to update role: %w", err)
 		}
 		s.logger.WithFields(logrus.Fields{
-			"type_id":  agentType.ID,
-			"name":     agentType.Name,
-			"category": agentType.Category,
-		}).Info("Agent type updated")
+			"type_id": agentType.ID,
+			"name":    agentType.Name,
+		}).Info("Role updated")
 	} else {
 		// Create new role
 		if err := s.repo.Create(ctx, agentType); err != nil {
 			return fmt.Errorf("failed to register role: %w", err)
 		}
 		s.logger.WithFields(logrus.Fields{
-			"type_id":  agentType.ID,
-			"name":     agentType.Name,
-			"category": agentType.Category,
-		}).Info("Agent type registered")
+			"type_id": agentType.ID,
+			"name":    agentType.Name,
+		}).Info("Role registered")
 	}
 
 	return nil
@@ -79,10 +77,9 @@ func (s *DefaultRoleService) UpdateType(ctx context.Context, agentType *Role) er
 	}
 
 	s.logger.WithFields(logrus.Fields{
-		"type_id":  agentType.ID,
-		"name":     agentType.Name,
-		"category": agentType.Category,
-	}).Info("Agent type updated")
+		"type_id": agentType.ID,
+		"name":    agentType.Name,
+	}).Info("Role updated")
 
 	return nil
 }
@@ -106,7 +103,7 @@ func (s *DefaultRoleService) UnregisterType(ctx context.Context, id string) erro
 		return fmt.Errorf("failed to unregister role: %w", err)
 	}
 
-	s.logger.WithField("type_id", id).Info("Agent type unregistered")
+	s.logger.WithField("type_id", id).Info("Role unregistered")
 
 	return nil
 }
@@ -225,10 +222,6 @@ func (s *DefaultRoleService) validateRole(agentType *Role) error {
 
 	if agentType.Name == "" {
 		return fmt.Errorf("role name cannot be empty")
-	}
-
-	if agentType.Category == "" {
-		return fmt.Errorf("role category cannot be empty")
 	}
 
 	if agentType.Version == "" {

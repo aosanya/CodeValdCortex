@@ -26,15 +26,15 @@ func NewRoleHandler(service registry.RoleService, logger *logrus.Logger) *RoleHa
 func (h *RoleHandler) ListRoles(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	// Check for category filter
-	category := c.Query("category")
+	// Check for tags filter
+	tagParam := c.Query("tag")
 	enabledOnly := c.Query("enabled") == "true"
 
 	var types []*registry.Role
 	var err error
 
-	if category != "" {
-		types, err = h.service.ListTypesByCategory(ctx, category)
+	if tagParam != "" {
+		types, err = h.service.ListTypesByTags(ctx, []string{tagParam})
 	} else if enabledOnly {
 		types, err = h.service.ListTypes(ctx)
 		// Filter enabled

@@ -5,7 +5,6 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
-	"github.com/aosanya/CodeValdCortex/internal/web/pages"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -24,67 +23,64 @@ func NewRolesWebHandler(service registry.RoleService, logger *logrus.Logger) *Ro
 	}
 }
 
-// ShowRoles renders the agent types page
+// ShowRoles renders a simple roles listing page (roles are primarily managed in Agency Designer)
 func (h *RolesWebHandler) ShowRoles(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	agentTypes, err := h.service.ListTypes(ctx)
+	roles, err := h.service.ListTypes(ctx)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to list agent types")
-		c.String(http.StatusInternalServerError, "Failed to load agent types")
+		h.logger.WithError(err).Error("Failed to list roles")
+		c.String(http.StatusInternalServerError, "Failed to load roles")
 		return
 	}
 
-	// Render Templ component
-	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err = pages.RolesPage(agentTypes).Render(ctx, c.Writer)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to render agent types page")
-		c.String(http.StatusInternalServerError, "Failed to render page")
-		return
-	}
+	// For now, return JSON until we create a dedicated roles page template
+	c.JSON(http.StatusOK, gin.H{
+		"roles": roles,
+		"count": len(roles),
+	})
 }
 
-// GetRolesLive returns agent types grid for HTMX updates
+// GetRolesLive returns roles grid for HTMX updates
 func (h *RolesWebHandler) GetRolesLive(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	// Check for filters
-	category := c.Query("category")
+	// Check for tags filter
+	tagFilter := c.Query("tag")
 	enabledOnly := c.Query("enabled") == "true"
 
-	var agentTypes []*registry.Role
+	var roles []*registry.Role
 	var err error
 
-	if category != "" {
-		agentTypes, err = h.service.ListTypesByCategory(ctx, category)
+	if tagFilter != "" {
+		roles, err = h.service.ListTypesByTags(ctx, []string{tagFilter})
 	} else {
-		agentTypes, err = h.service.ListTypes(ctx)
+		roles, err = h.service.ListTypes(ctx)
 	}
 
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to list agent types")
-		c.String(http.StatusInternalServerError, "Failed to load agent types")
+		h.logger.WithError(err).Error("Failed to list roles")
+		c.String(http.StatusInternalServerError, "Failed to load roles")
 		return
 	}
 
 	// Filter by enabled if requested
 	if enabledOnly {
 		filtered := make([]*registry.Role, 0)
-		for _, t := range agentTypes {
+		for _, t := range roles {
 			if t.IsEnabled {
 				filtered = append(filtered, t)
 			}
 		}
-		agentTypes = filtered
+		roles = filtered
 	}
 
-	// Return only the agent type cards (partial HTML)
+	// Return only the role cards (partial HTML)
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	for _, agentType := range agentTypes {
-		err := components.RoleCard(agentType).Render(ctx, c.Writer)
+	for _, role := range roles {
+		err := components.RoleCard(role).Render(ctx, c.Writer)
 		if err != nil {
-			h.logger.WithError(err).Error("Failed to render agent type card")
+			h.logger.WithError(err).Error("Failed to render role card")
 			continue
 		}
 	}

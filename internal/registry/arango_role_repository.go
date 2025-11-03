@@ -168,7 +168,40 @@ func (r *ArangoRoleRepository) List(ctx context.Context) ([]*Role, error) {
 	return types, nil
 }
 
-// ListByCategory returns roles filtered by category
+// ListByTags returns roles filtered by tags (roles must have at least one matching tag)
+func (r *ArangoRoleRepository) ListByTags(ctx context.Context, tags []string) ([]*Role, error) {
+	if len(tags) == 0 {
+		return r.List(ctx)
+	}
+
+	query := `FOR doc IN @@collection 
+		FILTER LENGTH(INTERSECTION(doc.tags, @tags)) > 0 
+		RETURN doc`
+	bindVars := map[string]interface{}{
+		"@collection": agentTypesCollection,
+		"tags":        tags,
+	}
+
+	cursor, err := r.db.Query(ctx, query, bindVars)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer cursor.Close()
+
+	var types []*Role
+	for cursor.HasMore() {
+		var agentType Role
+		_, err := cursor.ReadDocument(ctx, &agentType)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read document: %w", err)
+		}
+		types = append(types, &agentType)
+	}
+
+	return types, nil
+}
+
+// ListByCategory returns roles filtered by category (deprecated - use ListByTags)
 func (r *ArangoRoleRepository) ListByCategory(ctx context.Context, category string) ([]*Role, error) {
 	query := "FOR doc IN @@collection FILTER doc.category == @category RETURN doc"
 	bindVars := map[string]interface{}{

@@ -72,11 +72,11 @@ func New(cfg *config.Config) *App {
 		logger.WithError(err).Fatal("Failed to initialize agent registry")
 	}
 
-	// Initialize agent type registry with ArangoDB persistence
-	logger.Info("Initializing agent type repository with ArangoDB")
+	// Initialize role registry with ArangoDB persistence
+	logger.Info("Initializing role repository with ArangoDB")
 	roleRepo, err := registry.NewArangoRoleRepository(dbClient)
 	if err != nil {
-		logger.WithError(err).Fatal("Failed to initialize agent type repository")
+		logger.WithError(err).Fatal("Failed to initialize role repository")
 	}
 	roleService := registry.NewRoleService(roleRepo, logger)
 
@@ -447,34 +447,34 @@ func (a *App) setupServer() error {
 	return nil
 }
 
-// loadRolesFromDirectory loads agent type definitions from JSON files in a directory
+// loadRolesFromDirectory loads role definitions from JSON files in a directory
 func loadRolesFromDirectory(ctx context.Context, dir string, service registry.RoleService, logger *logrus.Logger) error {
 	// Check if directory exists
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		logger.WithField("dir", dir).Debug("Agent types directory does not exist, skipping")
+		logger.WithField("dir", dir).Debug("Roles directory does not exist, skipping")
 		return nil
 	}
 
 	// Read all JSON files from directory
 	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
 	if err != nil {
-		return fmt.Errorf("failed to read agent types directory: %w", err)
+		return fmt.Errorf("failed to read roles directory: %w", err)
 	}
 
 	if len(files) == 0 {
-		logger.WithField("dir", dir).Debug("No agent type files found")
+		logger.WithField("dir", dir).Debug("No role files found")
 		return nil
 	}
 
 	logger.WithFields(logrus.Fields{
 		"dir":   dir,
 		"count": len(files),
-	}).Info("Loading use case agent types")
+	}).Info("Loading use case roles")
 
-	// Load each agent type file
+	// Load each role file
 	for _, file := range files {
 		if err := loadRoleFromFile(ctx, file, service, logger); err != nil {
-			logger.WithError(err).WithField("file", file).Error("Failed to load agent type")
+			logger.WithError(err).WithField("file", file).Error("Failed to load role")
 			continue
 		}
 	}
@@ -482,7 +482,7 @@ func loadRolesFromDirectory(ctx context.Context, dir string, service registry.Ro
 	return nil
 }
 
-// loadRoleFromFile loads a single agent type from a JSON file
+// loadRoleFromFile loads a single role from a JSON file
 func loadRoleFromFile(ctx context.Context, filename string, service registry.RoleService, logger *logrus.Logger) error {
 	// Read file
 	data, err := os.ReadFile(filename)
@@ -502,11 +502,11 @@ func loadRoleFromFile(ctx context.Context, filename string, service registry.Rol
 	}
 
 	logger.WithFields(logrus.Fields{
-		"id":       role.ID,
-		"name":     role.Name,
-		"category": role.Category,
-		"file":     filepath.Base(filename),
-	}).Info("Loaded agent type")
+		"id":   role.ID,
+		"name": role.Name,
+		"tags": role.Tags,
+		"file": filepath.Base(filename),
+	}).Info("Loaded role")
 
 	return nil
 }

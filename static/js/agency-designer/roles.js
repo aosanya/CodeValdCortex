@@ -24,7 +24,7 @@ export function loadRoles() {
     }
 
     // Show loading state
-    rolesTableBody.innerHTML = '<tr><td colspan="6" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading roles...</p></td></tr>';
+    rolesTableBody.innerHTML = '<tr><td colspan="5" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading roles...</p></td></tr>';
 
     // Fetch roles HTML from API
     const url = `/api/v1/agencies/${agencyId}/roles/html`;
@@ -41,7 +41,7 @@ export function loadRoles() {
         })
         .catch(error => {
             console.error('[Roles] Error loading roles:', error);
-            rolesTableBody.innerHTML = '<tr><td colspan="6" class="has-text-danger has-text-centered py-5"><p>Error loading roles</p></td></tr>';
+            rolesTableBody.innerHTML = '<tr><td colspan="5" class="has-text-danger has-text-centered py-5"><p>Error loading roles</p></td></tr>';
         });
 }
 

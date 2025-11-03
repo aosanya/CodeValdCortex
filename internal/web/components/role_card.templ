@@ -5,28 +5,32 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
-templ RoleCard(agentType *registry.Role) {
+templ RoleCard(role *registry.Role) {
 	<div 
 		class="box"
 		x-data="{ expanded: false }"
-		data-type-id={ agentType.ID }
+		data-type-id={ role.ID }
 	>
 		<!-- Header -->
 		<div class="mb-4">
 			<div class="is-flex is-justify-content-space-between is-align-items-start">
 				<div class="is-flex-grow-1">
 					<h3 class="title is-5 mb-2">
-						{ agentType.Name }
+						{ role.Name }
 					</h3>
 					<p class="is-size-7 has-text-grey">
-						ID: <code class="is-size-7 has-background-light px-2 py-1" style="border-radius: 4px;">{ agentType.ID }</code>
+						ID: <code class="is-size-7 has-background-light px-2 py-1" style="border-radius: 4px;">{ role.ID }</code>
 					</p>
 				</div>
 				
 				<div class="tags ml-3">
-					@CategoryBadge(agentType.Category)
-					@EnabledBadge(agentType.IsEnabled)
-					if agentType.IsSystemType {
+					if len(role.Tags) > 0 {
+						for _, tag := range role.Tags {
+							<span class="tag is-light">{ tag }</span>
+						}
+					}
+					@EnabledBadge(role.IsEnabled)
+					if role.IsSystemType {
 						<span class="tag is-info is-light">
 							<span class="icon is-small">
 								<svg style="width: 0.75rem; height: 0.75rem;" fill="currentColor" viewBox="0 0 20 20">
@@ -43,28 +47,34 @@ templ RoleCard(agentType *registry.Role) {
 		<!-- Description -->
 		<div class="content mb-4">
 			<p class="is-size-6">
-				{ agentType.Description }
+				{ role.Description }
 			</p>
 		</div>
 		
 		<!-- Info Grid -->
 		<div class="mb-4">
 			<div class="columns is-mobile is-multiline is-size-7 mb-0">
-				<div class="column is-half py-2">
-					<span class="has-text-grey">Version:</span>
-					<span class="has-text-weight-medium ml-2">{ agentType.Version }</span>
-				</div>
-				<div class="column is-half py-2">
-					<span class="has-text-grey">Category:</span>
-					<span class="has-text-weight-medium ml-2">{ agentType.Category }</span>
-				</div>
+			<div class="column is-half py-2">
+				<span class="has-text-grey">Version:</span>
+				<span class="has-text-weight-medium ml-2">{ role.Version }</span>
+			</div>
+			<div class="column is-half py-2">
+				<span class="has-text-grey">Tags:</span>
+				<span class="has-text-weight-medium ml-2">
+					if len(role.Tags) > 0 {
+						{ fmt.Sprintf("%d", len(role.Tags)) }
+					} else {
+						0
+					}
+				</span>
+			</div>
 				<div class="column is-half py-2">
 					<span class="has-text-grey">Required Caps:</span>
-					<span class="has-text-weight-medium ml-2">{ fmt.Sprintf("%d", len(agentType.RequiredCapabilities)) }</span>
+					<span class="has-text-weight-medium ml-2">{ fmt.Sprintf("%d", len(role.RequiredCapabilities)) }</span>
 				</div>
 				<div class="column is-half py-2">
 					<span class="has-text-grey">Optional Caps:</span>
-					<span class="has-text-weight-medium ml-2">{ fmt.Sprintf("%d", len(agentType.OptionalCapabilities)) }</span>
+					<span class="has-text-weight-medium ml-2">{ fmt.Sprintf("%d", len(role.OptionalCapabilities)) }</span>
 				</div>
 			</div>
 		</div>
@@ -95,11 +105,11 @@ templ RoleCard(agentType *registry.Role) {
 				class="mt-4"
 			>
 				<!-- Required Capabilities -->
-				if len(agentType.RequiredCapabilities) > 0 {
+				if len(role.RequiredCapabilities) > 0 {
 					<div class="mb-4">
 						<h4 class="subtitle is-6">Required Capabilities</h4>
 						<div class="tags">
-							for _, cap := range agentType.RequiredCapabilities {
+							for _, cap := range role.RequiredCapabilities {
 								<span class="tag is-danger is-light">
 									{ cap }
 								</span>
@@ -109,11 +119,11 @@ templ RoleCard(agentType *registry.Role) {
 				}
 				
 				<!-- Optional Capabilities -->
-				if len(agentType.OptionalCapabilities) > 0 {
+				if len(role.OptionalCapabilities) > 0 {
 					<div class="mb-4">
 						<h4 class="subtitle is-6">Optional Capabilities</h4>
 						<div class="tags">
-							for _, cap := range agentType.OptionalCapabilities {
+							for _, cap := range role.OptionalCapabilities {
 								<span class="tag is-info is-light">
 									{ cap }
 								</span>
@@ -123,12 +133,12 @@ templ RoleCard(agentType *registry.Role) {
 				}
 				
 				<!-- Default Config -->
-				if len(agentType.DefaultConfig) > 0 {
+				if len(role.DefaultConfig) > 0 {
 					<div class="mb-4">
 						<h4 class="subtitle is-6">Default Configuration</h4>
 						<div class="box has-background-light">
 							<pre class="is-size-7">
-								for key, value := range agentType.DefaultConfig {
+								for key, value := range role.DefaultConfig {
 									{ fmt.Sprintf("%s: %v\n", key, value) }
 								}
 							</pre>
@@ -138,10 +148,10 @@ templ RoleCard(agentType *registry.Role) {
 				
 				<!-- Actions -->
 				<div class="buttons">
-					if !agentType.IsSystemType {
-						if agentType.IsEnabled {
+					if !role.IsSystemType {
+						if role.IsEnabled {
 							<button 
-								hx-post={ fmt.Sprintf("/api/v1/agent-types/%s/disable", agentType.ID) }
+								hx-post={ fmt.Sprintf("/api/v1/agent-types/%s/disable", role.ID) }
 								hx-target="closest div[data-type-id]"
 								hx-swap="outerHTML"
 								class="button is-warning is-small is-light"
@@ -150,7 +160,7 @@ templ RoleCard(agentType *registry.Role) {
 							</button>
 						} else {
 							<button 
-								hx-post={ fmt.Sprintf("/api/v1/agent-types/%s/enable", agentType.ID) }
+								hx-post={ fmt.Sprintf("/api/v1/agent-types/%s/enable", role.ID) }
 								hx-target="closest div[data-type-id]"
 								hx-swap="outerHTML"
 								class="button is-success is-small is-light"
@@ -159,14 +169,14 @@ templ RoleCard(agentType *registry.Role) {
 							</button>
 						}
 						<button 
-							@click="$dispatch('edit-agent-type', { id: agentType.ID })"
+							@click="$dispatch('edit-agent-type', { id: role.ID })"
 							class="button is-info is-small is-light"
 						>
 							Edit
 						</button>
 					}
 					<button 
-						@click="$dispatch('view-schema', { id: agentType.ID })"
+						@click="$dispatch('view-schema', { id: role.ID })"
 						class="button is-light is-small"
 					>
 						View Schema
