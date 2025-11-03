@@ -31,11 +31,6 @@ templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversa
 							@OverviewContent(currentAgency, conversation, overview)
 						</div>
 						
-						<!-- Agent Types View -->
-						<div class="view-content" data-view-content="agent-types">
-							@RolesContent(conversation)
-						</div>
-						
 						<!-- Layout View -->
 						<div class="view-content" data-view-content="layout">
 							<div class="layout-panel">
@@ -63,10 +58,6 @@ templ ViewSwitcher() {
 		<div class="view-tab is-active" data-view="overview">
 			<span class="view-icon">📊</span>
 			<span class="view-label">Overview</span>
-		</div>
-		<div class="view-tab" data-view="agent-types">
-			<span class="view-icon">🤖</span>
-			<span class="view-label">Agent Types</span>
 		</div>
 		<div class="view-tab" data-view="layout">
 			<span class="view-icon">🔗</span>

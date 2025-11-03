@@ -5,7 +5,6 @@
 import { initializeChatScroll, scrollToBottom } from './chat.js';
 import { initializeHTMXEvents } from './htmx.js';
 import { initializeViewSwitcher, switchView } from './views.js';
-import { initializeAgentSelection, selectAgentType } from './agents.js';
 import { initializeOverview, selectOverviewSection } from './overview.js';
 import {
     saveOverviewIntroduction,
@@ -47,7 +46,6 @@ function initializeAgencyDesigner() {
         initializeChatScroll();
         initializeHTMXEvents();
         initializeViewSwitcher();
-        initializeAgentSelection();
         initializeOverview();
         initializeAIProcessControls();
         initializeContextSelection(); // Initialize context selection system
@@ -133,7 +131,6 @@ function hideAIProcessStatus() {
 }
 
 // Export functions to global scope for onclick handlers
-window.selectAgentType = selectAgentType;
 window.selectOverviewSection = selectOverviewSection;
 window.saveOverviewIntroduction = saveOverviewIntroduction;
 window.undoOverviewIntroduction = undoOverviewIntroduction;

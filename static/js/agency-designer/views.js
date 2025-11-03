@@ -39,13 +39,6 @@ export function switchView(view) {
         case 'overview':
             // Overview is always available
             break;
-        case 'agent-types':
-            // Re-select first agent if needed
-            const firstAgent = document.querySelector('.agent-type-item');
-            if (firstAgent && !document.querySelector('.agent-type-item.is-active')) {
-                firstAgent.click();
-            }
-            break;
         case 'layout':
             // Layout diagram will be rendered here
             break;
