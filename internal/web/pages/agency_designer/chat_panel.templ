@@ -160,9 +160,6 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 		hx-on::after-request="
 			document.getElementById('user-input').value = ''; 
 			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-		"
-		hx-on::response-error="
-			console.error('CHAT: Response error:', event.detail);
 		">
 		
 		<div class="field has-addons">

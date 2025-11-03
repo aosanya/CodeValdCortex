@@ -47,8 +47,6 @@ export function loadRoles() {
 
 // Show role editor
 export function showRoleEditor(mode, roleKey = null) {
-    console.log(`[Roles] Show editor in ${mode} mode`, roleKey);
-
     roleEditorState.mode = mode;
     roleEditorState.roleKey = roleKey;
 
@@ -112,8 +110,6 @@ function loadRoleData(roleKey) {
 
 // Populate form with role data
 function populateRoleForm(role) {
-    console.log('[Roles] Populating form with role data:', role);
-
     const fields = {
         'role-name-editor': role.name || '',
         'role-tags-editor': (role.tags || []).join(', '),
@@ -134,8 +130,6 @@ function populateRoleForm(role) {
             console.warn(`[Roles] Element not found: ${id}`);
         }
     }
-
-    console.log('[Roles] Form population complete');
 }
 
 // Clear role form
@@ -225,8 +219,6 @@ export function saveRoleFromEditor() {
             : '1.0.0'
     };
 
-    console.log('[Roles] Saving role:', payload);
-
     // Determine URL and method
     const { mode, roleKey } = roleEditorState;
     const url = mode === 'add'
@@ -251,7 +243,6 @@ export function saveRoleFromEditor() {
             return response.json();
         })
         .then(result => {
-            console.log('[Roles] Role saved successfully:', result);
             showNotification(
                 mode === 'add' ? 'Role created successfully' : 'Role updated successfully',
                 'success'
@@ -345,8 +336,6 @@ export async function processAIRoleOperation(operations) {
         return;
     }
 
-    console.log('[Roles] Processing AI role operation:', operations);
-
     // Get selected role keys if needed
     const selectedRoleKeys = operations.includes('enhance') || operations.includes('consolidate')
         ? getSelectedRoleKeys()
@@ -400,7 +389,6 @@ export async function processAIRoleOperation(operations) {
         }
 
         const result = await response.json();
-        console.log('[Roles] AI operation result:', result);
 
         // Update status to show we're processing results
         if (window.showAIProcessStatus) {

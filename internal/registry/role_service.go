@@ -163,7 +163,7 @@ func (s *DefaultRoleService) ValidateAgentConfig(ctx context.Context, typeID str
 		for _, desc := range result.Errors() {
 			errMsg += fmt.Sprintf("\n  - %s", desc)
 		}
-		return fmt.Errorf(errMsg)
+		return fmt.Errorf("%s", errMsg)
 	}
 
 	// Apply custom validation rules

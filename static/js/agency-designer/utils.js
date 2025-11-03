@@ -21,7 +21,6 @@ export function getCurrentAgencyId() {
         return metaTag.getAttribute('content');
     }
 
-    console.warn('Could not determine agency ID');
     return null;
 }
 

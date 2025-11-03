@@ -126,15 +126,11 @@ export function addGoalContext(goalCode, goalDescription) {
  * @param {string} workItemDescription - Full work item description
  */
 export function addWorkItemContext(workItemCode, workItemDescription) {
-    console.log('[Context] addWorkItemContext called:', { workItemCode, workItemDescription });
-
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
     // If text is selected, use it; otherwise use full description
     const content = selectedText || workItemDescription;
-
-    console.log('[Context] Content to add:', content);
 
     // Check if context already exists
     const exists = contextState.contexts.some(ctx =>
@@ -142,14 +138,11 @@ export function addWorkItemContext(workItemCode, workItemDescription) {
     );
 
     if (exists) {
-        console.log('[Context] Context already exists, showing warning');
         showNotification('This context is already added', 'warning');
         return null;
     }
 
-    console.log('[Context] Creating new work item context');
     const result = createContext(ContextType.WORK_ITEM, workItemCode, content);
-    console.log('[Context] Context created:', result);
     return result;
 }
 

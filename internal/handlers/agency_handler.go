@@ -210,15 +210,7 @@ func (h *AgencyHandler) UpdateAgency(c *gin.Context) {
 		return
 	}
 
-	updates := agency.AgencyUpdates{
-		DisplayName: req.DisplayName,
-		Description: req.Description,
-		Category:    req.Category,
-		Icon:        req.Icon,
-		Status:      req.Status,
-		Metadata:    req.Metadata,
-		Settings:    req.Settings,
-	}
+	updates := agency.AgencyUpdates(req)
 
 	if err := h.service.UpdateAgency(c.Request.Context(), id, updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

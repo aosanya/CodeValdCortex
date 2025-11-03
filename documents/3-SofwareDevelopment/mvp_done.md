@@ -27,6 +27,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-025 | AI Agency Designer    | Advanced AI-driven agency design tool that brainstorms agency structure, creates roles, defines relationships, and generates complete agency architecture through intelligent conversation | 2025-10-29     | `feature/MVP-025_ai-agency-designer`   | ~8 hours   | ✅ Complete |
 | MVP-029 | Goals Module | Implement Goals CRUD operations, AI-powered goal generation/refinement from natural language, data models, templ templates, and UI in Agency Designer with database persistence | 2025-10-30     | `feature/MVP-029_problem-definition-module`   | ~6 hours   | ✅ Complete |
 | MVP-043 | Work Items UI Module - AI Status & Chat Refresh Fix | Fixed AI status message disappearing prematurely during AI operations. Implemented chat refresh pattern to display AI explanations after work items, goals, and introduction operations. Removed auto-hide timeouts, increased server write_timeout to 180s, and cleaned up debug logging | 2025-11-03     | `feature/MVP-043_work-items-ui-module`   | ~2 hours   | ✅ Complete |
+| MVP-044 | Roles UI Module | Built complete Roles UI with CRUD operations, AI-powered role generation, taxonomy fields (autonomy L0-L4), token budgets, tags-based categorization, system role filtering, and integration with Agency Designer. Migrated Category→Tags, extracted goals handlers to separate file, added sorting to roles/goals/work items | 2025-11-03     | `feature/MVP-044_roles-ui-module`   | ~6 hours   | ✅ Complete |
 
 ---
 

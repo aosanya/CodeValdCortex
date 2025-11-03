@@ -18,7 +18,7 @@ func TestRoleRepository(t *testing.T) {
 			ID:          "test-type",
 			Name:        "Test Type",
 			Description: "A test role",
-			Category:    "test",
+			Tags:        []string{"test"},
 			Version:     "1.0.0",
 			IsEnabled:   true,
 		}
@@ -34,10 +34,10 @@ func TestRoleRepository(t *testing.T) {
 
 	t.Run("Duplicate Create", func(t *testing.T) {
 		agentType := &Role{
-			ID:       "duplicate",
-			Name:     "Duplicate",
-			Category: "test",
-			Version:  "1.0.0",
+			ID:      "duplicate",
+			Name:    "Duplicate",
+			Tags:    []string{"test"},
+			Version: "1.0.0",
 		}
 
 		err := repo.Create(ctx, agentType)
@@ -53,8 +53,8 @@ func TestRoleRepository(t *testing.T) {
 		assert.GreaterOrEqual(t, len(types), 2)
 	})
 
-	t.Run("List By Category", func(t *testing.T) {
-		types, err := repo.ListByCategory(ctx, "test")
+	t.Run("List By Tags", func(t *testing.T) {
+		types, err := repo.ListByTags(ctx, []string{"test"})
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(types), 2)
 	})
@@ -93,7 +93,7 @@ func TestRoleService(t *testing.T) {
 			ID:          "service-test",
 			Name:        "Service Test",
 			Description: "Test type for service",
-			Category:    "test",
+			Tags:        []string{"test"},
 			Version:     "1.0.0",
 			IsEnabled:   true,
 		}
@@ -104,9 +104,9 @@ func TestRoleService(t *testing.T) {
 
 	t.Run("Register Invalid Type - No ID", func(t *testing.T) {
 		agentType := &Role{
-			Name:     "No ID",
-			Category: "test",
-			Version:  "1.0.0",
+			Name:    "No ID",
+			Tags:    []string{"test"},
+			Version: "1.0.0",
 		}
 
 		err := service.RegisterType(ctx, agentType)
@@ -115,9 +115,9 @@ func TestRoleService(t *testing.T) {
 
 	t.Run("Register Invalid Type - No Name", func(t *testing.T) {
 		agentType := &Role{
-			ID:       "no-name",
-			Category: "test",
-			Version:  "1.0.0",
+			ID:      "no-name",
+			Tags:    []string{"test"},
+			Version: "1.0.0",
 		}
 
 		err := service.RegisterType(ctx, agentType)
@@ -170,12 +170,12 @@ func TestDefaultRoles(t *testing.T) {
 			assert.Equal(t, typeID, agentType.ID)
 			assert.True(t, agentType.IsSystemType)
 			assert.True(t, agentType.IsEnabled)
-			assert.Equal(t, "core", agentType.Category)
+			assert.Contains(t, agentType.Tags, "core")
 		}
 	})
 
-	t.Run("List Types By Category", func(t *testing.T) {
-		coreTypes, err := service.ListTypesByCategory(ctx, "core")
+	t.Run("List Types By Tags", func(t *testing.T) {
+		coreTypes, err := service.ListTypesByTags(ctx, []string{"core"})
 		require.NoError(t, err)
 		assert.Equal(t, 5, len(coreTypes))
 	})
