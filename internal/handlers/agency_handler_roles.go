@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
@@ -26,6 +27,11 @@ func (h *AgencyHandler) GetAgencyRoles(c *gin.Context) {
 		}
 	}
 
+	// Sort roles by ID (code)
+	sort.Slice(userRoles, func(i, j int) bool {
+		return userRoles[i].ID < userRoles[j].ID
+	})
+
 	c.JSON(http.StatusOK, userRoles)
 }
 
@@ -48,6 +54,11 @@ func (h *AgencyHandler) GetAgencyRolesHTML(c *gin.Context) {
 			userRoles = append(userRoles, role)
 		}
 	}
+
+	// Sort roles by ID (code)
+	sort.Slice(userRoles, func(i, j int) bool {
+		return userRoles[i].ID < userRoles[j].ID
+	})
 
 	h.logger.Infof("Returning %d user-defined roles for HTML rendering", len(userRoles))
 

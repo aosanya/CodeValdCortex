@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
@@ -31,6 +32,11 @@ func (h *AgencyHandler) GetWorkItemsHTML(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error loading work items")
 		return
 	}
+
+	// Sort work items by Code
+	sort.Slice(workItems, func(i, j int) bool {
+		return workItems[i].Code < workItems[j].Code
+	})
 
 	// Render the work items list template
 	component := agency_designer.WorkItemsList(workItems)
