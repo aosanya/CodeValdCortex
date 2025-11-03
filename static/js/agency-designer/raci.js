@@ -28,7 +28,7 @@ function getAgencyId() {
 // Make loadRACIMatrix available globally for overview.js to call
 window.loadRACIMatrix = function () {
     console.log('[RACI] loadRACIMatrix called');
-    
+
     // Get agency ID if not already set
     if (!raciState.agencyId) {
         raciState.agencyId = getAgencyId();
@@ -44,7 +44,7 @@ window.loadRACIMatrix = function () {
         console.error('[RACI] Table body element not found');
         return;
     }
-    
+
     console.log('[RACI] Table body found, loading data...');
 
     // Show simple loading state in table
@@ -53,7 +53,7 @@ window.loadRACIMatrix = function () {
     // Fetch work items first
     const workItemsUrl = `/api/v1/agencies/${raciState.agencyId}/work-items`;
     console.log('[RACI] Fetching work items from:', workItemsUrl);
-    
+
     fetch(workItemsUrl)
         .then(response => {
             console.log('[RACI] Work items response status:', response.status);
@@ -119,7 +119,7 @@ function loadExistingAssignments() {
 function renderRACITable() {
     console.log('[RACI] renderRACITable called');
     console.log('[RACI] Work items count:', raciState.workItems ? raciState.workItems.length : 0);
-    
+
     const tableBody = document.getElementById('raci-matrix-body');
     const emptyState = document.getElementById('raci-empty-state');
     const tableContainer = document.getElementById('raci-matrix-table');
