@@ -38,20 +38,20 @@ templ GoalItem(goal *agency.Goal) {
 					<span class="icon"><i class="fas fa-layer-group"></i></span>
 					<span>Context</span>
 				</button>
-				<button 
-					class="button is-small is-info is-fullwidth" 
-					onclick={ templ.ComponentScript{Call: fmt.Sprintf("showGoalEditor('edit', '%s', '%s', '%s')", goal.Key, goal.Code, templ.EscapeString(goal.Description))} }
-					title="Edit">
-					<span class="icon"><i class="fas fa-edit"></i></span>
-					<span>Edit</span>
-				</button>
-				<button 
-					class="button is-small is-danger is-fullwidth" 
-					onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteGoal(%d)", goal.Number)} }
-					title="Delete">
-					<span class="icon"><i class="fas fa-trash"></i></span>
-					<span>Delete</span>
-				</button>
+			<button 
+				class="button is-small is-info is-fullwidth" 
+				onclick={ templ.ComponentScript{Call: fmt.Sprintf("showGoalEditor('edit', '%s', '%s', '%s')", goal.Key, goal.Code, templ.EscapeString(goal.Description))} }
+				title="Edit">
+				<span class="icon"><i class="fas fa-edit"></i></span>
+				<span>Edit</span>
+			</button>
+			<button 
+				class="button is-small is-danger is-fullwidth" 
+				onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteGoal('%s', %d)", goal.Key, goal.Number)} }
+				title="Delete">
+				<span class="icon"><i class="fas fa-trash"></i></span>
+				<span>Delete</span>
+			</button>
 			</div>
 		</td>
 	</tr>
