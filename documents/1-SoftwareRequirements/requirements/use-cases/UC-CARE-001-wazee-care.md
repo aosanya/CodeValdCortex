@@ -43,7 +43,7 @@ An agentic system where each element of the community care network is an autonom
 - Optimizes resource allocation and caregiver schedules
 - Respects elderly residents' autonomy and preferences
 
-## Agent Types
+## Roles
 
 ### 1. Elder Agent
 **Represents**: Individual elderly community members receiving care
@@ -629,7 +629,7 @@ IF emergency_across_multiple_elders
 - **Route Optimization**: GPS-based pathfinding for care providers
 - **Real-time Alerts**: Push notifications for emergencies and updates
 - **Analytics Dashboard**: Visual reports for coordinators and families
-- **Mobile Access**: Apps for all agent types
+- **Mobile Access**: Apps for all roles
 - **Offline Capability**: Core functions work without internet
 - **Data Privacy**: HIPAA-compliant health information protection
 
@@ -642,7 +642,7 @@ IF emergency_across_multiple_elders
 - **Family Portals**: Web and mobile apps for family members
 
 ### Security and Privacy
-- **Role-Based Access**: Different permissions for each agent type
+- **Role-Based Access**: Different permissions for each role
 - **Audit Logging**: Track all access to elder information
 - **Consent Management**: Elder control over information sharing
 - **Emergency Override**: Access during critical situations
@@ -703,7 +703,7 @@ IF emergency_across_multiple_elders
 
 ## Expansion Possibilities
 
-### Additional Agent Types
+### Additional Roles
 - **Doctor Agent**: For telehealth and in-person medical consultations
 - **Pharmacist Agent**: Medication counseling and interaction checking
 - **Physical Therapist Agent**: Mobility exercises and rehabilitation

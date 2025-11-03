@@ -11,13 +11,13 @@
 
 ## Overview
 
-Implemented a comprehensive AI-powered agency design tool that enables users to create complete multi-agent agency architectures through intelligent conversational interaction. The system brainstorms agency structure, creates agent types, defines relationships, and generates comprehensive agency blueprints.
+Implemented a comprehensive AI-powered agency design tool that enables users to create complete multi-agent agency architectures through intelligent conversational interaction. The system brainstorms agency structure, creates roles, defines relationships, and generates comprehensive agency blueprints.
 
 ## Objectives Achieved
 
 - ✅ **Conversational AI Interface**: Built interactive chat system for agency design discussion
 - ✅ **Template-First Architecture**: Implemented `.templ` file structure with minimal JavaScript
-- ✅ **Multi-View Design System**: Created tabbed interface (Overview, Agent Types, Layout)
+- ✅ **Multi-View Design System**: Created tabbed interface (Overview, Roles, Layout)
 - ✅ **Real-time AI Integration**: Connected Claude API for intelligent design assistance
 - ✅ **Dynamic Content Management**: Implemented CRUD operations for problems and units of work
 - ✅ **Status Indicator System**: Built unified AI processing status with proper HTMX integration
@@ -132,7 +132,7 @@ The AI Agency Designer follows a **Template-First Architecture** pattern:
 ### Session 3: Multi-View System (1.5 hours)
 - Developed tabbed interface for different views
 - Implemented view switching with JavaScript
-- Created overview, agent types, and layout sections
+- Created overview, roles, and layout sections
 - Added responsive navigation system
 
 ### Session 4: CRUD Operations (2 hours)
@@ -162,7 +162,7 @@ The AI Agency Designer follows a **Template-First Architecture** pattern:
 - **Overview Section**: Agency introduction and high-level description
 - **Problems Section**: Define key problems the agency will solve
 - **Units of Work Section**: Break down tasks and workflows
-- **Agent Types Section**: Design agent roles and capabilities (placeholder)
+- **Roles Section**: Design agent roles and capabilities (placeholder)
 - **Layout Section**: Visualize agency architecture (placeholder)
 
 ### 3. Advanced Editing Features
@@ -403,7 +403,7 @@ DELETE /agencies/{id}/units/{id}      # Delete unit
 ## Future Enhancement Opportunities
 
 ### Immediate Next Steps
-1. **Agent Types Editor**: Complete the agent types management system
+1. **Roles Editor**: Complete the roles management system
 2. **Layout Visualizer**: Implement the agency architecture diagram
 3. **Export Features**: Generate agency documentation and configs
 4. **Collaboration**: Multi-user editing and real-time sync

@@ -16,7 +16,7 @@ Successfully completed **MVP-025: AI Agency Designer**, a comprehensive AI-power
 
 #### Major Features Delivered:
 1. **Conversational AI Interface**: Real-time chat with Claude for agency brainstorming
-2. **Multi-View Design System**: Tabbed interface (Overview, Agent Types, Layout)  
+2. **Multi-View Design System**: Tabbed interface (Overview, Roles, Layout)  
 3. **Template-First Architecture**: Server-side rendering with minimal JavaScript
 4. **CRUD Operations**: Complete management for problems and units of work
 5. **AI-Powered Refinement**: One-click enhancement for text content

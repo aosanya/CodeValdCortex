@@ -45,7 +45,7 @@ Modern warehouses face increasing complexity due to:
 
 ## System Architecture
 
-### Agent Types
+### Roles
 
 #### 1. Robot Agent (`robot`)
 **Purpose**: Autonomous mobile robots for material handling and transportation
@@ -57,7 +57,7 @@ Modern warehouses face increasing complexity due to:
 - Monitor battery levels and auto-charge when needed
 - Report status and location in real-time
 
-**Agent Types**:
+**Roles**:
 - **AGV (Automated Guided Vehicle)**: Fixed path material transport
 - **AMR (Autonomous Mobile Robot)**: Dynamic path navigation
 - **Picker Robot**: Automated item picking
@@ -226,7 +226,7 @@ This use case uses the **Framework Topology Visualizer** (schema version 1.0.0) 
 
 **Agent Attributes for Visualization**:
 
-All agent types should include:
+All roles should include:
 - `coordinates`: [x, y] position in warehouse coordinate system (meters from origin)
 - `connection_rules`: Array of canonical relationship definitions
 - `visualization_metadata`: Display properties
@@ -666,7 +666,7 @@ The integration with the Framework Topology Visualizer provides unprecedented re
 ## References
 
 - CodeValdCortex Framework Documentation
-- Agent Type Registry System
+- Role Registry System
 - ArangoDB Message System Design
 - Warehouse Automation Best Practices
 - Industry Standards: ANSI MH10, ISO 18626

@@ -663,7 +663,7 @@ This use case uses the **Framework Topology Visualizer** (schema version 1.0.0) 
 
 **Agent Attributes for Visualization**:
 
-All agent types should include:
+All roles should include:
 - `coordinates`: GPS [latitude, longitude] for real-time positioning
 - `connection_rules`: Array of canonical relationship definitions
 - `visualization_metadata`: Display properties

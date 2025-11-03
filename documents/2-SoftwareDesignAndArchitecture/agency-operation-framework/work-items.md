@@ -364,13 +364,13 @@ Logs and tracing:
 - Example: HIPAA data export (template)
   - Template enforces `approvalPolicy` requiring privacy officer sign-off, evidence capture of exported records, and data residency check.
 
-## 12. Agent Types Taxonomy
+## 12. Role Taxonomy
 
-Work items are executed by agents with well-defined capabilities, autonomy levels, and constraints. The complete agent types taxonomy is documented separately.
+Work items are executed by agents with well-defined capabilities, autonomy levels, and constraints. The complete roles taxonomy is documented separately.
 
-**See**: [Agent Types Taxonomy](./agent-types-taxonomy.md) for comprehensive documentation including:
+**See**: [Role Taxonomy](./role-taxonomy.md) for comprehensive documentation including:
 
-- **Agent Type Classifications**: Stateless Tool-Caller, Planner/Coordinator, Data Access Agent, Long-Running Service, Sensor/Monitor, Actuator, Reviewer/HITL Proxy
+- **Role Classifications**: Stateless Tool-Caller, Planner/Coordinator, Data Access Agent, Long-Running Service, Sensor/Monitor, Actuator, Reviewer/HITL Proxy
 - **Skills & Tools Contract**: Tool adapters, capability declarations, proficiency levels
 - **Autonomy Levels (L0-L4)**: From manual to full autonomy with policy-bound action scopes
 - **Budgeting**: Token/$ budgets, time/compute quotas, exhaustion behaviors
@@ -481,9 +481,9 @@ Benefits:
 
 ### Phase 1: Core Schema & Registry (MVP-030)
 - [ ] Add JSON Schemas for each `work_item_type` to `work_item_types` collection
-- [ ] Implement agent type taxonomy fields in `agent_types` registry
+- [ ] Implement role taxonomy fields in `agent_types` registry
 - [ ] Add autonomy level, budget, and safety constraint fields to agent schema
-- [ ] Create default agent types with example configurations
+- [ ] Create default roles with example configurations
 
 ### Phase 2: Lifecycle & SLA Enforcement (MVP-031)
 - [ ] Implement server-side transition validator and `POST /work-items/{id}/transition` endpoint

@@ -10,9 +10,9 @@ Use cases in CodeValdCortex are **extremely thin** - they should contain **only 
 
 **Use cases should be declarative, not imperative.**
 
-- ✅ **DO**: Define agent types, schemas, and behaviors through JSON/YAML configuration
-- ✅ **DO**: Use framework-provided capabilities and built-in agent types
-- ✅ **DO**: Leverage the Agent Type Registry for dynamic type registration
+- ✅ **DO**: Define roles, schemas, and behaviors through JSON/YAML configuration
+- ✅ **DO**: Use framework-provided capabilities and built-in roles
+- ✅ **DO**: Leverage the Role Registry for dynamic type registration
 - ❌ **DON'T**: Write custom agent implementation code in use cases
 - ❌ **DON'T**: Create use case-specific lifecycle management
 - ❌ **DON'T**: Implement custom messaging or coordination logic
@@ -39,8 +39,8 @@ The framework (`/workspaces/CodeValdCortex/internal/`) provides all the infrastr
    - Request/Response patterns
    - Message matching and filtering
 
-4. **Agent Type Registry** (`internal/registry/`)
-   - Dynamic agent type registration
+4. **Role Registry** (`internal/registry/`)
+   - Dynamic role registration
    - JSON Schema validation
    - Type-based agent creation
    - Capability management
@@ -93,7 +93,7 @@ UC-INFRA-001-water-distribution-network/
 ├── README.md                     # Documentation
 └── config/
     └── agents/
-        └── pipe.json             # Pipe agent type definition
+        └── pipe.json             # Pipe role definition
 ```
 
 ### What Gets Loaded
@@ -101,12 +101,12 @@ UC-INFRA-001-water-distribution-network/
 The framework automatically:
 
 1. **Reads** `.env` to get `USECASE_CONFIG_DIR`
-2. **Scans** `config/agents/*.json` for agent type definitions
+2. **Scans** `config/agents/*.json` for role definitions
 3. **Validates** each JSON file against the AgentType schema
-4. **Registers** agent types in the Agent Type Registry
+4. **Registers** roles in the Role Registry
 5. **Makes available** for runtime agent creation
 
-### Agent Type Definition (pipe.json)
+### Role Definition (pipe.json)
 
 ```json
 {
@@ -153,7 +153,7 @@ The framework automatically:
 }
 ```
 
-This single JSON file defines **everything** about the pipe agent type:
+This single JSON file defines **everything** about the pipe role:
 - What data it requires (schema)
 - What it can do (capabilities)
 - How to validate instances (validation_rules)
@@ -219,7 +219,7 @@ curl -X POST http://localhost:8080/api/v1/agents \
 ```
 
 The framework:
-1. Looks up the "pipe" agent type from the registry
+1. Looks up the "pipe" role from the registry
 2. Validates the config against the JSON schema
 3. Creates and starts the agent
 4. Returns the agent ID
@@ -249,30 +249,30 @@ FLOW_EFFICIENCY_CRITICAL=0.5
 
 The framework reads these values and configures itself accordingly.
 
-## Loading Agent Types at Startup
+## Loading Roles at Startup
 
-The framework automatically loads use case agent types:
+The framework automatically loads use case roles:
 
 ```go
 // In internal/app/app.go - New() function
 
-// Register default agent types
+// Register default roles
 ctx := context.Background()
 if err := registry.InitializeDefaultAgentTypes(ctx, agentTypeService, logger); err != nil {
-    logger.Warn("Failed to initialize default agent types")
+    logger.Warn("Failed to initialize default roles")
 }
 
-// Load use case-specific agent types from config directory
+// Load use case-specific roles from config directory
 useCaseConfigDir := os.Getenv("USECASE_CONFIG_DIR")
 if useCaseConfigDir != "" {
     agentTypesDir := filepath.Join(useCaseConfigDir, "config", "agents")
     if err := loadAgentTypesFromDirectory(ctx, agentTypesDir, agentTypeService, logger); err != nil {
-        logger.Warn("Failed to load use case agent types")
+        logger.Warn("Failed to load use case roles")
     }
 }
 ```
 
-**Result**: All agent types (12 defaults + use case-specific) are available in the registry and ready to use.
+**Result**: All roles (12 defaults + use case-specific) are available in the registry and ready to use.
 
 ## Benefits of Configuration-Only Use Cases
 
@@ -295,7 +295,7 @@ if useCaseConfigDir != "" {
 - Early error detection
 
 ### 4. Flexibility
-- Add new agent types without code changes
+- Add new roles without code changes
 - Modify schemas dynamically
 - Enable/disable types via API
 - Hot-reload configurations
@@ -374,7 +374,7 @@ In rare cases where the framework doesn't provide required functionality:
 
 If you have existing use cases with custom code:
 
-### Step 1: Extract Agent Type Definition
+### Step 1: Extract Role Definition
 Convert Go structs to JSON Schema:
 
 ```go
@@ -454,7 +454,7 @@ Use cases within CodeValdCortex agencies should be designed with the Agency Oper
 - **Traceability**: Clear links between use case agents and the problems they help solve
 
 ### Work Items (WI) Implementation
-- **Work Package Alignment**: Use case agent types should support the defined Work Items
+- **Work Package Alignment**: Use case roles should support the defined Work Items
 - **Agent Capabilities**: Agent capabilities in JSON configuration should match WI requirements
 - **Deliverable Support**: Agent schemas should capture data needed for WI deliverables
 

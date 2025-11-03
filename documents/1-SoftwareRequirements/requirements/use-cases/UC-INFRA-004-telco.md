@@ -42,7 +42,7 @@ An agentic system where each network infrastructure element is an autonomous age
 - Automates configuration management and self-healing
 - Balances load and traffic across network paths
 
-## Agent Types
+## Roles
 
 ### 1. Cell Tower Agent (Base Station)
 **Represents**: Mobile network cell towers and base stations

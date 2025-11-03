@@ -1,15 +1,15 @@
 ---
-title: Agent Types Taxonomy
-path: /documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/agent-types-taxonomy.md
+title: Role Taxonomy
+path: /documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/role-taxonomy.md
 ---
 
-# Agent Types Taxonomy
+# Role Taxonomy
 
-This document specifies the comprehensive taxonomy for agent types within CodeValdCortex, including capabilities, autonomy levels, budgeting, safety constraints, and identity management.
+This document specifies the comprehensive taxonomy for roles within CodeValdCortex, including capabilities, autonomy levels, budgeting, safety constraints, and identity management.
 
 ## 1. Overview
 
-To support sophisticated work item execution, the agent type system must be extended with a rich taxonomy that defines:
+To support sophisticated work item execution, the role system must be extended with a rich taxonomy that defines:
 
 - Functional roles and capabilities
 - Skills and tool contracts
@@ -21,9 +21,9 @@ To support sophisticated work item execution, the agent type system must be exte
 
 This taxonomy ensures agents operate within well-defined boundaries while maintaining flexibility for different use cases and risk profiles.
 
-## 2. Agent Type Taxonomy
+## 2. Role Taxonomy
 
-Define agent types by their functional role and operational characteristics:
+Define roles by their functional role and operational characteristics:
 
 ### 2.1 Stateless Tool-Caller
 
@@ -209,7 +209,7 @@ Define agent types by their functional role and operational characteristics:
 
 ## 3. Skills & Tools Contract
 
-Each agent type must declare its skills and tool adapters to enable proper routing and capability matching.
+Each role must declare its skills and tool adapters to enable proper routing and capability matching.
 
 ### 3.1 Tool Adapters
 
@@ -384,7 +384,7 @@ Inspired by autonomous vehicle levels, define agent autonomy with corresponding 
 
 ### 4.2 Policy-Bound Action Scopes
 
-Each agent type includes an `autonomyPolicy` that defines its operational boundaries:
+Each role includes an `autonomyPolicy` that defines its operational boundaries:
 
 **Schema**:
 
@@ -833,7 +833,7 @@ interface CrossTenantPolicy {
 
 ---
 
-## 9. Complete Agent Type Example
+## 9. Complete Role Example
 
 Here's a complete example combining all taxonomy elements:
 
@@ -966,8 +966,8 @@ Here's a complete example combining all taxonomy elements:
 ### Phase 1: Schema Extension (MVP-030)
 - [ ] Extend `agent_types` collection schema with taxonomy fields
 - [ ] Add validation rules for new fields
-- [ ] Create migration script for existing agent types
-- [ ] Update agent type registry service
+- [ ] Create migration script for existing roles
+- [ ] Update role registry service
 
 ### Phase 2: Runtime Enforcement (MVP-031)
 - [ ] Implement autonomy level enforcement in task execution

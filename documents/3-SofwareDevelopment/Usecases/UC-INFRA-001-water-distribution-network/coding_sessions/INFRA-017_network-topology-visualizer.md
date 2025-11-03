@@ -304,7 +304,7 @@ After fix:  Parsed: 283/283 nodes have coordinates ✓
 
 **Location**: `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/data/`
 
-**Created 5 Agent Type Files**:
+**Created 5 Role Files**:
 
 #### 1. coordinators.json (5 agents)
 Zone coordinators managing different areas:
@@ -634,7 +634,7 @@ Rendering 283 nodes, 278 edges
 - ✅ Zoom in/out controls functional
 - ✅ Pan/drag map working
 - ✅ Hover tooltips showing agent metadata
-- ✅ Filters toggle agent types correctly
+- ✅ Filters toggle roles correctly
 - ✅ Layout algorithm switching works
 - ✅ Statistics update in real-time
 - ✅ Auto-refresh every 30 seconds
@@ -730,7 +730,7 @@ visualizer.render(data.nodes, data.edges, {});
 
 **Result**: Map displays 293 agents across Nairobi road network
 
-### Example 2: Filtering by Agent Type
+### Example 2: Filtering by Role
 ```javascript
 // User unchecks "Sensors" filter
 const filters = {
@@ -923,7 +923,7 @@ const stats = {
 
 ### UC-INFRA-001 Design ✅
 - Implements network topology visualization requirement
-- Displays all 5 water infrastructure agent types
+- Displays all 5 water infrastructure roles
 - Shows real-time agent status (running/stopped/error)
 - Provides geographic context for infrastructure
 - Supports multi-zone coordination visualization
@@ -931,7 +931,7 @@ const stats = {
 ### UI/UX Design ✅
 - Consistent with dashboard using Bulma CSS
 - Responsive layout (sidebar + map container)
-- Color-coded agent types matching dashboard
+- Color-coded roles matching dashboard
 - Interactive controls (filters, layouts, refresh)
 - Real-time statistics and legends
 
@@ -1000,7 +1000,7 @@ const stats = {
 3. **Design Consistency Pays Off**:
    - Bulma CSS reuse from dashboard saved time
    - Familiar navigation patterns improve UX
-   - Color-coded agent types match existing conventions
+   - Color-coded roles match existing conventions
 
 ## Deployment Checklist
 

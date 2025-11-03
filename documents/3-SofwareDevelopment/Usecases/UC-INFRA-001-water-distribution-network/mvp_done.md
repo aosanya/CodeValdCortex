@@ -6,7 +6,7 @@ This document tracks all completed MVP tasks for the UC-INFRA-001 Water Distribu
 
 | Task ID | Title | Completion Date | Module | Coding Session | Notes |
 |---------|-------|-----------------|--------|----------------|-------|
-| INFRA-001 | Pipe Agent Implementation | October 22, 2025 | UC-INFRA-001 & Framework | [INFRA-001_pipe-agent.md](./coding_sessions/INFRA-001_pipe-agent.md) | Established configuration-based agent type loading with ArangoDB persistence. Framework enhanced to auto-load types from JSON. Removed 7 infrastructure types from framework defaults. |
+| INFRA-001 | Pipe Agent Implementation | October 22, 2025 | UC-INFRA-001 & Framework | [INFRA-001_pipe-agent.md](./coding_sessions/INFRA-001_pipe-agent.md) | Established configuration-based role loading with ArangoDB persistence. Framework enhanced to auto-load types from JSON. Removed 7 infrastructure types from framework defaults. |
 | INFRA-007 | Fix Agent Instance Data Loading Path | October 23, 2025 | Framework | [INFRA-007_fix-data-path.md](./coding_sessions/INFRA-007_fix-data-path.md) | Fixed case-sensitive path issue in .env file preventing agent instance data from loading. Changed `Usecases` to `usecases` in USECASE_CONFIG_DIR. Application rebuilt and ready for instance loading. |
 | INFRA-009 | Leak Detection Scenario | October 23, 2025 | UC-INFRA-001 & Framework | [INFRA-009_leak-detection-scenario.md](./coding_sessions/INFRA-009_leak-detection-scenario.md) | Implemented complete 4-step leak detection workflow with REST API communication endpoints. Added MessageService and PubSubService REST handlers. Created standalone scenario demonstrating multi-agent coordination. |
 | INFRA-010 | Pressure Optimization Scenario | October 23, 2025 | UC-INFRA-001 | [INFRA-010_pressure-optimization-scenario.md](./coding_sessions/INFRA-010_pressure-optimization-scenario.md) | Implemented continuous 3-cycle pressure optimization workflow. Demonstrated 7-agent coordination (3 sensors, 3 pumps, 1 coordinator) with dynamic system adaptation (low→optimal→high pressure). Established continuous optimization loop pattern. |
@@ -22,18 +22,18 @@ This document tracks all completed MVP tasks for the UC-INFRA-001 Water Distribu
 **Developer**: AI Assistant  
 
 **Scope**:
-- Implemented configuration-based agent type loading
+- Implemented configuration-based role loading
 - Created pipe agent JSON schema definition
-- Established ArangoDB persistence for agent types
+- Established ArangoDB persistence for roles
 - Cleaned framework defaults (removed infrastructure types)
 - Standardized environment variables (CVXC_ prefix)
 - Implemented database auto-creation
 - Created use case startup script
 
 **Key Deliverables**:
-1. ✅ Pipe agent type JSON configuration (`config/agents/pipe.json`)
+1. ✅ Pipe role JSON configuration (`config/agents/pipe.json`)
 2. ✅ Agent type loader from directory (`internal/app/app.go`)
-3. ✅ ArangoDB agent type repository (`internal/registry/arango_agent_type_repository.go`)
+3. ✅ ArangoDB role repository (`internal/registry/arango_agent_type_repository.go`)
 4. ✅ Configuration-only architecture documentation (`usecase-architecture.md`)
 5. ✅ Use case startup script (`start.sh`)
 6. ✅ Updated framework defaults (5 core types only)
@@ -69,8 +69,8 @@ This document tracks all completed MVP tasks for the UC-INFRA-001 Water Distribu
 
 **Impact on Subsequent Tasks**:
 - Established pattern for INFRA-002 (Sensor), INFRA-003 (Pump), INFRA-004 (Valve), INFRA-005 (Coordinator)
-- All future infrastructure agent types can follow the same JSON configuration approach
-- No Go code changes needed for additional agent types
+- All future infrastructure roles can follow the same JSON configuration approach
+- No Go code changes needed for additional roles
 - Framework ready for agent runtime implementation (INFRA-006+)
 
 ### INFRA-007: Fix Agent Instance Data Loading Path ✅

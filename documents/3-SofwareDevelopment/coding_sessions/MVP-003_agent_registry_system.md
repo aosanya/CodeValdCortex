@@ -80,7 +80,7 @@ type AgentDocument struct {
 ```
 
 **Indexes Created** (for query optimization):
-1. **Type Index** (`idx_type`): Fast lookup by agent type
+1. **Type Index** (`idx_type`): Fast lookup by role
 2. **State Index** (`idx_state`): Query agents by lifecycle state
 3. **Health Index** (`idx_health`): Find healthy/unhealthy agents
 4. **Composite Index** (`idx_type_state`): Combined type+state queries

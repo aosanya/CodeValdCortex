@@ -44,7 +44,7 @@ An agentic system where each financial entity and process is an autonomous agent
 
 ---
 
-## Agent Types
+## Roles
 
 ### 1. Member Agent
 

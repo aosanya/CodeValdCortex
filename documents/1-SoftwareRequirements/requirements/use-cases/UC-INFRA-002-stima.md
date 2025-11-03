@@ -40,7 +40,7 @@ An agentic system where each grid infrastructure element is an autonomous agent 
 - Optimizes energy distribution and reduces losses
 - Facilitates renewable energy integration
 
-## Agent Types
+## Roles
 
 ### 1. Power Line Agent
 **Represents**: Electrical transmission and distribution lines (feeders) in the power grid

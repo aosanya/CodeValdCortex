@@ -49,7 +49,7 @@ This task builds on MVP-022 (Agency Selection Homepage) to add the ability to cr
 
 **HomepageLayout Component**:
 - Simplified navbar with only "Create Agency" button
-- Removed Dashboard/Agents/Pools/Agent Types links (not relevant on homepage)
+- Removed Dashboard/Agents/Pools/Roles links (not relevant on homepage)
 - Modal-based agency creation form
 
 **CreateAgencyModal**:
@@ -228,7 +228,7 @@ agencyService := agency.NewServiceWithDBInit(agencyRepo, agencyValidator, agency
 
 **Agency Database Collections**:
 1. `agents` - Agent instances for this agency
-2. `agent_types` - Custom agent type definitions
+2. `agent_types` - Custom role definitions
 3. `agent_messages` - Inter-agent communication logs
 4. `agent_publications` - Published messages/events
 5. `agent_subscriptions` - Agent topic subscriptions

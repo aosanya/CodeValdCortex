@@ -6,13 +6,13 @@
 ## Task Overview
 - **Objective**: Demonstrate CodeValdCortex framework capabilities using the Water Distribution Network use case
 - **Success Criteria**: Functional agent-based system that showcases autonomous infrastructure monitoring, agent collaboration, and real-time coordination
-- **Approach**: Configuration-based agent types + demonstration scenarios leveraging framework's messaging and coordination
+- **Approach**: Configuration-based roles + demonstration scenarios leveraging framework's messaging and coordination
 - **Focus**: Demonstrate the design documented in `/documents/2-SoftwareDesignAndArchitecture/Usecases/UC-INFRA-001-water-distribution-network/`
 
 ## Current State Summary
 
 ### ✅ What's Working Now
-1. **Agent Type System**: 5 water infrastructure agent types defined and loaded (pipe, sensor, pump, valve, zone coordinator) - See INFRA-001 to INFRA-005 in mvp_done.md
+1. **Role System**: 5 water infrastructure roles defined and loaded (pipe, sensor, pump, valve, zone coordinator) - See INFRA-001 to INFRA-005 in mvp_done.md
 2. **Framework Core**: Complete agent runtime, messaging (direct + pub/sub), state persistence, REST API, Web UI - See INFRA-006, INFRA-012, INFRA-014, INFRA-016 in mvp_done.md
 3. **Agent Instances**: 293 agent instances representing comprehensive Nairobi water distribution network - See INFRA-007, INFRA-008, INFRA-017 in mvp_done.md
 4. **Demonstration Scenarios**: Leak detection, pressure optimization, and predictive maintenance implemented - See INFRA-009, INFRA-010, INFRA-011 in mvp_done.md
@@ -26,7 +26,7 @@
 
 ### 📊 Progress Metrics
 - **Framework Foundation**: ✅ 100% Complete
-- **Agent Type Configuration**: ✅ 100% Complete (5/5 types)
+- **Role Configuration**: ✅ 100% Complete (5/5 types)
 - **Instance Creation**: ✅ 100% Complete (293/293 agents)
 - **Scenario Implementation**: ✅ 100% Complete (3/3 scenarios)
 - **Visualization & UI**: ⚠️ 67% Complete (base UI + topology visualizer done, advanced dashboards pending)
@@ -58,7 +58,7 @@
 **Imports**: `github.com/aosanya/CodeValdCortex` (base framework)
 
 **Implements**:
-- Domain-specific agent types (Pipe, Sensor, Pump, Valve, Zone Coordinator)
+- Domain-specific roles (Pipe, Sensor, Pump, Valve, Zone Coordinator)
 - Water infrastructure business logic
 - Leak detection scenarios
 - Pressure optimization algorithms
@@ -162,7 +162,7 @@
 | INFRA-020 | Emergency Response Coordination | Implement emergency scenario: Fire hydrant request → Zone increases pressure → Pumps coordinate → Valves reroute → Control room notified | **UC-INFRA-001** | Not Started | P2 | High | Go, Complex Events | INFRA-010 |
 | INFRA-021 | Energy Optimization | Implement smart pump scheduling to minimize energy costs while maintaining service levels based on time-of-day pricing and demand forecasting | **UC-INFRA-001** | Not Started | P2 | Medium | Go, Scheduling | INFRA-010 |
 | INFRA-022 | Water Quality Monitoring | Add water quality dimensions to sensor agents: contamination detection, temperature, pH levels with automatic response protocols | **UC-INFRA-001** | Not Started | P2 | Medium | Go, Analytics | INFRA-008 |
-| INFRA-023 | Customer Meter Integration | Add customer meter agent type for consumption tracking, billing data, and customer-level leak detection | **UC-INFRA-001** | Not Started | P2 | Low | Go, APIs | INFRA-008 |
+| INFRA-023 | Customer Meter Integration | Add customer meter role for consumption tracking, billing data, and customer-level leak detection | **UC-INFRA-001** | Not Started | P2 | Low | Go, APIs | INFRA-008 |
 
 ## Phase 8: Integration & Deployment (P2 - Enhancement)
 
@@ -179,8 +179,8 @@
 
 ### Priority Demo Scenarios
 
-1. **Agent Type Management** ✅ (INFRA-001 to INFRA-005)
-   - Show 5 water infrastructure agent types loaded from JSON
+1. **Role Management** ✅ (INFRA-001 to INFRA-005)
+   - Show 5 water infrastructure roles loaded from JSON
    - Demonstrate type registration via Web UI
    - Display JSON schema validation
 
@@ -214,7 +214,7 @@
 
 **Available Now**:
 - ✅ Web UI at http://localhost:8083 with Bulma CSS styling
-- ✅ Agent Type registry (5 water infrastructure types loaded)
+- ✅ Role registry (5 water infrastructure types loaded)
 - ✅ Agent instance management (293 agents representing Nairobi water network)
 - ✅ Three complete demonstration scenarios:
   - ✅ Leak Detection (INFRA-009) - 4-step workflow with multi-agent coordination
@@ -297,8 +297,8 @@
 ### Implementation Risks
 - **Framework Learning Curve**: Team may need time to learn CodeValdCortex patterns and ArangoDB
   - *Mitigation*: Provide training sessions on CodeValdCortex and ArangoDB AQL, code examples, pair programming
-- **Scope Expansion**: Adding too many agent types or features beyond MVP
-  - *Mitigation*: Strict adherence to phased approach, focus on 5 core agent types first
+- **Scope Expansion**: Adding too many roles or features beyond MVP
+  - *Mitigation*: Strict adherence to phased approach, focus on 5 core roles first
 - **Time-Series Data Volume**: High-frequency sensor data may overwhelm storage
   - *Mitigation*: Implement data aggregation in ArangoDB, use date-based collection partitioning and retention policies early
 
@@ -317,7 +317,7 @@
 - **System Uptime**: 99%+ during development, 99.9%+ for staging demos - ✅ Framework stable
 
 ### Functional Metrics
-- **Agent Types**: All 5 core agent types (Pipe, Sensor, Pump, Valve, Zone Coordinator) fully functional - ✅ Complete (JSON configurations)
+- **Roles**: All 5 core roles (Pipe, Sensor, Pump, Valve, Zone Coordinator) fully functional - ✅ Complete (JSON configurations)
 - **Agent Instances**: Create and manage 27+ agent instances representing water network - ⏳ Pending instance creation
 - **Communication Success**: 99%+ message delivery rate between agents - ✅ Framework tested
 - **Leak Detection**: Identify and isolate simulated leaks within 30 seconds - ⏳ Pending scenario implementation
@@ -338,7 +338,7 @@
 ## Current Progress Summary
 
 ### ✅ Completed (41% of MVP)
-1. **Phase 1**: All 5 agent type configurations (INFRA-001 to INFRA-005)
+1. **Phase 1**: All 5 role configurations (INFRA-001 to INFRA-005)
 2. **Phase 2**: Complete framework communication system (INFRA-006)
 3. **Phase 4**: Three demonstration scenarios (INFRA-009, INFRA-010, INFRA-011)
 4. **Phase 5**: ArangoDB collections and agent state persistence (INFRA-012, INFRA-014)
@@ -405,16 +405,16 @@ git branch -d feature/INFRA-XXX_description
 git push origin main
 ```
 
-**Note**: For configuration-only changes (agent types, environment variables), direct commits to main branch are acceptable.
+**Note**: For configuration-only changes (roles, environment variables), direct commits to main branch are acceptable.
 
 ### Implementation Patterns Established
 
 **Note**: Detailed implementation documentation for INFRA-001 through INFRA-011 is available in mvp_done.md.
 
-**Configuration-Based Agent Types** ✅:
+**Configuration-Based Roles** ✅:
 - Agent types defined in JSON files (`config/agents/*.json`)
 - Framework auto-loads from `USECASE_CONFIG_DIR/config/agents/`
-- No Go code needed for basic agent types
+- No Go code needed for basic roles
 - JSON schema validation enforced by framework
 - Types persist to ArangoDB `agent_types` collection
 
@@ -439,7 +439,7 @@ git push origin main
 - All settings in `.env` file with `CVXC_` prefix
 - Use case-specific settings with `USECASE_` prefix
 - Water infrastructure thresholds (pressure, flow, conditions)
-- Monitoring intervals configurable per agent type
+- Monitoring intervals configurable per role
 
 ### Repository Structure (Actual Implementation)
 
@@ -458,7 +458,7 @@ git push origin main
 │   ├── communication/                   # ✅ INFRA-006: Message & pub/sub systems
 │   ├── database/                        # ✅ INFRA-012: ArangoDB integration
 │   ├── memory/                          # ✅ INFRA-014: State persistence
-│   ├── registry/                        # ✅ Agent & agent type registries
+│   ├── registry/                        # ✅ Agent & role registries
 │   ├── task/                            # ✅ Task scheduling system
 │   ├── config/                          # ✅ Configuration management
 │   ├── api/                             # ✅ REST API server
@@ -543,13 +543,13 @@ open http://localhost:8083
 # or if in dev container:
 $BROWSER http://localhost:8083
 
-# 5. Verify agent types are loaded
-# Navigate to "Agent Types" page - should show 5 infrastructure types + 5 core types
+# 5. Verify roles are loaded
+# Navigate to "Roles" page - should show 5 infrastructure types + 5 core types
 ```
 
 **What You'll See**:
 - ✅ Dashboard with agent statistics
-- ✅ Agent Types page listing all 10 types (5 core + 5 water infrastructure)
+- ✅ Roles page listing all 10 types (5 core + 5 water infrastructure)
 - ✅ Agent instances page (currently empty - INFRA-007 will populate)
 - ✅ Health monitoring status
 

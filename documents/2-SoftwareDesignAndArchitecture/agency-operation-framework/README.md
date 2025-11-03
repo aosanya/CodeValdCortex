@@ -32,11 +32,11 @@ This directory contains the comprehensive specifications for CodeValdCortex's Ag
 
 ---
 
-### 3. [Agent Types Taxonomy](./agent-types-taxonomy.md)
+### 3. [Role Taxonomy](./role-taxonomy.md)
 **Purpose**: Comprehensive taxonomy for agent capabilities, constraints, and governance
 
 **Contains**:
-- **Agent Type Classifications**:
+- **Role Classifications**:
   - Stateless Tool-Caller
   - Planner/Coordinator
   - Data Access Agent
@@ -51,7 +51,7 @@ This directory contains the comprehensive specifications for CodeValdCortex's Ag
 - **Data Boundaries**: Allowed datasets, PII masking, data residency controls
 - **Safety Constraints**: Allowed/prohibited actions, two-person rule
 - **Identity & Tenancy**: OIDC/SPIFFE workload identity, attestation, tenant isolation
-- **Complete Examples**: Full agent type specification with all taxonomy elements
+- **Complete Examples**: Full role specification with all taxonomy elements
 
 ---
 
@@ -67,7 +67,7 @@ This directory contains the comprehensive specifications for CodeValdCortex's Ag
              │                  │                 │
              ▼                  ▼                 ▼
 ┌────────────────────┐  ┌────────────────┐  ┌──────────────────┐
-│   Work Items       │  │  Agent Types   │  │  Goals Module    │
+│   Work Items       │  │  Roles   │  │  Goals Module    │
 │   Specification    │◄─┤   Taxonomy     │  │  (future doc)    │
 └────────────────────┘  └────────────────┘  └──────────────────┘
          │                       │
@@ -101,7 +101,7 @@ Role assignment framework (Responsible, Accountable, Consulted, Informed) that c
 | Policy Gates & Evidence | 📝 Specified | MVP-035 |
 | Templates & Catalog | 📝 Specified | MVP-036 |
 | Traceability & Validation | 📝 Specified | MVP-037 |
-| Agent Types Taxonomy | 📝 Specified | MVP-030 |
+| Role Taxonomy | 📝 Specified | MVP-030 |
 
 **Legend**: 📝 Specified | 🚧 In Progress | ✅ Complete
 

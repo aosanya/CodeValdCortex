@@ -43,7 +43,7 @@ An agentic system where each city infrastructure element is an autonomous agent 
 - Improves citizen experience and quality of life
 - Supports data-driven urban planning and policy making
 
-## Agent Types
+## Roles
 
 ### 1. Traffic Signal Agent
 **Represents**: Intelligent traffic signals managing vehicle and pedestrian flow

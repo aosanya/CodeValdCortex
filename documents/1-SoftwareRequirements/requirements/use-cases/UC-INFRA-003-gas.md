@@ -42,7 +42,7 @@ An agentic system where each gas infrastructure element is an autonomous agent t
 - Automates emergency response and safety protocols
 - Integrates with odorization and gas quality monitoring
 
-## Agent Types
+## Roles
 
 ### 1. Gas Pipeline Agent
 **Represents**: Natural gas pipelines in the distribution network

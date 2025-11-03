@@ -42,7 +42,7 @@ An agentic system where each beehive and apiary stakeholder is an autonomous age
 - Integrates weather data and environmental monitoring for proactive management
 - Provides traceability for honey production and hive health certification
 
-## Agent Types
+## Roles
 
 ### 1. Beehive Agent
 **Represents**: Individual beehives equipped with IoT sensors and monitoring systems

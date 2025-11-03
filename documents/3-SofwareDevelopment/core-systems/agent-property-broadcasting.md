@@ -152,7 +152,7 @@ type PrivacyControls struct {
 }
 
 type SubscriberFilters struct {
-    // AllowedSubscriberTypes restricts by agent type
+    // AllowedSubscriberTypes restricts by role
     AllowedSubscriberTypes []string `json:"allowed_subscriber_types"`
     
     // EnableFavoriteNotifications allows special alerts to favorited subscribers

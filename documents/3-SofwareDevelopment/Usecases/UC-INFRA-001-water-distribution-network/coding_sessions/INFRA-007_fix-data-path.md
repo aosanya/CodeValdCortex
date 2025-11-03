@@ -32,7 +32,7 @@ This case-sensitivity issue caused the framework to look in a non-existent direc
    if useCaseConfigDir != "" {
        agentTypesDir := filepath.Join(useCaseConfigDir, "config", "agents")
        if err := loadAgentTypesFromDirectory(ctx, agentTypesDir, agentTypeService, logger); err != nil {
-           logger.WithError(err).Warn("Failed to load use case agent types")
+           logger.WithError(err).Warn("Failed to load use case roles")
        }
 
        // Load use case-specific agent instances from data directory

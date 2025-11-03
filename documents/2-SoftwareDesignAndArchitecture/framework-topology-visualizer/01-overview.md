@@ -17,7 +17,7 @@ Non-goals:
 
 ## When to use this visualizer
 
-- When multiple agent types and relationship types need to be visualized on a single, interactive topology map.
+- When multiple roles and relationship types need to be visualized on a single, interactive topology map.
 - When you need a cross-domain standard for relationships (supply, observe, route, command, host, depends_on).
 
 ## Key concepts

@@ -141,12 +141,12 @@ Use the dropdown at the top of the sidebar to switch between:
 When you select a use case:
 - ✅ Title and icon update
 - ✅ Map viewport flies to relevant location
-- ✅ Filters show relevant agent types
+- ✅ Filters show relevant roles
 - ✅ Sample data matches use case
 - ✅ Legend remains consistent
 
-### 4. Filter by Agent Type
-Check/uncheck agent types to show/hide them on the map
+### 4. Filter by Role
+Check/uncheck roles to show/hide them on the map
 
 ### 5. Change Layout
 Switch between:
@@ -165,7 +165,7 @@ Switch between:
 ### ✅ **Configuration-Driven**
 - Add new use cases by adding config objects
 - No code changes needed
-- Just define: title, icon, center, zoom, agent types
+- Just define: title, icon, center, zoom, roles
 
 ### ✅ **API-Driven Filtering**
 - Backend filters agents by use case
@@ -180,7 +180,7 @@ Switch between:
 ### ✅ **Extensible**
 Easy to add:
 - New use cases
-- New agent types
+- New roles
 - New visualizations
 - Custom styling per use case
 

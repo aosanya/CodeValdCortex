@@ -9,7 +9,7 @@
 - Robust, well-documented SDK for rapid multi-agent system development
 - Comprehensive examples and tutorials for common agent coordination patterns
 - High-performance runtime with low-latency agent communication capabilities
-- Flexible architecture supporting diverse agent types and coordination models
+- Flexible architecture supporting diverse roles and coordination models
 - Strong debugging and monitoring tools for distributed agent systems
 - Integration with existing AI/ML toolchains and development workflows
 

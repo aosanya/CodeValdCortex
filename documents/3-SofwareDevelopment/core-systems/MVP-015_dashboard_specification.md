@@ -443,7 +443,7 @@ templ CreateAgentModal() {
                 </div>
                 
                 <div class="form-group">
-                    <label for="type">Agent Type *</label>
+                    <label for="type">Role *</label>
                     <select 
                         id="type" 
                         name="type"

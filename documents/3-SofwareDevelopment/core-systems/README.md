@@ -48,7 +48,7 @@ Metrics Collection → Threshold Analysis → Scaling Policy → Resource Adjust
 
 ## Development Guidelines
 
-### Adding New Agent Types
+### Adding New Roles
 1. Define agent configuration schema in `AgentConfig`
 2. Implement validation logic in `validateConfig()`
 3. Add resource requirements calculation

@@ -110,18 +110,18 @@ An agentic system where each [element/entity] is an autonomous agent that:
 
 ---
 
-## 3. Agent Types Section
+## 3. Roles Section
 
-**Purpose**: Detailed specification of each agent type in the system.
+**Purpose**: Detailed specification of each role in the system.
 
 **Required Content**:
-- Minimum 3-5 agent types (can be more for complex systems)
+- Minimum 3-5 roles (can be more for complex systems)
 - Each agent must have: Represents, Attributes, Capabilities, State Machine, Example Behavior
 
 ### Agent Specification Template
 
 ```markdown
-## Agent Types
+## Roles
 
 ### [Number]. [Agent Name] Agent
 
@@ -161,7 +161,7 @@ IF [another condition]
 ### Agent Attribute Guidelines
 - **ID Attributes**: Follow pattern PREFIX-XXX (e.g., "AGT-001", "SEN-P-045")
 - **Enums**: Clearly define all possible values
-- **Relationships**: Reference other agent types by ID
+- **Relationships**: Reference other roles by ID
 - **Measurements**: Include units (meters, liters/min, kg, etc.)
 - **Temporal**: Use ISO 8601 format for dates/times
 
@@ -207,14 +207,14 @@ IF [another condition]
 
 **Agent Interaction Flow**:
 
-1. **[Agent Type] ([Agent ID])** [initial action]
+1. **[Role] ([Agent ID])** [initial action]
    \```
    State: [From] → [To]
    Action: [What it does]
    Decision: [What it decides]
    \```
 
-2. **[Agent Type]** [responds or coordinates]
+2. **[Role]** [responds or coordinates]
    \```
    → [Target Agent]: "[Communication message]"
    → [Another Agent]: "[Communication message]"
@@ -321,10 +321,10 @@ IF [another condition]
 [API Gateway]
   ↓
 [Application Servers (CodeValdCortex Runtime)]
-  ├─ [Agent Type 1] Agents
-  ├─ [Agent Type 2] Agents
-  ├─ [Agent Type 3] Agents
-  └─ [Agent Type N] Agents
+  ├─ [Role 1] Agents
+  ├─ [Role 2] Agents
+  ├─ [Role 3] Agents
+  └─ [Role N] Agents
   ↓
 [Data Layer]
   ├─ [Database 1] ([Technology])
@@ -539,7 +539,7 @@ When designing use cases that require visualization of agent networks and topolo
 
 **When to Apply**:
 Use the Framework Topology Visualizer specifications when your use case involves:
-- Multiple agent types with spatial or network relationships
+- Multiple roles with spatial or network relationships
 - Real-time visualization of agent networks and topologies
 - Cross-domain relationship modeling (supply, observe, route, command, host, depends_on)
 - Geographic or force-directed layout of agent systems
@@ -590,7 +590,7 @@ Use the Framework Topology Visualizer specifications when your use case involves
 
 When documenting a use case with visualization requirements:
 
-- **Section 3 (Agent Types)**: Include visualization-relevant attributes in agent specifications
+- **Section 3 (Roles)**: Include visualization-relevant attributes in agent specifications
   - Add `coordinates` attribute for geographic positioning
   - Define `visualization_metadata` for display properties
   - Specify relationship types using canonical taxonomy
@@ -634,14 +634,14 @@ configuration in `/usecases/UC-INFRA-001-water-distribution-network/viz-config.j
 
 ### Formatting
 - Use markdown consistently
-- Number all agent types
+- Number all roles
 - Use code blocks for pseudo-code
 - Use bullet points for lists
 - Use tables for complex comparisons
 
 ### Completeness Checklist
 - ✅ All 10 main sections present
-- ✅ Minimum 3-5 agent types defined
+- ✅ Minimum 3-5 roles defined
 - ✅ Each agent has all required subsections
 - ✅ Minimum 3 interaction scenarios
 - ✅ Technical architecture diagram included

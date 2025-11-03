@@ -48,7 +48,7 @@ Financial institutions and corporate treasury departments face critical challeng
 
 ## System Architecture
 
-### Agent Types
+### Roles
 
 #### 1. Entity Agent (`entity`)
 **Purpose**: Represents individual business entities (borrowers, counterparties, investees) with comprehensive financial profile management

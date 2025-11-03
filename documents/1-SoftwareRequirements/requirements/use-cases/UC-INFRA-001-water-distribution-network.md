@@ -34,7 +34,7 @@ An agentic system where each infrastructure element is an autonomous agent that:
 - Provides real-time data for decision-making
 - Enables predictive maintenance
 
-## Agent Types
+## Roles
 
 ### 1. Pipe Agent
 **Represents**: Physical water pipes in the distribution network

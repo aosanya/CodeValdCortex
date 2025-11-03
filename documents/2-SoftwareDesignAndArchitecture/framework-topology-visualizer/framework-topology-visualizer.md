@@ -37,7 +37,7 @@ Analysis of CodeValdCortex use cases reveals consistent visualization needs:
 ### Core Principles
 
 1. **Configuration-Driven**: Use cases configure visualizer through JSON, not custom code
-2. **Agent-Agnostic**: Works with any agent type, any use case
+2. **Agent-Agnostic**: Works with any role, any use case
 3. **Render-Flexible**: Supports SVG, Canvas, and WebGL backends
 4. **Update-Efficient**: Optimized for real-time agent state updates
 5. **Style-Customizable**: Use case-specific themes and visual languages
@@ -423,7 +423,7 @@ Since agents may not explicitly store connections, the visualizer can infer them
 }
 ```
 
-**Strategy 2: From Agent Type Configuration**
+**Strategy 2: From Role Configuration**
 ```json
 // Standardized graph-theory based agent-type connection rules
 {
@@ -511,7 +511,7 @@ Rendered edges for visualization: two directed edges
 ### Pseudocode: Build Graph from Agent-Type Rules (Go-like)
 
 ```go
-// loadAgentTypeRules loads connection rules for each agent type
+// loadAgentTypeRules loads connection rules for each role
 rules := LoadAgentTypeRules()
 
 // fetch all agents once
@@ -585,7 +585,7 @@ Map these to visualization config `connections` rules so styles (color, thicknes
 
 ### Registering New Rules (Use Case Workflow)
 
-1. Add `connection_rules` to the use case's agent type JSON (e.g., `usecases/UC-INFRA-001-water-distribution-network/config/agent_types/pump.json`).
+1. Add `connection_rules` to the use case's role JSON (e.g., `usecases/UC-INFRA-001-water-distribution-network/config/agent_types/pump.json`).
 2. Ensure agent instances include the metadata referenced by `match` (e.g., `downstream_pipes`).
 3. Optionally run a one-off AQL job to materialize `topology_edges` for performance.
 4. Configure the visualization `connections` source to `agents` (inference) or `topology_edges` (materialized).
@@ -1094,7 +1094,7 @@ GET /api/v1/agents/stream
 1. **No Duplicate Data**: Single source of truth (agents themselves)
 2. **No Custom Endpoints**: Reuse existing REST API
 3. **Consistent Data Model**: Same data structure everywhere
-4. **Framework Agnostic**: Works with any agent type
+4. **Framework Agnostic**: Works with any role
 5. **State Coherence**: Agent state = visualization state
 6. **Simplified Testing**: Test against existing agent API
 
@@ -1234,7 +1234,7 @@ GET /api/v1/agents/stream
 **Tasks**:
 1. Add loading states and error handling
 2. Implement search/filter controls
-3. Add legend showing agent types
+3. Add legend showing roles
 4. Performance testing with 27 agents
 5. Write framework documentation
 6. Create use case configuration guide
@@ -1244,7 +1244,7 @@ GET /api/v1/agents/stream
 **Deliverables**:
 - ✅ Loading spinners and error messages
 - ✅ Search bar to find agents by ID/name
-- ✅ Legend with agent type colors
+- ✅ Legend with role colors
 - ✅ Performance benchmarks (< 100ms render)
 - ✅ Framework documentation
 - ✅ Configuration guide for other use cases
@@ -2006,7 +2006,7 @@ func NormalizeIndoorCoordinate(raw map[string]any, config IndoorCRS) (*IndoorCoo
 
 ### Hybrid Use Cases (Mixed Indoor/Outdoor)
 
-**Strategy**: Use agent type to determine CRS:
+**Strategy**: Use role to determine CRS:
 ```json
 {
   "entities": {
@@ -4545,7 +4545,7 @@ func TestConfigMigration_V1_0_to_V1_1(t *testing.T) {
    - 30s polling interval
 
 5. **Connection Rules Inference**
-   - Strategy 2: agent type `connection_rules`
+   - Strategy 2: role `connection_rules`
    - JSONPath expressions (sandboxed)
    - Canonical relationship taxonomy
 

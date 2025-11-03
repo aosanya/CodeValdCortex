@@ -41,7 +41,7 @@ An agentic system where each community element is an autonomous agent that:
 - Detects and mitigates misinformation
 - Enables grassroots communication
 
-## Agent Types
+## Roles
 
 ### 1. Member Agent
 **Represents**: Individual party members participating in the community

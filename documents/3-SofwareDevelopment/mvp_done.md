@@ -24,7 +24,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-021 | Agency Management System     | Create database schema and backend services for managing agencies (use cases). Store agency metadata, configurations, and settings in ArangoDB. Implement CRUD operations and API endpoints for agency lifecycle management | 2025-10-25     | `feature/MVP-021_agency-management-system`    | ~4 hours   | ✅ Complete |
 | MVP-022 | Agency Selection Homepage    | Build homepage UI for selecting and switching between agencies with agency-specific database integration. Implement multi-database architecture where each agency operates with its own isolated ArangoDB database | 2025-10-25     | `feature/MVP-022_agency-selection-homepage`   | ~6 hours   | ✅ Complete |
 | MVP-024 | Create Agency Form    | Implement simplified agency creation form with only Agency Name field. UUID-based identification with "agency_" prefix for ArangoDB compatibility. Automatic database initialization with standard collections. AI Designer (MVP-025) handles advanced configuration | 2025-10-25     | `feature/MVP-024_create-agency-form`   | ~5 hours   | ✅ Complete |
-| MVP-025 | AI Agency Designer    | Advanced AI-driven agency design tool that brainstorms agency structure, creates agent types, defines relationships, and generates complete agency architecture through intelligent conversation | 2025-10-29     | `feature/MVP-025_ai-agency-designer`   | ~8 hours   | ✅ Complete |
+| MVP-025 | AI Agency Designer    | Advanced AI-driven agency design tool that brainstorms agency structure, creates roles, defines relationships, and generates complete agency architecture through intelligent conversation | 2025-10-29     | `feature/MVP-025_ai-agency-designer`   | ~8 hours   | ✅ Complete |
 | MVP-029 | Goals Module | Implement Goals CRUD operations, AI-powered goal generation/refinement from natural language, data models, templ templates, and UI in Agency Designer with database persistence | 2025-10-30     | `feature/MVP-029_problem-definition-module`   | ~6 hours   | ✅ Complete |
 | MVP-043 | Work Items UI Module - AI Status & Chat Refresh Fix | Fixed AI status message disappearing prematurely during AI operations. Implemented chat refresh pattern to display AI explanations after work items, goals, and introduction operations. Removed auto-hide timeouts, increased server write_timeout to 180s, and cleaned up debug logging | 2025-11-03     | `feature/MVP-043_work-items-ui-module`   | ~2 hours   | ✅ Complete |
 
@@ -1438,7 +1438,7 @@ Modified:
 1. **Data Models** (`internal/agency/types.go` - 115 lines)
    - `Agency`: Core entity with all fields and JSON tags
    - `AgencyStatus`: Enum (active, inactive, paused, archived)
-   - `AgencyMetadata`: Location, agent types, zones, tags, API endpoints
+   - `AgencyMetadata`: Location, roles, zones, tags, API endpoints
    - `AgencySettings`: Configuration flags for features
    - `AgencyFilters`: Query parameters for listing
    - `AgencyUpdates`: Partial update structure
@@ -1879,7 +1879,7 @@ Response (201 Created):
 - Bug fixes and solutions recorded
 
 #### Next Task
-**MVP-025**: AI Agency Designer - Advanced AI-driven agency design tool with brainstorming, agent type creation, relationship mapping, and architecture generation
+**MVP-025**: AI Agency Designer - Advanced AI-driven agency design tool with brainstorming, role creation, relationship mapping, and architecture generation
 
 ---
 
@@ -1891,7 +1891,7 @@ Response (201 Created):
 #### Objectives Achieved
 - ✅ **Conversational AI Interface**: Built interactive chat system for agency design discussion
 - ✅ **Template-First Architecture**: Implemented `.templ` file structure with minimal JavaScript
-- ✅ **Multi-View Design System**: Created tabbed interface (Overview, Agent Types, Layout)
+- ✅ **Multi-View Design System**: Created tabbed interface (Overview, Roles, Layout)
 - ✅ **Real-time AI Integration**: Connected Claude API for intelligent design assistance
 - ✅ **Dynamic Content Management**: Implemented CRUD operations for problems and units of work
 - ✅ **Status Indicator System**: Built unified AI processing status with proper HTMX integration
@@ -1901,7 +1901,7 @@ Response (201 Created):
 
 #### Key Deliverables
 1. **Agency Designer Interface**
-   - Multi-tabbed design system (Overview, Agent Types, Layout)
+   - Multi-tabbed design system (Overview, Roles, Layout)
    - Real-time AI chat integration with conversation persistence
    - Introduction editor with AI-powered refinement
    - Problems and Units of Work CRUD management
@@ -2006,7 +2006,7 @@ DELETE /agencies/{id}/units/{id}      # Delete unit
 
 #### Key Features Delivered
 1. **Conversational Agency Design**: Interactive AI chat for agency brainstorming
-2. **Multi-Section Builder**: Overview, Problems, Units of Work, Agent Types, Layout
+2. **Multi-Section Builder**: Overview, Problems, Units of Work, Roles, Layout
 3. **AI-Powered Refinement**: One-click AI enhancement for text content
 4. **Auto-save Functionality**: Real-time persistence of all user inputs
 5. **CRUD Operations**: Full create, read, update, delete for all entities

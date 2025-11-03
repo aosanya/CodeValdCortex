@@ -41,7 +41,7 @@ An agentic system where each element of the charity network is an autonomous age
 - Facilitates volunteer coordination
 - Prevents waste and duplication
 
-## Agent Types
+## Roles
 
 ### 1. Donor Agent
 **Represents**: Individuals or organizations donating items or resources

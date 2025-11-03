@@ -139,7 +139,7 @@ Implements **Agent Property Auto-Broadcasting** - agents can configure which pro
 - Better emergency response capability
 
 
-## Agent Types
+## Roles
 
 ### 1. Vehicle Agent (Mobile Tracking Agent - Bus/Matatu)
 

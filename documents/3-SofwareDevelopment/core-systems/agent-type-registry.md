@@ -1,4 +1,4 @@
-# Agent Type Registry System
+# Role Registry System
 
 **Version**: 1.0.0  
 **Status**: Implemented  
@@ -6,15 +6,15 @@
 
 ## Overview
 
-The Agent Type Registry is a flexible system that allows defining and managing agent types dynamically, rather than using hardcoded lists. This enables the framework to support domain-specific agent types for different use cases (e.g., water distribution infrastructure, logistics, community management) without modifying core framework code.
+The Role Registry is a flexible system that allows defining and managing roles dynamically, rather than using hardcoded lists. This enables the framework to support domain-specific roles for different use cases (e.g., water distribution infrastructure, logistics, community management) without modifying core framework code.
 
 ## Key Features
 
-- **Dynamic Agent Type Registration**: Define new agent types at runtime
+- **Dynamic Role Registration**: Define new roles at runtime
 - **Schema-Based Validation**: JSON Schema validation for agent configurations
-- **Category Organization**: Group related agent types by category
+- **Category Organization**: Group related roles by category
 - **Capability Management**: Define required and optional capabilities per type
-- **Enable/Disable Control**: Toggle agent type availability without deletion
+- **Enable/Disable Control**: Toggle role availability without deletion
 - **System vs Custom Types**: Protect core system types from deletion
 - **REST API**: Full CRUD operations via HTTP endpoints
 
@@ -25,7 +25,7 @@ The Agent Type Registry is a flexible system that allows defining and managing a
 1. **AgentType** - Core type definition with schema and validation rules
 2. **AgentTypeRepository** - Storage interface with in-memory implementation
 3. **AgentTypeService** - Business logic layer for type management
-4. **Agent Type Handlers** - REST API endpoints
+4. **Role Handlers** - REST API endpoints
 5. **Validator Integration** - Automatic validation in configuration and template validators
 
 ### Data Model
@@ -51,7 +51,7 @@ type AgentType struct {
 }
 ```
 
-## Pre-Registered Agent Types
+## Pre-Registered Roles
 
 ### Core System Types (Category: "core")
 
@@ -75,7 +75,7 @@ For Water Distribution Network use case:
 
 ## API Usage
 
-### List All Agent Types
+### List All Roles
 
 ```bash
 GET /api/v1/agent-types
@@ -101,7 +101,7 @@ Response:
 }
 ```
 
-### Get Specific Agent Type
+### Get Specific Role
 
 ```bash
 GET /api/v1/agent-types/pipe
@@ -128,7 +128,7 @@ Response:
 }
 ```
 
-### Create Custom Agent Type
+### Create Custom Role
 
 ```bash
 POST /api/v1/agent-types
@@ -156,7 +156,7 @@ Content-Type: application/json
 }
 ```
 
-### Update Agent Type
+### Update Role
 
 ```bash
 PUT /api/v1/agent-types/custom-sensor
@@ -170,14 +170,14 @@ Content-Type: application/json
 }
 ```
 
-### Enable/Disable Agent Type
+### Enable/Disable Role
 
 ```bash
 POST /api/v1/agent-types/custom-sensor/enable
 POST /api/v1/agent-types/custom-sensor/disable
 ```
 
-### Delete Agent Type
+### Delete Role
 
 ```bash
 DELETE /api/v1/agent-types/custom-sensor
@@ -206,7 +206,7 @@ err := registry.InitializeDefaultAgentTypes(ctx, agentTypeService, logger)
 ```go
 agentType := &registry.AgentType{
     ID:          "custom-agent",
-    Name:        "Custom Agent Type",
+    Name:        "Custom Role",
     Description: "Domain-specific agent",
     Category:    "custom",
     Version:     "1.0.0",
@@ -217,7 +217,7 @@ agentType := &registry.AgentType{
 err := agentTypeService.RegisterType(ctx, agentType)
 ```
 
-### Validate Agent Type
+### Validate Role
 
 ```go
 isValid, err := agentTypeService.IsValidType(ctx, "pipe")
@@ -276,7 +276,7 @@ err := agentTypeService.ValidateAgentConfig(ctx, "pipe", config)
 
 ## Validator Integration
 
-The configuration and template validators automatically use the Agent Type Registry when available:
+The configuration and template validators automatically use the Role Registry when available:
 
 ```go
 // Configuration validator
@@ -290,7 +290,7 @@ validator.SetAgentTypeService(agentTypeService)
 ```
 
 When the service is set, validators will:
-1. Check if the agent type is registered
+1. Check if the role is registered
 2. Verify it's enabled
 3. Validate configuration against the type's JSON schema
 4. Apply custom validation rules
@@ -299,7 +299,7 @@ If the service is not set, validators fall back to the hardcoded list of core ty
 
 ## Benefits
 
-1. **Extensibility**: Add new agent types without code changes
+1. **Extensibility**: Add new roles without code changes
 2. **Use Case Support**: Each use case can define its domain-specific agents
 3. **Validation**: Automatic schema-based validation ensures data integrity
 4. **Organization**: Category-based organization for better management
@@ -308,7 +308,7 @@ If the service is not set, validators fall back to the hardcoded list of core ty
 
 ## Use Case: Water Distribution Network
 
-The infrastructure agent types (pipe, sensor, valve, pump, reservoir, hydrant, meter) are now registered and ready to use. You can:
+The infrastructure roles (pipe, sensor, valve, pump, reservoir, hydrant, meter) are now registered and ready to use. You can:
 
 1. Create agents of these types via API
 2. Configuration validates against the specific schemas
@@ -339,10 +339,10 @@ The system will:
 
 ## Future Enhancements
 
-- [ ] ArangoDB persistence for agent types
+- [ ] ArangoDB persistence for roles
 - [ ] Versioning support for schema evolution
 - [ ] Agent type dependencies (e.g., "sensor requires pipe")
 - [ ] Capability validation framework
 - [ ] Agent type templates/inheritance
-- [ ] Import/export agent type definitions
-- [ ] Web UI for agent type management
+- [ ] Import/export role definitions
+- [ ] Web UI for role management

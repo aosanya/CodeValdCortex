@@ -7,7 +7,7 @@
 
 ## Overview
 
-This coding session documents the implementation of INFRA-001: Pipe Agent, including the foundational work for configuration-based agent type loading and ArangoDB persistence.
+This coding session documents the implementation of INFRA-001: Pipe Agent, including the foundational work for configuration-based role loading and ArangoDB persistence.
 
 ## Design Reference
 
@@ -17,9 +17,9 @@ This coding session documents the implementation of INFRA-001: Pipe Agent, inclu
 
 ## Implementation Summary
 
-### Phase 1: Configuration-Based Agent Type Loading
+### Phase 1: Configuration-Based Role Loading
 
-**Objective**: Enable use cases to define agent types via JSON configuration files instead of hardcoded Go implementations.
+**Objective**: Enable use cases to define roles via JSON configuration files instead of hardcoded Go implementations.
 
 **Design Alignment**: 
 - Use cases should be "extremely thin, only configs if possible" (per architectural decision)
@@ -30,12 +30,12 @@ This coding session documents the implementation of INFRA-001: Pipe Agent, inclu
 
 1. **Created Configuration Loader** (`internal/app/app.go`):
 ```go
-// Load use case-specific agent types from config directory
+// Load use case-specific roles from config directory
 useCaseConfigDir := os.Getenv("USECASE_CONFIG_DIR")
 if useCaseConfigDir != "" {
     agentTypesDir := filepath.Join(useCaseConfigDir, "config", "agents")
     if err := loadAgentTypesFromDirectory(ctx, agentTypesDir, agentTypeService, logger); err != nil {
-        logger.WithError(err).Warn("Failed to load use case agent types")
+        logger.WithError(err).Warn("Failed to load use case roles")
     }
 }
 
@@ -50,7 +50,7 @@ func loadAgentTypesFromDirectory(ctx context.Context, dir string, service regist
             continue
         }
         if err := loadAgentTypeFromFile(ctx, filepath.Join(dir, file.Name()), service, logger); err != nil {
-            logger.WithError(err).Warnf("Failed to load agent type from %s", file.Name())
+            logger.WithError(err).Warnf("Failed to load role from %s", file.Name())
         }
     }
     return nil
@@ -118,7 +118,7 @@ func loadAgentTypesFromDirectory(ctx context.Context, dir string, service regist
 
 ### Phase 2: Framework Cleanup
 
-**Objective**: Remove infrastructure-specific types from framework defaults, keeping only 5 core agent types.
+**Objective**: Remove infrastructure-specific types from framework defaults, keeping only 5 core roles.
 
 **Design Alignment**: 
 - Framework provides reusable core types: worker, coordinator, monitor, proxy, gateway
@@ -149,7 +149,7 @@ func getDefaultAgentTypes() []*AgentType {
 
 ### Phase 3: ArangoDB Persistence
 
-**Objective**: Persist agent types to database instead of in-memory storage.
+**Objective**: Persist roles to database instead of in-memory storage.
 
 **Design Alignment**:
 - Agent types must survive server restarts
@@ -171,7 +171,7 @@ func NewArangoAgentTypeRepository(dbClient *database.ArangoClient) (*ArangoAgent
     
     collection, err := ensureAgentTypesCollection(db)
     if err != nil {
-        return nil, fmt.Errorf("failed to ensure agent types collection: %w", err)
+        return nil, fmt.Errorf("failed to ensure roles collection: %w", err)
     }
     
     return &ArangoAgentTypeRepository{
@@ -235,10 +235,10 @@ func (s *DefaultAgentTypeService) RegisterType(ctx context.Context, agentType *A
 
 4. **Integrated into Application** (`internal/app/app.go`):
 ```go
-// Initialize agent type registry with ArangoDB persistence
+// Initialize role registry with ArangoDB persistence
 agentTypeRepo, err := registry.NewArangoAgentTypeRepository(dbClient)
 if err != nil {
-    logger.WithError(err).Fatal("Failed to initialize agent type repository")
+    logger.WithError(err).Fatal("Failed to initialize role repository")
 }
 agentTypeService := registry.NewAgentTypeService(agentTypeRepo, logger)
 ```
@@ -303,7 +303,7 @@ func (c *ArangoClient) ensureDatabase() error {
 }
 ```
 
-## Agent Type Specification
+## Role Specification
 
 ### Pipe Agent Attributes
 
@@ -342,7 +342,7 @@ Operational → Degraded → Warning → Critical → Maintenance
 
 ## Code Examples
 
-### Loading Agent Type from JSON
+### Loading Role from JSON
 
 ```go
 // Framework automatically loads on startup
@@ -367,7 +367,7 @@ func loadAgentTypeFromFile(ctx context.Context, filePath string, service registr
         "name":     agentType.Name,
         "category": agentType.Category,
         "file":     filepath.Base(filePath),
-    }).Info("Loaded agent type")
+    }).Info("Loaded role")
     
     return nil
 }
@@ -377,7 +377,7 @@ func loadAgentTypeFromFile(ctx context.Context, filePath string, service registr
 
 **First Run** (collection doesn't exist):
 ```
-INFO[0000] Initializing agent type repository with ArangoDB
+INFO[0000] Initializing role repository with ArangoDB
 INFO[0000] Creating new collection collection=agent_types
 INFO[0000] Created new collection collection=agent_types
 INFO[0000] Agent type registered category=core name="Worker Agent" type_id=worker
@@ -425,13 +425,13 @@ func TestDefaultAgentTypes(t *testing.T) {
 INFO[0000] Using existing database database=water_distribution_network
 INFO[0000] Connected to ArangoDB database=water_distribution_network
 INFO[0000] Agent registry repository initialized collection=agents
-INFO[0000] Initializing agent type repository with ArangoDB
+INFO[0000] Initializing role repository with ArangoDB
 INFO[0000] Using existing collection collection=agent_types
 INFO[0000] Agent type repository initialized collection=agent_types
-INFO[0000] Initialized 5 default agent types
-INFO[0000] Loading use case agent types count=1
+INFO[0000] Initialized 5 default roles
+INFO[0000] Loading use case roles count=1
 INFO[0000] Agent type updated category=infrastructure name="Pipe Agent" type_id=pipe
-INFO[0000] Loaded agent type id=pipe name="Pipe Agent"
+INFO[0000] Loaded role id=pipe name="Pipe Agent"
 INFO[0000] Starting HTTP server host=0.0.0.0 port=8083
 ```
 
@@ -449,11 +449,11 @@ INFO[0000] Starting HTTP server host=0.0.0.0 port=8083
 ### Created Files:
 1. `/workspaces/CodeValdCortex/internal/registry/arango_agent_type_repository.go` - ArangoDB persistence
 2. `/workspaces/CodeValdCortex/documents/2-SoftwareDesignAndArchitecture/usecase-architecture.md` - Architecture documentation
-3. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/config/agents/pipe.json` - Pipe agent type definition
+3. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/config/agents/pipe.json` - Pipe role definition
 4. `/workspaces/CodeValdCortex/usecases/UC-INFRA-001-water-distribution-network/start.sh` - Startup script
 
 ### Modified Files:
-1. `/workspaces/CodeValdCortex/internal/app/app.go` - Added agent type loading from config
+1. `/workspaces/CodeValdCortex/internal/app/app.go` - Added role loading from config
 2. `/workspaces/CodeValdCortex/internal/registry/default_types.go` - Removed infrastructure types
 3. `/workspaces/CodeValdCortex/internal/registry/agent_types.go` - Added `_key` field
 4. `/workspaces/CodeValdCortex/internal/registry/agent_type_service.go` - Update-or-create logic
@@ -470,7 +470,7 @@ INFO[0000] Starting HTTP server host=0.0.0.0 port=8083
 | Design Element | Implementation | Location |
 |----------------|----------------|----------|
 | Pipe Agent Schema | JSON configuration | `config/agents/pipe.json` |
-| Agent Type Registry | ArangoDB collection | `agent_types` collection |
+| Role Registry | ArangoDB collection | `agent_types` collection |
 | Configuration Loading | Auto-load from directory | `internal/app/app.go:loadAgentTypesFromDirectory()` |
 | State Persistence | ArangoAgentTypeRepository | `internal/registry/arango_agent_type_repository.go` |
 | Framework/UseCase Separation | 5 core types + use case configs | `default_types.go` + JSON files |
@@ -481,7 +481,7 @@ INFO[0000] Starting HTTP server host=0.0.0.0 port=8083
 2. **Behavior Implementation**: JSON defines schema only; actual agent behaviors deferred to runtime implementation
 3. **Communication Patterns**: Message passing not yet implemented - requires INFRA-006 completion
 
-These deviations are acceptable as this task focused on agent type **definition** via configuration, not runtime **behavior**.
+These deviations are acceptable as this task focused on role **definition** via configuration, not runtime **behavior**.
 
 ## Next Steps
 
@@ -493,7 +493,7 @@ These deviations are acceptable as this task focused on agent type **definition*
 
 ## Lessons Learned
 
-1. **Configuration Over Code**: JSON-based agent types significantly reduce boilerplate and improve maintainability
+1. **Configuration Over Code**: JSON-based roles significantly reduce boilerplate and improve maintainability
 2. **Viper Binding**: Nested environment variables require explicit `BindEnv()` calls
 3. **Build Caching**: `go clean -cache` necessary when changing core implementations
 4. **Update-or-Create Pattern**: Essential for reloadable configurations
@@ -501,8 +501,8 @@ These deviations are acceptable as this task focused on agent type **definition*
 
 ## Success Criteria Met
 
-- ✅ Pipe agent type defined with complete JSON schema
-- ✅ Framework loads agent types from configuration directory
+- ✅ Pipe role defined with complete JSON schema
+- ✅ Framework loads roles from configuration directory
 - ✅ Agent types persist to ArangoDB
 - ✅ Types survive server restarts
 - ✅ Configuration-only use case architecture established
@@ -514,6 +514,6 @@ These deviations are acceptable as this task focused on agent type **definition*
 
 ## Conclusion
 
-INFRA-001 successfully establishes the foundation for configuration-based agent type management in CodeValdCortex. The pipe agent is now defined via JSON schema, automatically loaded from the use case configuration directory, and persisted to ArangoDB for durability. This pattern can be replicated for all other infrastructure agent types (sensor, pump, valve, etc.) without writing additional Go code, demonstrating the power of the configuration-only approach.
+INFRA-001 successfully establishes the foundation for configuration-based role management in CodeValdCortex. The pipe agent is now defined via JSON schema, automatically loaded from the use case configuration directory, and persisted to ArangoDB for durability. This pattern can be replicated for all other infrastructure roles (sensor, pump, valve, etc.) without writing additional Go code, demonstrating the power of the configuration-only approach.
 
-The framework now cleanly separates core agent types (worker, coordinator, monitor, proxy, gateway) from domain-specific types, enabling true multi-tenancy and reusability across different use cases.
+The framework now cleanly separates core roles (worker, coordinator, monitor, proxy, gateway) from domain-specific types, enabling true multi-tenancy and reusability across different use cases.

@@ -41,7 +41,7 @@ An agentic system where intelligent agents provide:
 - Premium features for enhanced attendee experience
 - Integration with security and emergency services
 
-## Agent Types
+## Roles
 
 ### 1. Info Desk Agent
 **Represents**: AI-powered virtual information assistant

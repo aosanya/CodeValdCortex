@@ -41,7 +41,7 @@ An agentic system where each element of industry analysis is an autonomous agent
 - Learns from historical patterns to predict future industry dynamics
 - Adapts monitoring strategies based on industry-specific characteristics
 
-## Agent Types
+## Roles
 
 ### 1. Industry Analyzer Agent (Orchestrator)
 **Represents**: Central coordinator that manages the overall industry analysis process

@@ -41,7 +41,7 @@ An agentic system where each element of the livestock keeping network is an auto
 - Facilitates dispute resolution through clear historical records
 - Respects cultural practices while providing modern coordination tools
 
-## Agent Types
+## Roles
 
 ### 1. Owner Agent
 **Represents**: Livestock owners who entrust their animals to caretakers

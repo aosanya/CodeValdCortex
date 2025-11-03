@@ -23,7 +23,7 @@ This task enables multi-tenant architecture where each use case operates as an i
 Created comprehensive type definitions:
 - **Agency**: Core entity with ID, name, display name, category, icon, status, metadata, settings
 - **AgencyStatus**: Enum (active, inactive, paused, archived)
-- **AgencyMetadata**: Location, agent types, total agents, zones, API endpoint, tags
+- **AgencyMetadata**: Location, roles, total agents, zones, API endpoint, tags
 - **AgencySettings**: Configuration flags (auto_start, monitoring, dashboard, visualizer)
 - **AgencyFilters**: Query parameters for listing agencies
 - **AgencyUpdates**: Partial update structure with pointer fields
