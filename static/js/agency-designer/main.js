@@ -18,6 +18,13 @@ import {
     deleteGoal
 } from './goals.js';
 import {
+    showWorkItemEditor,
+    saveWorkItemFromEditor,
+    cancelWorkItemEdit,
+    deleteWorkItem,
+    filterWorkItems
+} from './work-items.js';
+import {
     showUnitEditor,
     saveUnitFromEditor,
     cancelUnitEdit,
@@ -99,18 +106,25 @@ function showAIProcessStatus(message = 'AI is working on your request...') {
         // Remove htmx-indicator class temporarily to prevent HTMX from hiding it
         processStatus.classList.remove('htmx-indicator');
 
-        // Add fallback timeout to hide status after 15 seconds
-        setTimeout(() => {
-            hideAIProcessStatus();
-        }, 15000);
-    }
-}
+        // Clear any existing timeout
+        if (processStatus._hideTimeout) {
+            clearTimeout(processStatus._hideTimeout);
+            processStatus._hideTimeout = null;
+        }
 
-// Hide AI process status
+        // No timeout - status will remain visible until explicitly hidden
+    }
+}// Hide AI process status
 function hideAIProcessStatus() {
     const processStatus = document.getElementById('ai-process-status');
 
     if (processStatus) {
+        // Clear any existing timeout
+        if (processStatus._hideTimeout) {
+            clearTimeout(processStatus._hideTimeout);
+            processStatus._hideTimeout = null;
+        }
+
         processStatus.style.display = 'none';
         // Add htmx-indicator class back
         processStatus.classList.add('htmx-indicator');

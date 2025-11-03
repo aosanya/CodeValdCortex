@@ -3,6 +3,7 @@
 
 import { loadIntroductionEditor } from './introduction.js';
 import { loadGoals } from './goals.js';
+import { loadWorkItems } from './work-items.js';
 import { loadUnits } from './units.js';
 
 // Initialize overview section
@@ -33,7 +34,7 @@ export function selectOverviewSection(element, section) {
     const titles = {
         'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
         'goal-definition': '<span class="icon"><i class="fas fa-bullseye"></i></span><span>Goal Definition</span>',
-        'units-of-work': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Units of Work</span>'
+        'work-items': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Work Items</span>'
     };
 
     if (titles[section] && overviewTitle) {
@@ -58,8 +59,8 @@ export function selectOverviewSection(element, section) {
             loadIntroductionEditor();
         } else if (section === 'goal-definition') {
             loadGoals();
-        } else if (section === 'units-of-work') {
-            loadUnits();
+        } else if (section === 'work-items') {
+            loadWorkItems();
         }
     }
 }

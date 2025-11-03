@@ -59,11 +59,11 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"content-units-of-work\" class=\"overview-content-section\" style=\"display: none;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"content-work-items\" class=\"overview-content-section\" style=\"display: none;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = UnitsOfWorkContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = WorkItemsContent(currentAgency, conversation).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -97,7 +97,7 @@ func OverviewNavigationList() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"units-of-work\" onclick=\"selectOverviewSection(this, 'units-of-work')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Units of Work</div><div class=\"nav-description\">Define work items</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"units-of-work\" onclick=\"selectOverviewSection(this, 'work-items')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Work Items</div><div class=\"nav-description\">Define work items</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -165,7 +165,7 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-section\"><!-- AI Goal Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><p class=\"has-text-weight-semibold\">AI Goal Operations:</p></div></div><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIGoalOperation(['create'])\" id=\"ai-create-goals-btn\" title=\"Generate new goals from introduction\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create Goals</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIGoalOperation(['enhance'])\" id=\"ai-enhance-goals-btn\" title=\"Select goals to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance Goals</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIGoalOperation(['consolidate'])\" id=\"ai-consolidate-goals-btn\" title=\"Select goals to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate Goals</span></button></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-section\"><!-- AI Goal Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Goal Operations:</p><span id=\"goal-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIGoalOperation(['create'])\" id=\"ai-create-goals-btn\" title=\"Generate new goals from introduction\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIGoalOperation(['enhance'])\" id=\"ai-enhance-goals-btn\" title=\"Select goals to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIGoalOperation(['consolidate'])\" id=\"ai-consolidate-goals-btn\" title=\"Select goals to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -185,8 +185,8 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 	})
 }
 
-// UnitsOfWorkContent shows the units of work section
-func UnitsOfWorkContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+// WorkItemsContent shows the work items section
+func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -207,15 +207,15 @@ func UnitsOfWorkContent(currentAgency *agency.Agency, conversation *ai.Conversat
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\"><!-- AI Work Item Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Work Item Operations:</p><span id=\"work-item-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkItemOperation(['create'])\" id=\"ai-create-work-items-btn\" title=\"Generate work items from goals\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkItemOperation(['enhance'])\" id=\"ai-enhance-work-items-btn\" title=\"Select work items to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIWorkItemOperation(['consolidate'])\" id=\"ai-consolidate-work-items-btn\" title=\"Select work items to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = UnitOfWorkEditorCard().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = WorkItemEditorCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = UnitsOfWorkListCard().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = WorkItemsListCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

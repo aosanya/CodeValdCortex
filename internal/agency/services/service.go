@@ -11,26 +11,26 @@ type CompositeService struct {
 	*AgencyService
 	*OverviewService
 	*GoalService
-	*UnitOfWorkService
+	*WorkItemService
 }
 
 // New creates a new composite service with all sub-services
 func New(repo agency.Repository, validator agency.Validator) agency.Service {
 	return &CompositeService{
-		AgencyService:     NewAgencyService(repo, validator, nil),
-		OverviewService:   NewOverviewService(repo),
-		GoalService:       NewGoalService(repo),
-		UnitOfWorkService: NewUnitOfWorkService(repo),
+		AgencyService:   NewAgencyService(repo, validator, nil),
+		OverviewService: NewOverviewService(repo),
+		GoalService:     NewGoalService(repo),
+		WorkItemService: NewWorkItemService(repo),
 	}
 }
 
 // NewWithDBInit creates a new composite service with database initialization support
 func NewWithDBInit(repo agency.Repository, validator agency.Validator, dbInit agency.DatabaseInitializer) agency.Service {
 	return &CompositeService{
-		AgencyService:     NewAgencyService(repo, validator, dbInit),
-		OverviewService:   NewOverviewService(repo),
-		GoalService:       NewGoalService(repo),
-		UnitOfWorkService: NewUnitOfWorkService(repo),
+		AgencyService:   NewAgencyService(repo, validator, dbInit),
+		OverviewService: NewOverviewService(repo),
+		GoalService:     NewGoalService(repo),
+		WorkItemService: NewWorkItemService(repo),
 	}
 }
 
@@ -99,18 +99,32 @@ func (c *CompositeService) DeleteGoal(ctx context.Context, agencyID string, key 
 	return c.GoalService.DeleteGoal(ctx, agencyID, key)
 }
 
-func (c *CompositeService) CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*agency.UnitOfWork, error) {
-	return c.UnitOfWorkService.CreateUnitOfWork(ctx, agencyID, code, description)
+// WorkItem forwarding methods
+
+func (c *CompositeService) CreateWorkItem(ctx context.Context, agencyID string, req agency.CreateWorkItemRequest) (*agency.WorkItem, error) {
+	return c.WorkItemService.CreateWorkItem(ctx, agencyID, req)
 }
 
-func (c *CompositeService) GetUnitsOfWork(ctx context.Context, agencyID string) ([]*agency.UnitOfWork, error) {
-	return c.UnitOfWorkService.GetUnitsOfWork(ctx, agencyID)
+func (c *CompositeService) GetWorkItems(ctx context.Context, agencyID string) ([]*agency.WorkItem, error) {
+	return c.WorkItemService.GetWorkItems(ctx, agencyID)
 }
 
-func (c *CompositeService) UpdateUnitOfWork(ctx context.Context, agencyID string, key string, code string, description string) error {
-	return c.UnitOfWorkService.UpdateUnitOfWork(ctx, agencyID, key, code, description)
+func (c *CompositeService) GetWorkItem(ctx context.Context, agencyID string, key string) (*agency.WorkItem, error) {
+	return c.WorkItemService.GetWorkItem(ctx, agencyID, key)
 }
 
-func (c *CompositeService) DeleteUnitOfWork(ctx context.Context, agencyID string, key string) error {
-	return c.UnitOfWorkService.DeleteUnitOfWork(ctx, agencyID, key)
+func (c *CompositeService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*agency.WorkItem, error) {
+	return c.WorkItemService.GetWorkItemByCode(ctx, agencyID, code)
+}
+
+func (c *CompositeService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req agency.UpdateWorkItemRequest) error {
+	return c.WorkItemService.UpdateWorkItem(ctx, agencyID, key, req)
+}
+
+func (c *CompositeService) DeleteWorkItem(ctx context.Context, agencyID string, key string) error {
+	return c.WorkItemService.DeleteWorkItem(ctx, agencyID, key)
+}
+
+func (c *CompositeService) ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
+	return c.WorkItemService.ValidateDependencies(ctx, agencyID, workItemCode, dependencies)
 }

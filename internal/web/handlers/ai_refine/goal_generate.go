@@ -39,11 +39,11 @@ func (h *Handler) GenerateGoal(c *gin.Context) {
 		existingGoals = []*agency.Goal{} // Continue with empty list
 	}
 
-	// Get units of work for context
-	unitsOfWork, err := h.agencyService.GetUnitsOfWork(ctx, agencyID)
+	// Get work items for context
+	workItems, err := h.agencyService.GetWorkItems(ctx, agencyID)
 	if err != nil {
-		h.logger.Error("Failed to get units of work", "agencyID", agencyID, "error", err)
-		unitsOfWork = []*agency.UnitOfWork{} // Continue with empty list
+		h.logger.Error("Failed to get work items", "agencyID", agencyID, "error", err)
+		workItems = []*agency.WorkItem{} // Continue with empty list
 	}
 
 	// Build generation request
@@ -51,7 +51,7 @@ func (h *Handler) GenerateGoal(c *gin.Context) {
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		ExistingGoals: existingGoals,
-		UnitsOfWork:   unitsOfWork,
+		WorkItems:     workItems,
 		UserInput:     req.UserInput,
 	}
 

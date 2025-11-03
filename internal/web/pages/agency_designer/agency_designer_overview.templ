@@ -37,8 +37,8 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 				<div id="content-goal-definition" class="overview-content-section" style="display: none;">
 					@GoalDefinitionContent(currentAgency, conversation)
 				</div>
-				<div id="content-units-of-work" class="overview-content-section" style="display: none;">
-					@UnitsOfWorkContent(currentAgency, conversation)
+				<div id="content-work-items" class="overview-content-section" style="display: none;">
+					@WorkItemsContent(currentAgency, conversation)
 				</div>
 			</div>
 		</main>
@@ -77,12 +77,12 @@ templ OverviewNavigationList() {
 		<div 
 			class="overview-nav-item"
 			data-section="units-of-work"
-			onclick="selectOverviewSection(this, 'units-of-work')">
+			onclick="selectOverviewSection(this, 'work-items')">
 			<div class="nav-icon">
 				<i class="fas fa-clipboard-list"></i>
 			</div>
 			<div class="nav-info">
-				<div class="nav-name">Units of Work</div>
+				<div class="nav-name">Work Items</div>
 				<div class="nav-description">Define work items</div>
 			</div>
 		</div>
@@ -101,43 +101,38 @@ templ GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conve
 	<div class="overview-section">
 		<!-- AI Goal Operations Toolbar -->
 		<div class="box mb-4 p-4">
-			<div class="level is-mobile">
-				<div class="level-left">
-					<div class="level-item">
-						<p class="has-text-weight-semibold">AI Goal Operations:</p>
-					</div>
+			<div class="is-flex is-flex-direction-column">
+				<div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+					<p class="has-text-weight-semibold mb-0">AI Goal Operations:</p>
+					<span id="goal-selection-count" class="tag is-info is-light" style="display: none;"></span>
 				</div>
-				<div class="level-right">
-					<div class="level-item">
-						<div class="buttons">
-							<button 
-								class="button is-small is-info"
-								onclick="processAIGoalOperation(['create'])"
-								id="ai-create-goals-btn"
-								title="Generate new goals from introduction">
-								<span class="icon"><i class="fas fa-sparkles"></i></span>
-								<span>Create Goals</span>
-							</button>
-							<button 
-								class="button is-small is-link is-static"
-								onclick="processAIGoalOperation(['enhance'])"
-								id="ai-enhance-goals-btn"
-								title="Select goals to enhance"
-								disabled>
-								<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
-								<span>Enhance Goals</span>
-							</button>
-							<button 
-								class="button is-small is-warning is-static"
-								onclick="processAIGoalOperation(['consolidate'])"
-								id="ai-consolidate-goals-btn"
-								title="Select goals to consolidate"
-								disabled>
-								<span class="icon"><i class="fas fa-compress"></i></span>
-								<span>Consolidate Goals</span>
-							</button>
-						</div>
-					</div>
+				<div class="buttons">
+					<button 
+						class="button is-small is-info"
+						onclick="processAIGoalOperation(['create'])"
+						id="ai-create-goals-btn"
+						title="Generate new goals from introduction">
+						<span class="icon"><i class="fas fa-sparkles"></i></span>
+						<span>Create</span>
+					</button>
+					<button 
+						class="button is-small is-link is-static"
+						onclick="processAIGoalOperation(['enhance'])"
+						id="ai-enhance-goals-btn"
+						title="Select goals to enhance"
+						disabled>
+						<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+						<span>Enhance</span>
+					</button>
+					<button 
+						class="button is-small is-warning is-static"
+						onclick="processAIGoalOperation(['consolidate'])"
+						id="ai-consolidate-goals-btn"
+						title="Select goals to consolidate"
+						disabled>
+						<span class="icon"><i class="fas fa-compress"></i></span>
+						<span>Consolidate</span>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -147,10 +142,48 @@ templ GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conve
 	</div>
 }
 
-// UnitsOfWorkContent shows the units of work section
-templ UnitsOfWorkContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+// WorkItemsContent shows the work items section
+templ WorkItemsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
-		@UnitOfWorkEditorCard()
-		@UnitsOfWorkListCard()
+		<!-- AI Work Item Operations Toolbar -->
+		<div class="box mb-4 p-4">
+			<div class="is-flex is-flex-direction-column">
+				<div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+					<p class="has-text-weight-semibold mb-0">AI Work Item Operations:</p>
+					<span id="work-item-selection-count" class="tag is-info is-light" style="display: none;"></span>
+				</div>
+				<div class="buttons">
+					<button 
+						class="button is-small is-info"
+						onclick="processAIWorkItemOperation(['create'])"
+						id="ai-create-work-items-btn"
+						title="Generate work items from goals">
+						<span class="icon"><i class="fas fa-sparkles"></i></span>
+						<span>Create</span>
+					</button>
+					<button 
+						class="button is-small is-link is-static"
+						onclick="processAIWorkItemOperation(['enhance'])"
+						id="ai-enhance-work-items-btn"
+						title="Select work items to enhance"
+						disabled>
+						<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+						<span>Enhance</span>
+					</button>
+					<button 
+						class="button is-small is-warning is-static"
+						onclick="processAIWorkItemOperation(['consolidate'])"
+						id="ai-consolidate-work-items-btn"
+						title="Select work items to consolidate"
+						disabled>
+						<span class="icon"><i class="fas fa-compress"></i></span>
+						<span>Consolidate</span>
+					</button>
+				</div>
+			</div>
+		</div>
+		
+		@WorkItemEditorCard()
+		@WorkItemsListCard()
 	</div>
 }

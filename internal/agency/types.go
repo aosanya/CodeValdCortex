@@ -168,25 +168,43 @@ type UpdateOverviewRequest struct {
 	Introduction string `json:"introduction"`
 }
 
-// UnitOfWork represents a unit of work that needs to be completed by the agency
-type UnitOfWork struct {
-	Key         string    `json:"_key,omitempty"`
-	AgencyID    string    `json:"agency_id"`
-	Number      int       `json:"number"`      // Display order/number
-	Code        string    `json:"code"`        // Unit of work code (e.g., UOW001, WRK-1)
-	Description string    `json:"description"` // The unit of work description
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+// WorkItem represents a work item in the agency
+type WorkItem struct {
+	Key          string    `json:"_key,omitempty"`
+	ID           string    `json:"_id,omitempty"`
+	AgencyID     string    `json:"agency_id"`
+	Number       int       `json:"number"`
+	Code         string    `json:"code"` // e.g., "WI-001"
+	Title        string    `json:"title"`
+	Description  string    `json:"description"`
+	Deliverables []string  `json:"deliverables"`
+	Dependencies []string  `json:"dependencies"` // References to other work item codes
+	Tags         []string  `json:"tags,omitempty"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-// CreateUnitOfWorkRequest is the request body for creating a unit of work
-type CreateUnitOfWorkRequest struct {
-	Code        string `json:"code" binding:"required"`
-	Description string `json:"description" binding:"required"`
+// CreateWorkItemRequest is the request body for creating a work item
+type CreateWorkItemRequest struct {
+	Title        string   `json:"title" binding:"required"`
+	Description  string   `json:"description" binding:"required"`
+	Deliverables []string `json:"deliverables"`
+	Dependencies []string `json:"dependencies"`
+	Tags         []string `json:"tags,omitempty"`
 }
 
-// UpdateUnitOfWorkRequest is the request body for updating a unit of work
-type UpdateUnitOfWorkRequest struct {
-	Code        string `json:"code" binding:"required"`
-	Description string `json:"description" binding:"required"`
+// UpdateWorkItemRequest is the request body for updating a work item
+type UpdateWorkItemRequest struct {
+	Title        string   `json:"title" binding:"required"`
+	Description  string   `json:"description" binding:"required"`
+	Deliverables []string `json:"deliverables"`
+	Dependencies []string `json:"dependencies"`
+	Tags         []string `json:"tags,omitempty"`
+}
+
+// WorkItemRefineRequest is the request body for AI work item refinement
+type WorkItemRefineRequest struct {
+	Title        string   `json:"title" binding:"required"`
+	Description  string   `json:"description" binding:"required"`
+	Deliverables []string `json:"deliverables"`
 }

@@ -61,6 +61,7 @@ function logContextStateChange(action, context = null) {
 export const ContextType = {
     INTRODUCTION: 'Introduction',
     GOAL: 'Goal Definition',
+    WORK_ITEM: 'Work Item',
     UNIT_OF_WORK: 'Unit of Work',
     AGENT_TYPE: 'Agent Type',
     GENERIC: 'Generic'
@@ -117,6 +118,39 @@ export function addGoalContext(goalCode, goalDescription) {
     }
 
     return createContext(ContextType.GOAL, goalCode, content);
+}
+
+/**
+ * Add context from work item
+ * @param {string} workItemCode - Work item code (e.g., WI-001)
+ * @param {string} workItemDescription - Full work item description
+ */
+export function addWorkItemContext(workItemCode, workItemDescription) {
+    console.log('[Context] addWorkItemContext called:', { workItemCode, workItemDescription });
+
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
+
+    // If text is selected, use it; otherwise use full description
+    const content = selectedText || workItemDescription;
+
+    console.log('[Context] Content to add:', content);
+
+    // Check if context already exists
+    const exists = contextState.contexts.some(ctx =>
+        ctx.type === ContextType.WORK_ITEM && ctx.code === workItemCode && ctx.content === content
+    );
+
+    if (exists) {
+        console.log('[Context] Context already exists, showing warning');
+        showNotification('This context is already added', 'warning');
+        return null;
+    }
+
+    console.log('[Context] Creating new work item context');
+    const result = createContext(ContextType.WORK_ITEM, workItemCode, content);
+    console.log('[Context] Context created:', result);
+    return result;
 }
 
 /**
@@ -376,6 +410,8 @@ function getContextTypeColor(type) {
             return 'is-info';
         case ContextType.GOAL:
             return 'is-primary';
+        case ContextType.WORK_ITEM:
+            return 'is-warning';
         case ContextType.UNIT_OF_WORK:
             return 'is-link';
         case ContextType.AGENT_TYPE:
@@ -552,6 +588,7 @@ if (typeof window !== 'undefined') {
     window.ContextManager = {
         createContext,
         addGoalContext,
+        addWorkItemContext,
         addIntroductionContext,
         addUnitContext,
         addAgentContext,

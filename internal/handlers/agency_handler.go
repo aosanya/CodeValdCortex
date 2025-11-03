@@ -27,6 +27,7 @@ func NewAgencyHandler(service agency.Service) *AgencyHandler {
 func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 	agencies := router.Group("/agencies")
 	{
+		// Core agency routes
 		agencies.GET("", h.ListAgencies)
 		agencies.POST("", h.CreateAgency)
 		agencies.GET("/:id", h.GetAgency)
@@ -35,8 +36,25 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.POST("/:id/activate", h.ActivateAgency)
 		agencies.GET("/active", h.GetActiveAgency)
 		agencies.GET("/:id/statistics", h.GetAgencyStatistics)
+
+		// Overview routes
 		agencies.GET("/:id/overview", h.GetOverview)
 		agencies.PUT("/:id/overview", h.UpdateOverview)
+
+		// Goals routes
+		agencies.GET("/:id/goals", h.GetGoals)
+		agencies.GET("/:id/goals/html", h.GetGoalsHTML)
+		agencies.POST("/:id/goals", h.CreateGoal)
+		agencies.PUT("/:id/goals/:goalKey", h.UpdateGoal)
+		agencies.DELETE("/:id/goals/:goalKey", h.DeleteGoal)
+
+		// Work items routes
+		agencies.GET("/:id/work-items", h.GetWorkItems)
+		agencies.GET("/:id/work-items/html", h.GetWorkItemsHTML)
+		agencies.POST("/:id/work-items", h.CreateWorkItem)
+		agencies.PUT("/:id/work-items/:key", h.UpdateWorkItem)
+		agencies.DELETE("/:id/work-items/:key", h.DeleteWorkItem)
+		agencies.POST("/:id/work-items/validate-deps", h.ValidateWorkItemDependencies)
 	}
 }
 
@@ -386,84 +404,4 @@ func (h *AgencyHandler) DeleteGoal(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Goal deleted successfully"})
-}
-
-// GetUnitsOfWork handles GET /api/v1/agencies/:id/units
-func (h *AgencyHandler) GetUnitsOfWork(c *gin.Context) {
-	id := c.Param("id")
-
-	units, err := h.service.GetUnitsOfWork(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, units)
-}
-
-// GetUnitsOfWorkHTML handles GET /api/v1/agencies/:id/units/html
-func (h *AgencyHandler) GetUnitsOfWorkHTML(c *gin.Context) {
-	id := c.Param("id")
-
-	units, err := h.service.GetUnitsOfWork(c.Request.Context(), id)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error loading units of work")
-		return
-	}
-
-	// Render the units list template
-	component := agency_designer.UnitsList(units)
-	c.Header("Content-Type", "text/html")
-	component.Render(c.Request.Context(), c.Writer)
-}
-
-// CreateUnitOfWork handles POST /api/v1/agencies/:id/units
-func (h *AgencyHandler) CreateUnitOfWork(c *gin.Context) {
-	id := c.Param("id")
-
-	var req agency.CreateUnitOfWorkRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	unit, err := h.service.CreateUnitOfWork(c.Request.Context(), id, req.Code, req.Description)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, unit)
-}
-
-// UpdateUnitOfWork handles PUT /api/v1/agencies/:id/units/:unitKey
-func (h *AgencyHandler) UpdateUnitOfWork(c *gin.Context) {
-	id := c.Param("id")
-	unitKey := c.Param("unitKey")
-
-	var req agency.UpdateUnitOfWorkRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if err := h.service.UpdateUnitOfWork(c.Request.Context(), id, unitKey, req.Code, req.Description); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Unit of work updated successfully"})
-}
-
-// DeleteUnitOfWork handles DELETE /api/v1/agencies/:id/units/:unitKey
-func (h *AgencyHandler) DeleteUnitOfWork(c *gin.Context) {
-	id := c.Param("id")
-	unitKey := c.Param("unitKey")
-
-	if err := h.service.DeleteUnitOfWork(c.Request.Context(), id, unitKey); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Unit of work deleted successfully"})
 }

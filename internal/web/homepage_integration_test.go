@@ -153,25 +153,47 @@ func (m *mockAgencyService) DeleteGoal(ctx context.Context, agencyID string, goa
 	return nil
 }
 
-func (m *mockAgencyService) CreateUnitOfWork(ctx context.Context, agencyID string, code string, description string) (*agency.UnitOfWork, error) {
-	return &agency.UnitOfWork{
-		Key:         "mock-unit-1",
-		AgencyID:    agencyID,
-		Number:      1,
-		Code:        code,
-		Description: description,
+func (m *mockAgencyService) CreateWorkItem(ctx context.Context, agencyID string, req agency.CreateWorkItemRequest) (*agency.WorkItem, error) {
+	return &agency.WorkItem{
+		Key:      "WI-001",
+		AgencyID: agencyID,
+		Number:   1,
+		Title:    req.Title,
 	}, nil
 }
 
-func (m *mockAgencyService) GetUnitsOfWork(ctx context.Context, agencyID string) ([]*agency.UnitOfWork, error) {
-	return []*agency.UnitOfWork{}, nil
+func (m *mockAgencyService) GetWorkItems(ctx context.Context, agencyID string) ([]*agency.WorkItem, error) {
+	return []*agency.WorkItem{}, nil
 }
 
-func (m *mockAgencyService) UpdateUnitOfWork(ctx context.Context, agencyID string, unitKey string, code string, description string) error {
+func (m *mockAgencyService) GetWorkItem(ctx context.Context, agencyID string, key string) (*agency.WorkItem, error) {
+	return &agency.WorkItem{
+		Key:      key,
+		AgencyID: agencyID,
+		Number:   1,
+		Title:    "Mock Work Item",
+	}, nil
+}
+
+func (m *mockAgencyService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*agency.WorkItem, error) {
+	return &agency.WorkItem{
+		Key:      "WI-001",
+		AgencyID: agencyID,
+		Number:   1,
+		Code:     code,
+		Title:    "Mock Work Item",
+	}, nil
+}
+
+func (m *mockAgencyService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req agency.UpdateWorkItemRequest) error {
 	return nil
 }
 
-func (m *mockAgencyService) DeleteUnitOfWork(ctx context.Context, agencyID string, unitKey string) error {
+func (m *mockAgencyService) DeleteWorkItem(ctx context.Context, agencyID string, key string) error {
+	return nil
+}
+
+func (m *mockAgencyService) ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
 	return nil
 }
 

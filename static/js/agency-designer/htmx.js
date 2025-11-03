@@ -52,6 +52,30 @@ export function initializeHTMXEvents() {
             indicator.style.display = 'none';
         }
 
+        // Check if this is an introduction refine operation
+        const isIntroductionRefine = (
+            evt.detail.target.id === 'introduction-content' ||
+            evt.detail.target.classList.contains('introduction-content')
+        );
+
+        // For introduction refine, refresh chat messages to show AI explanation
+        if (isIntroductionRefine) {
+            const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
+            const chatContainer = document.getElementById('chat-messages');
+
+            if (agencyId && chatContainer) {
+                fetch(`/agencies/${agencyId}/chat-messages`)
+                    .then(response => response.text())
+                    .then(html => {
+                        chatContainer.innerHTML = html;
+                        scrollToBottom(chatContainer);
+                    })
+                    .catch(error => {
+                        console.error('Error refreshing chat after introduction refine:', error);
+                    });
+            }
+        }
+
         // Hide AI process status only for specific targets that indicate completion
         const shouldHideStatus = (
             evt.detail.target.id === 'chat-messages' ||

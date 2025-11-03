@@ -2,6 +2,7 @@
 // Handles goal definition management
 
 import { getCurrentAgencyId, showNotification } from './utils.js';
+import { scrollToBottom } from './chat.js';
 
 // Goal editor state management
 let goalEditorState = {
@@ -695,8 +696,36 @@ export function processAIGoalOperation(operations) {
             }
             return response.json();
         })
-        .then(data => {
-            // Hide AI process status
+        .then(async data => {
+            // Update status to show we're processing results
+            if (window.showAIProcessStatus) {
+                window.showAIProcessStatus('Processing results and updating goals...');
+            }
+
+            // Reload goals list to show changes
+            await loadGoals();
+
+            // Clear selections and update buttons after reload
+            document.querySelectorAll('.goal-checkbox:checked').forEach(cb => cb.checked = false);
+            updateGoalSelectionButtons();
+
+            // Reload chat messages to show the AI explanation
+            try {
+                const chatContainer = document.getElementById('chat-messages');
+                if (chatContainer) {
+                    const chatResp = await fetch(`/agencies/${agencyId}/chat-messages`);
+                    if (chatResp.ok) {
+                        const chatHtml = await chatResp.text();
+                        chatContainer.innerHTML = chatHtml;
+                        // Scroll to bottom to show latest assistant message
+                        try { scrollToBottom(chatContainer); } catch (e) { /* ignore */ }
+                    }
+                }
+            } catch (err) {
+                console.error('[Goals] Error refreshing chat messages:', err);
+            }
+
+            // Hide AI process status after goals and chat are updated
             if (window.hideAIProcessStatus) {
                 window.hideAIProcessStatus();
             }
@@ -712,35 +741,6 @@ export function processAIGoalOperation(operations) {
             }).join(', ');
 
             showNotification(`AI successfully ${operationText}!`, 'success');
-
-            // Reload goals list to show changes
-            loadGoals();
-
-            // Clear selections and update buttons after reload
-            setTimeout(() => {
-                document.querySelectorAll('.goal-checkbox:checked').forEach(cb => cb.checked = false);
-                updateGoalSelectionButtons();
-            }, 500);
-
-            // Reload chat messages to show the AI explanation
-            if (window.location.pathname.includes('/designer')) {
-                const agencyId = getCurrentAgencyId();
-                const chatMessages = document.getElementById('chat-messages');
-
-                if (chatMessages && agencyId) {
-                    // Fetch updated chat messages
-                    fetch(`/agencies/${agencyId}/chat-messages`)
-                        .then(response => response.text())
-                        .then(html => {
-                            chatMessages.innerHTML = html;
-                            // Scroll to bottom to show new message
-                            chatMessages.scrollTop = chatMessages.scrollHeight;
-                        })
-                        .catch(error => {
-                            console.error('Error reloading chat messages:', error);
-                        });
-                }
-            }
         })
         .catch(error => {
             console.error('Error processing AI goal operation:', error);
@@ -824,22 +824,11 @@ function toggleAllGoals(checked) {
 }
 
 function updateSelectionCount(count) {
-    let countDisplay = document.getElementById('goal-selection-count');
-    if (!countDisplay && count > 0) {
-        // Create count display if it doesn't exist
-        const toolbar = document.querySelector('#ai-create-goals-btn').closest('.buttons');
-        if (toolbar) {
-            countDisplay = document.createElement('span');
-            countDisplay.id = 'goal-selection-count';
-            countDisplay.className = 'tag is-info is-light ml-2';
-            countDisplay.style.alignSelf = 'center';
-            toolbar.parentElement.insertBefore(countDisplay, toolbar);
-        }
-    }
+    const countDisplay = document.getElementById('goal-selection-count');
 
     if (countDisplay) {
         if (count > 0) {
-            countDisplay.textContent = `${count} goal(s) selected`;
+            countDisplay.textContent = `${count} selected`;
             countDisplay.style.display = 'inline-block';
         } else {
             countDisplay.style.display = 'none';
