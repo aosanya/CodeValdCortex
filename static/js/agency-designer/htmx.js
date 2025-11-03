@@ -26,7 +26,11 @@ export function initializeHTMXEvents() {
         }
 
         // Handle other AI operations
-        if (evt.detail.elt.matches('[hx-post*="refine"]')) {
+        if (evt.detail.elt.matches('[hx-post*="overview/refine"]')) {
+            if (window.showAIProcessStatus) {
+                window.showAIProcessStatus('AI is refining your introduction...');
+            }
+        } else if (evt.detail.elt.matches('[hx-post*="refine"]')) {
             if (window.showAIProcessStatus) {
                 window.showAIProcessStatus('AI is refining the design...');
             }
@@ -35,12 +39,6 @@ export function initializeHTMXEvents() {
         if (evt.detail.elt.matches('[hx-post*="generate"]')) {
             if (window.showAIProcessStatus) {
                 window.showAIProcessStatus('AI is generating the final design...');
-            }
-        }
-
-        if (evt.detail.elt.matches('[hx-post*="introduction"]')) {
-            if (window.showAIProcessStatus) {
-                window.showAIProcessStatus('AI is updating the introduction...');
             }
         }
     });

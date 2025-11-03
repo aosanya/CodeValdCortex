@@ -77,10 +77,18 @@ window.manualHideStatus = function () {
 };
 
 // Add handleRefineClick function for the button
+// This function is called when the "Refine" button is clicked
+// It shows the AI process status indicator
+// The actual introduction text is taken from the textarea by HTMX via hx-include
 window.handleRefineClick = function () {
+    // Show AI processing status
     if (window.showAIProcessStatus) {
         window.showAIProcessStatus('AI is refining your introduction...');
     }
+
+    // Note: The current textarea value is automatically included in the POST request
+    // by HTMX via the hx-include="#introduction-editor" attribute
+    // No need to manually read or send the textarea value here
 };
 
 // Since browsers don't fully support ES6 modules without bundling,

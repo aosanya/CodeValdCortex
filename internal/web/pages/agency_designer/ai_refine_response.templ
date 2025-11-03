@@ -36,21 +36,25 @@ templ AIRefineResponse(response *ai.RefineIntroductionResponse, currentAgency *a
 		
 		<!-- Updated introduction content -->
 		<div class="field">
+			<label class="label">Introduction</label>
 			<div class="control">
 				<textarea
-					class="textarea"
+					class="textarea context-selectable"
 					id="introduction-editor"
+					name="introduction-editor"
 					placeholder="Enter introduction text for this agency..."
 					rows="20"
-					style="font-family: monospace; font-size: 14px;">{ response.RefinedIntroduction }</textarea>
+					style="font-family: monospace; font-size: 14px;"
+					data-intro-text={ response.RefinedIntroduction }
+					title="Highlight text to add as context">{ response.RefinedIntroduction }</textarea>
 			</div>
 		</div>
-		<p class="help">Use this section to provide an overview and introduction to your agency.</p>
+		<p class="help">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p>
 		
 		<!-- Action buttons -->
-		<div class="buttons is-right mt-4">
+		<div class="buttons is-right">
 			<button
-				class="button is-primary"
+				class="button is-small is-primary"
 				onclick="saveOverviewIntroduction()"
 				id="save-introduction-btn">
 				<span class="icon"><i class="fas fa-save"></i></span>
@@ -58,17 +62,29 @@ templ AIRefineResponse(response *ai.RefineIntroductionResponse, currentAgency *a
 			</button>
 			<!-- AI Refine / Sparkle button (triggers AI refine flow) -->
 			<button
-				class="button is-info"
+				class="button is-small is-info"
 				hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/overview/refine" }
+				hx-include="#introduction-editor"
 				hx-target="#introduction-content"
-				hx-indicator="#ai-refine-loading"
+				hx-indicator="#ai-process-status"
+				hx-on::after-request="
+					if (window.hideAIProcessStatus) {
+						window.hideAIProcessStatus();
+					} else {
+						const status = document.getElementById('ai-process-status');
+						if (status) {
+							status.style.display = 'none';
+						}
+					}
+				"
 				id="ai-sparkle-btn"
+				onclick="window.handleRefineClick && window.handleRefineClick()"
 				title="Refine with AI">
 				<span class="icon"><i class="fas fa-magic"></i></span>
 				<span>Refine</span>
 			</button>
 			<button
-				class="button"
+				class="button is-small"
 				onclick="undoOverviewIntroduction()"
 				id="undo-introduction-btn">
 				<span class="icon"><i class="fas fa-undo"></i></span>

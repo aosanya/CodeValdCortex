@@ -40,14 +40,14 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 			return templ_7745c5c3_Err
 		}
 		if overview != nil && overview.Introduction != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<textarea class=\"textarea context-selectable\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<textarea class=\"textarea context-selectable\" id=\"introduction-editor\" name=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(overview.Introduction)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 26, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 27, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -60,7 +60,7 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(overview.Introduction)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 28, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 29, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -71,7 +71,7 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<textarea class=\"textarea context-selectable\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"\" title=\"Highlight text to add as context\"></textarea>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<textarea class=\"textarea context-selectable\" id=\"introduction-editor\" name=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"\" title=\"Highlight text to add as context\"></textarea>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -83,7 +83,7 @@ func IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversatio
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("/api/v1/agencies/" + currentAgency.ID + "/overview/refine")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 56, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/introduction_card.templ`, Line: 58, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

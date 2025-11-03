@@ -75,7 +75,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		AgencyID:      agencyID,
 		CurrentIntro:  currentIntroduction,
 		Goals:         goals,
-		WorkItems:   workItems,
+		WorkItems:     workItems,
 		AgencyContext: ag,
 	}
 
@@ -106,13 +106,51 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		"explanation": refinedResult.Explanation,
 	}).Info("AI refinement completed")
 
-	// Update the overview with refined introduction if it was changed
-	if refinedResult.WasChanged {
-		err = h.agencyService.UpdateAgencyOverview(c.Request.Context(), agencyID, refinedResult.RefinedIntroduction)
+	// Determine what text to save
+	// If AI refined it, use the refined version
+	// If AI didn't change it, still use the refined version (which is the current intro)
+	// This ensures user edits are saved even if AI says "no changes needed"
+	introToSave := refinedResult.RefinedIntroduction
+
+	// Check if the introduction is different from what's in the database
+	needsSave := (introToSave != overview.Introduction)
+
+	if needsSave {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":           agencyID,
+			"ai_changed":          refinedResult.WasChanged,
+			"intro_length":        len(introToSave),
+			"stored_intro_length": len(overview.Introduction),
+		}).Info("Introduction differs from database, saving")
+
+		err = h.agencyService.UpdateAgencyOverview(c.Request.Context(), agencyID, introToSave)
 		if err != nil {
-			h.logger.WithError(err).Error("Failed to save refined introduction")
-			// Continue to show the result even if saving failed
+			h.logger.WithError(err).Error("Failed to save introduction")
+			// Show error notification
+			c.Header("Content-Type", "text/html")
+			c.String(http.StatusInternalServerError, `
+				<div class="notification is-danger">
+					<div class="is-flex is-align-items-center">
+						<span class="icon has-text-danger mr-2">
+							<i class="fas fa-exclamation-triangle"></i>
+						</span>
+						<div>
+							<strong>Save Failed</strong>
+							<p class="mb-0">The introduction could not be saved. Please try again.</p>
+						</div>
+					</div>
+				</div>
+			`)
+			return
 		}
+
+		h.logger.WithFields(logrus.Fields{
+			"agency_id": agencyID,
+		}).Info("Successfully saved introduction to database")
+	} else {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id": agencyID,
+		}).Info("Introduction matches database, no save needed")
 	}
 
 	// Add the AI refinement explanation to the chat conversation

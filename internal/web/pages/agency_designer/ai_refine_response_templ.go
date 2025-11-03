@@ -63,33 +63,46 @@ func AIRefineResponse(response *ai.RefineIntroductionResponse, currentAgency *ag
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Updated introduction content --><div class=\"field\"><div class=\"control\"><textarea class=\"textarea\" id=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Updated introduction content --><div class=\"field\"><label class=\"label\">Introduction</label><div class=\"control\"><textarea class=\"textarea context-selectable\" id=\"introduction-editor\" name=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(response.RefinedIntroduction)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 45, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 48, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency.</p><!-- Action buttons --><div class=\"buttons is-right mt-4\"><button class=\"button is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-info\" hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" title=\"Highlight text to add as context\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs("/api/v1/agencies/" + currentAgency.ID + "/overview/refine")
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(response.RefinedIntroduction)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 62, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 49, Col: 76}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" hx-target=\"#introduction-content\" hx-indicator=\"#ai-refine-loading\" id=\"ai-sparkle-btn\" title=\"Refine with AI\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> <span>Refine</span></button> <button class=\"button\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div><!-- Loading indicator for AI refine --><div id=\"ai-refine-loading\" class=\"htmx-indicator\"><div class=\"notification is-info is-light\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-info mr-2\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>AI is refining your introduction...</span></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p><!-- Action buttons --><div class=\"buttons is-right\"><button class=\"button is-small is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-small is-info\" hx-post=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("/api/v1/agencies/" + currentAgency.ID + "/overview/refine")
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 66, Col: 73}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-include=\"#introduction-editor\" hx-target=\"#introduction-content\" hx-indicator=\"#ai-process-status\" hx-on::after-request=\"\n\t\t\t\t\tif (window.hideAIProcessStatus) {\n\t\t\t\t\t\twindow.hideAIProcessStatus();\n\t\t\t\t\t} else {\n\t\t\t\t\t\tconst status = document.getElementById('ai-process-status');\n\t\t\t\t\t\tif (status) {\n\t\t\t\t\t\t\tstatus.style.display = 'none';\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\" id=\"ai-sparkle-btn\" onclick=\"window.handleRefineClick && window.handleRefineClick()\" title=\"Refine with AI\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> <span>Refine</span></button> <button class=\"button is-small\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div><!-- Loading indicator for AI refine --><div id=\"ai-refine-loading\" class=\"htmx-indicator\"><div class=\"notification is-info is-light\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-info mr-2\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>AI is refining your introduction...</span></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
