@@ -42,17 +42,15 @@ templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.Conversa
 				
 				<!-- Right Column: AI Chat (Always Visible) -->
 				<div class="column is-one-third">
-					@ChatPanel(currentAgency, conversation)
-				</div>
+				@ChatPanel(currentAgency, conversation)
 			</div>
-			
-			<!-- Status Bar at Bottom (VS Code style) -->
-			@components.StatusBar(currentAgency, conversation)
 		</div>
-	}
+		
+		<!-- Status Bar at Bottom (VS Code style) -->
+		@components.StatusBar(currentAgency, conversation)
+	</div>
 }
-
-// ViewSwitcher shows the different view options
+}// ViewSwitcher shows the different view options
 templ ViewSwitcher() {
 	<div class="view-switcher">
 		<div class="view-tab is-active" data-view="overview">

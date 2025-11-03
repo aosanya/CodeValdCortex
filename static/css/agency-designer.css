@@ -1091,6 +1091,18 @@ body {
     border-left-color: var(--vscode-accent);
 }
 
+/* Style links that look like nav items */
+a.overview-nav-item,
+a.overview-nav-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+a.overview-nav-item:hover,
+a.overview-nav-link:hover {
+    background: var(--vscode-hover);
+}
+
 .overview-nav-item .nav-icon {
     display: flex;
     align-items: center;

@@ -35,7 +35,8 @@ export function selectOverviewSection(element, section) {
         'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
         'goal-definition': '<span class="icon"><i class="fas fa-bullseye"></i></span><span>Goal Definition</span>',
         'work-items': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Work Items</span>',
-        'roles': '<span class="icon"><i class="fas fa-user-tag"></i></span><span>Roles</span>'
+        'roles': '<span class="icon"><i class="fas fa-user-tag"></i></span><span>Roles</span>',
+        'raci-matrix': '<span class="icon"><i class="fas fa-table-cells"></i></span><span>RACI Matrix</span>'
     };
 
     if (titles[section] && overviewTitle) {
@@ -64,6 +65,11 @@ export function selectOverviewSection(element, section) {
             loadWorkItems();
         } else if (section === 'roles') {
             loadRoles();
+        } else if (section === 'raci-matrix') {
+            // Load RACI matrix data
+            if (window.loadRACIMatrix) {
+                window.loadRACIMatrix();
+            }
         }
     }
 }

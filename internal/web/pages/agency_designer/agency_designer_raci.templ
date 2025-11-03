@@ -1,0 +1,205 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// AgencyDesignerRACIPage renders the RACI matrix editor page
+templ AgencyDesignerRACIPage(currentAgency *agency.Agency) {
+	@components.LayoutWithAgency("RACI Matrix", currentAgency) {
+		<!-- RACI Matrix Specific CSS -->
+		<link rel="stylesheet" href="/static/css/agency-designer.css"/>
+		<link rel="stylesheet" href="/static/css/raci-matrix.css"/>
+		
+		<!-- RACI Matrix JavaScript -->
+		<script src="/static/js/agency-designer/raci.js" type="module" defer></script>
+		
+		<div class="container is-fluid mt-4">
+			<!-- Header with breadcrumb -->
+			<nav class="breadcrumb mb-4" aria-label="breadcrumbs">
+				<ul>
+					<li><a href="/agencies">Agencies</a></li>
+					<li><a href={ templ.SafeURL("/agencies/" + currentAgency.ID) }>{ currentAgency.DisplayName }</a></li>
+					<li><a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/designer") }>Designer</a></li>
+					<li class="is-active"><a href="#" aria-current="page">RACI Matrix</a></li>
+				</ul>
+			</nav>
+
+			<!-- Page Header -->
+			<div class="level mb-5">
+				<div class="level-left">
+					<div class="level-item">
+						<div>
+							<h1 class="title is-3">
+								<span class="icon-text">
+									<span class="icon"><i class="fas fa-table-cells"></i></span>
+									<span>RACI Matrix</span>
+								</span>
+							</h1>
+							<p class="subtitle is-6">
+								Define role responsibilities for work items
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="level-right">
+					<div class="level-item">
+						<div class="buttons">
+							<button class="button is-light" onclick="history.back()">
+								<span class="icon"><i class="fas fa-arrow-left"></i></span>
+								<span>Back</span>
+							</button>
+							<button class="button is-success" onclick="saveRACIMatrix()">
+								<span class="icon"><i class="fas fa-save"></i></span>
+								<span>Save Matrix</span>
+							</button>
+							<div class="dropdown is-right" id="export-dropdown">
+								<div class="dropdown-trigger">
+									<button class="button" aria-haspopup="true" aria-controls="export-menu" onclick="toggleExportDropdown()">
+										<span class="icon"><i class="fas fa-file-export"></i></span>
+										<span>Export</span>
+										<span class="icon is-small"><i class="fas fa-angle-down"></i></span>
+									</button>
+								</div>
+								<div class="dropdown-menu" id="export-menu" role="menu">
+									<div class="dropdown-content">
+										<a href="#" class="dropdown-item" onclick="exportRACIMatrix('pdf')">
+											<span class="icon"><i class="fas fa-file-pdf"></i></span>
+											<span>Export as PDF</span>
+										</a>
+										<a href="#" class="dropdown-item" onclick="exportRACIMatrix('markdown')">
+											<span class="icon"><i class="fas fa-file-lines"></i></span>
+											<span>Export as Markdown</span>
+										</a>
+										<a href="#" class="dropdown-item" onclick="exportRACIMatrix('json')">
+											<span class="icon"><i class="fas fa-file-code"></i></span>
+											<span>Export as JSON</span>
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- RACI Legend -->
+			<div class="box mb-4">
+				<div class="content">
+					<h5 class="title is-6 mb-3">RACI Roles Explained</h5>
+					<div class="columns">
+						<div class="column">
+							<span class="tag is-info mr-2">R</span>
+							<strong>Responsible:</strong> Does the work to complete the task
+						</div>
+						<div class="column">
+							<span class="tag is-success mr-2">A</span>
+							<strong>Accountable:</strong> Ultimately answerable for the task completion
+						</div>
+						<div class="column">
+							<span class="tag is-warning mr-2">C</span>
+							<strong>Consulted:</strong> Provides input and expertise
+						</div>
+						<div class="column">
+							<span class="tag is-light mr-2">I</span>
+							<strong>Informed:</strong> Kept updated on progress
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Validation Messages -->
+			<div id="raci-validation-messages"></div>
+
+			<!-- RACI Matrix Editor -->
+			<div class="box p-4">
+				<div class="raci-matrix-container">
+					<!-- Loading State -->
+					<div id="raci-loading" class="has-text-centered py-6">
+						<i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+						<p class="has-text-grey">Loading RACI matrix...</p>
+					</div>
+
+					<!-- Matrix Table -->
+					<div id="raci-matrix-table" style="display: none;">
+						<table class="table is-fullwidth is-striped is-hoverable raci-table">
+							<thead>
+								<tr>
+									<th style="width: 25%">Work Item</th>
+									<th style="width: 15%">Type</th>
+									<th id="raci-roles-header" class="has-text-centered">
+										<!-- Role columns will be dynamically inserted -->
+									</th>
+									<th style="width: 100px" class="has-text-centered">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="raci-matrix-body">
+								<!-- RACI rows will be dynamically inserted -->
+							</tbody>
+						</table>
+
+						<!-- Empty State -->
+						<div id="raci-empty-state" class="has-text-centered py-6" style="display: none;">
+							<i class="fas fa-table fa-3x mb-3 has-text-grey-light"></i>
+							<p class="has-text-grey">No work items or roles defined yet.</p>
+							<p class="help">Create work items and roles in the Designer first.</p>
+						</div>
+					</div>
+
+					<!-- Action Buttons -->
+					<div class="buttons mt-4">
+						<button class="button is-light" onclick="loadRACIMatrix()">
+							<span class="icon"><i class="fas fa-sync"></i></span>
+							<span>Refresh</span>
+						</button>
+						<button class="button is-info is-light" onclick="applyTemplate()">
+							<span class="icon"><i class="fas fa-file-import"></i></span>
+							<span>Apply Template</span>
+						</button>
+						<button class="button is-warning is-light" onclick="validateRACIMatrix()">
+							<span class="icon"><i class="fas fa-check-circle"></i></span>
+							<span>Validate Matrix</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Templates Section -->
+			<div class="box p-4">
+				<h4 class="title is-5 mb-4">
+					<span class="icon-text">
+						<span class="icon"><i class="fas fa-folder-open"></i></span>
+						<span>RACI Templates</span>
+					</span>
+				</h4>
+				<div id="raci-templates" class="columns is-multiline">
+					<!-- Templates will be loaded dynamically -->
+				</div>
+			</div>
+		</div>
+
+		<!-- Template Modal -->
+		<div class="modal" id="template-modal">
+			<div class="modal-background" onclick="closeTemplateModal()"></div>
+			<div class="modal-card">
+				<header class="modal-card-head">
+					<p class="modal-card-title">Apply RACI Template</p>
+					<button class="delete" aria-label="close" onclick="closeTemplateModal()"></button>
+				</header>
+				<section class="modal-card-body">
+					<div class="content">
+						<p>Select a template to apply predefined RACI assignments:</p>
+						<div id="template-list">
+							<!-- Template options will be loaded here -->
+						</div>
+					</div>
+				</section>
+				<footer class="modal-card-foot">
+					<button class="button is-success" onclick="applySelectedTemplate()">Apply Template</button>
+					<button class="button" onclick="closeTemplateModal()">Cancel</button>
+				</footer>
+			</div>
+		</div>
+	}
+}

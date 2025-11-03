@@ -191,6 +191,31 @@ func (h *AgencyDesignerWebHandler) GetChatMessages(c *gin.Context) {
 	}
 }
 
+// ShowRACIMatrix renders the RACI matrix editor page
+func (h *AgencyDesignerWebHandler) ShowRACIMatrix(c *gin.Context) {
+	agencyID := c.Param("id")
+
+	// Get the agency
+	ag, err := h.agencyRepo.GetByID(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to fetch agency")
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"error": "Agency not found",
+		})
+		return
+	}
+
+	// Render the RACI matrix page
+	component := agency_designer.AgencyDesignerRACIPage(ag)
+	if err := component.Render(c.Request.Context(), c.Writer); err != nil {
+		h.logger.WithError(err).Error("Failed to render RACI matrix page")
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": "Failed to render page",
+		})
+		return
+	}
+}
+
 // RegisterRoutes registers the web routes
 func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 	// Main designer page (starts new conversation)
@@ -198,6 +223,9 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 
 	// View specific conversation
 	router.GET("/agencies/:id/designer/conversations/:conversationId", h.ShowConversation)
+
+	// RACI matrix editor
+	router.GET("/agencies/:id/raci", h.ShowRACIMatrix)
 
 	// Get agent type details (HTMX endpoint)
 	router.GET("/api/v1/conversations/:conversationId/agents/:agentId", h.GetRoleDetails)

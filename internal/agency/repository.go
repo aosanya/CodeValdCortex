@@ -33,4 +33,11 @@ type Repository interface {
 	UpdateWorkItem(ctx context.Context, workItem *WorkItem) error
 	DeleteWorkItem(ctx context.Context, agencyID string, key string) error
 	ValidateDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error
+
+	// RACI Matrix methods
+	SaveRACIMatrix(ctx context.Context, agencyID string, matrix *RACIMatrix) error
+	GetRACIMatrix(ctx context.Context, agencyID string, key string) (*RACIMatrix, error)
+	ListRACIMatrices(ctx context.Context, agencyID string) ([]*RACIMatrix, error)
+	UpdateRACIMatrix(ctx context.Context, agencyID string, matrix *RACIMatrix) error
+	DeleteRACIMatrix(ctx context.Context, agencyID string, key string) error
 }
