@@ -18,7 +18,15 @@ func (h *AgencyHandler) GetAgencyRoles(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, roles)
+	// Filter out system roles (core, monitoring, etc.)
+	userRoles := make([]*registry.Role, 0)
+	for _, role := range roles {
+		if !role.IsSystemType {
+			userRoles = append(userRoles, role)
+		}
+	}
+
+	c.JSON(http.StatusOK, userRoles)
 }
 
 // GetAgencyRolesHTML handles GET /api/v1/agencies/:id/roles/html
@@ -33,10 +41,18 @@ func (h *AgencyHandler) GetAgencyRolesHTML(c *gin.Context) {
 		return
 	}
 
-	h.logger.Infof("Returning %d roles for HTML rendering", len(roles))
+	// Filter out system roles (core, monitoring, etc.)
+	userRoles := make([]*registry.Role, 0)
+	for _, role := range roles {
+		if !role.IsSystemType {
+			userRoles = append(userRoles, role)
+		}
+	}
+
+	h.logger.Infof("Returning %d user-defined roles for HTML rendering", len(userRoles))
 
 	// Render the roles list template
-	component := agency_designer.AgencyRolesList(roles)
+	component := agency_designer.AgencyRolesList(userRoles)
 	c.Header("Content-Type", "text/html")
 	component.Render(c.Request.Context(), c.Writer)
 }
@@ -87,6 +103,21 @@ func (h *AgencyHandler) UpdateAgencyRole(c *gin.Context) {
 	agencyID := c.Param("id")
 	key := c.Param("key")
 
+	// Check if role exists and is not a system role
+	existingRole, err := h.roleService.GetType(c.Request.Context(), key)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get role for update", "key", key)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+		return
+	}
+
+	// Prevent editing of system roles
+	if existingRole.IsSystemType {
+		h.logger.Warn("Attempted to update system role", "key", key)
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot edit system roles"})
+		return
+	}
+
 	var role registry.Role
 	if err := c.ShouldBindJSON(&role); err != nil {
 		h.logger.WithError(err).Error("Failed to bind role data")
@@ -113,6 +144,21 @@ func (h *AgencyHandler) UpdateAgencyRole(c *gin.Context) {
 func (h *AgencyHandler) DeleteAgencyRole(c *gin.Context) {
 	agencyID := c.Param("id")
 	key := c.Param("key")
+
+	// Check if role exists and is not a system role
+	role, err := h.roleService.GetType(c.Request.Context(), key)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get role for deletion", "key", key)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+		return
+	}
+
+	// Prevent deletion of system roles
+	if role.IsSystemType {
+		h.logger.Warn("Attempted to delete system role", "key", key)
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete system roles"})
+		return
+	}
 
 	if err := h.roleService.UnregisterType(c.Request.Context(), key); err != nil {
 		h.logger.WithError(err).Error("Failed to delete role", "agency_id", agencyID, "key", key)

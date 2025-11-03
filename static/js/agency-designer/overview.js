@@ -4,7 +4,7 @@
 import { loadIntroductionEditor } from './introduction.js';
 import { loadGoals } from './goals.js';
 import { loadWorkItems } from './work-items.js';
-import { loadUnits } from './units.js';
+import { loadRoles } from './roles.js';
 
 // Initialize overview section
 export function initializeOverview() {
@@ -34,7 +34,8 @@ export function selectOverviewSection(element, section) {
     const titles = {
         'introduction': '<span class="icon"><i class="fas fa-info-circle"></i></span><span>Introduction</span>',
         'goal-definition': '<span class="icon"><i class="fas fa-bullseye"></i></span><span>Goal Definition</span>',
-        'work-items': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Work Items</span>'
+        'work-items': '<span class="icon"><i class="fas fa-clipboard-list"></i></span><span>Work Items</span>',
+        'roles': '<span class="icon"><i class="fas fa-user-tag"></i></span><span>Roles</span>'
     };
 
     if (titles[section] && overviewTitle) {
@@ -61,6 +62,8 @@ export function selectOverviewSection(element, section) {
             loadGoals();
         } else if (section === 'work-items') {
             loadWorkItems();
+        } else if (section === 'roles') {
+            loadRoles();
         }
     }
 }
