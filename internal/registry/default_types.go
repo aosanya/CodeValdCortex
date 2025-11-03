@@ -37,7 +37,7 @@ func getDefaultRoles() []*Role {
 			ID:          "worker",
 			Name:        "Worker Agent",
 			Description: "General-purpose worker agent for task execution",
-			Category:    "core",
+			Tags:        []string{"core", "worker"},
 			Version:     "1.0.0",
 			Schema:      getWorkerSchema(),
 			RequiredCapabilities: []string{
@@ -63,7 +63,7 @@ func getDefaultRoles() []*Role {
 			ID:          "coordinator",
 			Name:        "Coordinator Agent",
 			Description: "Coordinator agent for orchestrating other agents",
-			Category:    "core",
+			Tags:        []string{"core", "coordinator"},
 			Version:     "1.0.0",
 			Schema:      getCoordinatorSchema(),
 			RequiredCapabilities: []string{
@@ -89,7 +89,7 @@ func getDefaultRoles() []*Role {
 			ID:          "monitor",
 			Name:        "Monitor Agent",
 			Description: "Monitoring and observability agent",
-			Category:    "core",
+			Tags:        []string{"core", "monitoring"},
 			Version:     "1.0.0",
 			Schema:      getMonitorSchema(),
 			RequiredCapabilities: []string{
@@ -114,7 +114,7 @@ func getDefaultRoles() []*Role {
 			ID:          "proxy",
 			Name:        "Proxy Agent",
 			Description: "Proxy agent for external system integration",
-			Category:    "core",
+			Tags:        []string{"core", "integration"},
 			Version:     "1.0.0",
 			Schema:      getProxySchema(),
 			RequiredCapabilities: []string{
@@ -139,7 +139,7 @@ func getDefaultRoles() []*Role {
 			ID:          "gateway",
 			Name:        "Gateway Agent",
 			Description: "API gateway agent for external access",
-			Category:    "core",
+			Tags:        []string{"core", "api", "gateway"},
 			Version:     "1.0.0",
 			Schema:      getGatewaySchema(),
 			RequiredCapabilities: []string{

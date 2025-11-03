@@ -31,21 +31,22 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 			</header>
 			<div class="details-content" id="overview-content">
 				<!-- All section contents pre-rendered, toggled by JavaScript -->
-				<div id="content-introduction" class="overview-content-section is-active">
-					@IntroductionContent(currentAgency, conversation, overview)
-				</div>
-				<div id="content-goal-definition" class="overview-content-section" style="display: none;">
-					@GoalDefinitionContent(currentAgency, conversation)
-				</div>
-				<div id="content-work-items" class="overview-content-section" style="display: none;">
-					@WorkItemsContent(currentAgency, conversation)
-				</div>
+			<div id="content-introduction" class="overview-content-section is-active">
+				@IntroductionContent(currentAgency, conversation, overview)
 			</div>
-		</main>
+			<div id="content-goal-definition" class="overview-content-section" style="display: none;">
+				@GoalDefinitionContent(currentAgency, conversation)
+			</div>
+			<div id="content-work-items" class="overview-content-section" style="display: none;">
+				@WorkItemsContent(currentAgency, conversation)
+			</div>
+			<div id="content-roles" class="overview-content-section" style="display: none;">
+				@OverviewRolesContent(currentAgency, conversation)
+			</div>
+		</div>
+	</main>
 	</div>
-}
-
-// OverviewNavigationList shows the three navigation nodes
+}// OverviewNavigationList shows the three navigation nodes
 templ OverviewNavigationList() {
 	<div class="overview-nav-list">
 		<div 
@@ -84,6 +85,19 @@ templ OverviewNavigationList() {
 			<div class="nav-info">
 				<div class="nav-name">Work Items</div>
 				<div class="nav-description">Define work items</div>
+			</div>
+		</div>
+		
+		<div 
+			class="overview-nav-item"
+			data-section="roles"
+			onclick="selectOverviewSection(this, 'roles')">
+			<div class="nav-icon">
+				<i class="fas fa-user-tag"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">Roles</div>
+				<div class="nav-description">Define agent roles</div>
 			</div>
 		</div>
 	</div>
@@ -185,5 +199,51 @@ templ WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversati
 		
 		@WorkItemEditorCard()
 		@WorkItemsListCard()
+	</div>
+}
+
+// OverviewRolesContent shows the roles section in the overview
+templ OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+	<div class="overview-section">
+		<!-- AI Role Operations Toolbar -->
+		<div class="box mb-4 p-4">
+			<div class="is-flex is-flex-direction-column">
+				<div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+					<p class="has-text-weight-semibold mb-0">AI Role Operations:</p>
+					<span id="role-selection-count" class="tag is-info is-light" style="display: none;"></span>
+				</div>
+				<div class="buttons">
+					<button 
+						class="button is-small is-info"
+						onclick="processAIRoleOperation(['create'])"
+						id="ai-create-roles-btn"
+						title="Generate roles from work items">
+						<span class="icon"><i class="fas fa-sparkles"></i></span>
+						<span>Create</span>
+					</button>
+					<button 
+						class="button is-small is-link is-static"
+						onclick="processAIRoleOperation(['enhance'])"
+						id="ai-enhance-roles-btn"
+						title="Select roles to enhance"
+						disabled>
+						<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+						<span>Enhance</span>
+					</button>
+					<button 
+						class="button is-small is-warning is-static"
+						onclick="processAIRoleOperation(['consolidate'])"
+						id="ai-consolidate-roles-btn"
+						title="Select roles to consolidate"
+						disabled>
+						<span class="icon"><i class="fas fa-compress"></i></span>
+						<span>Consolidate</span>
+					</button>
+				</div>
+			</div>
+		</div>
+		
+		@RoleEditorCard()
+		@RolesListCard()
 	</div>
 }

@@ -116,9 +116,9 @@ func (s *DefaultRoleService) ListTypes(ctx context.Context) ([]*Role, error) {
 	return s.repo.List(ctx)
 }
 
-// ListTypesByCategory returns roles by category
-func (s *DefaultRoleService) ListTypesByCategory(ctx context.Context, category string) ([]*Role, error) {
-	return s.repo.ListByCategory(ctx, category)
+// ListTypesByTags returns roles that have any of the specified tags
+func (s *DefaultRoleService) ListTypesByTags(ctx context.Context, tags []string) ([]*Role, error) {
+	return s.repo.ListByTags(ctx, tags)
 }
 
 // IsValidType checks if an role ID is valid and enabled

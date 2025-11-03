@@ -106,7 +106,7 @@ function populateRoleForm(role) {
 
     const fields = {
         'role-name-editor': role.name || '',
-        'role-category-editor': role.category || '',
+        'role-tags-editor': (role.tags || []).join(', '),
         'role-description-editor': role.description || '',
         'role-autonomy-level-editor': role.autonomy_level || '',
         'role-capabilities-editor': (role.capabilities || []).join('\n'),
@@ -132,7 +132,7 @@ function populateRoleForm(role) {
 function clearRoleForm() {
     const fields = [
         'role-name-editor',
-        'role-category-editor',
+        'role-tags-editor',
         'role-description-editor',
         'role-autonomy-level-editor',
         'role-capabilities-editor',
@@ -165,7 +165,7 @@ export function saveRoleFromEditor() {
 
     // Gather form data
     const name = document.getElementById('role-name-editor')?.value.trim();
-    const category = document.getElementById('role-category-editor')?.value;
+    const tagsText = document.getElementById('role-tags-editor')?.value.trim();
     const description = document.getElementById('role-description-editor')?.value.trim();
     const autonomyLevel = document.getElementById('role-autonomy-level-editor')?.value;
     const capabilitiesText = document.getElementById('role-capabilities-editor')?.value.trim();
@@ -180,17 +180,16 @@ export function saveRoleFromEditor() {
         return;
     }
 
-    if (!category) {
-        showNotification('Please select a category', 'warning');
-        return;
-    }
-
     if (!autonomyLevel) {
         showNotification('Please select an autonomy level', 'warning');
         return;
     }
 
-    // Parse capabilities and skills
+    // Parse tags, capabilities and skills
+    const tags = tagsText
+        ? tagsText.split(',').map(t => t.trim()).filter(t => t)
+        : [];
+
     const capabilities = capabilitiesText
         ? capabilitiesText.split('\n').map(c => c.trim().replace(/^-\s*/, '')).filter(c => c)
         : [];
@@ -202,7 +201,7 @@ export function saveRoleFromEditor() {
     // Prepare payload
     const payload = {
         name,
-        category,
+        tags,
         description,
         autonomy_level: autonomyLevel,
         capabilities,

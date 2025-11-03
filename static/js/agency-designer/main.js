@@ -31,12 +31,6 @@ import {
     deleteRole,
     filterRoles
 } from './roles.js';
-import {
-    showUnitEditor,
-    saveUnitFromEditor,
-    cancelUnitEdit,
-    deleteUnit
-} from './units.js';
 import { getCurrentAgencyId, showNotification } from './utils.js';
 import { initializeContextSelection } from './context.js';
 
@@ -147,15 +141,16 @@ window.showGoalEditor = showGoalEditor;
 window.saveGoalFromEditor = saveGoalFromEditor;
 window.cancelGoalEdit = cancelGoalEdit;
 window.deleteGoal = deleteGoal;
+window.showWorkItemEditor = showWorkItemEditor;
+window.saveWorkItemFromEditor = saveWorkItemFromEditor;
+window.cancelWorkItemEdit = cancelWorkItemEdit;
+window.deleteWorkItem = deleteWorkItem;
+window.filterWorkItems = filterWorkItems;
 window.showRoleEditor = showRoleEditor;
 window.saveRoleFromEditor = saveRoleFromEditor;
 window.cancelRoleEdit = cancelRoleEdit;
 window.deleteRole = deleteRole;
 window.filterRoles = filterRoles;
-window.showUnitEditor = showUnitEditor;
-window.saveUnitFromEditor = saveUnitFromEditor;
-window.cancelUnitEdit = cancelUnitEdit;
-window.deleteUnit = deleteUnit;
 
 // Export AI process control functions
 window.showAIProcessStatus = showAIProcessStatus;

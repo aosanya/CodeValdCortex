@@ -21,8 +21,8 @@ type Role struct {
 	// Description provides context about this role
 	Description string `json:"description,omitempty"`
 
-	// Category groups related roles (e.g., "infrastructure", "monitoring", "coordination")
-	Category string `json:"category"`
+	// Tags for categorizing and filtering roles
+	Tags []string `json:"tags,omitempty"`
 
 	// Version is the schema version for this role
 	Version string `json:"version"`
@@ -108,8 +108,8 @@ type RoleRepository interface {
 	// List returns all registered roles
 	List(ctx context.Context) ([]*Role, error)
 
-	// ListByCategory returns roles in a specific category
-	ListByCategory(ctx context.Context, category string) ([]*Role, error)
+	// ListByTags returns roles that have any of the specified tags
+	ListByTags(ctx context.Context, tags []string) ([]*Role, error)
 
 	// ListEnabled returns all enabled roles
 	ListEnabled(ctx context.Context) ([]*Role, error)
@@ -138,8 +138,8 @@ type RoleService interface {
 	// ListTypes returns all roles
 	ListTypes(ctx context.Context) ([]*Role, error)
 
-	// ListTypesByCategory returns roles by category
-	ListTypesByCategory(ctx context.Context, category string) ([]*Role, error)
+	// ListTypesByTags returns roles that have any of the specified tags
+	ListTypesByTags(ctx context.Context, tags []string) ([]*Role, error)
 
 	// IsValidType checks if a role ID is valid and enabled
 	IsValidType(ctx context.Context, typeID string) (bool, error)

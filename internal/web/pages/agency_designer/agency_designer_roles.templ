@@ -31,7 +31,15 @@ templ RoleItem(role *registry.Role) {
 			</div>
 		</td>
 		<td style="vertical-align: middle;">
-			<span class="tag is-light">{ role.Category }</span>
+			<div class="tags">
+				if len(role.Tags) > 0 {
+					for _, tag := range role.Tags {
+						<span class="tag is-light">{ tag }</span>
+					}
+				} else {
+					<span class="has-text-grey-light is-size-7">No tags</span>
+				}
+			</div>
 		</td>
 		<td style="vertical-align: middle;">
 			<span class="tag is-primary is-light">{ getAutonomyLabel(role) }</span>

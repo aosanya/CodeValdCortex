@@ -31,24 +31,17 @@ templ RoleEditorCard() {
 				<p class="help">A descriptive name for this role.</p>
 			</div>
 
-			<!-- Category Field -->
+			<!-- Tags Field -->
 			<div class="field">
-				<label class="label">Category</label>
+				<label class="label">Tags</label>
 				<div class="control">
-					<div class="select is-fullwidth">
-						<select id="role-category-editor">
-							<option value="">Select a category...</option>
-							<option value="Monitor">Monitor</option>
-							<option value="Controller">Controller</option>
-							<option value="Analyzer">Analyzer</option>
-							<option value="Coordinator">Coordinator</option>
-							<option value="Reporter">Reporter</option>
-							<option value="Worker">Worker</option>
-							<option value="Gateway">Gateway</option>
-						</select>
-					</div>
+					<input 
+						class="input"
+						type="text"
+						id="role-tags-editor"
+						placeholder="e.g., monitoring, infrastructure, core"/>
 				</div>
-				<p class="help">Group related roles by category.</p>
+				<p class="help">Comma-separated tags for categorizing this role.</p>
 			</div>
 
 			<!-- Description Field -->
