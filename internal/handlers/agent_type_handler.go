@@ -22,7 +22,7 @@ func NewAgentTypeHandler(service registry.AgentTypeService, logger *logrus.Logge
 	}
 }
 
-// ListAgentTypes handles GET /api/v1/agent-types
+// ListAgentTypes handles GET /api/v1/roles
 func (h *AgentTypeHandler) ListAgentTypes(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -63,7 +63,7 @@ func (h *AgentTypeHandler) ListAgentTypes(c *gin.Context) {
 	})
 }
 
-// GetAgentType handles GET /api/v1/agent-types/:id
+// GetAgentType handles GET /api/v1/roles/:id
 func (h *AgentTypeHandler) GetAgentType(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -80,7 +80,7 @@ func (h *AgentTypeHandler) GetAgentType(c *gin.Context) {
 	c.JSON(http.StatusOK, agentType)
 }
 
-// CreateAgentType handles POST /api/v1/agent-types
+// CreateAgentType handles POST /api/v1/roles
 func (h *AgentTypeHandler) CreateAgentType(c *gin.Context) {
 	ctx := c.Request.Context()
 
@@ -107,7 +107,7 @@ func (h *AgentTypeHandler) CreateAgentType(c *gin.Context) {
 	c.JSON(http.StatusCreated, agentType)
 }
 
-// UpdateAgentType handles PUT /api/v1/agent-types/:id
+// UpdateAgentType handles PUT /api/v1/roles/:id
 func (h *AgentTypeHandler) UpdateAgentType(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -135,7 +135,7 @@ func (h *AgentTypeHandler) UpdateAgentType(c *gin.Context) {
 	c.JSON(http.StatusOK, agentType)
 }
 
-// DeleteAgentType handles DELETE /api/v1/agent-types/:id
+// DeleteAgentType handles DELETE /api/v1/roles/:id
 func (h *AgentTypeHandler) DeleteAgentType(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -153,7 +153,7 @@ func (h *AgentTypeHandler) DeleteAgentType(c *gin.Context) {
 	})
 }
 
-// EnableAgentType handles POST /api/v1/agent-types/:id/enable
+// EnableAgentType handles POST /api/v1/roles/:id/enable
 func (h *AgentTypeHandler) EnableAgentType(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")
@@ -171,7 +171,7 @@ func (h *AgentTypeHandler) EnableAgentType(c *gin.Context) {
 	})
 }
 
-// DisableAgentType handles POST /api/v1/agent-types/:id/disable
+// DisableAgentType handles POST /api/v1/roles/:id/disable
 func (h *AgentTypeHandler) DisableAgentType(c *gin.Context) {
 	ctx := c.Request.Context()
 	id := c.Param("id")

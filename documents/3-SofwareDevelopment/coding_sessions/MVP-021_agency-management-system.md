@@ -212,7 +212,7 @@ documents/3-SofwareDevelopment/mvp.md  # Updated status to "In Progress"
   "status": "active",
   "metadata": {
     "location": "Nairobi, Kenya",
-    "agent_types": ["pipe", "sensor", "pump"],
+    "roles": ["pipe", "sensor", "pump"],
     "total_agents": 293,
     "zones": 5,
     "api_endpoint": "/api/v1/agencies/UC-INFRA-001",

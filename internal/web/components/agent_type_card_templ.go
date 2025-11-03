@@ -258,7 +258,7 @@ func AgentTypeCard(agentType *registry.AgentType) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/agent-types/%s/disable", agentType.ID))
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/roles/%s/disable", agentType.ID))
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/agent_type_card.templ`, Line: 144, Col: 77}
 				}
@@ -276,7 +276,7 @@ func AgentTypeCard(agentType *registry.AgentType) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/agent-types/%s/enable", agentType.ID))
+				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/v1/roles/%s/enable", agentType.ID))
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/agent_type_card.templ`, Line: 153, Col: 76}
 				}
@@ -289,7 +289,7 @@ func AgentTypeCard(agentType *registry.AgentType) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " <button @click=\"$dispatch('edit-agent-type', { id: agentType.ID })\" class=\"button is-info is-small is-light\">Edit</button> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " <button @click=\"$dispatch('edit-role', { id: agentType.ID })\" class=\"button is-info is-small is-light\">Edit</button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -302,7 +302,7 @@ func (a *App) setupServer() error {
 
 	// Web dashboard routes
 	router.GET("/", homepageHandler.ShowHomepage)
-	router.GET("/agent-types", agentTypesWebHandler.ShowAgentTypes)
+	router.GET("/roles", agentTypesWebHandler.ShowAgentTypes)
 	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
 	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
 
@@ -338,8 +338,8 @@ func (a *App) setupServer() error {
 		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
 
 		// Agent types web endpoints
-		webAPI.GET("/agent-types", agentTypesWebHandler.GetAgentTypesLive)
-		webAPI.POST("/agent-types/:id/:action", agentTypesWebHandler.HandleAgentTypeAction)
+		webAPI.GET("/roles", agentTypesWebHandler.GetAgentTypesLive)
+		webAPI.POST("/roles/:id/:action", agentTypesWebHandler.HandleAgentTypeAction)
 
 		// Topology visualizer endpoints
 		webAPI.GET("/topology/data", topologyVisualizerHandler.GetTopologyData)
@@ -360,13 +360,13 @@ func (a *App) setupServer() error {
 	{
 		// Agent types endpoints
 		agentTypeHandler := handlers.NewAgentTypeHandler(a.agentTypeService, a.logger)
-		v1.GET("/agent-types", agentTypeHandler.ListAgentTypes)
-		v1.GET("/agent-types/:id", agentTypeHandler.GetAgentType)
-		v1.POST("/agent-types", agentTypeHandler.CreateAgentType)
-		v1.PUT("/agent-types/:id", agentTypeHandler.UpdateAgentType)
-		v1.DELETE("/agent-types/:id", agentTypeHandler.DeleteAgentType)
-		v1.POST("/agent-types/:id/enable", agentTypeHandler.EnableAgentType)
-		v1.POST("/agent-types/:id/disable", agentTypeHandler.DisableAgentType)
+		v1.GET("/roles", agentTypeHandler.ListAgentTypes)
+		v1.GET("/roles/:id", agentTypeHandler.GetAgentType)
+		v1.POST("/roles", agentTypeHandler.CreateAgentType)
+		v1.PUT("/roles/:id", agentTypeHandler.UpdateAgentType)
+		v1.DELETE("/roles/:id", agentTypeHandler.DeleteAgentType)
+		v1.POST("/roles/:id/enable", agentTypeHandler.EnableAgentType)
+		v1.POST("/roles/:id/disable", agentTypeHandler.DisableAgentType)
 
 		// Agency endpoints
 		agencyHandler := handlers.NewAgencyHandler(a.agencyService)

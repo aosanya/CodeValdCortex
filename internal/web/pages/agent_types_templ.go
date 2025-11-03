@@ -68,7 +68,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'core' }\"><a @click=\"activeTab = 'core'\" hx-get=\"/api/web/agent-types?category=core\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Core</span> <span class=\"tag is-primary is-light ml-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'core' }\"><a @click=\"activeTab = 'core'\" hx-get=\"/api/web/roles?category=core\" hx-target=\"#roles-grid\" hx-trigger=\"click\"><span>Core</span> <span class=\"tag is-primary is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -81,7 +81,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'infrastructure' }\"><a @click=\"activeTab = 'infrastructure'\" hx-get=\"/api/web/agent-types?category=infrastructure\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Infrastructure</span> <span class=\"tag is-success is-light ml-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'infrastructure' }\"><a @click=\"activeTab = 'infrastructure'\" hx-get=\"/api/web/roles?category=infrastructure\" hx-target=\"#roles-grid\" hx-trigger=\"click\"><span>Infrastructure</span> <span class=\"tag is-success is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -94,7 +94,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'enabled' }\"><a @click=\"activeTab = 'enabled'\" hx-get=\"/api/web/agent-types?enabled=true\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Enabled Only</span> <span class=\"tag is-success is-light ml-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'enabled' }\"><a @click=\"activeTab = 'enabled'\" hx-get=\"/api/web/roles?enabled=true\" hx-target=\"#roles-grid\" hx-trigger=\"click\"><span>Enabled Only</span> <span class=\"tag is-success is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -107,7 +107,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></a></li></ul></div></div><!-- Agent Types Grid --><div id=\"agent-types-grid\" class=\"columns is-multiline\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></a></li></ul></div></div><!-- Agent Types Grid --><div id=\"roles-grid\" class=\"columns is-multiline\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

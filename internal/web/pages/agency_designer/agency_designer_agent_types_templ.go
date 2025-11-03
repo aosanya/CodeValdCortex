@@ -81,12 +81,12 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if conversation != nil && conversation.CurrentDesign != nil && len(conversation.CurrentDesign.AgentTypes) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"agent-types-sidebar\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"roles-sidebar\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for idx, agentType := range conversation.CurrentDesign.AgentTypes {
-				var templ_7745c5c3_Var3 = []any{"agent-type-item", templ.KV("is-active", idx == 0)}
+				var templ_7745c5c3_Var3 = []any{"role-item", templ.KV("is-active", idx == 0)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -130,7 +130,7 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-target=\"#agent-details\" hx-trigger=\"click\"><div class=\"agent-type-icon\"><i class=\"fas fa-robot\"></i></div><div class=\"agent-type-info\"><div class=\"agent-type-name\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-target=\"#agent-details\" hx-trigger=\"click\"><div class=\"role-icon\"><i class=\"fas fa-robot\"></i></div><div class=\"role-info\"><div class=\"role-name\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -143,7 +143,7 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"agent-type-category\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"role-category\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

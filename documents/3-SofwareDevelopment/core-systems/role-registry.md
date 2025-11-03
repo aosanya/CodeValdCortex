@@ -78,15 +78,15 @@ For Water Distribution Network use case:
 ### List All Roles
 
 ```bash
-GET /api/v1/agent-types
-GET /api/v1/agent-types?category=infrastructure
-GET /api/v1/agent-types?enabled=true
+GET /api/v1/roles
+GET /api/v1/roles?category=infrastructure
+GET /api/v1/roles?enabled=true
 ```
 
 Response:
 ```json
 {
-  "agent_types": [
+  "roles": [
     {
       "id": "pipe",
       "name": "Pipe Agent",
@@ -104,7 +104,7 @@ Response:
 ### Get Specific Role
 
 ```bash
-GET /api/v1/agent-types/pipe
+GET /api/v1/roles/pipe
 ```
 
 Response:
@@ -131,7 +131,7 @@ Response:
 ### Create Custom Role
 
 ```bash
-POST /api/v1/agent-types
+POST /api/v1/roles
 Content-Type: application/json
 
 {
@@ -159,7 +159,7 @@ Content-Type: application/json
 ### Update Role
 
 ```bash
-PUT /api/v1/agent-types/custom-sensor
+PUT /api/v1/roles/custom-sensor
 Content-Type: application/json
 
 {
@@ -173,14 +173,14 @@ Content-Type: application/json
 ### Enable/Disable Role
 
 ```bash
-POST /api/v1/agent-types/custom-sensor/enable
-POST /api/v1/agent-types/custom-sensor/disable
+POST /api/v1/roles/custom-sensor/enable
+POST /api/v1/roles/custom-sensor/disable
 ```
 
 ### Delete Role
 
 ```bash
-DELETE /api/v1/agent-types/custom-sensor
+DELETE /api/v1/roles/custom-sensor
 ```
 
 Note: System types (is_system_type: true) cannot be deleted.

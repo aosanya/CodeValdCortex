@@ -428,7 +428,7 @@ export USECASE_CONFIG_DIR=/path/to/usecase
 ./bin/codevaldcortex
 
 # Verify types loaded
-curl http://localhost:8080/api/v1/agent-types
+curl http://localhost:8080/api/v1/roles
 ```
 
 ## Conclusion

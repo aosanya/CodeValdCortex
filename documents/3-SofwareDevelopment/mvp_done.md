@@ -1524,7 +1524,7 @@ Modified:
   "icon": "💧",
   "status": "active",
   "metadata": {
-    "agent_types": [],
+    "roles": [],
     "total_agents": 0,
     "tags": ["infrastructure"],
     "api_endpoint": "/api/v1/agencies/UC-INFRA-001"
