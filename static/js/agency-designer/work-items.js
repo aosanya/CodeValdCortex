@@ -2,6 +2,7 @@
 // Handles work items management
 
 import { getCurrentAgencyId, showNotification } from './utils.js';
+import { scrollToBottom } from './chat.js';
 
 // Work item editor state management
 let workItemEditorState = {
@@ -12,40 +13,31 @@ let workItemEditorState = {
 
 // Load work items list
 export function loadWorkItems() {
-    console.log('[Work Items] loadWorkItems() called');
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
-        console.error('[Work Items] No agency ID found');
         return;
     }
-    console.log('[Work Items] Agency ID:', agencyId);
 
     const workItemsTableBody = document.getElementById('work-items-table-body');
     if (!workItemsTableBody) {
-        console.error('[Work Items] Work items table body not found');
         return;
     }
-    console.log('[Work Items] Table body element found');
 
     // Show loading state
     workItemsTableBody.innerHTML = '<tr><td colspan="4" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
 
     // Fetch work items HTML from API
     const url = `/api/v1/agencies/${agencyId}/work-items/html`;
-    console.log('[Work Items] Fetching from URL:', url);
 
     fetch(url)
         .then(response => {
-            console.log('[Work Items] Response status:', response.status);
             if (!response.ok) {
                 throw new Error('Failed to load work items');
             }
             return response.text();
         })
         .then(html => {
-            console.log('[Work Items] Received HTML, length:', html.length);
             workItemsTableBody.innerHTML = html;
-            console.log('[Work Items] Table updated successfully');
         })
         .catch(error => {
             console.error('[Work Items] Error loading work items:', error);
@@ -381,9 +373,6 @@ export function filterWorkItems() {
 
 // AI Work Item Operations
 export async function processAIWorkItemOperation(operations) {
-    console.log('[Work Items] AI operation called - this is for AI-GENERATED work items, not manual creation');
-    console.log('[Work Items] To manually create a work item, click the green "Add" button instead');
-
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
         showNotification('Error: No agency selected', 'error');
@@ -406,7 +395,6 @@ export async function processAIWorkItemOperation(operations) {
         }
     }
 
-    console.log('[Work Items] AI Work Item operations requested:', operations);
     let statusMessage = 'AI is processing your request...';
     if (operations.length === 1) {
         switch (operations[0]) {
@@ -450,9 +438,32 @@ export async function processAIWorkItemOperation(operations) {
         }
 
         const data = await response.json();
-        console.log('[Work Items] AI processing result:', data);
 
-        // Hide AI processing status
+        // Update status to show we're processing results
+        if (window.showAIProcessStatus) {
+            window.showAIProcessStatus('Processing results and updating work items...');
+        }
+
+        // Reload work items to show updates
+        await loadWorkItems();
+
+        // After work items are reloaded, refresh chat messages so AI explanation appears in the chat
+        try {
+            const chatContainer = document.getElementById('chat-messages');
+            if (chatContainer) {
+                const chatResp = await fetch(`/agencies/${agencyId}/chat-messages`);
+                if (chatResp.ok) {
+                    const chatHtml = await chatResp.text();
+                    chatContainer.innerHTML = chatHtml;
+                    // Scroll to bottom to show latest assistant message
+                    try { scrollToBottom(chatContainer); } catch (e) { /* ignore */ }
+                }
+            }
+        } catch (err) {
+            console.error('[Work Items] Error refreshing chat messages:', err);
+        }
+
+        // Hide AI processing status after work items and chat are updated
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();
         }
@@ -468,12 +479,7 @@ export async function processAIWorkItemOperation(operations) {
             showNotification('AI operations completed!', 'success');
         }
 
-        // Reload work items to show updates
-        await loadWorkItems();
-
     } catch (error) {
-        console.error('[Work Items] AI processing error:', error);
-
         // Hide AI processing status
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();

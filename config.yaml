@@ -6,7 +6,7 @@ server:
   host: "0.0.0.0"
   port: 8080
   read_timeout: 30
-  write_timeout: 30
+  write_timeout: 180  # Increased to 3 minutes for long-running AI operations
   tls_enabled: false
 
 kubernetes:
