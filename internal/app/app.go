@@ -369,7 +369,7 @@ func (a *App) setupServer() error {
 		v1.POST("/roles/:id/disable", roleHandler.DisableRole)
 
 		// Agency endpoints
-		agencyHandler := handlers.NewAgencyHandler(a.agencyService)
+		agencyHandler := handlers.NewAgencyHandler(a.agencyService, a.roleService, a.logger)
 		v1.GET("/agencies", agencyHandler.ListAgencies)
 		v1.GET("/agencies/:id", agencyHandler.GetAgency)
 		v1.POST("/agencies", agencyHandler.CreateAgency)
@@ -393,6 +393,14 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/work-items/:key", agencyHandler.UpdateWorkItem)
 		v1.DELETE("/agencies/:id/work-items/:key", agencyHandler.DeleteWorkItem)
 		v1.POST("/agencies/:id/work-items/validate-deps", agencyHandler.ValidateWorkItemDependencies)
+
+		// Roles endpoints
+		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
+		v1.GET("/agencies/:id/roles/html", agencyHandler.GetAgencyRolesHTML)
+		v1.POST("/agencies/:id/roles", agencyHandler.CreateAgencyRole)
+		v1.GET("/agencies/:id/roles/:key", agencyHandler.GetAgencyRole)
+		v1.PUT("/agencies/:id/roles/:key", agencyHandler.UpdateAgencyRole)
+		v1.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
 
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {

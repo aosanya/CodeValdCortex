@@ -45,6 +45,21 @@ type Role struct {
 	// Metadata contains additional type information (supports strings, arrays, and nested objects)
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 
+	// AutonomyLevel defines the level of autonomy for agents in this role (L0-L4)
+	AutonomyLevel string `json:"autonomy_level,omitempty"`
+
+	// RequiredSkills lists skills required for this role
+	RequiredSkills []string `json:"required_skills,omitempty"`
+
+	// TokenBudget is the total token budget for all agents of this role
+	TokenBudget int64 `json:"token_budget,omitempty"`
+
+	// Icon is the visual icon for this role (emoji or FontAwesome class)
+	Icon string `json:"icon,omitempty"`
+
+	// Color is the visual identification color for this role
+	Color string `json:"color,omitempty"`
+
 	// IsSystemType indicates if this is a core system role (cannot be deleted)
 	IsSystemType bool `json:"is_system_type"`
 

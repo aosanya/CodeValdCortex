@@ -59,7 +59,7 @@ func (h *RoleHandler) ListRoles(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"roles": types,
-		"count":       len(types),
+		"count": len(types),
 	})
 }
 

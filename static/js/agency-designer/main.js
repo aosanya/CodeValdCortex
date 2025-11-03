@@ -25,6 +25,13 @@ import {
     filterWorkItems
 } from './work-items.js';
 import {
+    showRoleEditor,
+    saveRoleFromEditor,
+    cancelRoleEdit,
+    deleteRole,
+    filterRoles
+} from './roles.js';
+import {
     showUnitEditor,
     saveUnitFromEditor,
     cancelUnitEdit,
@@ -140,6 +147,11 @@ window.showGoalEditor = showGoalEditor;
 window.saveGoalFromEditor = saveGoalFromEditor;
 window.cancelGoalEdit = cancelGoalEdit;
 window.deleteGoal = deleteGoal;
+window.showRoleEditor = showRoleEditor;
+window.saveRoleFromEditor = saveRoleFromEditor;
+window.cancelRoleEdit = cancelRoleEdit;
+window.deleteRole = deleteRole;
+window.filterRoles = filterRoles;
 window.showUnitEditor = showUnitEditor;
 window.saveUnitFromEditor = saveUnitFromEditor;
 window.cancelUnitEdit = cancelUnitEdit;
