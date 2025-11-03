@@ -36,8 +36,8 @@ type App struct {
 	logger               *logrus.Logger
 	dbClient             *database.ArangoClient
 	registry             *registry.Repository
-	agentTypeService     registry.AgentTypeService
-	agentTypeRepository  registry.AgentTypeRepository
+	roleService          registry.RoleService
+	roleRepository       registry.RoleRepository
 	agencyService        agency.Service
 	agencyRepository     agency.Repository
 	runtimeManager       *runtime.Manager
@@ -74,24 +74,24 @@ func New(cfg *config.Config) *App {
 
 	// Initialize agent type registry with ArangoDB persistence
 	logger.Info("Initializing agent type repository with ArangoDB")
-	agentTypeRepo, err := registry.NewArangoAgentTypeRepository(dbClient)
+	roleRepo, err := registry.NewArangoRoleRepository(dbClient)
 	if err != nil {
 		logger.WithError(err).Fatal("Failed to initialize agent type repository")
 	}
-	agentTypeService := registry.NewAgentTypeService(agentTypeRepo, logger)
+	roleService := registry.NewRoleService(roleRepo, logger)
 
-	// Register default agent types
+	// Register default roles
 	ctx := context.Background()
-	if err := registry.InitializeDefaultAgentTypes(ctx, agentTypeService, logger); err != nil {
-		logger.WithError(err).Warn("Failed to initialize default agent types")
+	if err := registry.InitializeDefaultRoles(ctx, roleService, logger); err != nil {
+		logger.WithError(err).Warn("Failed to initialize default roles")
 	}
 
-	// Load use case-specific agent types from config directory
+	// Load use case-specific roles from config directory
 	useCaseConfigDir := os.Getenv("USECASE_CONFIG_DIR")
 	if useCaseConfigDir != "" {
-		agentTypesDir := filepath.Join(useCaseConfigDir, "config", "agents")
-		if err := loadAgentTypesFromDirectory(ctx, agentTypesDir, agentTypeService, logger); err != nil {
-			logger.WithError(err).Warn("Failed to load use case agent types")
+		rolesDir := filepath.Join(useCaseConfigDir, "config", "agents")
+		if err := loadRolesFromDirectory(ctx, rolesDir, roleService, logger); err != nil {
+			logger.WithError(err).Warn("Failed to load use case roles")
 		}
 
 		// Load use case-specific agent instances from data directory
@@ -175,8 +175,8 @@ func New(cfg *config.Config) *App {
 		logger:               logger,
 		dbClient:             dbClient,
 		registry:             reg,
-		agentTypeRepository:  agentTypeRepo,
-		agentTypeService:     agentTypeService,
+		roleRepository:       roleRepo,
+		roleService:          roleService,
 		agencyService:        agencyService,
 		agencyRepository:     agencyRepo,
 		runtimeManager:       runtimeManager,
@@ -280,7 +280,7 @@ func (a *App) setupServer() error {
 
 	// Register web dashboard handler
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
-	agentTypesWebHandler := webhandlers.NewAgentTypesWebHandler(a.agentTypeService, a.logger)
+	rolesWebHandler := webhandlers.NewRolesWebHandler(a.roleService, a.logger)
 	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
 	// Initialize homepage handler
 	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.runtimeManager, a.dbClient, a.registry, a.logger)
@@ -302,7 +302,7 @@ func (a *App) setupServer() error {
 
 	// Web dashboard routes
 	router.GET("/", homepageHandler.ShowHomepage)
-	router.GET("/roles", agentTypesWebHandler.ShowAgentTypes)
+	router.GET("/roles", rolesWebHandler.ShowRoles)
 	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
 	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
 
@@ -337,9 +337,9 @@ func (a *App) setupServer() error {
 		webAPI.GET("/agents/json", dashboardHandler.GetAgentsJSON) // JSON API for large datasets
 		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
 
-		// Agent types web endpoints
-		webAPI.GET("/roles", agentTypesWebHandler.GetAgentTypesLive)
-		webAPI.POST("/roles/:id/:action", agentTypesWebHandler.HandleAgentTypeAction)
+		// Roles web endpoints
+		webAPI.GET("/roles", rolesWebHandler.GetRolesLive)
+		webAPI.POST("/roles/:id/:action", rolesWebHandler.HandleRoleAction)
 
 		// Topology visualizer endpoints
 		webAPI.GET("/topology/data", topologyVisualizerHandler.GetTopologyData)
@@ -358,15 +358,15 @@ func (a *App) setupServer() error {
 	// API routes
 	v1 := router.Group("/api/v1")
 	{
-		// Agent types endpoints
-		agentTypeHandler := handlers.NewAgentTypeHandler(a.agentTypeService, a.logger)
-		v1.GET("/roles", agentTypeHandler.ListAgentTypes)
-		v1.GET("/roles/:id", agentTypeHandler.GetAgentType)
-		v1.POST("/roles", agentTypeHandler.CreateAgentType)
-		v1.PUT("/roles/:id", agentTypeHandler.UpdateAgentType)
-		v1.DELETE("/roles/:id", agentTypeHandler.DeleteAgentType)
-		v1.POST("/roles/:id/enable", agentTypeHandler.EnableAgentType)
-		v1.POST("/roles/:id/disable", agentTypeHandler.DisableAgentType)
+		// Roles endpoints
+		roleHandler := handlers.NewRoleHandler(a.roleService, a.logger)
+		v1.GET("/roles", roleHandler.ListRoles)
+		v1.GET("/roles/:id", roleHandler.GetRole)
+		v1.POST("/roles", roleHandler.CreateRole)
+		v1.PUT("/roles/:id", roleHandler.UpdateRole)
+		v1.DELETE("/roles/:id", roleHandler.DeleteRole)
+		v1.POST("/roles/:id/enable", roleHandler.EnableRole)
+		v1.POST("/roles/:id/disable", roleHandler.DisableRole)
 
 		// Agency endpoints
 		agencyHandler := handlers.NewAgencyHandler(a.agencyService)
@@ -439,8 +439,8 @@ func (a *App) setupServer() error {
 	return nil
 }
 
-// loadAgentTypesFromDirectory loads agent type definitions from JSON files in a directory
-func loadAgentTypesFromDirectory(ctx context.Context, dir string, service registry.AgentTypeService, logger *logrus.Logger) error {
+// loadRolesFromDirectory loads agent type definitions from JSON files in a directory
+func loadRolesFromDirectory(ctx context.Context, dir string, service registry.RoleService, logger *logrus.Logger) error {
 	// Check if directory exists
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		logger.WithField("dir", dir).Debug("Agent types directory does not exist, skipping")
@@ -465,7 +465,7 @@ func loadAgentTypesFromDirectory(ctx context.Context, dir string, service regist
 
 	// Load each agent type file
 	for _, file := range files {
-		if err := loadAgentTypeFromFile(ctx, file, service, logger); err != nil {
+		if err := loadRoleFromFile(ctx, file, service, logger); err != nil {
 			logger.WithError(err).WithField("file", file).Error("Failed to load agent type")
 			continue
 		}
@@ -474,8 +474,8 @@ func loadAgentTypesFromDirectory(ctx context.Context, dir string, service regist
 	return nil
 }
 
-// loadAgentTypeFromFile loads a single agent type from a JSON file
-func loadAgentTypeFromFile(ctx context.Context, filename string, service registry.AgentTypeService, logger *logrus.Logger) error {
+// loadRoleFromFile loads a single agent type from a JSON file
+func loadRoleFromFile(ctx context.Context, filename string, service registry.RoleService, logger *logrus.Logger) error {
 	// Read file
 	data, err := os.ReadFile(filename)
 	if err != nil {
@@ -483,20 +483,20 @@ func loadAgentTypeFromFile(ctx context.Context, filename string, service registr
 	}
 
 	// Parse JSON
-	var agentType registry.AgentType
-	if err := json.Unmarshal(data, &agentType); err != nil {
+	var role registry.Role
+	if err := json.Unmarshal(data, &role); err != nil {
 		return fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
-	// Register agent type
-	if err := service.RegisterType(ctx, &agentType); err != nil {
-		return fmt.Errorf("failed to register agent type: %w", err)
+	// Register role
+	if err := service.RegisterType(ctx, &role); err != nil {
+		return fmt.Errorf("failed to register role: %w", err)
 	}
 
 	logger.WithFields(logrus.Fields{
-		"id":       agentType.ID,
-		"name":     agentType.Name,
-		"category": agentType.Category,
+		"id":       role.ID,
+		"name":     role.Name,
+		"category": role.Category,
 		"file":     filepath.Base(filename),
 	}).Info("Loaded agent type")
 

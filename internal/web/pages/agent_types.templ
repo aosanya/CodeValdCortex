@@ -6,7 +6,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
-templ AgentTypesPage(agentTypes []*registry.AgentType) {
+templ RolesPage(agentTypes []*registry.Role) {
 	@components.Layout("Agent Types") {
 		<div>
 			<!-- Header -->
@@ -38,7 +38,7 @@ templ AgentTypesPage(agentTypes []*registry.AgentType) {
 			
 			<!-- Stats -->
 			<div class="columns mb-5">
-				@AgentTypeStats(agentTypes)
+				@RoleStats(agentTypes)
 			</div>
 			
 			<!-- Filter Tabs -->
@@ -117,7 +117,7 @@ templ AgentTypesPage(agentTypes []*registry.AgentType) {
 				} else {
 					for _, agentType := range agentTypes {
 						<div class="column is-one-third">
-							@components.AgentTypeCard(agentType)
+							@components.RoleCard(agentType)
 						</div>
 					}
 				}
@@ -126,7 +126,7 @@ templ AgentTypesPage(agentTypes []*registry.AgentType) {
 	}
 }
 
-templ AgentTypeStats(agentTypes []*registry.AgentType) {
+templ RoleStats(agentTypes []*registry.Role) {
 	<div class="column">
 		<div class="box">
 			<div class="level is-mobile">
@@ -216,7 +216,7 @@ templ AgentTypeStats(agentTypes []*registry.AgentType) {
 	</div>
 }
 
-func countByCategory(types []*registry.AgentType, category string) string {
+func countByCategory(types []*registry.Role, category string) string {
 	count := 0
 	for _, t := range types {
 		if t.Category == category {
@@ -226,7 +226,7 @@ func countByCategory(types []*registry.AgentType, category string) string {
 	return fmt.Sprintf("%d", count)
 }
 
-func countEnabled(types []*registry.AgentType) string {
+func countEnabled(types []*registry.Role) string {
 	count := 0
 	for _, t := range types {
 		if t.IsEnabled {
@@ -236,7 +236,7 @@ func countEnabled(types []*registry.AgentType) string {
 	return fmt.Sprintf("%d", count)
 }
 
-func countSystemTypes(types []*registry.AgentType) string {
+func countSystemTypes(types []*registry.Role) string {
 	count := 0
 	for _, t := range types {
 		if t.IsSystemType {
@@ -246,7 +246,7 @@ func countSystemTypes(types []*registry.AgentType) string {
 	return fmt.Sprintf("%d", count)
 }
 
-func countCategories(types []*registry.AgentType) string {
+func countCategories(types []*registry.Role) string {
 	categories := make(map[string]bool)
 	for _, t := range types {
 		categories[t.Category] = true

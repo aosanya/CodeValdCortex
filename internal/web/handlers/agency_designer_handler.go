@@ -111,8 +111,8 @@ func (h *AgencyDesignerWebHandler) ShowConversation(c *gin.Context) {
 	}
 }
 
-// GetAgentTypeDetails returns the details for a specific agent type
-func (h *AgencyDesignerWebHandler) GetAgentTypeDetails(c *gin.Context) {
+// GetRoleDetails returns the details for a specific agent type
+func (h *AgencyDesignerWebHandler) GetRoleDetails(c *gin.Context) {
 	conversationID := c.Param("conversationId")
 	agentTypeID := c.Param("agentId")
 
@@ -125,10 +125,10 @@ func (h *AgencyDesignerWebHandler) GetAgentTypeDetails(c *gin.Context) {
 	}
 
 	// Find the agent type
-	var agentType *ai.AgentTypeSpec
-	for i := range conversation.CurrentDesign.AgentTypes {
-		if conversation.CurrentDesign.AgentTypes[i].ID == agentTypeID {
-			agentType = &conversation.CurrentDesign.AgentTypes[i]
+	var agentType *ai.RoleSpec
+	for i := range conversation.CurrentDesign.Roles {
+		if conversation.CurrentDesign.Roles[i].ID == agentTypeID {
+			agentType = &conversation.CurrentDesign.Roles[i]
 			break
 		}
 	}
@@ -148,7 +148,7 @@ func (h *AgencyDesignerWebHandler) GetAgentTypeDetails(c *gin.Context) {
 	}
 
 	// Render the agent type details
-	component := agency_designer.AgentTypeDetails(*agentType, relationships)
+	component := agency_designer.RoleDetails(*agentType, relationships)
 	err = component.Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agent type details")
@@ -200,7 +200,7 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/agencies/:id/designer/conversations/:conversationId", h.ShowConversation)
 
 	// Get agent type details (HTMX endpoint)
-	router.GET("/api/v1/conversations/:conversationId/agents/:agentId", h.GetAgentTypeDetails)
+	router.GET("/api/v1/conversations/:conversationId/agents/:agentId", h.GetRoleDetails)
 
 	// Get chat messages for an agency (HTMX endpoint)
 	router.GET("/agencies/:id/chat-messages", h.GetChatMessages)

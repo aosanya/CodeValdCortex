@@ -16,8 +16,8 @@ type DefaultValidator struct {
 	// resourceChecker checks resource availability
 	resourceChecker ResourceChecker
 
-	// agentTypeService validates against registered agent types
-	agentTypeService registry.AgentTypeService
+	// roleService validates against registered agent types
+	roleService registry.RoleService
 }
 
 // ResourceChecker defines the interface for checking resource availability
@@ -65,21 +65,21 @@ func (ve ValidationErrors) Error() string {
 func NewDefaultValidator(resourceChecker ResourceChecker) *DefaultValidator {
 	return &DefaultValidator{
 		resourceChecker:  resourceChecker,
-		agentTypeService: nil, // Set via SetAgentTypeService
+		roleService: nil, // Set via SetRoleService
 	}
 }
 
 // NewDefaultValidatorWithTypeService creates a validator with agent type service
-func NewDefaultValidatorWithTypeService(resourceChecker ResourceChecker, agentTypeService registry.AgentTypeService) *DefaultValidator {
+func NewDefaultValidatorWithTypeService(resourceChecker ResourceChecker, roleService registry.RoleService) *DefaultValidator {
 	return &DefaultValidator{
 		resourceChecker:  resourceChecker,
-		agentTypeService: agentTypeService,
+		roleService: roleService,
 	}
 }
 
-// SetAgentTypeService sets the agent type service for validation
-func (v *DefaultValidator) SetAgentTypeService(service registry.AgentTypeService) {
-	v.agentTypeService = service
+// SetRoleService sets the agent type service for validation
+func (v *DefaultValidator) SetRoleService(service registry.RoleService) {
+	v.roleService = service
 }
 
 // Validate validates an agent configuration
@@ -622,9 +622,9 @@ func (v *DefaultValidator) validateLabels(labels map[string]string) error {
 // validateAgentType validates an agent type using the registry or fallback to hardcoded list
 func (v *DefaultValidator) validateAgentType(agentType string) error {
 	// If agent type service is available, use it
-	if v.agentTypeService != nil {
+	if v.roleService != nil {
 		ctx := context.Background()
-		isValid, err := v.agentTypeService.IsValidType(ctx, agentType)
+		isValid, err := v.roleService.IsValidType(ctx, agentType)
 		if err != nil {
 			// On error, fall back to hardcoded validation
 			if !isValidAgentType(agentType) {

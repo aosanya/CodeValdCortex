@@ -4,8 +4,8 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/ai"
 )
 
-// AgentTypesContent renders the agent types section with sidebar and details panel
-templ AgentTypesContent(conversation *ai.ConversationContext) {
+// RolesContent renders the agent types section with sidebar and details panel
+templ RolesContent(conversation *ai.ConversationContext) {
 	<!-- Left Sidebar: Agent Types List -->
 	<aside class="sidebar-panel">
 		<header class="sidebar-header">
@@ -15,7 +15,7 @@ templ AgentTypesContent(conversation *ai.ConversationContext) {
 			</h3>
 		</header>
 		<div class="sidebar-content">
-			@AgentTypesList(conversation)
+			@RolesList(conversation)
 		</div>
 	</aside>
 	
@@ -33,15 +33,15 @@ templ AgentTypesContent(conversation *ai.ConversationContext) {
 	</main>
 }
 
-// AgentTypesList shows the list of agent types in the sidebar
-templ AgentTypesList(conversation *ai.ConversationContext) {
-	if conversation != nil && conversation.CurrentDesign != nil && len(conversation.CurrentDesign.AgentTypes) > 0 {
+// RolesList shows the list of agent types in the sidebar
+templ RolesList(conversation *ai.ConversationContext) {
+	if conversation != nil && conversation.CurrentDesign != nil && len(conversation.CurrentDesign.Roles) > 0 {
 		<div class="agent-types-sidebar">
-			for idx, agentType := range conversation.CurrentDesign.AgentTypes {
+			for idx, agentType := range conversation.CurrentDesign.Roles {
 				<div 
 					class={ "agent-type-item", templ.KV("is-active", idx == 0) }
 					data-agent-index={ string(rune(idx)) }
-					onclick="selectAgentType(this)"
+					onclick="selectRole(this)"
 					hx-get={ "/api/v1/conversations/" + conversation.ID + "/agents/" + agentType.ID }
 					hx-target="#agent-details"
 					hx-trigger="click">
@@ -58,7 +58,7 @@ templ AgentTypesList(conversation *ai.ConversationContext) {
 		<div class="sidebar-footer">
 			<div class="agent-count">
 				<span class="icon"><i class="fas fa-layer-group"></i></span>
-				<span>{ string(rune(len(conversation.CurrentDesign.AgentTypes))) } Agent Types</span>
+				<span>{ string(rune(len(conversation.CurrentDesign.Roles))) } Agent Types</span>
 			</div>
 			if len(conversation.CurrentDesign.Relationships) > 0 {
 				<div class="relationship-count">
@@ -93,8 +93,8 @@ templ EmptyDetailsView() {
 	</div>
 }
 
-// AgentTypeDetails shows detailed information about a selected agent type
-templ AgentTypeDetails(agentType ai.AgentTypeSpec, relationships []ai.AgentRelationship) {
+// RoleDetails shows detailed information about a selected agent type
+templ RoleDetails(agentType ai.RoleSpec, relationships []ai.AgentRelationship) {
 	<div class="agent-details-view">
 		<!-- Header -->
 		<div class="details-section">

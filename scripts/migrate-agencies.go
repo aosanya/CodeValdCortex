@@ -126,7 +126,7 @@ func discoverUseCases(rootDir string) ([]*agency.Agency, error) {
 			Icon:        getIconForCategory(category),
 			Status:      agency.AgencyStatusActive,
 			Metadata: agency.AgencyMetadata{
-				AgentTypes:  []string{},
+				Roles:       []string{},
 				TotalAgents: 0,
 				Tags:        []string{category},
 				APIEndpoint: fmt.Sprintf("/api/v1/agencies/%s", ucID),

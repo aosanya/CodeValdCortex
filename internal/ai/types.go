@@ -108,13 +108,13 @@ type AgencyDesign struct {
 	Name          string                 `json:"name"`
 	Description   string                 `json:"description"`
 	Category      string                 `json:"category"`
-	AgentTypes    []AgentTypeSpec        `json:"agent_types"`
+	Roles    []RoleSpec        `json:"agent_types"`
 	Relationships []AgentRelationship    `json:"relationships"`
 	Metadata      map[string]interface{} `json:"metadata"`
 }
 
-// AgentTypeSpec represents a designed agent type
-type AgentTypeSpec struct {
+// RoleSpec represents a designed agent type
+type RoleSpec struct {
 	ID            string                 `json:"id"`
 	Name          string                 `json:"name"`
 	Description   string                 `json:"description"`

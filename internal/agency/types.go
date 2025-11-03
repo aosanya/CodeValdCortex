@@ -35,7 +35,7 @@ const (
 // AgencyMetadata contains additional information about the agency
 type AgencyMetadata struct {
 	Location    string   `json:"location,omitempty"`
-	AgentTypes  []string `json:"agent_types,omitempty"`
+	Roles       []string `json:"roles,omitempty"`
 	TotalAgents int      `json:"total_agents"`
 	Zones       int      `json:"zones,omitempty"`
 	APIEndpoint string   `json:"api_endpoint,omitempty"`

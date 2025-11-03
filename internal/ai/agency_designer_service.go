@@ -191,7 +191,7 @@ func (s *AgencyDesignerService) GenerateAgencyDesign(ctx context.Context, conver
 	s.logger.WithFields(logrus.Fields{
 		"conversation_id": conversationID,
 		"agency_id":       conversation.AgencyID,
-		"agent_types":     len(design.AgentTypes),
+		"agent_types":     len(design.Roles),
 		"relationships":   len(design.Relationships),
 	}).Info("Generated agency design")
 

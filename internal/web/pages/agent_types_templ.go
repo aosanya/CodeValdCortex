@@ -14,7 +14,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
-func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
+func RolesPage(agentTypes []*registry.Role) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -51,7 +51,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = AgentTypeStats(agentTypes).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = RoleStats(agentTypes).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -68,7 +68,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'core' }\"><a @click=\"activeTab = 'core'\" hx-get=\"/api/web/roles?category=core\" hx-target=\"#roles-grid\" hx-trigger=\"click\"><span>Core</span> <span class=\"tag is-primary is-light ml-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'core' }\"><a @click=\"activeTab = 'core'\" hx-get=\"/api/web/agent-types?category=core\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Core</span> <span class=\"tag is-primary is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -81,7 +81,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'infrastructure' }\"><a @click=\"activeTab = 'infrastructure'\" hx-get=\"/api/web/roles?category=infrastructure\" hx-target=\"#roles-grid\" hx-trigger=\"click\"><span>Infrastructure</span> <span class=\"tag is-success is-light ml-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'infrastructure' }\"><a @click=\"activeTab = 'infrastructure'\" hx-get=\"/api/web/agent-types?category=infrastructure\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Infrastructure</span> <span class=\"tag is-success is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -94,7 +94,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'enabled' }\"><a @click=\"activeTab = 'enabled'\" hx-get=\"/api/web/roles?enabled=true\" hx-target=\"#roles-grid\" hx-trigger=\"click\"><span>Enabled Only</span> <span class=\"tag is-success is-light ml-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></a></li><li :class=\"{ 'is-active': activeTab === 'enabled' }\"><a @click=\"activeTab = 'enabled'\" hx-get=\"/api/web/agent-types?enabled=true\" hx-target=\"#agent-types-grid\" hx-trigger=\"click\"><span>Enabled Only</span> <span class=\"tag is-success is-light ml-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -107,7 +107,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></a></li></ul></div></div><!-- Agent Types Grid --><div id=\"roles-grid\" class=\"columns is-multiline\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span></a></li></ul></div></div><!-- Agent Types Grid --><div id=\"agent-types-grid\" class=\"columns is-multiline\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -122,7 +122,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = components.AgentTypeCard(agentType).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = components.RoleCard(agentType).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -146,7 +146,7 @@ func AgentTypesPage(agentTypes []*registry.AgentType) templ.Component {
 	})
 }
 
-func AgentTypeStats(agentTypes []*registry.AgentType) templ.Component {
+func RoleStats(agentTypes []*registry.Role) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -227,7 +227,7 @@ func AgentTypeStats(agentTypes []*registry.AgentType) templ.Component {
 	})
 }
 
-func countByCategory(types []*registry.AgentType, category string) string {
+func countByCategory(types []*registry.Role, category string) string {
 	count := 0
 	for _, t := range types {
 		if t.Category == category {
@@ -237,7 +237,7 @@ func countByCategory(types []*registry.AgentType, category string) string {
 	return fmt.Sprintf("%d", count)
 }
 
-func countEnabled(types []*registry.AgentType) string {
+func countEnabled(types []*registry.Role) string {
 	count := 0
 	for _, t := range types {
 		if t.IsEnabled {
@@ -247,7 +247,7 @@ func countEnabled(types []*registry.AgentType) string {
 	return fmt.Sprintf("%d", count)
 }
 
-func countSystemTypes(types []*registry.AgentType) string {
+func countSystemTypes(types []*registry.Role) string {
 	count := 0
 	for _, t := range types {
 		if t.IsSystemType {
@@ -257,7 +257,7 @@ func countSystemTypes(types []*registry.AgentType) string {
 	return fmt.Sprintf("%d", count)
 }
 
-func countCategories(types []*registry.AgentType) string {
+func countCategories(types []*registry.Role) string {
 	categories := make(map[string]bool)
 	for _, t := range types {
 		categories[t.Category] = true

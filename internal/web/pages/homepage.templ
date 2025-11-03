@@ -158,14 +158,14 @@ templ AgencyCard(ag agency.Agency) {
 								<span>{ fmt.Sprintf("%d", ag.Metadata.Zones) } Zones</span>
 							</span>
 						}
-						if len(ag.Metadata.AgentTypes) > 0 {
+						if len(ag.Metadata.Roles) > 0 {
 							<span class="tag is-warning is-light">
 								<span class="icon">
 									<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
 									</svg>
 								</span>
-								<span>{ fmt.Sprintf("%d", len(ag.Metadata.AgentTypes)) } Types</span>
+								<span>{ fmt.Sprintf("%d", len(ag.Metadata.Roles)) } Types</span>
 							</span>
 						}
 					</div>

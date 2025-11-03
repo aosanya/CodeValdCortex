@@ -12,8 +12,8 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/ai"
 )
 
-// AgentTypesContent renders the agent types section with sidebar and details panel
-func AgentTypesContent(conversation *ai.ConversationContext) templ.Component {
+// RolesContent renders the agent types section with sidebar and details panel
+func RolesContent(conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -38,7 +38,7 @@ func AgentTypesContent(conversation *ai.ConversationContext) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = AgentTypesList(conversation).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = RolesList(conversation).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -58,8 +58,8 @@ func AgentTypesContent(conversation *ai.ConversationContext) templ.Component {
 	})
 }
 
-// AgentTypesList shows the list of agent types in the sidebar
-func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
+// RolesList shows the list of agent types in the sidebar
+func RolesList(conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -80,13 +80,13 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if conversation != nil && conversation.CurrentDesign != nil && len(conversation.CurrentDesign.AgentTypes) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"roles-sidebar\">")
+		if conversation != nil && conversation.CurrentDesign != nil && len(conversation.CurrentDesign.Roles) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"agent-types-sidebar\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for idx, agentType := range conversation.CurrentDesign.AgentTypes {
-				var templ_7745c5c3_Var3 = []any{"role-item", templ.KV("is-active", idx == 0)}
+			for idx, agentType := range conversation.CurrentDesign.Roles {
+				var templ_7745c5c3_Var3 = []any{"agent-type-item", templ.KV("is-active", idx == 0)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -117,7 +117,7 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" onclick=\"selectAgentType(this)\" hx-get=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" onclick=\"selectRole(this)\" hx-get=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -130,7 +130,7 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-target=\"#agent-details\" hx-trigger=\"click\"><div class=\"role-icon\"><i class=\"fas fa-robot\"></i></div><div class=\"role-info\"><div class=\"role-name\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-target=\"#agent-details\" hx-trigger=\"click\"><div class=\"agent-type-icon\"><i class=\"fas fa-robot\"></i></div><div class=\"agent-type-info\"><div class=\"agent-type-name\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -143,7 +143,7 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"role-category\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div><div class=\"agent-type-category\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -166,9 +166,9 @@ func AgentTypesList(conversation *ai.ConversationContext) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(string(rune(len(conversation.CurrentDesign.AgentTypes))))
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(string(rune(len(conversation.CurrentDesign.Roles))))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_agent_types.templ`, Line: 61, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_agent_types.templ`, Line: 61, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -241,8 +241,8 @@ func EmptyDetailsView() templ.Component {
 	})
 }
 
-// AgentTypeDetails shows detailed information about a selected agent type
-func AgentTypeDetails(agentType ai.AgentTypeSpec, relationships []ai.AgentRelationship) templ.Component {
+// RoleDetails shows detailed information about a selected agent type
+func RoleDetails(agentType ai.RoleSpec, relationships []ai.AgentRelationship) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

@@ -14,26 +14,26 @@ import (
 
 // DefaultValidator implements the Validator interface
 type DefaultValidator struct {
-	agentTypeService registry.AgentTypeService
+	roleService registry.RoleService
 }
 
 // NewDefaultValidator creates a new default template validator
 func NewDefaultValidator() *DefaultValidator {
 	return &DefaultValidator{
-		agentTypeService: nil,
+		roleService: nil,
 	}
 }
 
 // NewDefaultValidatorWithTypeService creates a validator with agent type service
-func NewDefaultValidatorWithTypeService(agentTypeService registry.AgentTypeService) *DefaultValidator {
+func NewDefaultValidatorWithTypeService(roleService registry.RoleService) *DefaultValidator {
 	return &DefaultValidator{
-		agentTypeService: agentTypeService,
+		roleService: roleService,
 	}
 }
 
-// SetAgentTypeService sets the agent type service for validation
-func (v *DefaultValidator) SetAgentTypeService(service registry.AgentTypeService) {
-	v.agentTypeService = service
+// SetRoleService sets the agent type service for validation
+func (v *DefaultValidator) SetRoleService(service registry.RoleService) {
+	v.roleService = service
 }
 
 // ValidateTemplate validates a template
@@ -328,9 +328,9 @@ func (v *DefaultValidator) validateVariableConstraints(tv TemplateVariable) erro
 
 func (v *DefaultValidator) isValidAgentType(agentType string) bool {
 	// If agent type service is available, use it
-	if v.agentTypeService != nil {
+	if v.roleService != nil {
 		ctx := context.Background()
-		isValid, err := v.agentTypeService.IsValidType(ctx, agentType)
+		isValid, err := v.roleService.IsValidType(ctx, agentType)
 		if err == nil && isValid {
 			return true
 		}

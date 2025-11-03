@@ -8,30 +8,30 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// InitializeDefaultAgentTypes registers default agent types in the system
-func InitializeDefaultAgentTypes(ctx context.Context, service AgentTypeService, logger *logrus.Logger) error {
-	logger.Info("Initializing default agent types")
+// InitializeDefaultRoles registers default roles in the system
+func InitializeDefaultRoles(ctx context.Context, service RoleService, logger *logrus.Logger) error {
+	logger.Info("Initializing default roles")
 
-	defaultTypes := getDefaultAgentTypes()
+	defaultTypes := getDefaultRoles()
 
 	for _, agentType := range defaultTypes {
 		if err := service.RegisterType(ctx, agentType); err != nil {
-			logger.WithError(err).Warnf("Failed to register agent type %s (may already exist)", agentType.ID)
+			logger.WithError(err).Warnf("Failed to register role %s (may already exist)", agentType.ID)
 			// Continue with other types even if one fails
 		} else {
-			logger.WithField("type_id", agentType.ID).Info("Registered agent type")
+			logger.WithField("type_id", agentType.ID).Info("Registered role")
 		}
 	}
 
-	logger.Infof("Initialized %d default agent types", len(defaultTypes))
+	logger.Infof("Initialized %d default roles", len(defaultTypes))
 	return nil
 }
 
-// getDefaultAgentTypes returns the default system agent types
-func getDefaultAgentTypes() []*AgentType {
+// getDefaultRoles returns the default system roles
+func getDefaultRoles() []*Role {
 	now := time.Now()
 
-	return []*AgentType{
+	return []*Role{
 		// Core System Types
 		{
 			ID:          "worker",
@@ -165,7 +165,7 @@ func getDefaultAgentTypes() []*AgentType {
 	}
 }
 
-// Schema definitions for each agent type
+// Schema definitions for each role
 // These use JSON Schema format for validation
 
 func getWorkerSchema() json.RawMessage {

@@ -10,22 +10,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// AgentTypesWebHandler handles web interface requests for agent types
-type AgentTypesWebHandler struct {
-	service registry.AgentTypeService
+// RolesWebHandler handles web interface requests for agent types
+type RolesWebHandler struct {
+	service registry.RoleService
 	logger  *logrus.Logger
 }
 
-// NewAgentTypesWebHandler creates a new agent types web handler
-func NewAgentTypesWebHandler(service registry.AgentTypeService, logger *logrus.Logger) *AgentTypesWebHandler {
-	return &AgentTypesWebHandler{
+// NewRolesWebHandler creates a new agent types web handler
+func NewRolesWebHandler(service registry.RoleService, logger *logrus.Logger) *RolesWebHandler {
+	return &RolesWebHandler{
 		service: service,
 		logger:  logger,
 	}
 }
 
-// ShowAgentTypes renders the agent types page
-func (h *AgentTypesWebHandler) ShowAgentTypes(c *gin.Context) {
+// ShowRoles renders the agent types page
+func (h *RolesWebHandler) ShowRoles(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	agentTypes, err := h.service.ListTypes(ctx)
@@ -37,7 +37,7 @@ func (h *AgentTypesWebHandler) ShowAgentTypes(c *gin.Context) {
 
 	// Render Templ component
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err = pages.AgentTypesPage(agentTypes).Render(ctx, c.Writer)
+	err = pages.RolesPage(agentTypes).Render(ctx, c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agent types page")
 		c.String(http.StatusInternalServerError, "Failed to render page")
@@ -45,15 +45,15 @@ func (h *AgentTypesWebHandler) ShowAgentTypes(c *gin.Context) {
 	}
 }
 
-// GetAgentTypesLive returns agent types grid for HTMX updates
-func (h *AgentTypesWebHandler) GetAgentTypesLive(c *gin.Context) {
+// GetRolesLive returns agent types grid for HTMX updates
+func (h *RolesWebHandler) GetRolesLive(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	// Check for filters
 	category := c.Query("category")
 	enabledOnly := c.Query("enabled") == "true"
 
-	var agentTypes []*registry.AgentType
+	var agentTypes []*registry.Role
 	var err error
 
 	if category != "" {
@@ -70,7 +70,7 @@ func (h *AgentTypesWebHandler) GetAgentTypesLive(c *gin.Context) {
 
 	// Filter by enabled if requested
 	if enabledOnly {
-		filtered := make([]*registry.AgentType, 0)
+		filtered := make([]*registry.Role, 0)
 		for _, t := range agentTypes {
 			if t.IsEnabled {
 				filtered = append(filtered, t)
@@ -82,7 +82,7 @@ func (h *AgentTypesWebHandler) GetAgentTypesLive(c *gin.Context) {
 	// Return only the agent type cards (partial HTML)
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
 	for _, agentType := range agentTypes {
-		err := components.AgentTypeCard(agentType).Render(ctx, c.Writer)
+		err := components.RoleCard(agentType).Render(ctx, c.Writer)
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to render agent type card")
 			continue
@@ -90,8 +90,8 @@ func (h *AgentTypesWebHandler) GetAgentTypesLive(c *gin.Context) {
 	}
 }
 
-// HandleAgentTypeAction handles enable/disable actions via HTMX
-func (h *AgentTypesWebHandler) HandleAgentTypeAction(c *gin.Context) {
+// HandleRoleAction handles enable/disable actions via HTMX
+func (h *RolesWebHandler) HandleRoleAction(c *gin.Context) {
 	ctx := c.Request.Context()
 	typeID := c.Param("id")
 	action := c.Param("action")
@@ -124,7 +124,7 @@ func (h *AgentTypesWebHandler) HandleAgentTypeAction(c *gin.Context) {
 	}
 
 	c.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err = components.AgentTypeCard(agentType).Render(ctx, c.Writer)
+	err = components.RoleCard(agentType).Render(ctx, c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agent type card")
 		c.String(http.StatusInternalServerError, "Failed to render")
