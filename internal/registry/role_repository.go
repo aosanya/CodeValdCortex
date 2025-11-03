@@ -30,6 +30,11 @@ func (r *InMemoryRoleRepository) Create(ctx context.Context, agentType *Role) er
 		return fmt.Errorf("role %s already exists", agentType.ID)
 	}
 
+	// Set key to ID for consistency
+	if agentType.Key == "" {
+		agentType.Key = agentType.ID
+	}
+
 	// Set timestamps
 	now := time.Now()
 	agentType.CreatedAt = now

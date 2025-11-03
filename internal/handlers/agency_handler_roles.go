@@ -28,9 +28,12 @@ func (h *AgencyHandler) GetAgencyRolesHTML(c *gin.Context) {
 	// TODO: Filter by agency when agency-specific roles are implemented
 	roles, err := h.roleService.ListTypes(c.Request.Context())
 	if err != nil {
+		h.logger.WithError(err).Error("Failed to list roles")
 		c.String(http.StatusInternalServerError, "Error loading roles")
 		return
 	}
+
+	h.logger.Infof("Returning %d roles for HTML rendering", len(roles))
 
 	// Render the roles list template
 	component := agency_designer.AgencyRolesList(roles)
