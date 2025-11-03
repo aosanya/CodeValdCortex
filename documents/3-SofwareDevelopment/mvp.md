@@ -111,9 +111,8 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title                     | Description                                                | Status      | Priority | Effort | Skills Required       | Dependencies | Details |
 | ------- | ------------------------- | ---------------------------------------------------------- | ----------- | -------- | ------ | --------------------- | ------------ | ------- |
-| MVP-045 | RACI Matrix UI Editor     | Build interactive RACI matrix editor with role assignments, validation, templates, visual matrix interface, and export (PDF/Markdown/JSON) | Not Started | P1       | Medium | Go, Templ, Frontend Dev | MVP-044      | [MVP-045.md](mvp-details/MVP-045.md) |
 | MVP-046 | Agency Admin & Configuration Page | Build comprehensive admin interface for agency-wide settings: token budgets (role & individual agent levels), rate limits, resource quotas, AI model selection, cost controls, monitoring dashboards, and operational parameters | Not Started | P1       | Medium | Go, Templ, Frontend Dev, Analytics | MVP-044      | [MVP-046.md](mvp-details/MVP-046.md) |
-| MVP-047 | Agency Designer Export System | Implement comprehensive export functionality for entire agency design (all sections) to PDF, Markdown, and JSON formats with customizable templates and branding | Not Started | P1       | Medium | Go, PDF Generation, File Export | MVP-045      | [MVP-047.md](mvp-details/MVP-047.md) |
+| MVP-047 | Agency Designer Export System | Implement comprehensive export functionality for entire agency design (all sections) to PDF, Markdown, and JSON formats with customizable templates and branding | Not Started | P1       | Medium | Go, PDF Generation, File Export | MVP-044      | [MVP-047.md](mvp-details/MVP-047.md) |
 | MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (introduction, goals, work items, roles, RACI), and batch AI generation | Not Started | P1       | High   | Go, Templ, AI/LLM, Frontend Dev | MVP-047      | [MVP-042.md](mvp-details/MVP-042.md) |
 
 ## Agent Property Broadcasting Feature (P1 - Critical)

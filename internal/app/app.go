@@ -50,6 +50,7 @@ type App struct {
 	workItemRefiner      *ai.WorkItemRefiner
 	workItemConsolidator *ai.WorkItemConsolidator
 	roleCreator          *ai.RoleCreator
+	raciCreator          *ai.RACICreator
 }
 
 // New creates a new application instance
@@ -145,6 +146,7 @@ func New(cfg *config.Config) *App {
 	var workItemRefiner *ai.WorkItemRefiner
 	var workItemConsolidator *ai.WorkItemConsolidator
 	var roleCreator *ai.RoleCreator
+	var raciCreator *ai.RACICreator
 	if cfg.AI.Provider != "" {
 		// Build LLM config from app config
 		llmConfig := &ai.LLMConfig{
@@ -168,6 +170,7 @@ func New(cfg *config.Config) *App {
 			workItemRefiner = ai.NewWorkItemRefiner(llmClient, logger)
 			workItemConsolidator = ai.NewWorkItemConsolidator(llmClient, logger)
 			roleCreator = ai.NewRoleCreator(llmClient, logger)
+			raciCreator = ai.NewRACICreator(llmClient, logger)
 			logger.Info("AI agency designer service initialized successfully")
 		}
 	} else {
@@ -193,6 +196,7 @@ func New(cfg *config.Config) *App {
 		workItemRefiner:      workItemRefiner,
 		workItemConsolidator: workItemConsolidator,
 		roleCreator:          roleCreator,
+		raciCreator:          raciCreator,
 	}
 }
 
@@ -407,9 +411,13 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/roles/:key", agencyHandler.UpdateAgencyRole)
 		v1.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
 
+		// RACI Matrix endpoints
+		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetAgencyRACIMatrix)
+		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveAgencyRACIMatrix)
+
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {
-			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.workItemRefiner, a.workItemConsolidator, a.roleCreator, a.aiDesignerService, a.logger)
+			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.workItemRefiner, a.workItemConsolidator, a.roleCreator, a.raciCreator, a.aiDesignerService, a.logger)
 			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
 			if a.goalRefiner != nil {
 				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineGoal)
@@ -424,6 +432,10 @@ func (a *App) setupServer() error {
 			}
 			// Role AI processing endpoint
 			v1.POST("/agencies/:id/roles/ai-process", aiRefineHandler.ProcessAIRoleRequest)
+			// RACI AI processing endpoint
+			if a.raciCreator != nil {
+				v1.POST("/agencies/:id/raci-matrix/ai-generate", aiRefineHandler.ProcessAIRACIRequest)
+			}
 			a.logger.Info("AI Refine endpoints registered")
 		}
 

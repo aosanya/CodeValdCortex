@@ -212,18 +212,24 @@ func (r *Repository) getAgencyDatabase(ctx context.Context, agencyID string) (dr
 		return nil, fmt.Errorf("failed to get agency: %w", err)
 	}
 
+	// Use agency ID as database name if Database field is not set
+	dbName := agency.Database
+	if dbName == "" {
+		dbName = agency.ID
+	}
+
 	// Check if database exists
-	exists, err := r.client.DatabaseExists(ctx, agency.Database)
+	exists, err := r.client.DatabaseExists(ctx, dbName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check database existence: %w", err)
 	}
 
 	if !exists {
-		return nil, fmt.Errorf("agency database not found: %s", agency.Database)
+		return nil, fmt.Errorf("agency database not found: %s", dbName)
 	}
 
 	// Open database
-	db, err := r.client.Database(ctx, agency.Database)
+	db, err := r.client.Database(ctx, dbName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open agency database: %w", err)
 	}

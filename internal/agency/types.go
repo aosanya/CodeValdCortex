@@ -319,3 +319,45 @@ const (
 	RACIExportMarkdown RACIExportFormat = "markdown"
 	RACIExportJSON     RACIExportFormat = "json"
 )
+
+// RACIAssignment represents an edge between a work item and a role
+// Stored in ArangoDB as an edge in the raci_assignments collection within the agency's database
+type RACIAssignment struct {
+	Key         string    `json:"_key,omitempty"`
+	ID          string    `json:"_id,omitempty"`
+	From        string    `json:"_from"`         // Full ID: work_items/{work_item_key}
+	To          string    `json:"_to"`           // Full ID: roles/{role_key}
+	WorkItemKey string    `json:"work_item_key"` // Work item _key (denormalized for queries)
+	RoleKey     string    `json:"role_key"`      // Role _key (denormalized for queries)
+	RACI        string    `json:"raci"`          // "R", "A", "C", or "I"
+	Objective   string    `json:"objective"`     // Description of what the role does
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// CreateRACIAssignmentRequest is the request to create a RACI assignment edge
+type CreateRACIAssignmentRequest struct {
+	WorkItemKey string `json:"work_item_key" binding:"required"`
+	RoleKey     string `json:"role_key" binding:"required"`
+	RACI        string `json:"raci" binding:"required"`
+	Objective   string `json:"objective"`
+}
+
+// AgencyRACIAssignments represents all RACI assignments for an agency
+// This is a simpler model for the MVP that maps work items to role assignments
+// DEPRECATED: Use RACIAssignment edges instead
+type AgencyRACIAssignments struct {
+	Key         string                               `json:"_key,omitempty"`
+	ID          string                               `json:"_id,omitempty"`
+	AgencyID    string                               `json:"agency_id"`
+	Assignments map[string]map[string]RoleAssignment `json:"assignments"` // workItemKey -> roleKey -> assignment
+	CreatedAt   time.Time                            `json:"created_at"`
+	UpdatedAt   time.Time                            `json:"updated_at"`
+}
+
+// RoleAssignment represents a single RACI assignment for a role on a work item
+// DEPRECATED: Use RACIAssignment edge instead
+type RoleAssignment struct {
+	RACI      string `json:"raci"`      // "R", "A", "C", or "I"
+	Objective string `json:"objective"` // Description of what the role does for this work item
+}

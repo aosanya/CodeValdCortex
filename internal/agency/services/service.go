@@ -12,6 +12,7 @@ type CompositeService struct {
 	*OverviewService
 	*GoalService
 	*WorkItemService
+	*RACIService
 }
 
 // New creates a new composite service with all sub-services
@@ -21,6 +22,7 @@ func New(repo agency.Repository, validator agency.Validator) agency.Service {
 		OverviewService: NewOverviewService(repo),
 		GoalService:     NewGoalService(repo),
 		WorkItemService: NewWorkItemService(repo),
+		RACIService:     NewRACIService(repo),
 	}
 }
 
@@ -31,6 +33,7 @@ func NewWithDBInit(repo agency.Repository, validator agency.Validator, dbInit ag
 		OverviewService: NewOverviewService(repo),
 		GoalService:     NewGoalService(repo),
 		WorkItemService: NewWorkItemService(repo),
+		RACIService:     NewRACIService(repo),
 	}
 }
 

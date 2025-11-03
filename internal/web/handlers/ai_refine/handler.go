@@ -17,6 +17,7 @@ type Handler struct {
 	workItemRefiner      *ai.WorkItemRefiner
 	workItemConsolidator *ai.WorkItemConsolidator
 	roleCreator          *ai.RoleCreator
+	raciCreator          *ai.RACICreator
 	designerService      *ai.AgencyDesignerService
 	logger               *logrus.Logger
 }
@@ -31,6 +32,7 @@ func NewHandler(
 	workItemRefiner *ai.WorkItemRefiner,
 	workItemConsolidator *ai.WorkItemConsolidator,
 	roleCreator *ai.RoleCreator,
+	raciCreator *ai.RACICreator,
 	designerService *ai.AgencyDesignerService,
 	logger *logrus.Logger,
 ) *Handler {
@@ -43,6 +45,7 @@ func NewHandler(
 		workItemRefiner:      workItemRefiner,
 		workItemConsolidator: workItemConsolidator,
 		roleCreator:          roleCreator,
+		raciCreator:          raciCreator,
 		designerService:      designerService,
 		logger:               logger,
 	}

@@ -27,12 +27,9 @@ function getAgencyId() {
 
 // Make loadRACIMatrix available globally for overview.js to call
 window.loadRACIMatrix = function () {
-    console.log('[RACI] loadRACIMatrix called');
-
     // Get agency ID if not already set
     if (!raciState.agencyId) {
         raciState.agencyId = getAgencyId();
-        console.log('[RACI] Agency ID:', raciState.agencyId);
         if (!raciState.agencyId) {
             console.error('[RACI] Unable to determine agency ID');
             return;
@@ -45,45 +42,35 @@ window.loadRACIMatrix = function () {
         return;
     }
 
-    console.log('[RACI] Table body found, loading data...');
-
     // Show simple loading state in table
     tableBody.innerHTML = '<tr><td colspan="3" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
 
     // Fetch work items first
     const workItemsUrl = `/api/v1/agencies/${raciState.agencyId}/work-items`;
-    console.log('[RACI] Fetching work items from:', workItemsUrl);
 
     fetch(workItemsUrl)
         .then(response => {
-            console.log('[RACI] Work items response status:', response.status);
             if (!response.ok) throw new Error('Failed to fetch work items');
             return response.json();
         })
         .then(workItems => {
-            console.log('[RACI] Work items received:', workItems ? workItems.length : 0);
             raciState.workItems = workItems || [];
 
             // Fetch roles
             const rolesUrl = `/api/v1/agencies/${raciState.agencyId}/roles`;
-            console.log('[RACI] Fetching roles from:', rolesUrl);
             return fetch(rolesUrl);
         })
         .then(response => {
-            console.log('[RACI] Roles response status:', response.status);
             if (!response.ok) throw new Error('Failed to fetch roles');
             return response.json();
         })
         .then(roles => {
-            console.log('[RACI] Roles received:', roles ? roles.length : 0);
             raciState.roles = roles || [];
 
             // Render work items immediately
-            console.log('[RACI] Rendering RACI table...');
             renderRACITable();
 
             // Load RACI assignments in background
-            console.log('[RACI] Loading existing assignments...');
             loadExistingAssignments();
         })
         .catch(error => {
@@ -93,21 +80,17 @@ window.loadRACIMatrix = function () {
 }
 
 function loadExistingAssignments() {
-    console.log('[RACI] Loading existing assignments...');
     // Load RACI assignments and re-render when complete
     fetch(`/api/v1/agencies/${raciState.agencyId}/raci-matrix`)
         .then(response => {
-            console.log('[RACI] Assignments response status:', response.status);
             if (response.ok) {
                 return response.json();
             }
             return { assignments: {} };
         })
         .then(data => {
-            console.log('[RACI] Assignments data:', data);
             raciState.assignments = data.assignments || {};
             // Re-render table with assignments
-            console.log('[RACI] Re-rendering table with assignments');
             renderRACITable();
         })
         .catch(error => {
@@ -117,9 +100,6 @@ function loadExistingAssignments() {
 }
 
 function renderRACITable() {
-    console.log('[RACI] renderRACITable called');
-    console.log('[RACI] Work items count:', raciState.workItems ? raciState.workItems.length : 0);
-
     const tableBody = document.getElementById('raci-matrix-body');
     const emptyState = document.getElementById('raci-empty-state');
     const tableContainer = document.getElementById('raci-matrix-table');
@@ -131,19 +111,18 @@ function renderRACITable() {
 
     // Check if we have work items
     if (!raciState.workItems || raciState.workItems.length === 0) {
-        console.log('[RACI] No work items, showing empty state');
         if (tableContainer) tableContainer.style.display = 'none';
         if (emptyState) emptyState.style.display = 'block';
         return;
     }
 
-    console.log('[RACI] Rendering', raciState.workItems.length, 'work items');
     if (tableContainer) tableContainer.style.display = 'block';
     if (emptyState) emptyState.style.display = 'none';
 
     // Render work item rows with collapsible role assignments
     tableBody.innerHTML = raciState.workItems.map(workItem => {
-        const workItemKey = workItem.key || workItem.id;
+        // Work items from ArangoDB have _key field
+        const workItemKey = workItem._key || workItem.key || workItem.id;
         const assignments = raciState.assignments[workItemKey] || {};
         const assignmentCount = Object.keys(assignments).length;
 
@@ -207,21 +186,40 @@ function renderAssignmentsPanel(workItemKey, assignments) {
     const roles = Object.entries(assignments);
 
     let html = `
-        <div class="buttons mb-3">
-            <button class="button is-small is-primary" onclick="addRoleToWorkItem('${workItemKey}')">
-                <span class="icon"><i class="fas fa-plus"></i></span>
-                <span>Add Role</span>
-            </button>
+        <div class="level is-mobile mb-3">
+            <div class="level-left">
+                <div class="level-item">
+                    <button class="button is-small is-primary" onclick="addRoleToWorkItem('${workItemKey}')">
+                        <span class="icon"><i class="fas fa-plus"></i></span>
+                        <span>Add Role</span>
+                    </button>
+                </div>
+            </div>
         </div>
     `;
 
     if (roles.length === 0) {
         html += '<p class="help has-text-grey">No roles assigned yet. Click "Add Role" to assign responsibilities.</p>';
     } else {
-        html += '<div class="columns is-multiline">';
+        // Grid header
+        html += `
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%">Role</th>
+                            <th style="width: 10%">RACI</th>
+                            <th style="width: 50%">Objective</th>
+                            <th style="width: 10%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
         roles.forEach(([roleKey, data]) => {
-            const role = raciState.roles.find(r => (r.key || r.id) === roleKey);
-            const roleName = role ? (role.name || role.key) : roleKey;
+            // Match using _key (ArangoDB key) or id (logical identifier)
+            const role = raciState.roles.find(r => (r._key || r.key || r.id) === roleKey);
+            const roleName = role ? (role.name || role._key || role.key) : roleKey;
             const raciType = data.raci || 'R';
             const objective = data.objective || '';
             const raciColors = {
@@ -230,48 +228,43 @@ function renderAssignmentsPanel(workItemKey, assignments) {
                 'C': 'is-warning',
                 'I': 'is-light'
             };
+            const raciLabels = {
+                'R': 'Responsible',
+                'A': 'Accountable',
+                'C': 'Consulted',
+                'I': 'Informed'
+            };
 
             html += `
-                <div class="column is-half">
-                    <div class="box">
-                        <div class="level is-mobile mb-2">
-                            <div class="level-left">
-                                <div class="level-item">
-                                    <div class="tags has-addons mb-0">
-                                        <span class="tag ${raciColors[raciType]}">${raciType}</span>
-                                        <span class="tag is-dark">${escapeHtml(roleName)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="level-right">
-                                <div class="level-item">
-                                    <div class="buttons">
-                                        <button class="button is-small is-light" onclick="updateRoleRaci('${workItemKey}', '${roleKey}')">
-                                            <span class="icon"><i class="fas fa-exchange-alt"></i></span>
-                                        </button>
-                                        <button class="button is-small is-danger is-light" onclick="removeRoleFromWorkItem('${workItemKey}', '${roleKey}')">
-                                            <span class="icon"><i class="fas fa-times"></i></span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                <tr>
+                    <td>
+                        <strong>${escapeHtml(roleName)}</strong>
+                    </td>
+                    <td>
+                        <span class="tag ${raciColors[raciType]}" title="${raciLabels[raciType]}">${raciType}</span>
+                    </td>
+                    <td>
+                        ${objective ? `<p class="mb-0">${escapeHtml(objective)}</p>` : '<p class="help has-text-grey mb-0">No objective defined</p>'}
+                    </td>
+                    <td>
+                        <div class="buttons are-small">
+                            <button class="button is-light" onclick="editRoleObjective('${workItemKey}', '${roleKey}')" title="Edit assignment">
+                                <span class="icon"><i class="fas fa-edit"></i></span>
+                            </button>
+                            <button class="button is-danger is-light" onclick="removeRoleFromWorkItem('${workItemKey}', '${roleKey}')" title="Remove role">
+                                <span class="icon"><i class="fas fa-times"></i></span>
+                            </button>
                         </div>
-                        <div class="field">
-                            <label class="label is-small">Objective</label>
-                            <div class="control">
-                                <textarea 
-                                    class="textarea is-small" 
-                                    placeholder="Define the objective for this role in this work item..."
-                                    rows="2"
-                                    onchange="updateRoleObjective('${workItemKey}', '${roleKey}', this.value)"
-                                >${escapeHtml(objective)}</textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             `;
         });
-        html += '</div>';
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
     }
 
     return html;
@@ -299,8 +292,8 @@ window.addRoleToWorkItem = function (workItemKey) {
                             <div class="select is-fullwidth">
                                 <select id="role-select">
                                     ${raciState.roles.map(role => {
-        const roleKey = role.key || role.id;
-        const roleName = role.name || role.key;
+        const roleKey = role._key || role.key || role.id;
+        const roleName = role.name || role._key || role.key;
         return `<option value="${roleKey}">${escapeHtml(roleName)}</option>`;
     }).join('')}
                                 </select>
@@ -367,6 +360,9 @@ window.confirmAddRole = function (workItemKey) {
     closeAddRoleModal();
     renderRACITable();
     showSuccess('Role added successfully');
+
+    // Auto-save the new assignment
+    saveRACIAssignment(workItemKey, roleKey);
 }
 
 window.removeRoleFromWorkItem = function (workItemKey, roleKey) {
@@ -377,6 +373,9 @@ window.removeRoleFromWorkItem = function (workItemKey, roleKey) {
         }
     }
     renderRACITable();
+
+    // Auto-save after removal
+    saveRACIAssignment(workItemKey, roleKey);
 }
 
 window.updateRoleRaci = function (workItemKey, roleKey, raciType) {
@@ -394,6 +393,169 @@ window.updateRoleObjective = function (workItemKey, roleKey, objective) {
         raciState.assignments[workItemKey][roleKey] = { raci: 'R' };
     }
     raciState.assignments[workItemKey][roleKey].objective = objective;
+}
+
+// Save a single RACI assignment to the backend
+window.saveRACIAssignment = async function (workItemKey, roleKey) {
+    try {
+        // Save entire matrix (this handles create/update/delete logic on backend)
+        const response = await fetch(`/api/v1/agencies/${raciState.agencyId}/raci-matrix`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                assignments: raciState.assignments
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save assignment');
+        }
+
+        const data = await response.json();
+
+        // Show subtle success indicator
+        showNotification('Changes saved', 'success');
+
+    } catch (error) {
+        console.error('[RACI] Error saving assignment:', error);
+        showNotification('Failed to save changes. Click "Save Matrix" to retry.', 'warning');
+    }
+}
+
+window.editRoleObjective = function (workItemKey, roleKey) {
+    // Get current assignment data
+    const assignment = raciState.assignments[workItemKey]?.[roleKey] || {};
+    const currentObjective = assignment.objective || '';
+    const currentRaci = assignment.raci || 'R';
+
+    // Get role name for display
+    const role = raciState.roles.find(r => (r._key || r.key || r.id) === roleKey);
+    const roleName = role ? (role.name || role._key || role.key) : roleKey;
+
+    // Get work item name for display
+    const workItem = raciState.workItems.find(w => (w._key || w.key || w.id) === workItemKey);
+    const workItemName = workItem ? (workItem.name || workItem.title) : workItemKey;
+
+    // Create modal for editing objective and RACI type
+    const modalHtml = `
+        <div class="modal is-active" id="edit-objective-modal">
+            <div class="modal-background" onclick="closeEditObjectiveModal()"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Edit Role Assignment</p>
+                    <button class="delete" aria-label="close" onclick="closeEditObjectiveModal()"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="field">
+                        <label class="label">Work Item</label>
+                        <div class="content">
+                            <p class="has-text-weight-semibold">${escapeHtml(workItemName)}</p>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Role</label>
+                        <div class="content">
+                            <p class="has-text-weight-semibold">${escapeHtml(roleName)}</p>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">RACI Type</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="edit-raci-type-select">
+                                    <option value="R" ${currentRaci === 'R' ? 'selected' : ''}>Responsible - Does the work</option>
+                                    <option value="A" ${currentRaci === 'A' ? 'selected' : ''}>Accountable - Ultimately answerable</option>
+                                    <option value="C" ${currentRaci === 'C' ? 'selected' : ''}>Consulted - Provides input</option>
+                                    <option value="I" ${currentRaci === 'I' ? 'selected' : ''}>Informed - Kept updated</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Objective</label>
+                        <div class="control">
+                            <textarea 
+                                id="edit-objective-input" 
+                                class="textarea" 
+                                rows="4"
+                                placeholder="Define what this role needs to achieve for this work item..."
+                            >${escapeHtml(currentObjective)}</textarea>
+                        </div>
+                        <p class="help">Explain the specific goal or responsibility this role has for this work item.</p>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" onclick="confirmEditObjective('${workItemKey}', '${roleKey}')">
+                        <span class="icon"><i class="fas fa-save"></i></span>
+                        <span>Save Changes</span>
+                    </button>
+                    <button class="button" onclick="closeEditObjectiveModal()">Cancel</button>
+                </footer>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Focus on textarea
+    setTimeout(() => {
+        const textarea = document.getElementById('edit-objective-input');
+        if (textarea) {
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+    }, 100);
+}
+
+window.closeEditObjectiveModal = function () {
+    const modal = document.getElementById('edit-objective-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+window.confirmEditObjective = function (workItemKey, roleKey) {
+    const textarea = document.getElementById('edit-objective-input');
+    const raciSelect = document.getElementById('edit-raci-type-select');
+    if (!textarea || !raciSelect) return;
+
+    const objective = textarea.value.trim();
+    const raciType = raciSelect.value;
+
+    // Update state with both objective and RACI type
+    if (!raciState.assignments[workItemKey]) {
+        raciState.assignments[workItemKey] = {};
+    }
+    if (!raciState.assignments[workItemKey][roleKey]) {
+        raciState.assignments[workItemKey][roleKey] = {};
+    }
+    raciState.assignments[workItemKey][roleKey].raci = raciType;
+    raciState.assignments[workItemKey][roleKey].objective = objective;
+
+    // Save to backend
+    saveRACIAssignment(workItemKey, roleKey);
+
+    // Re-render table to show updated values
+    renderRACITable();
+
+    // Close modal
+    closeEditObjectiveModal();
+}
+
+// Keep the updateRoleObjective helper function
+window.saveRoleObjective = function (workItemKey, roleKey) {
+    // This function is no longer used with modal approach but keeping for compatibility
+    const objective = raciState.assignments[workItemKey]?.[roleKey]?.objective || '';
+    updateRoleObjective(workItemKey, roleKey, objective);
+    saveRACIAssignment(workItemKey, roleKey);
+    renderRACITable();
+}
+
+window.cancelEditObjective = function (workItemKey, roleKey) {
+    // This function is no longer used with modal approach but keeping for compatibility
+    closeEditObjectiveModal();
 }
 
 window.setRACIAssignment = function (workItemKey, roleKey, raciRole) {
@@ -449,7 +611,7 @@ window.validateRACIMatrix = function () {
     const warnings = [];
 
     raciState.workItems.forEach(workItem => {
-        const workItemKey = workItem.key || workItem.id;
+        const workItemKey = workItem._key || workItem.key || workItem.id;
         const assignments = raciState.assignments[workItemKey] || {};
         const roleEntries = Object.entries(assignments);
 
@@ -475,8 +637,8 @@ window.validateRACIMatrix = function () {
         // Check for objectives
         roleEntries.forEach(([roleKey, data]) => {
             if (!data.objective || data.objective.trim() === '') {
-                const role = raciState.roles.find(r => (r.key || r.id) === roleKey);
-                const roleName = role ? (role.name || role.key) : roleKey;
+                const role = raciState.roles.find(r => (r._key || r.key || r.id) === roleKey);
+                const roleName = role ? (role.name || role._key || role.key) : roleKey;
                 warnings.push(`"${workItem.name}" - Role "${roleName}" has no objective defined`);
             }
         });
@@ -536,6 +698,122 @@ function showValidationErrors(errors, warnings = []) {
     }
 
     container.innerHTML = html;
+}
+
+// AI-powered RACI mapping creation
+window.createRACIMappings = async function () {
+    if (!raciState.agencyId) {
+        raciState.agencyId = getAgencyId();
+        if (!raciState.agencyId) {
+            showError('Error: No agency selected');
+            return;
+        }
+    }
+
+    if (!raciState.workItems || raciState.workItems.length === 0) {
+        showError('No work items available. Please create work items first.');
+        return;
+    }
+
+    if (!raciState.roles || raciState.roles.length === 0) {
+        showError('No roles available. Please create roles first.');
+        return;
+    }
+
+    const statusMessage = 'AI is generating RACI mappings from your work items and roles...';
+
+    // Show AI processing status in the chat area
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus(statusMessage);
+    }
+
+    try {
+        // Disable button and show loading state
+        const btn = document.getElementById('ai-create-mappings-btn');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Creating...</span>';
+
+        // Call AI endpoint to create RACI mappings
+        const response = await fetch(`/api/v1/agencies/${raciState.agencyId}/raci-matrix/ai-generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                operations: ['create']
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to generate RACI mappings: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Update status to show we're processing results
+        if (window.showAIProcessStatus) {
+            window.showAIProcessStatus('Processing results and updating RACI mappings...');
+        }
+
+        // Update assignments
+        raciState.assignments = data.assignments || {};
+
+        // Re-render table with new mappings
+        renderRACITable();
+
+        // Refresh chat messages so AI explanation appears in the chat
+        try {
+            const chatContainer = document.getElementById('chat-messages');
+            if (chatContainer) {
+                const chatResp = await fetch(`/agencies/${raciState.agencyId}/chat-messages`);
+                if (chatResp.ok) {
+                    const chatHtml = await chatResp.text();
+                    chatContainer.innerHTML = chatHtml;
+                    // Scroll to bottom to show latest assistant message
+                    if (window.scrollToBottom) {
+                        try { window.scrollToBottom(chatContainer); } catch (e) { /* ignore */ }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('[RACI] Error refreshing chat:', err);
+        }
+
+        // Hide AI processing status
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+
+        // Show success message
+        const mappingCount = Object.keys(raciState.assignments).length;
+        if (mappingCount > 0) {
+            showSuccess(`Successfully created ${mappingCount} RACI mapping(s)! Review and adjust as needed.`);
+        } else {
+            showSuccess('RACI mappings created successfully!');
+        }
+
+        // Restore button
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+
+    } catch (error) {
+        console.error('[RACI] Error creating mappings:', error);
+
+        // Hide AI processing status
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+
+        showError(`AI processing failed: ${error.message}`);
+
+        // Restore button
+        const btn = document.getElementById('ai-create-mappings-btn');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="icon"><i class="fas fa-robot"></i></span><span>Create Mappings</span>';
+        }
+    }
 }
 
 window.exportRACIMatrix = async function (format) {

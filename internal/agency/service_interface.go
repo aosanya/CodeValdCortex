@@ -33,6 +33,15 @@ type Service interface {
 	UpdateWorkItem(ctx context.Context, agencyID string, key string, req UpdateWorkItemRequest) error
 	DeleteWorkItem(ctx context.Context, agencyID string, key string) error
 	ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error
+
+	// RACI Assignment methods (graph-based)
+	CreateRACIAssignment(ctx context.Context, agencyID string, assignment *RACIAssignment) error
+	GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*RACIAssignment, error)
+	GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*RACIAssignment, error)
+	GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*RACIAssignment, error)
+	UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *RACIAssignment) error
+	DeleteRACIAssignment(ctx context.Context, agencyID string, key string) error
+	DeleteRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) error
 }
 
 // Use services.New() or services.NewWithDBInit() to create a service instance.

@@ -40,4 +40,13 @@ type Repository interface {
 	ListRACIMatrices(ctx context.Context, agencyID string) ([]*RACIMatrix, error)
 	UpdateRACIMatrix(ctx context.Context, agencyID string, matrix *RACIMatrix) error
 	DeleteRACIMatrix(ctx context.Context, agencyID string, key string) error
+
+	// RACI Assignment edge methods (graph-based)
+	CreateRACIAssignment(ctx context.Context, agencyID string, assignment *RACIAssignment) error
+	GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*RACIAssignment, error)
+	GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*RACIAssignment, error)
+	GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*RACIAssignment, error)
+	UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *RACIAssignment) error
+	DeleteRACIAssignment(ctx context.Context, agencyID string, key string) error
+	DeleteRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) error
 }
