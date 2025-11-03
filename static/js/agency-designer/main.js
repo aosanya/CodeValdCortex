@@ -7,6 +7,7 @@ import { initializeHTMXEvents } from './htmx.js';
 import { initializeViewSwitcher, switchView } from './views.js';
 import { initializeOverview, selectOverviewSection } from './overview.js';
 import {
+    loadIntroductionEditor,
     saveOverviewIntroduction,
     undoOverviewIntroduction
 } from './introduction.js';
@@ -47,6 +48,7 @@ function initializeAgencyDesigner() {
         initializeHTMXEvents();
         initializeViewSwitcher();
         initializeOverview();
+        loadIntroductionEditor(); // Initialize introduction editor
         initializeAIProcessControls();
         initializeContextSelection(); // Initialize context selection system
     } catch (error) {

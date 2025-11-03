@@ -38,6 +38,7 @@ export function loadIntroductionEditor() {
 }
 
 // Save overview introduction
+// Save overview introduction
 export function saveOverviewIntroduction() {
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
@@ -91,6 +92,9 @@ export function saveOverviewIntroduction() {
             }
         });
 }
+
+// Update agency name display in various places
+// (name updates are not handled here; agency name is managed centrally)
 
 // Undo changes to overview introduction
 export function undoOverviewIntroduction() {

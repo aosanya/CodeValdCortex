@@ -10,7 +10,11 @@ templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.Conversati
 	<div class="box">
 		<div id="introduction-content">
 			<div class="content">
+
+				
+				<!-- Introduction Text Area -->
 				<div class="field">
+					<label class="label">Introduction</label>
 					<div class="control">
 						if overview != nil && overview.Introduction != "" {
 							<textarea

@@ -159,6 +159,9 @@ func (s *AgencyService) GetAgencyStatistics(ctx context.Context, id string) (*ag
 
 // applyUpdates applies the updates to the agency
 func (s *AgencyService) applyUpdates(agencyDoc *agency.Agency, updates agency.AgencyUpdates) {
+	if updates.Name != nil {
+		agencyDoc.Name = *updates.Name
+	}
 	if updates.DisplayName != nil {
 		agencyDoc.DisplayName = *updates.DisplayName
 	}

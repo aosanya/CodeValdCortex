@@ -62,6 +62,7 @@ type AgencyFilters struct {
 
 // AgencyUpdates defines fields that can be updated
 type AgencyUpdates struct {
+	Name        *string         `json:"name,omitempty"`
 	DisplayName *string         `json:"display_name,omitempty"`
 	Description *string         `json:"description,omitempty"`
 	Category    *string         `json:"category,omitempty"`
@@ -97,6 +98,7 @@ type CreateAgencyRequest struct {
 
 // UpdateAgencyRequest is the request body for updating an agency
 type UpdateAgencyRequest struct {
+	Name        *string         `json:"name,omitempty"`
 	DisplayName *string         `json:"display_name,omitempty"`
 	Description *string         `json:"description,omitempty"`
 	Category    *string         `json:"category,omitempty"`
