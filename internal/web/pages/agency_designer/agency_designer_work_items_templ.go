@@ -48,98 +48,46 @@ func WorkItemItem(workItem *agency.WorkItem) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-type=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><td style=\"vertical-align: middle; width: 40px;\"><label class=\"checkbox\"><input type=\"checkbox\" class=\"work-item-checkbox\" data-work-item-key=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(workItem.Type))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(workItem.Key)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 13, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 18, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" data-priority=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" onchange=\"updateWorkItemSelectionButtons()\"></label></td><td style=\"vertical-align: middle;\"><span class=\"tag is-info\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(string(workItem.Priority))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(workItem.Code)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 14, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 24, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-status=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></td><td style=\"vertical-align: middle;\"><span class=\"has-text-weight-semibold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(workItem.Status))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(workItem.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 15, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 27, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><td style=\"vertical-align: middle; width: 40px;\"><label class=\"checkbox\"><input type=\"checkbox\" class=\"work-item-checkbox\" data-work-item-key=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(workItem.Key)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 21, Col: 38}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" onchange=\"updateWorkItemSelectionButtons()\"></label></td><td style=\"vertical-align: middle;\"><span class=\"tag is-info\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(workItem.Code)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 27, Col: 44}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span></td><td style=\"vertical-align: middle;\"><span class=\"has-text-weight-semibold\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(workItem.Title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 30, Col: 58}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></td><td style=\"vertical-align: middle;\"><span class=\"tag is-light\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(getWorkItemTypeLabel(workItem.Type))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_work_items.templ`, Line: 33, Col: 67}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span></td><td style=\"vertical-align: middle;\"><div class=\"buttons\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></td><td style=\"vertical-align: middle;\"><div class=\"buttons\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -147,16 +95,16 @@ func WorkItemItem(workItem *agency.WorkItem) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button class=\"button is-small is-light is-fullwidth\" onclick=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<button class=\"button is-small is-light is-fullwidth\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("window.ContextManager.addWorkItemContext('%s', '%s')", workItem.Code, templ.EscapeString(getWorkItemContextText(workItem)))}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10.Call)
+		var templ_7745c5c3_Var6 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("window.ContextManager.addWorkItemContext('%s', '%s')", workItem.Code, templ.EscapeString(getWorkItemContextText(workItem)))}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" title=\"Add to context\"><span class=\"icon\"><i class=\"fas fa-layer-group\"></i></span> <span>Context</span></button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" title=\"Add to context\"><span class=\"icon\"><i class=\"fas fa-layer-group\"></i></span> <span>Context</span></button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -164,16 +112,16 @@ func WorkItemItem(workItem *agency.WorkItem) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<button class=\"button is-small is-info is-fullwidth\" onclick=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<button class=\"button is-small is-info is-fullwidth\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("showWorkItemEditor('edit', '%s')", workItem.Key)}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11.Call)
+		var templ_7745c5c3_Var7 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("showWorkItemEditor('edit', '%s')", workItem.Key)}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" title=\"Edit\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span>Edit</span></button> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" title=\"Edit\"><span class=\"icon\"><i class=\"fas fa-edit\"></i></span> <span>Edit</span></button> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,16 +129,16 @@ func WorkItemItem(workItem *agency.WorkItem) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<button class=\"button is-small is-danger is-fullwidth\" onclick=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<button class=\"button is-small is-danger is-fullwidth\" onclick=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var12 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("deleteWorkItem('%s')", workItem.Key)}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12.Call)
+		var templ_7745c5c3_Var8 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("deleteWorkItem('%s')", workItem.Key)}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8.Call)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" title=\"Delete\"><span class=\"icon\"><i class=\"fas fa-trash\"></i></span> <span>Delete</span></button></div></td></tr>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" title=\"Delete\"><span class=\"icon\"><i class=\"fas fa-trash\"></i></span> <span>Delete</span></button></div></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -215,13 +163,13 @@ func WorkItemsList(workItems []*agency.WorkItem) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var13 == nil {
-			templ_7745c5c3_Var13 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if len(workItems) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<tr><td colspan=\"4\" class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-info-circle\"></i> No work items defined yet. Click the + button to add one.</p></td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<tr><td colspan=\"4\" class=\"has-text-grey has-text-centered py-5\"><p><i class=\"fas fa-info-circle\"></i> No work items defined yet. Click the + button to add one.</p></td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -235,68 +183,6 @@ func WorkItemsList(workItems []*agency.WorkItem) templ.Component {
 		}
 		return nil
 	})
-}
-
-// Helper function to get work item type label
-func getWorkItemTypeLabel(workItemType agency.WorkItemType) string {
-	switch workItemType {
-	case agency.WorkItemTypeTask:
-		return "Task"
-	case agency.WorkItemTypeFeature:
-		return "Feature"
-	case agency.WorkItemTypeEpic:
-		return "Epic"
-	case agency.WorkItemTypeBug:
-		return "Bug"
-	case agency.WorkItemTypeResearch:
-		return "Research"
-	default:
-		return string(workItemType)
-	}
-}
-
-// Helper function to get priority badge class
-func getPriorityClass(priority agency.WorkItemPriority) string {
-	switch priority {
-	case agency.WorkItemPriorityP0:
-		return "tag is-danger"
-	case agency.WorkItemPriorityP1:
-		return "tag is-warning"
-	case agency.WorkItemPriorityP2:
-		return "tag is-info"
-	case agency.WorkItemPriorityP3:
-		return "tag is-light"
-	default:
-		return "tag is-light"
-	}
-}
-
-// Helper function to get status badge class
-func getStatusClass(status agency.WorkItemStatus) string {
-	switch status {
-	case agency.WorkItemStatusNotStarted:
-		return "tag is-light"
-	case agency.WorkItemStatusInProgress:
-		return "tag is-link"
-	case agency.WorkItemStatusDone:
-		return "tag is-success"
-	default:
-		return "tag is-light"
-	}
-}
-
-// Helper function to get status label
-func getStatusLabel(status agency.WorkItemStatus) string {
-	switch status {
-	case agency.WorkItemStatusNotStarted:
-		return "Not Started"
-	case agency.WorkItemStatusInProgress:
-		return "In Progress"
-	case agency.WorkItemStatusDone:
-		return "Done"
-	default:
-		return string(status)
-	}
 }
 
 // Helper function to get context text (description or title as fallback)

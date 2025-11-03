@@ -267,7 +267,7 @@ func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemReque
 		sb.WriteString("Existing Work Items:\n")
 		for _, wi := range req.ExistingWorkItems {
 			if wi.Key != req.CurrentWorkItem.Key {
-				sb.WriteString(fmt.Sprintf("- %s (%s): %s\n", wi.Code, wi.Type, wi.Title))
+				sb.WriteString(fmt.Sprintf("- %s: %s\n", wi.Code, wi.Title))
 			}
 		}
 		sb.WriteString("\n")
@@ -299,7 +299,7 @@ func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemReq
 	if len(req.ExistingWorkItems) > 0 {
 		sb.WriteString("Existing Work Items:\n")
 		for _, wi := range req.ExistingWorkItems {
-			sb.WriteString(fmt.Sprintf("- %s (%s): %s\n", wi.Code, wi.Type, wi.Title))
+			sb.WriteString(fmt.Sprintf("- %s: %s\n", wi.Code, wi.Title))
 		}
 		sb.WriteString("\n")
 	}
@@ -335,7 +335,7 @@ func (r *WorkItemRefiner) buildWorkItemsGenerationPrompt(req *GenerateWorkItemRe
 	if len(req.ExistingWorkItems) > 0 {
 		sb.WriteString("Existing Work Items:\n")
 		for _, wi := range req.ExistingWorkItems {
-			sb.WriteString(fmt.Sprintf("- %s (%s): %s\n", wi.Code, wi.Type, wi.Title))
+			sb.WriteString(fmt.Sprintf("- %s: %s\n", wi.Code, wi.Title))
 		}
 		sb.WriteString("\n")
 	}

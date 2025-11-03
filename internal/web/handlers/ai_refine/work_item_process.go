@@ -189,14 +189,10 @@ func (h *Handler) processCreateWorkItemsOperation(
 			"titleLength", len(workItemData.Title))
 
 		req := agency.CreateWorkItemRequest{
-			Title:           workItemData.Title,
-			Description:     workItemData.Description,
-			Type:            agency.WorkItemType(workItemData.SuggestedType),
-			Priority:        agency.WorkItemPriority(workItemData.SuggestedPriority),
-			Status:          agency.WorkItemStatusNotStarted,
-			Deliverables:    workItemData.Deliverables,
-			EstimatedEffort: fmt.Sprintf("%d story points", workItemData.SuggestedEffort),
-			Tags:            workItemData.SuggestedTags,
+			Title:        workItemData.Title,
+			Description:  workItemData.Description,
+			Deliverables: workItemData.Deliverables,
+			Tags:         workItemData.SuggestedTags,
 		}
 
 		savedWorkItem, err := h.agencyService.CreateWorkItem(c.Request.Context(), agencyID, req)
@@ -292,16 +288,11 @@ func (h *Handler) processEnhanceWorkItemsOperation(
 
 			// Update the work item with refined content
 			updateReq := agency.UpdateWorkItemRequest{
-				Title:           refinedResult.RefinedTitle,
-				Description:     refinedResult.RefinedDescription,
-				Type:            agency.WorkItemType(refinedResult.SuggestedType),
-				Priority:        agency.WorkItemPriority(refinedResult.SuggestedPriority),
-				Status:          workItem.Status,
-				Deliverables:    refinedResult.RefinedDeliverables,
-				Dependencies:    workItem.Dependencies,
-				EstimatedEffort: fmt.Sprintf("%d story points", refinedResult.SuggestedEffort),
-				AssignedTo:      workItem.AssignedTo,
-				Tags:            refinedResult.SuggestedTags,
+				Title:        refinedResult.RefinedTitle,
+				Description:  refinedResult.RefinedDescription,
+				Deliverables: refinedResult.RefinedDeliverables,
+				Dependencies: workItem.Dependencies,
+				Tags:         refinedResult.SuggestedTags,
 			}
 
 			// Update work item in database
@@ -319,9 +310,6 @@ func (h *Handler) processEnhanceWorkItemsOperation(
 			workItem.Title = refinedResult.RefinedTitle
 			workItem.Description = refinedResult.RefinedDescription
 			workItem.Deliverables = refinedResult.RefinedDeliverables
-			workItem.Type = agency.WorkItemType(refinedResult.SuggestedType)
-			workItem.Priority = agency.WorkItemPriority(refinedResult.SuggestedPriority)
-			workItem.EstimatedEffort = fmt.Sprintf("%d story points", refinedResult.SuggestedEffort)
 			workItem.Tags = refinedResult.SuggestedTags
 
 			changedCount++
@@ -450,14 +438,10 @@ func (h *Handler) processConsolidateWorkItemsOperation(
 			"mergedFrom", len(consolidatedWorkItem.MergedFromKeys))
 
 		req := agency.CreateWorkItemRequest{
-			Title:           consolidatedWorkItem.Title,
-			Description:     consolidatedWorkItem.Description,
-			Type:            agency.WorkItemType(consolidatedWorkItem.SuggestedType),
-			Priority:        agency.WorkItemPriority(consolidatedWorkItem.SuggestedPriority),
-			Status:          agency.WorkItemStatusNotStarted,
-			Deliverables:    consolidatedWorkItem.Deliverables,
-			EstimatedEffort: fmt.Sprintf("%d story points", consolidatedWorkItem.SuggestedEffort),
-			Tags:            consolidatedWorkItem.SuggestedTags,
+			Title:        consolidatedWorkItem.Title,
+			Description:  consolidatedWorkItem.Description,
+			Deliverables: consolidatedWorkItem.Deliverables,
+			Tags:         consolidatedWorkItem.SuggestedTags,
 		}
 
 		savedWorkItem, err := h.agencyService.CreateWorkItem(c.Request.Context(), agencyID, req)

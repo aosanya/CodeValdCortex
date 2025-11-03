@@ -123,7 +123,6 @@ func (c *WorkItemConsolidator) buildConsolidationPrompt(req *ConsolidateWorkItem
 	builder.WriteString("Current Work Items:\n")
 	for i, workItem := range req.CurrentWorkItems {
 		builder.WriteString(fmt.Sprintf("\n%d. [%s] %s - %s\n", i+1, workItem.Key, workItem.Code, workItem.Title))
-		builder.WriteString(fmt.Sprintf("   Type: %s | Priority: %s | Status: %s\n", workItem.Type, workItem.Priority, workItem.Status))
 		if workItem.Description != "" {
 			builder.WriteString(fmt.Sprintf("   Description: %s\n", workItem.Description))
 		}

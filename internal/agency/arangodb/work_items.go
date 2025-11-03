@@ -65,11 +65,6 @@ func (r *Repository) CreateWorkItem(ctx context.Context, workItem *agency.WorkIt
 		workItem.Code = fmt.Sprintf("WI-%03d", workItem.Number)
 	}
 
-	// Set default status if not provided
-	if workItem.Status == "" {
-		workItem.Status = agency.WorkItemStatusNotStarted
-	}
-
 	// Initialize empty slices if nil
 	if workItem.Deliverables == nil {
 		workItem.Deliverables = []string{}

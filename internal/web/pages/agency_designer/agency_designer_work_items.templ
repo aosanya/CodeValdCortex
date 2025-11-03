@@ -9,10 +9,7 @@ import (
 templ WorkItemItem(workItem *agency.WorkItem) {
 	<tr 
 		class="table-item" 
-		data-item-key={ workItem.Key }
-		data-type={ string(workItem.Type) }
-		data-priority={ string(workItem.Priority) }
-		data-status={ string(workItem.Status) }>
+		data-item-key={ workItem.Key }>
 		<td style="vertical-align: middle; width: 40px;">
 			<label class="checkbox">
 				<input 
@@ -28,9 +25,6 @@ templ WorkItemItem(workItem *agency.WorkItem) {
 		</td>
 		<td style="vertical-align: middle;">
 			<span class="has-text-weight-semibold">{ workItem.Title }</span>
-		</td>
-		<td style="vertical-align: middle;">
-			<span class="tag is-light">{ getWorkItemTypeLabel(workItem.Type) }</span>
 		</td>
 		<td style="vertical-align: middle;">
 			<div class="buttons">
@@ -72,68 +66,6 @@ templ WorkItemsList(workItems []*agency.WorkItem) {
 		for _, workItem := range workItems {
 			@WorkItemItem(workItem)
 		}
-	}
-}
-
-// Helper function to get work item type label
-func getWorkItemTypeLabel(workItemType agency.WorkItemType) string {
-	switch workItemType {
-	case agency.WorkItemTypeTask:
-		return "Task"
-	case agency.WorkItemTypeFeature:
-		return "Feature"
-	case agency.WorkItemTypeEpic:
-		return "Epic"
-	case agency.WorkItemTypeBug:
-		return "Bug"
-	case agency.WorkItemTypeResearch:
-		return "Research"
-	default:
-		return string(workItemType)
-	}
-}
-
-// Helper function to get priority badge class
-func getPriorityClass(priority agency.WorkItemPriority) string {
-	switch priority {
-	case agency.WorkItemPriorityP0:
-		return "tag is-danger"
-	case agency.WorkItemPriorityP1:
-		return "tag is-warning"
-	case agency.WorkItemPriorityP2:
-		return "tag is-info"
-	case agency.WorkItemPriorityP3:
-		return "tag is-light"
-	default:
-		return "tag is-light"
-	}
-}
-
-// Helper function to get status badge class
-func getStatusClass(status agency.WorkItemStatus) string {
-	switch status {
-	case agency.WorkItemStatusNotStarted:
-		return "tag is-light"
-	case agency.WorkItemStatusInProgress:
-		return "tag is-link"
-	case agency.WorkItemStatusDone:
-		return "tag is-success"
-	default:
-		return "tag is-light"
-	}
-}
-
-// Helper function to get status label
-func getStatusLabel(status agency.WorkItemStatus) string {
-	switch status {
-	case agency.WorkItemStatusNotStarted:
-		return "Not Started"
-	case agency.WorkItemStatusInProgress:
-		return "In Progress"
-	case agency.WorkItemStatusDone:
-		return "Done"
-	default:
-		return string(status)
 	}
 }
 

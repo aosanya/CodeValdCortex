@@ -35,22 +35,12 @@ func (s *WorkItemService) CreateWorkItem(ctx context.Context, agencyID string, r
 	}
 
 	workItem := &agency.WorkItem{
-		AgencyID:        agencyID,
-		Title:           req.Title,
-		Description:     req.Description,
-		Type:            req.Type,
-		Priority:        req.Priority,
-		Status:          req.Status,
-		Deliverables:    req.Deliverables,
-		Dependencies:    req.Dependencies,
-		EstimatedEffort: req.EstimatedEffort,
-		AssignedTo:      req.AssignedTo,
-		Tags:            req.Tags,
-	}
-
-	// Set default status if not provided
-	if workItem.Status == "" {
-		workItem.Status = agency.WorkItemStatusNotStarted
+		AgencyID:     agencyID,
+		Title:        req.Title,
+		Description:  req.Description,
+		Deliverables: req.Deliverables,
+		Dependencies: req.Dependencies,
+		Tags:         req.Tags,
 	}
 
 	if err := s.repo.CreateWorkItem(ctx, workItem); err != nil {
@@ -132,13 +122,8 @@ func (s *WorkItemService) UpdateWorkItem(ctx context.Context, agencyID string, k
 	// Update fields
 	workItem.Title = req.Title
 	workItem.Description = req.Description
-	workItem.Type = req.Type
-	workItem.Priority = req.Priority
-	workItem.Status = req.Status
 	workItem.Deliverables = req.Deliverables
 	workItem.Dependencies = req.Dependencies
-	workItem.EstimatedEffort = req.EstimatedEffort
-	workItem.AssignedTo = req.AssignedTo
 	workItem.Tags = req.Tags
 
 	// Save
@@ -173,68 +158,4 @@ func (s *WorkItemService) ValidateDependencies(ctx context.Context, agencyID str
 	}
 
 	return s.repo.ValidateDependencies(ctx, agencyID, workItemCode, dependencies)
-}
-
-// GetWorkItemTemplates returns predefined work item templates
-func (s *WorkItemService) GetWorkItemTemplates() map[string]WorkItemTemplate {
-	return map[string]WorkItemTemplate{
-		string(agency.WorkItemTypeTask): {
-			Type:        agency.WorkItemTypeTask,
-			Description: "A single unit of work to be completed",
-			Deliverables: []string{
-				"Implementation complete",
-				"Unit tests passing",
-				"Code reviewed",
-			},
-		},
-		string(agency.WorkItemTypeFeature): {
-			Type:        agency.WorkItemTypeFeature,
-			Description: "A new feature or capability to be developed",
-			Deliverables: []string{
-				"Feature specification document",
-				"Implementation complete",
-				"Integration tests passing",
-				"User documentation updated",
-				"Feature deployed",
-			},
-		},
-		string(agency.WorkItemTypeEpic): {
-			Type:        agency.WorkItemTypeEpic,
-			Description: "A large body of work that can be broken down into smaller tasks",
-			Deliverables: []string{
-				"Epic broken down into tasks/features",
-				"Architecture design document",
-				"All child work items completed",
-				"Integration verified",
-				"Release notes prepared",
-			},
-		},
-		string(agency.WorkItemTypeBug): {
-			Type:        agency.WorkItemTypeBug,
-			Description: "A defect or issue that needs to be fixed",
-			Deliverables: []string{
-				"Root cause identified",
-				"Fix implemented",
-				"Regression tests added",
-				"Fix verified in production",
-			},
-		},
-		string(agency.WorkItemTypeResearch): {
-			Type:        agency.WorkItemTypeResearch,
-			Description: "Investigation or proof of concept work",
-			Deliverables: []string{
-				"Research findings documented",
-				"Recommendations provided",
-				"Proof of concept (if applicable)",
-				"Decision recorded",
-			},
-		},
-	}
-}
-
-// WorkItemTemplate represents a template for creating work items
-type WorkItemTemplate struct {
-	Type         agency.WorkItemType
-	Description  string
-	Deliverables []string
 }

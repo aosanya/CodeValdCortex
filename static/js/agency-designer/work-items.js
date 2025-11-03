@@ -157,13 +157,9 @@ function populateWorkItemForm(workItem) {
 
     const fields = {
         'work-item-title-editor': workItem.title || '',
-        'work-item-type-editor': workItem.type || 'task',
-        'work-item-priority-editor': workItem.priority || 'P2',
-        'work-item-status-editor': workItem.status || 'not-started',
         'work-item-description-editor': workItem.description || '',
         'work-item-deliverables-editor': workItem.deliverables ? workItem.deliverables.join('\n') : '',
         'work-item-dependencies-editor': workItem.dependencies ? workItem.dependencies.join(', ') : '',
-        'work-item-effort-editor': workItem.estimated_effort || '',
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
     };
 
@@ -189,7 +185,6 @@ function clearWorkItemForm() {
         'work-item-description-editor',
         'work-item-deliverables-editor',
         'work-item-dependencies-editor',
-        'work-item-effort-editor',
         'work-item-tags-editor'
     ];
 
@@ -199,16 +194,6 @@ function clearWorkItemForm() {
             element.value = '';
         }
     });
-
-    // Reset selects to defaults
-    const typeSelect = document.getElementById('work-item-type-editor');
-    if (typeSelect) typeSelect.value = 'task';
-
-    const prioritySelect = document.getElementById('work-item-priority-editor');
-    if (prioritySelect) prioritySelect.value = 'P2';
-
-    const statusSelect = document.getElementById('work-item-status-editor');
-    if (statusSelect) statusSelect.value = 'not-started';
 
     workItemEditorState.originalData = {};
 }
@@ -227,9 +212,6 @@ export function saveWorkItemFromEditor() {
 
     // Get form values
     const title = document.getElementById('work-item-title-editor')?.value.trim();
-    const type = document.getElementById('work-item-type-editor')?.value;
-    const priority = document.getElementById('work-item-priority-editor')?.value;
-    const status = document.getElementById('work-item-status-editor')?.value;
     const description = document.getElementById('work-item-description-editor')?.value.trim();
     const deliverables = document.getElementById('work-item-deliverables-editor')?.value
         .split('\n')
@@ -239,7 +221,6 @@ export function saveWorkItemFromEditor() {
         .split(',')
         .map(d => d.trim())
         .filter(d => d.length > 0);
-    const effort = document.getElementById('work-item-effort-editor')?.value;
     const tags = document.getElementById('work-item-tags-editor')?.value
         .split(',')
         .map(t => t.trim())
@@ -247,13 +228,9 @@ export function saveWorkItemFromEditor() {
 
     console.log('[Work Items] Form values:', {
         title,
-        type,
-        priority,
-        status,
         descriptionLength: description?.length || 0,
         deliverablesCount: deliverables?.length || 0,
         dependenciesCount: dependencies?.length || 0,
-        effort,
         tagsCount: tags?.length || 0
     });
 
@@ -286,13 +263,9 @@ export function saveWorkItemFromEditor() {
 
     const requestBody = {
         title,
-        type,
-        priority,
-        status,
         description,
         deliverables,
         dependencies,
-        estimated_effort: effort || '',
         tags
     };
 
@@ -385,26 +358,20 @@ export function deleteWorkItem(workItemKey) {
 
 // Filter work items
 export function filterWorkItems() {
-    const searchInput = document.getElementById('work-items-search')?.value.toLowerCase() || '';
-    const statusFilter = document.getElementById('filter-status')?.value || '';
-    const priorityFilter = document.getElementById('filter-priority')?.value || '';
+    const searchInput = document.getElementById('work-item-search')?.value.toLowerCase() || '';
     const typeFilter = document.getElementById('filter-type')?.value || '';
+    const tbody = document.getElementById('work-items-tbody');
+    if (!tbody) return;
 
-    const rows = document.querySelectorAll('#work-items-table-body tr.table-item');
+    const rows = tbody.querySelectorAll('.table-item');
 
     rows.forEach(row => {
         const key = row.dataset.itemKey || '';
         const title = row.querySelector('.has-text-weight-semibold')?.textContent.toLowerCase() || '';
-        const type = row.dataset.type || '';
-        const priority = row.dataset.priority || '';
-        const status = row.dataset.status || '';
 
         const matchesSearch = !searchInput || key.toLowerCase().includes(searchInput) || title.includes(searchInput);
-        const matchesStatus = !statusFilter || status === statusFilter;
-        const matchesPriority = !priorityFilter || priority === priorityFilter;
-        const matchesType = !typeFilter || type === typeFilter;
 
-        if (matchesSearch && matchesStatus && matchesPriority && matchesType) {
+        if (matchesSearch) {
             row.style.display = '';
         } else {
             row.style.display = 'none';

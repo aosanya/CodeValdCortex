@@ -168,92 +168,43 @@ type UpdateOverviewRequest struct {
 	Introduction string `json:"introduction"`
 }
 
-// WorkItemType represents the type of work item
-type WorkItemType string
-
-const (
-	WorkItemTypeTask     WorkItemType = "Task"
-	WorkItemTypeFeature  WorkItemType = "Feature"
-	WorkItemTypeEpic     WorkItemType = "Epic"
-	WorkItemTypeBug      WorkItemType = "Bug"
-	WorkItemTypeResearch WorkItemType = "Research"
-)
-
-// WorkItemPriority represents the priority level of a work item
-type WorkItemPriority string
-
-const (
-	WorkItemPriorityP0 WorkItemPriority = "P0" // Critical/Blocking
-	WorkItemPriorityP1 WorkItemPriority = "P1" // High
-	WorkItemPriorityP2 WorkItemPriority = "P2" // Medium
-	WorkItemPriorityP3 WorkItemPriority = "P3" // Low
-)
-
-// WorkItemStatus represents the current status of a work item
-type WorkItemStatus string
-
-const (
-	WorkItemStatusNotStarted WorkItemStatus = "Not Started"
-	WorkItemStatusInProgress WorkItemStatus = "In Progress"
-	WorkItemStatusBlocked    WorkItemStatus = "Blocked"
-	WorkItemStatusInReview   WorkItemStatus = "In Review"
-	WorkItemStatusDone       WorkItemStatus = "Done"
-	WorkItemStatusCancelled  WorkItemStatus = "Cancelled"
-)
-
 // WorkItem represents a work item in the agency
 type WorkItem struct {
-	Key             string           `json:"_key,omitempty"`
-	ID              string           `json:"_id,omitempty"`
-	AgencyID        string           `json:"agency_id"`
-	Number          int              `json:"number"`
-	Code            string           `json:"code"` // e.g., "WI-001"
-	Title           string           `json:"title"`
-	Description     string           `json:"description"`
-	Type            WorkItemType     `json:"type"`
-	Priority        WorkItemPriority `json:"priority"`
-	Status          WorkItemStatus   `json:"status"`
-	Deliverables    []string         `json:"deliverables"`
-	Dependencies    []string         `json:"dependencies"`     // References to other work item codes
-	EstimatedEffort string           `json:"estimated_effort"` // e.g., "2 weeks", "40 hours"
-	AssignedTo      string           `json:"assigned_to,omitempty"`
-	Tags            []string         `json:"tags,omitempty"`
-	CreatedAt       time.Time        `json:"created_at"`
-	UpdatedAt       time.Time        `json:"updated_at"`
+	Key          string    `json:"_key,omitempty"`
+	ID           string    `json:"_id,omitempty"`
+	AgencyID     string    `json:"agency_id"`
+	Number       int       `json:"number"`
+	Code         string    `json:"code"` // e.g., "WI-001"
+	Title        string    `json:"title"`
+	Description  string    `json:"description"`
+	Deliverables []string  `json:"deliverables"`
+	Dependencies []string  `json:"dependencies"` // References to other work item codes
+	Tags         []string  `json:"tags,omitempty"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // CreateWorkItemRequest is the request body for creating a work item
 type CreateWorkItemRequest struct {
-	Title           string           `json:"title" binding:"required"`
-	Description     string           `json:"description" binding:"required"`
-	Type            WorkItemType     `json:"type" binding:"required"`
-	Priority        WorkItemPriority `json:"priority" binding:"required"`
-	Status          WorkItemStatus   `json:"status"`
-	Deliverables    []string         `json:"deliverables"`
-	Dependencies    []string         `json:"dependencies"`
-	EstimatedEffort string           `json:"estimated_effort"`
-	AssignedTo      string           `json:"assigned_to,omitempty"`
-	Tags            []string         `json:"tags,omitempty"`
+	Title        string   `json:"title" binding:"required"`
+	Description  string   `json:"description" binding:"required"`
+	Deliverables []string `json:"deliverables"`
+	Dependencies []string `json:"dependencies"`
+	Tags         []string `json:"tags,omitempty"`
 }
 
 // UpdateWorkItemRequest is the request body for updating a work item
 type UpdateWorkItemRequest struct {
-	Title           string           `json:"title" binding:"required"`
-	Description     string           `json:"description" binding:"required"`
-	Type            WorkItemType     `json:"type" binding:"required"`
-	Priority        WorkItemPriority `json:"priority" binding:"required"`
-	Status          WorkItemStatus   `json:"status" binding:"required"`
-	Deliverables    []string         `json:"deliverables"`
-	Dependencies    []string         `json:"dependencies"`
-	EstimatedEffort string           `json:"estimated_effort"`
-	AssignedTo      string           `json:"assigned_to,omitempty"`
-	Tags            []string         `json:"tags,omitempty"`
+	Title        string   `json:"title" binding:"required"`
+	Description  string   `json:"description" binding:"required"`
+	Deliverables []string `json:"deliverables"`
+	Dependencies []string `json:"dependencies"`
+	Tags         []string `json:"tags,omitempty"`
 }
 
 // WorkItemRefineRequest is the request body for AI work item refinement
 type WorkItemRefineRequest struct {
 	Title        string   `json:"title" binding:"required"`
 	Description  string   `json:"description" binding:"required"`
-	Type         string   `json:"type" binding:"required"`
 	Deliverables []string `json:"deliverables"`
 }
