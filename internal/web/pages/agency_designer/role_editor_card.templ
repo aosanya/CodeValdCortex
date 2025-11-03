@@ -145,18 +145,22 @@ templ RoleEditorCard() {
 			</div>
 		</div>
 		<footer class="card-footer">
-			<button 
-				class="card-footer-item button is-success"
-				onclick="saveRoleFromEditor()">
-				<span class="icon"><i class="fas fa-save"></i></span>
-				<span>Save Role</span>
-			</button>
-			<button 
-				class="card-footer-item button is-light"
-				onclick="cancelRoleEdit()">
-				<span class="icon"><i class="fas fa-times"></i></span>
-				<span>Cancel</span>
-			</button>
+			<div class="card-footer-item">
+				<button 
+					class="button is-small is-primary"
+					onclick="saveRoleFromEditor()">
+					<span class="icon"><i class="fas fa-save"></i></span>
+					<span>Save</span>
+				</button>
+			</div>
+			<div class="card-footer-item">
+				<button 
+					class="button is-small"
+					onclick="cancelRoleEdit()">
+					<span class="icon"><i class="fas fa-times"></i></span>
+					<span>Cancel</span>
+				</button>
+			</div>
 		</footer>
 	</div>
 }

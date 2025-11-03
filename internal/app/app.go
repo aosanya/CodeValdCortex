@@ -49,6 +49,7 @@ type App struct {
 	goalConsolidator     *ai.GoalConsolidator
 	workItemRefiner      *ai.WorkItemRefiner
 	workItemConsolidator *ai.WorkItemConsolidator
+	roleCreator          *ai.RoleCreator
 }
 
 // New creates a new application instance
@@ -136,16 +137,17 @@ func New(cfg *config.Config) *App {
 	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
 	logger.Info("Agency management service initialized successfully")
 
-	// Initialize AI agency designer service (if configured)
+	// Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
 	var introductionRefiner *ai.IntroductionRefiner
 	var goalRefiner *ai.GoalRefiner
 	var goalConsolidator *ai.GoalConsolidator
 	var workItemRefiner *ai.WorkItemRefiner
 	var workItemConsolidator *ai.WorkItemConsolidator
-	if cfg.AI.Provider != "" && cfg.AI.APIKey != "" {
-		logger.WithField("provider", cfg.AI.Provider).Info("Initializing AI agency designer service")
-		aiConfig := &ai.LLMConfig{
+	var roleCreator *ai.RoleCreator
+	if cfg.AI.Provider != "" {
+		// Build LLM config from app config
+		llmConfig := &ai.LLMConfig{
 			Provider:    ai.Provider(cfg.AI.Provider),
 			APIKey:      cfg.AI.APIKey,
 			Model:       cfg.AI.Model,
@@ -154,9 +156,10 @@ func New(cfg *config.Config) *App {
 			MaxTokens:   cfg.AI.MaxTokens,
 			Timeout:     cfg.AI.Timeout,
 		}
-		llmClient, err := ai.NewLLMClient(aiConfig)
+
+		llmClient, err := ai.NewLLMClient(llmConfig)
 		if err != nil {
-			logger.WithError(err).Warn("Failed to initialize LLM client, AI designer will not be available")
+			logger.WithError(err).Error("Failed to initialize LLM client")
 		} else {
 			aiDesignerService = ai.NewAgencyDesignerService(llmClient, logger)
 			introductionRefiner = ai.NewIntroductionRefiner(llmClient, logger)
@@ -164,6 +167,7 @@ func New(cfg *config.Config) *App {
 			goalConsolidator = ai.NewGoalConsolidator(llmClient, logger)
 			workItemRefiner = ai.NewWorkItemRefiner(llmClient, logger)
 			workItemConsolidator = ai.NewWorkItemConsolidator(llmClient, logger)
+			roleCreator = ai.NewRoleCreator(llmClient, logger)
 			logger.Info("AI agency designer service initialized successfully")
 		}
 	} else {
@@ -188,6 +192,7 @@ func New(cfg *config.Config) *App {
 		goalConsolidator:     goalConsolidator,
 		workItemRefiner:      workItemRefiner,
 		workItemConsolidator: workItemConsolidator,
+		roleCreator:          roleCreator,
 	}
 }
 
@@ -404,7 +409,7 @@ func (a *App) setupServer() error {
 
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {
-			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.workItemRefiner, a.workItemConsolidator, a.aiDesignerService, a.logger)
+			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.workItemRefiner, a.workItemConsolidator, a.roleCreator, a.aiDesignerService, a.logger)
 			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
 			if a.goalRefiner != nil {
 				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineGoal)
@@ -417,6 +422,8 @@ func (a *App) setupServer() error {
 			if a.workItemRefiner != nil {
 				v1.POST("/agencies/:id/work-items/ai-process", aiRefineHandler.ProcessAIWorkItemRequest)
 			}
+			// Role AI processing endpoint
+			v1.POST("/agencies/:id/roles/ai-process", aiRefineHandler.ProcessAIRoleRequest)
 			a.logger.Info("AI Refine endpoints registered")
 		}
 

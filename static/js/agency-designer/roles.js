@@ -52,8 +52,16 @@ export function showRoleEditor(mode, roleKey = null) {
     roleEditorState.mode = mode;
     roleEditorState.roleKey = roleKey;
 
-    // Update title
+    const editorCard = document.getElementById('role-editor-card');
+    const listCard = document.getElementById('roles-list-card');
     const title = document.getElementById('role-editor-title');
+
+    if (!editorCard || !listCard || !title) {
+        console.error('[Roles] Role editor elements not found');
+        return;
+    }
+
+    // Update title
     if (title) {
         title.textContent = mode === 'add' ? 'Add New Role' : 'Edit Role';
     }
@@ -65,12 +73,14 @@ export function showRoleEditor(mode, roleKey = null) {
         loadRoleData(roleKey);
     }
 
-    // Show editor card
-    const editorCard = document.getElementById('role-editor-card');
-    if (editorCard) {
-        editorCard.classList.remove('is-hidden');
-        // Scroll to editor
-        editorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Show editor, hide list
+    editorCard.classList.remove('is-hidden');
+    listCard.classList.add('is-hidden');
+
+    // Focus on name field
+    const nameEditor = document.getElementById('role-name-editor');
+    if (nameEditor) {
+        nameEditor.focus();
     }
 }
 
@@ -198,7 +208,7 @@ export function saveRoleFromEditor() {
         ? requiredSkillsText.split(',').map(s => s.trim()).filter(s => s)
         : [];
 
-    // Prepare payload
+    // Construct payload
     const payload = {
         name,
         tags,
@@ -208,7 +218,11 @@ export function saveRoleFromEditor() {
         required_skills: requiredSkills,
         token_budget: tokenBudget,
         icon,
-        color
+        color,
+        // Include version: preserve existing for edit, default for add
+        version: roleEditorState.mode === 'edit' && roleEditorState.originalData?.version
+            ? roleEditorState.originalData.version
+            : '1.0.0'
     };
 
     console.log('[Roles] Saving role:', payload);
@@ -259,8 +273,13 @@ export function saveRoleFromEditor() {
 // Cancel role edit
 export function cancelRoleEdit() {
     const editorCard = document.getElementById('role-editor-card');
+    const listCard = document.getElementById('roles-list-card');
+
     if (editorCard) {
         editorCard.classList.add('is-hidden');
+    }
+    if (listCard) {
+        listCard.classList.remove('is-hidden');
     }
 
     clearRoleForm();
@@ -322,6 +341,7 @@ export function filterRoles() {
 export async function processAIRoleOperation(operations) {
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
+        showNotification('Error: No agency selected', 'error');
         return;
     }
 
@@ -338,13 +358,36 @@ export async function processAIRoleOperation(operations) {
         return;
     }
 
+    // Determine status message
+    let statusMessage = 'AI is processing your request...';
+    if (operations.length === 1) {
+        switch (operations[0]) {
+            case 'create':
+                statusMessage = 'AI is generating roles from your work items...';
+                break;
+            case 'enhance':
+                statusMessage = `AI is enhancing ${selectedRoleKeys.length} role(s)...`;
+                break;
+            case 'consolidate':
+                statusMessage = `AI is consolidating ${selectedRoleKeys.length} role(s)...`;
+                break;
+        }
+    } else if (operations.length > 1) {
+        statusMessage = `AI is performing ${operations.length} operations on your roles...`;
+    }
+
+    // Show AI processing status in the chat area
+    if (window.showAIProcessStatus) {
+        window.showAIProcessStatus(statusMessage);
+    }
+
     const payload = {
         operations,
         role_keys: selectedRoleKeys
     };
 
     try {
-        const response = await fetch(`/api/v1/agencies/${agencyId}/ai/process-roles`, {
+        const response = await fetch(`/api/v1/agencies/${agencyId}/roles/ai-process`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -359,16 +402,45 @@ export async function processAIRoleOperation(operations) {
         const result = await response.json();
         console.log('[Roles] AI operation result:', result);
 
-        showNotification('AI operation completed', 'success');
+        // Update status to show we're processing results
+        if (window.showAIProcessStatus) {
+            window.showAIProcessStatus('Processing results and updating roles...');
+        }
 
         // Reload roles list
-        loadRoles();
+        await loadRoles();
 
-        // Scroll to chat to show AI response
-        scrollToBottom();
+        // After roles are reloaded, refresh chat messages so AI explanation appears in the chat
+        try {
+            const chatContainer = document.getElementById('chat-messages');
+            if (chatContainer) {
+                const chatResp = await fetch(`/agencies/${agencyId}/chat-messages`);
+                if (chatResp.ok) {
+                    const chatHtml = await chatResp.text();
+                    chatContainer.innerHTML = chatHtml;
+                    // Scroll to bottom to show latest assistant message
+                    try { scrollToBottom(); } catch (e) { /* ignore */ }
+                }
+            }
+        } catch (err) {
+            console.error('[Roles] Error refreshing chat messages:', err);
+        }
+
+        // Hide AI processing status after roles and chat are updated
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+
+        showNotification('AI operation completed', 'success');
 
     } catch (error) {
         console.error('[Roles] Error processing AI operation:', error);
+
+        // Hide processing status on error
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+
         showNotification('Error processing AI operation', 'danger');
     }
 }
