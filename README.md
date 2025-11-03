@@ -143,6 +143,7 @@ Organizations choose CodeValdCortex to solve three critical business problems:
 
 ## 🏗️ Architecture
 
+### System Architecture
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Agency Designer│    │   API Gateway   │    │  Agent Pools    │
@@ -154,84 +155,24 @@ Organizations choose CodeValdCortex to solve three critical business problems:
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  Orchestration  │    │   Coordination  │    │   Message Bus   │
 │    Engine       │◄──►│    Service      │◄──►│  (Go Channels)  │
-│                 │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   ArangoDB      │    │   Monitoring    │    │   Security      │
-│ (Graph Database │    │ (Prometheus/    │    │  (Auth/RBAC)    │
-│ Goals/Work)     │    │  Grafana)       │    │                 │
+│ (Graph Database)│    │ (Prometheus)    │    │  (Auth/RBAC)    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### Agency Operations Framework Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Agency Designer Interface                     │
-├─────────────────────────────────────────────────────────────────────┤
-│  Goals Definition    │  Work Items Mgmt  │  RACI Matrix Editor      │
-│                      │                   │                          │
-│  • Goal CRUD         │  • Work Item CRUD │  • Visual Matrix         │
-│  • Success Metrics   │  • Deliverables   │  • Role Assignment       │
-│  • Non-Goals         │  • Dependencies   │  • Validation Rules      │
-│  • Auto-numbering    │                   │  • Templates             │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                     ArangoDB Graph Database                          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   ┌─────────────┐    ┌─────────────────────┐    ┌─────────────┐     │
-│   │   Goals     │    │   Relationships     │    │ Work Items  │     │
-│   │ Collection  │◄──►│   (Graph Edges)     │◄──►│ Collection  │     │
-│   │             │    │                     │    │             │     │
-│   │ • Code      │    │ • achieves         │    │ • Code      │     │
-│   │ • Scope     │    │ • supports         │    │ • RACI      │     │
-│   │ • Metrics   │    │ • enables          │    │ • Delivs    │     │
-│   │ • NonGoals  │    │ • advances         │    └─────────────┘     │
-│   └─────────────┘    │ • mitigates        │                       │
-│                      └─────────────────────┘                       │
-└─────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      Analytics & Reporting                           │
-├─────────────────────────────────────────────────────────────────────┤
-│  Graph Visualization │  Coverage Analysis │  Impact Analysis        │
-│                      │                    │                         │
-│  • Interactive Graph │  • Unaddressed     │  • Multi-goal           │
-│  • Node/Edge Types   │    Goals           │    Work Items          │
-│  • Layout Algorithms │  • Solution Gaps   │  • RACI Distribution    │
-│                      │                    │  • Workload Analysis    │
-└─────────────────────────────────────────────────────────────────────┘
-```
+**Core Components**: Agency Designer (Goals/Work Items/RACI) → ArangoDB Graph (relationships mapping) → Analytics (visualization & impact analysis)
 
 ## 🛠️ Technology Stack
 
-### Backend
-- **Go 1.21+**: Native concurrency with goroutines and channels
-- **Templ**: Type-safe HTML templating for server-side rendering
-- **HTMX**: Modern frontend interactions without JavaScript frameworks
-- **Kubernetes**: Container orchestration and service mesh
-- **ArangoDB**: Multi-model graph database for problems, work items, and relationships
-- **Redis**: Distributed caching and message persistence
-- **gRPC**: High-performance service communication
+**Backend**: Go 1.21+, Templ (HTML templates), HTMX (frontend interactions), ArangoDB (graph database), Redis (caching), gRPC (service communication)
 
-### Infrastructure
-- **Docker**: Containerized microservices architecture
-- **Helm**: Kubernetes package management and deployment
-- **Istio**: Service mesh for security and observability
-- **Prometheus/Grafana**: Metrics collection and visualization
-- **Jaeger**: Distributed tracing and performance monitoring
+**Infrastructure**: Docker, Kubernetes, Helm, Prometheus/Grafana (monitoring), Jaeger (tracing)
 
-### Development
-- **CI/CD**: GitHub Actions with automated testing and deployment
-- **Testing**: Comprehensive unit, integration, and load testing
-- **Documentation**: Markdown-based with architectural diagrams
-- **Code Quality**: Linting, security scanning, and code coverage
+**Development**: GitHub Actions (CI/CD), comprehensive testing, Markdown documentation
 
 ## 📁 Project Structure
 
@@ -251,19 +192,44 @@ CodeValdCortex/
 ## 📚 Documentation
 
 ### Quick Navigation
-- **[Requirements](documents/1-SoftwareRequirements/README.md)**: System requirements, stakeholder needs, and project specifications
-- **[Architecture](documents/2-SoftwareDesignAndArchitecture/README.md)**: Technical design, system architecture, and technology decisions
-- **[Development](documents/3-SofwareDevelopment/README.md)**: Development guides, implementation details, and operational procedures
+- **[Requirements](documents/1-SoftwareRequirements/README.md)**: System requirements and specifications
+- **[Architecture](documents/2-SoftwareDesignAndArchitecture/README.md)**: Technical design and system architecture
+- **[Development](documents/3-SofwareDevelopment/README.md)**: Development guides and implementation details
+- **[Agency Operations Framework](documents/2-SoftwareDesignAndArchitecture/agency-operations-framework.md)**: Goals, work items, and RACI management
+- **[MVP Tasks](documents/3-SofwareDevelopment/mvp.md)**: Current development roadmap
 
-### Key Documents
-- **[Problem Definition](documents/1-SoftwareRequirements/introduction/problem-definition.md)**: Market analysis and solution overview
-- **[Functional Requirements](documents/1-SoftwareRequirements/requirements/functional-requirements.md)**: Core system capabilities and features
-- **[Agency Operations Framework](documents/2-SoftwareDesignAndArchitecture/agency-operations-framework.md)**: Goals, work items, and RACI matrix management
-- **[General Architecture](documents/2-SoftwareDesignAndArchitecture/2-general-architecture.md)**: High-level system design
-- **[Backend Architecture](documents/2-SoftwareDesignAndArchitecture/backend-architecture.md)**: Go-based backend implementation
-- **[Core Features](documents/3-SofwareDevelopment/core-systems/agent-lifecycle.md)**: Agent lifecycle management
-- **[MVP Tasks](documents/3-SofwareDevelopment/mvp.md)**: Current development roadmap and task breakdown
-- **[Infrastructure Setup](documents/3-SofwareDevelopment/infrastructure/)**: Kubernetes, ArangoDB, and monitoring setup
+## Agent Autonomy Levels (L0–L4)
+
+Inspired by autonomous vehicle levels, CodeValdCortex supports both AI agents and human workers across a spectrum of autonomy with corresponding oversight requirements.
+
+### Autonomy Level Definitions
+
+**L0 — Manual**
+- Agent provides recommendations only; human executes all actions
+- Agent acts as advisor/assistant with zero autonomous authority
+- **Use Cases**: High-risk decisions, exploratory analysis, learning scenarios
+
+**L1 — Assisted**
+- Agent performs routine, low-risk actions; human approves high-risk actions
+- Agent suggests action plans; human has veto power
+- **Use Cases**: Data collection, standard reporting, routine maintenance
+
+**L2 — Conditional**
+- Agent operates autonomously under defined constraints
+- Human intervenes for exceptions; constraint violations trigger review
+- **Use Cases**: Standard workflows, monitored operations, rule-based processes
+
+**L3 — High Automation**
+- Agent handles most scenarios independently; human on-call for edge cases
+- Agent self-diagnoses and recovers from common failures
+- **Use Cases**: Production monitoring, automated responses, standard operations
+
+**L4 — Full Autonomy**
+- Agent operates completely independently; human notified post-facto
+- Agent self-manages errors and recovery; human audit for compliance only
+- **Use Cases**: Well-defined processes, mature workflows, high-confidence scenarios
+
+**Human-AI Collaboration**: CodeValdCortex treats both AI agents and human workers as participants in the same orchestration framework, enabling seamless collaboration across the autonomy spectrum.
 
 ## 🚀 Quick Start
 
@@ -391,169 +357,64 @@ kubectl get pods -n codevaldcortex
 
 See [QA Documentation](documents/4-QA/README.md) for detailed testing instructions.
 
-## 🎯 Customer Success Stories & Use Cases
+## 🎯 Use Cases
 
 ### Primary Market: Enterprise AI Operations
-**Customer Profile**: Organizations running production AI agent workloads requiring enterprise-grade reliability, security, and compliance.
-
-### Core Use Cases (Proven Value)
+Organizations running production AI agent workloads requiring enterprise-grade reliability, security, and compliance.
 
 **Financial Services: Multi-Agent Risk Analysis**
-- **Problem**: Manual risk analysis creates bottlenecks; AI pilots can't scale to production
-- **Solution**: Deploy 500+ specialized risk analysis agents across hybrid cloud
-- **Value**: 80% reduction in analysis time, 100% audit trail for regulatory compliance
-- **Tech**: Real-time coordination, secure multi-tenancy, comprehensive logging
+- Deploy 500+ specialized risk analysis agents across hybrid cloud
+- 80% reduction in analysis time, 100% audit trail for regulatory compliance
 
 **Healthcare: Distributed Patient Data Processing**
-- **Problem**: Patient data scattered across systems; HIPAA concerns block AI adoption
-- **Solution**: Orchestrate HIPAA-compliant agents for data aggregation and analysis
-- **Value**: Centralized patient view without data movement, full compliance audit trails
-- **Tech**: Zero-trust security, encrypted communication, access control
+- Orchestrate HIPAA-compliant agents for data aggregation and analysis
+- Centralized patient view without data movement, full compliance audit trails
 
 **Manufacturing: Supply Chain Optimization**
-- **Problem**: Supply chain disruptions require real-time coordination across vendors
-- **Solution**: Deploy agent teams for demand forecasting, inventory optimization, vendor coordination
-- **Value**: 30% reduction in stockouts, 20% improvement in inventory turnover
-- **Tech**: Multi-agent coordination, goal-work item tracking, real-time visibility
+- Deploy agent teams for demand forecasting, inventory optimization, vendor coordination
+- 30% reduction in stockouts, 20% improvement in inventory turnover
 
 **Telecommunications: Network Monitoring & Optimization**
-- **Problem**: Network complexity exceeds human monitoring capability; outages cost millions
-- **Solution**: Deploy autonomous monitoring agents across distributed infrastructure
-- **Value**: 99.9% uptime, proactive issue detection, 60% reduction in MTTR
-- **Tech**: Kubernetes-native deployment, horizontal scaling, distributed tracing
+- Deploy autonomous monitoring agents across distributed infrastructure
+- 99.9% uptime, proactive issue detection, 60% reduction in MTTR
 
 ## 📊 Business Impact & ROI
 
-> **Value Creation Framework**: CodeValdCortex transforms technical capabilities into measurable enterprise outcomes across functional, emotional, and transformational dimensions.
-
 ### Quantifiable Business Outcomes
 
-#### Functional Value: Time & Cost Savings
+**Functional Value: Time & Cost Savings**
+- **Faster Time-to-Production**: 60% reduction in AI deployment time (6-12 months → 4-8 weeks)
+- **Operational Leverage**: 20-100x efficiency (1 engineer per 1,000+ agents vs. 1 per 10-50 agents)
+- **Infrastructure Efficiency**: 70% reduction in infrastructure costs (<2GB per 1,000 agents)
 
-**Faster Time-to-Production**
-- **Before**: 6-12 months from AI pilot to production deployment
-- **After**: 4-8 weeks with CodeValdCortex
-- **Impact**: **60% reduction in AI deployment time**, 10x faster operationalization
-- **Financial Value**: $500K-$2M saved per major AI initiative (reduced consulting fees, internal labor)
+**Emotional Value: Risk Reduction & Control**
+- **Compliance Ready**: Zero compliance violations, 100% auditability, 12-month faster certification
+- **Security & Governance**: Zero security breaches, automated RBAC, comprehensive monitoring
+- **Operational Reliability**: 99.9% availability, 60% reduction in MTTR, <30 second recovery
 
-**Operational Leverage**
-- **Traditional**: 1 DevOps engineer per 10-50 agents
-- **With CodeValdCortex**: 1 engineer per 1,000+ agents
-- **Impact**: **20-100x operational efficiency**, transforming AI operations from cost center to strategic asset
-- **Financial Value**: $2-5M annual savings in operational overhead (Fortune 500 enterprise)
-
-**Infrastructure Efficiency**
-- **Traditional**: 8-16GB memory per 100 agents with manual orchestration
-- **With CodeValdCortex**: <2GB memory per 1,000 agents with automated lifecycle management
-- **Impact**: **70% reduction in infrastructure costs**, enabling cost-effective scaling
-- **Financial Value**: $1-3M annual cloud compute savings at 5,000+ agent scale
-
----
-
-#### Emotional Value: Risk Reduction & Control
-
-**Compliance & Audit Readiness**
-- **Before**: 12-18 months to achieve compliance certification with manual audit trails
-- **After**: Compliance-ready from day one with built-in audit, RBAC, and reporting
-- **Impact**: **Zero compliance violations**, 100% auditability of AI decisions, 12-month faster certification
-- **Risk Mitigation**: Avoidance of $10M-$100M regulatory penalties (financial services, healthcare)
-
-**Security & Governance**
-- **Traditional**: Agent-to-agent attack vectors, inconsistent access control, manual security reviews
-- **With CodeValdCortex**: Zero-trust architecture, automated RBAC, comprehensive security monitoring
-- **Impact**: **Zero security breaches** in production AI deployments, elimination of agent compromise risks
-- **Risk Mitigation**: Avoidance of $4.5M average data breach cost (IBM Security 2024)
-
-**Operational Reliability**
-- **Traditional**: 95-98% uptime with manual intervention and extended downtime during failures
-- **With CodeValdCortex**: 99.9% availability with automated failover and <30 second recovery
-- **Impact**: **60% reduction in Mean Time To Resolution (MTTR)**, proactive issue detection
-- **Financial Value**: $500K-$5M avoided downtime costs per year (enterprise e-commerce, fintech)
-
----
-
-#### Life-Changing Value: Business Transformation
-
-**Scale Economics Unlock**
-- **Challenge**: Organizations cannot achieve ROI on AI automation when 1 engineer can only manage 10-50 agents
-- **With CodeValdCortex**: Achieve **100x operational leverage** — enabling AI automation to become financially viable at enterprise scale
-- **Transformation**: AI operations shift from "experimental project" to "strategic competitive advantage"
-
-**Responsible Automation Enablement**
-- **Challenge**: Regulated industries (finance, healthcare, telecom) cannot deploy AI agents without complete auditability and governance
-- **With CodeValdCortex**: Built-in compliance, audit trails, and impact analysis enable **responsible AI deployment at scale**
-- **Transformation**: Organizations move from "AI is too risky" to "AI is a governed, auditable production capability"
-
-**Hybrid Cloud Freedom**
-- **Challenge**: Infrastructure lock-in prevents organizations from optimizing workload placement and negotiating competitive pricing
-- **With CodeValdCortex**: Deploy agents across on-premise, AWS, Azure, GCP without re-architecture
-- **Transformation**: Organizations achieve **infrastructure independence**, enabling cloud cost optimization and multi-cloud resilience
-
----
-
-### Value Mapping: Technical Metrics → Enterprise Outcomes
-
-| Technical Capability | Technical Metric | Enterprise Outcome | Measurable Impact |
-|---------------------|------------------|-------------------|-------------------|
-| **Multi-Agent Coordination** | 10,000+ concurrent agents | Deploy complex AI workflows at scale | 60% reduction in deployment time |
-| **Sub-100ms Latency** | <100ms agent coordination | Real-time decision-making and responsiveness | 80% faster transaction processing |
-| **99.9% Availability** | <30 seconds recovery time | Business continuity and customer trust | 60% reduction in MTTR, $500K-$5M avoided downtime costs |
-| **Resource Efficiency** | <2GB per 1,000 agents | Cost-effective scaling to production | 70% lower infrastructure costs |
-| **Complete Audit Trails** | 100% action logging | Regulatory compliance and risk mitigation | Zero compliance violations, avoidance of $10M-$100M penalties |
-| **Zero-Trust Security** | Encrypted + authenticated comms | Enterprise-grade security posture | Zero security breaches, avoidance of $4.5M breach costs |
-| **Goal-Work Item Mapping** | Real-time impact analysis | Business alignment and predictability | 85% reduction in unintended consequences |
-| **Kubernetes-Native** | Auto-scaling, self-healing | Operational reliability at scale | 99.9% uptime, 24/7 autonomous operations |
-
----
+**Life-Changing Value: Business Transformation**
+- **Scale Economics**: 100x operational leverage enables AI automation to become financially viable
+- **Responsible Automation**: Built-in compliance enables regulated industries to deploy AI at scale
+- **Hybrid Cloud Freedom**: Infrastructure independence enables cost optimization and multi-cloud resilience
 
 ### ROI Example: Fortune 500 Financial Services
 
-**Scenario**: Deploy 5,000 AI agents for fraud detection, risk analysis, and customer service automation
-
-**Investment**:
-- Implementation: $500K (professional services, training, integration)
-- Annual Infrastructure: $1.2M (cloud compute, storage, networking)
-- Annual Operations: $600K (2 DevOps engineers at $300K fully loaded)
-- **Total Year 1**: $2.3M
+**Investment (Year 1)**: $2.3M (implementation, infrastructure, operations)
 
 **Value Delivered**:
-- **Time Savings**: 60% faster AI deployment ($1.5M saved in consulting fees and internal labor)
-- **Operational Efficiency**: 20x operational leverage ($4M saved vs. 40 engineers needed with traditional approach)
-- **Infrastructure Optimization**: 70% reduction in cloud costs ($2.8M saved vs. traditional orchestration)
-- **Risk Avoidance**: Zero compliance violations, zero security breaches ($10M+ avoided regulatory penalties)
-- **Business Impact**: 80% reduction in fraud detection time, 99.9% system uptime ($15M+ revenue protection)
-- **Total Year 1 Value**: $33.3M+
+- Time Savings: $1.5M (reduced consulting and internal labor)
+- Operational Efficiency: $4M (20x leverage vs. traditional approach)
+- Infrastructure Optimization: $2.8M (70% cloud cost reduction)
+- Risk Avoidance: $10M+ (avoided regulatory penalties)
+- Business Impact: $15M+ (fraud detection, uptime improvement)
 
-**ROI**: **1,348% Year 1 ROI** — transforming AI operations from cost center to strategic asset
-
----
-
-### Customer Testimonials: Value in Practice
-
-> *"CodeValdCortex reduced our AI deployment time from 9 months to 5 weeks. More importantly, built-in compliance and audit trails gave our legal team the confidence to approve production deployment — something they'd blocked for 2 years."*  
-> — **VP Engineering, Fortune 500 Financial Services**
-
-> *"We manage 3,000+ healthcare AI agents with a team of 3 engineers. Before CodeValdCortex, that would have required 60+ engineers and still wouldn't meet HIPAA auditability requirements."*  
-> — **CTO, Healthcare Data Platform**
-
-> *"The 100x operational leverage isn't marketing hype — it's real. We went from drowning in manual agent coordination to having complete visibility and control at scale. CodeValdCortex transformed our AI operations from reactive firefighting to proactive governance."*  
-> — **Director of AI Operations, Telecommunications**
+**Total Year 1 Value**: $33.3M+ | **ROI**: 1,348%
 
 ## 🔒 Security & Compliance
 
-### Security Framework
-- **Zero-Trust Architecture**: All communications encrypted and authenticated
-- **Role-Based Access Control**: Fine-grained permissions with audit trails
-- **Data Encryption**: AES-256 at rest, TLS 1.3 in transit
-- **Vulnerability Management**: Automated scanning and patching
-- **Incident Response**: Comprehensive logging and alerting
+**Security Framework**: Zero-trust architecture, role-based access control (RBAC), AES-256 encryption at rest, TLS 1.3 in transit, automated vulnerability scanning
 
-### Compliance Ready
-- **SOC 2 Type II**: Security controls and audit procedures
-- **ISO 27001**: Information security management system
-- **GDPR**: Data protection and privacy compliance
-- **HIPAA**: Healthcare data security requirements
-- **PCI DSS**: Payment card industry security standards
+**Compliance Ready**: SOC 2 Type II, ISO 27001, GDPR, HIPAA, PCI DSS controls built-in
 
 ## 🤝 Contributing
 
