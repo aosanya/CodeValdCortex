@@ -20,13 +20,42 @@ export function initializeOverview() {
             ];
         }
 
-        // Set default context to introduction
-        window.currentAgencyContext = 'introduction';
+        // Check if there's a hash in the URL
+        const hash = window.location.hash.slice(1); // Remove the '#'
+        const validSections = window.AGENCY_CONTEXTS;
 
-        // Update the context display to show Introduction
-        const contextCurrentEl = document.getElementById('context-current');
-        if (contextCurrentEl) {
-            contextCurrentEl.textContent = 'Introduction';
+        // Set default context based on hash or default to introduction
+        if (hash && validSections.includes(hash)) {
+            window.currentAgencyContext = hash;
+
+            // Update the context display
+            const contextCurrentEl = document.getElementById('context-current');
+            if (contextCurrentEl) {
+                const labelMap = {
+                    'introduction': 'Introduction',
+                    'goal-definition': 'Goal Definition',
+                    'work-items': 'Work Items',
+                    'roles': 'Roles',
+                    'raci-matrix': 'RACI Matrix'
+                };
+                contextCurrentEl.textContent = labelMap[hash] || hash;
+            }
+
+            // Activate the correct nav item
+            const navItem = document.querySelector(`.overview-nav-item[data-section="${hash}"]`);
+            if (navItem) {
+                selectOverviewSection(navItem, hash);
+            }
+        } else {
+            // Set default context to introduction
+            window.currentAgencyContext = 'introduction';
+            window.location.hash = 'introduction';
+
+            // Update the context display to show Introduction
+            const contextCurrentEl = document.getElementById('context-current');
+            if (contextCurrentEl) {
+                contextCurrentEl.textContent = 'Introduction';
+            }
         }
     }
 
@@ -35,8 +64,10 @@ export function initializeOverview() {
     const introEditor = document.getElementById('introduction-editor');
 
     if (overviewView && overviewView.classList.contains('is-active') && introEditor) {
-        // Load introduction data
-        loadIntroductionEditor();
+        // Load introduction data if on introduction section
+        if (!window.location.hash || window.location.hash === '#introduction') {
+            loadIntroductionEditor();
+        }
     }
 }
 
@@ -57,6 +88,10 @@ export function selectOverviewSection(element, section) {
         // Track current selected context (for backend calls to include as `context`)
         window.currentAgencyContext = section;
     }
+
+    // Update URL hash
+    window.location.hash = section;
+
     // Remove active class from all overview nav items
     const allItems = document.querySelectorAll('.overview-nav-item');
     allItems.forEach(item => item.classList.remove('is-active'));
@@ -124,3 +159,7 @@ export function selectOverviewSection(element, section) {
         }
     }
 }
+
+// Make functions available globally for inline onclick handlers
+window.selectOverviewSection = selectOverviewSection;
+window.initializeOverview = initializeOverview;
