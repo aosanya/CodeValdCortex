@@ -3,6 +3,7 @@
 
 import { getCurrentAgencyId, showNotification } from './utils.js';
 import { scrollToBottom } from './chat.js';
+import { loadEntityList, showEntityEditor, cancelEntityEdit, deleteEntity, saveEntity, populateForm, clearForm } from './crud-helpers.js';
 
 // Work item editor state management
 let workItemEditorState = {
@@ -13,72 +14,29 @@ let workItemEditorState = {
 
 // Load work items list
 export function loadWorkItems() {
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId) {
-        return;
-    }
-
-    const workItemsTableBody = document.getElementById('work-items-table-body');
-    if (!workItemsTableBody) {
-        return;
-    }
-
-    // Show loading state
-    workItemsTableBody.innerHTML = '<tr><td colspan="4" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
-
-    // Fetch work items HTML from API
-    const url = `/api/v1/agencies/${agencyId}/work-items/html`;
-
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load work items');
-            }
-            return response.text();
-        })
-        .then(html => {
-            workItemsTableBody.innerHTML = html;
-        })
-        .catch(error => {
-            workItemsTableBody.innerHTML = '<tr><td colspan="4" class="has-text-danger has-text-centered py-5"><p>Error loading work items</p></td></tr>';
-        });
+    return loadEntityList('work-items', 'work-items-table-body', 4);
 }
 
 // Show work item editor
 export function showWorkItemEditor(mode, workItemKey = null) {
-
     workItemEditorState.mode = mode;
     workItemEditorState.workItemKey = workItemKey;
 
-    const editorCard = document.getElementById('work-item-editor-card');
-    const listCard = document.getElementById('work-items-list-card');
-    const editorTitle = document.getElementById('work-item-editor-title');
-
-    if (!editorCard || !listCard || !editorTitle) {
-        return;
-    }
+    showEntityEditor(
+        mode,
+        'work-item-editor-card',
+        'work-items-list-card',
+        'work-item-editor-title',
+        'Add New Work Item',
+        'Edit Work Item',
+        'work-item-title-editor'
+    );
 
     if (mode === 'add') {
-        // Clear form for new work item
-        editorTitle.textContent = 'Add New Work Item';
         clearWorkItemForm();
     } else if (mode === 'edit') {
-        // Load existing work item data
-        editorTitle.textContent = 'Edit Work Item';
         loadWorkItemData(workItemKey);
     }
-
-    // Show editor, hide list
-    editorCard.classList.remove('is-hidden');
-    listCard.classList.add('is-hidden');
-
-    // Focus on title field
-    const titleEditor = document.getElementById('work-item-title-editor');
-    if (titleEditor) {
-        titleEditor.focus();
-    } else {
-    }
-
 }
 
 // Load work item data for editing
@@ -115,55 +73,30 @@ function loadWorkItemData(workItemKey) {
 
 // Populate form with work item data
 function populateWorkItemForm(workItem) {
-
-    const fields = {
+    populateForm({
         'work-item-title-editor': workItem.title || '',
         'work-item-description-editor': workItem.description || '',
         'work-item-deliverables-editor': workItem.deliverables ? workItem.deliverables.join('\n') : '',
         'work-item-dependencies-editor': workItem.dependencies ? workItem.dependencies.join(', ') : '',
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
-    };
-
-
-    for (const [id, value] of Object.entries(fields)) {
-        const element = document.getElementById(id);
-        if (element) {
-            element.value = value;
-        } else {
-        }
-    }
-
+    });
 }
 
 // Clear work item form
 function clearWorkItemForm() {
-    const fields = [
+    clearForm([
         'work-item-title-editor',
         'work-item-description-editor',
         'work-item-deliverables-editor',
         'work-item-dependencies-editor',
         'work-item-tags-editor'
-    ];
-
-    fields.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.value = '';
-        }
-    });
+    ]);
 
     workItemEditorState.originalData = {};
 }
 
 // Save work item from editor
 export function saveWorkItemFromEditor() {
-
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
-        return;
-    }
-
     // Get form values
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
@@ -193,13 +126,7 @@ export function saveWorkItemFromEditor() {
         return;
     }
 
-    const isAddMode = workItemEditorState.mode === 'add';
-    const url = isAddMode
-        ? `/api/v1/agencies/${agencyId}/work-items`
-        : `/api/v1/agencies/${agencyId}/work-items/${workItemEditorState.workItemKey}`;
-    const method = isAddMode ? 'POST' : 'PUT';
-
-    const requestBody = {
+    const data = {
         title,
         description,
         deliverables,
@@ -207,44 +134,21 @@ export function saveWorkItemFromEditor() {
         tags
     };
 
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to ${isAddMode ? 'create' : 'update'} work item`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            showNotification(`Work item ${isAddMode ? 'added' : 'updated'} successfully!`, 'success');
-            cancelWorkItemEdit();
-            loadWorkItems();
-        })
-        .catch(error => {
-            showNotification(`Error ${isAddMode ? 'adding' : 'updating'} work item`, 'error');
-        });
+    saveEntity('work-items', workItemEditorState.mode, workItemEditorState.workItemKey, data, 'save-work-item-btn', () => {
+        cancelWorkItemEdit();
+        loadWorkItems();
+    });
 }
 
 // Cancel work item edit
 export function cancelWorkItemEdit() {
-
-    const editorCard = document.getElementById('work-item-editor-card');
-    const listCard = document.getElementById('work-items-list-card');
-
-    if (editorCard) {
-        editorCard.classList.add('is-hidden');
-    }
-    if (listCard) {
-        listCard.classList.remove('is-hidden');
-    }
-
-    clearWorkItemForm();
+    cancelEntityEdit('work-item-editor-card', 'work-items-list-card', [
+        'work-item-title-editor',
+        'work-item-description-editor',
+        'work-item-deliverables-editor',
+        'work-item-dependencies-editor',
+        'work-item-tags-editor'
+    ]);
 
     // Reset state
     workItemEditorState = {
@@ -252,37 +156,11 @@ export function cancelWorkItemEdit() {
         workItemKey: null,
         originalData: {}
     };
-
 }
 
 // Delete work item
 export function deleteWorkItem(workItemKey) {
-    if (!confirm(`Are you sure you want to delete this work item?`)) {
-        return;
-    }
-
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
-        return;
-    }
-
-    fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}`, {
-        method: 'DELETE'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to delete work item');
-            }
-            return response.json();
-        })
-        .then(() => {
-            showNotification('Work item deleted successfully!', 'success');
-            loadWorkItems();
-        })
-        .catch(error => {
-            showNotification('Error deleting work item', 'error');
-        });
+    deleteEntity('work-items', workItemKey, 'this work item', loadWorkItems);
 }
 
 // Filter work items
