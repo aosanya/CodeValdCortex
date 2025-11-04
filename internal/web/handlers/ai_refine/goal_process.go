@@ -18,8 +18,9 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 
 	// Parse request body
 	var req struct {
-		Operations []string `json:"operations" binding:"required"`
-		GoalKeys   []string `json:"goal_keys"` // Optional: specific goals to enhance/consolidate
+		Operations  []string `json:"operations" binding:"required"`
+		GoalKeys    []string `json:"goal_keys"`    // Optional: specific goals to enhance/consolidate
+		UserRequest string   `json:"user_request"` // Optional: user's request for creating/modifying goals
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Error("Failed to parse AI process request", "error", err)
@@ -28,9 +29,10 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 	}
 
 	h.logger.WithFields(logrus.Fields{
-		"agency_id":  agencyID,
-		"operations": req.Operations,
-		"goal_keys":  req.GoalKeys,
+		"agency_id":    agencyID,
+		"operations":   req.Operations,
+		"goal_keys":    req.GoalKeys,
+		"user_request": req.UserRequest,
 	}).Info("Processing AI goal operations")
 
 	// Validate agency exists and get context
@@ -94,7 +96,7 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 
 		switch operation {
 		case "create":
-			h.processCreateOperation(c, agencyID, ag, overview, existingGoals, workItems, results, &createdGoals)
+			h.processCreateOperation(c, agencyID, ag, overview, existingGoals, workItems, req.UserRequest, results, &createdGoals)
 		case "enhance":
 			h.processEnhanceOperation(c, agencyID, ag, goalsToProcess, workItems, results, &enhancedGoals)
 		case "consolidate":
@@ -148,19 +150,33 @@ func (h *Handler) processCreateOperation(
 	overview *agency.Overview,
 	existingGoals []*agency.Goal,
 	workItems []*agency.WorkItem,
+	userRequest string,
 	results map[string]interface{},
 	createdGoals *[]*agency.Goal,
 ) {
-	// Generate new goals based on introduction
-	if overview.Introduction == "" {
-		h.logger.Warn("No introduction found for goal generation", "agencyID", agencyID)
-		results["create_error"] = "No introduction found. Please add an introduction first."
+	// Generate new goals based on introduction or user request
+	var userInput string
+	if userRequest != "" {
+		// User provided specific request for goal creation
+		userInput = userRequest
+		h.logger.Info("Using user request for goal generation",
+			"agencyID", agencyID,
+			"userRequest", userRequest)
+	} else if overview.Introduction != "" {
+		// Fall back to using introduction
+		userInput = "Based on the agency introduction: " + overview.Introduction
+		h.logger.Info("Using introduction for goal generation",
+			"agencyID", agencyID,
+			"introductionLength", len(overview.Introduction))
+	} else {
+		h.logger.Warn("No introduction or user request found for goal generation", "agencyID", agencyID)
+		results["create_error"] = "No introduction or user request found. Please add an introduction or provide a specific goal request."
 		return
 	}
 
 	h.logger.Info("Starting multiple goal generation from introduction",
 		"agencyID", agencyID,
-		"introductionLength", len(overview.Introduction),
+		"userInputLength", len(userInput),
 		"existingGoalsCount", len(existingGoals))
 
 	// Generate multiple goals in one AI call
@@ -168,8 +184,8 @@ func (h *Handler) processCreateOperation(
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		ExistingGoals: existingGoals,
-		WorkItems:   workItems,
-		UserInput:     "Based on the agency introduction: " + overview.Introduction,
+		WorkItems:     workItems,
+		UserInput:     userInput,
 	}
 
 	h.logger.Info("Calling AI to generate multiple goals", "agencyID", agencyID)
@@ -262,7 +278,7 @@ func (h *Handler) processEnhanceOperation(
 			Scope:          goal.Scope,
 			SuccessMetrics: goal.SuccessMetrics,
 			ExistingGoals:  existingGoals,
-			WorkItems:    workItems,
+			WorkItems:      workItems,
 			AgencyContext:  ag,
 		}
 
@@ -358,7 +374,7 @@ func (h *Handler) processConsolidateOperation(
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		CurrentGoals:  existingGoals,
-		WorkItems:   workItems,
+		WorkItems:     workItems,
 	}
 
 	consolidationResult, err := h.goalConsolidator.ConsolidateGoals(c.Request.Context(), consolidationReq)

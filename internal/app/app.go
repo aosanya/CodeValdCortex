@@ -299,7 +299,7 @@ func (a *App) setupServer() error {
 	var chatHandler *webhandlers.ChatHandler
 	if a.aiDesignerService != nil && a.introductionRefiner != nil {
 		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	}
 

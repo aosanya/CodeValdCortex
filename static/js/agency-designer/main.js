@@ -15,7 +15,8 @@ import {
     showGoalEditor,
     saveGoalFromEditor,
     cancelGoalEdit,
-    deleteGoal
+    deleteGoal,
+    loadGoals
 } from './goals.js';
 import {
     showWorkItemEditor,
@@ -54,6 +55,15 @@ function initializeAgencyDesigner() {
             console.log('[Main] Introduction updated event received - reloading editor');
             loadIntroductionEditor();
         });
+
+        // Listen for goals updates from chat processing
+        document.body.addEventListener('goalsUpdated', function () {
+            console.log('[Main] Goals updated event received - reloading goals list');
+            if (typeof loadGoals === 'function') {
+                loadGoals();
+            }
+        });
+
         loadIntroductionEditor(); // Initialize introduction editor
         initializeAIProcessControls();
         initializeContextSelection(); // Initialize context selection system

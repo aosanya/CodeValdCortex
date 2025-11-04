@@ -6,8 +6,34 @@ import { initializeAgentSelection } from './agents.js';
 
 // Initialize HTMX event listeners
 export function initializeHTMXEvents() {
-    // Show typing indicator when request starts
+    // Log context being sent with chat messages
+    document.body.addEventListener('htmx:configRequest', function (evt) {
+        if (evt.detail.path && evt.detail.path.includes('/messages/web')) {
+            console.log('[HTMX] Chat message request config:', {
+                path: evt.detail.path,
+                verb: evt.detail.verb,
+                parameters: evt.detail.parameters,
+                headers: evt.detail.headers
+            });
+        }
+    });
+
+    // Log what's actually being sent
     document.body.addEventListener('htmx:beforeRequest', function (evt) {
+        if (evt.detail.path && evt.detail.path.includes('/messages/web')) {
+            console.log('[HTMX] About to send chat request:', {
+                path: evt.detail.path,
+                parameters: evt.detail.parameters,
+                target: evt.detail.target
+            });
+
+            // Try to log the actual form data
+            const formData = new FormData(evt.detail.elt);
+            console.log('[HTMX] Form data entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}: ${value}`);
+            }
+        }
 
         const indicator = document.getElementById('typing-indicator');
         if (indicator && evt.detail.elt.matches('form[hx-post*="conversations"]')) {

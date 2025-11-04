@@ -131,7 +131,7 @@ export function deleteGoal(goalKey, goalNumber) {
 }
 
 // Process AI Goal Operation - Direct operation without modal
-export function processAIGoalOperation(operations) {
+export function processAIGoalOperation(operations, userRequest = '') {
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
         showNotification('Error: No agency selected', 'error');
@@ -161,16 +161,24 @@ export function processAIGoalOperation(operations) {
         window.showAIProcessStatus(statusMessage);
     }
 
+    // Build request body
+    const requestBody = {
+        operations: operations,
+        goal_keys: selectedGoalKeys
+    };
+
+    // Add user request if provided
+    if (userRequest && userRequest.trim() !== '') {
+        requestBody.user_request = userRequest.trim();
+    }
+
     // Call AI endpoint with operations and selected goal keys
     fetch(`/api/v1/agencies/${agencyId}/goals/ai-process`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            operations: operations,
-            goal_keys: selectedGoalKeys
-        })
+        body: JSON.stringify(requestBody)
     })
         .then(response => {
             if (!response.ok) {

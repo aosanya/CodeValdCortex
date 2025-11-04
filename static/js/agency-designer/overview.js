@@ -27,6 +27,14 @@ export function initializeOverview() {
         // Set default context based on hash or default to introduction
         if (hash && validSections.includes(hash)) {
             window.currentAgencyContext = hash;
+            console.log('[Overview] Initialized context from URL hash:', hash);
+
+            // Update hidden context field in chat form
+            const contextField = document.getElementById('chat-context-field');
+            if (contextField) {
+                contextField.value = hash;
+                console.log('[Overview] Initialized chat context field to:', hash);
+            }
 
             // Update the context display
             const contextCurrentEl = document.getElementById('context-current');
@@ -50,6 +58,14 @@ export function initializeOverview() {
             // Set default context to introduction
             window.currentAgencyContext = 'introduction';
             window.location.hash = 'introduction';
+            console.log('[Overview] Initialized context to default: introduction');
+
+            // Update hidden context field in chat form
+            const contextField = document.getElementById('chat-context-field');
+            if (contextField) {
+                contextField.value = 'introduction';
+                console.log('[Overview] Initialized chat context field to: introduction');
+            }
 
             // Update the context display to show Introduction
             const contextCurrentEl = document.getElementById('context-current');
@@ -87,6 +103,14 @@ export function selectOverviewSection(element, section) {
 
         // Track current selected context (for backend calls to include as `context`)
         window.currentAgencyContext = section;
+        console.log('[Overview] Context changed to:', section);
+
+        // Update hidden context field in chat form immediately
+        const contextField = document.getElementById('chat-context-field');
+        if (contextField) {
+            contextField.value = section;
+            console.log('[Overview] Updated chat context field to:', section);
+        }
     }
 
     // Update URL hash

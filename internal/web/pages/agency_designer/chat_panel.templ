@@ -140,7 +140,19 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 		} else {
 			hx-swap="beforeend"
 		}
-		hx-vals="js:{message: document.getElementById('user-input').value + (window.ContextManager ? window.ContextManager.getFormattedContexts() : ''), context: window.currentAgencyContext}"
+		hx-vals='js:{"context": window.currentAgencyContext || "introduction"}'
+		hx-on::before-request="
+			console.log('[Chat Form] Submitting with context:', window.currentAgencyContext, 'Message:', document.getElementById('user-input').value);
+			// Append formatted contexts to message if available
+			const messageInput = document.getElementById('user-input');
+			const originalMessage = messageInput.value;
+			if (window.ContextManager) {
+				const formattedContexts = window.ContextManager.getFormattedContexts();
+				if (formattedContexts) {
+					messageInput.value = originalMessage + formattedContexts;
+				}
+			}
+		"
 		hx-on::after-request="
 			document.getElementById('user-input').value = ''; 
 			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
