@@ -1665,3 +1665,19 @@ a.overview-nav-link:hover {
 .context-list::-webkit-scrollbar-thumb:hover {
     background: var(--vscode-text-muted);
 }
+/* Pulsing animation for refine button when chat requests refinement */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(50, 115, 220, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(50, 115, 220, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(50, 115, 220, 0);
+    }
+}
+
+.button.is-pulsing {
+    animation: pulse 2s infinite;
+}

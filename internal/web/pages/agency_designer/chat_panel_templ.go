@@ -63,7 +63,7 @@ func ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationContex
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Typing Indicator --><div class=\"typing-indicator\" id=\"typing-indicator\" style=\"display: none;\"><div class=\"typing-bubble\"><span></span><span></span><span></span></div></div><!-- Context Panel (between messages and input) --><div class=\"chat-context-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><!-- Typing Indicator --><div class=\"typing-indicator\" id=\"typing-indicator\" style=\"display: none;\"><div class=\"notification is-info is-light\"><span class=\"icon\"><i class=\"fas fa-circle-notch fa-spin\"></i></span> <span>AI is thinking...</span></div></div><!-- Context Panel (between messages and input) --><div class=\"chat-context-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -116,7 +116,7 @@ func WelcomeMessage(agencyName string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(agencyName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 79, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 78, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -202,7 +202,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 109, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 108, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -215,7 +215,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 112, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 111, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -266,7 +266,7 @@ func AIMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 136, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 135, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -309,7 +309,7 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getMessageEndpoint(agencyID, conversation))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 145, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 144, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -330,7 +330,7 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " hx-indicator=\"#typing-indicator\" hx-on::before-request=\"\n\t\t\tconst input = document.getElementById('user-input');\n\t\t\tconst contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';\n\t\t\tif (contexts) {\n\t\t\t\tinput.value = input.value + contexts;\n\t\t\t}\n\t\t\" hx-on::after-request=\"\n\t\t\tdocument.getElementById('user-input').value = ''; \n\t\t\tdocument.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;\n\t\t\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Describe your requirements...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-primary\" type=\"submit\"><span class=\"icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><!-- Context indicator --><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, " hx-indicator=\"#typing-indicator\" hx-vals=\"js:{message: document.getElementById('user-input').value + (window.ContextManager ? window.ContextManager.getFormattedContexts() : ''), activeTab: window.AgencyDesigner ? window.AgencyDesigner.getCurrentTab() : 'overview'}\" hx-on::after-request=\"\n\t\t\tdocument.getElementById('user-input').value = ''; \n\t\t\tdocument.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;\n\t\t\t// Clear selections after message is sent\n\t\t\tif (window.ContextManager) {\n\t\t\t\twindow.ContextManager.clearSelections();\n\t\t\t}\n\t\t\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Describe your requirements...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-primary\" type=\"submit\"><span class=\"icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><!-- Context indicator --><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -267,16 +267,36 @@ export function getAllContexts() {
  * @returns {string} Formatted context string for AI
  */
 export function getFormattedContexts() {
-    if (contextState.contexts.length === 0) {
+    // Include both finalized contexts and pending selections
+    const hasContexts = contextState.contexts.length > 0;
+    const hasSelections = contextState.selections.length > 0;
+
+    console.log('[ContextManager] getFormattedContexts called:', {
+        contexts: contextState.contexts.length,
+        selections: contextState.selections.length
+    });
+
+    if (!hasContexts && !hasSelections) {
+        console.log('[ContextManager] No contexts or selections to format');
         return '';
     }
 
     let formatted = '\n\n**Context:**\n';
+
+    // Add finalized contexts
     contextState.contexts.forEach((ctx, index) => {
         formatted += `\n${index + 1}. **${ctx.type}** [${ctx.code}]:\n`;
         formatted += `   ${ctx.content}\n`;
     });
 
+    // Add pending selections (these are the yellow boxes)
+    contextState.selections.forEach((sel, index) => {
+        const num = contextState.contexts.length + index + 1;
+        formatted += `\n${num}. **${sel.type}** [${sel.code}]:\n`;
+        formatted += `   ${sel.text}\n`;
+    });
+
+    console.log('[ContextManager] Formatted context:', formatted.substring(0, 200));
     return formatted;
 }
 

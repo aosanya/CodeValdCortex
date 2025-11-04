@@ -25,22 +25,21 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 				@ChatMessages(conversation.Messages)
 			} else {
 				@WelcomeMessage(currentAgency.Name)
-			}
+		}
+	</div>
+	
+	<!-- Typing Indicator -->
+	<div class="typing-indicator" id="typing-indicator" style="display: none;">
+		<div class="notification is-info is-light">
+			<span class="icon"><i class="fas fa-circle-notch fa-spin"></i></span>
+			<span>AI is thinking...</span>
 		</div>
-		
-		<!-- Typing Indicator -->
-		<div class="typing-indicator" id="typing-indicator" style="display: none;">
-			<div class="typing-bubble">
-				<span></span><span></span><span></span>
-			</div>
-		</div>
-		
-		<!-- Context Panel (between messages and input) -->
-		<div class="chat-context-section">
-			@ContextPanel()
-		</div>
-		
-		<!-- Chat Input (Independent) -->
+	</div>
+	
+	<!-- Context Panel (between messages and input) -->
+	<div class="chat-context-section">
+		@ContextPanel()
+	</div>		<!-- Chat Input (Independent) -->
 		<div class="chat-input-container">
 			<!-- AI Process Status Bar (inside input panel) -->
 			<div class="ai-process-status htmx-indicator" id="ai-process-status" style="display: none;">
@@ -150,16 +149,14 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 			hx-swap="beforeend"
 		}
 		hx-indicator="#typing-indicator"
-		hx-on::before-request="
-			const input = document.getElementById('user-input');
-			const contexts = window.ContextManager ? window.ContextManager.getFormattedContexts() : '';
-			if (contexts) {
-				input.value = input.value + contexts;
-			}
-		"
+		hx-vals="js:{message: document.getElementById('user-input').value + (window.ContextManager ? window.ContextManager.getFormattedContexts() : ''), activeTab: window.AgencyDesigner ? window.AgencyDesigner.getCurrentTab() : 'overview'}"
 		hx-on::after-request="
 			document.getElementById('user-input').value = ''; 
 			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+			// Clear selections after message is sent
+			if (window.ContextManager) {
+				window.ContextManager.clearSelections();
+			}
 		">
 		
 		<div class="field has-addons">

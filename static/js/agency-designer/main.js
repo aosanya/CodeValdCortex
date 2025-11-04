@@ -155,3 +155,24 @@ window.filterRoles = filterRoles;
 window.showAIProcessStatus = showAIProcessStatus;
 window.hideAIProcessStatus = hideAIProcessStatus;
 window.stopAIProcess = stopAIProcess;
+
+// Create AgencyDesigner namespace for utility functions
+window.AgencyDesigner = {
+    getCurrentTab: function () {
+        // Check which overview section is active
+        const activeSection = document.querySelector('.overview-section-button.is-active');
+        if (activeSection) {
+            const section = activeSection.getAttribute('data-section');
+            return section || 'overview';
+        }
+
+        // Fallback to checking view tabs
+        const activeViewTab = document.querySelector('.view-tab.is-active');
+        if (activeViewTab) {
+            return activeViewTab.getAttribute('data-view') || 'overview';
+        }
+
+        // Default to overview
+        return 'overview';
+    }
+};

@@ -297,9 +297,9 @@ func (a *App) setupServer() error {
 	// Initialize AI agency designer web handler (if service available)
 	var aiDesignerWebHandler *webhandlers.AgencyDesignerWebHandler
 	var chatHandler *webhandlers.ChatHandler
-	if a.aiDesignerService != nil {
+	if a.aiDesignerService != nil && a.introductionRefiner != nil {
 		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	}
 

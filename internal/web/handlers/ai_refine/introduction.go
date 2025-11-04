@@ -5,6 +5,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -70,13 +71,64 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		workItems = []*agency.WorkItem{}
 	}
 
+	// Get all roles for context
+	roles, err := h.roleService.ListTypes(c.Request.Context())
+	if err != nil {
+		h.logger.WithError(err).Warn("Failed to fetch roles, continuing without them")
+		roles = []*registry.Role{}
+	}
+
+	// Get RACI assignments for context
+	assignments, err := h.agencyService.GetAllRACIAssignments(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
+		assignments = []*agency.RACIAssignment{}
+	}
+
+	// Get conversation context for recent chat messages
+	var conversationHistory []ai.Message
+	var userRequest string
+	conv, err := h.designerService.GetConversationByAgencyID(agencyID)
+	if err == nil && conv != nil {
+		// Include recent conversation messages (last 5) for context
+		messageCount := len(conv.Messages)
+		startIdx := 0
+		if messageCount > 5 {
+			startIdx = messageCount - 5
+		}
+		conversationHistory = conv.Messages[startIdx:]
+
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":     agencyID,
+			"message_count": len(conversationHistory),
+		}).Info("Including conversation context in introduction refinement")
+	}
+
+	// Check if there's a specific user request from the form
+	userRequest = c.PostForm("user-request")
+	if userRequest == "" {
+		// Check if there's a pending request from chat (passed via header or session)
+		userRequest = c.GetHeader("X-User-Request")
+	}
+
+	if userRequest != "" {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":    agencyID,
+			"user_request": userRequest,
+		}).Info("User provided specific refinement request")
+	}
+
 	// Build refinement request
 	refineReq := &ai.RefineIntroductionRequest{
-		AgencyID:      agencyID,
-		CurrentIntro:  currentIntroduction,
-		Goals:         goals,
-		WorkItems:     workItems,
-		AgencyContext: ag,
+		AgencyID:            agencyID,
+		CurrentIntro:        currentIntroduction,
+		Goals:               goals,
+		WorkItems:           workItems,
+		Roles:               roles,
+		Assignments:         assignments,
+		AgencyContext:       ag,
+		ConversationHistory: conversationHistory,
+		UserRequest:         userRequest,
 	}
 
 	// Call AI refiner service
