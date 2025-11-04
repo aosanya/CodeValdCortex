@@ -28,14 +28,6 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 		}
 	</div>
 	
-	<!-- Typing Indicator -->
-	<div class="typing-indicator" id="typing-indicator" style="display: none;">
-		<div class="notification is-info is-light">
-			<span class="icon"><i class="fas fa-circle-notch fa-spin"></i></span>
-			<span>AI is thinking...</span>
-		</div>
-	</div>
-	
 	<!-- Context Panel (between messages and input) -->
 	<div class="chat-context-section">
 		@ContextPanel()
@@ -148,8 +140,7 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 		} else {
 			hx-swap="beforeend"
 		}
-		hx-indicator="#typing-indicator"
-		hx-vals="js:{message: document.getElementById('user-input').value + (window.ContextManager ? window.ContextManager.getFormattedContexts() : ''), activeTab: window.AgencyDesigner ? window.AgencyDesigner.getCurrentTab() : 'overview'}"
+		hx-vals="js:{message: document.getElementById('user-input').value + (window.ContextManager ? window.ContextManager.getFormattedContexts() : ''), context: window.currentAgencyContext}"
 		hx-on::after-request="
 			document.getElementById('user-input').value = ''; 
 			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;

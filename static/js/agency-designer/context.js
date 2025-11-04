@@ -307,21 +307,28 @@ function updateContextDisplay() {
     const contextContainer = document.getElementById('context-container');
     if (!contextContainer) return;
 
+    // Get the clear button in the header
+    const clearButton = document.querySelector('.context-panel .button[onclick*="clearAllContexts"]');
+
     if (contextState.contexts.length === 0 && contextState.selections.length === 0) {
-        contextContainer.innerHTML = `
-            <div class="has-text-grey has-text-centered py-3">
-                <p><i class="fas fa-info-circle"></i> No contexts selected</p>
-                <p class="is-size-7 mt-2">Highlight text from goals, units, or introduction to add context</p>
-            </div>
-        `;
+        // Empty state - clear container and hide clear button
+        contextContainer.innerHTML = '';
+        if (clearButton) {
+            clearButton.style.display = 'none';
+        }
         return;
+    }
+
+    // Show clear button when there's content
+    if (clearButton) {
+        clearButton.style.display = '';
     }
 
     let html = '';
 
     // Render pending selections first (if any)
     if (contextState.selections.length > 0) {
-        html += `<div class="mb-3">`;
+        html += `<div class="">`;
 
         contextState.selections.forEach((sel, index) => {
             const typeColor = getContextTypeColor(sel.type);
@@ -331,27 +338,17 @@ function updateContextDisplay() {
 
             html += `
                 <div class="box p-2 mb-2 has-background-warning-light" data-selection-index="${index}">
-                    <div class="level is-mobile">
-                        <div class="level-left" style="flex-shrink: 1; min-width: 0;">
-                            <div class="level-item">
-                                <span class="tag is-small ${typeColor}">${sel.type}</span>
-                            </div>
-                            <div class="level-item">
-                                <strong class="is-size-7">${sel.code}</strong>
-                            </div>
+                    <div class="is-flex is-justify-content-space-between is-align-items-center">
+                        <div class="is-flex is-align-items-center" style="gap: 0.5rem; flex: 1; min-width: 0;">
+                            <span class="tag is-small ${typeColor}" style="flex-shrink: 0;">${sel.type}</span>
+                            <span class="is-size-7" style="word-break: break-word; overflow: hidden;">${escapeHtml(truncatedText)}</span>
                         </div>
-                        <div class="level-right" style="flex-shrink: 0;">
-                            <div class="level-item">
-                                <button 
-                                    class="delete is-small" 
-                                    onclick="window.ContextManager.removeSelection(${index})"
-                                    title="Remove selection"
-                                ></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="content is-small mt-1">
-                        <p class="is-size-7" style="word-break: break-word;">${escapeHtml(truncatedText)}</p>
+                        <button 
+                            class="delete is-small" 
+                            onclick="window.ContextManager.removeSelection(${index})"
+                            title="Remove selection"
+                            style="flex-shrink: 0;"
+                        ></button>
                     </div>
                 </div>
             `;
@@ -386,9 +383,6 @@ function updateContextDisplay() {
                         <div class="level-left">
                             <div class="level-item">
                                 <span class="tag ${typeColor}">${ctx.type}</span>
-                            </div>
-                            <div class="level-item">
-                                <strong class="has-text-weight-semibold">${ctx.code}</strong>
                             </div>
                         </div>
                         <div class="level-right">

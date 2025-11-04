@@ -153,16 +153,20 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	h.logger.WithFields(logrus.Fields{
-		"agency_id":   agencyID,
-		"was_changed": refinedResult.WasChanged,
-		"explanation": refinedResult.Explanation,
+		"agency_id":        agencyID,
+		"was_changed":      refinedResult.WasChanged,
+		"explanation":      refinedResult.Explanation,
+		"changed_sections": refinedResult.ChangedSections,
 	}).Info("AI refinement completed")
 
-	// Determine what text to save
-	// If AI refined it, use the refined version
-	// If AI didn't change it, still use the refined version (which is the current intro)
-	// This ensures user edits are saved even if AI says "no changes needed"
-	introToSave := refinedResult.RefinedIntroduction
+	// Extract introduction from the refined data
+	var introToSave string
+	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
+		introToSave = refinedResult.Data.Introduction
+	} else {
+		// Fallback to current introduction if data is missing
+		introToSave = currentIntroduction
+	}
 
 	// Check if the introduction is different from what's in the database
 	needsSave := (introToSave != overview.Introduction)
@@ -250,7 +254,9 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	// Update overview object for template rendering
-	overview.Introduction = refinedResult.RefinedIntroduction
+	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
+		overview.Introduction = refinedResult.Data.Introduction
+	}
 
 	// Render the refined introduction response
 	component := agency_designer.AIRefineResponse(refinedResult, ag, overview)

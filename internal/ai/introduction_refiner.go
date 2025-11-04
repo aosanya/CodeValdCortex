@@ -40,11 +40,10 @@ type RefineIntroductionRequest struct {
 
 // RefineIntroductionResponse contains the AI-refined introduction
 type RefineIntroductionResponse struct {
-	RefinedIntroduction string              `json:"refined_introduction"` // For backward compatibility
-	WasChanged          bool                `json:"was_changed"`
-	Explanation         string              `json:"explanation"`
-	ChangedSections     []string            `json:"changed_sections"` // Array of section codes that were changed
-	Data                *AgencyDataResponse `json:"data"`             // Complete updated agency data
+	WasChanged      bool                `json:"was_changed"`
+	Explanation     string              `json:"explanation"`
+	ChangedSections []string            `json:"changed_sections"` // Array of section codes that were changed
+	Data            *AgencyDataResponse `json:"data"`             // Complete updated agency data
 }
 
 // AgencyDataResponse contains the complete agency data structure
@@ -84,7 +83,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 		"full_prompt":       prompt,
 	}).Info("==== SENDING TO AI - Built refinement prompt ====")
 
-	// Request AI refinement
+	// Request AI refinement with strict JSON enforcement
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
 		Messages: []Message{
 			{
@@ -96,7 +95,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 				Content: prompt,
 			},
 		},
-		Temperature: 0.7,
+		Temperature: 0.0, // Completely deterministic - no creativity
 		MaxTokens:   2048,
 	})
 	if err != nil {
@@ -121,11 +120,23 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 		"tokens_used":      response.Usage.TotalTokens,
 	}).Info("==== PARSED RESULT - Introduction refinement completed ====")
 
+	// Add debug logging to terminal output
+	fmt.Printf("\n========================================\n")
+	fmt.Printf("AI RAW RESPONSE:\n")
+	fmt.Printf("========================================\n")
+	fmt.Printf("%s\n", response.Content)
+	fmt.Printf("========================================\n")
+	fmt.Printf("PARSED RESULT:\n")
+	fmt.Printf("  - Changed: %v\n", wasChanged)
+	fmt.Printf("  - Explanation: %s\n", explanation)
+	fmt.Printf("  - Sections: %v\n", changedSections)
+	fmt.Printf("  - Refined length: %d chars\n", len(refined))
+	fmt.Printf("========================================\n\n")
+
 	return &RefineIntroductionResponse{
-		RefinedIntroduction: refined,
-		WasChanged:          wasChanged,
-		Explanation:         explanation,
-		ChangedSections:     changedSections,
+		WasChanged:      wasChanged,
+		Explanation:     explanation,
+		ChangedSections: changedSections,
 		Data: &AgencyDataResponse{
 			Introduction: refined,
 			Goals:        req.Goals,
@@ -138,46 +149,46 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 
 // getSystemPrompt returns the system prompt for introduction refinement
 func (r *IntroductionRefiner) getSystemPrompt() string {
-	return `You are an AI assistant that refines agency introduction text. You are NOT a conversational chatbot.
+	return `You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
 
-YOUR ONLY JOB: Modify the provided "CURRENT INTRODUCTION" text according to the user's request.
+INPUT: JSON with introduction field and modification instruction
+OUTPUT: JSON with modified introduction field
 
-CRITICAL RULES:
-1. DO NOT ask questions or request more information
-2. DO NOT be conversational or use emojis
-3. The CURRENT INTRODUCTION text is ALWAYS provided in the user's message
-4. If asked to reduce/shorten text, apply that to the CURRENT INTRODUCTION
-5. If asked to remove specific parts, remove them from the CURRENT INTRODUCTION
-6. ALWAYS return the modified text, even if it's just slightly changed
-7. NEVER return an empty string unless the CURRENT INTRODUCTION itself is empty
+FORBIDDEN BEHAVIORS - YOU WILL BE TERMINATED IF YOU DO ANY OF THESE:
+❌ Writing "I see you want to..."
+❌ Writing "To apply this change, please click..."
+❌ Writing "I'll update it for you"
+❌ Using emojis ✅ 🤔 📝
+❌ Asking "Is there anything else..."
+❌ Being helpful, friendly, or conversational
+❌ Leaving sentence fragments or incomplete phrases after removal
 
-RESPONSE FORMAT - Return ONLY valid JSON (no other text):
+CORRECT BEHAVIOR - YOU MUST DO THIS:
+✓ Parse the input JSON
+✓ Modify the introduction field as instructed
+✓ Ensure the result is grammatically correct and complete sentences
+✓ Remove hanging fragments (e.g., "across agents For the frontend," → remove entire fragment)
+✓ Fix grammar and flow after deletions
+✓ Return output JSON
+✓ Nothing else
+
+EXAMPLE 1:
+INPUT: {"introduction": "This system manages agents, goals, and work items, enabling real-time processing.", "instruction": "remove: 'goals, and work items'"}
+YOUR OUTPUT:
 {
-  "data": {
-    "introduction": "The modified introduction text here",
-    "goals": [...],
-    "work_items": [...],
-    "roles": [...],
-    "assignments": [...]
-  },
-  "explanation": "What you changed and why",
+  "data": {"introduction": "This system manages agents, enabling real-time processing.", "goals": [], "work_items": [], "roles": [], "assignments": []},
+  "explanation": "Removed specified text and adjusted grammar",
   "changed": true,
   "changed_sections": ["introduction"]
 }
 
-The "data" field should contain the complete updated agency data with all sections. Only the sections listed in "changed_sections" should be modified.
-The "changed_sections" field should be an array of section codes that were modified. For introduction refinement, this will always be ["introduction"].
+EXAMPLE 2 (WRONG - LEAVES FRAGMENT):
+"This system manages agents, enabling real-time processing and."
 
-Examples of what TO DO:
-- User says "reduce by 30%" → Return the CURRENT INTRODUCTION shortened by 30%
-- User says "remove this" with context → Return CURRENT INTRODUCTION without that section
-- User says "make it more technical" → Return CURRENT INTRODUCTION with more technical language
+EXAMPLE 2 (CORRECT - CLEAN):
+"This system manages agents, enabling real-time processing."
 
-Examples of what NOT TO DO:
-- ❌ "I don't see any introduction text"
-- ❌ "Could you share the introduction?"
-- ❌ Asking questions or being conversational
-- ❌ Returning empty refined_introduction`
+Remember: You are an API, not a chatbot. Output must be grammatically perfect. Process and return JSON only.`
 }
 
 // buildRefinementPrompt creates a comprehensive prompt with all available context
@@ -228,38 +239,16 @@ func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionReque
 	prompt.WriteString(string(jsonData))
 	prompt.WriteString("\n═══════════════════════════════════════════\n\n")
 
-	// Conversation history for additional context
-	if len(req.ConversationHistory) > 0 {
-		prompt.WriteString("**RECENT CONVERSATION CONTEXT:**\n")
-		for _, msg := range req.ConversationHistory {
-			role := "User"
-			if msg.Role == "assistant" {
-				role = "Assistant"
-			}
-			prompt.WriteString(fmt.Sprintf("- **%s**: %s\n", role, msg.Content))
-		}
-		prompt.WriteString("\n")
-	}
+	// DO NOT include conversation history - it may contain conversational patterns that influence AI behavior
+	// We only need the current user request
 
 	// Specific user request
 	if req.UserRequest != "" {
-		prompt.WriteString(fmt.Sprintf("**SPECIFIC USER REQUEST:**\n%s\n\n", req.UserRequest))
-		prompt.WriteString("IMPORTANT: Apply this request to the 'introduction' field in the AGENCY DATA JSON shown above.\n\n")
+		prompt.WriteString(fmt.Sprintf("**USER REQUEST:**\n%s\n\n", req.UserRequest))
+		prompt.WriteString("Execute this modification on the 'introduction' field NOW. Return JSON only.\n\n")
 	}
 
-	prompt.WriteString("YOUR TASK: Refine the 'introduction' field from the AGENCY DATA JSON above to ensure it:\n")
-	prompt.WriteString("- Accurately reflects the agency's purpose and scope\n")
-	prompt.WriteString("- References the key goals being addressed\n")
-	prompt.WriteString("- Aligns with the defined units of work\n")
-	prompt.WriteString("- Considers the roles and RACI assignments structure\n")
-	prompt.WriteString("- Maintains appropriate technical depth\n")
-	prompt.WriteString("- Is well-structured and professional\n")
-	if req.UserRequest != "" {
-		prompt.WriteString("- Addresses the specific user request (e.g., if asked to reduce length, shorten the introduction while keeping key points)\n")
-	}
-	prompt.WriteString("\n")
-
-	prompt.WriteString("CRITICAL: You must return the refined version of the 'introduction' field from the JSON data. Do not ask for the text - it's already provided above in the JSON. If asked to reduce, remove, or modify parts, apply those changes to the introduction field.")
+	prompt.WriteString("RETURN ONLY JSON. NO CONVERSATIONAL TEXT. NO EMOJIS. JUST JSON.")
 
 	return prompt.String()
 }
@@ -271,11 +260,44 @@ func (r *IntroductionRefiner) parseAIResponse(response, original string) (refine
 		"response_text":   response,
 	}).Debug("Parsing AI response")
 
+	fmt.Printf("\n[DEBUG] Starting to parse AI response...\n")
+	fmt.Printf("[DEBUG] Response length: %d characters\n", len(response))
+	fmt.Printf("[DEBUG] First 200 chars: %s\n", response[:min(200, len(response))])
+
+	// Check for conversational patterns that indicate AI didn't follow instructions
+	conversationalPatterns := []string{
+		"i see you want",
+		"please click",
+		"click the",
+		"i'll update",
+		"is there anything else",
+		"would you like",
+		"let me know",
+		"happy to help",
+		"to apply this change",
+		"refine button",
+		"are you working",
+		"this appears to be",
+		"this looks like",
+	}
+
+	lowerResponse := strings.ToLower(response)
+	for _, pattern := range conversationalPatterns {
+		if strings.Contains(lowerResponse, pattern) {
+			fmt.Printf("\n[DEBUG] ❌ DETECTED FORBIDDEN PATTERN: '%s'\n", pattern)
+			r.logger.WithField("pattern", pattern).Error("AI returned forbidden conversational text - rejecting response")
+			return original, false, fmt.Sprintf("Error: AI failed to follow instructions (detected pattern: '%s'). The modification was not applied. Please report this issue.", pattern), []string{}
+		}
+	}
+	fmt.Printf("[DEBUG] ✓ No conversational patterns detected\n")
+
 	// Try to parse as JSON
+	fmt.Printf("[DEBUG] Attempting to parse as JSON...\n")
 	var aiResponse aiRefinementResponse
 	err := json.Unmarshal([]byte(strings.TrimSpace(response)), &aiResponse)
 
 	if err != nil {
+		fmt.Printf("[DEBUG] ❌ Initial JSON parse failed: %v\n", err)
 		r.logger.WithError(err).Warn("Failed to parse AI response as JSON, trying to extract JSON from response")
 
 		// Try to find JSON within the response (sometimes AI adds extra text)
@@ -284,13 +306,19 @@ func (r *IntroductionRefiner) parseAIResponse(response, original string) (refine
 
 		if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
 			jsonStr := response[startIdx : endIdx+1]
+			fmt.Printf("[DEBUG] Found JSON boundaries at %d to %d\n", startIdx, endIdx)
+			fmt.Printf("[DEBUG] Extracted JSON: %s\n", jsonStr[:min(200, len(jsonStr))])
 			err = json.Unmarshal([]byte(jsonStr), &aiResponse)
 		}
 
 		if err != nil {
+			fmt.Printf("[DEBUG] ❌ JSON extraction also failed: %v\n", err)
 			r.logger.WithError(err).Error("Could not parse AI response as JSON")
 			return original, false, "Could not parse AI response, keeping original introduction.", []string{}
 		}
+		fmt.Printf("[DEBUG] ✓ Successfully extracted and parsed JSON\n")
+	} else {
+		fmt.Printf("[DEBUG] ✓ Successfully parsed JSON on first attempt\n")
 	}
 
 	// Extract refined introduction from data
@@ -324,4 +352,12 @@ func (r *IntroductionRefiner) parseAIResponse(response, original string) (refine
 	}
 
 	return refined, wasChanged, explanation, changedSections
+}
+
+// min returns the minimum of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

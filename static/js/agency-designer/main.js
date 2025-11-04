@@ -48,6 +48,12 @@ function initializeAgencyDesigner() {
         initializeHTMXEvents();
         initializeViewSwitcher();
         initializeOverview();
+
+        // Listen for introduction updates from chat refinement
+        document.body.addEventListener('introductionUpdated', function () {
+            console.log('[Main] Introduction updated event received - reloading editor');
+            loadIntroductionEditor();
+        });
         loadIntroductionEditor(); // Initialize introduction editor
         initializeAIProcessControls();
         initializeContextSelection(); // Initialize context selection system

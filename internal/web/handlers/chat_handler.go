@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,7 +44,7 @@ func NewChatHandler(
 func (h *ChatHandler) SendMessage(c *gin.Context) {
 	conversationID := c.Param("conversationId")
 	userMessage := c.PostForm("message")
-	activeTab := c.PostForm("activeTab") // Get active tab from form
+	context := c.PostForm("context") // Get current section context (introduction, goal-definition, work-items, roles, raci-matrix)
 
 	if userMessage == "" {
 		h.logger.Warn("Empty message received")
@@ -54,26 +55,41 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 	h.logger.WithFields(logrus.Fields{
 		"conversation_id": conversationID,
 		"message_length":  len(userMessage),
-		"active_tab":      activeTab,
+		"context":         context,
 	}).Info("Processing chat message")
 
-	// If user is on the introduction tab, always perform refinement
-	if activeTab == "introduction" {
-		h.logger.Info("User on introduction tab - performing direct refinement")
+	fmt.Printf("\n[CHAT DEBUG] Processing message with context: '%s'\n", context)
+	fmt.Printf("[CHAT DEBUG] Message: '%s'\n", userMessage)
+	fmt.Printf("[CHAT DEBUG] Is introduction context? %v\n", context == "introduction")
+
+	// If user is on the introduction section, perform refinement
+	if context == "introduction" {
+		fmt.Printf("[CHAT DEBUG] ✓ On introduction context - will perform refinement\n")
+		h.logger.Info("User on introduction section - performing direct refinement")
 
 		// Get conversation to find agency ID
 		conversation, err := h.designerService.GetConversation(conversationID)
 		if err == nil && conversation != nil {
+			fmt.Printf("[CHAT DEBUG] Found conversation for agency: %s\n", conversation.AgencyID)
+
 			// Perform the refinement directly
 			refined, err := h.performIntroductionRefinement(c, conversation.AgencyID, userMessage)
 			if err != nil {
+				fmt.Printf("[CHAT DEBUG] ❌ Refinement failed: %v\n", err)
 				h.logger.WithError(err).Error("Failed to perform introduction refinement")
 				// Fall back to normal chat
 			} else if refined != nil {
+				fmt.Printf("[CHAT DEBUG] ✓ Refinement successful - returning result\n")
 				// Refinement successful - return the result
 				return
+			} else {
+				fmt.Printf("[CHAT DEBUG] ⚠ Refinement returned nil - falling back to chat\n")
 			}
+		} else {
+			fmt.Printf("[CHAT DEBUG] ❌ Could not get conversation: %v\n", err)
 		}
+	} else {
+		fmt.Printf("[CHAT DEBUG] Not on introduction context (context='%s') - using normal chat\n", context)
 	}
 
 	// Get AI response (this also adds the user message to the conversation)
@@ -143,7 +159,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 func (h *ChatHandler) StartConversation(c *gin.Context) {
 	agencyID := c.Param("id")
 	userMessage := c.PostForm("message")
-	activeTab := c.PostForm("activeTab") // Get active tab from form
+	context := c.PostForm("context") // Get current section context
 
 	if userMessage == "" {
 		h.logger.Warn("Empty message received for new conversation")
@@ -154,12 +170,12 @@ func (h *ChatHandler) StartConversation(c *gin.Context) {
 	h.logger.WithFields(logrus.Fields{
 		"agency_id":      agencyID,
 		"message_length": len(userMessage),
-		"active_tab":     activeTab,
+		"context":        context,
 	}).Info("Starting new conversation")
 
-	// If user is on the introduction tab, always perform refinement
-	if activeTab == "introduction" {
-		h.logger.Info("User on introduction tab - performing direct refinement in new conversation")
+	// If user is on the introduction section, perform refinement
+	if context == "introduction" {
+		h.logger.Info("User on introduction section - performing direct refinement in new conversation")
 
 		// Start conversation first
 		ctx := c.Request.Context()
@@ -323,23 +339,31 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID str
 	}
 
 	h.logger.WithFields(logrus.Fields{
-		"agency_id":       agencyID,
-		"refined_len":     len(refinedResult.RefinedIntroduction),
-		"was_changed":     refinedResult.WasChanged,
-		"explanation_len": len(refinedResult.Explanation),
+		"agency_id":        agencyID,
+		"was_changed":      refinedResult.WasChanged,
+		"explanation_len":  len(refinedResult.Explanation),
+		"changed_sections": refinedResult.ChangedSections,
 	}).Info("Introduction refinement completed")
 
+	// Extract refined introduction from data
+	var refinedIntro string
+	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
+		refinedIntro = refinedResult.Data.Introduction
+	} else {
+		refinedIntro = overview.Introduction
+	}
+
 	// Check if AI returned empty introduction - keep original if so
-	if strings.TrimSpace(refinedResult.RefinedIntroduction) == "" {
+	if strings.TrimSpace(refinedIntro) == "" {
 		h.logger.Warn("AI returned empty introduction, keeping original")
-		refinedResult.RefinedIntroduction = overview.Introduction
+		refinedIntro = overview.Introduction
 		refinedResult.Explanation = "AI returned empty introduction, keeping original."
 		refinedResult.WasChanged = false
 	}
 
 	// Save the refined introduction
-	if refinedResult.RefinedIntroduction != overview.Introduction {
-		err = h.agencyService.UpdateAgencyOverview(ctx, agencyID, refinedResult.RefinedIntroduction)
+	if refinedIntro != overview.Introduction {
+		err = h.agencyService.UpdateAgencyOverview(ctx, agencyID, refinedIntro)
 		if err != nil {
 			return nil, err
 		}
@@ -349,6 +373,9 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID str
 	h.designerService.AddMessage(c.Param("conversationId"), "user", userMessage)
 	chatMessage := "✨ **Introduction Refined & Saved**\n\n" + refinedResult.Explanation
 	h.designerService.AddMessage(c.Param("conversationId"), "assistant", chatMessage)
+
+	// Trigger introduction reload on the frontend
+	c.Header("HX-Trigger", "introductionUpdated")
 
 	// Render response
 	userMsg := ai.Message{Role: "user", Content: userMessage}

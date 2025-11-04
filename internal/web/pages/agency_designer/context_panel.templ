@@ -4,15 +4,15 @@ import "fmt"
 
 // ContextPanel renders the context selection panel
 templ ContextPanel() {
-	<div class="box context-panel">
-		<header class="level is-mobile mb-3">
+	<div class="box context-panel m-0 p-1">
+		<header class="level is-mobile m-0 p-0">
 			<div class="level-left">
 				<div class="level-item">
 					<h5 class="title is-6">
 						<span class="icon has-text-info">
 							<i class="fas fa-layer-group"></i>
 						</span>
-						<span>Context</span>
+						<span>Context</span> : <span id="context-current" class="ml-2 has-text-weight-semibold is-size-7"></span>
 					</h5>
 				</div>
 			</div>
@@ -21,7 +21,8 @@ templ ContextPanel() {
 					<button 
 						class="button is-small is-text"
 						onclick="window.ContextManager.clearAllContexts()"
-						title="Clear all contexts">
+						title="Clear all contexts"
+						style="display: none;">
 						<span class="icon is-small">
 							<i class="fas fa-trash"></i>
 						</span>
@@ -33,10 +34,6 @@ templ ContextPanel() {
 		
 		<div id="context-container" class="context-list">
 			<!-- Contexts will be dynamically rendered here -->
-			<div class="has-text-grey has-text-centered py-3">
-				<p><i class="fas fa-info-circle"></i> No contexts selected</p>
-				<p class="is-size-7 mt-2">Highlight text from goals, units, or other items to add context</p>
-			</div>
 		</div>
 	</div>
 }

@@ -45,8 +45,8 @@ templ AIRefineResponse(response *ai.RefineIntroductionResponse, currentAgency *a
 					placeholder="Enter introduction text for this agency..."
 					rows="20"
 					style="font-family: monospace; font-size: 14px;"
-					data-intro-text={ response.RefinedIntroduction }
-					title="Highlight text to add as context">{ response.RefinedIntroduction }</textarea>
+					data-intro-text={ response.Data.Introduction }
+					title="Highlight text to add as context">{ response.Data.Introduction }</textarea>
 			</div>
 		</div>
 		<p class="help">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p>
