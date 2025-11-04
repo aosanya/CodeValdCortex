@@ -160,6 +160,8 @@ export function selectOverviewSection(element, section) {
     }
 }
 
-// Make functions available globally for inline onclick handlers
-window.selectOverviewSection = selectOverviewSection;
-window.initializeOverview = initializeOverview;
+// Immediately export to window for inline onclick handlers
+if (typeof window !== 'undefined') {
+    window.selectOverviewSection = selectOverviewSection;
+    window.initializeOverview = initializeOverview;
+}

@@ -121,5 +121,13 @@ window.handleRefineClick = function () {
 import('./agency-designer/main.js').then((module) => {
     // Module loaded successfully
 }).catch(error => {
-    // Error loading modules
+    console.error('[agency-designer.js] Error loading main module:', error);
+});
+
+// Also directly import and expose overview functions since they're needed by inline onclick handlers
+import('./agency-designer/overview.js').then((module) => {
+    window.selectOverviewSection = module.selectOverviewSection;
+    window.initializeOverview = module.initializeOverview;
+}).catch(error => {
+    console.error('[agency-designer.js] Error loading overview module:', error);
 });

@@ -224,13 +224,7 @@ export function processAIGoalOperation(operations) {
 }
 
 // Make functions globally available
-window.showGenerateGoalModal = showGenerateGoalModal;
-window.closeGenerateGoalModal = closeGenerateGoalModal;
-window.processAIGoalRequest = processAIGoalRequest;
 window.processAIGoalOperation = processAIGoalOperation;
-window.selectAIGoalOption = selectAIGoalOption;
-window.closeCreateGoalDialog = closeCreateGoalDialog;
-window.generateGoalWithAI = generateGoalWithAI;
 
 // Goal selection management
 function getSelectedGoalKeys() {

@@ -139,7 +139,11 @@ function hideAIProcessStatus() {
 }
 
 // Export functions to global scope for onclick handlers
-window.selectOverviewSection = selectOverviewSection;
+if (typeof selectOverviewSection !== 'undefined') {
+    window.selectOverviewSection = selectOverviewSection;
+} else {
+    console.error('[Main] selectOverviewSection is undefined!');
+}
 window.saveOverviewIntroduction = saveOverviewIntroduction;
 window.undoOverviewIntroduction = undoOverviewIntroduction;
 window.showGoalEditor = showGoalEditor;
