@@ -103,16 +103,25 @@ func (c *WorkItemConsolidator) ConsolidateWorkItems(ctx context.Context, req *Co
 
 // buildConsolidationPrompt creates the prompt for work item consolidation
 func (c *WorkItemConsolidator) buildConsolidationPrompt(req *ConsolidateWorkItemsRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"current_work_items": req.CurrentWorkItems,
-		"goals":              req.Goals,
+	// Create typed AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.Goals,
+		WorkItems:    req.CurrentWorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    "",
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("\n\nPlease analyze these work items and consolidate them into a lean, manageable list. Look for duplicates, overlaps, and opportunities to combine related items.")
 

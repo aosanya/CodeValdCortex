@@ -237,37 +237,50 @@ func (r *WorkItemRefiner) GenerateWorkItems(ctx context.Context, req *GenerateWo
 
 // buildWorkItemRefinementPrompt creates a context-rich prompt for work item refinement
 func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"current_work_item":   req.CurrentWorkItem,
-		"title":               req.Title,
-		"description":         req.Description,
-		"deliverables":        req.Deliverables,
-		"existing_work_items": req.ExistingWorkItems,
-		"goals":               req.Goals,
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.Goals,
+		WorkItems:    req.ExistingWorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    "",
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("Please refine this work item to be clear, actionable, and aligned with agency goals.")
 
 	return builder.String()
 } // buildWorkItemGenerationPrompt creates a prompt for generating a single work item
 func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"goals":               req.Goals,
-		"existing_work_items": req.ExistingWorkItems,
-		"user_input":          req.UserInput,
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.Goals,
+		WorkItems:    req.ExistingWorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    req.UserInput,
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("Please generate a work item based on this request.")
 
@@ -276,17 +289,25 @@ func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemReq
 
 // buildWorkItemsGenerationPrompt creates a prompt for generating multiple work items
 func (r *WorkItemRefiner) buildWorkItemsGenerationPrompt(req *GenerateWorkItemRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"goals":               req.Goals,
-		"existing_work_items": req.ExistingWorkItems,
-		"user_input":          req.UserInput,
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.Goals,
+		WorkItems:    req.ExistingWorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    req.UserInput,
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("Please generate 3-7 work items that would help achieve these goals. ")
 	builder.WriteString("Create a balanced mix of tasks, features, and possibly epic-level work items. ")

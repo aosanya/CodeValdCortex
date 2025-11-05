@@ -27,15 +27,9 @@ func NewIntroductionRefiner(llmClient LLMClient, logger *logrus.Logger) *Introdu
 
 // RefineIntroductionRequest contains the context for refining an introduction
 type RefineIntroductionRequest struct {
-	AgencyID            string                   `json:"agency_id"`
-	CurrentIntro        string                   `json:"current_introduction"`
-	Goals               []*agency.Goal           `json:"goals"`
-	WorkItems           []*agency.WorkItem       `json:"work_items"`
-	Roles               []*registry.Role         `json:"roles"`
-	Assignments         []*agency.RACIAssignment `json:"assignments"`
-	AgencyContext       *agency.Agency           `json:"agency_context"`
-	ConversationHistory []Message                `json:"conversation_history,omitempty"` // Recent chat messages for context
-	UserRequest         string                   `json:"user_request,omitempty"`         // Specific user request from chat
+	AgencyID            string    `json:"agency_id"`
+	AIContext           AIContext `json:"ai_context"`                     // Structured AI context with all agency data
+	ConversationHistory []Message `json:"conversation_history,omitempty"` // Recent chat messages for context
 }
 
 // RefineIntroductionResponse contains the AI-refined introduction
@@ -64,22 +58,22 @@ type aiRefinementResponse struct {
 }
 
 // RefineIntroduction uses AI to refine the agency introduction based on all available context
-func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *RefineIntroductionRequest) (*RefineIntroductionResponse, error) {
+func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *RefineIntroductionRequest, context) (*RefineIntroductionResponse, error) {
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":           req.AgencyID,
-		"current_intro_chars": len(req.CurrentIntro),
-		"goals_count":         len(req.Goals),
-		"work_items_count":    len(req.WorkItems),
+		"current_intro_chars": len(req.AIContext.Introduction),
+		"goals_count":         len(req.AIContext.Goals),
+		"work_items_count":    len(req.AIContext.WorkItems),
 	}).Info("Starting introduction refinement")
 
 	// Build comprehensive prompt with all context
-	prompt := r.buildRefinementPrompt(req)
+	prompt := r.buildRefinementPrompt(req, req.AIContext)
 
 	r.logger.WithFields(logrus.Fields{
 		"prompt_length":     len(prompt),
-		"user_request":      req.UserRequest,
-		"current_intro_len": len(req.CurrentIntro),
-		"current_intro":     req.CurrentIntro,
+		"user_request":      req.AIContext.UserInput,
+		"current_intro_len": len(req.AIContext.Introduction),
+		"current_intro":     req.AIContext.Introduction,
 		"full_prompt":       prompt,
 	}).Info("==== SENDING TO AI - Built refinement prompt ====")
 
@@ -108,7 +102,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 	}).Info("==== RECEIVED FROM AI - Full response ====")
 
 	// Parse the response
-	refined, wasChanged, explanation, changedSections := r.parseAIResponse(response.Content, req.CurrentIntro)
+	refined, wasChanged, explanation, changedSections := r.parseAIResponse(response.Content, req.AIContext.Introduction)
 
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":        req.AgencyID,
@@ -139,10 +133,10 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 		ChangedSections: changedSections,
 		Data: &AgencyDataResponse{
 			Introduction: refined,
-			Goals:        req.Goals,
-			WorkItems:    req.WorkItems,
-			Roles:        req.Roles,
-			Assignments:  req.Assignments,
+			Goals:        req.AIContext.Goals,
+			WorkItems:    req.AIContext.WorkItems,
+			Roles:        req.AIContext.Roles,
+			Assignments:  req.AIContext.Assignments,
 		},
 	}, nil
 }
@@ -192,29 +186,20 @@ Remember: You are an API, not a chatbot. Output must be grammatically perfect. P
 }
 
 // buildRefinementPrompt creates a comprehensive prompt with all available context
-func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionRequest) string {
-	// Create structured context payload
-	contextData := map[string]interface{}{
-		"introduction": req.CurrentIntro,
-		"goals":        req.Goals,
-		"work_items":   req.WorkItems,
-		"roles":        req.Roles,
-		"assignments":  req.Assignments,
-	}
-
+func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionRequest, contextData AIContext) string {
 	var prompt strings.Builder
 
 	prompt.WriteString("You are refining an agency introduction. Below is the complete agency data in JSON format.\n\n")
 
 	// Use the reusable agency context formatter
-	prompt.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	prompt.WriteString(FormatAgencyContextBlock(contextData))
 
 	// DO NOT include conversation history - it may contain conversational patterns that influence AI behavior
 	// We only need the current user request
 
 	// Specific user request
-	if req.UserRequest != "" {
-		prompt.WriteString(fmt.Sprintf("**USER REQUEST:**\n%s\n\n", req.UserRequest))
+	if contextData.UserInput != "" {
+		prompt.WriteString(fmt.Sprintf("**USER REQUEST:**\n%s\n\n", contextData.UserInput))
 		prompt.WriteString("Execute this modification on the 'introduction' field NOW. Return JSON only.\n\n")
 	}
 

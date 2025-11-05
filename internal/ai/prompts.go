@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/aosanya/CodeValdCortex/internal/agency"
 )
 
 // System prompts for different conversation phases
@@ -208,37 +206,36 @@ Use emojis for visual clarity (✅ ⚠️ 🔄 etc).`
 // for inclusion in AI prompts. This ensures consistent agency context presentation across all AI calls.
 //
 // Parameters:
-//   - agencyContext: The agency object containing display name, category, and description
-//   - contextData: Any additional context data to include (typically a struct with goals, work items, etc.)
+//   - contextData: AIContext containing all agency metadata and working data
 //
 // Returns a formatted string block with:
 //   - Agency basic information (name, category, description)
 //   - Complete context data in JSON format with visual separators
-func FormatAgencyContextBlock(agencyContext *agency.Agency, contextData interface{}) string {
+func FormatAgencyContextBlock(contextData AIContext) string {
 	var builder strings.Builder
 
-	// Handle the agency context if provided
-	if agencyContext != nil {
+	// Add agency basic information from AIContext
+	if contextData.AgencyName != "" {
 		builder.WriteString("You are working with the following agency context.\n\n")
-		builder.WriteString(fmt.Sprintf("**Agency Name:** %s\n", agencyContext.DisplayName))
-		builder.WriteString(fmt.Sprintf("**Category:** %s\n", agencyContext.Category))
-		if agencyContext.Description != "" {
-			builder.WriteString(fmt.Sprintf("**Description:** %s\n", agencyContext.Description))
+		builder.WriteString(fmt.Sprintf("**Agency Name:** %s\n", contextData.AgencyName))
+		if contextData.AgencyCategory != "" {
+			builder.WriteString(fmt.Sprintf("**Category:** %s\n", contextData.AgencyCategory))
+		}
+		if contextData.AgencyDescription != "" {
+			builder.WriteString(fmt.Sprintf("**Description:** %s\n", contextData.AgencyDescription))
 		}
 		builder.WriteString("\n")
 	}
 
 	// Add JSON data block with visual separators
-	if contextData != nil {
-		// Marshal the context data to JSON
-		jsonData, err := json.MarshalIndent(contextData, "", "  ")
-		if err == nil && len(jsonData) > 0 {
-			builder.WriteString("═══════════════════════════════════════════\n")
-			builder.WriteString("CONTEXT DATA (JSON):\n")
-			builder.WriteString("═══════════════════════════════════════════\n")
-			builder.WriteString(string(jsonData))
-			builder.WriteString("\n═══════════════════════════════════════════\n\n")
-		}
+	// Marshal the complete context data to JSON
+	jsonData, err := json.MarshalIndent(contextData, "", "  ")
+	if err == nil && len(jsonData) > 0 {
+		builder.WriteString("═══════════════════════════════════════════\n")
+		builder.WriteString("CONTEXT DATA (JSON):\n")
+		builder.WriteString("═══════════════════════════════════════════\n")
+		builder.WriteString(string(jsonData))
+		builder.WriteString("\n═══════════════════════════════════════════\n\n")
 	}
 
 	return builder.String()

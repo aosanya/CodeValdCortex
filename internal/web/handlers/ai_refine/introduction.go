@@ -5,7 +5,6 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/ai"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -57,37 +56,43 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		currentIntroduction = overview.Introduction
 	}
 
-	// Get all goals for context
-	goals, err := h.agencyService.GetGoals(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch goals, continuing without them")
-		goals = []*agency.Goal{}
+	// Check if there's a specific user request from the form
+	userRequest := c.PostForm("user-request")
+	if userRequest == "" {
+		// Check if there's a pending request from chat (passed via header or session)
+		userRequest = c.GetHeader("X-User-Request")
 	}
 
-	// Get all units of work for context
-	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch units of work, continuing without them")
-		workItems = []*agency.WorkItem{}
+	if userRequest != "" {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":    agencyID,
+			"user_request": userRequest,
+		}).Info("User provided specific refinement request")
 	}
 
-	// Get all roles for context
-	roles, err := h.roleService.ListTypes(c.Request.Context())
+	// Build AI context data using shared context builder (pass the full agency object)
+	aiContextData, err := h.contextBuilder.BuildAIContext(c.Request.Context(), ag, currentIntroduction, userRequest)
 	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch roles, continuing without them")
-		roles = []*registry.Role{}
-	}
-
-	// Get RACI assignments for context
-	assignments, err := h.agencyService.GetAllRACIAssignments(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
-		assignments = []*agency.RACIAssignment{}
+		h.logger.WithError(err).Error("Failed to build AI context data")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusInternalServerError, `
+			<div class="notification is-danger">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-danger mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>Context Build Failed</strong>
+						<p class="mb-0">Failed to gather necessary context data.</p>
+					</div>
+				</div>
+			</div>
+		`)
+		return
 	}
 
 	// Get conversation context for recent chat messages
 	var conversationHistory []ai.Message
-	var userRequest string
 	conv, err := h.designerService.GetConversationByAgencyID(agencyID)
 	if err == nil && conv != nil {
 		// Include recent conversation messages (last 5) for context
@@ -104,31 +109,11 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		}).Info("Including conversation context in introduction refinement")
 	}
 
-	// Check if there's a specific user request from the form
-	userRequest = c.PostForm("user-request")
-	if userRequest == "" {
-		// Check if there's a pending request from chat (passed via header or session)
-		userRequest = c.GetHeader("X-User-Request")
-	}
-
-	if userRequest != "" {
-		h.logger.WithFields(logrus.Fields{
-			"agency_id":    agencyID,
-			"user_request": userRequest,
-		}).Info("User provided specific refinement request")
-	}
-
-	// Build refinement request
+	// Build refinement request using the structured AI context data
 	refineReq := &ai.RefineIntroductionRequest{
 		AgencyID:            agencyID,
-		CurrentIntro:        currentIntroduction,
-		Goals:               goals,
-		WorkItems:           workItems,
-		Roles:               roles,
-		Assignments:         assignments,
-		AgencyContext:       ag,
+		AIContext:           aiContextData,
 		ConversationHistory: conversationHistory,
-		UserRequest:         userRequest,
 	}
 
 	// Call AI refiner service

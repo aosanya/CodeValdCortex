@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -104,9 +103,8 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 			// Processing successful - return
 			return
 		}
-
-		// If not handled by specialized processing, enrich the message with section context
-		userMessage = h.enrichMessageWithContext(c.Request.Context(), conversation.AgencyID, userMessage, context)
+		// Note: Context enrichment is no longer needed here as the AI prompt builder
+		// (FormatAgencyContextBlock) already includes all agency data (goals, work items, etc.)
 	} else {
 		h.logger.WithError(convErr).Warn("Could not get conversation for context processing")
 	}
@@ -394,38 +392,6 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID str
 
 	result := "success"
 	return &result, nil
-}
-
-// enrichMessageWithContext adds section-specific context to the user's message
-// This helps the AI understand what the user is referring to (e.g., "remove G013" needs goals context)
-func (h *ChatHandler) enrichMessageWithContext(ctx context.Context, agencyID, userMessage, sectionContext string) string {
-	// Only enrich for specific sections where context is helpful
-	switch sectionContext {
-	case "goal-definition":
-		// Add goals context
-		goals, err := h.agencyService.GetGoals(ctx, agencyID)
-		if err == nil && len(goals) > 0 {
-			contextInfo := "\n\n[Context: Current Goals]\n"
-			for _, goal := range goals {
-				contextInfo += fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description)
-			}
-			return userMessage + contextInfo
-		}
-
-	case "work-items":
-		// Add work items context
-		workItems, err := h.agencyService.GetWorkItems(ctx, agencyID)
-		if err == nil && len(workItems) > 0 {
-			contextInfo := "\n\n[Context: Current Work Items]\n"
-			for _, item := range workItems {
-				contextInfo += fmt.Sprintf("- %s: %s\n", item.Code, item.Description)
-			}
-			return userMessage + contextInfo
-		}
-	}
-
-	// No context enrichment needed or available
-	return userMessage
 }
 
 // handleContextSpecificProcessing handles context-specific processing for both new and existing conversations

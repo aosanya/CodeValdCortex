@@ -19,6 +19,7 @@ type Handler struct {
 	roleCreator          *ai.RoleCreator
 	raciCreator          *ai.RACICreator
 	designerService      *ai.AgencyDesignerService
+	contextBuilder       *AIContextBuilder
 	logger               *logrus.Logger
 }
 
@@ -36,6 +37,9 @@ func NewHandler(
 	designerService *ai.AgencyDesignerService,
 	logger *logrus.Logger,
 ) *Handler {
+	// Create context builder for shared AI context gathering
+	contextBuilder := NewAIContextBuilder(agencyService, roleService, logger)
+
 	return &Handler{
 		agencyService:        agencyService,
 		roleService:          roleService,
@@ -47,6 +51,7 @@ func NewHandler(
 		roleCreator:          roleCreator,
 		raciCreator:          raciCreator,
 		designerService:      designerService,
+		contextBuilder:       contextBuilder,
 		logger:               logger,
 	}
 }

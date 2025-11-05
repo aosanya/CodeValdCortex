@@ -102,16 +102,25 @@ func (c *GoalConsolidator) ConsolidateGoals(ctx context.Context, req *Consolidat
 
 // buildConsolidationPrompt creates the prompt for goal consolidation
 func (c *GoalConsolidator) buildConsolidationPrompt(req *ConsolidateGoalsRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"current_goals": req.CurrentGoals,
-		"work_items":    req.WorkItems,
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.CurrentGoals,
+		WorkItems:    req.WorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    "",
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("\n\nPlease analyze these goals and consolidate them into a lean, strategic list. Aim to reduce the count by 30-50% while maintaining complete coverage.")
 

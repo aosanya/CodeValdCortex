@@ -133,16 +133,25 @@ Response must be valid JSON matching this structure:
 }
 
 func (r *RoleCreator) buildRoleGenerationPrompt(req *GenerateRolesRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"work_items":     req.WorkItems,
-		"existing_roles": req.ExistingRoles,
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "",  // Not available in this request
+		Goals:        nil, // Not available in this request
+		WorkItems:    req.WorkItems,
+		Roles:        req.ExistingRoles,
+		Assignments:  nil, // Not available in this request
+		UserInput:    "",
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	// Request
 	builder.WriteString("\n## Task\n\n")

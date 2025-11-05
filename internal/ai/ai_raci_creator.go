@@ -153,16 +153,25 @@ func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMap
 }
 
 func (c *RACICreator) buildRACICreationPrompt(req *CreateRACIMappingsRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"work_items": req.WorkItems,
-		"roles":      req.Roles,
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "",  // Not available in this request
+		Goals:        nil, // Not available in this request
+		WorkItems:    req.WorkItems,
+		Roles:        req.Roles,
+		Assignments:  nil, // Not available in this request (we're creating them)
+		UserInput:    "",
 	}
 
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("\nPlease analyze these work items and roles, then create appropriate RACI assignments.\n")
 	builder.WriteString("Ensure each work item has exactly one Accountable role and at least one Responsible role.\n")

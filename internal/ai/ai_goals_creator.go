@@ -113,12 +113,27 @@ func stripMarkdownFences(content string) string {
 	return content
 }
 
-// RefineGoal uses AI to refine a goal definition based on all available context
+// RefineGoal uses AI to refine a goal definition based on agency context
 func (r *GoalRefiner) RefineGoal(ctx context.Context, req *RefineGoalRequest) (*RefineGoalResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI goal refinement")
 
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.ExistingGoals,
+		WorkItems:    req.WorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    "",
+	}
+
 	// Build the prompt for goal refinement
-	prompt := r.buildGoalRefinementPrompt(req)
+	prompt := r.buildGoalRefinementPrompt(req, contextData)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -174,8 +189,23 @@ func (r *GoalRefiner) RefineGoal(ctx context.Context, req *RefineGoalRequest) (*
 func (r *GoalRefiner) GenerateGoal(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI goal generation")
 
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.ExistingGoals,
+		WorkItems:    req.WorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    req.UserInput,
+	}
+
 	// Build the prompt for goal generation
-	prompt := r.buildGoalGenerationPrompt(req)
+	prompt := r.buildGoalGenerationPrompt(req, contextData)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -218,8 +248,23 @@ func (r *GoalRefiner) GenerateGoal(ctx context.Context, req *GenerateGoalRequest
 func (r *GoalRefiner) GenerateGoals(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalsResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI multiple goals generation")
 
-	// Build the prompt for goals generation
-	prompt := r.buildGoalsGenerationPrompt(req)
+	// Create structured AIContext with all available context data
+	contextData := AIContext{
+		// Agency metadata
+		AgencyName:        req.AgencyContext.DisplayName,
+		AgencyCategory:    req.AgencyContext.Category,
+		AgencyDescription: req.AgencyContext.Description,
+		// Agency working data
+		Introduction: "", // Not available in this request
+		Goals:        req.ExistingGoals,
+		WorkItems:    req.WorkItems,
+		Roles:        nil, // Not available in this request
+		Assignments:  nil, // Not available in this request
+		UserInput:    req.UserInput,
+	}
+
+	// Build the prompt for multiple goals generation
+	prompt := r.buildGoalsGenerationPrompt(req, contextData)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -257,38 +302,21 @@ func (r *GoalRefiner) GenerateGoals(ctx context.Context, req *GenerateGoalReques
 }
 
 // buildGoalRefinementPrompt creates the prompt for goal refinement
-func (r *GoalRefiner) buildGoalRefinementPrompt(req *RefineGoalRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"current_goal":    req.CurrentGoal,
-		"description":     req.Description,
-		"scope":           req.Scope,
-		"success_metrics": req.SuccessMetrics,
-		"existing_goals":  req.ExistingGoals,
-		"work_items":      req.WorkItems,
-	}
-
+func (r *GoalRefiner) buildGoalRefinementPrompt(req *RefineGoalRequest, contextData AIContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("Please refine this goal definition to be clearer, more specific, and better aligned with the agency's purpose. Provide specific, measurable success metrics and suggest appropriate priority, category, and tags.")
 
 	return builder.String()
 } // buildGoalGenerationPrompt creates the prompt for goal generation
-func (r *GoalRefiner) buildGoalGenerationPrompt(req *GenerateGoalRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"existing_goals": req.ExistingGoals,
-		"work_items":     req.WorkItems,
-		"user_input":     req.UserInput,
-	}
-
+func (r *GoalRefiner) buildGoalGenerationPrompt(req *GenerateGoalRequest, contextData AIContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("Please generate a well-defined goal based on the user's request. Make it specific to this agency type and avoid duplicating existing goals. Include specific, measurable success metrics and suggest an appropriate goal code, priority, category, and tags.")
 
@@ -296,18 +324,11 @@ func (r *GoalRefiner) buildGoalGenerationPrompt(req *GenerateGoalRequest) string
 }
 
 // buildGoalsGenerationPrompt creates the prompt for multiple goals generation
-func (r *GoalRefiner) buildGoalsGenerationPrompt(req *GenerateGoalRequest) string {
-	// Create context map with relevant data
-	contextData := map[string]interface{}{
-		"existing_goals": req.ExistingGoals,
-		"work_items":     req.WorkItems,
-		"user_input":     req.UserInput,
-	}
-
+func (r *GoalRefiner) buildGoalsGenerationPrompt(req *GenerateGoalRequest, contextData AIContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
-	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
+	builder.WriteString(FormatAgencyContextBlock(contextData))
 
 	builder.WriteString("Based on the agency context and input, generate 3-5 well-defined goals. Each goal should be specific to this agency type, avoid duplicating existing goals, and include measurable success metrics. Suggest appropriate goal codes (P001, P002, etc.), priorities, categories, and tags for each.")
 
