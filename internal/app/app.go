@@ -31,26 +31,24 @@ import (
 
 // App represents the main application
 type App struct {
-	config               *config.Config
-	server               *http.Server
-	logger               *logrus.Logger
-	dbClient             *database.ArangoClient
-	registry             *registry.Repository
-	roleService          registry.RoleService
-	roleRepository       registry.RoleRepository
-	agencyService        agency.Service
-	agencyRepository     agency.Repository
-	runtimeManager       *runtime.Manager
-	messageService       *communication.MessageService
-	pubSubService        *communication.PubSubService
-	aiDesignerService    *ai.AgencyDesignerService
-	introductionRefiner  *ai.AIIntroductionBuilder
-	goalRefiner          *ai.GoalsBuilder
-	goalConsolidator     *ai.GoalConsolidator
-	workItemRefiner      *ai.WorkItemRefiner
-	workItemConsolidator *ai.WorkItemConsolidator
-	roleCreator          *ai.RoleCreator
-	raciCreator          *ai.RACICreator
+	config              *config.Config
+	server              *http.Server
+	logger              *logrus.Logger
+	dbClient            *database.ArangoClient
+	registry            *registry.Repository
+	roleService         registry.RoleService
+	roleRepository      registry.RoleRepository
+	agencyService       agency.Service
+	agencyRepository    agency.Repository
+	runtimeManager      *runtime.Manager
+	messageService      *communication.MessageService
+	pubSubService       *communication.PubSubService
+	aiDesignerService   *ai.AgencyDesignerService
+	introductionRefiner *ai.AIIntroductionBuilder
+	goalRefiner         *ai.AIGoalsBuilder
+	workItemBuilder     *ai.AIWorkItemsBuilder
+	roleBuilder         *ai.AIRolesBuilder
+	raciCreator         *ai.RACICreator
 }
 
 // New creates a new application instance
@@ -141,12 +139,10 @@ func New(cfg *config.Config) *App {
 	// Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
 	var introductionRefiner *ai.AIIntroductionBuilder
-	var goalRefiner *ai.GoalsBuilder
-	var goalConsolidator *ai.GoalConsolidator
-	var workItemRefiner *ai.WorkItemRefiner
-	var workItemConsolidator *ai.WorkItemConsolidator
-	var roleCreator *ai.RoleCreator
-	var raciCreator *ai.RACICreator
+	var goalRefiner *ai.AIGoalsBuilder
+	var workItemBuilder *ai.AIWorkItemsBuilder
+	var roleBuilder *ai.AIRolesBuilder
+	var raciBuilder *ai.AIRACIBuilder
 	if cfg.AI.Provider != "" {
 		// Build LLM config from app config
 		llmConfig := &ai.LLMConfig{
@@ -166,11 +162,9 @@ func New(cfg *config.Config) *App {
 			aiDesignerService = ai.NewAgencyDesignerService(llmClient, logger)
 			introductionRefiner = ai.NewAIIntroductionBuilder(llmClient, logger)
 			goalRefiner = ai.NewGoalRefiner(llmClient, logger)
-			goalConsolidator = ai.NewGoalConsolidator(llmClient, logger)
-			workItemRefiner = ai.NewWorkItemRefiner(llmClient, logger)
-			workItemConsolidator = ai.NewWorkItemConsolidator(llmClient, logger)
-			roleCreator = ai.NewRoleCreator(llmClient, logger)
-			raciCreator = ai.NewRACICreator(llmClient, logger)
+			workItemBuilder = ai.NewAIWorkItemsBuilder(llmClient, logger)
+			roleBuilder = ai.NewAIRolesBuilder(llmClient, logger)
+			raciBuilder = ai.NewAIRACIBuilder(llmClient, logger)
 			logger.Info("AI agency designer service initialized successfully")
 		}
 	} else {
@@ -178,25 +172,23 @@ func New(cfg *config.Config) *App {
 	}
 
 	return &App{
-		config:               cfg,
-		logger:               logger,
-		dbClient:             dbClient,
-		registry:             reg,
-		roleRepository:       roleRepo,
-		roleService:          roleService,
-		agencyService:        agencyService,
-		agencyRepository:     agencyRepo,
-		runtimeManager:       runtimeManager,
-		messageService:       messageService,
-		pubSubService:        pubSubService,
-		aiDesignerService:    aiDesignerService,
-		introductionRefiner:  introductionRefiner,
-		goalRefiner:          goalRefiner,
-		goalConsolidator:     goalConsolidator,
-		workItemRefiner:      workItemRefiner,
-		workItemConsolidator: workItemConsolidator,
-		roleCreator:          roleCreator,
-		raciCreator:          raciCreator,
+		config:              cfg,
+		logger:              logger,
+		dbClient:            dbClient,
+		registry:            reg,
+		roleRepository:      roleRepo,
+		roleService:         roleService,
+		agencyService:       agencyService,
+		agencyRepository:    agencyRepo,
+		runtimeManager:      runtimeManager,
+		messageService:      messageService,
+		pubSubService:       pubSubService,
+		aiDesignerService:   aiDesignerService,
+		introductionRefiner: introductionRefiner,
+		goalRefiner:         goalRefiner,
+		workItemBuilder:     workItemBuilder,
+		roleBuilder:         roleBuilder,
+		raciBuilder:         raciCreator,
 	}
 }
 
@@ -299,7 +291,7 @@ func (a *App) setupServer() error {
 	var chatHandler *webhandlers.ChatHandler
 	if a.aiDesignerService != nil && a.introductionRefiner != nil {
 		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	}
 
@@ -417,23 +409,21 @@ func (a *App) setupServer() error {
 
 		// AI Refine endpoints (if AI services are available)
 		if a.introductionRefiner != nil {
-			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.goalConsolidator, a.workItemRefiner, a.workItemConsolidator, a.roleCreator, a.raciCreator, a.aiDesignerService, a.logger)
+			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.workItemBuilder, a.roleBuilder, a.raciBuilder, a.aiDesignerService, a.logger)
 			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
 			if a.goalRefiner != nil {
 				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineGoal)
 				v1.POST("/agencies/:id/goals/generate", aiRefineHandler.GenerateGoal)
 				v1.POST("/agencies/:id/goals/ai-process", aiRefineHandler.ProcessAIGoalRequest)
-			}
-			if a.goalConsolidator != nil {
 				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoals)
 			}
-			if a.workItemRefiner != nil {
+			if a.workItemBuilder != nil {
 				v1.POST("/agencies/:id/work-items/ai-process", aiRefineHandler.ProcessAIWorkItemRequest)
 			}
 			// Role AI processing endpoint
 			v1.POST("/agencies/:id/roles/ai-process", aiRefineHandler.ProcessAIRoleRequest)
 			// RACI AI processing endpoint
-			if a.raciCreator != nil {
+			if a.raciBuilder != nil {
 				v1.POST("/agencies/:id/raci-matrix/ai-generate", aiRefineHandler.ProcessAIRACIRequest)
 			}
 			a.logger.Info("AI Refine endpoints registered")

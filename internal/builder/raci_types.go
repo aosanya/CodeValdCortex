@@ -81,21 +81,3 @@ type ConsolidateRACIMappingsResponse struct {
 	Summary                 string                               `json:"summary"`
 	Explanation             string                               `json:"explanation"`
 }
-
-// aiRACIMappingResponse represents the AI's response structure
-type aiRACIMappingResponse struct {
-	Mappings    []aiRACIMapping `json:"mappings"`
-	Explanation string          `json:"explanation"`
-}
-
-// aiRACIMapping represents a single work item's RACI assignments
-type aiRACIMapping struct {
-	WorkItemKey string                      `json:"work_item_key"`
-	Assignments map[string]aiRACIAssignment `json:"assignments"` // roleKey -> assignment
-}
-
-// aiRACIAssignment represents a role's assignment to a work item
-type aiRACIAssignment struct {
-	RACI      string `json:"raci"`
-	Objective string `json:"objective"`
-}

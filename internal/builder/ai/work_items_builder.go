@@ -6,48 +6,25 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
 
-// WorkItemRefiner handles AI-powered work item definition and refinement
-type WorkItemRefiner struct {
+// Compile-time check to ensure AIWorkItemsBuilder implements WorkItemBuilderInterface
+var _ builder.WorkItemBuilderInterface = (*AIWorkItemsBuilder)(nil)
+
+// AIWorkItemsBuilder handles AI-powered work item definition and refinement
+type AIWorkItemsBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
-// NewWorkItemRefiner creates a new work item refiner service
-func NewWorkItemRefiner(llmClient LLMClient, logger *logrus.Logger) *WorkItemRefiner {
-	return &WorkItemRefiner{
+// NewAIWorkItemsBuilder creates a new AI-powered work item builder
+func NewAIWorkItemsBuilder(llmClient LLMClient, logger *logrus.Logger) *AIWorkItemsBuilder {
+	return &AIWorkItemsBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
-}
-
-// RefineWorkItemRequest contains the context for refining a work item
-type RefineWorkItemRequest struct {
-	AgencyID          string             `json:"agency_id"`
-	CurrentWorkItem   *agency.WorkItem   `json:"current_work_item"`
-	Title             string             `json:"title"`
-	Description       string             `json:"description"`
-	Deliverables      []string           `json:"deliverables"`
-	ExistingWorkItems []*agency.WorkItem `json:"existing_work_items"`
-	Goals             []*agency.Goal     `json:"goals"`
-	AgencyContext     *agency.Agency     `json:"agency_context"`
-}
-
-// RefineWorkItemResponse contains the AI-refined work item
-type RefineWorkItemResponse struct {
-	RefinedTitle        string   `json:"refined_title"`
-	RefinedDescription  string   `json:"refined_description"`
-	RefinedDeliverables []string `json:"refined_deliverables"`
-	SuggestedType       string   `json:"suggested_type"`
-	SuggestedPriority   string   `json:"suggested_priority"`
-	SuggestedEffort     int      `json:"suggested_effort"`
-	SuggestedTags       []string `json:"suggested_tags"`
-	WasChanged          bool     `json:"was_changed"`
-	Explanation         string   `json:"explanation"`
 }
 
 // aiWorkItemRefinementResponse represents the JSON structure returned by the AI
@@ -63,40 +40,12 @@ type aiWorkItemRefinementResponse struct {
 	Changed             bool     `json:"changed"`
 }
 
-// GenerateWorkItemRequest contains the context for generating a new work item
-type GenerateWorkItemRequest struct {
-	AgencyID          string             `json:"agency_id"`
-	AgencyContext     *agency.Agency     `json:"agency_context"`
-	ExistingWorkItems []*agency.WorkItem `json:"existing_work_items"`
-	Goals             []*agency.Goal     `json:"goals"`
-	UserInput         string             `json:"user_input"`
-}
-
-// GenerateWorkItemResponse contains the AI-generated work item
-type GenerateWorkItemResponse struct {
-	Title             string   `json:"title"`
-	Description       string   `json:"description"`
-	Deliverables      []string `json:"deliverables"`
-	SuggestedCode     string   `json:"suggested_code"`
-	SuggestedType     string   `json:"suggested_type"`
-	SuggestedPriority string   `json:"suggested_priority"`
-	SuggestedEffort   int      `json:"suggested_effort"`
-	SuggestedTags     []string `json:"suggested_tags"`
-	Explanation       string   `json:"explanation"`
-}
-
-// GenerateWorkItemsResponse contains multiple AI-generated work items
-type GenerateWorkItemsResponse struct {
-	WorkItems   []GenerateWorkItemResponse `json:"work_items"`
-	Explanation string                     `json:"explanation"`
-}
-
 // RefineWorkItem uses AI to refine a work item definition based on all available context
-func (r *WorkItemRefiner) RefineWorkItem(ctx context.Context, req *RefineWorkItemRequest) (*RefineWorkItemResponse, error) {
+func (r *AIWorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.RefineWorkItemRequest, builderContext builder.BuilderContext) (*builder.RefineWorkItemResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI work item refinement")
 
 	// Build the prompt for work item refinement
-	prompt := r.buildWorkItemRefinementPrompt(req)
+	prompt := r.buildWorkItemRefinementPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -126,7 +75,7 @@ func (r *WorkItemRefiner) RefineWorkItem(ctx context.Context, req *RefineWorkIte
 	}
 
 	// Convert to our response format
-	result := &RefineWorkItemResponse{
+	result := &builder.RefineWorkItemResponse{
 		RefinedTitle:        aiResponse.RefinedTitle,
 		RefinedDescription:  aiResponse.RefinedDescription,
 		RefinedDeliverables: aiResponse.RefinedDeliverables,
@@ -150,11 +99,11 @@ func (r *WorkItemRefiner) RefineWorkItem(ctx context.Context, req *RefineWorkIte
 }
 
 // GenerateWorkItem uses AI to generate a new work item from user input
-func (r *WorkItemRefiner) GenerateWorkItem(ctx context.Context, req *GenerateWorkItemRequest) (*GenerateWorkItemResponse, error) {
+func (r *AIWorkItemsBuilder) GenerateWorkItem(ctx context.Context, req *builder.GenerateWorkItemRequest, builderContext builder.BuilderContext) (*builder.GenerateWorkItemResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI work item generation")
 
 	// Build the prompt for work item generation
-	prompt := r.buildWorkItemGenerationPrompt(req)
+	prompt := r.buildWorkItemGenerationPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -177,7 +126,7 @@ func (r *WorkItemRefiner) GenerateWorkItem(ctx context.Context, req *GenerateWor
 
 	// Parse the AI response
 	cleanedContent := stripMarkdownFences(response.Content)
-	var aiResponse GenerateWorkItemResponse
+	var aiResponse builder.GenerateWorkItemResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
@@ -195,11 +144,11 @@ func (r *WorkItemRefiner) GenerateWorkItem(ctx context.Context, req *GenerateWor
 }
 
 // GenerateWorkItems uses AI to generate multiple work items from goals
-func (r *WorkItemRefiner) GenerateWorkItems(ctx context.Context, req *GenerateWorkItemRequest) (*GenerateWorkItemsResponse, error) {
+func (r *AIWorkItemsBuilder) GenerateWorkItems(ctx context.Context, req *builder.GenerateWorkItemRequest, builderContext builder.BuilderContext) (*builder.GenerateWorkItemsResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI work items generation")
 
 	// Build the prompt for multiple work items generation
-	prompt := r.buildWorkItemsGenerationPrompt(req)
+	prompt := r.buildWorkItemsGenerationPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -222,7 +171,7 @@ func (r *WorkItemRefiner) GenerateWorkItems(ctx context.Context, req *GenerateWo
 
 	// Parse the AI response
 	cleanedContent := stripMarkdownFences(response.Content)
-	var aiResponse GenerateWorkItemsResponse
+	var aiResponse builder.GenerateWorkItemsResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
@@ -237,22 +186,7 @@ func (r *WorkItemRefiner) GenerateWorkItems(ctx context.Context, req *GenerateWo
 }
 
 // buildWorkItemRefinementPrompt creates a context-rich prompt for work item refinement
-func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemRequest) string {
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "", // Not available in this request
-		Goals:        req.Goals,
-		WorkItems:    req.ExistingWorkItems,
-		Roles:        nil, // Not available in this request
-		Assignments:  nil, // Not available in this request
-		UserInput:    "",
-	}
-
+func (r *AIWorkItemsBuilder) buildWorkItemRefinementPrompt(_ *builder.RefineWorkItemRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -262,22 +196,7 @@ func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemReque
 
 	return builder.String()
 } // buildWorkItemGenerationPrompt creates a prompt for generating a single work item
-func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemRequest) string {
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "", // Not available in this request
-		Goals:        req.Goals,
-		WorkItems:    req.ExistingWorkItems,
-		Roles:        nil, // Not available in this request
-		Assignments:  nil, // Not available in this request
-		UserInput:    req.UserInput,
-	}
-
+func (r *AIWorkItemsBuilder) buildWorkItemGenerationPrompt(_ *builder.GenerateWorkItemRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -289,22 +208,7 @@ func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemReq
 }
 
 // buildWorkItemsGenerationPrompt creates a prompt for generating multiple work items
-func (r *WorkItemRefiner) buildWorkItemsGenerationPrompt(req *GenerateWorkItemRequest) string {
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "", // Not available in this request
-		Goals:        req.Goals,
-		WorkItems:    req.ExistingWorkItems,
-		Roles:        nil, // Not available in this request
-		Assignments:  nil, // Not available in this request
-		UserInput:    req.UserInput,
-	}
-
+func (r *AIWorkItemsBuilder) buildWorkItemsGenerationPrompt(_ *builder.GenerateWorkItemRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -315,7 +219,71 @@ func (r *WorkItemRefiner) buildWorkItemsGenerationPrompt(req *GenerateWorkItemRe
 	builder.WriteString("Ensure each work item is specific, actionable, and clearly contributes to one or more goals.")
 
 	return builder.String()
-} // System prompts for work item operations
+}
+
+// ConsolidateWorkItems analyzes and consolidates work items into a lean, concise list
+func (r *AIWorkItemsBuilder) ConsolidateWorkItems(ctx context.Context, req *builder.ConsolidateWorkItemsRequest, builderContext builder.BuilderContext) (*builder.ConsolidateWorkItemsResponse, error) {
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":        req.AgencyID,
+		"total_work_items": len(req.CurrentWorkItems),
+	}).Info("Starting work item consolidation")
+
+	// Build the prompt for work item consolidation
+	prompt := r.buildWorkItemConsolidationPrompt(req, builderContext)
+
+	// Make the LLM request
+	response, err := r.llmClient.Chat(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: workItemConsolidationSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Error("Failed to get AI response for work item consolidation")
+		return nil, fmt.Errorf("AI consolidation failed: %w", err)
+	}
+
+	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
+
+	var consolidationResp builder.ConsolidateWorkItemsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &consolidationResp); err != nil {
+		r.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse work item consolidation response")
+		return nil, fmt.Errorf("failed to parse consolidation response: %w", err)
+	}
+
+	r.logger.WithFields(logrus.Fields{
+		"original_count":     len(req.CurrentWorkItems),
+		"consolidated_count": len(consolidationResp.ConsolidatedWorkItems),
+		"removed_count":      len(consolidationResp.RemovedWorkItems),
+	}).Info("Work item consolidation completed")
+
+	return &consolidationResp, nil
+}
+
+// buildWorkItemConsolidationPrompt creates the prompt for work item consolidation
+func (r *AIWorkItemsBuilder) buildWorkItemConsolidationPrompt(_ *builder.ConsolidateWorkItemsRequest, contextData builder.BuilderContext) string {
+	var builder strings.Builder
+
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(contextData))
+
+	builder.WriteString("Analyze these work items and provide a consolidated, optimized list. ")
+	builder.WriteString("Remove duplicates, merge related items, and ensure clear separation of concerns. ")
+	builder.WriteString("Keep only essential work items that directly contribute to the goals. ")
+	builder.WriteString("Return a lean, actionable set of work items prioritized by importance.")
+
+	return builder.String()
+}
+
+// System prompts for work item operations
 const workItemRefinementSystemPrompt = `You are an expert project manager and technical architect helping to refine work items for software development.
 
 Your task is to refine work items to be:
@@ -396,3 +364,75 @@ Return your response as a JSON object with this structure:
 Use short, memorable codes (2-4 uppercase letters) that are unique.
 Prioritize foundational work as P0/P1, enhancements as P2/P3.
 Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
+
+const workItemConsolidationSystemPrompt = `Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.
+
+IMPORTANT: Only consolidate work items when it truly adds value. If work items are already well-defined and distinct, keep them separate.
+
+Evaluate if consolidation is needed:
+
+1. **Assess consolidation value**:
+   - Check for duplicate or near-duplicate work items
+   - Look for items with significant scope overlap
+   - Identify items that are really subtasks of a larger item
+   - Determine if items can be combined without losing clarity
+   - **If items are distinct and well-scoped, DO NOT force consolidation**
+
+2. **When consolidation IS beneficial**:
+   - Merge duplicate or overlapping work items
+   - Combine related tasks into Features or Epics when appropriate
+   - Ensure each consolidated item remains actionable
+   - Preserve all deliverables and requirements
+   - Maintain clear acceptance criteria
+   - Keep effort estimates reasonable (1, 2, 3, 5, 8, 13 story points)
+
+3. **When consolidation is NOT beneficial**:
+   - Return empty arrays for consolidated_work_items and removed_work_items
+   - Provide explanation that work items are already well-defined
+   - Don't force consolidation just to reduce count
+
+4. **Maintain work quality**:
+   - Each work item should be SMART and actionable
+   - Avoid creating overly broad or vague items
+   - Ensure proper categorization (Task, Feature, Epic, Bug, Research)
+   - Balance scope and achievability
+   - Support clear sprint planning
+
+5. **Track merges accurately** (only when consolidating):
+   - Record ALL original work item keys that were merged in "merged_from_keys"
+   - List ALL work item keys to DELETE in "removed_work_items"
+   - Provide clear explanations of consolidation decisions
+
+Focus on practical project management. Do not force consolidation.
+
+Respond ONLY with valid JSON (no markdown, no explanations outside JSON) in this exact format:
+
+If consolidation is NOT beneficial:
+{
+  "consolidated_work_items": [],
+  "removed_work_items": [],
+  "summary": "No consolidation needed - work items are already distinct and well-scoped",
+  "explanation": "Each work item addresses a specific deliverable and should remain independent"
+}
+
+If consolidation IS beneficial:
+{
+  "consolidated_work_items": [
+    {
+      "title": "Clear, actionable title",
+      "description": "Detailed description of what needs to be done",
+      "deliverables": ["Deliverable 1", "Deliverable 2", "Deliverable 3"],
+      "suggested_code": "SHORT-CODE",
+      "suggested_type": "Task|Feature|Epic|Bug|Research",
+      "suggested_priority": "P0|P1|P2|P3",
+      "suggested_effort": 1-13,
+      "suggested_tags": ["tag1", "tag2"],
+      "merged_from_keys": ["original_key1", "original_key2"],
+      "explanation": "Brief explanation of what was consolidated and why"
+    }
+  ],
+  "removed_work_items": ["original_key1", "original_key2"],
+  "summary": "Consolidated X work items into Y more focused items",
+  "explanation": "Overall consolidation strategy and benefits"
+}
+`

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 )
 
@@ -47,7 +47,7 @@ func (h *Handler) GenerateGoal(c *gin.Context) {
 	}
 
 	// Build generation request
-	genReq := &ai.GenerateGoalRequest{
+	genReq := &builder.GenerateGoalRequest{
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		ExistingGoals: existingGoals,
@@ -55,8 +55,16 @@ func (h *Handler) GenerateGoal(c *gin.Context) {
 		UserInput:     req.UserInput,
 	}
 
+	// Build AI context
+	builderContext, err := h.contextBuilder.BuildBuilderContext(ctx, ag, "", req.UserInput)
+	if err != nil {
+		h.logger.Error("Failed to build AI context", "agencyID", agencyID, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to build context"})
+		return
+	}
+
 	// Generate goal using AI
-	result, err := h.goalRefiner.GenerateGoal(ctx, genReq)
+	result, err := h.goalRefiner.GenerateGoal(ctx, genReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to generate goal", "agencyID", agencyID, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate goal"})

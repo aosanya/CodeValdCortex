@@ -6,50 +6,28 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
 
-// GoalsBuilder handles AI-powered goal definition and refinement
-type GoalsBuilder struct {
+// Compile-time check to ensure AIGoalBuilder implements GoalBuilderInterface
+var _ builder.GoalBuilderInterface = (*AIGoalsBuilder)(nil)
+
+// AIGoalsBuilder handles AI-powered goal definition and refinement
+type AIGoalsBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
 // NewGoalRefiner creates a new goal refiner service
-func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *GoalsBuilder {
-	return &GoalsBuilder{
+func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *AIGoalsBuilder {
+	return &AIGoalsBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
 }
 
-// RefineGoalRequest contains the context for refining a goal
-type RefineGoalRequest struct {
-	AgencyID       string             `json:"agency_id"`
-	CurrentGoal    *agency.Goal       `json:"current_goal"`
-	Description    string             `json:"description"`
-	Scope          string             `json:"scope"`
-	SuccessMetrics []string           `json:"success_metrics"`
-	ExistingGoals  []*agency.Goal     `json:"existing_goals"`
-	WorkItems      []*agency.WorkItem `json:"work_items"`
-	AgencyContext  *agency.Agency     `json:"agency_context"`
-}
-
-// RefineGoalResponse contains the AI-refined goal
-type RefineGoalResponse struct {
-	RefinedDescription string   `json:"refined_description"`
-	RefinedScope       string   `json:"refined_scope"`
-	RefinedMetrics     []string `json:"refined_metrics"`
-	SuggestedPriority  string   `json:"suggested_priority"`
-	SuggestedCategory  string   `json:"suggested_category"`
-	SuggestedTags      []string `json:"suggested_tags"`
-	WasChanged         bool     `json:"was_changed"`
-	Explanation        string   `json:"explanation"`
-}
-
-// aiGoalRefinementResponse represents the JSON structure returned by the AI
+// aiGoalRefinementResponse represents the JSON structure returned by the AI for goal refinement
 type aiGoalRefinementResponse struct {
 	RefinedDescription string   `json:"refined_description"`
 	RefinedScope       string   `json:"refined_scope"`
@@ -59,33 +37,6 @@ type aiGoalRefinementResponse struct {
 	SuggestedTags      []string `json:"suggested_tags"`
 	Explanation        string   `json:"explanation"`
 	Changed            bool     `json:"changed"`
-}
-
-// GenerateGoalRequest contains the context for generating a new goal
-type GenerateGoalRequest struct {
-	AgencyID      string             `json:"agency_id"`
-	AgencyContext *agency.Agency     `json:"agency_context"`
-	ExistingGoals []*agency.Goal     `json:"existing_goals"`
-	WorkItems     []*agency.WorkItem `json:"work_items"`
-	UserInput     string             `json:"user_input"`
-}
-
-// GenerateGoalResponse contains the AI-generated goal
-type GenerateGoalResponse struct {
-	Description       string   `json:"description"`
-	Scope             string   `json:"scope"`
-	SuccessMetrics    []string `json:"success_metrics"`
-	SuggestedCode     string   `json:"suggested_code"`
-	SuggestedPriority string   `json:"suggested_priority"`
-	SuggestedCategory string   `json:"suggested_category"`
-	SuggestedTags     []string `json:"suggested_tags"`
-	Explanation       string   `json:"explanation"`
-}
-
-// GenerateGoalsResponse contains multiple AI-generated goals
-type GenerateGoalsResponse struct {
-	Goals       []GenerateGoalResponse `json:"goals"`
-	Explanation string                 `json:"explanation"`
 }
 
 // stripMarkdownFences removes markdown code fences from JSON responses
@@ -115,26 +66,11 @@ func stripMarkdownFences(content string) string {
 }
 
 // RefineGoal uses AI to refine a goal definition based on agency context
-func (r *GoalsBuilder) RefineGoal(ctx context.Context, req *RefineGoalRequest) (*RefineGoalResponse, error) {
+func (r *AIGoalsBuilder) RefineGoal(ctx context.Context, req *builder.RefineGoalRequest, builderContext builder.BuilderContext) (*builder.RefineGoalResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI goal refinement")
 
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "", // Not available in this request
-		Goals:        req.ExistingGoals,
-		WorkItems:    req.WorkItems,
-		Roles:        nil, // Not available in this request
-		Assignments:  nil, // Not available in this request
-		UserInput:    "",
-	}
-
-	// Build the prompt for goal refinement
-	prompt := r.buildGoalRefinementPrompt(req, contextData)
+	// Build the refinement prompt using the provided context
+	prompt := r.buildGoalRefinementPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -164,7 +100,7 @@ func (r *GoalsBuilder) RefineGoal(ctx context.Context, req *RefineGoalRequest) (
 	}
 
 	// Convert to our response format
-	result := &RefineGoalResponse{
+	result := &builder.RefineGoalResponse{
 		RefinedDescription: aiResponse.RefinedDescription,
 		RefinedScope:       aiResponse.RefinedScope,
 		RefinedMetrics:     aiResponse.RefinedMetrics,
@@ -187,26 +123,11 @@ func (r *GoalsBuilder) RefineGoal(ctx context.Context, req *RefineGoalRequest) (
 }
 
 // GenerateGoal uses AI to generate a new goal from user input
-func (r *GoalsBuilder) GenerateGoal(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalResponse, error) {
+func (r *AIGoalsBuilder) GenerateGoal(ctx context.Context, req *builder.GenerateGoalRequest, builderContext builder.BuilderContext) (*builder.GenerateGoalResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI goal generation")
 
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "", // Not available in this request
-		Goals:        req.ExistingGoals,
-		WorkItems:    req.WorkItems,
-		Roles:        nil, // Not available in this request
-		Assignments:  nil, // Not available in this request
-		UserInput:    req.UserInput,
-	}
-
 	// Build the prompt for goal generation
-	prompt := r.buildGoalGenerationPrompt(req, contextData)
+	prompt := r.buildGoalGenerationPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -229,7 +150,7 @@ func (r *GoalsBuilder) GenerateGoal(ctx context.Context, req *GenerateGoalReques
 
 	// Parse the AI response
 	cleanedContent := stripMarkdownFences(response.Content)
-	var aiResponse GenerateGoalResponse
+	var aiResponse builder.GenerateGoalResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
@@ -246,26 +167,11 @@ func (r *GoalsBuilder) GenerateGoal(ctx context.Context, req *GenerateGoalReques
 }
 
 // GenerateGoals uses AI to generate multiple goals from user input
-func (r *GoalsBuilder) GenerateGoals(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalsResponse, error) {
+func (r *AIGoalsBuilder) GenerateGoals(ctx context.Context, req *builder.GenerateGoalRequest, builderContext builder.BuilderContext) (*builder.GenerateGoalsResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI multiple goals generation")
 
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "", // Not available in this request
-		Goals:        req.ExistingGoals,
-		WorkItems:    req.WorkItems,
-		Roles:        nil, // Not available in this request
-		Assignments:  nil, // Not available in this request
-		UserInput:    req.UserInput,
-	}
-
 	// Build the prompt for multiple goals generation
-	prompt := r.buildGoalsGenerationPrompt(req, contextData)
+	prompt := r.buildGoalsGenerationPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -288,7 +194,7 @@ func (r *GoalsBuilder) GenerateGoals(ctx context.Context, req *GenerateGoalReque
 
 	// Parse the AI response
 	cleanedContent := stripMarkdownFences(response.Content)
-	var aiResponse GenerateGoalsResponse
+	var aiResponse builder.GenerateGoalsResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
@@ -302,8 +208,55 @@ func (r *GoalsBuilder) GenerateGoals(ctx context.Context, req *GenerateGoalReque
 	return &aiResponse, nil
 }
 
+// ConsolidateGoals analyzes and consolidates goals into a lean, concise list
+func (r *AIGoalsBuilder) ConsolidateGoals(ctx context.Context, req *builder.ConsolidateGoalsRequest, builderContext builder.BuilderContext) (*builder.ConsolidateGoalsResponse, error) {
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":   req.AgencyID,
+		"total_goals": len(req.CurrentGoals),
+	}).Info("Starting goal consolidation")
+
+	// Build the prompt for goal consolidation
+	prompt := r.buildGoalConsolidationPrompt(req, builderContext)
+
+	// Make the LLM request
+	response, err := r.llmClient.Chat(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: goalConsolidationSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Error("Failed to get AI response for goal consolidation")
+		return nil, fmt.Errorf("AI consolidation failed: %w", err)
+	}
+
+	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
+
+	var consolidationResp builder.ConsolidateGoalsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &consolidationResp); err != nil {
+		r.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse goal consolidation response")
+		return nil, fmt.Errorf("failed to parse consolidation response: %w", err)
+	}
+
+	r.logger.WithFields(logrus.Fields{
+		"original_count":     len(req.CurrentGoals),
+		"consolidated_count": len(consolidationResp.ConsolidatedGoals),
+		"removed_count":      len(consolidationResp.RemovedGoals),
+	}).Info("Goal consolidation completed")
+
+	return &consolidationResp, nil
+}
+
 // buildGoalRefinementPrompt creates the prompt for goal refinement
-func (r *GoalsBuilder) buildGoalRefinementPrompt(_ *RefineGoalRequest, contextData builder.BuilderContext) string {
+func (r *AIGoalsBuilder) buildGoalRefinementPrompt(_ *builder.RefineGoalRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -315,7 +268,7 @@ func (r *GoalsBuilder) buildGoalRefinementPrompt(_ *RefineGoalRequest, contextDa
 }
 
 // buildGoalGenerationPrompt creates the prompt for goal generation
-func (r *GoalsBuilder) buildGoalGenerationPrompt(_ *GenerateGoalRequest, contextData builder.BuilderContext) string {
+func (r *AIGoalsBuilder) buildGoalGenerationPrompt(_ *builder.GenerateGoalRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -327,7 +280,7 @@ func (r *GoalsBuilder) buildGoalGenerationPrompt(_ *GenerateGoalRequest, context
 }
 
 // buildGoalsGenerationPrompt creates the prompt for multiple goals generation
-func (r *GoalsBuilder) buildGoalsGenerationPrompt(_ *GenerateGoalRequest, contextData builder.BuilderContext) string {
+func (r *AIGoalsBuilder) buildGoalsGenerationPrompt(_ *builder.GenerateGoalRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -336,7 +289,21 @@ func (r *GoalsBuilder) buildGoalsGenerationPrompt(_ *GenerateGoalRequest, contex
 	builder.WriteString("Based on the agency context and input, generate 3-5 well-defined goals. Each goal should be specific to this agency type, avoid duplicating existing goals, and include measurable success metrics. Suggest appropriate goal codes (P001, P002, etc.), priorities, categories, and tags for each.")
 
 	return builder.String()
-} // System prompts for AI goal handling
+}
+
+// buildGoalConsolidationPrompt creates the prompt for goal consolidation
+func (r *AIGoalsBuilder) buildGoalConsolidationPrompt(_ *builder.ConsolidateGoalsRequest, contextData builder.BuilderContext) string {
+	var builder strings.Builder
+
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(contextData))
+
+	builder.WriteString("\n\nPlease analyze these goals and consolidate them into a lean, strategic list. Aim to reduce the count by 30-50% while maintaining complete coverage.")
+
+	return builder.String()
+}
+
+// System prompts for AI goal handling
 const goalRefinementSystemPrompt = `Act as a strategic advisor. Your role is to refine and enhance goal definitions for agencies, ensuring they express clear strategic intentions and are outcome-oriented.
 
 Based on the agency's mission, capabilities, and ecosystem, refine goals to:
@@ -441,3 +408,74 @@ Respond with JSON in this exact format:
 }
 
 Present results in a structured, concise format suitable for ongoing strategic guidance.`
+
+const goalConsolidationSystemPrompt = `Act as a strategic advisor. Your task is to analyze goals for multi-agent systems and determine if consolidation is beneficial.
+
+IMPORTANT: Only consolidate goals when it truly adds value. If goals are already well-defined and strategically distinct, keep them separate.
+
+Evaluate if consolidation is needed:
+
+1. **Assess consolidation value**:
+   - Check for duplicate or near-duplicate goals
+   - Look for goals with significant strategic overlap
+   - Identify goals that are really subgoals of a larger strategic objective
+   - Determine if goals can be combined without losing strategic clarity
+   - **If goals are distinct and well-scoped, DO NOT force consolidation**
+
+2. **When consolidation IS beneficial**:
+   - Merge duplicate or overlapping goals
+   - Combine related objectives when it clarifies strategy
+   - Ensure each consolidated goal remains measurable
+   - Preserve all success metrics and requirements
+   - Maintain clear strategic direction
+   - Keep goals at appropriate strategic level
+
+3. **When consolidation is NOT beneficial**:
+   - Return empty arrays for consolidated_goals and removed_goals
+   - Provide explanation that goals are already well-defined
+   - Don't force consolidation just to reduce count
+
+4. **Maintain strategic quality**:
+   - Each goal should express clear strategic intention
+   - Avoid creating overly broad or vague goals
+   - Ensure proper categorization and prioritization
+   - Balance strategic scope and achievability
+   - Support effective agency planning
+
+5. **Track merges accurately** (only when consolidating):
+   - Record ALL original goal keys that were merged in "merged_from_keys"
+   - List ALL goal keys to DELETE in "removed_goals"
+   - Provide clear explanations of consolidation decisions
+
+Focus on practical strategic management. Do not force consolidation.
+
+Respond ONLY with valid JSON (no markdown, no explanations outside JSON) in this exact format:
+
+If consolidation is NOT beneficial:
+{
+  "consolidated_goals": [],
+  "removed_goals": [],
+  "summary": "No consolidation needed - goals are already distinct and well-scoped",
+  "explanation": "Each goal addresses a specific strategic objective and should remain independent"
+}
+
+If consolidation IS beneficial:
+{
+  "consolidated_goals": [
+    {
+      "description": "Clear, outcome-oriented goal description",
+      "scope": "Well-defined scope describing strategic approach",
+      "success_metrics": ["Measurable outcome 1", "Measurable outcome 2", "Measurable outcome 3"],
+      "suggested_code": "G001",
+      "suggested_priority": "High/Medium/Low",
+      "suggested_category": "Strategic category",
+      "suggested_tags": ["tag1", "tag2"],
+      "merged_from_keys": ["original_key1", "original_key2"],
+      "explanation": "Brief explanation of what was consolidated and why"
+    }
+  ],
+  "removed_goals": ["original_key1", "original_key2"],
+  "summary": "Consolidated X goals into Y more focused strategic objectives",
+  "explanation": "Overall consolidation strategy and benefits"
+}
+`

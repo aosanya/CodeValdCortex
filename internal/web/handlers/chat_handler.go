@@ -20,8 +20,7 @@ type ChatHandler struct {
 	agencyService       agency.Service
 	roleService         registry.RoleService
 	introductionRefiner *ai.AIIntroductionBuilder
-	goalRefiner         *ai.GoalsBuilder
-	goalConsolidator    *ai.GoalConsolidator
+	goalRefiner         *ai.AIGoalsBuilder
 	logger              *logrus.Logger
 }
 
@@ -31,8 +30,7 @@ func NewChatHandler(
 	agencyService agency.Service,
 	roleService registry.RoleService,
 	introductionRefiner *ai.AIIntroductionBuilder,
-	goalRefiner *ai.GoalsBuilder,
-	goalConsolidator *ai.GoalConsolidator,
+	goalRefiner *ai.AIGoalsBuilder,
 	logger *logrus.Logger,
 ) *ChatHandler {
 	return &ChatHandler{
@@ -41,7 +39,6 @@ func NewChatHandler(
 		roleService:         roleService,
 		introductionRefiner: introductionRefiner,
 		goalRefiner:         goalRefiner,
-		goalConsolidator:    goalConsolidator,
 		logger:              logger,
 	}
 }

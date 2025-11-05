@@ -6,60 +6,53 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
 
-// RoleCreator handles AI-powered role generation from work items
-type RoleCreator struct {
+// Verify AIRolesBuilder implements RoleBuilderInterface
+var _ builder.RoleBuilderInterface = (*AIRolesBuilder)(nil)
+
+// AIRolesBuilder handles AI-powered role operations (generation, refinement, consolidation)
+type AIRolesBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
-// NewRoleCreator creates a new role creator service
-func NewRoleCreator(llmClient LLMClient, logger *logrus.Logger) *RoleCreator {
-	return &RoleCreator{
+// NewAIRolesBuilder creates a new AI roles builder
+func NewAIRolesBuilder(llmClient LLMClient, logger *logrus.Logger) *AIRolesBuilder {
+	return &AIRolesBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
 }
 
-// GenerateRolesRequest contains the context for generating roles
-type GenerateRolesRequest struct {
-	AgencyID      string             `json:"agency_id"`
-	AgencyContext *agency.Agency     `json:"agency_context"`
-	WorkItems     []*agency.WorkItem `json:"work_items"`
-	ExistingRoles []*registry.Role   `json:"existing_roles"`
+// Stub methods - to be implemented following the goals/work items pattern
+
+// RefineRole refines a role definition (to be implemented)
+func (r *AIRolesBuilder) RefineRole(ctx context.Context, req *builder.RefineRoleRequest, builderContext builder.BuilderContext) (*builder.RefineRoleResponse, error) {
+	// TODO: Implement role refinement
+	return nil, fmt.Errorf("RefineRole not yet implemented")
 }
 
-// GenerateRolesResponse contains the AI-generated roles
-type GenerateRolesResponse struct {
-	Roles       []GeneratedRole `json:"roles"`
-	Explanation string          `json:"explanation"`
+// GenerateRole generates a single role (to be implemented)
+func (r *AIRolesBuilder) GenerateRole(ctx context.Context, req *builder.GenerateRoleRequest, builderContext builder.BuilderContext) (*builder.GenerateRoleResponse, error) {
+	// TODO: Implement single role generation
+	return nil, fmt.Errorf("GenerateRole not yet implemented")
 }
 
-// GeneratedRole represents a single AI-generated role
-type GeneratedRole struct {
-	Name           string   `json:"name"`
-	Description    string   `json:"description"`
-	Tags           []string `json:"tags"`
-	AutonomyLevel  string   `json:"autonomy_level"`
-	Capabilities   []string `json:"capabilities"`
-	RequiredSkills []string `json:"required_skills"`
-	TokenBudget    int64    `json:"token_budget"`
-	Icon           string   `json:"icon"`
-	Color          string   `json:"color"`
-	SuggestedCode  string   `json:"suggested_code"`
+// ConsolidateRoles consolidates roles into a lean list (to be implemented)
+func (r *AIRolesBuilder) ConsolidateRoles(ctx context.Context, req *builder.ConsolidateRolesRequest, builderContext builder.BuilderContext) (*builder.ConsolidateRolesResponse, error) {
+	// TODO: Implement role consolidation
+	return nil, fmt.Errorf("ConsolidateRoles not yet implemented")
 }
 
 // GenerateRoles uses AI to generate roles from work items
-func (r *RoleCreator) GenerateRoles(ctx context.Context, req *GenerateRolesRequest) (*GenerateRolesResponse, error) {
+func (r *AIRolesBuilder) GenerateRoles(ctx context.Context, req *builder.GenerateRolesRequest, builderContext builder.BuilderContext) (*builder.GenerateRolesResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI role generation from work items")
 
 	// Build the prompt for role generation
-	prompt := r.buildRoleGenerationPrompt(req)
+	prompt := r.buildRoleGenerationPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -82,7 +75,7 @@ func (r *RoleCreator) GenerateRoles(ctx context.Context, req *GenerateRolesReque
 
 	// Parse the AI response
 	cleanedContent := stripMarkdownFences(response.Content)
-	var aiResponse GenerateRolesResponse
+	var aiResponse builder.GenerateRolesResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
 		r.logger.WithError(err).Error("Failed to parse AI role generation response")
 		r.logger.WithField("response", cleanedContent).Debug("Raw AI response for debugging")
@@ -93,7 +86,7 @@ func (r *RoleCreator) GenerateRoles(ctx context.Context, req *GenerateRolesReque
 	return &aiResponse, nil
 }
 
-func (r *RoleCreator) getRoleGenerationSystemPrompt() string {
+func (r *AIRolesBuilder) getRoleGenerationSystemPrompt() string {
 	return `You are an expert AI agent system architect helping to design multi-agent systems.
 
 Your task is to analyze work items and generate appropriate agent role definitions.
@@ -133,22 +126,7 @@ Response must be valid JSON matching this structure:
 }`
 }
 
-func (r *RoleCreator) buildRoleGenerationPrompt(req *GenerateRolesRequest) string {
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "",  // Not available in this request
-		Goals:        nil, // Not available in this request
-		WorkItems:    req.WorkItems,
-		Roles:        req.ExistingRoles,
-		Assignments:  nil, // Not available in this request
-		UserInput:    "",
-	}
-
+func (r *AIRolesBuilder) buildRoleGenerationPrompt(_ *builder.GenerateRolesRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter

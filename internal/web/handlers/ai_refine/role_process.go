@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -95,7 +95,7 @@ func (h *Handler) processCreateRolesOperation(
 	results map[string]interface{},
 ) {
 	// Check if role creator is available
-	if h.roleCreator == nil {
+	if h.roleBuilder == nil {
 		h.logger.Warn("Role creator not available", "agencyID", agencyID)
 		results["create_error"] = "AI role generation service is not configured"
 		return
@@ -117,15 +117,20 @@ func (h *Handler) processCreateRolesOperation(
 
 	ctx := c.Request.Context()
 
-	// Call AI role creator
-	generateReq := &ai.GenerateRolesRequest{
-		AgencyID:      agencyID,
-		AgencyContext: ag,
-		WorkItems:     workItems,
-		ExistingRoles: []*registry.Role{}, // TODO: Get from role service
+	// Build AI context for role generation
+	builderContext, err := h.contextBuilder.BuildBuilderContext(ctx, ag, "", "")
+	if err != nil {
+		h.logger.Error("Failed to build context for role generation", "agencyID", agencyID, "error", err)
+		results["create_error"] = fmt.Sprintf("Failed to build context: %v", err)
+		return
 	}
 
-	response, err := h.roleCreator.GenerateRoles(ctx, generateReq)
+	// Call AI role builder
+	generateReq := &builder.GenerateRolesRequest{
+		AgencyID: agencyID,
+	}
+
+	response, err := h.roleBuilder.GenerateRoles(ctx, generateReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to generate roles", "agencyID", agencyID, "error", err)
 		results["create_error"] = fmt.Sprintf("Failed to generate roles: %v", err)
@@ -142,7 +147,7 @@ func (h *Handler) processCreateRolesOperation(
 	for _, genRole := range response.Roles {
 		// Convert AI generated role to registry.Role
 		role := &registry.Role{
-			ID:                   genRole.SuggestedCode,
+			ID:                   genRole.Name, // Use name as ID since SuggestedCode not in builder type yet
 			Name:                 genRole.Name,
 			Description:          genRole.Description,
 			Tags:                 genRole.Tags,
@@ -151,8 +156,8 @@ func (h *Handler) processCreateRolesOperation(
 			RequiredSkills:       genRole.RequiredSkills,
 			RequiredCapabilities: genRole.Capabilities,
 			TokenBudget:          genRole.TokenBudget,
-			Icon:                 genRole.Icon,
-			Color:                genRole.Color,
+			Icon:                 "🤖",       // Default icon until builder type includes it
+			Color:                "#3498db", // Default color until builder type includes it
 			IsSystemType:         false,
 			IsEnabled:            true,
 		}

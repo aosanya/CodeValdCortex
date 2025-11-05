@@ -86,16 +86,3 @@ type ConsolidatedWorkItem struct {
 	ConsolidatedFrom  []string `json:"consolidated_from"` // Keys of original work items
 	Rationale         string   `json:"rationale"`
 }
-
-// aiWorkItemRefinementResponse represents the JSON structure returned by the AI
-type aiWorkItemRefinementResponse struct {
-	RefinedTitle        string   `json:"refined_title"`
-	RefinedDescription  string   `json:"refined_description"`
-	RefinedDeliverables []string `json:"refined_deliverables"`
-	SuggestedType       string   `json:"suggested_type"`
-	SuggestedPriority   string   `json:"suggested_priority"`
-	SuggestedEffort     int      `json:"suggested_effort"`
-	SuggestedTags       []string `json:"suggested_tags"`
-	Explanation         string   `json:"explanation"`
-	Changed             bool     `json:"changed"`
-}

@@ -197,6 +197,34 @@ func (m *mockAgencyService) ValidateWorkItemDependencies(ctx context.Context, ag
 	return nil
 }
 
+func (m *mockAgencyService) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *agency.RACIAssignment) error {
+	return nil
+}
+
+func (m *mockAgencyService) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*agency.RACIAssignment, error) {
+	return []*agency.RACIAssignment{}, nil
+}
+
+func (m *mockAgencyService) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*agency.RACIAssignment, error) {
+	return []*agency.RACIAssignment{}, nil
+}
+
+func (m *mockAgencyService) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*agency.RACIAssignment, error) {
+	return []*agency.RACIAssignment{}, nil
+}
+
+func (m *mockAgencyService) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *agency.RACIAssignment) error {
+	return nil
+}
+
+func (m *mockAgencyService) DeleteRACIAssignment(ctx context.Context, agencyID string, key string) error {
+	return nil
+}
+
+func (m *mockAgencyService) DeleteRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) error {
+	return nil
+}
+
 // setupTestRouter creates a test router with the homepage handlers and middleware
 func setupTestRouter(agencyService agency.Service) *gin.Engine {
 	gin.SetMode(gin.TestMode)

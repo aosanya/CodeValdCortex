@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -89,7 +89,7 @@ func (h *Handler) ProcessAIRACIRequest(c *gin.Context) {
 		"results": results,
 	}
 
-	if assignments, ok := results["assignments"].(map[string]map[string]ai.RACIAssignment); ok {
+	if assignments, ok := results["assignments"].(map[string]map[string]builder.RACIAssignment); ok {
 		response["assignments"] = assignments
 		response["mapping_count"] = countTotalAssignments(assignments)
 	}
@@ -119,19 +119,38 @@ func (h *Handler) processCreateRACIMappingsOperation(
 		return
 	}
 
-	// Check if we have a RACI creator
-	if h.raciCreator == nil {
-		h.logger.Error("RACI creator not available", "agencyID", agencyID)
+	// Check if we have a RACI builder
+	if h.raciBuilder == nil {
+		h.logger.Error("RACI builder not available", "agencyID", agencyID)
 		results["create_error"] = "RACI creation service not available"
 		return
 	}
 
+	// Get RACI assignments for context
+	assignments, err := h.agencyService.GetAllRACIAssignments(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
+		assignments = []*agency.RACIAssignment{}
+	}
+
+	// Build context for RACI creation
+	aiContext := builder.BuilderContext{
+		// Agency metadata
+		AgencyName:        ag.DisplayName,
+		AgencyCategory:    ag.Category,
+		AgencyDescription: ag.Description,
+		// Agency working data
+		Introduction: "",  // Introduction not available in agency struct
+		Goals:        nil, // We would need to fetch these
+		WorkItems:    workItems,
+		Roles:        roles,
+		Assignments:  assignments,
+		UserInput:    "",
+	}
+
 	// Create RACI mappings request
-	createReq := &ai.CreateRACIMappingsRequest{
-		AgencyID:      agencyID,
-		WorkItems:     workItems,
-		Roles:         roles,
-		AgencyContext: ag,
+	createReq := &builder.CreateRACIMappingsRequest{
+		AgencyID: agencyID,
 	}
 
 	h.logger.Info("Calling AI to generate RACI mappings",
@@ -139,7 +158,7 @@ func (h *Handler) processCreateRACIMappingsOperation(
 		"workItems", len(workItems),
 		"roles", len(roles))
 
-	result, err := h.raciCreator.CreateRACIMappings(c.Request.Context(), createReq)
+	result, err := h.raciBuilder.CreateRACIMappings(c.Request.Context(), createReq, aiContext)
 	if err != nil {
 		h.logger.Error("Failed to generate RACI mappings from AI", "agencyID", agencyID, "error", err)
 		results["create_error"] = err.Error()
@@ -213,7 +232,7 @@ func (h *Handler) addRACIExplanationToChat(c *gin.Context, agencyID string, expl
 	}
 }
 
-func countTotalAssignments(assignments map[string]map[string]ai.RACIAssignment) int {
+func countTotalAssignments(assignments map[string]map[string]builder.RACIAssignment) int {
 	count := 0
 	for _, roleAssignments := range assignments {
 		count += len(roleAssignments)

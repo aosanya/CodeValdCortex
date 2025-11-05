@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -45,15 +45,23 @@ func (h *Handler) ConsolidateGoals(c *gin.Context) {
 		workItems = []*agency.WorkItem{}
 	}
 
+	// Build AI context
+	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to build AI context")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to build context"})
+		return
+	}
+
 	// Perform consolidation
-	consolidationReq := &ai.ConsolidateGoalsRequest{
+	consolidationReq := &builder.ConsolidateGoalsRequest{
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		CurrentGoals:  goals,
 		WorkItems:     workItems,
 	}
 
-	result, err := h.goalConsolidator.ConsolidateGoals(c.Request.Context(), consolidationReq)
+	result, err := h.goalRefiner.ConsolidateGoals(c.Request.Context(), consolidationReq, builderContext)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to consolidate goals")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to consolidate goals"})

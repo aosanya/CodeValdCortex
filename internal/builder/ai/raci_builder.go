@@ -6,44 +6,25 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
 
-// RACICreator handles AI-powered RACI matrix creation
-type RACICreator struct {
+// Ensure AIRACIBuilder implements the RACIBuilderInterface
+var _ builder.RACIBuilderInterface = (*AIRACIBuilder)(nil)
+
+// AIRACIBuilder handles AI-powered RACI matrix creation
+type AIRACIBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
-// NewRACICreator creates a new RACI creator service
-func NewRACICreator(llmClient LLMClient, logger *logrus.Logger) *RACICreator {
-	return &RACICreator{
+// NewAIRACIBuilder creates a new RACI builder service
+func NewAIRACIBuilder(llmClient LLMClient, logger *logrus.Logger) *AIRACIBuilder {
+	return &AIRACIBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
-}
-
-// CreateRACIMappingsRequest contains the context for creating RACI mappings
-type CreateRACIMappingsRequest struct {
-	AgencyID      string             `json:"agency_id"`
-	WorkItems     []*agency.WorkItem `json:"work_items"`
-	Roles         []*registry.Role   `json:"roles"`
-	AgencyContext *agency.Agency     `json:"agency_context"`
-}
-
-// RACIAssignment represents a role assignment with objective
-type RACIAssignment struct {
-	RACI      string `json:"raci"`      // R, A, C, or I
-	Objective string `json:"objective"` // What this role needs to achieve
-}
-
-// CreateRACIMappingsResponse contains the AI-generated RACI mappings
-type CreateRACIMappingsResponse struct {
-	Assignments map[string]map[string]RACIAssignment `json:"assignments"` // workItemKey -> roleKey -> assignment
-	Explanation string                               `json:"explanation"`
 }
 
 // aiRACIMappingResponse represents the AI's response structure
@@ -90,18 +71,18 @@ Return your response as a JSON object with this structure:
 }`
 
 // CreateRACIMappings generates RACI assignments using AI
-func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMappingsRequest) (*CreateRACIMappingsResponse, error) {
-	c.logger.WithFields(logrus.Fields{
+func (r *AIRACIBuilder) CreateRACIMappings(ctx context.Context, req *builder.CreateRACIMappingsRequest, aiContext builder.BuilderContext) (*builder.CreateRACIMappingsResponse, error) {
+	r.logger.WithFields(logrus.Fields{
 		"agency_id":  req.AgencyID,
-		"work_items": len(req.WorkItems),
-		"roles":      len(req.Roles),
+		"work_items": len(aiContext.WorkItems),
+		"roles":      len(aiContext.Roles),
 	}).Info("Creating RACI mappings with AI")
 
 	// Build the prompt with context
-	prompt := c.buildRACICreationPrompt(req)
+	prompt := r.buildRACICreationPrompt(req, aiContext)
 
 	// Make the LLM request
-	response, err := c.llmClient.Chat(ctx, &ChatRequest{
+	response, err := r.llmClient.Chat(ctx, &ChatRequest{
 		Messages: []Message{
 			{
 				Role:    "system",
@@ -115,7 +96,7 @@ func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMap
 	})
 
 	if err != nil {
-		c.logger.WithError(err).Error("Failed to get AI response for RACI creation")
+		r.logger.WithError(err).Error("Failed to get AI response for RACI creation")
 		return nil, fmt.Errorf("AI RACI creation failed: %w", err)
 	}
 
@@ -123,28 +104,28 @@ func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMap
 	cleanedContent := stripMarkdownFences(response.Content)
 	var aiResponse aiRACIMappingResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &aiResponse); err != nil {
-		c.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI RACI response")
+		r.logger.WithError(err).WithField("response", response.Content).Error("Failed to parse AI RACI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
 	}
 
 	// Convert to our response format
-	assignments := make(map[string]map[string]RACIAssignment)
+	assignments := make(map[string]map[string]builder.RACIAssignment)
 	for _, mapping := range aiResponse.Mappings {
 		if assignments[mapping.WorkItemKey] == nil {
-			assignments[mapping.WorkItemKey] = make(map[string]RACIAssignment)
+			assignments[mapping.WorkItemKey] = make(map[string]builder.RACIAssignment)
 		}
-		assignments[mapping.WorkItemKey][mapping.RoleKey] = RACIAssignment{
+		assignments[mapping.WorkItemKey][mapping.RoleKey] = builder.RACIAssignment{
 			RACI:      mapping.RACI,
 			Objective: mapping.Objective,
 		}
 	}
 
-	result := &CreateRACIMappingsResponse{
+	result := &builder.CreateRACIMappingsResponse{
 		Assignments: assignments,
 		Explanation: aiResponse.Explanation,
 	}
 
-	c.logger.WithFields(logrus.Fields{
+	r.logger.WithFields(logrus.Fields{
 		"agency_id":         req.AgencyID,
 		"mappings_created":  len(aiResponse.Mappings),
 		"work_items_mapped": len(assignments),
@@ -153,22 +134,7 @@ func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMap
 	return result, nil
 }
 
-func (c *RACICreator) buildRACICreationPrompt(req *CreateRACIMappingsRequest) string {
-	// Create structured builder.BuilderContext with all available context data
-	contextData := builder.BuilderContext{
-		// Agency metadata
-		AgencyName:        req.AgencyContext.DisplayName,
-		AgencyCategory:    req.AgencyContext.Category,
-		AgencyDescription: req.AgencyContext.Description,
-		// Agency working data
-		Introduction: "",  // Not available in this request
-		Goals:        nil, // Not available in this request
-		WorkItems:    req.WorkItems,
-		Roles:        req.Roles,
-		Assignments:  nil, // Not available in this request (we're creating them)
-		UserInput:    "",
-	}
-
+func (r *AIRACIBuilder) buildRACICreationPrompt(_ *builder.CreateRACIMappingsRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -179,4 +145,22 @@ func (c *RACICreator) buildRACICreationPrompt(req *CreateRACIMappingsRequest) st
 	builder.WriteString("Provide clear objectives for each assignment that explain what the role needs to achieve.")
 
 	return builder.String()
+}
+
+// RefineRACIMapping refines an existing RACI mapping using AI
+// TODO: Implement RACI mapping refinement logic
+func (r *AIRACIBuilder) RefineRACIMapping(ctx context.Context, req *builder.RefineRACIMappingRequest, aiContext builder.BuilderContext) (*builder.RefineRACIMappingResponse, error) {
+	return nil, fmt.Errorf("RefineRACIMapping: not yet implemented")
+}
+
+// GenerateRACIMapping generates a single new RACI mapping using AI
+// TODO: Implement single RACI mapping generation logic
+func (r *AIRACIBuilder) GenerateRACIMapping(ctx context.Context, req *builder.GenerateRACIMappingRequest, aiContext builder.BuilderContext) (*builder.GenerateRACIMappingResponse, error) {
+	return nil, fmt.Errorf("GenerateRACIMapping: not yet implemented")
+}
+
+// ConsolidateRACIMappings consolidates multiple RACI mappings using AI
+// TODO: Implement RACI mapping consolidation logic
+func (r *AIRACIBuilder) ConsolidateRACIMappings(ctx context.Context, req *builder.ConsolidateRACIMappingsRequest, aiContext builder.BuilderContext) (*builder.ConsolidateRACIMappingsResponse, error) {
+	return nil, fmt.Errorf("ConsolidateRACIMappings: not yet implemented")
 }

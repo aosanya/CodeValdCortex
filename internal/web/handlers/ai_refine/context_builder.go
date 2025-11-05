@@ -58,7 +58,7 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		assignments = []*agency.RACIAssignment{}
 	}
 
-	aiContext := builder.BuilderContext{
+	builderContext := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        agencyObj.DisplayName,
 		AgencyCategory:    agencyObj.Category,
@@ -83,5 +83,5 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		"has_user_input":    userRequest != "",
 	}).Debug("AI context data built successfully")
 
-	return aiContext, nil
+	return builderContext, nil
 }

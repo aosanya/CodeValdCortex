@@ -27,11 +27,3 @@ type AgencyDataResponse struct {
 	Roles        []*registry.Role         `json:"roles"`
 	Assignments  []*agency.RACIAssignment `json:"assignments"`
 }
-
-// aiRefinementResponse represents the JSON structure returned by the AI
-type aiRefinementResponse struct {
-	Data            *AgencyDataResponse `json:"data"`
-	Explanation     string              `json:"explanation"`
-	Changed         bool                `json:"changed"`
-	ChangedSections []string            `json:"changed_sections"`
-}

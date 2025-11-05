@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -179,8 +179,16 @@ func (h *Handler) processCreateOperation(
 		"userInputLength", len(userInput),
 		"existingGoalsCount", len(existingGoals))
 
+	// Build AI context
+	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", userInput)
+	if err != nil {
+		h.logger.Error("Failed to build AI context", "agencyID", agencyID, "error", err)
+		results["create_error"] = fmt.Sprintf("Failed to build context: %v", err)
+		return
+	}
+
 	// Generate multiple goals in one AI call
-	genReq := &ai.GenerateGoalRequest{
+	genReq := &builder.GenerateGoalRequest{
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		ExistingGoals: existingGoals,
@@ -190,7 +198,7 @@ func (h *Handler) processCreateOperation(
 
 	h.logger.Info("Calling AI to generate multiple goals", "agencyID", agencyID)
 
-	result, err := h.goalRefiner.GenerateGoals(c.Request.Context(), genReq)
+	result, err := h.goalRefiner.GenerateGoals(c.Request.Context(), genReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to generate goals from AI", "agencyID", agencyID, "error", err)
 		results["create_error"] = err.Error()
@@ -270,8 +278,19 @@ func (h *Handler) processEnhanceOperation(
 			"goalKey", goal.Key,
 			"goalCode", goal.Code)
 
+		// Build AI context for this goal refinement
+		builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+		if err != nil {
+			h.logger.Error("Failed to build AI context",
+				"agencyID", agencyID,
+				"goalKey", goal.Key,
+				"error", err)
+			enhancementResults = append(enhancementResults, fmt.Sprintf("Failed to build context for %s: %s", goal.Code, err.Error()))
+			continue
+		}
+
 		// Build refinement request
-		refineReq := &ai.RefineGoalRequest{
+		refineReq := &builder.RefineGoalRequest{
 			AgencyID:       agencyID,
 			CurrentGoal:    goal,
 			Description:    goal.Description,
@@ -283,7 +302,7 @@ func (h *Handler) processEnhanceOperation(
 		}
 
 		// Call AI to refine the goal
-		refinedResult, err := h.goalRefiner.RefineGoal(c.Request.Context(), refineReq)
+		refinedResult, err := h.goalRefiner.RefineGoal(c.Request.Context(), refineReq, builderContext)
 		if err != nil {
 			h.logger.Error("Failed to enhance goal",
 				"agencyID", agencyID,
@@ -369,15 +388,23 @@ func (h *Handler) processConsolidateOperation(
 		"agencyID", agencyID,
 		"currentGoalsCount", len(existingGoals))
 
+	// Build AI context for consolidation
+	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+	if err != nil {
+		h.logger.Error("Failed to build AI context", "agencyID", agencyID, "error", err)
+		results["consolidate_error"] = fmt.Sprintf("Failed to build context: %v", err)
+		return
+	}
+
 	// Perform consolidation
-	consolidationReq := &ai.ConsolidateGoalsRequest{
+	consolidationReq := &builder.ConsolidateGoalsRequest{
 		AgencyID:      agencyID,
 		AgencyContext: ag,
 		CurrentGoals:  existingGoals,
 		WorkItems:     workItems,
 	}
 
-	consolidationResult, err := h.goalConsolidator.ConsolidateGoals(c.Request.Context(), consolidationReq)
+	consolidationResult, err := h.goalRefiner.ConsolidateGoals(c.Request.Context(), consolidationReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to consolidate goals", "agencyID", agencyID, "error", err)
 		results["consolidate_error"] = err.Error()
@@ -441,7 +468,7 @@ func (h *Handler) processConsolidateOperation(
 			"agencyID", agencyID,
 			"goalIndex", i+1,
 			"goalCode", consolidatedGoal.SuggestedCode,
-			"mergedFrom", len(consolidatedGoal.MergedFromKeys))
+			"mergedFrom", len(consolidatedGoal.ConsolidatedFrom))
 
 		goal, err := h.agencyService.CreateGoal(c.Request.Context(), agencyID, consolidatedGoal.SuggestedCode, consolidatedGoal.Description)
 		if err != nil {

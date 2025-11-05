@@ -72,7 +72,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	// Build AI context data using shared context builder (pass the full agency object)
-	aiContextData, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, currentIntroduction, userRequest)
+	builderContextData, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, currentIntroduction, userRequest)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to build AI context data")
 		c.Header("Content-Type", "text/html")
@@ -116,8 +116,8 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		ConversationHistory: conversationHistory,
 	}
 
-	// Call AI refiner service with aiContextData passed separately
-	refinedResult, err := h.introductionRefiner.RefineIntroduction(c.Request.Context(), refineReq, aiContextData)
+	// Call AI refiner service with builderContextData passed separately
+	refinedResult, err := h.introductionRefiner.RefineIntroduction(c.Request.Context(), refineReq, builderContextData)
 	if err != nil {
 		h.logger.WithError(err).Error("AI refinement failed")
 		c.Header("Content-Type", "text/html")

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -40,13 +40,6 @@ func (h *Handler) ProcessAIWorkItemRequest(c *gin.Context) {
 		h.logger.Error("Agency not found", "agencyID", agencyID, "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Agency not found"})
 		return
-	}
-
-	// Get goals for context
-	goals, err := h.agencyService.GetGoals(ctx, agencyID)
-	if err != nil {
-		h.logger.Warn("Failed to get goals", "agencyID", agencyID, "error", err)
-		goals = []*agency.Goal{}
 	}
 
 	// Get existing work items
@@ -86,11 +79,11 @@ func (h *Handler) ProcessAIWorkItemRequest(c *gin.Context) {
 
 		switch operation {
 		case "create":
-			h.processCreateWorkItemsOperation(c, agencyID, ag, goals, existingWorkItems, results, &createdWorkItems)
+			h.processCreateWorkItemsOperation(c, agencyID, ag, results, &createdWorkItems)
 		case "enhance":
-			h.processEnhanceWorkItemsOperation(c, agencyID, ag, workItemsToProcess, goals, results, &enhancedWorkItems)
+			h.processEnhanceWorkItemsOperation(c, agencyID, ag, workItemsToProcess, results, &enhancedWorkItems)
 		case "consolidate":
-			h.processConsolidateWorkItemsOperation(c, agencyID, ag, workItemsToProcess, goals, results, &createdWorkItems)
+			h.processConsolidateWorkItemsOperation(c, agencyID, ag, workItemsToProcess, results, &createdWorkItems)
 		}
 	}
 
@@ -133,13 +126,19 @@ func (h *Handler) processCreateWorkItemsOperation(
 	c *gin.Context,
 	agencyID string,
 	ag *agency.Agency,
-	goals []*agency.Goal,
-	existingWorkItems []*agency.WorkItem,
 	results map[string]interface{},
 	createdWorkItems *[]*agency.WorkItem,
 ) {
-	// Generate new work items based on goals
-	if len(goals) == 0 {
+	// Build AI context to get goals
+	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+	if err != nil {
+		h.logger.Error("Failed to build context for work item generation", "agencyID", agencyID, "error", err)
+		results["create_error"] = err.Error()
+		return
+	}
+
+	// Generate new work items based on goals from context
+	if len(builderContext.Goals) == 0 {
 		h.logger.Warn("No goals found for work item generation", "agencyID", agencyID)
 		results["create_error"] = "No goals found. Please create goals first."
 		return
@@ -147,28 +146,33 @@ func (h *Handler) processCreateWorkItemsOperation(
 
 	h.logger.Info("Starting work item generation from goals",
 		"agencyID", agencyID,
-		"goalsCount", len(goals),
-		"existingWorkItemsCount", len(existingWorkItems))
+		"goalsCount", len(builderContext.Goals),
+		"existingWorkItemsCount", len(builderContext.WorkItems))
 
 	// Build user input from goals
 	var goalsContext strings.Builder
 	goalsContext.WriteString("Based on the following goals:\n")
-	for _, goal := range goals {
+	for _, goal := range builderContext.Goals {
 		goalsContext.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
 	}
 
+	// Rebuild context with user input
+	builderContext, err = h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", goalsContext.String())
+	if err != nil {
+		h.logger.Error("Failed to build context for work item generation", "agencyID", agencyID, "error", err)
+		results["create_error"] = err.Error()
+		return
+	}
+
 	// Generate multiple work items in one AI call
-	genReq := &ai.GenerateWorkItemRequest{
-		AgencyID:          agencyID,
-		AgencyContext:     ag,
-		ExistingWorkItems: existingWorkItems,
-		Goals:             goals,
-		UserInput:         goalsContext.String(),
+	genReq := &builder.GenerateWorkItemRequest{
+		AgencyID:  agencyID,
+		UserInput: goalsContext.String(),
 	}
 
 	h.logger.Info("Calling AI to generate multiple work items", "agencyID", agencyID)
 
-	result, err := h.workItemRefiner.GenerateWorkItems(c.Request.Context(), genReq)
+	result, err := h.workItemBuilder.GenerateWorkItems(c.Request.Context(), genReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to generate work items from AI", "agencyID", agencyID, "error", err)
 		results["create_error"] = err.Error()
@@ -229,7 +233,6 @@ func (h *Handler) processEnhanceWorkItemsOperation(
 	agencyID string,
 	ag *agency.Agency,
 	existingWorkItems []*agency.WorkItem,
-	goals []*agency.Goal,
 	results map[string]interface{},
 	enhancedWorkItems *[]*agency.WorkItem,
 ) {
@@ -255,20 +258,24 @@ func (h *Handler) processEnhanceWorkItemsOperation(
 			"workItemKey", workItem.Key,
 			"workItemCode", workItem.Code)
 
+		// Build AI context for refinement
+		builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+		if err != nil {
+			h.logger.Error("Failed to build context for work item refinement", "agencyID", agencyID, "error", err)
+			enhancementResults = append(enhancementResults, fmt.Sprintf("Failed to build context for %s: %s", workItem.Code, err.Error()))
+			continue
+		}
+
 		// Build refinement request
-		refineReq := &ai.RefineWorkItemRequest{
-			AgencyID:          agencyID,
-			CurrentWorkItem:   workItem,
-			Title:             workItem.Title,
-			Description:       workItem.Description,
-			Deliverables:      workItem.Deliverables,
-			ExistingWorkItems: existingWorkItems,
-			Goals:             goals,
-			AgencyContext:     ag,
+		refineReq := &builder.RefineWorkItemRequest{
+			AgencyID:     agencyID,
+			Title:        workItem.Title,
+			Description:  workItem.Description,
+			Deliverables: workItem.Deliverables,
 		}
 
 		// Call AI to refine the work item
-		refinedResult, err := h.workItemRefiner.RefineWorkItem(c.Request.Context(), refineReq)
+		refinedResult, err := h.workItemBuilder.RefineWorkItem(c.Request.Context(), refineReq, builderContext)
 		if err != nil {
 			h.logger.Error("Failed to enhance work item",
 				"agencyID", agencyID,
@@ -348,7 +355,6 @@ func (h *Handler) processConsolidateWorkItemsOperation(
 	agencyID string,
 	ag *agency.Agency,
 	existingWorkItems []*agency.WorkItem,
-	goals []*agency.Goal,
 	results map[string]interface{},
 	createdWorkItems *[]*agency.WorkItem,
 ) {
@@ -363,15 +369,20 @@ func (h *Handler) processConsolidateWorkItemsOperation(
 		"agencyID", agencyID,
 		"currentWorkItemsCount", len(existingWorkItems))
 
-	// Perform consolidation
-	consolidationReq := &ai.ConsolidateWorkItemsRequest{
-		AgencyID:         agencyID,
-		AgencyContext:    ag,
-		CurrentWorkItems: existingWorkItems,
-		Goals:            goals,
+	// Build AI context for consolidation
+	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+	if err != nil {
+		h.logger.Error("Failed to build context for work item consolidation", "agencyID", agencyID, "error", err)
+		results["consolidate_error"] = err.Error()
+		return
 	}
 
-	consolidationResult, err := h.workItemConsolidator.ConsolidateWorkItems(c.Request.Context(), consolidationReq)
+	// Perform consolidation
+	consolidationReq := &builder.ConsolidateWorkItemsRequest{
+		AgencyID: agencyID,
+	}
+
+	consolidationResult, err := h.workItemBuilder.ConsolidateWorkItems(c.Request.Context(), consolidationReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to consolidate work items", "agencyID", agencyID, "error", err)
 		results["consolidate_error"] = err.Error()
@@ -435,7 +446,7 @@ func (h *Handler) processConsolidateWorkItemsOperation(
 			"agencyID", agencyID,
 			"workItemIndex", i+1,
 			"workItemCode", consolidatedWorkItem.SuggestedCode,
-			"mergedFrom", len(consolidatedWorkItem.MergedFromKeys))
+			"consolidatedFrom", len(consolidatedWorkItem.ConsolidatedFrom))
 
 		req := agency.CreateWorkItemRequest{
 			Title:        consolidatedWorkItem.Title,

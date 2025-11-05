@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -105,20 +105,40 @@ func (h *Handler) RefineGoal(c *gin.Context) {
 		workItems = []*agency.WorkItem{}
 	}
 
+	// Build AI context
+	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to build AI context")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusInternalServerError, `
+			<div class="notification is-danger">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-danger mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>Context Error:</strong> Failed to build AI context
+					</div>
+				</div>
+			</div>
+		`)
+		return
+	}
+
 	// Build refinement request
-	refineReq := &ai.RefineGoalRequest{
+	refineReq := &builder.RefineGoalRequest{
 		AgencyID:       agencyID,
 		CurrentGoal:    currentGoal,
 		Description:    currentDescription,
 		Scope:          currentScope,
 		SuccessMetrics: currentMetrics,
 		ExistingGoals:  existingGoals,
-		WorkItems:    workItems,
+		WorkItems:      workItems,
 		AgencyContext:  ag,
 	}
 
 	// Call AI refinement service
-	result, err := h.goalRefiner.RefineGoal(c.Request.Context(), refineReq)
+	result, err := h.goalRefiner.RefineGoal(c.Request.Context(), refineReq, builderContext)
 	if err != nil {
 		h.logger.WithError(err).Error("AI goal refinement failed")
 		c.Header("Content-Type", "text/html")
