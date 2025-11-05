@@ -7,6 +7,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -594,4 +595,261 @@ func (h *Handler) addExplanationToChat(c *gin.Context, agencyID string, explanat
 			"agencyID", agencyID,
 			"conversationID", conversation.ID)
 	}
+}
+
+// ProcessGoalChatRequest handles chat-based goal interactions
+// This is similar to RefineIntroduction but for goals in chat context
+func (h *Handler) ProcessGoalChatRequest(c *gin.Context) {
+	h.logger.Info("🔵 HANDLER CALLED: ProcessGoalChatRequest")
+
+	agencyID := c.Param("id")
+
+	// Get user's chat message/request
+	userRequest := c.PostForm("user-request")
+	if userRequest == "" {
+		userRequest = c.PostForm("message")
+	}
+
+	if userRequest == "" {
+		h.logger.Error("No user request provided for goal chat")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusBadRequest, `
+			<div class="notification is-warning">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-warning mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>No Request Provided</strong>
+						<p class="mb-0">Please provide a message or request.</p>
+					</div>
+				</div>
+			</div>
+		`)
+		return
+	}
+
+	h.logger.WithFields(logrus.Fields{
+		"agency_id":    agencyID,
+		"user_request": userRequest,
+	}).Info("Processing chat-based goal request")
+
+	// Get agency context
+	ctx := c.Request.Context()
+	ag, err := h.agencyService.GetAgency(ctx, agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to fetch agency")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusNotFound, `
+			<div class="notification is-warning">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-warning mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>Agency Not Found</strong>
+						<p class="mb-0">The requested agency could not be found.</p>
+					</div>
+				</div>
+			</div>
+		`)
+		return
+	}
+
+	// Get conversation context for recent chat messages
+	conv, err := h.designerService.GetConversationByAgencyID(agencyID)
+	if err != nil || conv == nil {
+		h.logger.WithError(err).Warn("No conversation found for agency")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusBadRequest, `
+			<div class="notification is-warning">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-warning mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>No Conversation</strong>
+						<p class="mb-0">Please start a conversation first.</p>
+					</div>
+				</div>
+			</div>
+		`)
+		return
+	}
+
+	// Add user message to conversation
+	if addErr := h.designerService.AddMessage(conv.ID, "user", userRequest); addErr != nil {
+		h.logger.WithError(addErr).Error("Failed to add user message to conversation")
+	}
+
+	// Build AI context
+	builderContext, err := h.contextBuilder.BuildBuilderContext(ctx, ag, "", userRequest)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to build AI context")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusInternalServerError, `
+			<div class="notification is-danger">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-danger mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>Context Build Failed</strong>
+						<p class="mb-0">Failed to gather necessary context data.</p>
+					</div>
+				</div>
+			</div>
+		`)
+		return
+	}
+
+	// Determine operation from user request
+	// Simple keyword-based routing for now
+	userRequestLower := strings.ToLower(userRequest)
+	var operation string
+	if strings.Contains(userRequestLower, "create") || strings.Contains(userRequestLower, "generate") || strings.Contains(userRequestLower, "add") {
+		operation = "create"
+	} else if strings.Contains(userRequestLower, "consolidate") || strings.Contains(userRequestLower, "merge") || strings.Contains(userRequestLower, "combine") {
+		operation = "consolidate"
+	} else if strings.Contains(userRequestLower, "status") || strings.Contains(userRequestLower, "list") || strings.Contains(userRequestLower, "show") {
+		operation = "status"
+	} else {
+		// Default to enhance for general requests (including remove, delete, improve, refine, etc.)
+		operation = "enhance"
+	}
+
+	h.logger.Info("Determined operation from user request",
+		"operation", operation,
+		"userRequest", userRequest)
+
+	// Get existing goals for context
+	existingGoals := builderContext.Goals
+
+	// Process based on operation
+	var responseMessage string
+	switch operation {
+	case "create":
+		// Generate new goals
+		genReq := &builder.GenerateGoalRequest{
+			AgencyID:      agencyID,
+			AgencyContext: ag,
+		}
+		result, genErr := h.goalRefiner.GenerateGoals(ctx, genReq, builderContext)
+		if genErr != nil {
+			h.logger.WithError(genErr).Error("Failed to generate goals")
+			responseMessage = fmt.Sprintf("❌ Failed to generate goals: %v", genErr)
+		} else {
+			// Create goals using agency service
+			createdCount := 0
+			for _, goalResp := range result.Goals {
+				_, createErr := h.agencyService.CreateGoal(ctx, agencyID, goalResp.SuggestedCode, goalResp.Description)
+				if createErr != nil {
+					h.logger.WithError(createErr).Error("Failed to create goal", "goalCode", goalResp.SuggestedCode)
+				} else {
+					createdCount++
+				}
+			}
+			responseMessage = fmt.Sprintf("✨ **Created %d Goals**\n\n%s", createdCount, result.Explanation)
+		}
+
+	case "consolidate":
+		// Consolidate goals
+		if len(existingGoals) < 2 {
+			responseMessage = "ℹ️ Need at least 2 goals to consolidate."
+		} else {
+			consolidateReq := &builder.ConsolidateGoalsRequest{
+				AgencyID:      agencyID,
+				AgencyContext: ag,
+			}
+			result, consolidateErr := h.goalRefiner.ConsolidateGoals(ctx, consolidateReq, builderContext)
+			if consolidateErr != nil {
+				h.logger.WithError(consolidateErr).Error("Failed to consolidate goals")
+				responseMessage = fmt.Sprintf("❌ Failed to consolidate goals: %v", consolidateErr)
+			} else {
+				// Format consolidation suggestions
+				suggestions := make([]string, len(result.ConsolidatedGoals))
+				for i, cGoal := range result.ConsolidatedGoals {
+					suggestions[i] = fmt.Sprintf("**%s**: %s", cGoal.SuggestedCode, cGoal.Description)
+				}
+				responseMessage = fmt.Sprintf("💡 **Consolidation Suggestions**\n\n%s\n\n**Removed Goals**: %s\n\n%s",
+					strings.Join(suggestions, "\n"),
+					strings.Join(result.RemovedGoals, ", "),
+					result.Summary)
+			}
+		}
+
+	case "enhance":
+		// Enhance/refine goals based on user request (includes remove, delete, improve, refine)
+		if len(existingGoals) == 0 {
+			responseMessage = "ℹ️ No goals found to work with. Try creating some goals first."
+		} else {
+			h.logger.Info("Processing enhance/refine request",
+				"agencyID", agencyID,
+				"userRequest", userRequest,
+				"existingGoalsCount", len(existingGoals))
+
+			// General enhancement - provide guidance
+			responseMessage = fmt.Sprintf("🔧 **Goal Enhancement**\n\nI can help you with the following:\n\n"+
+				"• **Remove specific goals**: Specify the goal code (e.g., 'remove G013')\n"+
+				"• **Improve goal descriptions**: I can enhance clarity and specificity\n"+
+				"• **Refine scope and metrics**: I can suggest better success criteria\n\n"+
+				"Current goals (%d):\n", len(existingGoals))
+
+			for i, goal := range existingGoals {
+				responseMessage += fmt.Sprintf("%d. **%s**: %s\n", i+1, goal.Code, goal.Description)
+			}
+
+			responseMessage += "\n💡 Try asking me to 'remove G013' or 'consolidate goals'."
+		}
+
+	case "status":
+		// Provide status of current goals
+		if len(existingGoals) == 0 {
+			responseMessage = "ℹ️ No goals have been defined yet. Would you like me to create some goals based on the agency introduction?"
+		} else {
+			goalsList := make([]string, len(existingGoals))
+			for i, goal := range existingGoals {
+				goalsList[i] = fmt.Sprintf("- **%s**: %s", goal.Code, goal.Description)
+			}
+			responseMessage = fmt.Sprintf("📊 **Current Goals (%d)**\n\n%s\n\nHow can I help with these goals? I can create new ones, consolidate them, or help refine them.", len(existingGoals), strings.Join(goalsList, "\n"))
+		}
+
+	default:
+		responseMessage = "❓ I'm not sure what you want to do with the goals. Try asking to create, consolidate, or enhance goals, or ask for the current status."
+	}
+
+	// Add AI response to conversation
+	if addErr := h.designerService.AddMessage(conv.ID, "assistant", responseMessage); addErr != nil {
+		h.logger.WithError(addErr).Error("Failed to add AI response to conversation")
+	}
+
+	// Render chat messages (user + assistant)
+	c.Header("Content-Type", "text/html")
+
+	// Get updated conversation to retrieve messages
+	updatedConv, err := h.designerService.GetConversation(conv.ID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get updated conversation")
+		c.String(http.StatusInternalServerError, "Failed to render messages")
+		return
+	}
+
+	// Render last 2 messages (user + assistant)
+	messageCount := len(updatedConv.Messages)
+	if messageCount >= 2 {
+		// Render user message
+		userMsg := &updatedConv.Messages[messageCount-2]
+		if renderErr := agency_designer.UserMessage(*userMsg).Render(ctx, c.Writer); renderErr != nil {
+			h.logger.WithError(renderErr).Error("Failed to render user message")
+		}
+		// Render assistant message
+		aiMsg := &updatedConv.Messages[messageCount-1]
+		if renderErr := agency_designer.AIMessage(*aiMsg).Render(ctx, c.Writer); renderErr != nil {
+			h.logger.WithError(renderErr).Error("Failed to render AI message")
+		}
+	}
+
+	h.logger.Info("Successfully processed chat-based goal request",
+		"agencyID", agencyID,
+		"operation", operation)
 }

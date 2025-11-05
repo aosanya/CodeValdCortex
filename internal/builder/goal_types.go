@@ -83,3 +83,36 @@ type ConsolidatedGoal struct {
 	ConsolidatedFrom  []string `json:"consolidated_from"` // Keys of original goals
 	Rationale         string   `json:"rationale"`
 }
+
+// RefineGoalsRequest contains the context for dynamically processing goals based on user message
+type RefineGoalsRequest struct {
+	AgencyID      string             `json:"agency_id"`
+	UserMessage   string             `json:"user_message"`   // Natural language instruction from user
+	TargetGoals   []*agency.Goal     `json:"target_goals"`   // Optional: specific goals to operate on
+	ExistingGoals []*agency.Goal     `json:"existing_goals"` // All existing goals for context
+	WorkItems     []*agency.WorkItem `json:"work_items"`     // Work items for context
+	AgencyContext *agency.Agency     `json:"agency_context"`
+}
+
+// RefineGoalsResponse contains the results of dynamic goal processing
+type RefineGoalsResponse struct {
+	Action           string                    `json:"action"`             // What action was determined (refine, generate, consolidate, enhance_all, etc.)
+	RefinedGoals     []RefinedGoalResult       `json:"refined_goals"`      // Goals that were refined
+	GeneratedGoals   []GenerateGoalResponse    `json:"generated_goals"`    // Newly generated goals
+	ConsolidatedData *ConsolidateGoalsResponse `json:"consolidated_data"`  // Consolidation results if applicable
+	Explanation      string                    `json:"explanation"`        // What was done and why
+	NoActionNeeded   bool                      `json:"no_action_needed"`   // True if goals are already optimal
+}
+
+// RefinedGoalResult represents a single refined goal
+type RefinedGoalResult struct {
+	OriginalKey        string   `json:"original_key"`
+	RefinedDescription string   `json:"refined_description"`
+	RefinedScope       string   `json:"refined_scope"`
+	RefinedMetrics     []string `json:"refined_metrics"`
+	SuggestedPriority  string   `json:"suggested_priority"`
+	SuggestedCategory  string   `json:"suggested_category"`
+	SuggestedTags      []string `json:"suggested_tags"`
+	WasChanged         bool     `json:"was_changed"`
+	Explanation        string   `json:"explanation"`
+}

@@ -42,10 +42,10 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, userMessage 
 	return &result, nil
 }
 
-// performGoalsRefinement delegates to the ai_refine handler for goals processing
+// performGoalsRefinement delegates to the ai_refine handler for goals processing via chat
 // Returns the response HTML or nil if refinement failed
 func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string) (*string, error) {
-	h.logger.Info("🔵 DELEGATING: Goals processing to ai_refine.Handler")
+	h.logger.Info("🔵 DELEGATING: Goals processing to ai_refine.Handler (chat mode)")
 
 	// Get agencyID from context
 	agencyID := c.Param("id")
@@ -71,9 +71,10 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string)
 
 	// Set the user request in the form so the ai_refine handler can access it
 	c.Request.PostForm.Set("user-request", userMessage)
+	c.Request.PostForm.Set("message", userMessage)
 
-	// Delegate to the ai_refine handler which has the full logic
-	h.aiRefineHandler.ProcessAIGoalRequest(c)
+	// Delegate to the ai_refine chat-friendly goal handler
+	h.aiRefineHandler.ProcessGoalChatRequest(c)
 
 	// If we got here without panic, consider it successful
 	result := "success"
