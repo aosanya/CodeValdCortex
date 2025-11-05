@@ -134,7 +134,7 @@ func (h *Handler) processCreateRACIMappingsOperation(
 	}
 
 	// Build context for RACI creation
-	aiContext := builder.BuilderContext{
+	builderContext := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        ag.DisplayName,
 		AgencyCategory:    ag.Category,
@@ -158,7 +158,7 @@ func (h *Handler) processCreateRACIMappingsOperation(
 		"workItems", len(workItems),
 		"roles", len(roles))
 
-	result, err := h.raciBuilder.CreateRACIMappings(c.Request.Context(), createReq, aiContext)
+	result, err := h.raciBuilder.CreateRACIMappings(c.Request.Context(), createReq, builderContext)
 	if err != nil {
 		h.logger.Error("Failed to generate RACI mappings from AI", "agencyID", agencyID, "error", err)
 		results["create_error"] = err.Error()

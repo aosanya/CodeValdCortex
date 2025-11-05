@@ -71,15 +71,15 @@ Return your response as a JSON object with this structure:
 }`
 
 // CreateRACIMappings generates RACI assignments using AI
-func (r *AIRACIBuilder) CreateRACIMappings(ctx context.Context, req *builder.CreateRACIMappingsRequest, aiContext builder.BuilderContext) (*builder.CreateRACIMappingsResponse, error) {
+func (r *AIRACIBuilder) CreateRACIMappings(ctx context.Context, req *builder.CreateRACIMappingsRequest, builderContext builder.BuilderContext) (*builder.CreateRACIMappingsResponse, error) {
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":  req.AgencyID,
-		"work_items": len(aiContext.WorkItems),
-		"roles":      len(aiContext.Roles),
+		"work_items": len(builderContext.WorkItems),
+		"roles":      len(builderContext.Roles),
 	}).Info("Creating RACI mappings with AI")
 
 	// Build the prompt with context
-	prompt := r.buildRACICreationPrompt(req, aiContext)
+	prompt := r.buildRACICreationPrompt(req, builderContext)
 
 	// Make the LLM request
 	response, err := r.llmClient.Chat(ctx, &ChatRequest{
@@ -149,18 +149,18 @@ func (r *AIRACIBuilder) buildRACICreationPrompt(_ *builder.CreateRACIMappingsReq
 
 // RefineRACIMapping refines an existing RACI mapping using AI
 // TODO: Implement RACI mapping refinement logic
-func (r *AIRACIBuilder) RefineRACIMapping(ctx context.Context, req *builder.RefineRACIMappingRequest, aiContext builder.BuilderContext) (*builder.RefineRACIMappingResponse, error) {
+func (r *AIRACIBuilder) RefineRACIMapping(ctx context.Context, req *builder.RefineRACIMappingRequest, builderContext builder.BuilderContext) (*builder.RefineRACIMappingResponse, error) {
 	return nil, fmt.Errorf("RefineRACIMapping: not yet implemented")
 }
 
 // GenerateRACIMapping generates a single new RACI mapping using AI
 // TODO: Implement single RACI mapping generation logic
-func (r *AIRACIBuilder) GenerateRACIMapping(ctx context.Context, req *builder.GenerateRACIMappingRequest, aiContext builder.BuilderContext) (*builder.GenerateRACIMappingResponse, error) {
+func (r *AIRACIBuilder) GenerateRACIMapping(ctx context.Context, req *builder.GenerateRACIMappingRequest, builderContext builder.BuilderContext) (*builder.GenerateRACIMappingResponse, error) {
 	return nil, fmt.Errorf("GenerateRACIMapping: not yet implemented")
 }
 
 // ConsolidateRACIMappings consolidates multiple RACI mappings using AI
 // TODO: Implement RACI mapping consolidation logic
-func (r *AIRACIBuilder) ConsolidateRACIMappings(ctx context.Context, req *builder.ConsolidateRACIMappingsRequest, aiContext builder.BuilderContext) (*builder.ConsolidateRACIMappingsResponse, error) {
+func (r *AIRACIBuilder) ConsolidateRACIMappings(ctx context.Context, req *builder.ConsolidateRACIMappingsRequest, builderContext builder.BuilderContext) (*builder.ConsolidateRACIMappingsResponse, error) {
 	return nil, fmt.Errorf("ConsolidateRACIMappings: not yet implemented")
 }
