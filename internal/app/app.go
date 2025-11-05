@@ -289,13 +289,15 @@ func (a *App) setupServer() error {
 	// Initialize AI agency designer web handler (if service available)
 	var aiDesignerWebHandler *webhandlers.AgencyDesignerWebHandler
 	var chatHandler *webhandlers.ChatHandler
+	var aiRefineHandler *ai_refine.Handler
 	if a.aiDesignerService != nil && a.introductionRefiner != nil {
-		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.logger)
-		a.logger.Info("AI Agency Designer web handler initialized")
-	}
+		// Create AI refine handler (needed by chat handler and API routes)
+		aiRefineHandler = ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.workItemBuilder, a.roleBuilder, a.raciBuilder, a.aiDesignerService, a.logger)
 
-	// Agency middleware
+		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
+		a.logger.Info("AI Agency Designer web handler initialized")
+	} // Agency middleware
 	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger)
 
 	// Serve static files
@@ -408,8 +410,7 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveAgencyRACIMatrix)
 
 		// AI Refine endpoints (if AI services are available)
-		if a.introductionRefiner != nil {
-			aiRefineHandler := ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.workItemBuilder, a.roleBuilder, a.raciBuilder, a.aiDesignerService, a.logger)
+		if aiRefineHandler != nil {
 			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
 			if a.goalRefiner != nil {
 				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineGoal)

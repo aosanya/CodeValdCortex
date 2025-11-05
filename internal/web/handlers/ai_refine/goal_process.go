@@ -14,6 +14,8 @@ import (
 // ProcessAIGoalRequest handles POST /api/v1/agencies/:id/goals/ai-process
 // Processes multiple AI operations on goals (create, enhance, consolidate)
 func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
+	h.logger.Info("🔵 HANDLER CALLED: ProcessAIGoalRequest")
+
 	agencyID := c.Param("id")
 
 	// Parse request body
@@ -96,10 +98,13 @@ func (h *Handler) ProcessAIGoalRequest(c *gin.Context) {
 
 		switch operation {
 		case "create":
+			h.logger.Info("🔵 CALLING: processCreateOperation", "agencyID", agencyID)
 			h.processCreateOperation(c, agencyID, ag, overview, existingGoals, workItems, req.UserRequest, results, &createdGoals)
 		case "enhance":
+			h.logger.Info("🔵 CALLING: processEnhanceOperation", "agencyID", agencyID)
 			h.processEnhanceOperation(c, agencyID, ag, goalsToProcess, workItems, results, &enhancedGoals)
 		case "consolidate":
+			h.logger.Info("🔵 CALLING: processConsolidateOperation", "agencyID", agencyID)
 			h.processConsolidateOperation(c, agencyID, ag, goalsToProcess, workItems, results, &createdGoals)
 		}
 	}
@@ -154,6 +159,8 @@ func (h *Handler) processCreateOperation(
 	results map[string]interface{},
 	createdGoals *[]*agency.Goal,
 ) {
+	h.logger.Info("🟢 FUNCTION ENTRY: processCreateOperation", "agencyID", agencyID)
+
 	// Generate new goals based on introduction or user request
 	var userInput string
 	if userRequest != "" {
@@ -256,6 +263,8 @@ func (h *Handler) processEnhanceOperation(
 	results map[string]interface{},
 	enhancedGoals *[]*agency.Goal,
 ) {
+	h.logger.Info("🟢 FUNCTION ENTRY: processEnhanceOperation", "agencyID", agencyID)
+
 	// Check if there are goals to enhance
 	if len(existingGoals) == 0 {
 		h.logger.Warn("No goals to enhance", "agencyID", agencyID)
@@ -377,6 +386,8 @@ func (h *Handler) processConsolidateOperation(
 	results map[string]interface{},
 	createdGoals *[]*agency.Goal,
 ) {
+	h.logger.Info("🟢 FUNCTION ENTRY: processConsolidateOperation", "agencyID", agencyID)
+
 	// Consolidate goals into a lean, strategic list
 	if len(existingGoals) < 2 {
 		h.logger.Warn("Too few goals to consolidate", "count", len(existingGoals))
@@ -532,6 +543,11 @@ func (h *Handler) formatExplanationAsBullets(explanation string) string {
 }
 
 func (h *Handler) addExplanationToChat(c *gin.Context, agencyID string, explanation string, createdGoalsCount int) {
+	h.logger.Info("🟢 FUNCTION ENTRY: addExplanationToChat",
+		"agencyID", agencyID,
+		"createdGoalsCount", createdGoalsCount,
+		"explanationLength", len(explanation))
+
 	h.logger.Info("Attempting to add AI explanation to chat",
 		"agencyID", agencyID,
 		"createdGoalsCount", createdGoalsCount,

@@ -3,12 +3,11 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
+	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -21,6 +20,8 @@ type ChatHandler struct {
 	roleService         registry.RoleService
 	introductionRefiner *ai.IntroductionBuilder
 	goalRefiner         *ai.GoalsBuilder
+	contextBuilder      *ai_refine.BuilderContextBuilder
+	aiRefineHandler     *ai_refine.Handler
 	logger              *logrus.Logger
 }
 
@@ -31,14 +32,20 @@ func NewChatHandler(
 	roleService registry.RoleService,
 	introductionRefiner *ai.IntroductionBuilder,
 	goalRefiner *ai.GoalsBuilder,
+	aiRefineHandler *ai_refine.Handler,
 	logger *logrus.Logger,
 ) *ChatHandler {
+	// Create context builder for shared AI context gathering
+	contextBuilder := ai_refine.NewBuilderContextBuilder(agencyService, roleService, logger)
+
 	return &ChatHandler{
 		designerService:     designerService,
 		agencyService:       agencyService,
 		roleService:         roleService,
 		introductionRefiner: introductionRefiner,
 		goalRefiner:         goalRefiner,
+		contextBuilder:      contextBuilder,
+		aiRefineHandler:     aiRefineHandler,
 		logger:              logger,
 	}
 }
@@ -172,6 +179,8 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 // StartConversation handles POST /api/v1/agencies/:id/designer/conversations/web
 // Starts a new conversation and returns the first message
 func (h *ChatHandler) StartConversation(c *gin.Context) {
+	h.logger.Info("🔵 HANDLER CALLED: StartConversation")
+
 	agencyID := c.Param("id")
 	userMessage := c.PostForm("message")
 	context := c.PostForm("context") // Get current section context
@@ -189,6 +198,7 @@ func (h *ChatHandler) StartConversation(c *gin.Context) {
 	}).Info("Starting new conversation")
 
 	// Handle context-specific processing (introduction, goal-definition, etc.)
+	h.logger.Info("🔵 CALLING: handleContextSpecificProcessing", "context", context)
 	handled, err := h.handleContextSpecificProcessing(c, agencyID, userMessage, context, true)
 	if err != nil {
 		h.logger.WithError(err).Error("Context-specific processing failed")
@@ -270,178 +280,4 @@ func (h *ChatHandler) StartConversation(c *gin.Context) {
 		return
 	}
 	h.logger.Info("AI message rendered successfully")
-}
-
-// isIntroductionRefinementRequest detects if a chat message is requesting introduction refinement
-// Looks for: action keywords + introduction context markers
-// performIntroductionRefinement directly refines the introduction based on chat request
-// Returns the response HTML or nil if refinement failed
-func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID string, userMessage string) (*string, error) {
-	ctx := c.Request.Context()
-
-	// Get agency
-	ag, err := h.agencyService.GetAgency(ctx, agencyID)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get current overview/introduction
-	overview, err := h.agencyService.GetAgencyOverview(ctx, agencyID)
-	if err != nil {
-		// Create empty overview if not found
-		overview = &agency.Overview{
-			AgencyID:     agencyID,
-			Introduction: "",
-		}
-	}
-
-	// Get goals and work items for context
-	goals, _ := h.agencyService.GetGoals(ctx, agencyID)
-	workItems, _ := h.agencyService.GetWorkItems(ctx, agencyID)
-
-	// Get roles and assignments for context
-	roles, _ := h.roleService.ListTypes(ctx)
-	assignments, _ := h.agencyService.GetAllRACIAssignments(ctx, agencyID)
-
-	// Extract user request - keep the full message with context for AI
-	// The AI needs to see what the user wants to remove
-	userRequest := userMessage // Use full message, not just extracted request
-
-	h.logger.WithFields(logrus.Fields{
-		"agency_id":          agencyID,
-		"current_intro_len":  len(overview.Introduction),
-		"current_intro_text": overview.Introduction,
-		"user_request_len":   len(userRequest),
-		"user_request_text":  userRequest,
-		"goals_count":        len(goals),
-		"work_items_count":   len(workItems),
-	}).Info("==== CHAT HANDLER - Preparing introduction refinement request ====")
-
-	// Build refinement request with just metadata
-	refineReq := &builder.RefineIntroductionRequest{
-		AgencyID: agencyID,
-	}
-
-	// Build AI context with all agency data
-	builderContext := builder.BuilderContext{
-		AgencyName:        ag.DisplayName,
-		AgencyCategory:    ag.Category,
-		AgencyDescription: ag.Description,
-		Introduction:      overview.Introduction,
-		Goals:             goals,
-		WorkItems:         workItems,
-		Roles:             roles,
-		Assignments:       assignments,
-		UserInput:         userRequest,
-	}
-
-	// Call AI refiner with new signature
-	refinedResult, err := h.introductionRefiner.RefineIntroduction(ctx, refineReq, builderContext)
-	if err != nil {
-		return nil, err
-	}
-
-	h.logger.WithFields(logrus.Fields{
-		"agency_id":        agencyID,
-		"was_changed":      refinedResult.WasChanged,
-		"explanation_len":  len(refinedResult.Explanation),
-		"changed_sections": refinedResult.ChangedSections,
-	}).Info("Introduction refinement completed")
-
-	// Extract refined introduction from data
-	var refinedIntro string
-	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
-		refinedIntro = refinedResult.Data.Introduction
-	} else {
-		refinedIntro = overview.Introduction
-	}
-
-	// Check if AI returned empty introduction - keep original if so
-	if strings.TrimSpace(refinedIntro) == "" {
-		h.logger.Warn("AI returned empty introduction, keeping original")
-		refinedIntro = overview.Introduction
-		refinedResult.Explanation = "AI returned empty introduction, keeping original."
-		refinedResult.WasChanged = false
-	}
-
-	// Save the refined introduction
-	if refinedIntro != overview.Introduction {
-		err = h.agencyService.UpdateAgencyOverview(ctx, agencyID, refinedIntro)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Add messages to conversation
-	h.designerService.AddMessage(c.Param("conversationId"), "user", userMessage)
-	chatMessage := "✨ **Introduction Refined & Saved**\n\n" + refinedResult.Explanation
-	h.designerService.AddMessage(c.Param("conversationId"), "assistant", chatMessage)
-
-	// Trigger introduction reload on the frontend
-	c.Header("HX-Trigger", "introductionUpdated")
-
-	// Render response
-	userMsg := ai.Message{Role: "user", Content: userMessage}
-	aiMsg := ai.Message{Role: "assistant", Content: chatMessage}
-
-	c.Header("Content-Type", "text/html")
-	err = agency_designer.UserMessage(userMsg).Render(ctx, c.Writer)
-	if err != nil {
-		return nil, err
-	}
-	err = agency_designer.AIMessage(aiMsg).Render(ctx, c.Writer)
-	if err != nil {
-		return nil, err
-	}
-
-	result := "success"
-	return &result, nil
-}
-
-// handleContextSpecificProcessing handles context-specific processing for both new and existing conversations
-// Returns (handled bool, error) where handled=true means the request was fully processed
-func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, userMessage, context string, isNewConversation bool) (bool, error) {
-	if context == "introduction" {
-		h.logger.Info("User on introduction section - performing direct refinement")
-
-		var conversationID string
-		if isNewConversation {
-			// Start conversation first for new conversations
-			ctx := c.Request.Context()
-			conversation, err := h.designerService.StartConversation(ctx, agencyID)
-			if err != nil {
-				h.logger.WithError(err).Error("Failed to start conversation for refinement")
-				return false, err
-			}
-			conversationID = conversation.ID
-			// Store conversation ID for the refinement method
-			c.Params = append(c.Params, gin.Param{Key: "conversationId", Value: conversationID})
-		}
-
-		// Perform the refinement directly
-		refined, err := h.performIntroductionRefinement(c, agencyID, userMessage)
-		if err != nil {
-			h.logger.WithError(err).Error("Failed to perform introduction refinement")
-			return false, err
-		}
-
-		if refined != nil {
-			return true, nil // Successfully handled
-		}
-		return false, nil // Not handled, fall through to normal chat
-
-	} else if context == "goal-definition" {
-		h.logger.Info("User on goal-definition section - letting AI handle the request")
-
-		// Let AI decide: it can either create goals or just provide advice/discussion
-		// The AI will analyze the request and determine the appropriate response
-		// If it decides to create goals, it will do so; otherwise it will just chat
-
-		// For now, fall through to normal chat where AI can provide intelligent responses
-		// The AI context includes all goals, so it can discuss them intelligently
-		return false, nil // Use normal chat with full context
-	}
-
-	// Context not recognized or not handled
-	return false, nil
 }
