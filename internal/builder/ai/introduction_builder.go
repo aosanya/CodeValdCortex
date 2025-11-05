@@ -11,17 +11,17 @@ import (
 )
 
 // Compile-time check to ensure AIIntroductionBuilder implements IntroductionBuilderInterface
-var _ builder.IntroductionBuilderInterface = (*AIIntroductionBuilder)(nil)
+var _ builder.IntroductionBuilderInterface = (*IntroductionBuilder)(nil)
 
-// AIIntroductionBuilder handles AI-powered introduction refinement
-type AIIntroductionBuilder struct {
+// IntroductionBuilder handles AI-powered introduction refinement
+type IntroductionBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
 // NewAIIntroductionBuilder creates a new AI introduction builder service
-func NewAIIntroductionBuilder(llmClient LLMClient, logger *logrus.Logger) *AIIntroductionBuilder {
-	return &AIIntroductionBuilder{
+func NewAIIntroductionBuilder(llmClient LLMClient, logger *logrus.Logger) *IntroductionBuilder {
+	return &IntroductionBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
@@ -36,7 +36,7 @@ type aiRefinementResponse struct {
 }
 
 // RefineIntroduction uses AI to refine the agency introduction based on all available context
-func (r *AIIntroductionBuilder) RefineIntroduction(ctx context.Context, req *builder.RefineIntroductionRequest, builderContext builder.BuilderContext) (*builder.RefineIntroductionResponse, error) {
+func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *builder.RefineIntroductionRequest, builderContext builder.BuilderContext) (*builder.RefineIntroductionResponse, error) {
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":           req.AgencyID,
 		"current_intro_chars": len(builderContext.Introduction),
@@ -120,7 +120,7 @@ func (r *AIIntroductionBuilder) RefineIntroduction(ctx context.Context, req *bui
 }
 
 // getSystemPrompt returns the system prompt for introduction refinement
-func (r *AIIntroductionBuilder) getSystemPrompt() string {
+func (r *IntroductionBuilder) getSystemPrompt() string {
 	return `You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
 
 INPUT: JSON with introduction field and modification instruction
@@ -164,7 +164,7 @@ Remember: You are an API, not a chatbot. Output must be grammatically perfect. P
 }
 
 // buildRefinementPrompt creates a comprehensive prompt with all available context
-func (r *AIIntroductionBuilder) buildRefinementPrompt(builderContext builder.BuilderContext) string {
+func (r *IntroductionBuilder) buildRefinementPrompt(builderContext builder.BuilderContext) string {
 	var prompt strings.Builder
 
 	prompt.WriteString("You are refining an agency introduction. Below is the complete agency data in JSON format.\n\n")
@@ -187,7 +187,7 @@ func (r *AIIntroductionBuilder) buildRefinementPrompt(builderContext builder.Bui
 }
 
 // parseAIResponse extracts the refined introduction, change status, explanation, and changed sections from AI JSON response
-func (r *AIIntroductionBuilder) parseAIResponse(response, original string) (refined string, wasChanged bool, explanation string, changedSections []string) {
+func (r *IntroductionBuilder) parseAIResponse(response, original string) (refined string, wasChanged bool, explanation string, changedSections []string) {
 	r.logger.WithFields(logrus.Fields{
 		"response_length": len(response),
 		"response_text":   response,

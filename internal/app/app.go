@@ -44,11 +44,11 @@ type App struct {
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
 	aiDesignerService   *ai.AgencyDesignerService
-	introductionRefiner *ai.AIIntroductionBuilder
-	goalRefiner         *ai.AIGoalsBuilder
-	workItemBuilder     *ai.AIWorkItemsBuilder
-	roleBuilder         *ai.AIRolesBuilder
-	raciCreator         *ai.RACICreator
+	introductionRefiner *ai.IntroductionBuilder
+	goalRefiner         *ai.GoalsBuilder
+	workItemBuilder     *ai.WorkItemsBuilder
+	roleBuilder         *ai.RolesBuilder
+	raciBuilder         *ai.RACIBuilder
 }
 
 // New creates a new application instance
@@ -138,11 +138,11 @@ func New(cfg *config.Config) *App {
 
 	// Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
-	var introductionRefiner *ai.AIIntroductionBuilder
-	var goalRefiner *ai.AIGoalsBuilder
-	var workItemBuilder *ai.AIWorkItemsBuilder
-	var roleBuilder *ai.AIRolesBuilder
-	var raciBuilder *ai.AIRACIBuilder
+	var introductionRefiner *ai.IntroductionBuilder
+	var goalRefiner *ai.GoalsBuilder
+	var workItemBuilder *ai.WorkItemsBuilder
+	var roleBuilder *ai.RolesBuilder
+	var raciBuilder *ai.RACIBuilder
 	if cfg.AI.Provider != "" {
 		// Build LLM config from app config
 		llmConfig := &ai.LLMConfig{
@@ -188,7 +188,7 @@ func New(cfg *config.Config) *App {
 		goalRefiner:         goalRefiner,
 		workItemBuilder:     workItemBuilder,
 		roleBuilder:         roleBuilder,
-		raciBuilder:         raciCreator,
+		raciBuilder:         raciBuilder,
 	}
 }
 

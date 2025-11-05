@@ -8,7 +8,7 @@ import (
 )
 
 func TestParseAIResponse_ValidJSON(t *testing.T) {
-	refiner := &AIIntroductionBuilder{
+	refiner := &IntroductionBuilder{
 		logger: logrus.New(),
 	}
 
@@ -36,7 +36,7 @@ func TestParseAIResponse_ValidJSON(t *testing.T) {
 }
 
 func TestParseAIResponse_NoChanges(t *testing.T) {
-	refiner := &AIIntroductionBuilder{
+	refiner := &IntroductionBuilder{
 		logger: logrus.New(),
 	}
 
@@ -63,7 +63,7 @@ func TestParseAIResponse_NoChanges(t *testing.T) {
 }
 
 func TestParseAIResponse_JSONWithExtraText(t *testing.T) {
-	refiner := &AIIntroductionBuilder{
+	refiner := &IntroductionBuilder{
 		logger: logrus.New(),
 	}
 
@@ -95,7 +95,7 @@ func TestParseAIResponse_JSONWithExtraText(t *testing.T) {
 }
 
 func TestParseAIResponse_InvalidJSON(t *testing.T) {
-	refiner := &AIIntroductionBuilder{
+	refiner := &IntroductionBuilder{
 		logger: logrus.New(),
 	}
 
@@ -111,7 +111,7 @@ func TestParseAIResponse_InvalidJSON(t *testing.T) {
 }
 
 func TestParseAIResponse_EmptyRefinedIntroduction(t *testing.T) {
-	refiner := &AIIntroductionBuilder{
+	refiner := &IntroductionBuilder{
 		logger: logrus.New(),
 	}
 
@@ -139,7 +139,7 @@ func TestParseAIResponse_EmptyRefinedIntroduction(t *testing.T) {
 }
 
 func TestParseAIResponse_IdenticalContent(t *testing.T) {
-	refiner := &AIIntroductionBuilder{
+	refiner := &IntroductionBuilder{
 		logger: logrus.New(),
 	}
 

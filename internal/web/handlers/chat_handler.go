@@ -19,8 +19,8 @@ type ChatHandler struct {
 	designerService     *ai.AgencyDesignerService
 	agencyService       agency.Service
 	roleService         registry.RoleService
-	introductionRefiner *ai.AIIntroductionBuilder
-	goalRefiner         *ai.AIGoalsBuilder
+	introductionRefiner *ai.IntroductionBuilder
+	goalRefiner         *ai.GoalsBuilder
 	logger              *logrus.Logger
 }
 
@@ -29,8 +29,8 @@ func NewChatHandler(
 	designerService *ai.AgencyDesignerService,
 	agencyService agency.Service,
 	roleService registry.RoleService,
-	introductionRefiner *ai.AIIntroductionBuilder,
-	goalRefiner *ai.AIGoalsBuilder,
+	introductionRefiner *ai.IntroductionBuilder,
+	goalRefiner *ai.GoalsBuilder,
 	logger *logrus.Logger,
 ) *ChatHandler {
 	return &ChatHandler{

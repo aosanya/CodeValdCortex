@@ -11,17 +11,17 @@ import (
 )
 
 // Compile-time check to ensure AIWorkItemsBuilder implements WorkItemBuilderInterface
-var _ builder.WorkItemBuilderInterface = (*AIWorkItemsBuilder)(nil)
+var _ builder.WorkItemBuilderInterface = (*WorkItemsBuilder)(nil)
 
-// AIWorkItemsBuilder handles AI-powered work item definition and refinement
-type AIWorkItemsBuilder struct {
+// WorkItemsBuilder handles AI-powered work item definition and refinement
+type WorkItemsBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
 // NewAIWorkItemsBuilder creates a new AI-powered work item builder
-func NewAIWorkItemsBuilder(llmClient LLMClient, logger *logrus.Logger) *AIWorkItemsBuilder {
-	return &AIWorkItemsBuilder{
+func NewAIWorkItemsBuilder(llmClient LLMClient, logger *logrus.Logger) *WorkItemsBuilder {
+	return &WorkItemsBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
@@ -41,7 +41,7 @@ type aiWorkItemRefinementResponse struct {
 }
 
 // RefineWorkItem uses AI to refine a work item definition based on all available context
-func (r *AIWorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.RefineWorkItemRequest, builderContext builder.BuilderContext) (*builder.RefineWorkItemResponse, error) {
+func (r *WorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.RefineWorkItemRequest, builderContext builder.BuilderContext) (*builder.RefineWorkItemResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI work item refinement")
 
 	// Build the prompt for work item refinement
@@ -99,7 +99,7 @@ func (r *AIWorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.Re
 }
 
 // GenerateWorkItem uses AI to generate a new work item from user input
-func (r *AIWorkItemsBuilder) GenerateWorkItem(ctx context.Context, req *builder.GenerateWorkItemRequest, builderContext builder.BuilderContext) (*builder.GenerateWorkItemResponse, error) {
+func (r *WorkItemsBuilder) GenerateWorkItem(ctx context.Context, req *builder.GenerateWorkItemRequest, builderContext builder.BuilderContext) (*builder.GenerateWorkItemResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI work item generation")
 
 	// Build the prompt for work item generation
@@ -144,7 +144,7 @@ func (r *AIWorkItemsBuilder) GenerateWorkItem(ctx context.Context, req *builder.
 }
 
 // GenerateWorkItems uses AI to generate multiple work items from goals
-func (r *AIWorkItemsBuilder) GenerateWorkItems(ctx context.Context, req *builder.GenerateWorkItemRequest, builderContext builder.BuilderContext) (*builder.GenerateWorkItemsResponse, error) {
+func (r *WorkItemsBuilder) GenerateWorkItems(ctx context.Context, req *builder.GenerateWorkItemRequest, builderContext builder.BuilderContext) (*builder.GenerateWorkItemsResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI work items generation")
 
 	// Build the prompt for multiple work items generation
@@ -186,7 +186,7 @@ func (r *AIWorkItemsBuilder) GenerateWorkItems(ctx context.Context, req *builder
 }
 
 // buildWorkItemRefinementPrompt creates a context-rich prompt for work item refinement
-func (r *AIWorkItemsBuilder) buildWorkItemRefinementPrompt(_ *builder.RefineWorkItemRequest, contextData builder.BuilderContext) string {
+func (r *WorkItemsBuilder) buildWorkItemRefinementPrompt(_ *builder.RefineWorkItemRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -196,7 +196,7 @@ func (r *AIWorkItemsBuilder) buildWorkItemRefinementPrompt(_ *builder.RefineWork
 
 	return builder.String()
 } // buildWorkItemGenerationPrompt creates a prompt for generating a single work item
-func (r *AIWorkItemsBuilder) buildWorkItemGenerationPrompt(_ *builder.GenerateWorkItemRequest, contextData builder.BuilderContext) string {
+func (r *WorkItemsBuilder) buildWorkItemGenerationPrompt(_ *builder.GenerateWorkItemRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -208,7 +208,7 @@ func (r *AIWorkItemsBuilder) buildWorkItemGenerationPrompt(_ *builder.GenerateWo
 }
 
 // buildWorkItemsGenerationPrompt creates a prompt for generating multiple work items
-func (r *AIWorkItemsBuilder) buildWorkItemsGenerationPrompt(_ *builder.GenerateWorkItemRequest, contextData builder.BuilderContext) string {
+func (r *WorkItemsBuilder) buildWorkItemsGenerationPrompt(_ *builder.GenerateWorkItemRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -222,7 +222,7 @@ func (r *AIWorkItemsBuilder) buildWorkItemsGenerationPrompt(_ *builder.GenerateW
 }
 
 // ConsolidateWorkItems analyzes and consolidates work items into a lean, concise list
-func (r *AIWorkItemsBuilder) ConsolidateWorkItems(ctx context.Context, req *builder.ConsolidateWorkItemsRequest, builderContext builder.BuilderContext) (*builder.ConsolidateWorkItemsResponse, error) {
+func (r *WorkItemsBuilder) ConsolidateWorkItems(ctx context.Context, req *builder.ConsolidateWorkItemsRequest, builderContext builder.BuilderContext) (*builder.ConsolidateWorkItemsResponse, error) {
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":        req.AgencyID,
 		"total_work_items": len(req.CurrentWorkItems),
@@ -269,7 +269,7 @@ func (r *AIWorkItemsBuilder) ConsolidateWorkItems(ctx context.Context, req *buil
 }
 
 // buildWorkItemConsolidationPrompt creates the prompt for work item consolidation
-func (r *AIWorkItemsBuilder) buildWorkItemConsolidationPrompt(_ *builder.ConsolidateWorkItemsRequest, contextData builder.BuilderContext) string {
+func (r *WorkItemsBuilder) buildWorkItemConsolidationPrompt(_ *builder.ConsolidateWorkItemsRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter

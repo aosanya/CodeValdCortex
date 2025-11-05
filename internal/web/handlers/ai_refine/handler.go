@@ -11,11 +11,11 @@ import (
 type Handler struct {
 	agencyService       agency.Service
 	roleService         registry.RoleService
-	introductionRefiner *ai.AIIntroductionBuilder
-	goalRefiner         *ai.AIGoalsBuilder
-	workItemBuilder     *ai.AIWorkItemsBuilder
-	roleBuilder         *ai.AIRolesBuilder
-	raciBuilder         *ai.AIRACIBuilder
+	introductionRefiner *ai.IntroductionBuilder
+	goalRefiner         *ai.GoalsBuilder
+	workItemBuilder     *ai.WorkItemsBuilder
+	roleBuilder         *ai.RolesBuilder
+	raciBuilder         *ai.RACIBuilder
 	designerService     *ai.AgencyDesignerService
 	contextBuilder      *BuilderContextBuilder
 	logger              *logrus.Logger
@@ -25,11 +25,11 @@ type Handler struct {
 func NewHandler(
 	agencyService agency.Service,
 	roleService registry.RoleService,
-	introductionRefiner *ai.AIIntroductionBuilder,
-	goalRefiner *ai.AIGoalsBuilder,
-	workItemBuilder *ai.AIWorkItemsBuilder,
-	roleBuilder *ai.AIRolesBuilder,
-	raciBuilder *ai.AIRACIBuilder,
+	introductionRefiner *ai.IntroductionBuilder,
+	goalRefiner *ai.GoalsBuilder,
+	workItemBuilder *ai.WorkItemsBuilder,
+	roleBuilder *ai.RolesBuilder,
+	raciBuilder *ai.RACIBuilder,
 	designerService *ai.AgencyDesignerService,
 	logger *logrus.Logger,
 ) *Handler {
