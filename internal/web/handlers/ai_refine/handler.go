@@ -2,7 +2,7 @@ package ai_refine
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )

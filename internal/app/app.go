@@ -15,7 +15,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
-	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"

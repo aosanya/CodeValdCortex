@@ -5,7 +5,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 )
 
 // formatAIMessage formats AI message content with basic markdown-like formatting
