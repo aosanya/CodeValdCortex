@@ -20,8 +20,16 @@ export function initializeHTMXEvents() {
 
     // Log what's actually being sent
     document.body.addEventListener('htmx:beforeRequest', function (evt) {
-        if (evt.detail.path && evt.detail.path.includes('/messages/web')) {
-            console.log('[HTMX] About to send chat request:', {
+        console.log('[HTMX] beforeRequest event:', {
+            path: evt.detail.path,
+            eltTag: evt.detail.elt.tagName,
+            eltClass: evt.detail.elt.className,
+            matchesConversations: evt.detail.elt.matches('form[hx-post*="conversations"]'),
+            matchesMessages: evt.detail.elt.matches('form[hx-post*="messages"]')
+        });
+
+        if (evt.detail.path && (evt.detail.path.includes('/messages/web') || evt.detail.path.includes('/conversations/web'))) {
+            console.log('[HTMX] Chat request detected:', {
                 path: evt.detail.path,
                 parameters: evt.detail.parameters,
                 target: evt.detail.target
@@ -36,8 +44,57 @@ export function initializeHTMXEvents() {
         }
 
         const indicator = document.getElementById('typing-indicator');
-        if (indicator && evt.detail.elt.matches('form[hx-post*="conversations"]')) {
-            indicator.style.display = 'block';
+        const isChatForm = evt.detail.elt.matches('form[hx-post*="conversations"]') ||
+            evt.detail.elt.matches('form[hx-post*="messages"]');
+
+        console.log('[HTMX] Indicator element:', indicator ? 'found' : 'NOT FOUND');
+        console.log('[HTMX] Is chat form?', isChatForm);
+
+        if (isChatForm) {
+            console.log('[HTMX] ✅ Chat form detected');
+
+            // Get the input field and message
+            const input = evt.detail.elt.querySelector('input[name="message"]');
+            const message = input ? input.value.trim() : '';
+
+            // Add user message to chat immediately
+            if (message && message.length > 0) {
+                const chatContainer = document.getElementById('chat-messages');
+                if (chatContainer) {
+                    // Create user message element
+                    const userMessageDiv = document.createElement('div');
+                    userMessageDiv.className = 'message is-user';
+                    userMessageDiv.innerHTML = `
+                        <div class="message-header">
+                            <span class="icon has-text-info">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <span>You</span>
+                        </div>
+                        <div class="message-body">
+                            <div class="content">
+                                <p>${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.appendChild(userMessageDiv);
+
+                    // Scroll to show the new message
+                    setTimeout(() => scrollToBottom(chatContainer), 50);
+                }
+
+                // Clear the input immediately
+                if (input) {
+                    input.value = '';
+                    console.log('[HTMX] ✅ Input cleared and message added to chat');
+                }
+            }
+
+            // Show typing indicator if it exists
+            if (indicator) {
+                indicator.style.display = 'block';
+                console.log('[HTMX] ✅ Typing indicator shown');
+            }
 
             // Show AI process status for chat requests with context-aware message
             if (window.showAIProcessStatus) {
@@ -65,7 +122,10 @@ export function initializeHTMXEvents() {
                         statusMessage = 'AI is processing your message...';
                 }
 
+                console.log('[HTMX] ✅ Calling showAIProcessStatus:', statusMessage);
                 window.showAIProcessStatus(statusMessage);
+            } else {
+                console.warn('[HTMX] ❌ window.showAIProcessStatus is not defined!');
             }
 
             // Scroll to show typing indicator
@@ -73,6 +133,8 @@ export function initializeHTMXEvents() {
             if (chatContainer) {
                 setTimeout(() => scrollToBottom(chatContainer), 100);
             }
+        } else {
+            console.log('[HTMX] ❌ Not a chat form, skipping status display');
         }
 
         // Handle other AI operations
@@ -143,6 +205,26 @@ export function initializeHTMXEvents() {
         const chatContainer = document.getElementById('chat-messages');
         if (chatContainer && evt.detail.target.id === 'chat-messages') {
             setTimeout(() => scrollToBottom(chatContainer), 100);
+
+            // Refresh goals list if we're in goal-definition context
+            const context = window.currentAgencyContext || '';
+            if (context === 'goal-definition') {
+                const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
+                const goalsTableBody = document.getElementById('goals-table-body');
+
+                if (agencyId && goalsTableBody) {
+                    console.log('[HTMX] Refreshing goals list after chat response');
+                    fetch(`/api/v1/agencies/${agencyId}/goals/html`)
+                        .then(response => response.text())
+                        .then(html => {
+                            goalsTableBody.innerHTML = html;
+                            console.log('[HTMX] ✅ Goals list refreshed');
+                        })
+                        .catch(error => {
+                            console.error('[HTMX] ❌ Error refreshing goals list:', error);
+                        });
+                }
+            }
         }
 
         // Re-initialize agent selection if sidebar was updated
@@ -184,12 +266,11 @@ export function initializeHTMXEvents() {
         }
     });
 
-    // Clear input after successful send
+    // Focus input after successful send (input already cleared in beforeRequest)
     document.body.addEventListener('htmx:afterRequest', function (evt) {
         if (evt.detail.successful && evt.detail.elt.matches('form[hx-post*="conversations"]')) {
             const input = evt.detail.elt.querySelector('input[name="message"]');
             if (input) {
-                input.value = '';
                 input.focus();
             }
         }

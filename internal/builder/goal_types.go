@@ -96,12 +96,12 @@ type RefineGoalsRequest struct {
 
 // RefineGoalsResponse contains the results of dynamic goal processing
 type RefineGoalsResponse struct {
-	Action           string                    `json:"action"`             // What action was determined (refine, generate, consolidate, enhance_all, etc.)
-	RefinedGoals     []RefinedGoalResult       `json:"refined_goals"`      // Goals that were refined
-	GeneratedGoals   []GenerateGoalResponse    `json:"generated_goals"`    // Newly generated goals
-	ConsolidatedData *ConsolidateGoalsResponse `json:"consolidated_data"`  // Consolidation results if applicable
-	Explanation      string                    `json:"explanation"`        // What was done and why
-	NoActionNeeded   bool                      `json:"no_action_needed"`   // True if goals are already optimal
+	Action           string                    `json:"action"`            // What action was determined (refine, generate, consolidate, enhance_all, etc.)
+	RefinedGoals     []RefinedGoalResult       `json:"refined_goals"`     // Goals that were refined
+	GeneratedGoals   []GenerateGoalResponse    `json:"generated_goals"`   // Newly generated goals
+	ConsolidatedData *ConsolidateGoalsResponse `json:"consolidated_data"` // Consolidation results if applicable
+	Explanation      string                    `json:"explanation"`       // What was done and why
+	NoActionNeeded   bool                      `json:"no_action_needed"`  // True if goals are already optimal
 }
 
 // RefinedGoalResult represents a single refined goal

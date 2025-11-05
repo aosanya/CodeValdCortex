@@ -1,6 +1,53 @@
 // Agency Designer - Modular Version Entry Point
 // This file loads the modular agency designer components
 
+// Define AI status functions immediately to ensure they're always available
+window.showAIProcessStatus = function (message = 'AI is working on your request...') {
+    const processStatus = document.getElementById('ai-process-status');
+    const statusMessage = document.getElementById('ai-status-message');
+
+    // Update message text
+    if (statusMessage) {
+        statusMessage.textContent = message;
+    }
+
+    // Show the process status bar
+    if (processStatus) {
+        processStatus.style.display = 'flex';
+        processStatus.style.visibility = 'visible';
+        // Remove htmx-indicator class temporarily to prevent HTMX from hiding it
+        processStatus.classList.remove('htmx-indicator');
+
+        // Clear any existing timeout
+        if (processStatus._hideTimeout) {
+            clearTimeout(processStatus._hideTimeout);
+            processStatus._hideTimeout = null;
+        }
+
+        console.log('[AI Status] Showing:', message);
+    } else {
+        console.warn('[AI Status] Element #ai-process-status not found');
+    }
+};
+
+window.hideAIProcessStatus = function () {
+    const processStatus = document.getElementById('ai-process-status');
+
+    if (processStatus) {
+        // Clear any existing timeout
+        if (processStatus._hideTimeout) {
+            clearTimeout(processStatus._hideTimeout);
+            processStatus._hideTimeout = null;
+        }
+
+        processStatus.style.display = 'none';
+        // Add htmx-indicator class back
+        processStatus.classList.add('htmx-indicator');
+
+        console.log('[AI Status] Hidden');
+    }
+};
+
 // Add HTMX event listeners directly here as a fallback
 
 // HTMX afterSwap event listener - direct implementation

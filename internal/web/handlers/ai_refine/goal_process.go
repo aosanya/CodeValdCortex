@@ -703,120 +703,181 @@ func (h *Handler) ProcessGoalChatRequest(c *gin.Context) {
 		return
 	}
 
-	// Determine operation from user request
-	// Simple keyword-based routing for now
-	userRequestLower := strings.ToLower(userRequest)
-	var operation string
-	if strings.Contains(userRequestLower, "create") || strings.Contains(userRequestLower, "generate") || strings.Contains(userRequestLower, "add") {
-		operation = "create"
-	} else if strings.Contains(userRequestLower, "consolidate") || strings.Contains(userRequestLower, "merge") || strings.Contains(userRequestLower, "combine") {
-		operation = "consolidate"
-	} else if strings.Contains(userRequestLower, "status") || strings.Contains(userRequestLower, "list") || strings.Contains(userRequestLower, "show") {
-		operation = "status"
-	} else {
-		// Default to enhance for general requests (including remove, delete, improve, refine, etc.)
-		operation = "enhance"
-	}
-
-	h.logger.Info("Determined operation from user request",
-		"operation", operation,
-		"userRequest", userRequest)
-
 	// Get existing goals for context
 	existingGoals := builderContext.Goals
 
-	// Process based on operation
+	// Use the new RefineGoals method to dynamically determine and execute the appropriate action
+	refineReq := &builder.RefineGoalsRequest{
+		AgencyID:      agencyID,
+		UserMessage:   userRequest,
+		TargetGoals:   nil, // Will analyze all goals
+		ExistingGoals: existingGoals,
+		WorkItems:     builderContext.WorkItems,
+		AgencyContext: ag,
+	}
+
+	result, err := h.goalRefiner.RefineGoals(ctx, refineReq, builderContext)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to process goal request dynamically")
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusInternalServerError, `
+			<div class="notification is-danger">
+				<div class="is-flex is-align-items-center">
+					<span class="icon has-text-danger mr-2">
+						<i class="fas fa-exclamation-triangle"></i>
+					</span>
+					<div>
+						<strong>AI Processing Failed</strong>
+						<p class="mb-0">Failed to process your goal request.</p>
+					</div>
+				</div>
+			</div>
+		`)
+		return
+	}
+
+	// Format the response based on the action taken
 	var responseMessage string
-	switch operation {
-	case "create":
-		// Generate new goals
-		genReq := &builder.GenerateGoalRequest{
-			AgencyID:      agencyID,
-			AgencyContext: ag,
-		}
-		result, genErr := h.goalRefiner.GenerateGoals(ctx, genReq, builderContext)
-		if genErr != nil {
-			h.logger.WithError(genErr).Error("Failed to generate goals")
-			responseMessage = fmt.Sprintf("❌ Failed to generate goals: %v", genErr)
+	switch result.Action {
+	case "refine", "enhance_all":
+		if result.NoActionNeeded {
+			responseMessage = "✅ **Goals Review Complete**\n\n" + result.Explanation
 		} else {
-			// Create goals using agency service
-			createdCount := 0
-			for _, goalResp := range result.Goals {
-				_, createErr := h.agencyService.CreateGoal(ctx, agencyID, goalResp.SuggestedCode, goalResp.Description)
-				if createErr != nil {
-					h.logger.WithError(createErr).Error("Failed to create goal", "goalCode", goalResp.SuggestedCode)
-				} else {
-					createdCount++
+			// Apply refinements to goals
+			updatedCount := 0
+			for _, rg := range result.RefinedGoals {
+				if rg.WasChanged {
+					// Find and update the goal
+					for _, goal := range existingGoals {
+						if goal.Key == rg.OriginalKey {
+							// Update goal with refined data - UpdateGoal only updates code and description
+							// We need to update the full goal object through the repository
+							updateErr := h.agencyService.UpdateGoal(ctx, agencyID, goal.Key, goal.Code, rg.RefinedDescription)
+							if updateErr != nil {
+								h.logger.WithError(updateErr).Error("Failed to update goal", "goalKey", goal.Key)
+							} else {
+								updatedCount++
+								h.logger.Info("Successfully updated goal", "goalKey", goal.Key, "goalCode", goal.Code)
+							}
+							break
+						}
+					}
 				}
 			}
-			responseMessage = fmt.Sprintf("✨ **Created %d Goals**\n\n%s", createdCount, result.Explanation)
+
+			if updatedCount > 0 {
+				responseMessage = fmt.Sprintf("✨ **Refined %d Goals**\n\n%s", updatedCount, result.Explanation)
+			} else {
+				responseMessage = "✅ **Goals Review Complete**\n\nAll goals are already well-defined. " + result.Explanation
+			}
+		}
+
+	case "generate":
+		if len(result.GeneratedGoals) > 0 {
+			// Create new goals
+			createdCount := 0
+			createdCodes := []string{}
+
+			for _, g := range result.GeneratedGoals {
+				_, createErr := h.agencyService.CreateGoal(ctx, agencyID, g.SuggestedCode, g.Description)
+				if createErr != nil {
+					h.logger.WithError(createErr).Error("Failed to create goal", "goalCode", g.SuggestedCode)
+				} else {
+					createdCount++
+					createdCodes = append(createdCodes, g.SuggestedCode)
+					h.logger.Info("Successfully created goal", "goalCode", g.SuggestedCode)
+				}
+			}
+
+			goalsList := make([]string, len(createdCodes))
+			for i, code := range createdCodes {
+				for _, g := range result.GeneratedGoals {
+					if g.SuggestedCode == code {
+						goalsList[i] = fmt.Sprintf("- **%s**: %s", code, g.Description)
+						break
+					}
+				}
+			}
+
+			if createdCount > 0 {
+				responseMessage = fmt.Sprintf("✨ **Generated %d New Goals**\n\n%s\n\n%s",
+					createdCount,
+					strings.Join(goalsList, "\n"),
+					result.Explanation)
+			} else {
+				responseMessage = fmt.Sprintf("❌ **Failed to Create Goals**\n\n%s", result.Explanation)
+			}
+		} else {
+			responseMessage = "ℹ️ " + result.Explanation
+		}
+
+	case "remove":
+		// Handle goal removal - actually delete the goals from the database
+		if result.ConsolidatedData != nil && len(result.ConsolidatedData.RemovedGoals) > 0 {
+			deletedCount := 0
+			deletedCodes := []string{}
+
+			// Delete each goal
+			for _, goalKey := range result.ConsolidatedData.RemovedGoals {
+				// Find the goal to get its code for the response message
+				for _, goal := range existingGoals {
+					if goal.Key == goalKey {
+						deleteErr := h.agencyService.DeleteGoal(ctx, agencyID, goalKey)
+						if deleteErr != nil {
+							h.logger.WithError(deleteErr).Error("Failed to delete goal", "goalKey", goalKey, "goalCode", goal.Code)
+						} else {
+							deletedCount++
+							deletedCodes = append(deletedCodes, goal.Code)
+							h.logger.Info("Successfully deleted goal", "goalKey", goalKey, "goalCode", goal.Code)
+						}
+						break
+					}
+				}
+			}
+
+			if deletedCount > 0 {
+				responseMessage = fmt.Sprintf("🗑️ **Removed %d Goal(s)**\n\n**Removed**: %s\n\n%s",
+					deletedCount,
+					strings.Join(deletedCodes, ", "),
+					result.Explanation)
+			} else {
+				responseMessage = fmt.Sprintf("❌ **Failed to Remove Goals**\n\n%s", result.Explanation)
+			}
+		} else {
+			responseMessage = "ℹ️ " + result.Explanation
 		}
 
 	case "consolidate":
-		// Consolidate goals
-		if len(existingGoals) < 2 {
-			responseMessage = "ℹ️ Need at least 2 goals to consolidate."
-		} else {
-			consolidateReq := &builder.ConsolidateGoalsRequest{
-				AgencyID:      agencyID,
-				AgencyContext: ag,
-			}
-			result, consolidateErr := h.goalRefiner.ConsolidateGoals(ctx, consolidateReq, builderContext)
-			if consolidateErr != nil {
-				h.logger.WithError(consolidateErr).Error("Failed to consolidate goals")
-				responseMessage = fmt.Sprintf("❌ Failed to consolidate goals: %v", consolidateErr)
-			} else {
-				// Format consolidation suggestions
-				suggestions := make([]string, len(result.ConsolidatedGoals))
-				for i, cGoal := range result.ConsolidatedGoals {
+		if result.ConsolidatedData != nil {
+			var parts []string
+			if len(result.ConsolidatedData.ConsolidatedGoals) > 0 {
+				suggestions := make([]string, len(result.ConsolidatedData.ConsolidatedGoals))
+				for i, cGoal := range result.ConsolidatedData.ConsolidatedGoals {
 					suggestions[i] = fmt.Sprintf("**%s**: %s", cGoal.SuggestedCode, cGoal.Description)
 				}
-				responseMessage = fmt.Sprintf("💡 **Consolidation Suggestions**\n\n%s\n\n**Removed Goals**: %s\n\n%s",
-					strings.Join(suggestions, "\n"),
-					strings.Join(result.RemovedGoals, ", "),
-					result.Summary)
+				parts = append(parts, fmt.Sprintf("💡 **Consolidation Suggestions**\n\n%s", strings.Join(suggestions, "\n")))
 			}
-		}
-
-	case "enhance":
-		// Enhance/refine goals based on user request (includes remove, delete, improve, refine)
-		if len(existingGoals) == 0 {
-			responseMessage = "ℹ️ No goals found to work with. Try creating some goals first."
+			if len(result.ConsolidatedData.RemovedGoals) > 0 {
+				parts = append(parts, fmt.Sprintf("**Removed Goals**: %s", strings.Join(result.ConsolidatedData.RemovedGoals, ", ")))
+			}
+			parts = append(parts, result.ConsolidatedData.Summary)
+			responseMessage = strings.Join(parts, "\n\n")
 		} else {
-			h.logger.Info("Processing enhance/refine request",
-				"agencyID", agencyID,
-				"userRequest", userRequest,
-				"existingGoalsCount", len(existingGoals))
-
-			// General enhancement - provide guidance
-			responseMessage = fmt.Sprintf("🔧 **Goal Enhancement**\n\nI can help you with the following:\n\n"+
-				"• **Remove specific goals**: Specify the goal code (e.g., 'remove G013')\n"+
-				"• **Improve goal descriptions**: I can enhance clarity and specificity\n"+
-				"• **Refine scope and metrics**: I can suggest better success criteria\n\n"+
-				"Current goals (%d):\n", len(existingGoals))
-
-			for i, goal := range existingGoals {
-				responseMessage += fmt.Sprintf("%d. **%s**: %s\n", i+1, goal.Code, goal.Description)
-			}
-
-			responseMessage += "\n💡 Try asking me to 'remove G013' or 'consolidate goals'."
+			responseMessage = "ℹ️ " + result.Explanation
 		}
 
-	case "status":
-		// Provide status of current goals
-		if len(existingGoals) == 0 {
-			responseMessage = "ℹ️ No goals have been defined yet. Would you like me to create some goals based on the agency introduction?"
-		} else {
-			goalsList := make([]string, len(existingGoals))
-			for i, goal := range existingGoals {
-				goalsList[i] = fmt.Sprintf("- **%s**: %s", goal.Code, goal.Description)
-			}
-			responseMessage = fmt.Sprintf("📊 **Current Goals (%d)**\n\n%s\n\nHow can I help with these goals? I can create new ones, consolidate them, or help refine them.", len(existingGoals), strings.Join(goalsList, "\n"))
-		}
+	case "no_action":
+		responseMessage = "✅ " + result.Explanation
 
 	default:
-		responseMessage = "❓ I'm not sure what you want to do with the goals. Try asking to create, consolidate, or enhance goals, or ask for the current status."
+		responseMessage = result.Explanation
 	}
+
+	h.logger.Info("Dynamic goal processing completed",
+		"action", result.Action,
+		"refined_count", len(result.RefinedGoals),
+		"generated_count", len(result.GeneratedGoals),
+		"no_action", result.NoActionNeeded)
 
 	// Add AI response to conversation
 	if addErr := h.designerService.AddMessage(conv.ID, "assistant", responseMessage); addErr != nil {
@@ -851,5 +912,5 @@ func (h *Handler) ProcessGoalChatRequest(c *gin.Context) {
 
 	h.logger.Info("Successfully processed chat-based goal request",
 		"agencyID", agencyID,
-		"operation", operation)
+		"action", result.Action)
 }

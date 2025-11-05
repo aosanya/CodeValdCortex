@@ -417,6 +417,7 @@ func (a *App) setupServer() error {
 				v1.POST("/agencies/:id/goals/generate", aiRefineHandler.GenerateGoal)
 				v1.POST("/agencies/:id/goals/ai-process", aiRefineHandler.ProcessAIGoalRequest)
 				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoals)
+				v1.POST("/agencies/:id/goals/refine-dynamic", aiRefineHandler.RefineGoals)
 			}
 			if a.workItemBuilder != nil {
 				v1.POST("/agencies/:id/work-items/ai-process", aiRefineHandler.ProcessAIWorkItemRequest)

@@ -33,6 +33,7 @@ type IntroductionBuilderInterface interface {
 // GoalBuilderInterface defines the contract for all goal-related AI operations (refinement, generation, consolidation)
 type GoalBuilderInterface interface {
 	RefineGoal(ctx context.Context, req *RefineGoalRequest, builderContext BuilderContext) (*RefineGoalResponse, error)
+	RefineGoals(ctx context.Context, req *RefineGoalsRequest, builderContext BuilderContext) (*RefineGoalsResponse, error)
 	GenerateGoal(ctx context.Context, req *GenerateGoalRequest, builderContext BuilderContext) (*GenerateGoalResponse, error)
 	GenerateGoals(ctx context.Context, req *GenerateGoalRequest, builderContext BuilderContext) (*GenerateGoalsResponse, error)
 	ConsolidateGoals(ctx context.Context, req *ConsolidateGoalsRequest, builderContext BuilderContext) (*ConsolidateGoalsResponse, error)

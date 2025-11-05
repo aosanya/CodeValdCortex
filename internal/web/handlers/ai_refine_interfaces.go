@@ -47,6 +47,11 @@ type GoalBuilderInterface interface {
 	// Refines a specific goal definition using AI with full agency context.
 	RefineGoal(c *gin.Context)
 
+	// RefineGoals handles POST /api/v1/agencies/:id/goals/refine-dynamic
+	// Dynamically determines and executes the appropriate goal operation based on user message.
+	// Can refine, generate, consolidate, or enhance goals based on natural language input.
+	RefineGoals(c *gin.Context)
+
 	// GenerateGoal handles POST /api/v1/agencies/:id/goals/generate
 	// Generates a single goal using AI based on user input.
 	GenerateGoal(c *gin.Context)
