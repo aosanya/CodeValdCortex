@@ -112,12 +112,11 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	// Build refinement request using the structured AI context data
 	refineReq := &ai.RefineIntroductionRequest{
 		AgencyID:            agencyID,
-		AIContext:           aiContextData,
 		ConversationHistory: conversationHistory,
 	}
 
-	// Call AI refiner service
-	refinedResult, err := h.introductionRefiner.RefineIntroduction(c.Request.Context(), refineReq)
+	// Call AI refiner service with aiContextData passed separately
+	refinedResult, err := h.introductionRefiner.RefineIntroduction(c.Request.Context(), refineReq, aiContextData)
 	if err != nil {
 		h.logger.WithError(err).Error("AI refinement failed")
 		c.Header("Content-Type", "text/html")

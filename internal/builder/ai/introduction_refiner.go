@@ -28,7 +28,6 @@ func NewIntroductionRefiner(llmClient LLMClient, logger *logrus.Logger) *Introdu
 // RefineIntroductionRequest contains the context for refining an introduction
 type RefineIntroductionRequest struct {
 	AgencyID            string    `json:"agency_id"`
-	AIContext           AIContext `json:"ai_context"`                     // Structured AI context with all agency data
 	ConversationHistory []Message `json:"conversation_history,omitempty"` // Recent chat messages for context
 }
 
@@ -58,22 +57,22 @@ type aiRefinementResponse struct {
 }
 
 // RefineIntroduction uses AI to refine the agency introduction based on all available context
-func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *RefineIntroductionRequest, context) (*RefineIntroductionResponse, error) {
+func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *RefineIntroductionRequest, aiContext AIContext) (*RefineIntroductionResponse, error) {
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":           req.AgencyID,
-		"current_intro_chars": len(req.AIContext.Introduction),
-		"goals_count":         len(req.AIContext.Goals),
-		"work_items_count":    len(req.AIContext.WorkItems),
+		"current_intro_chars": len(aiContext.Introduction),
+		"goals_count":         len(aiContext.Goals),
+		"work_items_count":    len(aiContext.WorkItems),
 	}).Info("Starting introduction refinement")
 
 	// Build comprehensive prompt with all context
-	prompt := r.buildRefinementPrompt(req, req.AIContext)
+	prompt := r.buildRefinementPrompt(aiContext)
 
 	r.logger.WithFields(logrus.Fields{
 		"prompt_length":     len(prompt),
-		"user_request":      req.AIContext.UserInput,
-		"current_intro_len": len(req.AIContext.Introduction),
-		"current_intro":     req.AIContext.Introduction,
+		"user_request":      aiContext.UserInput,
+		"current_intro_len": len(aiContext.Introduction),
+		"current_intro":     aiContext.Introduction,
 		"full_prompt":       prompt,
 	}).Info("==== SENDING TO AI - Built refinement prompt ====")
 
@@ -102,7 +101,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 	}).Info("==== RECEIVED FROM AI - Full response ====")
 
 	// Parse the response
-	refined, wasChanged, explanation, changedSections := r.parseAIResponse(response.Content, req.AIContext.Introduction)
+	refined, wasChanged, explanation, changedSections := r.parseAIResponse(response.Content, aiContext.Introduction)
 
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":        req.AgencyID,
@@ -133,10 +132,10 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *Refin
 		ChangedSections: changedSections,
 		Data: &AgencyDataResponse{
 			Introduction: refined,
-			Goals:        req.AIContext.Goals,
-			WorkItems:    req.AIContext.WorkItems,
-			Roles:        req.AIContext.Roles,
-			Assignments:  req.AIContext.Assignments,
+			Goals:        aiContext.Goals,
+			WorkItems:    aiContext.WorkItems,
+			Roles:        aiContext.Roles,
+			Assignments:  aiContext.Assignments,
 		},
 	}, nil
 }
@@ -186,20 +185,20 @@ Remember: You are an API, not a chatbot. Output must be grammatically perfect. P
 }
 
 // buildRefinementPrompt creates a comprehensive prompt with all available context
-func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionRequest, contextData AIContext) string {
+func (r *IntroductionRefiner) buildRefinementPrompt(aiContext AIContext) string {
 	var prompt strings.Builder
 
 	prompt.WriteString("You are refining an agency introduction. Below is the complete agency data in JSON format.\n\n")
 
 	// Use the reusable agency context formatter
-	prompt.WriteString(FormatAgencyContextBlock(contextData))
+	prompt.WriteString(FormatAgencyContextBlock(aiContext))
 
 	// DO NOT include conversation history - it may contain conversational patterns that influence AI behavior
 	// We only need the current user request
 
 	// Specific user request
-	if contextData.UserInput != "" {
-		prompt.WriteString(fmt.Sprintf("**USER REQUEST:**\n%s\n\n", contextData.UserInput))
+	if aiContext.UserInput != "" {
+		prompt.WriteString(fmt.Sprintf("**USER REQUEST:**\n%s\n\n", aiContext.UserInput))
 		prompt.WriteString("Execute this modification on the 'introduction' field NOW. Return JSON only.\n\n")
 	}
 
