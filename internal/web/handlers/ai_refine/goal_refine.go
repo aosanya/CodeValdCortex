@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -91,21 +90,7 @@ func (h *Handler) RefineGoal(c *gin.Context) {
 		currentMetrics = currentGoal.SuccessMetrics
 	}
 
-	// Get all existing goals for context
-	existingGoals, err := h.agencyService.GetGoals(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch existing goals, continuing without them")
-		existingGoals = []*agency.Goal{}
-	}
-
-	// Get all units of work for context
-	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch units of work, continuing without them")
-		workItems = []*agency.WorkItem{}
-	}
-
-	// Build AI context
+	// Build AI context (contains goals, work items, roles, and RACI assignments)
 	builderContext, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, "", "")
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to build AI context")
@@ -132,8 +117,6 @@ func (h *Handler) RefineGoal(c *gin.Context) {
 		Description:    currentDescription,
 		Scope:          currentScope,
 		SuccessMetrics: currentMetrics,
-		ExistingGoals:  existingGoals,
-		WorkItems:      workItems,
 		AgencyContext:  ag,
 	}
 

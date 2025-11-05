@@ -276,8 +276,10 @@ export function getFormattedContexts() {
         selections: contextState.selections.length
     });
 
+    // If no explicit contexts/selections, return empty string
+    // (Context is already being appended by the backend/form handler)
     if (!hasContexts && !hasSelections) {
-        console.log('[ContextManager] No contexts or selections to format');
+        console.log('[ContextManager] No contexts or selections, returning empty');
         return '';
     }
 
