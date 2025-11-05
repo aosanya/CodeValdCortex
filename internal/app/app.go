@@ -44,8 +44,8 @@ type App struct {
 	messageService       *communication.MessageService
 	pubSubService        *communication.PubSubService
 	aiDesignerService    *ai.AgencyDesignerService
-	introductionRefiner  *ai.IntroductionRefiner
-	goalRefiner          *ai.GoalRefiner
+	introductionRefiner  *ai.AIIntroductionBuilder
+	goalRefiner          *ai.GoalsBuilder
 	goalConsolidator     *ai.GoalConsolidator
 	workItemRefiner      *ai.WorkItemRefiner
 	workItemConsolidator *ai.WorkItemConsolidator
@@ -140,8 +140,8 @@ func New(cfg *config.Config) *App {
 
 	// Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
-	var introductionRefiner *ai.IntroductionRefiner
-	var goalRefiner *ai.GoalRefiner
+	var introductionRefiner *ai.AIIntroductionBuilder
+	var goalRefiner *ai.GoalsBuilder
 	var goalConsolidator *ai.GoalConsolidator
 	var workItemRefiner *ai.WorkItemRefiner
 	var workItemConsolidator *ai.WorkItemConsolidator
@@ -164,7 +164,7 @@ func New(cfg *config.Config) *App {
 			logger.WithError(err).Error("Failed to initialize LLM client")
 		} else {
 			aiDesignerService = ai.NewAgencyDesignerService(llmClient, logger)
-			introductionRefiner = ai.NewIntroductionRefiner(llmClient, logger)
+			introductionRefiner = ai.NewAIIntroductionBuilder(llmClient, logger)
 			goalRefiner = ai.NewGoalRefiner(llmClient, logger)
 			goalConsolidator = ai.NewGoalConsolidator(llmClient, logger)
 			workItemRefiner = ai.NewWorkItemRefiner(llmClient, logger)

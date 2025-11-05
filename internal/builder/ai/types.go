@@ -3,6 +3,8 @@ package ai
 import (
 	"context"
 	"time"
+
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 )
 
 // Provider represents different LLM providers
@@ -15,13 +17,8 @@ const (
 	ProviderCustom Provider = "custom"
 )
 
-// Message represents a chat message
-type Message struct {
-	Role      string    `json:"role"`           // "system", "user", "assistant"
-	Content   string    `json:"content"`        // Message content
-	Name      string    `json:"name,omitempty"` // Optional speaker name
-	Timestamp time.Time `json:"timestamp"`      // When message was created
-}
+// Message is an alias to builder.Message to avoid circular dependencies
+type Message = builder.Message
 
 // ChatRequest represents a request to the LLM
 type ChatRequest struct {
@@ -108,7 +105,7 @@ type AgencyDesign struct {
 	Name          string                 `json:"name"`
 	Description   string                 `json:"description"`
 	Category      string                 `json:"category"`
-	Roles    []RoleSpec        `json:"agent_types"`
+	Roles         []RoleSpec             `json:"agent_types"`
 	Relationships []AgentRelationship    `json:"relationships"`
 	Metadata      map[string]interface{} `json:"metadata"`
 }

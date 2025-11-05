@@ -11,15 +11,15 @@ import (
 type Handler struct {
 	agencyService        agency.Service
 	roleService          registry.RoleService
-	introductionRefiner  *ai.IntroductionRefiner
-	goalRefiner          *ai.GoalRefiner
+	introductionRefiner  *ai.AIIntroductionBuilder
+	goalRefiner          *ai.GoalsBuilder
 	goalConsolidator     *ai.GoalConsolidator
 	workItemRefiner      *ai.WorkItemRefiner
 	workItemConsolidator *ai.WorkItemConsolidator
 	roleCreator          *ai.RoleCreator
 	raciCreator          *ai.RACICreator
 	designerService      *ai.AgencyDesignerService
-	contextBuilder       *AIContextBuilder
+	contextBuilder       *BuilderContextBuilder
 	logger               *logrus.Logger
 }
 
@@ -27,8 +27,8 @@ type Handler struct {
 func NewHandler(
 	agencyService agency.Service,
 	roleService registry.RoleService,
-	introductionRefiner *ai.IntroductionRefiner,
-	goalRefiner *ai.GoalRefiner,
+	introductionRefiner *ai.AIIntroductionBuilder,
+	goalRefiner *ai.GoalsBuilder,
 	goalConsolidator *ai.GoalConsolidator,
 	workItemRefiner *ai.WorkItemRefiner,
 	workItemConsolidator *ai.WorkItemConsolidator,
@@ -38,7 +38,7 @@ func NewHandler(
 	logger *logrus.Logger,
 ) *Handler {
 	// Create context builder for shared AI context gathering
-	contextBuilder := NewAIContextBuilder(agencyService, roleService, logger)
+	contextBuilder := NewBuilderContextBuilder(agencyService, roleService, logger)
 
 	return &Handler{
 		agencyService:        agencyService,

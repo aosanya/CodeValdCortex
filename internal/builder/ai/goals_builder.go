@@ -11,18 +11,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Compile-time check to ensure AIGoalBuilder implements GoalBuilderInterface
-var _ builder.GoalBuilderInterface = (*AIGoalBuilder)(nil)
-
-// AIGoalBuilder handles AI-powered goal definition and refinement
-type AIGoalBuilder struct {
+// GoalsBuilder handles AI-powered goal definition and refinement
+type GoalsBuilder struct {
 	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
 // NewGoalRefiner creates a new goal refiner service
-func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *AIGoalBuilder {
-	return &AIGoalBuilder{
+func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *GoalsBuilder {
+	return &GoalsBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
@@ -118,7 +115,7 @@ func stripMarkdownFences(content string) string {
 }
 
 // RefineGoal uses AI to refine a goal definition based on agency context
-func (r *AIGoalBuilder) RefineGoal(ctx context.Context, req *RefineGoalRequest) (*RefineGoalResponse, error) {
+func (r *GoalsBuilder) RefineGoal(ctx context.Context, req *RefineGoalRequest) (*RefineGoalResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI goal refinement")
 
 	// Create structured builder.BuilderContext with all available context data
@@ -190,7 +187,7 @@ func (r *AIGoalBuilder) RefineGoal(ctx context.Context, req *RefineGoalRequest) 
 }
 
 // GenerateGoal uses AI to generate a new goal from user input
-func (r *AIGoalBuilder) GenerateGoal(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalResponse, error) {
+func (r *GoalsBuilder) GenerateGoal(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI goal generation")
 
 	// Create structured builder.BuilderContext with all available context data
@@ -249,7 +246,7 @@ func (r *AIGoalBuilder) GenerateGoal(ctx context.Context, req *GenerateGoalReque
 }
 
 // GenerateGoals uses AI to generate multiple goals from user input
-func (r *AIGoalBuilder) GenerateGoals(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalsResponse, error) {
+func (r *GoalsBuilder) GenerateGoals(ctx context.Context, req *GenerateGoalRequest) (*GenerateGoalsResponse, error) {
 	r.logger.WithField("agency_id", req.AgencyID).Info("Starting AI multiple goals generation")
 
 	// Create structured builder.BuilderContext with all available context data
@@ -306,7 +303,7 @@ func (r *AIGoalBuilder) GenerateGoals(ctx context.Context, req *GenerateGoalRequ
 }
 
 // buildGoalRefinementPrompt creates the prompt for goal refinement
-func (r *AIGoalBuilder) buildGoalRefinementPrompt(_ *RefineGoalRequest, contextData builder.BuilderContext) string {
+func (r *GoalsBuilder) buildGoalRefinementPrompt(_ *RefineGoalRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -318,7 +315,7 @@ func (r *AIGoalBuilder) buildGoalRefinementPrompt(_ *RefineGoalRequest, contextD
 }
 
 // buildGoalGenerationPrompt creates the prompt for goal generation
-func (r *AIGoalBuilder) buildGoalGenerationPrompt(_ *GenerateGoalRequest, contextData builder.BuilderContext) string {
+func (r *GoalsBuilder) buildGoalGenerationPrompt(_ *GenerateGoalRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter
@@ -330,7 +327,7 @@ func (r *AIGoalBuilder) buildGoalGenerationPrompt(_ *GenerateGoalRequest, contex
 }
 
 // buildGoalsGenerationPrompt creates the prompt for multiple goals generation
-func (r *AIGoalBuilder) buildGoalsGenerationPrompt(_ *GenerateGoalRequest, contextData builder.BuilderContext) string {
+func (r *GoalsBuilder) buildGoalsGenerationPrompt(_ *GenerateGoalRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
 	// Use the reusable agency context formatter

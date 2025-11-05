@@ -7,22 +7,21 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	builderai "github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/sirupsen/logrus"
 )
 
-// Compile-time check to ensure IntroductionRefiner implements IntroductionBuilderInterface
-var _ builder.IntroductionBuilderInterface = (*IntroductionRefiner)(nil)
+// Compile-time check to ensure AIIntroductionBuilder implements IntroductionBuilderInterface
+var _ builder.IntroductionBuilderInterface = (*AIIntroductionBuilder)(nil)
 
-// IntroductionRefiner handles AI-powered introduction refinement
-type IntroductionRefiner struct {
-	llmClient builderai.LLMClient
+// AIIntroductionBuilder handles AI-powered introduction refinement
+type AIIntroductionBuilder struct {
+	llmClient LLMClient
 	logger    *logrus.Logger
 }
 
-// NewIntroductionRefiner creates a new introduction refiner service
-func NewIntroductionRefiner(llmClient builderai.LLMClient, logger *logrus.Logger) *IntroductionRefiner {
-	return &IntroductionRefiner{
+// NewAIIntroductionBuilder creates a new AI introduction builder service
+func NewAIIntroductionBuilder(llmClient LLMClient, logger *logrus.Logger) *AIIntroductionBuilder {
+	return &AIIntroductionBuilder{
 		llmClient: llmClient,
 		logger:    logger,
 	}
@@ -37,7 +36,7 @@ type aiRefinementResponse struct {
 }
 
 // RefineIntroduction uses AI to refine the agency introduction based on all available context
-func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *builder.RefineIntroductionRequest, aiContext builder.AIContext) (*builder.RefineIntroductionResponse, error) {
+func (r *AIIntroductionBuilder) RefineIntroduction(ctx context.Context, req *builder.RefineIntroductionRequest, aiContext builder.BuilderContext) (*builder.RefineIntroductionResponse, error) {
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":           req.AgencyID,
 		"current_intro_chars": len(aiContext.Introduction),
@@ -57,8 +56,8 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *build
 	}).Info("==== SENDING TO AI - Built refinement prompt ====")
 
 	// Request AI refinement with strict JSON enforcement
-	response, err := r.llmClient.Chat(ctx, &builderai.ChatRequest{
-		Messages: []builderai.Message{
+	response, err := r.llmClient.Chat(ctx, &ChatRequest{
+		Messages: []Message{
 			{
 				Role:    "system",
 				Content: r.getSystemPrompt(),
@@ -121,7 +120,7 @@ func (r *IntroductionRefiner) RefineIntroduction(ctx context.Context, req *build
 }
 
 // getSystemPrompt returns the system prompt for introduction refinement
-func (r *IntroductionRefiner) getSystemPrompt() string {
+func (r *AIIntroductionBuilder) getSystemPrompt() string {
 	return `You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
 
 INPUT: JSON with introduction field and modification instruction
@@ -165,13 +164,13 @@ Remember: You are an API, not a chatbot. Output must be grammatically perfect. P
 }
 
 // buildRefinementPrompt creates a comprehensive prompt with all available context
-func (r *IntroductionRefiner) buildRefinementPrompt(aiContext builder.AIContext) string {
+func (r *AIIntroductionBuilder) buildRefinementPrompt(aiContext builder.BuilderContext) string {
 	var prompt strings.Builder
 
 	prompt.WriteString("You are refining an agency introduction. Below is the complete agency data in JSON format.\n\n")
 
 	// Use the reusable agency context formatter
-	prompt.WriteString(builderai.FormatAgencyContextBlock(aiContext))
+	prompt.WriteString(FormatAgencyContextBlock(aiContext))
 
 	// DO NOT include conversation history - it may contain conversational patterns that influence AI behavior
 	// We only need the current user request
@@ -188,7 +187,7 @@ func (r *IntroductionRefiner) buildRefinementPrompt(aiContext builder.AIContext)
 }
 
 // parseAIResponse extracts the refined introduction, change status, explanation, and changed sections from AI JSON response
-func (r *IntroductionRefiner) parseAIResponse(response, original string) (refined string, wasChanged bool, explanation string, changedSections []string) {
+func (r *AIIntroductionBuilder) parseAIResponse(response, original string) (refined string, wasChanged bool, explanation string, changedSections []string) {
 	r.logger.WithFields(logrus.Fields{
 		"response_length": len(response),
 		"response_text":   response,

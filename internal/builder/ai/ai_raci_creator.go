@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
@@ -153,8 +154,8 @@ func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMap
 }
 
 func (c *RACICreator) buildRACICreationPrompt(req *CreateRACIMappingsRequest) string {
-	// Create structured AIContext with all available context data
-	contextData := AIContext{
+	// Create structured builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,

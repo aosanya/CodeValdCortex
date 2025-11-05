@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
 
@@ -103,8 +104,8 @@ func (c *WorkItemConsolidator) ConsolidateWorkItems(ctx context.Context, req *Co
 
 // buildConsolidationPrompt creates the prompt for work item consolidation
 func (c *WorkItemConsolidator) buildConsolidationPrompt(req *ConsolidateWorkItemsRequest) string {
-	// Create typed AIContext with all available context data
-	contextData := AIContext{
+	// Create typed builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,

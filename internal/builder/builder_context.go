@@ -1,14 +1,24 @@
-package ai
+package builder
 
 import (
+	"time"
+
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
-// AIContext is a shared context structure used when building prompts for AI calls.
+// Message represents a chat message (shared type for AI interactions)
+type Message struct {
+	Role      string    `json:"role"`           // "system", "user", "assistant"
+	Content   string    `json:"content"`        // Message content
+	Name      string    `json:"name,omitempty"` // Optional speaker name
+	Timestamp time.Time `json:"timestamp"`      // When message was created
+}
+
+// BuilderContext is a shared context structure used when building prompts for AI calls.
 // It centralizes commonly used fields so all prompt builders can pass a typed
 // structure instead of ad-hoc maps.
-type AIContext struct {
+type BuilderContext struct {
 	// Agency metadata
 	AgencyName        string `json:"agency_name,omitempty"`
 	AgencyCategory    string `json:"agency_category,omitempty"`

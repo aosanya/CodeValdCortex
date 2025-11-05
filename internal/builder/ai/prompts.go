@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 )
 
 // System prompts for different conversation phases
@@ -206,15 +208,15 @@ Use emojis for visual clarity (✅ ⚠️ 🔄 etc).`
 // for inclusion in AI prompts. This ensures consistent agency context presentation across all AI calls.
 //
 // Parameters:
-//   - contextData: AIContext containing all agency metadata and working data
+//   - contextData: builder.BuilderContext containing all agency metadata and working data
 //
 // Returns a formatted string block with:
 //   - Agency basic information (name, category, description)
 //   - Complete context data in JSON format with visual separators
-func FormatAgencyContextBlock(contextData AIContext) string {
+func FormatAgencyContextBlock(contextData builder.BuilderContext) string {
 	var builder strings.Builder
 
-	// Add agency basic information from AIContext
+	// Add agency basic information from builder.BuilderContext
 	if contextData.AgencyName != "" {
 		builder.WriteString("You are working with the following agency context.\n\n")
 		builder.WriteString(fmt.Sprintf("**Agency Name:** %s\n", contextData.AgencyName))

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
 
@@ -237,8 +238,8 @@ func (r *WorkItemRefiner) GenerateWorkItems(ctx context.Context, req *GenerateWo
 
 // buildWorkItemRefinementPrompt creates a context-rich prompt for work item refinement
 func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemRequest) string {
-	// Create structured AIContext with all available context data
-	contextData := AIContext{
+	// Create structured builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,
@@ -262,8 +263,8 @@ func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemReque
 	return builder.String()
 } // buildWorkItemGenerationPrompt creates a prompt for generating a single work item
 func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemRequest) string {
-	// Create structured AIContext with all available context data
-	contextData := AIContext{
+	// Create structured builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,
@@ -289,8 +290,8 @@ func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemReq
 
 // buildWorkItemsGenerationPrompt creates a prompt for generating multiple work items
 func (r *WorkItemRefiner) buildWorkItemsGenerationPrompt(req *GenerateWorkItemRequest) string {
-	// Create structured AIContext with all available context data
-	contextData := AIContext{
+	// Create structured builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,

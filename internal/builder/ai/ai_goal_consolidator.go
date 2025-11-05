@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
 
@@ -102,8 +103,8 @@ func (c *GoalConsolidator) ConsolidateGoals(ctx context.Context, req *Consolidat
 
 // buildConsolidationPrompt creates the prompt for goal consolidation
 func (c *GoalConsolidator) buildConsolidationPrompt(req *ConsolidateGoalsRequest) string {
-	// Create structured AIContext with all available context data
-	contextData := AIContext{
+	// Create structured builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,

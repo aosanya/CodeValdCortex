@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
@@ -71,7 +72,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	// Build AI context data using shared context builder (pass the full agency object)
-	aiContextData, err := h.contextBuilder.BuildAIContext(c.Request.Context(), ag, currentIntroduction, userRequest)
+	aiContextData, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, currentIntroduction, userRequest)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to build AI context data")
 		c.Header("Content-Type", "text/html")
@@ -110,7 +111,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	// Build refinement request using the structured AI context data
-	refineReq := &ai.RefineIntroductionRequest{
+	refineReq := &builder.RefineIntroductionRequest{
 		AgencyID:            agencyID,
 		ConversationHistory: conversationHistory,
 	}

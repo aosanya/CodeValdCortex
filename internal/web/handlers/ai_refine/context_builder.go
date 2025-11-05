@@ -4,30 +4,30 @@ import (
 	"context"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
 
-// AIContextBuilder provides methods to build AI context from agency data
-type AIContextBuilder struct {
+// BuilderContextBuilder provides methods to build AI context from agency data
+type BuilderContextBuilder struct {
 	agencyService agency.Service
 	roleService   registry.RoleService
 	logger        *logrus.Logger
 }
 
-// NewAIContextBuilder creates a new AI context builder
-func NewAIContextBuilder(agencyService agency.Service, roleService registry.RoleService, logger *logrus.Logger) *AIContextBuilder {
-	return &AIContextBuilder{
+// NewBuilderContextBuilder creates a new AI context builder
+func NewBuilderContextBuilder(agencyService agency.Service, roleService registry.RoleService, logger *logrus.Logger) *BuilderContextBuilder {
+	return &BuilderContextBuilder{
 		agencyService: agencyService,
 		roleService:   roleService,
 		logger:        logger,
 	}
 }
 
-// BuildAIContext gathers all agency context data and returns it as a structured AIContext
+// BuildBuilderContext gathers all agency context data and returns it as a structured BuilderContext
 // This is the centralized function used by all AI operations to ensure consistent context
-func (b *AIContextBuilder) BuildAIContext(ctx context.Context, agencyObj *agency.Agency, currentIntroduction string, userRequest string) (ai.AIContext, error) {
+func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *agency.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
 	b.logger.WithField("agency_id", agencyObj.ID).Debug("Building AI context data")
 
 	// Get all goals for context
@@ -58,7 +58,7 @@ func (b *AIContextBuilder) BuildAIContext(ctx context.Context, agencyObj *agency
 		assignments = []*agency.RACIAssignment{}
 	}
 
-	aiContext := ai.AIContext{
+	aiContext := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        agencyObj.DisplayName,
 		AgencyCategory:    agencyObj.Category,

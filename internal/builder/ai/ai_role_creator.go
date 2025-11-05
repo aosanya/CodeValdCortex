@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
@@ -133,8 +134,8 @@ Response must be valid JSON matching this structure:
 }
 
 func (r *RoleCreator) buildRoleGenerationPrompt(req *GenerateRolesRequest) string {
-	// Create structured AIContext with all available context data
-	contextData := AIContext{
+	// Create structured builder.BuilderContext with all available context data
+	contextData := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        req.AgencyContext.DisplayName,
 		AgencyCategory:    req.AgencyContext.Category,

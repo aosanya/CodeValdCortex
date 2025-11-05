@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
@@ -18,8 +19,8 @@ type ChatHandler struct {
 	designerService     *ai.AgencyDesignerService
 	agencyService       agency.Service
 	roleService         registry.RoleService
-	introductionRefiner *ai.IntroductionRefiner
-	goalRefiner         *ai.GoalRefiner
+	introductionRefiner *ai.AIIntroductionBuilder
+	goalRefiner         *ai.GoalsBuilder
 	goalConsolidator    *ai.GoalConsolidator
 	logger              *logrus.Logger
 }
@@ -29,8 +30,8 @@ func NewChatHandler(
 	designerService *ai.AgencyDesignerService,
 	agencyService agency.Service,
 	roleService registry.RoleService,
-	introductionRefiner *ai.IntroductionRefiner,
-	goalRefiner *ai.GoalRefiner,
+	introductionRefiner *ai.AIIntroductionBuilder,
+	goalRefiner *ai.GoalsBuilder,
 	goalConsolidator *ai.GoalConsolidator,
 	logger *logrus.Logger,
 ) *ChatHandler {
@@ -319,20 +320,26 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID str
 		"work_items_count":   len(workItems),
 	}).Info("==== CHAT HANDLER - Preparing introduction refinement request ====")
 
-	// Build refinement request
-	refineReq := &ai.RefineIntroductionRequest{
-		AgencyID:      agencyID,
-		CurrentIntro:  overview.Introduction,
-		Goals:         goals,
-		WorkItems:     workItems,
-		Roles:         roles,
-		Assignments:   assignments,
-		AgencyContext: ag,
-		UserRequest:   userRequest, // Full message with context
+	// Build refinement request with just metadata
+	refineReq := &builder.RefineIntroductionRequest{
+		AgencyID: agencyID,
 	}
 
-	// Call AI refiner
-	refinedResult, err := h.introductionRefiner.RefineIntroduction(ctx, refineReq)
+	// Build AI context with all agency data
+	builderContext := builder.BuilderContext{
+		AgencyName:        ag.DisplayName,
+		AgencyCategory:    ag.Category,
+		AgencyDescription: ag.Description,
+		Introduction:      overview.Introduction,
+		Goals:             goals,
+		WorkItems:         workItems,
+		Roles:             roles,
+		Assignments:       assignments,
+		UserInput:         userRequest,
+	}
+
+	// Call AI refiner with new signature
+	refinedResult, err := h.introductionRefiner.RefineIntroduction(ctx, refineReq, builderContext)
 	if err != nil {
 		return nil, err
 	}
