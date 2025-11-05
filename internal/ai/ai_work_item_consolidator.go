@@ -103,40 +103,21 @@ func (c *WorkItemConsolidator) ConsolidateWorkItems(ctx context.Context, req *Co
 
 // buildConsolidationPrompt creates the prompt for work item consolidation
 func (c *WorkItemConsolidator) buildConsolidationPrompt(req *ConsolidateWorkItemsRequest) string {
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"current_work_items": req.CurrentWorkItems,
+		"goals":              req.Goals,
+	}
+
 	var builder strings.Builder
 
-	// Agency context
-	builder.WriteString(fmt.Sprintf("Agency: %s\n", req.AgencyContext.Name))
-	builder.WriteString(fmt.Sprintf("Description: %s\n", req.AgencyContext.Description))
-	builder.WriteString(fmt.Sprintf("Total Work Items: %d\n\n", len(req.CurrentWorkItems)))
-
-	// Goals context
-	if len(req.Goals) > 0 {
-		builder.WriteString("Agency Goals:\n")
-		for _, goal := range req.Goals {
-			builder.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-		}
-		builder.WriteString("\n")
-	}
-
-	// Current work items list
-	builder.WriteString("Current Work Items:\n")
-	for i, workItem := range req.CurrentWorkItems {
-		builder.WriteString(fmt.Sprintf("\n%d. [%s] %s - %s\n", i+1, workItem.Key, workItem.Code, workItem.Title))
-		if workItem.Description != "" {
-			builder.WriteString(fmt.Sprintf("   Description: %s\n", workItem.Description))
-		}
-		if len(workItem.Deliverables) > 0 {
-			builder.WriteString(fmt.Sprintf("   Deliverables: %s\n", strings.Join(workItem.Deliverables, ", ")))
-		}
-	}
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	builder.WriteString("\n\nPlease analyze these work items and consolidate them into a lean, manageable list. Look for duplicates, overlaps, and opportunities to combine related items.")
 
 	return builder.String()
-}
-
-// workItemConsolidationSystemPrompt defines the AI's role for work item consolidation
+} // workItemConsolidationSystemPrompt defines the AI's role for work item consolidation
 const workItemConsolidationSystemPrompt = `Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.
 
 IMPORTANT: Only consolidate work items when it truly adds value. If work items are already well-defined and distinct, keep them separate.

@@ -237,119 +237,63 @@ func (r *WorkItemRefiner) GenerateWorkItems(ctx context.Context, req *GenerateWo
 
 // buildWorkItemRefinementPrompt creates a context-rich prompt for work item refinement
 func (r *WorkItemRefiner) buildWorkItemRefinementPrompt(req *RefineWorkItemRequest) string {
-	var sb strings.Builder
-
-	// Agency context
-	sb.WriteString(fmt.Sprintf("Agency: %s\n", req.AgencyContext.Name))
-	sb.WriteString(fmt.Sprintf("Category: %s\n\n", req.AgencyContext.Category))
-
-	// Current work item
-	sb.WriteString("Current Work Item:\n")
-	sb.WriteString(fmt.Sprintf("Code: %s\n", req.CurrentWorkItem.Code))
-	sb.WriteString(fmt.Sprintf("Title: %s\n", req.Title))
-	sb.WriteString(fmt.Sprintf("Description: %s\n", req.Description))
-	if len(req.Deliverables) > 0 {
-		sb.WriteString(fmt.Sprintf("Deliverables:\n%s\n", strings.Join(req.Deliverables, "\n- ")))
-	}
-	sb.WriteString("\n")
-
-	// Goals context
-	if len(req.Goals) > 0 {
-		sb.WriteString("Related Goals:\n")
-		for _, goal := range req.Goals {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-		}
-		sb.WriteString("\n")
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"current_work_item":   req.CurrentWorkItem,
+		"title":               req.Title,
+		"description":         req.Description,
+		"deliverables":        req.Deliverables,
+		"existing_work_items": req.ExistingWorkItems,
+		"goals":               req.Goals,
 	}
 
-	// Existing work items for context
-	if len(req.ExistingWorkItems) > 0 {
-		sb.WriteString("Existing Work Items:\n")
-		for _, wi := range req.ExistingWorkItems {
-			if wi.Key != req.CurrentWorkItem.Key {
-				sb.WriteString(fmt.Sprintf("- %s: %s\n", wi.Code, wi.Title))
-			}
-		}
-		sb.WriteString("\n")
-	}
+	var builder strings.Builder
 
-	sb.WriteString("Please refine this work item to be clear, actionable, and aligned with agency goals.")
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
-	return sb.String()
-}
+	builder.WriteString("Please refine this work item to be clear, actionable, and aligned with agency goals.")
 
-// buildWorkItemGenerationPrompt creates a prompt for generating a single work item
+	return builder.String()
+} // buildWorkItemGenerationPrompt creates a prompt for generating a single work item
 func (r *WorkItemRefiner) buildWorkItemGenerationPrompt(req *GenerateWorkItemRequest) string {
-	var sb strings.Builder
-
-	// Agency context
-	sb.WriteString(fmt.Sprintf("Agency: %s\n", req.AgencyContext.Name))
-	sb.WriteString(fmt.Sprintf("Category: %s\n\n", req.AgencyContext.Category))
-
-	// Goals context
-	if len(req.Goals) > 0 {
-		sb.WriteString("Agency Goals:\n")
-		for _, goal := range req.Goals {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-		}
-		sb.WriteString("\n")
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"goals":               req.Goals,
+		"existing_work_items": req.ExistingWorkItems,
+		"user_input":          req.UserInput,
 	}
 
-	// Existing work items for context
-	if len(req.ExistingWorkItems) > 0 {
-		sb.WriteString("Existing Work Items:\n")
-		for _, wi := range req.ExistingWorkItems {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", wi.Code, wi.Title))
-		}
-		sb.WriteString("\n")
-	}
+	var builder strings.Builder
 
-	// User input
-	sb.WriteString(fmt.Sprintf("User Request: %s\n\n", req.UserInput))
-	sb.WriteString("Please generate a work item based on this request.")
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
-	return sb.String()
+	builder.WriteString("Please generate a work item based on this request.")
+
+	return builder.String()
 }
 
 // buildWorkItemsGenerationPrompt creates a prompt for generating multiple work items
 func (r *WorkItemRefiner) buildWorkItemsGenerationPrompt(req *GenerateWorkItemRequest) string {
-	var sb strings.Builder
-
-	// Agency context
-	sb.WriteString(fmt.Sprintf("Agency: %s\n", req.AgencyContext.Name))
-	sb.WriteString(fmt.Sprintf("Category: %s\n\n", req.AgencyContext.Category))
-
-	// Goals context
-	if len(req.Goals) > 0 {
-		sb.WriteString("Agency Goals:\n")
-		for _, goal := range req.Goals {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-			if goal.Scope != "" {
-				sb.WriteString(fmt.Sprintf("  Scope: %s\n", goal.Scope))
-			}
-		}
-		sb.WriteString("\n")
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"goals":               req.Goals,
+		"existing_work_items": req.ExistingWorkItems,
+		"user_input":          req.UserInput,
 	}
 
-	// Existing work items for context
-	if len(req.ExistingWorkItems) > 0 {
-		sb.WriteString("Existing Work Items:\n")
-		for _, wi := range req.ExistingWorkItems {
-			sb.WriteString(fmt.Sprintf("- %s: %s\n", wi.Code, wi.Title))
-		}
-		sb.WriteString("\n")
-	}
+	var builder strings.Builder
 
-	// User input
-	sb.WriteString(fmt.Sprintf("%s\n\n", req.UserInput))
-	sb.WriteString("Please generate 3-7 work items that would help achieve these goals. ")
-	sb.WriteString("Create a balanced mix of tasks, features, and possibly epic-level work items. ")
-	sb.WriteString("Ensure each work item is specific, actionable, and clearly contributes to one or more goals.")
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
-	return sb.String()
-}
+	builder.WriteString("Please generate 3-7 work items that would help achieve these goals. ")
+	builder.WriteString("Create a balanced mix of tasks, features, and possibly epic-level work items. ")
+	builder.WriteString("Ensure each work item is specific, actionable, and clearly contributes to one or more goals.")
 
-// System prompts for work item operations
+	return builder.String()
+} // System prompts for work item operations
 const workItemRefinementSystemPrompt = `You are an expert project manager and technical architect helping to refine work items for software development.
 
 Your task is to refine work items to be:

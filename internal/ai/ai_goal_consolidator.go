@@ -102,44 +102,21 @@ func (c *GoalConsolidator) ConsolidateGoals(ctx context.Context, req *Consolidat
 
 // buildConsolidationPrompt creates the prompt for goal consolidation
 func (c *GoalConsolidator) buildConsolidationPrompt(req *ConsolidateGoalsRequest) string {
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"current_goals": req.CurrentGoals,
+		"work_items":    req.WorkItems,
+	}
+
 	var builder strings.Builder
 
-	// Agency context
-	builder.WriteString(fmt.Sprintf("Agency: %s\n", req.AgencyContext.Name))
-	builder.WriteString(fmt.Sprintf("Description: %s\n", req.AgencyContext.Description))
-	builder.WriteString(fmt.Sprintf("Total Goals: %d\n\n", len(req.CurrentGoals)))
-
-	// Current goals list
-	builder.WriteString("Current Goals:\n")
-	for i, goal := range req.CurrentGoals {
-		builder.WriteString(fmt.Sprintf("\n%d. [%s] %s\n", i+1, goal.Key, goal.Description))
-		if goal.Scope != "" {
-			builder.WriteString(fmt.Sprintf("   Scope: %s\n", goal.Scope))
-		}
-		if len(goal.SuccessMetrics) > 0 {
-			builder.WriteString(fmt.Sprintf("   Metrics: %s\n", strings.Join(goal.SuccessMetrics, ", ")))
-		}
-		if goal.Priority != "" {
-			builder.WriteString(fmt.Sprintf("   Priority: %s\n", goal.Priority))
-		}
-	}
-
-	// Work items for context
-	if len(req.WorkItems) > 0 {
-		builder.WriteString("\n\nExisting Work Items:\n")
-		for i, workItem := range req.WorkItems {
-			if i < 10 { // Limit to avoid token overflow
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", workItem.Code, workItem.Title))
-			}
-		}
-	}
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	builder.WriteString("\n\nPlease analyze these goals and consolidate them into a lean, strategic list. Aim to reduce the count by 30-50% while maintaining complete coverage.")
 
 	return builder.String()
-}
-
-// goalConsolidationSystemPrompt defines the AI's role for goal consolidation
+} // goalConsolidationSystemPrompt defines the AI's role for goal consolidation
 const goalConsolidationSystemPrompt = `Act as a strategic advisor. Your task is to analyze goals for multi-agent systems and determine if consolidation is beneficial.
 
 IMPORTANT: Only consolidate goals when it truly adds strategic value. If goals are already well-defined and distinct, keep them separate.

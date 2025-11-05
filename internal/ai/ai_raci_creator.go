@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
@@ -152,45 +153,20 @@ func (c *RACICreator) CreateRACIMappings(ctx context.Context, req *CreateRACIMap
 }
 
 func (c *RACICreator) buildRACICreationPrompt(req *CreateRACIMappingsRequest) string {
-	prompt := fmt.Sprintf(`Create RACI assignments for the following agency:
-
-Agency: %s
-Description: %s
-
-`, req.AgencyContext.Name, req.AgencyContext.Description)
-
-	// Add work items
-	prompt += fmt.Sprintf("Work Items (%d):\n", len(req.WorkItems))
-	for _, wi := range req.WorkItems {
-		prompt += fmt.Sprintf("- Key: %s\n  Title: %s\n  Description: %s\n",
-			wi.Key, wi.Title, wi.Description)
-		if len(wi.Deliverables) > 0 {
-			prompt += "  Deliverables:\n"
-			for _, d := range wi.Deliverables {
-				prompt += fmt.Sprintf("    - %s\n", d)
-			}
-		}
-		prompt += "\n"
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"work_items": req.WorkItems,
+		"roles":      req.Roles,
 	}
 
-	// Add roles
-	prompt += fmt.Sprintf("\nRoles (%d):\n", len(req.Roles))
-	for _, role := range req.Roles {
-		prompt += fmt.Sprintf("- Key: %s\n  Name: %s\n  Description: %s\n",
-			role.Key, role.Name, role.Description)
-		if len(role.RequiredCapabilities) > 0 {
-			prompt += "  Capabilities:\n"
-			for _, cap := range role.RequiredCapabilities {
-				prompt += fmt.Sprintf("    - %s\n", cap)
-			}
-		}
-		prompt += "\n"
-	}
+	var builder strings.Builder
 
-	prompt += `
-Please analyze these work items and roles, then create appropriate RACI assignments.
-Ensure each work item has exactly one Accountable role and at least one Responsible role.
-Provide clear objectives for each assignment that explain what the role needs to achieve.`
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
-	return prompt
+	builder.WriteString("\nPlease analyze these work items and roles, then create appropriate RACI assignments.\n")
+	builder.WriteString("Ensure each work item has exactly one Accountable role and at least one Responsible role.\n")
+	builder.WriteString("Provide clear objectives for each assignment that explain what the role needs to achieve.")
+
+	return builder.String()
 }

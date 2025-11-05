@@ -258,71 +258,37 @@ func (r *GoalRefiner) GenerateGoals(ctx context.Context, req *GenerateGoalReques
 
 // buildGoalRefinementPrompt creates the prompt for goal refinement
 func (r *GoalRefiner) buildGoalRefinementPrompt(req *RefineGoalRequest) string {
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"current_goal":    req.CurrentGoal,
+		"description":     req.Description,
+		"scope":           req.Scope,
+		"success_metrics": req.SuccessMetrics,
+		"existing_goals":  req.ExistingGoals,
+		"work_items":      req.WorkItems,
+	}
+
 	var builder strings.Builder
 
-	// Agency context
-	builder.WriteString(fmt.Sprintf("Agency: %s (%s)\n", req.AgencyContext.DisplayName, req.AgencyContext.Category))
-	builder.WriteString(fmt.Sprintf("Description: %s\n\n", req.AgencyContext.Description))
-
-	// Current goal to refine
-	builder.WriteString("Current Goal to Refine:\n")
-	builder.WriteString(fmt.Sprintf("Description: %s\n", req.Description))
-	if req.Scope != "" {
-		builder.WriteString(fmt.Sprintf("Scope: %s\n", req.Scope))
-	}
-	if len(req.SuccessMetrics) > 0 {
-		builder.WriteString(fmt.Sprintf("Success Metrics: %s\n", strings.Join(req.SuccessMetrics, ", ")))
-	}
-	builder.WriteString("\n")
-
-	// Existing goals for context
-	if len(req.ExistingGoals) > 0 {
-		builder.WriteString("Existing Goals in Agency:\n")
-		for i, goal := range req.ExistingGoals {
-			if i < 5 { // Limit to avoid token overflow
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-			}
-		}
-		builder.WriteString("\n")
-	}
-
-	// Work items for context
-	if len(req.WorkItems) > 0 {
-		builder.WriteString("Existing Work Items in Agency:\n")
-		for i, workItem := range req.WorkItems {
-			if i < 5 { // Limit to avoid token overflow
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", workItem.Code, workItem.Title))
-			}
-		}
-		builder.WriteString("\n")
-	}
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	builder.WriteString("Please refine this goal definition to be clearer, more specific, and better aligned with the agency's purpose. Provide specific, measurable success metrics and suggest appropriate priority, category, and tags.")
 
 	return builder.String()
-}
-
-// buildGoalGenerationPrompt creates the prompt for goal generation
+} // buildGoalGenerationPrompt creates the prompt for goal generation
 func (r *GoalRefiner) buildGoalGenerationPrompt(req *GenerateGoalRequest) string {
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"existing_goals": req.ExistingGoals,
+		"work_items":     req.WorkItems,
+		"user_input":     req.UserInput,
+	}
+
 	var builder strings.Builder
 
-	// Agency context
-	builder.WriteString(fmt.Sprintf("Agency: %s (%s)\n", req.AgencyContext.DisplayName, req.AgencyContext.Category))
-	builder.WriteString(fmt.Sprintf("Description: %s\n\n", req.AgencyContext.Description))
-
-	// User input
-	builder.WriteString(fmt.Sprintf("User Request: %s\n\n", req.UserInput))
-
-	// Existing goals for context and to avoid duplicates
-	if len(req.ExistingGoals) > 0 {
-		builder.WriteString("Existing Goals (to avoid duplication):\n")
-		for i, goal := range req.ExistingGoals {
-			if i < 10 { // Show more for duplication checking
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-			}
-		}
-		builder.WriteString("\n")
-	}
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	builder.WriteString("Please generate a well-defined goal based on the user's request. Make it specific to this agency type and avoid duplicating existing goals. Include specific, measurable success metrics and suggest an appropriate goal code, priority, category, and tags.")
 
@@ -331,32 +297,22 @@ func (r *GoalRefiner) buildGoalGenerationPrompt(req *GenerateGoalRequest) string
 
 // buildGoalsGenerationPrompt creates the prompt for multiple goals generation
 func (r *GoalRefiner) buildGoalsGenerationPrompt(req *GenerateGoalRequest) string {
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"existing_goals": req.ExistingGoals,
+		"work_items":     req.WorkItems,
+		"user_input":     req.UserInput,
+	}
+
 	var builder strings.Builder
 
-	// Agency context
-	builder.WriteString(fmt.Sprintf("Agency: %s (%s)\n", req.AgencyContext.DisplayName, req.AgencyContext.Category))
-	builder.WriteString(fmt.Sprintf("Description: %s\n\n", req.AgencyContext.Description))
-
-	// User input (typically the introduction)
-	builder.WriteString(fmt.Sprintf("Context/Input: %s\n\n", req.UserInput))
-
-	// Existing goals for context and to avoid duplicates
-	if len(req.ExistingGoals) > 0 {
-		builder.WriteString("Existing Goals (to avoid duplication):\n")
-		for i, goal := range req.ExistingGoals {
-			if i < 10 {
-				builder.WriteString(fmt.Sprintf("- %s: %s\n", goal.Code, goal.Description))
-			}
-		}
-		builder.WriteString("\n")
-	}
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	builder.WriteString("Based on the agency context and input, generate 3-5 well-defined goals. Each goal should be specific to this agency type, avoid duplicating existing goals, and include measurable success metrics. Suggest appropriate goal codes (P001, P002, etc.), priorities, categories, and tags for each.")
 
 	return builder.String()
-}
-
-// System prompts for AI goal handling
+} // System prompts for AI goal handling
 const goalRefinementSystemPrompt = `Act as a strategic advisor. Your role is to refine and enhance goal definitions for agencies, ensuring they express clear strategic intentions and are outcome-oriented.
 
 Based on the agency's mission, capabilities, and ecosystem, refine goals to:

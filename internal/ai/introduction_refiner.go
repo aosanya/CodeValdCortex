@@ -193,51 +193,21 @@ Remember: You are an API, not a chatbot. Output must be grammatically perfect. P
 
 // buildRefinementPrompt creates a comprehensive prompt with all available context
 func (r *IntroductionRefiner) buildRefinementPrompt(req *RefineIntroductionRequest) string {
-	// Create structured JSON payload with all agency data
-	type AgencyData struct {
-		Introduction string                   `json:"introduction"`
-		Goals        []*agency.Goal           `json:"goals"`
-		WorkItems    []*agency.WorkItem       `json:"work_items"`
-		Roles        []*registry.Role         `json:"roles"`
-		Assignments  []*agency.RACIAssignment `json:"assignments"`
-	}
-
-	agencyData := AgencyData{
-		Introduction: req.CurrentIntro,
-		Goals:        req.Goals,
-		WorkItems:    req.WorkItems,
-		Roles:        req.Roles,
-		Assignments:  req.Assignments,
-	}
-
-	// Marshal to JSON
-	jsonData, err := json.MarshalIndent(agencyData, "", "  ")
-	if err != nil {
-		r.logger.WithError(err).Error("Failed to marshal agency data to JSON")
-		// Fallback to simple string if JSON marshaling fails
-		return fmt.Sprintf("Current Introduction: %s\n\nUser Request: %s", req.CurrentIntro, req.UserRequest)
+	// Create structured context payload
+	contextData := map[string]interface{}{
+		"introduction": req.CurrentIntro,
+		"goals":        req.Goals,
+		"work_items":   req.WorkItems,
+		"roles":        req.Roles,
+		"assignments":  req.Assignments,
 	}
 
 	var prompt strings.Builder
 
 	prompt.WriteString("You are refining an agency introduction. Below is the complete agency data in JSON format.\n\n")
 
-	// Agency basic info
-	if req.AgencyContext != nil {
-		prompt.WriteString(fmt.Sprintf("**Agency Name:** %s\n", req.AgencyContext.DisplayName))
-		prompt.WriteString(fmt.Sprintf("**Category:** %s\n", req.AgencyContext.Category))
-		if req.AgencyContext.Description != "" {
-			prompt.WriteString(fmt.Sprintf("**Description:** %s\n", req.AgencyContext.Description))
-		}
-		prompt.WriteString("\n")
-	}
-
-	// Complete agency data as JSON
-	prompt.WriteString("═══════════════════════════════════════════\n")
-	prompt.WriteString("AGENCY DATA (JSON):\n")
-	prompt.WriteString("═══════════════════════════════════════════\n")
-	prompt.WriteString(string(jsonData))
-	prompt.WriteString("\n═══════════════════════════════════════════\n\n")
+	// Use the reusable agency context formatter
+	prompt.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	// DO NOT include conversation history - it may contain conversational patterns that influence AI behavior
 	// We only need the current user request

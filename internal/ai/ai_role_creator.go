@@ -133,69 +133,26 @@ Response must be valid JSON matching this structure:
 }
 
 func (r *RoleCreator) buildRoleGenerationPrompt(req *GenerateRolesRequest) string {
-	var prompt strings.Builder
-
-	// Agency context
-	prompt.WriteString(fmt.Sprintf("## Agency: %s\n\n", req.AgencyContext.Name))
-	if req.AgencyContext.Description != "" {
-		prompt.WriteString(fmt.Sprintf("**Description:** %s\n\n", req.AgencyContext.Description))
+	// Create context map with relevant data
+	contextData := map[string]interface{}{
+		"work_items":     req.WorkItems,
+		"existing_roles": req.ExistingRoles,
 	}
 
-	// Work items context
-	prompt.WriteString(fmt.Sprintf("## Work Items (%d total)\n\n", len(req.WorkItems)))
+	var builder strings.Builder
 
-	// Group work items by tags to identify functional areas
-	tagCounts := make(map[string]int)
-	for _, wi := range req.WorkItems {
-		for _, tag := range wi.Tags {
-			tagCounts[tag]++
-		}
-	}
-
-	// Show work item summary
-	prompt.WriteString("**Work Item Categories:**\n")
-	for tag, count := range tagCounts {
-		prompt.WriteString(fmt.Sprintf("- %s: %d items\n", tag, count))
-	}
-	prompt.WriteString("\n")
-
-	// Show first 10 work items as examples
-	prompt.WriteString("**Sample Work Items:**\n")
-	maxDisplay := 10
-	if len(req.WorkItems) < maxDisplay {
-		maxDisplay = len(req.WorkItems)
-	}
-	for i := 0; i < maxDisplay; i++ {
-		wi := req.WorkItems[i]
-		prompt.WriteString(fmt.Sprintf("- **%s**: %s\n", wi.Code, wi.Title))
-		if len(wi.Tags) > 0 {
-			prompt.WriteString(fmt.Sprintf("  Tags: %s\n", strings.Join(wi.Tags, ", ")))
-		}
-	}
-	if len(req.WorkItems) > maxDisplay {
-		prompt.WriteString(fmt.Sprintf("... and %d more work items\n", len(req.WorkItems)-maxDisplay))
-	}
-	prompt.WriteString("\n")
-
-	// Existing roles context
-	if len(req.ExistingRoles) > 0 {
-		prompt.WriteString(fmt.Sprintf("## Existing Roles (%d)\n\n", len(req.ExistingRoles)))
-		prompt.WriteString("**Avoid creating roles similar to these:**\n")
-		for _, role := range req.ExistingRoles {
-			prompt.WriteString(fmt.Sprintf("- %s: %s\n", role.Name, role.Description))
-		}
-		prompt.WriteString("\n")
-	}
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(req.AgencyContext, contextData))
 
 	// Request
-	prompt.WriteString("## Task\n\n")
-	prompt.WriteString("Based on the work items above, generate agent roles that would be needed to execute this work.\n")
-	prompt.WriteString("Consider:\n")
-	prompt.WriteString("- What types of specialized agents are needed?\n")
-	prompt.WriteString("- What capabilities and skills should each role have?\n")
-	prompt.WriteString("- What level of autonomy is appropriate for each role?\n")
-	prompt.WriteString("- How should roles coordinate with each other?\n\n")
-	prompt.WriteString("Generate roles as a JSON response.")
+	builder.WriteString("\n## Task\n\n")
+	builder.WriteString("Based on the work items above, generate agent roles that would be needed to execute this work.\n")
+	builder.WriteString("Consider:\n")
+	builder.WriteString("- What types of specialized agents are needed?\n")
+	builder.WriteString("- What capabilities and skills should each role have?\n")
+	builder.WriteString("- What level of autonomy is appropriate for each role?\n")
+	builder.WriteString("- How should roles coordinate with each other?\n\n")
+	builder.WriteString("Generate roles as a JSON response.")
 
-	return prompt.String()
+	return builder.String()
 }

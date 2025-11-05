@@ -39,9 +39,33 @@ export function initializeHTMXEvents() {
         if (indicator && evt.detail.elt.matches('form[hx-post*="conversations"]')) {
             indicator.style.display = 'block';
 
-            // Show AI process status for chat requests
+            // Show AI process status for chat requests with context-aware message
             if (window.showAIProcessStatus) {
-                window.showAIProcessStatus('AI is processing your message...');
+                // Get the current context to show appropriate message
+                const context = window.currentAgencyContext || '';
+                let statusMessage = 'AI is processing your message...';
+
+                switch (context) {
+                    case 'introduction':
+                        statusMessage = 'AI is refining your introduction...';
+                        break;
+                    case 'goal-definition':
+                        statusMessage = 'AI is generating goals...';
+                        break;
+                    case 'work-items':
+                        statusMessage = 'AI is processing work items...';
+                        break;
+                    case 'roles':
+                        statusMessage = 'AI is working on roles...';
+                        break;
+                    case 'raci-matrix':
+                        statusMessage = 'AI is updating RACI matrix...';
+                        break;
+                    default:
+                        statusMessage = 'AI is processing your message...';
+                }
+
+                window.showAIProcessStatus(statusMessage);
             }
 
             // Scroll to show typing indicator
