@@ -158,13 +158,9 @@ export function saveWorkflowFromEditor() {
         status,
         nodes,
         edges,
-        variables: {}
+        variables: {},
+        agency_id: agencyId // Always include agency_id
     };
-
-    // Add agency_id for new workflows
-    if (workflowEditorState.mode === 'add') {
-        workflow.agency_id = agencyId;
-    }
 
     // Determine endpoint and method
     let url, method;
