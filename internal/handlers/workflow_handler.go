@@ -23,9 +23,9 @@ func NewWorkflowHandler(service *workflow.Service, logger *logrus.Logger) *Workf
 	}
 }
 
-// CreateWorkflow handles POST /api/v1/agencies/:agencyId/workflows
+// CreateWorkflow handles POST /api/v1/agencies/:id/workflows
 func (h *WorkflowHandler) CreateWorkflow(c *gin.Context) {
-	agencyID := c.Param("agencyId")
+	agencyID := c.Param("id")
 
 	var req workflow.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -48,9 +48,9 @@ func (h *WorkflowHandler) CreateWorkflow(c *gin.Context) {
 	c.JSON(http.StatusCreated, req)
 }
 
-// GetWorkflows handles GET /api/v1/agencies/:agencyId/workflows
+// GetWorkflows handles GET /api/v1/agencies/:id/workflows
 func (h *WorkflowHandler) GetWorkflows(c *gin.Context) {
-	agencyID := c.Param("agencyId")
+	agencyID := c.Param("id")
 
 	workflows, err := h.service.GetWorkflowsByAgency(c.Request.Context(), agencyID)
 	if err != nil {

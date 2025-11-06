@@ -439,8 +439,8 @@ func (a *App) setupServer() error {
 		// Workflow endpoints
 		if a.workflowService != nil {
 			workflowHandler := handlers.NewWorkflowHandler(a.workflowService, a.logger)
-			v1.POST("/agencies/:agencyId/workflows", workflowHandler.CreateWorkflow)
-			v1.GET("/agencies/:agencyId/workflows", workflowHandler.GetWorkflows)
+			v1.POST("/agencies/:id/workflows", workflowHandler.CreateWorkflow)
+			v1.GET("/agencies/:id/workflows", workflowHandler.GetWorkflows)
 			v1.GET("/agencies/:id/workflows/html", workflowHandler.GetWorkflowsHTML)
 			v1.GET("/workflows/:id", workflowHandler.GetWorkflow)
 			v1.PUT("/workflows/:id", workflowHandler.UpdateWorkflow)
