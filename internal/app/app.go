@@ -22,10 +22,10 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
-	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	webmiddleware "github.com/aosanya/CodeValdCortex/internal/web/middleware"
+	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -50,6 +50,7 @@ type App struct {
 	workItemBuilder     *ai.WorkItemsBuilder
 	roleBuilder         *ai.RolesBuilder
 	raciBuilder         *ai.RACIBuilder
+	workflowBuilder     *ai.WorkflowsBuilder
 	workflowService     *workflow.Service
 }
 
@@ -145,6 +146,7 @@ func New(cfg *config.Config) *App {
 	var workItemBuilder *ai.WorkItemsBuilder
 	var roleBuilder *ai.RolesBuilder
 	var raciBuilder *ai.RACIBuilder
+	var workflowBuilder *ai.WorkflowsBuilder
 	if cfg.AI.Provider != "" {
 		// Build LLM config from app config
 		llmConfig := &ai.LLMConfig{
@@ -167,6 +169,7 @@ func New(cfg *config.Config) *App {
 			workItemBuilder = ai.NewAIWorkItemsBuilder(llmClient, logger)
 			roleBuilder = ai.NewAIRolesBuilder(llmClient, logger)
 			raciBuilder = ai.NewAIRACIBuilder(llmClient, logger)
+			workflowBuilder = ai.NewAIWorkflowsBuilder(llmClient, logger)
 			logger.Info("AI agency designer service initialized successfully")
 		}
 	} else {
@@ -199,6 +202,7 @@ func New(cfg *config.Config) *App {
 		workItemBuilder:     workItemBuilder,
 		roleBuilder:         roleBuilder,
 		raciBuilder:         raciBuilder,
+		workflowBuilder:     workflowBuilder,
 		workflowService:     workflowService,
 	}
 }
@@ -303,7 +307,19 @@ func (a *App) setupServer() error {
 	var aiRefineHandler *ai_refine.Handler
 	if a.aiDesignerService != nil && a.introductionRefiner != nil {
 		// Create AI refine handler (needed by chat handler and API routes)
-		aiRefineHandler = ai_refine.NewHandler(a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, a.workItemBuilder, a.roleBuilder, a.raciBuilder, a.aiDesignerService, a.logger)
+		aiRefineHandler = ai_refine.NewHandler(
+			a.agencyService,
+			a.roleService,
+			a.workflowService,
+			a.introductionRefiner,
+			a.goalRefiner,
+			a.workItemBuilder,
+			a.roleBuilder,
+			a.raciBuilder,
+			a.workflowBuilder,
+			a.aiDesignerService,
+			a.logger,
+		)
 
 		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
 		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
@@ -471,6 +487,10 @@ func (a *App) setupServer() error {
 				v1.POST("/agencies/:id/raci-matrix/generate", aiRefineHandler.GenerateRACIMappingWithPrompt)
 				v1.POST("/agencies/:id/raci-matrix/consolidate", aiRefineHandler.ConsolidateRACIMappingsWithPrompt)
 				v1.POST("/agencies/:id/raci-matrix/create-complete", aiRefineHandler.CreateCompleteRACIMatrixWithPrompt)
+			}
+			if a.workflowBuilder != nil {
+				// Main dynamic router - handles all workflow operations through natural language prompts
+				v1.POST("/agencies/:id/workflows/refine-dynamic", aiRefineHandler.RefineWorkflows)
 			}
 			a.logger.Info("AI Refine endpoints registered")
 		}

@@ -4,6 +4,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
+	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/sirupsen/logrus"
 )
 
@@ -11,11 +12,13 @@ import (
 type Handler struct {
 	agencyService       agency.Service
 	roleService         registry.RoleService
+	workflowService     *workflow.Service
 	introductionRefiner *ai.IntroductionBuilder
 	goalRefiner         *ai.GoalsBuilder
 	workItemBuilder     *ai.WorkItemsBuilder
 	roleBuilder         *ai.RolesBuilder
 	raciBuilder         *ai.RACIBuilder
+	workflowBuilder     *ai.WorkflowsBuilder
 	designerService     *ai.AgencyDesignerService
 	contextBuilder      *BuilderContextBuilder
 	logger              *logrus.Logger
@@ -25,11 +28,13 @@ type Handler struct {
 func NewHandler(
 	agencyService agency.Service,
 	roleService registry.RoleService,
+	workflowService *workflow.Service,
 	introductionRefiner *ai.IntroductionBuilder,
 	goalRefiner *ai.GoalsBuilder,
 	workItemBuilder *ai.WorkItemsBuilder,
 	roleBuilder *ai.RolesBuilder,
 	raciBuilder *ai.RACIBuilder,
+	workflowBuilder *ai.WorkflowsBuilder,
 	designerService *ai.AgencyDesignerService,
 	logger *logrus.Logger,
 ) *Handler {
@@ -39,11 +44,13 @@ func NewHandler(
 	return &Handler{
 		agencyService:       agencyService,
 		roleService:         roleService,
+		workflowService:     workflowService,
 		introductionRefiner: introductionRefiner,
 		goalRefiner:         goalRefiner,
 		workItemBuilder:     workItemBuilder,
 		roleBuilder:         roleBuilder,
 		raciBuilder:         raciBuilder,
+		workflowBuilder:     workflowBuilder,
 		designerService:     designerService,
 		contextBuilder:      contextBuilder,
 		logger:              logger,
