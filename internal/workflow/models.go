@@ -54,25 +54,25 @@ type Position struct {
 // NodeData contains node-specific configuration
 type NodeData struct {
 	// Common fields
-	Name        string                 `json:"name,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+
 	// Start node fields
 	Trigger string `json:"trigger,omitempty"` // manual, scheduled, event, api
-	
+
 	// Work item node fields
 	WorkItemID   string                 `json:"work_item_id,omitempty"`
 	WorkItemType string                 `json:"work_item_type,omitempty"`
 	Role         string                 `json:"role,omitempty"`
 	SLAHours     int                    `json:"sla_hours,omitempty"`
 	Parameters   map[string]interface{} `json:"parameters,omitempty"`
-	
+
 	// Decision node fields
 	Condition string `json:"condition,omitempty"`
-	
+
 	// Parallel node fields
 	GatewayType string `json:"gateway_type,omitempty"` // fork, join
-	
+
 	// End node fields
 	Status string `json:"status,omitempty"` // success, failure
 }

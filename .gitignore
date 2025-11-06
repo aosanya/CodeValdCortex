@@ -101,3 +101,5 @@ out/
 # OS generated files
 Icon?
 documents/dump
+bin/
+bin/codevaldcortex

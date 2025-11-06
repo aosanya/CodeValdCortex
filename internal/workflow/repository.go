@@ -11,13 +11,13 @@ type Repository interface {
 	Update(ctx context.Context, workflow *Workflow) error
 	Delete(ctx context.Context, id string) error
 	List(ctx context.Context, limit, offset int) ([]*Workflow, error)
-	
+
 	// Workflow execution operations
 	CreateExecution(ctx context.Context, execution *WorkflowExecution) error
 	GetExecution(ctx context.Context, id string) (*WorkflowExecution, error)
 	GetExecutionsByWorkflowID(ctx context.Context, workflowID string) ([]*WorkflowExecution, error)
 	UpdateExecution(ctx context.Context, execution *WorkflowExecution) error
-	
+
 	// Node execution operations
 	UpdateNodeExecution(ctx context.Context, executionID string, nodeExecution *NodeExecution) error
 }
