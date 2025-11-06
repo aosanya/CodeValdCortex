@@ -3,7 +3,7 @@
 
 import { getCurrentAgencyId, showNotification } from './utils.js';
 import { scrollToBottom } from './chat.js';
-import { loadEntityList, showEntityEditor, cancelEntityEdit, deleteEntity, saveEntity, populateForm, clearForm } from './crud-helpers.js';
+import { loadEntityList, showEntityEditor, cancelEntityEdit, populateForm, clearForm } from './crud-helpers.js';
 
 // Workflow editor state management
 let workflowEditorState = {
@@ -146,6 +146,11 @@ export function saveWorkflowFromEditor() {
     }
 
     const agencyId = getCurrentAgencyId();
+    if (!agencyId) {
+        showNotification('Error: No agency selected', 'error');
+        return;
+    }
+
     const workflow = {
         name,
         description,
@@ -173,7 +178,28 @@ export function saveWorkflowFromEditor() {
     }
 
     // Save workflow
-    saveEntity(url, method, workflow, 'workflow', cancelWorkflowEdit, loadWorkflows);
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(workflow)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} workflow`);
+            }
+            return response.json();
+        })
+        .then(() => {
+            showNotification(`Workflow ${method === 'POST' ? 'created' : 'updated'} successfully`, 'success');
+            cancelWorkflowEdit();
+            loadWorkflows();
+        })
+        .catch(error => {
+            console.error('Error saving workflow:', error);
+            showNotification(`Error ${method === 'POST' ? 'creating' : 'updating'} workflow`, 'error');
+        });
 }
 
 // Cancel workflow editing
