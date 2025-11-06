@@ -243,12 +243,12 @@ func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]workflow.W
 	var workflows []workflow.Workflow
 	if err := json.Unmarshal([]byte(cleaned), &workflows); err != nil {
 		b.logger.WithError(err).WithField("response", cleaned).Error("Failed to parse workflows JSON")
-		
+
 		// Provide more helpful error for truncated JSON
 		if strings.Contains(err.Error(), "unexpected end of JSON input") {
 			return nil, fmt.Errorf("invalid JSON response: response was truncated (too large). Try generating fewer or simpler workflows")
 		}
-		
+
 		return nil, fmt.Errorf("invalid JSON response: %w", err)
 	}
 

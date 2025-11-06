@@ -189,7 +189,23 @@ export function deleteWorkflow(workflowId) {
         return;
     }
 
-    deleteEntity(`/api/v1/workflows/${workflowId}`, 'workflow', loadWorkflows);
+    fetch(`/api/v1/workflows/${workflowId}`, {
+        method: 'DELETE'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete workflow');
+            }
+            return response.json();
+        })
+        .then(() => {
+            showNotification('Workflow deleted successfully', 'success');
+            loadWorkflows();
+        })
+        .catch(error => {
+            console.error('Error deleting workflow:', error);
+            showNotification('Error deleting workflow', 'error');
+        });
 }
 
 // Duplicate workflow
