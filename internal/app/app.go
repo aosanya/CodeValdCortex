@@ -441,6 +441,7 @@ func (a *App) setupServer() error {
 			workflowHandler := handlers.NewWorkflowHandler(a.workflowService, a.logger)
 			v1.POST("/agencies/:agencyId/workflows", workflowHandler.CreateWorkflow)
 			v1.GET("/agencies/:agencyId/workflows", workflowHandler.GetWorkflows)
+			v1.GET("/agencies/:id/workflows/html", workflowHandler.GetWorkflowsHTML)
 			v1.GET("/workflows/:id", workflowHandler.GetWorkflow)
 			v1.PUT("/workflows/:id", workflowHandler.UpdateWorkflow)
 			v1.DELETE("/workflows/:id", workflowHandler.DeleteWorkflow)

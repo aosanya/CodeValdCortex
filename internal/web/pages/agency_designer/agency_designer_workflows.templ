@@ -1,0 +1,97 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/workflow"
+)
+
+// WorkflowsList renders the workflows table rows
+templ WorkflowsList(workflows []*workflow.Workflow) {
+	if len(workflows) == 0 {
+		<tr>
+			<td colspan="5" class="has-text-grey has-text-centered py-5">
+				<p><i class="fas fa-info-circle"></i> No workflows defined yet. Click the + button or use AI to generate workflows.</p>
+			</td>
+		</tr>
+	} else {
+		for _, wf := range workflows {
+			@WorkflowItem(wf)
+		}
+	}
+}
+
+// WorkflowItem renders a single workflow row
+templ WorkflowItem(wf *workflow.Workflow) {
+	<tr data-workflow-id={ wf.ID }>
+		<td style="width: 50px; text-align: center;">
+			<label class="checkbox">
+				<input
+					type="checkbox"
+					class="workflow-checkbox"
+					value={ wf.ID }
+					onchange="updateWorkflowSelectionUI()"
+				/>
+			</label>
+		</td>
+		<td>
+			<strong>{ wf.Name }</strong>
+			if wf.Description != "" {
+				<br/>
+				<span class="is-size-7 has-text-grey">{ truncateText(wf.Description, 80) }</span>
+			}
+		</td>
+		<td style="width: 120px;">
+			<span class="tag is-light">{ wf.Version }</span>
+		</td>
+		<td style="width: 120px;">
+			@WorkflowStatusBadge(wf.Status)
+		</td>
+		<td style="width: 200px;">
+			<div class="buttons is-flex is-flex-wrap-nowrap">
+				<button
+					class="button is-small is-info"
+					onclick={ templ.ComponentScript{Call: `showWorkflowEditor('edit', '` + wf.ID + `')`} }
+					title="Edit Workflow">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+				</button>
+				<button
+					class="button is-small is-success"
+					onclick={ templ.ComponentScript{Call: `duplicateWorkflow('` + wf.ID + `')`} }
+					title="Duplicate Workflow">
+					<span class="icon"><i class="fas fa-copy"></i></span>
+				</button>
+				<button
+					class="button is-small is-danger"
+					onclick={ templ.ComponentScript{Call: `deleteWorkflow('` + wf.ID + `')`} }
+					title="Delete Workflow">
+					<span class="icon"><i class="fas fa-trash"></i></span>
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// WorkflowStatusBadge renders a status badge based on workflow status
+templ WorkflowStatusBadge(status workflow.WorkflowStatus) {
+	switch status {
+		case workflow.WorkflowStatusDraft:
+			<span class="tag is-light">Draft</span>
+		case workflow.WorkflowStatusActive:
+			<span class="tag is-success is-light">Active</span>
+		case workflow.WorkflowStatusPaused:
+			<span class="tag is-warning is-light">Paused</span>
+		case workflow.WorkflowStatusCompleted:
+			<span class="tag is-info is-light">Completed</span>
+		case workflow.WorkflowStatusFailed:
+			<span class="tag is-danger is-light">Failed</span>
+		default:
+			<span class="tag is-light">{ string(status) }</span>
+	}
+}
+
+// Helper function to truncate text
+func truncateText(text string, maxLen int) string {
+	if len(text) <= maxLen {
+		return text
+	}
+	return text[:maxLen] + "..."
+}

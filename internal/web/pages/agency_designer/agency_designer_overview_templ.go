@@ -83,7 +83,15 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></div></main></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div><div id=\"content-workflows\" class=\"overview-content-section\" style=\"display: none;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = WorkflowsContent(currentAgency).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div></main></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -113,7 +121,7 @@ func OverviewNavigationList(currentAgency *agency.Agency) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"work-items\" onclick=\"selectOverviewSection(this, 'work-items')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Work Items</div><div class=\"nav-description\">Define work items</div></div></div><div class=\"overview-nav-item\" data-section=\"roles\" onclick=\"selectOverviewSection(this, 'roles')\"><div class=\"nav-icon\"><i class=\"fas fa-user-tag\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Roles</div><div class=\"nav-description\">Define agent roles</div></div></div><div class=\"overview-nav-item\" data-section=\"raci-matrix\" onclick=\"selectOverviewSection(this, 'raci-matrix')\"><div class=\"nav-icon\"><i class=\"fas fa-table-cells\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">RACI Matrix</div><div class=\"nav-description\">Role assignments</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"work-items\" onclick=\"selectOverviewSection(this, 'work-items')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Work Items</div><div class=\"nav-description\">Define work items</div></div></div><div class=\"overview-nav-item\" data-section=\"roles\" onclick=\"selectOverviewSection(this, 'roles')\"><div class=\"nav-icon\"><i class=\"fas fa-user-tag\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Roles</div><div class=\"nav-description\">Define agent roles</div></div></div><div class=\"overview-nav-item\" data-section=\"raci-matrix\" onclick=\"selectOverviewSection(this, 'raci-matrix')\"><div class=\"nav-icon\"><i class=\"fas fa-table-cells\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">RACI Matrix</div><div class=\"nav-description\">Role assignments</div></div></div><div class=\"overview-nav-item\" data-section=\"workflows\" onclick=\"selectOverviewSection(this, 'workflows')\"><div class=\"nav-icon\"><i class=\"fas fa-sitemap\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Workflows</div><div class=\"nav-description\">Work item orchestration</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -143,7 +151,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -151,7 +159,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,7 +189,7 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\"><!-- AI Goal Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Goal Operations:</p><span id=\"goal-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIGoalOperation(['create'])\" id=\"ai-create-goals-btn\" title=\"Generate new goals from introduction\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIGoalOperation(['enhance'])\" id=\"ai-enhance-goals-btn\" title=\"Select goals to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIGoalOperation(['consolidate'])\" id=\"ai-consolidate-goals-btn\" title=\"Select goals to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"overview-section\"><!-- AI Goal Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Goal Operations:</p><span id=\"goal-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIGoalOperation(['create'])\" id=\"ai-create-goals-btn\" title=\"Generate new goals from introduction\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIGoalOperation(['enhance'])\" id=\"ai-enhance-goals-btn\" title=\"Select goals to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIGoalOperation(['consolidate'])\" id=\"ai-consolidate-goals-btn\" title=\"Select goals to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -193,7 +201,7 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -223,7 +231,7 @@ func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"overview-section\"><!-- AI Work Item Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Work Item Operations:</p><span id=\"work-item-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkItemOperation(['create'])\" id=\"ai-create-work-items-btn\" title=\"Generate work items from goals\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkItemOperation(['enhance'])\" id=\"ai-enhance-work-items-btn\" title=\"Select work items to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIWorkItemOperation(['consolidate'])\" id=\"ai-consolidate-work-items-btn\" title=\"Select work items to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"overview-section\"><!-- AI Work Item Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Work Item Operations:</p><span id=\"work-item-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkItemOperation(['create'])\" id=\"ai-create-work-items-btn\" title=\"Generate work items from goals\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkItemOperation(['enhance'])\" id=\"ai-enhance-work-items-btn\" title=\"Select work items to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIWorkItemOperation(['consolidate'])\" id=\"ai-consolidate-work-items-btn\" title=\"Select work items to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -235,7 +243,7 @@ func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -265,7 +273,7 @@ func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Convers
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"overview-section\"><!-- AI Role Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Role Operations:</p><span id=\"role-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIRoleOperation(['create'])\" id=\"ai-create-roles-btn\" title=\"Generate roles from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIRoleOperation(['enhance'])\" id=\"ai-enhance-roles-btn\" title=\"Select roles to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIRoleOperation(['consolidate'])\" id=\"ai-consolidate-roles-btn\" title=\"Select roles to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"overview-section\"><!-- AI Role Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Role Operations:</p><span id=\"role-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIRoleOperation(['create'])\" id=\"ai-create-roles-btn\" title=\"Generate roles from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIRoleOperation(['enhance'])\" id=\"ai-enhance-roles-btn\" title=\"Select roles to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIRoleOperation(['consolidate'])\" id=\"ai-consolidate-roles-btn\" title=\"Select roles to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -277,7 +285,7 @@ func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Convers
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -307,7 +315,53 @@ func RACIMatrixContent(currentAgency *agency.Agency) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"overview-section\"><!-- Validation Messages --><div id=\"raci-validation-messages\"></div><!-- RACI Matrix Editor --><div class=\"box p-4\"><div class=\"level mb-4\"><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"createRACIMappings()\" id=\"ai-create-mappings-btn\" title=\"Generate RACI mappings from work items and roles using AI\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <span>Create Mappings</span></button></div></div></div></div><div class=\"raci-matrix-container\"><!-- Loading State (small, non-blocking) --><div id=\"raci-loading\" class=\"notification is-info is-light\" style=\"display: none;\"><span class=\"icon\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>Loading role assignments...</span></div><!-- Work Items List --><div id=\"raci-matrix-table\" style=\"display: block;\"><div class=\"table-container\"><table class=\"table is-fullwidth is-borderless raci-table\"><tbody id=\"raci-matrix-body\"><!-- Work item rows with collapsible assignments will be dynamically inserted --></tbody></table></div><!-- Empty State --><div id=\"raci-empty-state\" class=\"has-text-centered py-6\" style=\"display: none;\"><i class=\"fas fa-clipboard-list fa-3x mb-3 has-text-grey-light\"></i><p class=\"has-text-grey\">No work items defined yet.</p><p class=\"help\">Create work items first, then return here to assign roles and define objectives.</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"overview-section\"><!-- Validation Messages --><div id=\"raci-validation-messages\"></div><!-- RACI Matrix Editor --><div class=\"box p-4\"><div class=\"level mb-4\"><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"createRACIMappings()\" id=\"ai-create-mappings-btn\" title=\"Generate RACI mappings from work items and roles using AI\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <span>Create Mappings</span></button></div></div></div></div><div class=\"raci-matrix-container\"><!-- Loading State (small, non-blocking) --><div id=\"raci-loading\" class=\"notification is-info is-light\" style=\"display: none;\"><span class=\"icon\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>Loading role assignments...</span></div><!-- Work Items List --><div id=\"raci-matrix-table\" style=\"display: block;\"><div class=\"table-container\"><table class=\"table is-fullwidth is-borderless raci-table\"><tbody id=\"raci-matrix-body\"><!-- Work item rows with collapsible assignments will be dynamically inserted --></tbody></table></div><!-- Empty State --><div id=\"raci-empty-state\" class=\"has-text-centered py-6\" style=\"display: none;\"><i class=\"fas fa-clipboard-list fa-3x mb-3 has-text-grey-light\"></i><p class=\"has-text-grey\">No work items defined yet.</p><p class=\"help\">Create work items first, then return here to assign roles and define objectives.</p></div></div></div></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// WorkflowsContent renders the workflows section with AI operations and workflow management
+func WorkflowsContent(currentAgency *agency.Agency) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\"><!-- AI Workflow Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Workflow Operations:</p><span id=\"workflow-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkflowOperation('create')\" id=\"ai-create-workflows-btn\" title=\"Generate workflows from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkflowOperation('refine')\" id=\"ai-refine-workflows-btn\" title=\"Select a workflow to refine\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Refine</span></button> <button class=\"button is-small is-success is-static\" onclick=\"processAIWorkflowOperation('suggest')\" id=\"ai-suggest-workflows-btn\" title=\"Select a workflow to get improvement suggestions\" disabled><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> <span>Suggest Improvements</span></button></div></div><!-- AI Response Container --><div id=\"workflow-ai-response\" class=\"mt-3\" style=\"display: none;\"></div></div><!-- Workflows List Card --><div class=\"columns\"><div class=\"column\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = WorkflowsListCard().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><!-- Workflow Editor Card (Initially Hidden) --><div class=\"columns\"><div class=\"column\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = WorkflowEditorCard().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

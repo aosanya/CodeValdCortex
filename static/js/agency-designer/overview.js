@@ -5,6 +5,7 @@ import { loadIntroductionEditor } from './introduction.js';
 import { loadGoals } from './goals.js';
 import { loadWorkItems } from './work-items.js';
 import { loadRoles } from './roles.js';
+import { loadWorkflows } from './workflows.js';
 
 // Initialize overview section
 export function initializeOverview() {
@@ -16,7 +17,8 @@ export function initializeOverview() {
                 'goal-definition',
                 'work-items',
                 'roles',
-                'raci-matrix'
+                'raci-matrix',
+                'workflows'
             ];
         }
 
@@ -44,7 +46,8 @@ export function initializeOverview() {
                     'goal-definition': 'Goal Definition',
                     'work-items': 'Work Items',
                     'roles': 'Roles',
-                    'raci-matrix': 'RACI Matrix'
+                    'raci-matrix': 'RACI Matrix',
+                    'workflows': 'Workflows'
                 };
                 contextCurrentEl.textContent = labelMap[hash] || hash;
             }
@@ -180,6 +183,8 @@ export function selectOverviewSection(element, section) {
             if (window.loadRACIMatrix) {
                 window.loadRACIMatrix();
             }
+        } else if (section === 'workflows') {
+            loadWorkflows();
         }
     }
 }

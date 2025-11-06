@@ -331,3 +331,67 @@ templ RACIMatrixContent(currentAgency *agency.Agency) {
 		</div>
 	</div>
 }
+
+// WorkflowsContent renders the workflows section with AI operations and workflow management
+templ WorkflowsContent(currentAgency *agency.Agency) {
+	<div class="overview-section">
+		<!-- AI Workflow Operations Toolbar -->
+		<div class="box mb-4 p-4">
+			<div class="is-flex is-flex-direction-column">
+				<div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+					<p class="has-text-weight-semibold mb-0">AI Workflow Operations:</p>
+					<span id="workflow-selection-count" class="tag is-info is-light" style="display: none;"></span>
+				</div>
+				<div class="buttons">
+					<button 
+						class="button is-small is-info"
+						onclick="processAIWorkflowOperation('create')"
+						id="ai-create-workflows-btn"
+						title="Generate workflows from work items">
+						<span class="icon"><i class="fas fa-sparkles"></i></span>
+						<span>Create</span>
+					</button>
+					<button 
+						class="button is-small is-link is-static"
+						onclick="processAIWorkflowOperation('refine')"
+						id="ai-refine-workflows-btn"
+						title="Select a workflow to refine"
+						disabled>
+						<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+						<span>Refine</span>
+					</button>
+					<button 
+						class="button is-small is-success is-static"
+						onclick="processAIWorkflowOperation('suggest')"
+						id="ai-suggest-workflows-btn"
+						title="Select a workflow to get improvement suggestions"
+						disabled>
+						<span class="icon"><i class="fas fa-lightbulb"></i></span>
+						<span>Suggest Improvements</span>
+					</button>
+				</div>
+			</div>
+
+			<!-- AI Response Container -->
+			<div 
+				id="workflow-ai-response" 
+				class="mt-3"
+				style="display: none;">
+			</div>
+		</div>
+
+		<!-- Workflows List Card -->
+		<div class="columns">
+			<div class="column">
+				@WorkflowsListCard()
+			</div>
+		</div>
+
+		<!-- Workflow Editor Card (Initially Hidden) -->
+		<div class="columns">
+			<div class="column">
+				@WorkflowEditorCard()
+			</div>
+		</div>
+	</div>
+}

@@ -1,0 +1,148 @@
+package agency_designer
+
+// WorkflowEditorCard renders the workflow editor card component
+templ WorkflowEditorCard() {
+<!-- Workflow Editor Card (Hidden by default) -->
+<div class="card mb-4 is-hidden" id="workflow-editor-card">
+<header class="card-header">
+<p class="card-header-title">
+<span class="icon"><i class="fas fa-sitemap"></i></span>
+<span id="workflow-editor-title">Add New Workflow</span>
+</p>
+<button 
+class="card-header-icon button is-small is-text"
+onclick="cancelWorkflowEdit()"
+title="Cancel">
+<span class="icon"><i class="fas fa-times"></i></span>
+</button>
+</header>
+<div class="card-content">
+<!-- Name Field -->
+<div class="field">
+<label class="label">Workflow Name</label>
+<div class="control">
+<input 
+class="input"
+type="text"
+id="workflow-name-editor"
+placeholder="e.g., User Onboarding Process"
+maxlength="200">
+</div>
+<p class="help">A clear, descriptive name for this workflow.</p>
+</div>
+
+<!-- Description Field -->
+<div class="field">
+<label class="label">Description</label>
+<div class="control">
+<textarea 
+class="textarea"
+id="workflow-description-editor"
+placeholder="Describe the workflow purpose and what it accomplishes..."
+rows="6"
+style="font-family: monospace; font-size: 14px;"></textarea>
+</div>
+<p class="help">Explain what this workflow does and when it should be used.</p>
+</div>
+
+<!-- Version Field -->
+<div class="field">
+<label class="label">Version</label>
+<div class="control">
+<input 
+class="input"
+type="text"
+id="workflow-version-editor"
+placeholder="e.g., 1.0.0"
+value="1.0.0"
+maxlength="20">
+</div>
+<p class="help">Semantic version number (major.minor.patch).</p>
+</div>
+
+<!-- Status Field -->
+<div class="field">
+<label class="label">Status</label>
+<div class="control">
+<div class="select">
+<select id="workflow-status-editor">
+<option value="draft">Draft</option>
+<option value="active">Active</option>
+<option value="paused">Paused</option>
+<option value="completed">Completed</option>
+<option value="failed">Failed</option>
+</select>
+</div>
+</div>
+<p class="help">Current status of this workflow.</p>
+</div>
+
+<!-- Visual Designer Notice -->
+<div class="notification is-info is-light">
+<p class="mb-2"><strong>Visual Workflow Designer</strong></p>
+<p class="is-size-7">
+Use the <strong>Visual Designer</strong> (MVP-052) to add and connect nodes, define conditions, and configure workflow logic. 
+The designer will be available in the next phase.
+</p>
+</div>
+
+<!-- AI Generate Button -->
+<div class="field">
+<div class="buttons">
+<button 
+class="button is-small is-link"
+onclick="generateWorkflowWithAI()"
+id="generate-workflow-btn"
+title="Use AI to generate workflow structure from description">
+<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
+<span>AI Generate</span>
+</button>
+<button 
+class="button is-small is-info"
+onclick="refineWorkflowWithAI()"
+id="refine-workflow-btn"
+title="Use AI to refine and improve workflow"
+disabled>
+<span class="icon"><i class="fas fa-sparkles"></i></span>
+<span>AI Refine</span>
+</button>
+</div>
+</div>
+
+<!-- Node/Edge Preview (JSON for now) -->
+<div class="field">
+<label class="label">
+Workflow Structure (JSON)
+<span class="tag is-warning is-light ml-2">Advanced</span>
+</label>
+<div class="control">
+<textarea 
+class="textarea"
+id="workflow-structure-editor"
+placeholder='{"nodes": [], "edges": []}'
+rows="10"
+style="font-family: 'Courier New', monospace; font-size: 12px;"></textarea>
+</div>
+<p class="help">Raw JSON representation of nodes and edges. Use Visual Designer for easier editing.</p>
+</div>
+</div>
+<footer class="card-footer">
+<div class="card-footer-item">
+<button 
+class="button is-small is-primary"
+onclick="saveWorkflowFromEditor()">
+<span class="icon"><i class="fas fa-save"></i></span>
+<span>Save</span>
+</button>
+</div>
+<div class="card-footer-item">
+<button 
+class="button is-small"
+onclick="cancelWorkflowEdit()">
+<span class="icon"><i class="fas fa-times"></i></span>
+<span>Cancel</span>
+</button>
+</div>
+</footer>
+</div>
+}
