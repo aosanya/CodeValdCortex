@@ -22,6 +22,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
+	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	webmiddleware "github.com/aosanya/CodeValdCortex/internal/web/middleware"
@@ -49,6 +50,7 @@ type App struct {
 	workItemBuilder     *ai.WorkItemsBuilder
 	roleBuilder         *ai.RolesBuilder
 	raciBuilder         *ai.RACIBuilder
+	workflowService     *workflow.Service
 }
 
 // New creates a new application instance
@@ -171,6 +173,14 @@ func New(cfg *config.Config) *App {
 		logger.Info("AI configuration not provided, AI designer will not be available")
 	}
 
+	// Initialize workflow service
+	workflowRepo, err := workflow.NewArangoRepository(dbClient.Database(), logger)
+	if err != nil {
+		logger.WithError(err).Warn("Failed to initialize workflow repository")
+	}
+	workflowService := workflow.NewService(workflowRepo, logger)
+	logger.Info("Workflow service initialized successfully")
+
 	return &App{
 		config:              cfg,
 		logger:              logger,
@@ -189,6 +199,7 @@ func New(cfg *config.Config) *App {
 		workItemBuilder:     workItemBuilder,
 		roleBuilder:         roleBuilder,
 		raciBuilder:         raciBuilder,
+		workflowService:     workflowService,
 	}
 }
 
@@ -408,6 +419,20 @@ func (a *App) setupServer() error {
 		// RACI Matrix endpoints
 		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetAgencyRACIMatrix)
 		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveAgencyRACIMatrix)
+
+		// Workflow endpoints
+		if a.workflowService != nil {
+			workflowHandler := handlers.NewWorkflowHandler(a.workflowService, a.logger)
+			v1.POST("/agencies/:agencyId/workflows", workflowHandler.CreateWorkflow)
+			v1.GET("/agencies/:agencyId/workflows", workflowHandler.GetWorkflows)
+			v1.GET("/workflows/:id", workflowHandler.GetWorkflow)
+			v1.PUT("/workflows/:id", workflowHandler.UpdateWorkflow)
+			v1.DELETE("/workflows/:id", workflowHandler.DeleteWorkflow)
+			v1.POST("/workflows/:id/duplicate", workflowHandler.DuplicateWorkflow)
+			v1.POST("/workflows/validate", workflowHandler.ValidateWorkflow)
+			v1.POST("/workflows/:id/execute", workflowHandler.StartExecution)
+			a.logger.Info("Workflow endpoints registered")
+		}
 
 		// AI Refine endpoints (if AI services are available)
 		if aiRefineHandler != nil {
