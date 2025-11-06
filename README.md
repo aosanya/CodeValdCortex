@@ -472,19 +472,24 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 - ✅ REST API layer and basic orchestration
 - ✅ Agency Management with Templ+HTMX interface
 
+### ✅ Completed Agency Operations Framework (MVP-021 to MVP-045)
+- ✅ **MVP-021-022**: Agency management system with database isolation
+- ✅ **MVP-024-025**: Agency creation form and AI-powered designer
+- ✅ **MVP-029**: Goals Module - Complete CRUD operations with AI-powered generation and refinement
+- ✅ **MVP-044**: Roles UI Module - Full role management with autonomy levels and AI generation
+- ✅ **MVP-045**: RACI Matrix Editor - Interactive grid with modal editing and persistence
+- ✅ **ARCH-REFACTOR-001**: Major AI builder architecture restructuring and dead code cleanup
+
 ### 🔄 In Progress (Current Sprint)
 - 🔄 Management Dashboard with real-time monitoring (MVP-015)
-- � Agency Designer enhancements and user experience improvements
+- 🔄 Agency Designer UI/UX refinements and performance optimization
 
-### 📋 Planned - Agency Operations Framework (v1.0 MVP)
-- 📋 **MVP-029**: Goals Module - Structured goal cataloging with CRUD operations, success metrics, and non-goals
-- 📋 **MVP-030**: Work Items Basic Management - Core work breakdown structure with deliverables
-- 📋 **MVP-033**: RACI Matrix Editor - Visual responsibility assignment with validation and templates
-- 📋 **MVP-031**: Graph Relationships System - ArangoDB graph mapping between goals and work items
-- 📋 **MVP-032**: Agency Operations Analytics - Coverage analysis, impact visualization, and reporting
-
-### 🚀 Advanced Features (v1.0 MVP)
-- 📋 **MVP-023**: AI Agent Creator - Conversational interface for natural language agent configuration
+### 📋 Planned - Core Operations & Infrastructure (High Priority)
+- 📋 **MVP-046**: Agency Admin & Configuration Page - Token budgets, rate limits, monitoring dashboards
+- 📋 **MVP-047**: Export System - PDF/Markdown/JSON export with custom templates
+- 📋 **MVP-042**: AI-Powered Agency Creator - Text upload and selective AI generation
+- � **MVP-030**: Work Items Core Schema & Registry - Work item types with JSON schemas
+- 📋 **MVP-023**: AI Agent Creator - Conversational interface for agent configuration
 - 📋 **MVP-014**: Kubernetes Deployment - Production-ready containerized deployment
 - 📋 **MVP-016-020**: Agent Property Broadcasting - Real-time agent state sharing with UC-TRACK-001 implementation
 
@@ -504,20 +509,25 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 
 ### Current Development Focus
 
-**Phase**: Agency Operations Framework  
-**Active Milestone**: MVP-029 (Goals Module)  
-**Strategic Objective**: Build the operations layer for production agent orchestration
+**Phase**: Infrastructure & Advanced Features  
+**Active Milestone**: MVP-046 (Agency Admin & Configuration)  
+**Strategic Objective**: Complete agency management layer and prepare for agent lifecycle implementation
+
+**Recently Completed Major Milestones**:
+- ✅ **Agency Operations Framework**: Complete Goals, Roles, and RACI matrix management
+- ✅ **AI Builder Architecture**: Major refactoring for maintainability and consistency
+- ✅ **Code Quality Enhancement**: Comprehensive dead code cleanup and tooling automation
 
 **Key Deliverables for Q4 2025**:
-1. Complete Agency Operations Framework (Goals, Work Items, RACI)
-2. Graph database relationships and analytics
-3. Production Kubernetes deployment with agent lifecycle management
+1. Complete Agency Admin configuration and export systems (MVP-046, MVP-047)
+2. Begin core work items and agent lifecycle management (MVP-030+)
+3. Production Kubernetes deployment preparation (MVP-014)
 
 **Success Metrics**:
-- ✅ Agent orchestration at 1000+ concurrent agents
-- ✅ Goal-to-work-item relationship mapping functional
-- ✅ <100ms agent coordination latency
-- ✅ Production-grade monitoring and observability
+- ✅ Agency Operations Framework functional (Goals, Roles, RACI)
+- ✅ AI-powered design assistance across all modules
+- ✅ Clean, maintainable codebase with automated quality controls
+- 📋 Production-ready agency management
 
 ---
 

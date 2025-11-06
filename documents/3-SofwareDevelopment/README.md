@@ -15,15 +15,24 @@ The CodeValdCortex software development documentation has been organized into fo
 
 ### Development Documents (Root Level)
 - **[introduction.md](introduction.md)**: Development methodology, team structure, and enterprise standards
-- **[mvp.md](mvp.md)**: Minimum Viable Product definition and scope
+- **[mvp.md](mvp.md)**: Active MVP task tracking (remaining tasks only)
+- **[mvp_done.md](mvp_done.md)**: Completed MVP tasks archive with implementation details
+- **[PROJECT_STATUS_UPDATE_20251106.md](PROJECT_STATUS_UPDATE_20251106.md)**: Latest project status and milestone completion
+- **[coding_sessions/](coding_sessions/)**: Detailed implementation logs for each completed task
 - **[deployment.md](deployment.md)**: Production deployment strategies and CI/CD pipelines *(pending)*
 - **[future-features.md](future-features.md)**: Post-MVP roadmap and advanced features *(pending)*
 - **[maintenance.md](maintenance.md)**: Ongoing maintenance and operational procedures *(pending)*
 
-### Agency Operations Framework
-- **[Goals](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#goals-module)**: Structured approach to defining goals that agencies achieve
-- **[Work Items](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#work-items-wi)**: Discrete work packages with clear deliverables and dependencies  
-- **[RACI Matrix](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#raci-matrix-for-work-items)**: Role and responsibility assignments for each work item
+### Agency Operations Framework (✅ Complete)
+- **[Goals Module](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#goals-module)**: ✅ Complete CRUD operations with AI-powered generation and refinement
+- **[Roles UI Module](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#roles)**: ✅ Full role management with autonomy levels, token budgets, and AI integration  
+- **[RACI Matrix Editor](../2-SoftwareDesignAndArchitecture/agency-operations-framework.md#raci-matrix-for-work-items)**: ✅ Interactive grid-based responsibility assignment with real-time persistence
+
+### Recent Major Achievements
+- **✅ Agency Operations Framework**: Complete UI suite for agency design (MVP-021 to MVP-045)
+- **✅ AI Builder Architecture**: Major refactoring for maintainability and dead code elimination (ARCH-REFACTOR-001)
+- **✅ Quality Tooling**: Comprehensive automated dead code analysis and linting improvements
+- **✅ Code Consistency**: Unified interface patterns across all AI operations
 
 ## Architecture Overview
 
