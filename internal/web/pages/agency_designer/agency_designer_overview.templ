@@ -46,6 +46,9 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 			<div id="content-raci-matrix" class="overview-content-section" style="display: none;">
 				@RACIMatrixContent(currentAgency)
 			</div>
+			<div id="content-workflows" class="overview-content-section" style="display: none;">
+				@WorkflowsContent(currentAgency)
+			</div>
 		</div>
 	</main>
 	</div>
@@ -116,6 +119,19 @@ templ OverviewNavigationList(currentAgency *agency.Agency) {
 			<div class="nav-info">
 				<div class="nav-name">RACI Matrix</div>
 				<div class="nav-description">Role assignments</div>
+			</div>
+		</div>
+		
+		<div 
+			class="overview-nav-item"
+			data-section="workflows"
+			onclick="selectOverviewSection(this, 'workflows')">
+			<div class="nav-icon">
+				<i class="fas fa-sitemap"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">Workflows</div>
+				<div class="nav-description">Work item orchestration</div>
 			</div>
 		</div>
 	</div>
