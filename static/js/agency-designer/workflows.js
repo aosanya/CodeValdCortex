@@ -338,7 +338,12 @@ export function processAIWorkflowOperation(operation) {
         },
         body: JSON.stringify(requestData)
     })
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            return response.text();
+        })
         .then(html => {
             responseContainer.innerHTML = html;
             loadWorkflows(); // Reload list to show new/updated workflows
@@ -352,7 +357,7 @@ export function processAIWorkflowOperation(operation) {
         })
         .catch(error => {
             console.error('AI workflow operation error:', error);
-            responseContainer.innerHTML = '<div class="notification is-danger">Failed to process AI request</div>';
+            responseContainer.innerHTML = '<div class="notification is-danger"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to process AI request. The response may have been too large or the AI service encountered an error.</div>';
         });
 }
 

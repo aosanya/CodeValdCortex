@@ -67,20 +67,23 @@ Return ONLY a valid JSON array of workflows. Each workflow should follow this st
 	"variables": {}
 }
 
-Create 2-3 workflows that make sense for this agency. Ensure:
-- Each workflow has a clear start and end
-- Work items are connected in logical order
-- Use decision nodes for branching logic
-- Use parallel nodes for concurrent tasks
-- Position nodes in a left-to-right flow (increment x by 200 for each step)`
+Create ONLY 1 simple workflow that makes sense for this agency. Keep it minimal and focused:
+- Maximum 5-7 nodes total
+- Each workflow must have exactly 1 start and 1 end node
+- Work items are connected in logical sequential order
+- Avoid complex decision trees - use decision nodes sparingly
+- NO parallel nodes unless absolutely essential
+- Position nodes in a simple left-to-right flow (increment x by 200-250 for each step)
+- Focus on the single most important workflow for this agency
+- Return a JSON array with ONLY 1 workflow object`
 
 	response, err := b.llmClient.Chat(ctx, &ChatRequest{
 		Messages: []Message{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: prompt},
 		},
-		Temperature: 0.7,
-		MaxTokens:   4000,
+		Temperature: 0.5,
+		MaxTokens:   2500,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate workflows: %w", err)
@@ -231,9 +234,21 @@ func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]workflow.W
 	// Clean response
 	cleaned := b.cleanJSONResponse(response)
 
+	// Check for truncated JSON (common error)
+	if !strings.HasSuffix(strings.TrimSpace(cleaned), "]") {
+		b.logger.WithField("response_length", len(cleaned)).Warn("JSON response appears truncated - missing closing bracket")
+		return nil, fmt.Errorf("invalid JSON response: response appears truncated (likely too large). Try creating fewer or simpler workflows")
+	}
+
 	var workflows []workflow.Workflow
 	if err := json.Unmarshal([]byte(cleaned), &workflows); err != nil {
 		b.logger.WithError(err).WithField("response", cleaned).Error("Failed to parse workflows JSON")
+		
+		// Provide more helpful error for truncated JSON
+		if strings.Contains(err.Error(), "unexpected end of JSON input") {
+			return nil, fmt.Errorf("invalid JSON response: response was truncated (too large). Try generating fewer or simpler workflows")
+		}
+		
 		return nil, fmt.Errorf("invalid JSON response: %w", err)
 	}
 
