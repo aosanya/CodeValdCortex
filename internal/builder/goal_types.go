@@ -110,6 +110,7 @@ type RefinedGoalResult struct {
 	RefinedDescription string   `json:"refined_description"`
 	RefinedScope       string   `json:"refined_scope"`
 	RefinedMetrics     []string `json:"refined_metrics"`
+	SuggestedCode      string   `json:"suggested_code"` // Updated goal code
 	SuggestedPriority  string   `json:"suggested_priority"`
 	SuggestedCategory  string   `json:"suggested_category"`
 	SuggestedTags      []string `json:"suggested_tags"`

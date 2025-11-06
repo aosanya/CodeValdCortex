@@ -413,20 +413,39 @@ func (a *App) setupServer() error {
 		if aiRefineHandler != nil {
 			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
 			if a.goalRefiner != nil {
-				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineGoal)
-				v1.POST("/agencies/:id/goals/generate", aiRefineHandler.GenerateGoal)
-				v1.POST("/agencies/:id/goals/ai-process", aiRefineHandler.ProcessAIGoalRequest)
-				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoals)
+				// Main dynamic router - handles all goal operations through natural language prompts
 				v1.POST("/agencies/:id/goals/refine-dynamic", aiRefineHandler.RefineGoals)
+				// Convenience routes that use RefineGoals with preset prompts
+				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineSpecificGoal)
+				v1.POST("/agencies/:id/goals/generate", aiRefineHandler.GenerateGoalWithPrompt)
+				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoalsWithPrompt)
 			}
 			if a.workItemBuilder != nil {
-				v1.POST("/agencies/:id/work-items/ai-process", aiRefineHandler.ProcessAIWorkItemRequest)
+				// Main dynamic router - handles all work item operations through natural language prompts
+				v1.POST("/agencies/:id/work-items/refine-dynamic", aiRefineHandler.RefineWorkItems)
+				// Convenience routes that use RefineWorkItems with preset prompts
+				v1.POST("/agencies/:id/work-items/refine-specific", aiRefineHandler.RefineSpecificWorkItem)
+				v1.POST("/agencies/:id/work-items/generate", aiRefineHandler.GenerateWorkItemWithPrompt)
+				v1.POST("/agencies/:id/work-items/consolidate", aiRefineHandler.ConsolidateWorkItemsWithPrompt)
+				v1.POST("/agencies/:id/work-items/enhance-all", aiRefineHandler.EnhanceAllWorkItems)
 			}
-			// Role AI processing endpoint
-			v1.POST("/agencies/:id/roles/ai-process", aiRefineHandler.ProcessAIRoleRequest)
-			// RACI AI processing endpoint
+			if a.roleBuilder != nil {
+				// Main dynamic router - handles all role operations through natural language prompts
+				v1.POST("/agencies/:id/roles/refine-dynamic", aiRefineHandler.RefineRoles)
+				// Convenience routes that use RefineRoles with preset prompts
+				v1.POST("/agencies/:id/roles/refine-specific", aiRefineHandler.RefineSpecificRole)
+				v1.POST("/agencies/:id/roles/generate", aiRefineHandler.GenerateRoleWithPrompt)
+				v1.POST("/agencies/:id/roles/consolidate", aiRefineHandler.ConsolidateRolesWithPrompt)
+				v1.POST("/agencies/:id/roles/enhance-all", aiRefineHandler.EnhanceAllRolesWithPrompt)
+			}
 			if a.raciBuilder != nil {
-				v1.POST("/agencies/:id/raci-matrix/ai-generate", aiRefineHandler.ProcessAIRACIRequest)
+				// Main dynamic router - handles all RACI operations through natural language prompts
+				v1.POST("/agencies/:id/raci-matrix/refine-dynamic", aiRefineHandler.RefineRACIMappings)
+				// Convenience routes that use RefineRACIMappings with preset prompts
+				v1.POST("/agencies/:id/raci-matrix/refine-specific", aiRefineHandler.RefineSpecificRACIMapping)
+				v1.POST("/agencies/:id/raci-matrix/generate", aiRefineHandler.GenerateRACIMappingWithPrompt)
+				v1.POST("/agencies/:id/raci-matrix/consolidate", aiRefineHandler.ConsolidateRACIMappingsWithPrompt)
+				v1.POST("/agencies/:id/raci-matrix/create-complete", aiRefineHandler.CreateCompleteRACIMatrixWithPrompt)
 			}
 			a.logger.Info("AI Refine endpoints registered")
 		}

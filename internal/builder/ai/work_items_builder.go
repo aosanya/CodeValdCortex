@@ -27,6 +27,24 @@ func NewAIWorkItemsBuilder(llmClient LLMClient, logger *logrus.Logger) *WorkItem
 	}
 }
 
+// RefineWorkItems is the main dynamic method for all work item operations
+// It analyzes the user message to determine what action to take and handles
+// work item refinement, generation, consolidation, and enhancement
+func (w *WorkItemsBuilder) RefineWorkItems(ctx context.Context, req *builder.RefineWorkItemsRequest, builderContext builder.BuilderContext) (*builder.RefineWorkItemsResponse, error) {
+	w.logger.WithField("agency_id", req.AgencyID).Info("Starting dynamic work item processing")
+
+	// For now, return a placeholder response
+	// TODO: Implement dynamic work item processing following the pattern from goals_builder.go
+	response := &builder.RefineWorkItemsResponse{
+		Action:         "under_construction",
+		Explanation:    "Work item processing is under construction. This will analyze the user message to determine whether to refine existing work items, generate new work items, consolidate duplicate work items, or enhance all work items.",
+		NoActionNeeded: false,
+	}
+
+	w.logger.Info("Dynamic work item processing completed (placeholder)")
+	return response, nil
+}
+
 // aiWorkItemRefinementResponse represents the JSON structure returned by the AI
 type aiWorkItemRefinementResponse struct {
 	RefinedTitle        string   `json:"refined_title"`

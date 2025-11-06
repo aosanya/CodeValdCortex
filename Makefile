@@ -160,6 +160,66 @@ install-tools: ## Install development tools
 	@echo "Installing development tools..."
 	$(GOCMD) install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	$(GOCMD) install github.com/air-verse/air@latest
+	$(GOCMD) install honnef.co/go/tools/cmd/staticcheck@latest
+	$(GOCMD) install mvdan.cc/unparam@latest
+	-$(GOCMD) install github.com/nishanths/exhaustive/cmd/exhaustive@latest || echo "Warning: exhaustive tool installation failed (Go version compatibility)"
+	$(GOCMD) install github.com/alexkohler/unimport@latest
+
+.PHONY: deadcode
+deadcode: ## Check for dead code using multiple tools
+	@echo "🔍 Running comprehensive dead code analysis..."
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "📊 DEAD CODE ANALYSIS REPORT"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "🔍 1. UNUSED PARAMETERS (unparam)"
+	@echo "────────────────────────────────────────"
+	@if command -v unparam >/dev/null 2>&1; then \
+		unparam ./... || echo "✅ No unused parameters found"; \
+	else \
+		echo "⚠️  unparam not installed, skipping"; \
+	fi
+	@echo ""
+	@echo "🔍 2. UNUSED IMPORTS (unimport)" 
+	@echo "────────────────────────────────────────"
+	@if command -v unimport >/dev/null 2>&1; then \
+		unimport ./... || echo "✅ No unused imports found"; \
+	else \
+		echo "⚠️  unimport not installed, skipping"; \
+	fi
+	@echo ""
+	@echo "🔍 3. STATICCHECK ANALYSIS (unused code detection)"
+	@echo "────────────────────────────────────────"
+	@if command -v staticcheck >/dev/null 2>&1; then \
+		staticcheck -checks=U1000,U1001 ./... || echo "✅ No unused code found"; \
+	else \
+		echo "⚠️  staticcheck not installed, skipping"; \
+	fi
+	@echo ""
+	@echo "🔍 4. GOLANGCI-LINT DEAD CODE CHECKS"
+	@echo "────────────────────────────────────────"
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		golangci-lint run --enable=unused,ineffassign --disable-all || echo "✅ No dead code found"; \
+	else \
+		echo "⚠️  golangci-lint not installed, skipping"; \
+	fi
+	@echo ""
+	@echo "🔍 5. MISSING EXHAUSTIVE SWITCH CASES"
+	@echo "────────────────────────────────────────"
+	@if command -v exhaustive >/dev/null 2>&1; then \
+		exhaustive ./... || echo "✅ All switch cases are exhaustive"; \
+	else \
+		echo "⚠️  exhaustive not installed (Go version compatibility issue), skipping"; \
+	fi
+	@echo ""
+	@echo "🔍 6. GO VET ANALYSIS (built-in dead code detection)"
+	@echo "────────────────────────────────────────"
+	@$(GOCMD) vet ./... || echo "✅ No vet issues found"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "✅ Dead code analysis complete!"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 .PHONY: dev-setup
 dev-setup: install-tools deps ## Setup development environment

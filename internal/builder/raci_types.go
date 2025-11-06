@@ -5,46 +5,6 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
-// RefineRACIMappingRequest contains the context for refining a RACI mapping (placeholder for future implementation)
-type RefineRACIMappingRequest struct {
-	AgencyID         string                   `json:"agency_id"`
-	WorkItemKey      string                   `json:"work_item_key"`
-	RoleKey          string                   `json:"role_key"`
-	CurrentRaci      string                   `json:"current_raci"` // R, A, C, or I
-	CurrentObjective string                   `json:"current_objective"`
-	WorkItems        []*agency.WorkItem       `json:"work_items"`
-	Roles            []*registry.Role         `json:"roles"`
-	AllAssignments   []*agency.RACIAssignment `json:"all_assignments"`
-	AgencyContext    *agency.Agency           `json:"agency_context"`
-}
-
-// RefineRACIMappingResponse contains the AI-refined RACI mapping (placeholder for future implementation)
-type RefineRACIMappingResponse struct {
-	RefinedRaci      string `json:"refined_raci"`
-	RefinedObjective string `json:"refined_objective"`
-	WasChanged       bool   `json:"was_changed"`
-	Explanation      string `json:"explanation"`
-}
-
-// GenerateRACIMappingRequest contains the context for generating a single RACI mapping (placeholder for future implementation)
-type GenerateRACIMappingRequest struct {
-	AgencyID       string                   `json:"agency_id"`
-	WorkItemKey    string                   `json:"work_item_key"`
-	RoleKey        string                   `json:"role_key"`
-	WorkItems      []*agency.WorkItem       `json:"work_items"`
-	Roles          []*registry.Role         `json:"roles"`
-	AllAssignments []*agency.RACIAssignment `json:"all_assignments"`
-	AgencyContext  *agency.Agency           `json:"agency_context"`
-	UserInput      string                   `json:"user_input"`
-}
-
-// GenerateRACIMappingResponse contains the AI-generated RACI mapping (placeholder for future implementation)
-type GenerateRACIMappingResponse struct {
-	Raci        string `json:"raci"`      // R, A, C, or I
-	Objective   string `json:"objective"` // What this role needs to achieve
-	Explanation string `json:"explanation"`
-}
-
 // CreateRACIMappingsRequest contains the context for creating RACI mappings
 type CreateRACIMappingsRequest struct {
 	AgencyID      string             `json:"agency_id"`
@@ -80,4 +40,38 @@ type ConsolidateRACIMappingsResponse struct {
 	RemovedAssignments      []string                             `json:"removed_assignments"`      // Keys of assignments that were removed
 	Summary                 string                               `json:"summary"`
 	Explanation             string                               `json:"explanation"`
+}
+
+// RefineRACIMappingsRequest contains the context for dynamic RACI processing
+type RefineRACIMappingsRequest struct {
+	AgencyID            string                   `json:"agency_id"`
+	UserMessage         string                   `json:"user_message"`
+	TargetWorkItemKeys  []string                 `json:"target_work_item_keys"` // Specific work items to operate on (nil means all)
+	TargetRoleKeys      []string                 `json:"target_role_keys"`      // Specific roles to operate on (nil means all)
+	ExistingAssignments []*agency.RACIAssignment `json:"existing_assignments"`  // All current RACI assignments for context
+	WorkItems           []*agency.WorkItem       `json:"work_items"`            // Work items for context
+	Roles               []*registry.Role         `json:"roles"`                 // Roles for context
+	AgencyContext       *agency.Agency           `json:"agency_context"`
+}
+
+// RefineRACIMappingsResponse contains the dynamic RACI processing results
+type RefineRACIMappingsResponse struct {
+	Action             string                           `json:"action"`              // What action was determined (refine, generate, consolidate, create_all, etc.)
+	RefinedAssignments []RefinedRACIAssignmentResult    `json:"refined_assignments"` // RACI assignments that were refined
+	GeneratedMappings  *CreateRACIMappingsResponse      `json:"generated_mappings"`  // Newly generated RACI mappings
+	ConsolidatedData   *ConsolidateRACIMappingsResponse `json:"consolidated_data"`   // Consolidation results if applicable
+	Explanation        string                           `json:"explanation"`         // What was done and why
+	NoActionNeeded     bool                             `json:"no_action_needed"`    // True if RACI assignments are already optimal
+}
+
+// RefinedRACIAssignmentResult represents a single refined RACI assignment
+type RefinedRACIAssignmentResult struct {
+	WorkItemKey       string `json:"work_item_key"`
+	RoleKey           string `json:"role_key"`
+	OriginalRaci      string `json:"original_raci"`
+	RefinedRaci       string `json:"refined_raci"`
+	OriginalObjective string `json:"original_objective"`
+	RefinedObjective  string `json:"refined_objective"`
+	WasChanged        bool   `json:"was_changed"`
+	Explanation       string `json:"explanation"`
 }

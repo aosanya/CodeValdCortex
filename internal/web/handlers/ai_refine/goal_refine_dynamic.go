@@ -18,28 +18,42 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 
 	h.logger.WithField("agency_id", agencyID).Info("Processing dynamic AI goal refinement request")
 
-	// Parse request body
+	// Check if this is a wrapper call with a preset request
 	var req struct {
 		UserMessage string   `json:"user_message" binding:"required"` // Natural language instruction
 		GoalKeys    []string `json:"goal_keys"`                       // Optional: specific goals to operate on
 	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.logger.WithError(err).Error("Failed to parse dynamic refinement request")
-		c.Header("Content-Type", "text/html")
-		c.String(http.StatusBadRequest, `
-			<div class="notification is-danger">
-				<div class="is-flex is-align-items-center">
-					<span class="icon has-text-danger mr-2">
-						<i class="fas fa-exclamation-circle"></i>
-					</span>
-					<div>
-						<strong>Invalid Request</strong>
-						<p class="mb-0">Please provide a user message describing what you want to do with the goals.</p>
+
+	// First, check if there's a preset request from wrapper methods
+	if dynamicReq, exists := c.Get("dynamic_request"); exists {
+		if presetReq, ok := dynamicReq.(struct {
+			UserMessage string   `json:"user_message"`
+			GoalKeys    []string `json:"goal_keys"`
+		}); ok {
+			req.UserMessage = presetReq.UserMessage
+			req.GoalKeys = presetReq.GoalKeys
+			h.logger.WithField("source", "wrapper").Info("Using preset request from wrapper method")
+		}
+	} else {
+		// Parse request body for direct calls
+		if err := c.ShouldBindJSON(&req); err != nil {
+			h.logger.WithError(err).Error("Failed to parse dynamic refinement request")
+			c.Header("Content-Type", "text/html")
+			c.String(http.StatusBadRequest, `
+				<div class="notification is-danger">
+					<div class="is-flex is-align-items-center">
+						<span class="icon has-text-danger mr-2">
+							<i class="fas fa-exclamation-circle"></i>
+						</span>
+						<div>
+							<strong>Invalid Request</strong>
+							<p class="mb-0">Please provide a user message describing what you want to do with the goals.</p>
+						</div>
 					</div>
 				</div>
-			</div>
-		`)
-		return
+			`)
+			return
+		}
 	}
 
 	// Get agency context

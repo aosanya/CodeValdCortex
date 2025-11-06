@@ -32,33 +32,20 @@ type IntroductionBuilderInterface interface {
 
 // GoalBuilderInterface defines the contract for all goal-related AI operations (refinement, generation, consolidation)
 type GoalBuilderInterface interface {
-	RefineGoal(ctx context.Context, req *RefineGoalRequest, builderContext BuilderContext) (*RefineGoalResponse, error)
 	RefineGoals(ctx context.Context, req *RefineGoalsRequest, builderContext BuilderContext) (*RefineGoalsResponse, error)
-	GenerateGoal(ctx context.Context, req *GenerateGoalRequest, builderContext BuilderContext) (*GenerateGoalResponse, error)
-	GenerateGoals(ctx context.Context, req *GenerateGoalRequest, builderContext BuilderContext) (*GenerateGoalsResponse, error)
-	ConsolidateGoals(ctx context.Context, req *ConsolidateGoalsRequest, builderContext BuilderContext) (*ConsolidateGoalsResponse, error)
 }
 
 // WorkItemBuilderInterface defines the contract for all work item-related AI operations (refinement, generation, consolidation)
 type WorkItemBuilderInterface interface {
-	RefineWorkItem(ctx context.Context, req *RefineWorkItemRequest, builderContext BuilderContext) (*RefineWorkItemResponse, error)
-	GenerateWorkItem(ctx context.Context, req *GenerateWorkItemRequest, builderContext BuilderContext) (*GenerateWorkItemResponse, error)
-	GenerateWorkItems(ctx context.Context, req *GenerateWorkItemRequest, builderContext BuilderContext) (*GenerateWorkItemsResponse, error)
-	ConsolidateWorkItems(ctx context.Context, req *ConsolidateWorkItemsRequest, builderContext BuilderContext) (*ConsolidateWorkItemsResponse, error)
+	RefineWorkItems(ctx context.Context, req *RefineWorkItemsRequest, builderContext BuilderContext) (*RefineWorkItemsResponse, error)
 }
 
-// RoleBuilderInterface defines the contract for all role-related AI operations (refinement, generation, consolidation)
+// RoleBuilderInterface for AI-powered role operations
 type RoleBuilderInterface interface {
-	RefineRole(ctx context.Context, req *RefineRoleRequest, builderContext BuilderContext) (*RefineRoleResponse, error)
-	GenerateRole(ctx context.Context, req *GenerateRoleRequest, builderContext BuilderContext) (*GenerateRoleResponse, error)
-	GenerateRoles(ctx context.Context, req *GenerateRolesRequest, builderContext BuilderContext) (*GenerateRolesResponse, error)
-	ConsolidateRoles(ctx context.Context, req *ConsolidateRolesRequest, builderContext BuilderContext) (*ConsolidateRolesResponse, error)
+	RefineRoles(ctx context.Context, req *RefineRolesRequest, builderContext BuilderContext) (*RefineRolesResponse, error)
 }
 
 // RACIBuilderInterface defines the contract for all RACI-related AI operations (refinement, generation, creation, consolidation)
 type RACIBuilderInterface interface {
-	RefineRACIMapping(ctx context.Context, req *RefineRACIMappingRequest, builderContext BuilderContext) (*RefineRACIMappingResponse, error)
-	GenerateRACIMapping(ctx context.Context, req *GenerateRACIMappingRequest, builderContext BuilderContext) (*GenerateRACIMappingResponse, error)
-	CreateRACIMappings(ctx context.Context, req *CreateRACIMappingsRequest, builderContext BuilderContext) (*CreateRACIMappingsResponse, error)
-	ConsolidateRACIMappings(ctx context.Context, req *ConsolidateRACIMappingsRequest, builderContext BuilderContext) (*ConsolidateRACIMappingsResponse, error)
+	RefineRACIMappings(ctx context.Context, req *RefineRACIMappingsRequest, builderContext BuilderContext) (*RefineRACIMappingsResponse, error)
 }
