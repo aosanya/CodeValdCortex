@@ -131,11 +131,37 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 		}).Info("Filtered work items by keys")
 	}
 
+	// Extract work item codes from context section of message (if present)
+	// The chat form appends context like: "\n\n**Context:**\n\n1. **work-item** [WI-001]:\n   Description here"
+	contextWorkItemCodes := extractWorkItemCodesFromContext(req.UserMessage)
+	if len(contextWorkItemCodes) > 0 {
+		h.logger.WithFields(logrus.Fields{
+			"extracted_codes": contextWorkItemCodes,
+		}).Info("Extracted work item codes from context")
+
+		// Add these codes to the target work items if not already specified
+		if len(req.WorkItemKeys) == 0 {
+			req.WorkItemKeys = contextWorkItemCodes
+
+			// Filter target work items by extracted codes
+			workItemKeyMap := make(map[string]bool)
+			for _, key := range contextWorkItemCodes {
+				workItemKeyMap[key] = true
+			}
+			for _, workItem := range existingWorkItems {
+				if workItemKeyMap[workItem.Code] {
+					targetWorkItems = append(targetWorkItems, workItem)
+				}
+			}
+		}
+	}
+
 	h.logger.WithFields(logrus.Fields{
 		"agency_id":           agencyID,
 		"user_message":        req.UserMessage,
 		"target_work_items":   len(targetWorkItems),
 		"existing_work_items": len(existingWorkItems),
+		"context_codes":       len(contextWorkItemCodes),
 	}).Info("Starting dynamic work item refinement")
 
 	// Build AI context data using shared context builder (will be used when RefineWorkItems is implemented)
@@ -192,15 +218,12 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 		h.logger.WithError(addErr).Error("Failed to add user message to conversation")
 	}
 
-	// Use AI to parse the user request and create a work item
-	workItemData, err := h.parseWorkItemRequest(c.Request.Context(), req.UserMessage, ag)
+	// Let AI decide what to do based on the message and context (creation vs refinement vs other operations)
+	workItemData, err := h.processWorkItemRequest(c.Request.Context(), req.UserMessage, targetWorkItems, existingWorkItems, ag)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to parse work item request with AI")
+		h.logger.WithError(err).Error("Failed to process work item request with AI")
 		responseMessage := "❌ **Unable to Process Request**\n\n" +
-			"I had trouble understanding your work item request. Please try rephrasing it with more details about:\n" +
-			"• What the work item is about\n" +
-			"• What needs to be delivered\n" +
-			"• Any dependencies or requirements"
+			"I had trouble understanding your request. Please try rephrasing it with more details."
 
 		if addErr := h.designerService.AddMessage(conversation.ID, "assistant", responseMessage); addErr != nil {
 			h.logger.WithError(addErr).Error("Failed to add AI response to conversation")
@@ -217,6 +240,93 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 		`, agencyID, ag.Name))
 		return
 	}
+
+	// Execute the operation determined by AI
+	if workItemData.Operation == "update" {
+		// UPDATE MODE: Refine existing work item
+		h.logger.WithFields(logrus.Fields{
+			"operation":  "update",
+			"target_key": workItemData.TargetKey,
+		}).Info("AI determined this is an update operation")
+
+		// Update the work item
+		updateReq := agency.UpdateWorkItemRequest{
+			Title:        workItemData.Title,
+			Description:  workItemData.Description,
+			Deliverables: workItemData.Deliverables,
+			Tags:         workItemData.Tags,
+		}
+
+		err = h.agencyService.UpdateWorkItem(c.Request.Context(), agencyID, workItemData.TargetKey, updateReq)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to update work item")
+			responseMessage := "❌ **Failed to Update Work Item**\n\n" +
+				"I understood your request but couldn't save the changes. Please try again."
+
+			if addErr := h.designerService.AddMessage(conversation.ID, "assistant", responseMessage); addErr != nil {
+				h.logger.WithError(addErr).Error("Failed to add AI response to conversation")
+			}
+
+			c.Header("Content-Type", "text/html")
+			c.String(http.StatusOK, fmt.Sprintf(`
+				<div class="ai-refine-response" 
+					hx-trigger="load delay:100ms" 
+					hx-get="/agencies/%s/chat-messages?agencyName=%s"
+					hx-target="#chat-messages" 
+					hx-swap="innerHTML">
+			</div>
+			`, agencyID, ag.Name))
+			return
+		}
+
+		// Get the updated work item
+		updatedWorkItem, err := h.agencyService.GetWorkItem(c.Request.Context(), agencyID, workItemData.TargetKey)
+		if err != nil {
+			h.logger.WithError(err).Warn("Failed to get updated work item for display")
+		}
+
+		// Prepare success response
+		responseMessage := fmt.Sprintf("✅ **Work Item Updated Successfully!**\n\n"+
+			"**%s** (%s)\n\n"+
+			"%s\n\n"+
+			"**Deliverables:**\n%s",
+			workItemData.Title,
+			workItemData.TargetKey,
+			workItemData.Description,
+			formatDeliverables(workItemData.Deliverables))
+
+		if addErr := h.designerService.AddMessage(conversation.ID, "assistant", responseMessage); addErr != nil {
+			h.logger.WithError(addErr).Error("Failed to add AI response to conversation")
+		}
+
+		h.logger.Info("Work item updated successfully via AI",
+			"agencyID", agencyID,
+			"workItemKey", updatedWorkItem.Key)
+
+		// Return success with table refresh
+		c.Header("Content-Type", "text/html")
+		c.String(http.StatusOK, fmt.Sprintf(`
+			<div class="ai-refine-response" 
+				hx-trigger="load delay:100ms" 
+				hx-get="/agencies/%s/chat-messages?agencyName=%s"
+				hx-target="#chat-messages" 
+				hx-swap="innerHTML"
+				hx-on::after-swap="
+					const workItemsTable = document.getElementById('work-items-table-body');
+					if (workItemsTable) {
+						htmx.ajax('GET', '/api/v1/agencies/%s/work-items/html', {
+							target: '#work-items-table-body',
+							swap: 'innerHTML'
+						});
+					}
+				">
+			</div>
+		`, agencyID, ag.Name, agencyID))
+		return
+	}
+
+	// CREATE MODE: Create new work item
+	h.logger.WithField("operation", "create").Info("AI determined this is a create operation")
 
 	// Resolve dependencies: AI may return human-readable titles. We must convert them to work item codes.
 	resolvedDeps := []string{}
@@ -326,8 +436,9 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 	`, agencyID, ag.Name, agencyID))
 }
 
-// parseWorkItemRequest uses AI to parse a natural language work item request
-func (h *Handler) parseWorkItemRequest(ctx context.Context, userMessage string, ag *agency.Agency) (*workItemParseResult, error) {
+// processWorkItemRequest uses AI to intelligently process work item requests
+// The AI determines whether to create a new work item or refine an existing one based on context
+func (h *Handler) processWorkItemRequest(ctx context.Context, userMessage string, targetWorkItems, existingWorkItems []*agency.WorkItem, ag *agency.Agency) (*workItemProcessResult, error) {
 	// Get agency overview for context
 	overview, err := h.agencyService.GetAgencyOverview(ctx, ag.ID)
 	if err != nil {
@@ -335,43 +446,76 @@ func (h *Handler) parseWorkItemRequest(ctx context.Context, userMessage string, 
 		overview = &agency.Overview{}
 	}
 
-	systemPrompt := `You are an AI assistant that helps parse natural language requests for creating work items in a project management system.
+	systemPrompt := `You are an AI assistant that helps manage work items in a project management system.
 
-Given a user's request, extract the following information:
-- title: A clear, concise title for the work item (required)
-- description: A detailed description of what needs to be done (required)
-- deliverables: A list of concrete deliverables or outputs (array of strings)
-- dependencies: ONLY include dependencies if the user explicitly mentions them or if they reference existing work items. Otherwise, leave this as an empty array. (array of strings)
+Based on the user's request and the provided context, determine the appropriate action and return work item details.
+
+CONTEXT-AWARE BEHAVIOR:
+- If work items are provided in the target context, the user wants to REFINE/UPDATE those items
+- If no target work items are provided, the user wants to CREATE a new work item
+- Use the user's message to understand what changes or improvements to make
+
+Return a JSON object with these fields:
+- operation: "create" or "update" (based on whether target work items exist)
+- target_key: the work item key to update (only for update operations, empty for create)
+- title: A clear, concise title (required)
+- description: A detailed description (required)
+- deliverables: A list of concrete deliverables (array of strings)
+- dependencies: Dependencies as work item codes (array of strings) - only if explicitly mentioned
 - tags: Relevant tags or categories (array of strings)
 
-IMPORTANT: For dependencies, only include them if the user's request explicitly mentions prerequisite work or references existing work items. Most new work items should have an empty dependencies array.
+IMPORTANT RULES:
+1. If target work items exist, operation MUST be "update" and target_key MUST be set
+2. Preserve good existing content unless user explicitly asks to change it
+3. For refinements: improve clarity, add details, fix issues based on user feedback
+4. For new items: create comprehensive, well-structured work items
+5. Do NOT add dependencies unless explicitly mentioned by the user
 
-Return ONLY a JSON object with these fields. Do not include any markdown formatting or code blocks.
-
-Example input: "Add a work item for: User add a new issue"
-Example output:
-{
-  "title": "User Add New Issue",
-  "description": "Implement functionality for users to add new issues through the work items interface",
-  "deliverables": ["UI form for adding issues", "Backend API endpoint", "Database schema update", "Input validation"],
-  "dependencies": [],
-  "tags": ["feature", "user-interface", "work-items"]
-}`
+Return ONLY valid JSON. No markdown, no code blocks, no explanations.`
 
 	introduction := "No introduction available"
 	if overview.Introduction != "" {
 		introduction = overview.Introduction
 	}
 
+	// Build context information
+	targetContext := "None - this is a new work item request"
+	if len(targetWorkItems) > 0 {
+		targetContext = "Target Work Items to Refine:\n"
+		for _, wi := range targetWorkItems {
+			deliverables := "None"
+			if len(wi.Deliverables) > 0 {
+				deliverables = strings.Join(wi.Deliverables, "\n    - ")
+			}
+			targetContext += fmt.Sprintf(`
+- Code: %s
+  Title: %s
+  Description: %s
+  Deliverables:
+    - %s
+  Tags: %s
+`, wi.Code, wi.Title, wi.Description, deliverables, strings.Join(wi.Tags, ", "))
+		}
+	}
+
+	existingContext := "No existing work items"
+	if len(existingWorkItems) > 0 {
+		existingContext = fmt.Sprintf("Existing work items count: %d", len(existingWorkItems))
+	}
+
 	userPrompt := fmt.Sprintf(`Agency Context:
 - Name: %s
 - Introduction: %s
+- %s
+
+%s
 
 User Request: %s
 
-Parse this request and return a JSON object with the work item details.`, ag.Name, introduction, userMessage)
+Determine the operation and return appropriate work item details as JSON.`,
+		ag.Name, introduction, existingContext, targetContext, userMessage)
 
-	// Call AI service via the introductionRefiner's LLM client (all builders share the same client)
+	// Call AI service
 	response, err := h.callAI(ctx, systemPrompt, userPrompt)
 	if err != nil {
 		return nil, fmt.Errorf("AI request failed: %w", err)
@@ -379,13 +523,12 @@ Parse this request and return a JSON object with the work item details.`, ag.Nam
 
 	// Parse JSON response
 	cleanedContent := strings.TrimSpace(response)
-	// Remove markdown code blocks if present
 	cleanedContent = strings.TrimPrefix(cleanedContent, "```json")
 	cleanedContent = strings.TrimPrefix(cleanedContent, "```")
 	cleanedContent = strings.TrimSuffix(cleanedContent, "```")
 	cleanedContent = strings.TrimSpace(cleanedContent)
 
-	var result workItemParseResult
+	var result workItemProcessResult
 	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
 		h.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse AI response")
 		return nil, fmt.Errorf("failed to parse AI response: %w", err)
@@ -427,8 +570,10 @@ BEGIN JSON OUTPUT NOW:`, systemPrompt, userPrompt)
 	return response.Content, nil
 }
 
-// workItemParseResult represents the AI-parsed work item data
-type workItemParseResult struct {
+// workItemProcessResult represents the AI-processed work item operation
+type workItemProcessResult struct {
+	Operation    string   `json:"operation"`  // "create" or "update"
+	TargetKey    string   `json:"target_key"` // Work item key to update (for update operations)
 	Title        string   `json:"title"`
 	Description  string   `json:"description"`
 	Deliverables []string `json:"deliverables"`
@@ -446,4 +591,33 @@ func formatDeliverables(deliverables []string) string {
 		formatted = append(formatted, "• "+d)
 	}
 	return strings.Join(formatted, "\n")
+}
+
+// extractWorkItemCodesFromContext parses the context section of a message to extract work item codes
+// Example context format:
+// **Context:**
+//  1. **work-item** [WI-001]:
+//     Description here
+func extractWorkItemCodesFromContext(message string) []string {
+	var codes []string
+
+	// Look for work item codes in square brackets [WI-XXX] or [MVP-XXX]
+	// Common patterns: [WI-001], [MVP-001], etc.
+	lines := strings.Split(message, "\n")
+	for _, line := range lines {
+		// Look for patterns like "**work-item** [CODE]:" or just "[CODE]"
+		if strings.Contains(line, "[") && strings.Contains(line, "]") {
+			start := strings.Index(line, "[")
+			end := strings.Index(line, "]")
+			if start >= 0 && end > start {
+				code := strings.TrimSpace(line[start+1 : end])
+				// Validate it looks like a work item code (has a dash)
+				if strings.Contains(code, "-") {
+					codes = append(codes, code)
+				}
+			}
+		}
+	}
+
+	return codes
 }

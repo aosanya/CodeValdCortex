@@ -104,6 +104,19 @@ export function selectOverviewSection(element, section) {
             ];
         }
 
+        // Clear navigational contexts from the previous section
+        const previousSection = window.currentAgencyContext;
+        if (previousSection && previousSection !== section && window.ContextManager) {
+            // Clear navigational contexts from the section we're leaving
+            window.ContextManager.clearNavigationalContexts(previousSection);
+        }
+
+        // When entering work-items, clear ALL navigational contexts
+        if (section === 'work-items' && window.ContextManager) {
+            window.ContextManager.clearNavigationalContexts();
+            console.log('[Overview] Cleared all navigational contexts when entering work-items');
+        }
+
         // Track current selected context (for backend calls to include as `context`)
         window.currentAgencyContext = section;
         console.log('[Overview] Context changed to:', section);

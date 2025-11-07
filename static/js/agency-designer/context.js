@@ -7,6 +7,8 @@ import { showNotification } from './utils.js';
  * @typedef {Object} ContextMetadata
  * @property {number} [selectionCount] - Number of selections combined
  * @property {Selection[]} [selections] - Array of individual selections
+ * @property {boolean} [isNavigational] - If true, context is automatically removed when navigating away
+ * @property {string} [section] - The section this context belongs to (introduction, work-items, goals, etc.)
  */
 
 /**
@@ -124,8 +126,9 @@ export function addGoalContext(goalCode, goalDescription) {
  * Add context from work item
  * @param {string} workItemCode - Work item code (e.g., WI-001)
  * @param {string} workItemDescription - Full work item description
+ * @param {boolean} [isNavigational=true] - If true, context is removed when navigating away from work items
  */
-export function addWorkItemContext(workItemCode, workItemDescription) {
+export function addWorkItemContext(workItemCode, workItemDescription, isNavigational = true) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -142,7 +145,10 @@ export function addWorkItemContext(workItemCode, workItemDescription) {
         return null;
     }
 
-    const result = createContext(ContextType.WORK_ITEM, workItemCode, content);
+    const result = createContext(ContextType.WORK_ITEM, workItemCode, content, {
+        isNavigational: isNavigational,
+        section: 'work-items'
+    });
     return result;
 }
 
@@ -226,6 +232,32 @@ export function removeContext(contextId) {
         logContextStateChange('REMOVED', removed);
         updateContextDisplay();
         showNotification(`Context removed: ${removed.type} ${removed.code}`, 'info');
+    }
+}
+
+/**
+ * Clear navigational contexts for a specific section
+ * @param {string} [section] - Section to clear (e.g., 'work-items'). If not provided, clears all navigational contexts.
+ */
+export function clearNavigationalContexts(section = null) {
+    const beforeCount = contextState.contexts.length;
+
+    if (section) {
+        // Clear only contexts for specific section
+        contextState.contexts = contextState.contexts.filter(ctx =>
+            !ctx.metadata?.isNavigational || ctx.metadata?.section !== section
+        );
+    } else {
+        // Clear all navigational contexts
+        contextState.contexts = contextState.contexts.filter(ctx => !ctx.metadata?.isNavigational);
+    }
+
+    const removedCount = beforeCount - contextState.contexts.length;
+
+    if (removedCount > 0) {
+        logContextStateChange('CLEARED_NAVIGATIONAL');
+        updateContextDisplay();
+        console.log(`[ContextManager] Cleared ${removedCount} navigational context(s)${section ? ` from section: ${section}` : ''}`);
     }
 }
 
@@ -604,6 +636,7 @@ if (typeof window !== 'undefined') {
         removeContext,
         removeSelection,
         clearAllContexts,
+        clearNavigationalContexts,
         getAllContexts,
         getFormattedContexts,
         initializeContextSelection,

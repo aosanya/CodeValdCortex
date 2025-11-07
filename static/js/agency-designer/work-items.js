@@ -150,6 +150,12 @@ export function cancelWorkItemEdit() {
         'work-item-tags-editor'
     ]);
 
+    // Clear all navigational contexts when returning to work items list
+    if (window.ContextManager) {
+        window.ContextManager.clearNavigationalContexts();
+        console.log('[WorkItems] Cleared navigational contexts when returning to list');
+    }
+
     // Reset state
     workItemEditorState = {
         mode: 'add',
