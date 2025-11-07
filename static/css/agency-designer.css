@@ -1668,3 +1668,31 @@ a.overview-nav-link:hover {
 .button.is-pulsing {
     animation: pulse 2s infinite;
 }
+
+/* ===================================
+   GLOBAL FORM ELEMENT SIZING
+   =================================== */
+
+/* Make all labels smaller (0.75rem) */
+.label {
+    font-size: 0.75rem !important;
+}
+
+/* Make all help text smaller (0.65rem) */
+.help {
+    font-size: 0.65rem !important;
+}
+
+/* Make all inputs and textareas smaller */
+.input,
+.textarea,
+.select select {
+    font-size: 0.8rem !important;
+}
+
+/* Apply smaller size to input/textarea elements */
+.input.is-small,
+.textarea.is-small,
+.select.is-small select {
+    font-size: 0.75rem !important;
+}
