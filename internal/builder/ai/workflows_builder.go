@@ -204,9 +204,6 @@ func (b *WorkflowsBuilder) buildContextPrompt(ag *models.Agency, overview *model
 	sb.WriteString("Available Work Items:\n")
 	for _, wi := range workItems {
 		sb.WriteString(fmt.Sprintf("- %s (key: %s): %s\n", wi.Title, wi.Key, wi.Description))
-		if len(wi.Dependencies) > 0 {
-			sb.WriteString(fmt.Sprintf("  Dependencies: %v\n", wi.Dependencies))
-		}
 	}
 
 	sb.WriteString("\nCreate workflows that orchestrate these work items in logical sequences.")

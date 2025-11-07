@@ -194,10 +194,6 @@ func (m *mockAgencyService) DeleteWorkItem(ctx context.Context, agencyID string,
 	return nil
 }
 
-func (m *mockAgencyService) ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
-	return nil
-}
-
 func (m *mockAgencyService) CreateWorkItemGoalLink(ctx context.Context, agencyID string, link *models.WorkItemGoalLink) error {
 	return nil
 }

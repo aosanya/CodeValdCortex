@@ -101,32 +101,3 @@ func (h *AgencyHandler) DeleteWorkItem(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Work item deleted successfully"})
 }
-
-// ValidateWorkItemDependencies handles POST /api/v1/agencies/:id/work-items/validate-deps
-func (h *AgencyHandler) ValidateWorkItemDependencies(c *gin.Context) {
-	id := c.Param("id")
-
-	var req struct {
-		WorkItemKey  string   `json:"work_item_key"`
-		Dependencies []string `json:"dependencies"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
-		return
-	}
-
-	err := h.service.ValidateWorkItemDependencies(c.Request.Context(), id, req.WorkItemKey, req.Dependencies)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"valid": false,
-			"error": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"valid": true,
-	})
-}

@@ -420,7 +420,6 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/work-items", agencyHandler.CreateWorkItem)
 		v1.PUT("/agencies/:id/work-items/:key", agencyHandler.UpdateWorkItem)
 		v1.DELETE("/agencies/:id/work-items/:key", agencyHandler.DeleteWorkItem)
-		v1.POST("/agencies/:id/work-items/validate-deps", agencyHandler.ValidateWorkItemDependencies)
 
 		// Roles endpoints
 		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)

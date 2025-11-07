@@ -36,7 +36,6 @@ type Service interface {
 	GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error)
 	UpdateWorkItem(ctx context.Context, agencyID string, key string, req models.UpdateWorkItemRequest) error
 	DeleteWorkItem(ctx context.Context, agencyID string, key string) error
-	ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error
 
 	// RACI Assignment methods (graph-based)
 	CreateRACIAssignment(ctx context.Context, agencyID string, assignment *models.RACIAssignment) error

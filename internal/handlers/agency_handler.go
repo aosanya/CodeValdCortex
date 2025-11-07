@@ -60,7 +60,6 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.POST("/:id/work-items", h.CreateWorkItem)
 		agencies.PUT("/:id/work-items/:key", h.UpdateWorkItem)
 		agencies.DELETE("/:id/work-items/:key", h.DeleteWorkItem)
-		agencies.POST("/:id/work-items/validate-deps", h.ValidateWorkItemDependencies)
 
 		// Work item-goal link routes
 		agencies.GET("/:id/work-items/:key/goals", h.GetWorkItemGoalLinks)

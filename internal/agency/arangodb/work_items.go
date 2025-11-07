@@ -69,9 +69,6 @@ func (r *Repository) CreateWorkItem(ctx context.Context, workItem *models.WorkIt
 	if workItem.Deliverables == nil {
 		workItem.Deliverables = []string{}
 	}
-	if workItem.Dependencies == nil {
-		workItem.Dependencies = []string{}
-	}
 	if workItem.Tags == nil {
 		workItem.Tags = []string{}
 	}
@@ -350,75 +347,6 @@ func (r *Repository) DeleteWorkItem(ctx context.Context, agencyID string, key st
 	_, err = agencyDB.Query(ctx, renumberQuery, renumberBindVars)
 	if err != nil {
 		return fmt.Errorf("failed to renumber work items: %w", err)
-	}
-
-	return nil
-}
-
-// ValidateDependencies checks for circular dependencies in work items
-func (r *Repository) ValidateDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
-	if len(dependencies) == 0 {
-		return nil
-	}
-
-	// Get the agency-specific database
-	agencyDoc, err := r.GetByID(ctx, agencyID)
-	if err != nil {
-		return fmt.Errorf("failed to get agency: %w", err)
-	}
-
-	// Use agency ID as database name if not set
-	dbName := agencyDoc.Database
-	if dbName == "" {
-		dbName = agencyDoc.ID
-	}
-
-	// Get connection to agency's database
-	agencyDB, err := r.client.Database(ctx, dbName)
-	if err != nil {
-		return fmt.Errorf("failed to connect to agency database: %w", err)
-	}
-
-	// Ensure work_items collection exists
-	workItemsColl, err := ensureWorkItemsCollection(ctx, agencyDB)
-	if err != nil {
-		return fmt.Errorf("failed to ensure work_items collection: %w", err)
-	}
-
-	// Check if any of the dependencies would create a circular dependency
-	// This is a simple check - for a more complete check, we'd need to traverse the entire dependency graph
-	for _, depCode := range dependencies {
-		// Check if the dependency exists
-		query := "FOR wi IN @@collection FILTER wi.agency_id == @agencyId AND wi.code == @code RETURN wi"
-		bindVars := map[string]interface{}{
-			"@collection": workItemsColl.Name(),
-			"agencyId":    agencyID,
-			"code":        depCode,
-		}
-
-		cursor, err := agencyDB.Query(ctx, query, bindVars)
-		if err != nil {
-			return fmt.Errorf("failed to query dependency: %w", err)
-		}
-
-		if !cursor.HasMore() {
-			cursor.Close()
-			return fmt.Errorf("dependency work item not found: %s", depCode)
-		}
-
-		var depWorkItem models.WorkItem
-		_, err = cursor.ReadDocument(ctx, &depWorkItem)
-		cursor.Close()
-		if err != nil {
-			return fmt.Errorf("failed to read dependency: %w", err)
-		}
-
-		// Check if the dependency depends on this work item (direct circular dependency)
-		for _, transDep := range depWorkItem.Dependencies {
-			if transDep == workItemCode {
-				return fmt.Errorf("circular dependency detected: %s depends on %s which depends on %s", workItemCode, depCode, transDep)
-			}
-		}
 	}
 
 	return nil

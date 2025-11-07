@@ -28,19 +28,11 @@ func (s *WorkItemService) CreateWorkItem(ctx context.Context, agencyID string, r
 		return nil, fmt.Errorf("failed to verify agency: %w", err)
 	}
 
-	// Validate dependencies if provided
-	if len(req.Dependencies) > 0 {
-		if err := s.repo.ValidateDependencies(ctx, agencyID, "", req.Dependencies); err != nil {
-			return nil, fmt.Errorf("invalid dependencies: %w", err)
-		}
-	}
-
 	workItem := &models.WorkItem{
 		AgencyID:     agencyID,
 		Title:        req.Title,
 		Description:  req.Description,
 		Deliverables: req.Deliverables,
-		Dependencies: req.Dependencies,
 		Tags:         req.Tags,
 	}
 
@@ -113,18 +105,10 @@ func (s *WorkItemService) UpdateWorkItem(ctx context.Context, agencyID string, k
 		return fmt.Errorf("failed to get work item: %w", err)
 	}
 
-	// Validate dependencies if changed
-	if len(req.Dependencies) > 0 {
-		if err := s.repo.ValidateDependencies(ctx, agencyID, workItem.Code, req.Dependencies); err != nil {
-			return fmt.Errorf("invalid dependencies: %w", err)
-		}
-	}
-
 	// Update fields
 	workItem.Title = req.Title
 	workItem.Description = req.Description
 	workItem.Deliverables = req.Deliverables
-	workItem.Dependencies = req.Dependencies
 	workItem.Tags = req.Tags
 
 	// Save
@@ -148,17 +132,6 @@ func (s *WorkItemService) DeleteWorkItem(ctx context.Context, agencyID string, k
 	}
 
 	return nil
-}
-
-// ValidateDependencies validates work item dependencies
-func (s *WorkItemService) ValidateDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
-	// Verify agency exists
-	_, err := s.repo.GetByID(ctx, agencyID)
-	if err != nil {
-		return fmt.Errorf("failed to verify agency: %w", err)
-	}
-
-	return s.repo.ValidateDependencies(ctx, agencyID, workItemCode, dependencies)
 }
 
 // CreateWorkItemGoalLink creates a new link between a work item and a goal

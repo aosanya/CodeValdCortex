@@ -34,7 +34,6 @@ type Repository interface {
 	GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error)
 	UpdateWorkItem(ctx context.Context, workItem *models.WorkItem) error
 	DeleteWorkItem(ctx context.Context, agencyID string, key string) error
-	ValidateDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error
 
 	// RACI Matrix methods
 	SaveRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix) error

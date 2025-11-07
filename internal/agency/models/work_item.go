@@ -12,7 +12,6 @@ type WorkItem struct {
 	Title        string    `json:"title"`
 	Description  string    `json:"description"`
 	Deliverables []string  `json:"deliverables"`
-	Dependencies []string  `json:"dependencies"` // References to other work item codes
 	Tags         []string  `json:"tags,omitempty"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
@@ -23,7 +22,6 @@ type CreateWorkItemRequest struct {
 	Title        string   `json:"title" binding:"required"`
 	Description  string   `json:"description" binding:"required"`
 	Deliverables []string `json:"deliverables"`
-	Dependencies []string `json:"dependencies"`
 	Tags         []string `json:"tags,omitempty"`
 }
 
@@ -32,7 +30,6 @@ type UpdateWorkItemRequest struct {
 	Title        string   `json:"title" binding:"required"`
 	Description  string   `json:"description" binding:"required"`
 	Deliverables []string `json:"deliverables"`
-	Dependencies []string `json:"dependencies"`
 	Tags         []string `json:"tags,omitempty"`
 }
 

@@ -128,7 +128,3 @@ func (c *CompositeService) UpdateWorkItem(ctx context.Context, agencyID string, 
 func (c *CompositeService) DeleteWorkItem(ctx context.Context, agencyID string, key string) error {
 	return c.WorkItemService.DeleteWorkItem(ctx, agencyID, key)
 }
-
-func (c *CompositeService) ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
-	return c.WorkItemService.ValidateDependencies(ctx, agencyID, workItemCode, dependencies)
-}

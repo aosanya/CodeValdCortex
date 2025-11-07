@@ -367,7 +367,6 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 		Title:        workItemData.Title,
 		Description:  workItemData.Description,
 		Deliverables: workItemData.Deliverables,
-		Dependencies: resolvedDeps,
 		Tags:         workItemData.Tags,
 	}
 

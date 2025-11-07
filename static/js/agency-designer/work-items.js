@@ -37,15 +37,15 @@ async function loadGoalsForSelection() {
         goals.forEach(goal => {
             const label = document.createElement('label');
             label.className = 'checkbox is-block mb-2';
-            
+
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.value = goal._key || goal.key;
             checkbox.className = 'mr-2';
             checkbox.dataset.goalKey = goal._key || goal.key;
-            
+
             const text = document.createTextNode(` ${goal.code} - ${goal.description.substring(0, 60)}${goal.description.length > 60 ? '...' : ''}`);
-            
+
             label.appendChild(checkbox);
             label.appendChild(text);
             container.appendChild(label);
@@ -145,7 +145,6 @@ function populateWorkItemForm(workItem) {
         'work-item-title-editor': workItem.title || '',
         'work-item-description-editor': workItem.description || '',
         'work-item-deliverables-editor': workItem.deliverables ? workItem.deliverables.join('\n') : '',
-        'work-item-dependencies-editor': workItem.dependencies ? workItem.dependencies.join(', ') : '',
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
     });
 }
@@ -156,7 +155,6 @@ function clearWorkItemForm() {
         'work-item-title-editor',
         'work-item-description-editor',
         'work-item-deliverables-editor',
-        'work-item-dependencies-editor',
         'work-item-tags-editor'
     ]);
 
@@ -179,10 +177,6 @@ export async function saveWorkItemFromEditor() {
     const description = document.getElementById('work-item-description-editor')?.value.trim();
     const deliverables = document.getElementById('work-item-deliverables-editor')?.value
         .split('\n')
-        .map(d => d.trim())
-        .filter(d => d.length > 0);
-    const dependencies = document.getElementById('work-item-dependencies-editor')?.value
-        .split(',')
         .map(d => d.trim())
         .filter(d => d.length > 0);
     const tags = document.getElementById('work-item-tags-editor')?.value
@@ -212,7 +206,6 @@ export async function saveWorkItemFromEditor() {
         title,
         description,
         deliverables,
-        dependencies,
         tags
     };
 
@@ -285,7 +278,6 @@ export function cancelWorkItemEdit() {
         'work-item-title-editor',
         'work-item-description-editor',
         'work-item-deliverables-editor',
-        'work-item-dependencies-editor',
         'work-item-tags-editor'
     ]);
 
@@ -460,33 +452,6 @@ export function refineWorkItemDescription() {
     showNotification('AI refinement for work items coming soon!', 'info');
 }
 
-// Validate work item dependencies
-export function validateWorkItemDependencies(dependencies) {
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId || !dependencies || dependencies.length === 0) {
-        return Promise.resolve(true);
-    }
-
-    return fetch(`/api/v1/agencies/${agencyId}/work-items/validate-deps`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ dependencies })
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.valid) {
-                showNotification(`Invalid dependencies: ${data.error}`, 'warning');
-                return false;
-            }
-            return true;
-        })
-        .catch(error => {
-            return true; // Don't block on validation errors
-        });
-}
-
 // Get selected work item keys from checkboxes
 function getSelectedWorkItemKeys() {
     const checkboxes = document.querySelectorAll('.work-item-checkbox:checked');
@@ -577,7 +542,6 @@ window.deleteWorkItem = deleteWorkItem;
 window.filterWorkItems = filterWorkItems;
 window.processAIWorkItemOperation = processAIWorkItemOperation;
 window.refineWorkItemDescription = refineWorkItemDescription;
-window.validateWorkItemDependencies = validateWorkItemDependencies;
 window.getSelectedWorkItemKeys = getSelectedWorkItemKeys;
 window.updateWorkItemSelectionButtons = updateWorkItemSelectionButtons;
 window.toggleAllWorkItems = toggleAllWorkItems;
