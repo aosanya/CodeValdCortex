@@ -24,7 +24,12 @@ templ WorkItemItem(workItem *agency.WorkItem) {
 			<span class="tag is-info">{ workItem.Code }</span>
 		</td>
 		<td style="vertical-align: middle;">
-			<span class="has-text-weight-semibold">{ workItem.Title }</span>
+			<div>
+				<p class="is-size-6 has-text-weight-semibold mb-1">{ workItem.Title }</p>
+				if workItem.Description != "" {
+					<p class="is-size-7 has-text-grey">{ truncateText(workItem.Description, 100) }</p>
+				}
+			</div>
 		</td>
 		<td style="vertical-align: middle;">
 			<div class="buttons">
@@ -37,7 +42,7 @@ templ WorkItemItem(workItem *agency.WorkItem) {
 				</button>
 				<button 
 					class="button is-small is-info is-fullwidth" 
-					onclick={ templ.ComponentScript{Call: fmt.Sprintf("showWorkItemEditor('edit', '%s')", workItem.Key)} }
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("window.ContextManager.addWorkItemContext('%s', '%s'); showWorkItemEditor('edit', '%s')", workItem.Code, templ.EscapeString(getWorkItemContextText(workItem)), workItem.Key)} }
 					title="Edit">
 					<span class="icon"><i class="fas fa-edit"></i></span>
 					<span>Edit</span>

@@ -86,11 +86,21 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string)
 func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, userMessage string) (*string, error) {
 	h.logger.Info("🔵 DELEGATING: Work items processing to ai_refine.Handler (chat mode)")
 
-	// Get agencyID from context
+	// Get agencyID from context - try param first, then conversation
 	agencyID := c.Param("id")
+	conversationID := c.Param("conversationId")
+
+	// If no agencyID in params (follow-up message), get it from conversation
+	if agencyID == "" && conversationID != "" {
+		conversation, err := h.designerService.GetConversation(conversationID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to get conversation for agency ID")
+			return nil, err
+		}
+		agencyID = conversation.AgencyID
+	}
 
 	// Ensure conversation exists - start one if this is a new conversation
-	conversationID := c.Param("conversationId")
 	if conversationID == "" {
 		// Start conversation first for new conversations
 		ctx := c.Request.Context()
@@ -102,6 +112,21 @@ func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, userMessage str
 		conversationID = conversation.ID
 		// Store conversation ID in params so it's available downstream
 		c.Params = append(c.Params, gin.Param{Key: "conversationId", Value: conversationID})
+	}
+
+	// Store agencyID in params so RefineWorkItems can access it
+	if agencyID != "" {
+		// Check if already exists
+		hasID := false
+		for _, p := range c.Params {
+			if p.Key == "id" {
+				hasID = true
+				break
+			}
+		}
+		if !hasID {
+			c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
+		}
 	}
 
 	h.logger.Info("Conversation ready for work items processing",
