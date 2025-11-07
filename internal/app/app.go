@@ -321,13 +321,11 @@ func (a *App) setupServer() error {
 			a.logger,
 		)
 
-		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
+		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.workflowService, a.logger)
 		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	} // Agency middleware
-	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger)
-
-	// Serve static files
+	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger) // Serve static files
 	router.Static("/static", "./static")
 
 	// Web dashboard routes

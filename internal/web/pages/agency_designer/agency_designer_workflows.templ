@@ -48,6 +48,12 @@ templ WorkflowItem(wf *workflow.Workflow) {
 		<td style="width: 200px;">
 			<div class="buttons is-flex is-flex-wrap-nowrap">
 				<button
+					class="button is-small is-primary"
+					onclick={ templ.ComponentScript{Call: `window.location.href='/agencies/` + wf.AgencyID + `/designer/workflows/` + wf.ID + `'`} }
+					title="Open in Visual Designer">
+					<span class="icon"><i class="fas fa-project-diagram"></i></span>
+				</button>
+				<button
 					class="button is-small is-info"
 					onclick={ templ.ComponentScript{Call: `showWorkflowEditor('edit', '` + wf.ID + `')`} }
 					title="Edit Workflow">
