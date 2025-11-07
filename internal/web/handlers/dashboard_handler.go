@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
@@ -40,7 +40,7 @@ func (h *DashboardHandler) ShowDashboard(c *gin.Context) {
 	// Filter by agency if one is selected
 	var agents []*agent.Agent
 	if ag, exists := c.Get("agency"); exists {
-		if agencyPtr, ok := ag.(*agency.Agency); ok {
+		if agencyPtr, ok := ag.(*models.Agency); ok {
 			// Filter agents by agency
 			for _, a := range allAgents {
 				if agencyID, exists := a.Metadata["agency_id"]; exists && agencyID == agencyPtr.ID {
@@ -57,9 +57,9 @@ func (h *DashboardHandler) ShowDashboard(c *gin.Context) {
 	stats := h.calculateStats(agents)
 
 	// Get current agency from context (if available)
-	var currentAgency *agency.Agency
+	var currentAgency *models.Agency
 	if ag, exists := c.Get("agency"); exists {
-		if agencyPtr, ok := ag.(*agency.Agency); ok {
+		if agencyPtr, ok := ag.(*models.Agency); ok {
 			currentAgency = agencyPtr
 		}
 	}

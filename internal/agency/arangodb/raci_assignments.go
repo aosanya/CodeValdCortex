@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 )
 
@@ -82,7 +82,7 @@ func ensureRACIAssignmentIndexes(ctx context.Context, collection driver.Collecti
 }
 
 // CreateRACIAssignment creates a new RACI assignment edge
-func (r *Repository) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *agency.RACIAssignment) error {
+func (r *Repository) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *models.RACIAssignment) error {
 	// Get the agency document
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -131,7 +131,7 @@ func (r *Repository) CreateRACIAssignment(ctx context.Context, agencyID string, 
 }
 
 // GetRACIAssignmentsForWorkItem retrieves all RACI assignments for a work item
-func (r *Repository) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*agency.RACIAssignment, error) {
+func (r *Repository) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*models.RACIAssignment, error) {
 	// Get the agency document
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -158,7 +158,7 @@ func (r *Repository) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID
 
 	if !exists {
 		// No assignments yet - return empty array
-		return []*agency.RACIAssignment{}, nil
+		return []*models.RACIAssignment{}, nil
 	}
 
 	// Get collection
@@ -185,9 +185,9 @@ func (r *Repository) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID
 	}
 	defer cursor.Close()
 
-	var assignments []*agency.RACIAssignment
+	var assignments []*models.RACIAssignment
 	for cursor.HasMore() {
-		var assignment agency.RACIAssignment
+		var assignment models.RACIAssignment
 		_, err := cursor.ReadDocument(ctx, &assignment)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read assignment: %w", err)
@@ -199,7 +199,7 @@ func (r *Repository) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID
 }
 
 // GetRACIAssignmentsForRole retrieves all RACI assignments for a role
-func (r *Repository) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleKey string) ([]*agency.RACIAssignment, error) {
+func (r *Repository) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleKey string) ([]*models.RACIAssignment, error) {
 	// Get the agency document
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -226,7 +226,7 @@ func (r *Repository) GetRACIAssignmentsForRole(ctx context.Context, agencyID str
 
 	if !exists {
 		// No assignments yet - return empty array
-		return []*agency.RACIAssignment{}, nil
+		return []*models.RACIAssignment{}, nil
 	}
 
 	// Get collection
@@ -253,9 +253,9 @@ func (r *Repository) GetRACIAssignmentsForRole(ctx context.Context, agencyID str
 	}
 	defer cursor.Close()
 
-	var assignments []*agency.RACIAssignment
+	var assignments []*models.RACIAssignment
 	for cursor.HasMore() {
-		var assignment agency.RACIAssignment
+		var assignment models.RACIAssignment
 		_, err := cursor.ReadDocument(ctx, &assignment)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read assignment: %w", err)
@@ -267,7 +267,7 @@ func (r *Repository) GetRACIAssignmentsForRole(ctx context.Context, agencyID str
 }
 
 // GetAllRACIAssignments retrieves all RACI assignments for an agency
-func (r *Repository) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*agency.RACIAssignment, error) {
+func (r *Repository) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*models.RACIAssignment, error) {
 	// Get the agency document
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -294,7 +294,7 @@ func (r *Repository) GetAllRACIAssignments(ctx context.Context, agencyID string)
 
 	if !exists {
 		// No assignments yet - return empty array
-		return []*agency.RACIAssignment{}, nil
+		return []*models.RACIAssignment{}, nil
 	}
 
 	// Get collection
@@ -319,9 +319,9 @@ func (r *Repository) GetAllRACIAssignments(ctx context.Context, agencyID string)
 	}
 	defer cursor.Close()
 
-	var assignments []*agency.RACIAssignment
+	var assignments []*models.RACIAssignment
 	for cursor.HasMore() {
-		var assignment agency.RACIAssignment
+		var assignment models.RACIAssignment
 		_, err := cursor.ReadDocument(ctx, &assignment)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read assignment: %w", err)
@@ -333,7 +333,7 @@ func (r *Repository) GetAllRACIAssignments(ctx context.Context, agencyID string)
 }
 
 // UpdateRACIAssignment updates an existing RACI assignment
-func (r *Repository) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *agency.RACIAssignment) error {
+func (r *Repository) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *models.RACIAssignment) error {
 	// Get agency-specific database
 	agencyDB, err := r.getAgencyDatabase(ctx, agencyID)
 	if err != nil {

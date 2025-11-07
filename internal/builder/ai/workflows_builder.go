@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/sirupsen/logrus"
 )
@@ -26,7 +26,7 @@ func NewAIWorkflowsBuilder(llmClient LLMClient, logger *logrus.Logger) *Workflow
 }
 
 // GenerateWorkflowsFromContext generates workflow suggestions based on agency context
-func (b *WorkflowsBuilder) GenerateWorkflowsFromContext(ctx context.Context, ag *agency.Agency, overview *agency.Overview, workItems []agency.WorkItem) ([]workflow.Workflow, error) {
+func (b *WorkflowsBuilder) GenerateWorkflowsFromContext(ctx context.Context, ag *models.Agency, overview *models.Overview, workItems []models.WorkItem) ([]workflow.Workflow, error) {
 	prompt := b.buildContextPrompt(ag, overview, workItems)
 
 	systemPrompt := `You are an expert workflow architect specializing in designing efficient work item orchestration flows.
@@ -100,7 +100,7 @@ Create ONLY 1 simple workflow that makes sense for this agency. Keep it minimal 
 }
 
 // GenerateWorkflowWithPrompt generates a workflow based on user's natural language prompt
-func (b *WorkflowsBuilder) GenerateWorkflowWithPrompt(ctx context.Context, ag *agency.Agency, userPrompt string, workItems []agency.WorkItem) (*workflow.Workflow, error) {
+func (b *WorkflowsBuilder) GenerateWorkflowWithPrompt(ctx context.Context, ag *models.Agency, userPrompt string, workItems []models.WorkItem) (*workflow.Workflow, error) {
 	prompt := b.buildPromptWithContext(ag, userPrompt, workItems)
 
 	systemPrompt := `You are an expert workflow designer. Based on the user's request and available work items, create a single workflow.
@@ -192,7 +192,7 @@ Preserve the workflow structure and ensure all connections remain valid.`
 }
 
 // buildContextPrompt creates a prompt with agency context
-func (b *WorkflowsBuilder) buildContextPrompt(ag *agency.Agency, overview *agency.Overview, workItems []agency.WorkItem) string {
+func (b *WorkflowsBuilder) buildContextPrompt(ag *models.Agency, overview *models.Overview, workItems []models.WorkItem) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("Agency: %s\n\n", ag.Name))
@@ -215,7 +215,7 @@ func (b *WorkflowsBuilder) buildContextPrompt(ag *agency.Agency, overview *agenc
 }
 
 // buildPromptWithContext creates a prompt for user-requested workflow
-func (b *WorkflowsBuilder) buildPromptWithContext(ag *agency.Agency, userPrompt string, workItems []agency.WorkItem) string {
+func (b *WorkflowsBuilder) buildPromptWithContext(ag *models.Agency, userPrompt string, workItems []models.WorkItem) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("Agency: %s\n\n", ag.Name))

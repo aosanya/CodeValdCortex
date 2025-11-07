@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/google/uuid"
 )
 
 // Validator defines the interface for agency validation
 type Validator interface {
-	ValidateAgency(agency *Agency) error
+	ValidateAgency(agency *models.Agency) error
 }
 
 // validator implements the Validator interface
@@ -21,7 +22,7 @@ func NewValidator() Validator {
 }
 
 // ValidateAgency validates an agency's fields
-func (v *validator) ValidateAgency(agency *Agency) error {
+func (v *validator) ValidateAgency(agency *models.Agency) error {
 	if agency == nil {
 		return fmt.Errorf("agency cannot be nil")
 	}
@@ -81,9 +82,9 @@ func (v *validator) ValidateAgency(agency *Agency) error {
 }
 
 // isValidStatus checks if the status is valid
-func isValidStatus(status AgencyStatus) bool {
+func isValidStatus(status models.AgencyStatus) bool {
 	switch status {
-	case AgencyStatusActive, AgencyStatusInactive, AgencyStatusPaused, AgencyStatusArchived:
+	case models.AgencyStatusActive, models.AgencyStatusInactive, models.AgencyStatusPaused, models.AgencyStatusArchived:
 		return true
 	default:
 		return false

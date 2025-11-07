@@ -3,7 +3,7 @@ package ai_refine
 import (
 	"net/http"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
@@ -44,7 +44,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to fetch overview")
 		// Create empty overview if not found
-		overview = &agency.Overview{
+		overview = &models.Overview{
 			AgencyID:     agencyID,
 			Introduction: "",
 		}

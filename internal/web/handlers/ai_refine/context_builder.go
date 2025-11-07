@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
@@ -27,21 +28,21 @@ func NewBuilderContextBuilder(agencyService agency.Service, roleService registry
 
 // BuildBuilderContext gathers all agency context data and returns it as a structured BuilderContext
 // This is the centralized function used by all AI operations to ensure consistent context
-func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *agency.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
+func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *models.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
 	b.logger.WithField("agency_id", agencyObj.ID).Debug("Building AI context data")
 
 	// Get all goals for context
 	goals, err := b.agencyService.GetGoals(ctx, agencyObj.ID)
 	if err != nil {
 		b.logger.WithError(err).Warn("Failed to fetch goals, continuing without them")
-		goals = []*agency.Goal{}
+		goals = []*models.Goal{}
 	}
 
 	// Get all units of work for context
 	workItems, err := b.agencyService.GetWorkItems(ctx, agencyObj.ID)
 	if err != nil {
 		b.logger.WithError(err).Warn("Failed to fetch units of work, continuing without them")
-		workItems = []*agency.WorkItem{}
+		workItems = []*models.WorkItem{}
 	}
 
 	// Get all roles for context
@@ -55,7 +56,7 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 	assignments, err := b.agencyService.GetAllRACIAssignments(ctx, agencyObj.ID)
 	if err != nil {
 		b.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
-		assignments = []*agency.RACIAssignment{}
+		assignments = []*models.RACIAssignment{}
 	}
 
 	builderContext := builder.BuilderContext{

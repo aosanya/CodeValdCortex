@@ -9,12 +9,12 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 )
 
 // OverviewContent renders the overview section with three navigation nodes
-func OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
+func OverviewContent(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -100,7 +100,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 }
 
 // OverviewNavigationList shows the three navigation nodes
-func OverviewNavigationList(currentAgency *agency.Agency) templ.Component {
+func OverviewNavigationList(currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -130,7 +130,7 @@ func OverviewNavigationList(currentAgency *agency.Agency) templ.Component {
 }
 
 // IntroductionContent shows the introduction section
-func IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
+func IntroductionContent(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -168,7 +168,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 }
 
 // GoalDefinitionContent shows the goal definition section
-func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func GoalDefinitionContent(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -210,7 +210,7 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 }
 
 // WorkItemsContent shows the work items section
-func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func WorkItemsContent(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -252,7 +252,7 @@ func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 }
 
 // OverviewRolesContent shows the roles section in the overview
-func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func OverviewRolesContent(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -294,7 +294,7 @@ func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Convers
 }
 
 // RACIMatrixContent shows the RACI matrix section in the overview
-func RACIMatrixContent(currentAgency *agency.Agency) templ.Component {
+func RACIMatrixContent(currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -324,7 +324,7 @@ func RACIMatrixContent(currentAgency *agency.Agency) templ.Component {
 }
 
 // WorkflowsContent renders the workflows section with AI operations and workflow management
-func WorkflowsContent(currentAgency *agency.Agency) templ.Component {
+func WorkflowsContent(currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

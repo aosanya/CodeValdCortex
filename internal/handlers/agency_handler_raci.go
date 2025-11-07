@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -65,11 +65,11 @@ func (h *AgencyHandler) SaveAgencyRACIMatrix(c *gin.Context) {
 	existingAssignments, err := h.service.GetAllRACIAssignments(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("[RACI SAVE] Failed to fetch existing assignments, will create new ones")
-		existingAssignments = []*agency.RACIAssignment{}
+		existingAssignments = []*models.RACIAssignment{}
 	}
 
 	// Build map of existing assignments for quick lookup
-	existingMap := make(map[string]*agency.RACIAssignment)
+	existingMap := make(map[string]*models.RACIAssignment)
 	for _, assignment := range existingAssignments {
 		key := assignment.WorkItemKey + ":" + assignment.RoleKey
 		existingMap[key] = assignment
@@ -94,7 +94,7 @@ func (h *AgencyHandler) SaveAgencyRACIMatrix(c *gin.Context) {
 				delete(existingMap, lookupKey) // Remove from map so we know it was processed
 			} else {
 				// Create new assignment
-				newAssignment := &agency.RACIAssignment{
+				newAssignment := &models.RACIAssignment{
 					From:        "work_items/" + workItemKey,
 					To:          "roles/" + roleKey,
 					WorkItemKey: workItemKey,

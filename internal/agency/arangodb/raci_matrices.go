@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 )
 
@@ -14,7 +14,7 @@ const (
 )
 
 // SaveRACIMatrix saves a RACI matrix to the agency database
-func (r *Repository) SaveRACIMatrix(ctx context.Context, agencyID string, matrix *agency.RACIMatrix) error {
+func (r *Repository) SaveRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix) error {
 	// Get agency-specific database
 	agencyDB, err := r.getAgencyDatabase(ctx, agencyID)
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *Repository) SaveRACIMatrix(ctx context.Context, agencyID string, matrix
 }
 
 // GetRACIMatrix retrieves a RACI matrix by key
-func (r *Repository) GetRACIMatrix(ctx context.Context, agencyID string, key string) (*agency.RACIMatrix, error) {
+func (r *Repository) GetRACIMatrix(ctx context.Context, agencyID string, key string) (*models.RACIMatrix, error) {
 	// Get agency-specific database
 	agencyDB, err := r.getAgencyDatabase(ctx, agencyID)
 	if err != nil {
@@ -54,7 +54,7 @@ func (r *Repository) GetRACIMatrix(ctx context.Context, agencyID string, key str
 	}
 
 	// Read the document
-	var matrix agency.RACIMatrix
+	var matrix models.RACIMatrix
 	_, err = collection.ReadDocument(ctx, key, &matrix)
 	if err != nil {
 		if driver.IsNotFound(err) {
@@ -67,7 +67,7 @@ func (r *Repository) GetRACIMatrix(ctx context.Context, agencyID string, key str
 }
 
 // ListRACIMatrices lists all RACI matrices for an agency
-func (r *Repository) ListRACIMatrices(ctx context.Context, agencyID string) ([]*agency.RACIMatrix, error) {
+func (r *Repository) ListRACIMatrices(ctx context.Context, agencyID string) ([]*models.RACIMatrix, error) {
 	// Get agency-specific database
 	agencyDB, err := r.getAgencyDatabase(ctx, agencyID)
 	if err != nil {
@@ -92,9 +92,9 @@ func (r *Repository) ListRACIMatrices(ctx context.Context, agencyID string) ([]*
 	}
 	defer cursor.Close()
 
-	var matrices []*agency.RACIMatrix
+	var matrices []*models.RACIMatrix
 	for {
-		var matrix agency.RACIMatrix
+		var matrix models.RACIMatrix
 		_, err := cursor.ReadDocument(ctx, &matrix)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -108,7 +108,7 @@ func (r *Repository) ListRACIMatrices(ctx context.Context, agencyID string) ([]*
 }
 
 // UpdateRACIMatrix updates an existing RACI matrix
-func (r *Repository) UpdateRACIMatrix(ctx context.Context, agencyID string, matrix *agency.RACIMatrix) error {
+func (r *Repository) UpdateRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix) error {
 	// Get agency-specific database
 	agencyDB, err := r.getAgencyDatabase(ctx, agencyID)
 	if err != nil {

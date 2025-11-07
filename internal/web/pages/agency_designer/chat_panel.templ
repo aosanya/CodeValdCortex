@@ -2,11 +2,11 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // ChatPanel renders the AI chat panel for the agency designer
-templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<aside class="chat-panel">
 		<header class="chat-header">
 			<div class="chat-header-content">

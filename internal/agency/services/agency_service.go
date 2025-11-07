@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // AgencyService handles core agency CRUD operations
@@ -26,7 +27,7 @@ func NewAgencyService(repo agency.Repository, validator agency.Validator, dbInit
 }
 
 // CreateAgency creates a new agency
-func (s *AgencyService) CreateAgency(ctx context.Context, agencyDoc *agency.Agency) error {
+func (s *AgencyService) CreateAgency(ctx context.Context, agencyDoc *models.Agency) error {
 	// Validate agency configuration
 	if err := s.validator.ValidateAgency(agencyDoc); err != nil {
 		return fmt.Errorf("validation failed: %w", err)
@@ -39,7 +40,7 @@ func (s *AgencyService) CreateAgency(ctx context.Context, agencyDoc *agency.Agen
 
 	// Set default status if not provided
 	if agencyDoc.Status == "" {
-		agencyDoc.Status = agency.AgencyStatusActive
+		agencyDoc.Status = models.AgencyStatusActive
 	}
 
 	// Set database field if not provided
@@ -64,7 +65,7 @@ func (s *AgencyService) CreateAgency(ctx context.Context, agencyDoc *agency.Agen
 }
 
 // GetAgency retrieves an agency by ID
-func (s *AgencyService) GetAgency(ctx context.Context, id string) (*agency.Agency, error) {
+func (s *AgencyService) GetAgency(ctx context.Context, id string) (*models.Agency, error) {
 	agencyDoc, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get agency: %w", err)
@@ -73,7 +74,7 @@ func (s *AgencyService) GetAgency(ctx context.Context, id string) (*agency.Agenc
 }
 
 // ListAgencies retrieves agencies with optional filtering
-func (s *AgencyService) ListAgencies(ctx context.Context, filters agency.AgencyFilters) ([]*agency.Agency, error) {
+func (s *AgencyService) ListAgencies(ctx context.Context, filters models.AgencyFilters) ([]*models.Agency, error) {
 	agencies, err := s.repo.List(ctx, filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list agencies: %w", err)
@@ -82,7 +83,7 @@ func (s *AgencyService) ListAgencies(ctx context.Context, filters agency.AgencyF
 }
 
 // UpdateAgency updates an existing agency
-func (s *AgencyService) UpdateAgency(ctx context.Context, id string, updates agency.AgencyUpdates) error {
+func (s *AgencyService) UpdateAgency(ctx context.Context, id string, updates models.AgencyUpdates) error {
 	// Get existing agency
 	existing, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -133,7 +134,7 @@ func (s *AgencyService) SetActiveAgency(ctx context.Context, id string) error {
 }
 
 // GetActiveAgency returns the currently active agency
-func (s *AgencyService) GetActiveAgency(ctx context.Context) (*agency.Agency, error) {
+func (s *AgencyService) GetActiveAgency(ctx context.Context) (*models.Agency, error) {
 	if s.active == "" {
 		return nil, fmt.Errorf("no active agency set")
 	}
@@ -142,7 +143,7 @@ func (s *AgencyService) GetActiveAgency(ctx context.Context) (*agency.Agency, er
 }
 
 // GetAgencyStatistics retrieves operational statistics for an agency
-func (s *AgencyService) GetAgencyStatistics(ctx context.Context, id string) (*agency.AgencyStatistics, error) {
+func (s *AgencyService) GetAgencyStatistics(ctx context.Context, id string) (*models.AgencyStatistics, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -158,7 +159,7 @@ func (s *AgencyService) GetAgencyStatistics(ctx context.Context, id string) (*ag
 }
 
 // applyUpdates applies the updates to the agency
-func (s *AgencyService) applyUpdates(agencyDoc *agency.Agency, updates agency.AgencyUpdates) {
+func (s *AgencyService) applyUpdates(agencyDoc *models.Agency, updates models.AgencyUpdates) {
 	if updates.Name != nil {
 		agencyDoc.Name = *updates.Name
 	}

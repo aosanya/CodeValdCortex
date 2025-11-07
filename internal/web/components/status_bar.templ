@@ -2,11 +2,11 @@ package components
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // StatusBar renders the VS Code-style status bar at the bottom of the page
-templ StatusBar(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ StatusBar(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<div class="vscode-status-bar">
 		<div class="status-bar-left">
 			<span class="status-item">
@@ -45,7 +45,7 @@ templ StatusBar(currentAgency *agency.Agency, conversation *ai.ConversationConte
 }
 
 // StatusBarSimple renders a simpler status bar without conversation info
-templ StatusBarSimple(currentAgency *agency.Agency, leftItems ...string) {
+templ StatusBarSimple(currentAgency *models.Agency, leftItems ...string) {
 	<div class="vscode-status-bar">
 		<div class="status-bar-left">
 			<span class="status-item">

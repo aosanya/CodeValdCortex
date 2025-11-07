@@ -2,11 +2,11 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // IntroductionCard renders the introduction card component
-templ IntroductionCard(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
+templ IntroductionCard(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) {
 	<div class="box">
 		<div id="introduction-content">
 			<div class="content">

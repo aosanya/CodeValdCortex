@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/database"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
@@ -48,7 +49,7 @@ func NewHomepageHandler(
 // ShowHomepage renders the agency selection homepage
 func (h *HomepageHandler) ShowHomepage(c *gin.Context) {
 	// List all agencies
-	filters := agency.AgencyFilters{
+	filters := models.AgencyFilters{
 		// Default: show all active and inactive agencies
 		// Exclude archived by default
 	}

@@ -301,16 +301,16 @@ type RACIMatrix struct {
 type RACIActivity struct {
     Name        string              `json:"name"`
     Description string              `json:"description"`
-    Assignments map[string]RACIRole `json:"assignments"`
+    Assignments map[string]models.RACIRole `json:"assignments"`
 }
 
-type RACIRole string
+type models.RACIRole string
 
 const (
-    RACIResponsible RACIRole = "R"
-    RACIAccountable RACIRole = "A"
-    RACIConsulted   RACIRole = "C"
-    RACIInformed    RACIRole = "I"
+    models.RACIResponsible models.RACIRole = "R"
+    RACIAccountable models.RACIRole = "A"
+    RACIConsulted   models.RACIRole = "C"
+    RACIInformed    models.RACIRole = "I"
 )
 ```
 
@@ -347,16 +347,16 @@ type RACIMatrix struct {
 type RACIActivity struct {
     Name        string              `json:"name"`
     Description string              `json:"description"`
-    Assignments map[string]RACIRole `json:"assignments"`
+    Assignments map[string]models.RACIRole `json:"assignments"`
 }
 
-type RACIRole string
+type models.RACIRole string
 
 const (
-    RACIResponsible RACIRole = "R"
-    RACIAccountable RACIRole = "A"
-    RACIConsulted   RACIRole = "C"
-    RACIInformed    RACIRole = "I"
+    models.RACIResponsible models.RACIRole = "R"
+    RACIAccountable models.RACIRole = "A"
+    RACIConsulted   models.RACIRole = "C"
+    RACIInformed    models.RACIRole = "I"
 )
 ```
 

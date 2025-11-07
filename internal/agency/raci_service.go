@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/google/uuid"
 )
 
@@ -25,7 +26,7 @@ func NewRACIService(repo Repository) *RACIService {
 }
 
 // CreateMatrix creates a new RACI matrix
-func (s *RACIService) CreateMatrix(ctx context.Context, agencyID string, req *CreateRACIMatrixRequest) (*RACIMatrix, error) {
+func (s *RACIService) CreateMatrix(ctx context.Context, agencyID string, req *models.CreateRACIMatrixRequest) (*models.RACIMatrix, error) {
 	// Generate key
 	key := fmt.Sprintf("raci_%s", uuid.New().String()[:8])
 
@@ -39,7 +40,7 @@ func (s *RACIService) CreateMatrix(ctx context.Context, agencyID string, req *Cr
 		}
 	}
 
-	matrix := &RACIMatrix{
+	matrix := &models.RACIMatrix{
 		Key:         key,
 		AgencyID:    agencyID,
 		WorkItemKey: req.WorkItemKey,
@@ -73,7 +74,7 @@ func (s *RACIService) CreateMatrix(ctx context.Context, agencyID string, req *Cr
 }
 
 // GetMatrix retrieves a RACI matrix by key
-func (s *RACIService) GetMatrix(ctx context.Context, agencyID, key string) (*RACIMatrix, error) {
+func (s *RACIService) GetMatrix(ctx context.Context, agencyID, key string) (*models.RACIMatrix, error) {
 	matrix, err := s.repo.GetRACIMatrix(ctx, agencyID, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get RACI matrix: %w", err)
@@ -82,7 +83,7 @@ func (s *RACIService) GetMatrix(ctx context.Context, agencyID, key string) (*RAC
 }
 
 // ListMatrices lists all RACI matrices for an agency
-func (s *RACIService) ListMatrices(ctx context.Context, agencyID string) ([]*RACIMatrix, error) {
+func (s *RACIService) ListMatrices(ctx context.Context, agencyID string) ([]*models.RACIMatrix, error) {
 	matrices, err := s.repo.ListRACIMatrices(ctx, agencyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list RACI matrices: %w", err)
@@ -91,7 +92,7 @@ func (s *RACIService) ListMatrices(ctx context.Context, agencyID string) ([]*RAC
 }
 
 // UpdateMatrix updates an existing RACI matrix
-func (s *RACIService) UpdateMatrix(ctx context.Context, agencyID, key string, req *UpdateRACIMatrixRequest) (*RACIMatrix, error) {
+func (s *RACIService) UpdateMatrix(ctx context.Context, agencyID, key string, req *models.UpdateRACIMatrixRequest) (*models.RACIMatrix, error) {
 	// Get existing matrix
 	matrix, err := s.repo.GetRACIMatrix(ctx, agencyID, key)
 	if err != nil {
@@ -146,7 +147,7 @@ func (s *RACIService) DeleteMatrix(ctx context.Context, agencyID, key string) er
 }
 
 // ValidateMatrix validates a RACI matrix and returns detailed results
-func (s *RACIService) ValidateMatrix(ctx context.Context, agencyID, key string) (*RACIValidationResult, error) {
+func (s *RACIService) ValidateMatrix(ctx context.Context, agencyID, key string) (*models.RACIValidationResult, error) {
 	matrix, err := s.repo.GetRACIMatrix(ctx, agencyID, key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get RACI matrix: %w", err)
@@ -156,12 +157,12 @@ func (s *RACIService) ValidateMatrix(ctx context.Context, agencyID, key string) 
 }
 
 // GetTemplates returns available RACI templates
-func (s *RACIService) GetTemplates(ctx context.Context) ([]*RACITemplate, error) {
+func (s *RACIService) GetTemplates(ctx context.Context) ([]*models.RACITemplate, error) {
 	// Return built-in templates
 	templates := s.getBuiltInTemplates()
 
 	// TODO: Also fetch custom templates from database
-	// customTemplates, err := s.repo.ListRACITemplates(ctx)
+	// customTemplates, err := s.repo.Listmodels.RACITemplates(ctx)
 	// if err == nil {
 	//     templates = append(templates, customTemplates...)
 	// }
@@ -170,10 +171,10 @@ func (s *RACIService) GetTemplates(ctx context.Context) ([]*RACITemplate, error)
 }
 
 // ApplyTemplate applies a template to create a new RACI matrix
-func (s *RACIService) ApplyTemplate(ctx context.Context, agencyID, templateID string, name string) (*RACIMatrix, error) {
+func (s *RACIService) ApplyTemplate(ctx context.Context, agencyID, templateID string, name string) (*models.RACIMatrix, error) {
 	// Get template
 	templates := s.getBuiltInTemplates()
-	var template *RACITemplate
+	var template *models.RACITemplate
 	for _, t := range templates {
 		if t.Key == templateID {
 			template = t
@@ -186,7 +187,7 @@ func (s *RACIService) ApplyTemplate(ctx context.Context, agencyID, templateID st
 	}
 
 	// Create matrix from template
-	req := &CreateRACIMatrixRequest{
+	req := &models.CreateRACIMatrixRequest{
 		Name:       name,
 		Activities: template.Activities,
 		Roles:      template.Roles,
@@ -280,8 +281,8 @@ func (s *RACIService) ExportToMarkdown(ctx context.Context, agencyID, key string
 }
 
 // getBuiltInTemplates returns the built-in RACI templates
-func (s *RACIService) getBuiltInTemplates() []*RACITemplate {
-	return []*RACITemplate{
+func (s *RACIService) getBuiltInTemplates() []*models.RACITemplate {
+	return []*models.RACITemplate{
 		{
 			Key:         "software-dev",
 			Name:        "Software Development Project",
@@ -289,13 +290,13 @@ func (s *RACIService) getBuiltInTemplates() []*RACITemplate {
 			Category:    "Software Development",
 			IsPublic:    true,
 			Roles:       []string{"Project Manager", "Tech Lead", "Developer", "QA Engineer", "DevOps"},
-			Activities: []RACIActivity{
-				{ID: "1", Name: "Requirements Gathering", Description: "Collect and document project requirements", Order: 1, Assignments: map[string]RACIRole{"Project Manager": RACIAccountable, "Tech Lead": RACIConsulted, "Developer": RACIInformed}},
-				{ID: "2", Name: "Design Architecture", Description: "Design system architecture", Order: 2, Assignments: map[string]RACIRole{"Tech Lead": RACIAccountable, "Developer": RACIConsulted, "Project Manager": RACIInformed}},
-				{ID: "3", Name: "Implementation", Description: "Write code and implement features", Order: 3, Assignments: map[string]RACIRole{"Developer": RACIResponsible, "Tech Lead": RACIAccountable, "QA Engineer": RACIInformed}},
-				{ID: "4", Name: "Code Review", Description: "Review and approve code changes", Order: 4, Assignments: map[string]RACIRole{"Tech Lead": RACIAccountable, "Developer": RACIConsulted}},
-				{ID: "5", Name: "Testing", Description: "Execute test plans and report bugs", Order: 5, Assignments: map[string]RACIRole{"QA Engineer": RACIResponsible, "Tech Lead": RACIAccountable, "Developer": RACIConsulted}},
-				{ID: "6", Name: "Deployment", Description: "Deploy to production environment", Order: 6, Assignments: map[string]RACIRole{"DevOps": RACIResponsible, "Tech Lead": RACIAccountable, "Project Manager": RACIInformed}},
+			Activities: []models.RACIActivity{
+				{ID: "1", Name: "Requirements Gathering", Description: "Collect and document project requirements", Order: 1, Assignments: map[string]models.RACIRole{"Project Manager": models.RACIAccountable, "Tech Lead": models.RACIConsulted, "Developer": models.RACIInformed}},
+				{ID: "2", Name: "Design Architecture", Description: "Design system architecture", Order: 2, Assignments: map[string]models.RACIRole{"Tech Lead": models.RACIAccountable, "Developer": models.RACIConsulted, "Project Manager": models.RACIInformed}},
+				{ID: "3", Name: "Implementation", Description: "Write code and implement features", Order: 3, Assignments: map[string]models.RACIRole{"Developer": models.RACIResponsible, "Tech Lead": models.RACIAccountable, "QA Engineer": models.RACIInformed}},
+				{ID: "4", Name: "Code Review", Description: "Review and approve code changes", Order: 4, Assignments: map[string]models.RACIRole{"Tech Lead": models.RACIAccountable, "Developer": models.RACIConsulted}},
+				{ID: "5", Name: "Testing", Description: "Execute test plans and report bugs", Order: 5, Assignments: map[string]models.RACIRole{"QA Engineer": models.RACIResponsible, "Tech Lead": models.RACIAccountable, "Developer": models.RACIConsulted}},
+				{ID: "6", Name: "Deployment", Description: "Deploy to production environment", Order: 6, Assignments: map[string]models.RACIRole{"DevOps": models.RACIResponsible, "Tech Lead": models.RACIAccountable, "Project Manager": models.RACIInformed}},
 			},
 		},
 		{
@@ -305,12 +306,12 @@ func (s *RACIService) getBuiltInTemplates() []*RACITemplate {
 			Category:    "Research",
 			IsPublic:    true,
 			Roles:       []string{"Research Lead", "Analyst", "Stakeholder", "Reviewer"},
-			Activities: []RACIActivity{
-				{ID: "1", Name: "Define Research Scope", Description: "Define research objectives and scope", Order: 1, Assignments: map[string]RACIRole{"Research Lead": RACIAccountable, "Stakeholder": RACIConsulted}},
-				{ID: "2", Name: "Data Collection", Description: "Gather and organize data", Order: 2, Assignments: map[string]RACIRole{"Analyst": RACIResponsible, "Research Lead": RACIAccountable}},
-				{ID: "3", Name: "Analysis", Description: "Analyze data and draw insights", Order: 3, Assignments: map[string]RACIRole{"Analyst": RACIResponsible, "Research Lead": RACIAccountable, "Reviewer": RACIConsulted}},
-				{ID: "4", Name: "Report Writing", Description: "Document findings and recommendations", Order: 4, Assignments: map[string]RACIRole{"Research Lead": RACIAccountable, "Analyst": RACIResponsible, "Reviewer": RACIConsulted}},
-				{ID: "5", Name: "Presentation", Description: "Present findings to stakeholders", Order: 5, Assignments: map[string]RACIRole{"Research Lead": RACIAccountable, "Stakeholder": RACIInformed}},
+			Activities: []models.RACIActivity{
+				{ID: "1", Name: "Define Research Scope", Description: "Define research objectives and scope", Order: 1, Assignments: map[string]models.RACIRole{"Research Lead": models.RACIAccountable, "Stakeholder": models.RACIConsulted}},
+				{ID: "2", Name: "Data Collection", Description: "Gather and organize data", Order: 2, Assignments: map[string]models.RACIRole{"Analyst": models.RACIResponsible, "Research Lead": models.RACIAccountable}},
+				{ID: "3", Name: "Analysis", Description: "Analyze data and draw insights", Order: 3, Assignments: map[string]models.RACIRole{"Analyst": models.RACIResponsible, "Research Lead": models.RACIAccountable, "Reviewer": models.RACIConsulted}},
+				{ID: "4", Name: "Report Writing", Description: "Document findings and recommendations", Order: 4, Assignments: map[string]models.RACIRole{"Research Lead": models.RACIAccountable, "Analyst": models.RACIResponsible, "Reviewer": models.RACIConsulted}},
+				{ID: "5", Name: "Presentation", Description: "Present findings to stakeholders", Order: 5, Assignments: map[string]models.RACIRole{"Research Lead": models.RACIAccountable, "Stakeholder": models.RACIInformed}},
 			},
 		},
 		{
@@ -320,12 +321,12 @@ func (s *RACIService) getBuiltInTemplates() []*RACITemplate {
 			Category:    "Infrastructure",
 			IsPublic:    true,
 			Roles:       []string{"DevOps Lead", "System Admin", "Security Engineer", "Developer", "Manager"},
-			Activities: []RACIActivity{
-				{ID: "1", Name: "Infrastructure Planning", Description: "Plan infrastructure requirements", Order: 1, Assignments: map[string]RACIRole{"DevOps Lead": RACIAccountable, "System Admin": RACIConsulted, "Manager": RACIInformed}},
-				{ID: "2", Name: "Security Review", Description: "Review security requirements", Order: 2, Assignments: map[string]RACIRole{"Security Engineer": RACIAccountable, "DevOps Lead": RACIConsulted}},
-				{ID: "3", Name: "Infrastructure Setup", Description: "Configure servers and services", Order: 3, Assignments: map[string]RACIRole{"System Admin": RACIResponsible, "DevOps Lead": RACIAccountable}},
-				{ID: "4", Name: "Deployment Configuration", Description: "Configure deployment pipelines", Order: 4, Assignments: map[string]RACIRole{"DevOps Lead": RACIResponsible, "Developer": RACIConsulted}},
-				{ID: "5", Name: "Monitoring Setup", Description: "Set up monitoring and alerting", Order: 5, Assignments: map[string]RACIRole{"System Admin": RACIResponsible, "DevOps Lead": RACIAccountable}},
+			Activities: []models.RACIActivity{
+				{ID: "1", Name: "Infrastructure Planning", Description: "Plan infrastructure requirements", Order: 1, Assignments: map[string]models.RACIRole{"DevOps Lead": models.RACIAccountable, "System Admin": models.RACIConsulted, "Manager": models.RACIInformed}},
+				{ID: "2", Name: "Security Review", Description: "Review security requirements", Order: 2, Assignments: map[string]models.RACIRole{"Security Engineer": models.RACIAccountable, "DevOps Lead": models.RACIConsulted}},
+				{ID: "3", Name: "Infrastructure Setup", Description: "Configure servers and services", Order: 3, Assignments: map[string]models.RACIRole{"System Admin": models.RACIResponsible, "DevOps Lead": models.RACIAccountable}},
+				{ID: "4", Name: "Deployment Configuration", Description: "Configure deployment pipelines", Order: 4, Assignments: map[string]models.RACIRole{"DevOps Lead": models.RACIResponsible, "Developer": models.RACIConsulted}},
+				{ID: "5", Name: "Monitoring Setup", Description: "Set up monitoring and alerting", Order: 5, Assignments: map[string]models.RACIRole{"System Admin": models.RACIResponsible, "DevOps Lead": models.RACIAccountable}},
 			},
 		},
 	}

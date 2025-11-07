@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 )
@@ -48,7 +48,7 @@ func (h *AgencyHandler) GetGoalsHTML(c *gin.Context) {
 func (h *AgencyHandler) CreateGoal(c *gin.Context) {
 	id := c.Param("id")
 
-	var req agency.CreateGoalRequest
+	var req models.CreateGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -68,7 +68,7 @@ func (h *AgencyHandler) UpdateGoal(c *gin.Context) {
 	id := c.Param("id")
 	goalKey := c.Param("goalKey")
 
-	var req agency.UpdateGoalRequest
+	var req models.UpdateGoalRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return

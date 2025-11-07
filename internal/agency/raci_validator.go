@@ -2,6 +2,8 @@ package agency
 
 import (
 	"fmt"
+
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RACIValidator provides validation logic for RACI matrices
@@ -13,12 +15,12 @@ func NewRACIValidator() *RACIValidator {
 }
 
 // ValidateMatrix validates a complete RACI matrix
-func (v *RACIValidator) ValidateMatrix(matrix *RACIMatrix) *RACIValidationResult {
-	result := &RACIValidationResult{
+func (v *RACIValidator) ValidateMatrix(matrix *models.RACIMatrix) *models.RACIValidationResult {
+	result := &models.RACIValidationResult{
 		IsValid:  true,
-		Errors:   []RACIValidationError{},
-		Warnings: []RACIValidationWarning{},
-		Summary: RACIValidationSummary{
+		Errors:   []models.RACIValidationError{},
+		Warnings: []models.RACIValidationWarning{},
+		Summary: models.RACIValidationSummary{
 			TotalActivities: len(matrix.Activities),
 		},
 	}
@@ -39,7 +41,7 @@ func (v *RACIValidator) ValidateMatrix(matrix *RACIMatrix) *RACIValidationResult
 }
 
 // validateActivity validates a single activity
-func (v *RACIValidator) validateActivity(activity *RACIActivity, result *RACIValidationResult) {
+func (v *RACIValidator) validateActivity(activity *models.RACIActivity, result *models.RACIValidationResult) {
 	// Count RACI roles
 	accountableCount := 0
 	responsibleCount := 0
@@ -48,27 +50,27 @@ func (v *RACIValidator) validateActivity(activity *RACIActivity, result *RACIVal
 
 	for _, role := range activity.Assignments {
 		switch role {
-		case RACIAccountable:
+		case models.RACIAccountable:
 			accountableCount++
-		case RACIResponsible:
+		case models.RACIResponsible:
 			responsibleCount++
-		case RACIConsulted:
+		case models.RACIConsulted:
 			consultedCount++
-		case RACIInformed:
+		case models.RACIInformed:
 			informedCount++
 		}
 	}
 
 	// Validation Rule 1: Must have exactly ONE Accountable
 	if accountableCount == 0 {
-		result.Errors = append(result.Errors, RACIValidationError{
+		result.Errors = append(result.Errors, models.RACIValidationError{
 			ActivityID: activity.ID,
 			Activity:   activity.Name,
 			ErrorType:  "missing_accountable",
 			Message:    fmt.Sprintf("Activity '%s' has no Accountable (A) role assigned. Each activity must have exactly one Accountable.", activity.Name),
 		})
 	} else if accountableCount > 1 {
-		result.Errors = append(result.Errors, RACIValidationError{
+		result.Errors = append(result.Errors, models.RACIValidationError{
 			ActivityID: activity.ID,
 			Activity:   activity.Name,
 			ErrorType:  "multiple_accountable",
@@ -78,7 +80,7 @@ func (v *RACIValidator) validateActivity(activity *RACIActivity, result *RACIVal
 
 	// Validation Rule 2: Must have at least ONE Responsible
 	if responsibleCount == 0 {
-		result.Errors = append(result.Errors, RACIValidationError{
+		result.Errors = append(result.Errors, models.RACIValidationError{
 			ActivityID: activity.ID,
 			Activity:   activity.Name,
 			ErrorType:  "missing_responsible",
@@ -88,7 +90,7 @@ func (v *RACIValidator) validateActivity(activity *RACIActivity, result *RACIVal
 
 	// Warning: No Consulted roles (not an error, but worth noting)
 	if consultedCount == 0 {
-		result.Warnings = append(result.Warnings, RACIValidationWarning{
+		result.Warnings = append(result.Warnings, models.RACIValidationWarning{
 			ActivityID:  activity.ID,
 			Activity:    activity.Name,
 			WarningType: "no_consulted",
@@ -98,7 +100,7 @@ func (v *RACIValidator) validateActivity(activity *RACIActivity, result *RACIVal
 
 	// Warning: No Informed roles (not an error, but worth noting)
 	if informedCount == 0 {
-		result.Warnings = append(result.Warnings, RACIValidationWarning{
+		result.Warnings = append(result.Warnings, models.RACIValidationWarning{
 			ActivityID:  activity.ID,
 			Activity:    activity.Name,
 			WarningType: "no_informed",
@@ -107,10 +109,10 @@ func (v *RACIValidator) validateActivity(activity *RACIActivity, result *RACIVal
 	}
 }
 
-// ValidateRACIRole checks if a RACI role value is valid
-func (v *RACIValidator) ValidateRACIRole(role RACIRole) bool {
+// Validatemodels.RACIRole checks if a RACI role value is valid
+func (v *RACIValidator) ValidateRACIRole(role models.RACIRole) bool {
 	switch role {
-	case RACIResponsible, RACIAccountable, RACIConsulted, RACIInformed:
+	case models.RACIResponsible, models.RACIAccountable, models.RACIConsulted, models.RACIInformed:
 		return true
 	default:
 		return false
@@ -142,7 +144,7 @@ func (v *RACIValidator) ValidateRoles(roles []string) []string {
 }
 
 // ValidateActivities checks if activities are valid
-func (v *RACIValidator) ValidateActivities(activities []RACIActivity, roles []string) []string {
+func (v *RACIValidator) ValidateActivities(activities []models.RACIActivity, roles []string) []string {
 	errors := []string{}
 
 	if len(activities) == 0 {

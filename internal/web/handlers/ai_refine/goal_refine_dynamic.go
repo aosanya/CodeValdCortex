@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -81,11 +81,11 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 	existingGoals, err := h.agencyService.GetGoals(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch existing goals")
-		existingGoals = []*agency.Goal{}
+		existingGoals = []*models.Goal{}
 	}
 
 	// Filter target goals if specific keys were provided
-	var targetGoals []*agency.Goal
+	var targetGoals []*models.Goal
 	if len(req.GoalKeys) > 0 {
 		goalKeyMap := make(map[string]bool)
 		for _, key := range req.GoalKeys {
@@ -106,14 +106,14 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch work items")
-		workItems = []*agency.WorkItem{}
+		workItems = []*models.WorkItem{}
 	}
 
 	// Get overview for introduction context
 	overview, err := h.agencyService.GetAgencyOverview(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch overview")
-		overview = &agency.Overview{AgencyID: agencyID}
+		overview = &models.Overview{AgencyID: agencyID}
 	}
 
 	// Build the AI builder context

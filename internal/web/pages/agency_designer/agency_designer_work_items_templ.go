@@ -10,12 +10,12 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"strings"
 )
 
 // WorkItemItem renders a single work item in the list as a table row
-func WorkItemItem(workItem *agency.WorkItem) templ.Component {
+func WorkItemItem(workItem *models.WorkItem) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -171,7 +171,7 @@ func WorkItemItem(workItem *agency.WorkItem) templ.Component {
 }
 
 // WorkItemsList renders all work items as table rows
-func WorkItemsList(workItems []*agency.WorkItem) templ.Component {
+func WorkItemsList(workItems []*models.WorkItem) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -210,7 +210,7 @@ func WorkItemsList(workItems []*agency.WorkItem) templ.Component {
 }
 
 // Helper function to get context text (description or title as fallback)
-func getWorkItemContextText(workItem *agency.WorkItem) string {
+func getWorkItemContextText(workItem *models.WorkItem) string {
 	if workItem.Description != "" {
 		return workItem.Description
 	}

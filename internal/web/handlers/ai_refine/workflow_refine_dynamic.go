@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -86,17 +86,17 @@ func (h *Handler) RefineWorkflows(c *gin.Context) {
 	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch work items for workflow context")
-		workItems = []*agency.WorkItem{}
+		workItems = []*models.WorkItem{}
 	}
 
 	// Convert pointers to values for AI builder
-	workItemValues := make([]agency.WorkItem, len(workItems))
+	workItemValues := make([]models.WorkItem, len(workItems))
 	for i, wi := range workItems {
 		workItemValues[i] = *wi
 	}
 
 	// Get overview for additional context (note: there's no GetOverview method, so we'll skip this)
-	var overview *agency.Overview = nil
+	var overview *models.Overview = nil
 
 	// Call the AI to determine the operation type
 	h.logger.WithFields(logrus.Fields{
@@ -125,7 +125,7 @@ func (h *Handler) RefineWorkflows(c *gin.Context) {
 }
 
 // generateWorkflowsFromContext generates workflows based on agency goals and work items
-func (h *Handler) generateWorkflowsFromContext(c *gin.Context, ag *agency.Agency, overview *agency.Overview, workItems []agency.WorkItem) {
+func (h *Handler) generateWorkflowsFromContext(c *gin.Context, ag *models.Agency, overview *models.Overview, workItems []models.WorkItem) {
 	// Note: GenerateWorkflowsFromContext doesn't take goals parameter
 	h.logger.WithFields(logrus.Fields{
 		"agency_id":  ag.ID,
@@ -183,7 +183,7 @@ func (h *Handler) generateWorkflowsFromContext(c *gin.Context, ag *agency.Agency
 }
 
 // generateWorkflowFromPrompt generates a single workflow from user's natural language prompt
-func (h *Handler) generateWorkflowFromPrompt(c *gin.Context, ag *agency.Agency, userPrompt string, workItems []agency.WorkItem) {
+func (h *Handler) generateWorkflowFromPrompt(c *gin.Context, ag *models.Agency, userPrompt string, workItems []models.WorkItem) {
 	h.logger.WithFields(logrus.Fields{
 		"agency_id": ag.ID,
 		"prompt":    userPrompt,
@@ -250,7 +250,7 @@ func (h *Handler) generateWorkflowFromPrompt(c *gin.Context, ag *agency.Agency, 
 }
 
 // refineSpecificWorkflow refines an existing workflow based on user feedback
-func (h *Handler) refineSpecificWorkflow(c *gin.Context, userFeedback string, workflowKey string, workItems []agency.WorkItem) {
+func (h *Handler) refineSpecificWorkflow(c *gin.Context, userFeedback string, workflowKey string, workItems []models.WorkItem) {
 	h.logger.WithFields(logrus.Fields{
 		"workflow_key": workflowKey,
 		"feedback":     userFeedback,

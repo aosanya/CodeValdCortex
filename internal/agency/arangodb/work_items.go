@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 )
 
 // CreateWorkItem creates a new work item in the agency's work_items collection
-func (r *Repository) CreateWorkItem(ctx context.Context, workItem *agency.WorkItem) error {
+func (r *Repository) CreateWorkItem(ctx context.Context, workItem *models.WorkItem) error {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, workItem.AgencyID)
 	if err != nil {
@@ -87,7 +87,7 @@ func (r *Repository) CreateWorkItem(ctx context.Context, workItem *agency.WorkIt
 }
 
 // GetWorkItems retrieves all work items for an agency
-func (r *Repository) GetWorkItems(ctx context.Context, agencyID string) ([]*agency.WorkItem, error) {
+func (r *Repository) GetWorkItems(ctx context.Context, agencyID string) ([]*models.WorkItem, error) {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -125,9 +125,9 @@ func (r *Repository) GetWorkItems(ctx context.Context, agencyID string) ([]*agen
 	}
 	defer cursor.Close()
 
-	var workItems []*agency.WorkItem
+	var workItems []*models.WorkItem
 	for cursor.HasMore() {
-		var workItem agency.WorkItem
+		var workItem models.WorkItem
 		_, err := cursor.ReadDocument(ctx, &workItem)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read work item: %w", err)
@@ -139,7 +139,7 @@ func (r *Repository) GetWorkItems(ctx context.Context, agencyID string) ([]*agen
 }
 
 // GetWorkItem retrieves a single work item by key
-func (r *Repository) GetWorkItem(ctx context.Context, agencyID string, key string) (*agency.WorkItem, error) {
+func (r *Repository) GetWorkItem(ctx context.Context, agencyID string, key string) (*models.WorkItem, error) {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -165,7 +165,7 @@ func (r *Repository) GetWorkItem(ctx context.Context, agencyID string, key strin
 	}
 
 	// Read the document
-	var workItem agency.WorkItem
+	var workItem models.WorkItem
 	_, err = workItemsColl.ReadDocument(ctx, key, &workItem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read work item: %w", err)
@@ -175,7 +175,7 @@ func (r *Repository) GetWorkItem(ctx context.Context, agencyID string, key strin
 }
 
 // GetWorkItemByCode retrieves a single work item by code
-func (r *Repository) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*agency.WorkItem, error) {
+func (r *Repository) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error) {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -218,7 +218,7 @@ func (r *Repository) GetWorkItemByCode(ctx context.Context, agencyID string, cod
 		return nil, fmt.Errorf("work item not found: %s", code)
 	}
 
-	var workItem agency.WorkItem
+	var workItem models.WorkItem
 	_, err = cursor.ReadDocument(ctx, &workItem)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read work item: %w", err)
@@ -228,7 +228,7 @@ func (r *Repository) GetWorkItemByCode(ctx context.Context, agencyID string, cod
 }
 
 // UpdateWorkItem updates an existing work item
-func (r *Repository) UpdateWorkItem(ctx context.Context, workItem *agency.WorkItem) error {
+func (r *Repository) UpdateWorkItem(ctx context.Context, workItem *models.WorkItem) error {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, workItem.AgencyID)
 	if err != nil {
@@ -292,7 +292,7 @@ func (r *Repository) DeleteWorkItem(ctx context.Context, agencyID string, key st
 	}
 
 	// Get the work item to find its number and code
-	var workItemToDelete agency.WorkItem
+	var workItemToDelete models.WorkItem
 	_, err = workItemsColl.ReadDocument(ctx, key, &workItemToDelete)
 	if err != nil {
 		return fmt.Errorf("failed to read work item: %w", err)
@@ -406,7 +406,7 @@ func (r *Repository) ValidateDependencies(ctx context.Context, agencyID string, 
 			return fmt.Errorf("dependency work item not found: %s", depCode)
 		}
 
-		var depWorkItem agency.WorkItem
+		var depWorkItem models.WorkItem
 		_, err = cursor.ReadDocument(ctx, &depWorkItem)
 		cursor.Close()
 		if err != nil {

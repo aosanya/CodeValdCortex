@@ -2,11 +2,11 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // OverviewContent renders the overview section with three navigation nodes
-templ OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
+templ OverviewContent(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) {
 	<div class="overview-layout">
 		<!-- Left Sidebar: Overview Navigation -->
 		<aside class="sidebar-panel">
@@ -55,7 +55,7 @@ templ OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 }
 
 // OverviewNavigationList shows the three navigation nodes
-templ OverviewNavigationList(currentAgency *agency.Agency) {
+templ OverviewNavigationList(currentAgency *models.Agency) {
 	<div class="overview-nav-list">
 		<div 
 			class="overview-nav-item is-active"
@@ -138,14 +138,14 @@ templ OverviewNavigationList(currentAgency *agency.Agency) {
 }
 
 // IntroductionContent shows the introduction section
-templ IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
+templ IntroductionContent(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) {
 	<div class="overview-section">
 		@IntroductionCard(currentAgency, conversation, overview)
 	</div>
 }
 
 // GoalDefinitionContent shows the goal definition section
-templ GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ GoalDefinitionContent(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
 		<!-- AI Goal Operations Toolbar -->
 		<div class="box mb-4 p-4">
@@ -191,7 +191,7 @@ templ GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conve
 }
 
 // WorkItemsContent shows the work items section
-templ WorkItemsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ WorkItemsContent(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
 		<!-- AI Work Item Operations Toolbar -->
 		<div class="box mb-4 p-4">
@@ -237,7 +237,7 @@ templ WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversati
 }
 
 // OverviewRolesContent shows the roles section in the overview
-templ OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ OverviewRolesContent(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<div class="overview-section">
 		<!-- AI Role Operations Toolbar -->
 		<div class="box mb-4 p-4">
@@ -283,7 +283,7 @@ templ OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Conver
 }
 
 // RACIMatrixContent shows the RACI matrix section in the overview
-templ RACIMatrixContent(currentAgency *agency.Agency) {
+templ RACIMatrixContent(currentAgency *models.Agency) {
 	<div class="overview-section">
 		<!-- Validation Messages -->
 		<div id="raci-validation-messages"></div>
@@ -333,7 +333,7 @@ templ RACIMatrixContent(currentAgency *agency.Agency) {
 }
 
 // WorkflowsContent renders the workflows section with AI operations and workflow management
-templ WorkflowsContent(currentAgency *agency.Agency) {
+templ WorkflowsContent(currentAgency *models.Agency) {
 	<div class="overview-section">
 		<!-- AI Workflow Operations Toolbar -->
 		<div class="box mb-4 p-4">

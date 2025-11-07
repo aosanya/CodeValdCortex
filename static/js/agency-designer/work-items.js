@@ -12,6 +12,34 @@ let workItemEditorState = {
     originalData: {}
 };
 
+// Load goals for the multi-select dropdown
+async function loadGoalsForSelection() {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId) return;
+
+    try {
+        const response = await fetch(`/api/v1/agencies/${agencyId}/goals`);
+        if (!response.ok) throw new Error('Failed to fetch goals');
+
+        const goals = await response.json();
+        const select = document.getElementById('work-item-goals-editor');
+        if (!select) return;
+
+        // Clear existing options
+        select.innerHTML = '';
+
+        // Add goals as options
+        goals.forEach(goal => {
+            const option = document.createElement('option');
+            option.value = goal._key || goal.key;
+            option.textContent = `${goal.code} - ${goal.description.substring(0, 60)}${goal.description.length > 60 ? '...' : ''}`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading goals:', error);
+    }
+}
+
 // Load work items list
 export function loadWorkItems() {
     return loadEntityList('work-items', 'work-items-table-body', 4);
@@ -32,6 +60,9 @@ export function showWorkItemEditor(mode, workItemKey = null) {
         'work-item-title-editor'
     );
 
+    // Load available goals for the dropdown
+    loadGoalsForSelection();
+
     if (mode === 'add') {
         clearWorkItemForm();
     } else if (mode === 'edit') {
@@ -40,35 +71,56 @@ export function showWorkItemEditor(mode, workItemKey = null) {
 }
 
 // Load work item data for editing
-function loadWorkItemData(workItemKey) {
-
+async function loadWorkItemData(workItemKey) {
     const agencyId = getCurrentAgencyId();
     if (!agencyId || !workItemKey) {
         return;
     }
 
+    try {
+        // Fetch work item data
+        const response = await fetch(`/api/v1/agencies/${agencyId}/work-items`);
+        const workItems = await response.json();
 
-    // Fetch work item data
-    fetch(`/api/v1/agencies/${agencyId}/work-items`)
-        .then(response => {
-            return response.json();
-        })
-        .then(workItems => {
+        // The key field comes as "_key" from JSON
+        const workItem = workItems.find(wi => wi._key === workItemKey || wi.key === workItemKey);
 
-            // The key field comes as "_key" from JSON
-            const workItem = workItems.find(wi => wi._key === workItemKey || wi.key === workItemKey);
+        if (workItem) {
+            populateWorkItemForm(workItem);
+            workItemEditorState.originalData = workItem;
 
+            // Load linked goals for this work item
+            await loadLinkedGoals(workItemKey);
+        } else {
+            showNotification('Work item not found', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading work item:', error);
+        showNotification('Error loading work item data', 'error');
+    }
+}
 
-            if (workItem) {
-                populateWorkItemForm(workItem);
-                workItemEditorState.originalData = workItem;
-            } else {
-                showNotification('Work item not found', 'error');
-            }
-        })
-        .catch(error => {
-            showNotification('Error loading work item data', 'error');
+// Load and select linked goals for a work item
+async function loadLinkedGoals(workItemKey) {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId || !workItemKey) return;
+
+    try {
+        const response = await fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}/goals`);
+        if (!response.ok) return; // No links yet, that's OK
+
+        const links = await response.json();
+        const select = document.getElementById('work-item-goals-editor');
+        if (!select) return;
+
+        // Select the linked goals
+        const linkedGoalKeys = links.map(link => link.goal_key);
+        Array.from(select.options).forEach(option => {
+            option.selected = linkedGoalKeys.includes(option.value);
         });
+    } catch (error) {
+        console.error('Error loading goal links:', error);
+    }
 }
 
 // Populate form with work item data
@@ -96,7 +148,7 @@ function clearWorkItemForm() {
 }
 
 // Save work item from editor
-export function saveWorkItemFromEditor() {
+export async function saveWorkItemFromEditor() {
     // Get form values
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
@@ -112,6 +164,10 @@ export function saveWorkItemFromEditor() {
         .split(',')
         .map(t => t.trim())
         .filter(t => t.length > 0);
+
+    // Get selected goals
+    const goalsSelect = document.getElementById('work-item-goals-editor');
+    const selectedGoals = Array.from(goalsSelect.selectedOptions).map(opt => opt.value);
 
     // Validation
     if (!title) {
@@ -134,10 +190,67 @@ export function saveWorkItemFromEditor() {
         tags
     };
 
-    saveEntity('work-items', workItemEditorState.mode, workItemEditorState.workItemKey, data, 'save-work-item-btn', () => {
+    // Save the work item first
+    try {
+        const agencyId = getCurrentAgencyId();
+        const url = workItemEditorState.mode === 'add'
+            ? `/api/v1/agencies/${agencyId}/work-items`
+            : `/api/v1/agencies/${agencyId}/work-items/${workItemEditorState.workItemKey}`;
+
+        const method = workItemEditorState.mode === 'add' ? 'POST' : 'PUT';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save work item');
+        }
+
+        const savedWorkItem = await response.json();
+        const workItemKey = savedWorkItem._key || savedWorkItem.key || workItemEditorState.workItemKey;
+
+        // Save goal links
+        await saveGoalLinks(workItemKey, selectedGoals);
+
+        showNotification('Work item saved successfully', 'success');
         cancelWorkItemEdit();
         loadWorkItems();
-    });
+    } catch (error) {
+        console.error('Error saving work item:', error);
+        showNotification('Error saving work item', 'error');
+    }
+}
+
+// Save goal links for a work item
+async function saveGoalLinks(workItemKey, selectedGoalKeys) {
+    const agencyId = getCurrentAgencyId();
+    if (!agencyId || !workItemKey) return;
+
+    try {
+        // Delete existing links
+        await fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}/goals`, {
+            method: 'DELETE'
+        });
+
+        // Create new links
+        for (const goalKey of selectedGoalKeys) {
+            await fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}/goals`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    work_item_key: workItemKey,
+                    goal_key: goalKey,
+                    relationship: 'addresses'
+                })
+            });
+        }
+    } catch (error) {
+        console.error('Error saving goal links:', error);
+        // Don't throw - work item was saved, links are optional
+    }
 }
 
 // Cancel work item edit

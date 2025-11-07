@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // GoalService handles goal operations
@@ -20,14 +21,14 @@ func NewGoalService(repo agency.Repository) *GoalService {
 }
 
 // CreateGoal creates a new goal for an agency
-func (s *GoalService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*agency.Goal, error) {
+func (s *GoalService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*models.Goal, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify agency: %w", err)
 	}
 
-	goal := &agency.Goal{
+	goal := &models.Goal{
 		AgencyID:    agencyID,
 		Code:        code,
 		Description: description,
@@ -41,7 +42,7 @@ func (s *GoalService) CreateGoal(ctx context.Context, agencyID string, code stri
 }
 
 // GetGoals retrieves all goals for an agency
-func (s *GoalService) GetGoals(ctx context.Context, agencyID string) ([]*agency.Goal, error) {
+func (s *GoalService) GetGoals(ctx context.Context, agencyID string) ([]*models.Goal, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -57,7 +58,7 @@ func (s *GoalService) GetGoals(ctx context.Context, agencyID string) ([]*agency.
 }
 
 // GetGoal retrieves a single goal by key
-func (s *GoalService) GetGoal(ctx context.Context, agencyID string, key string) (*agency.Goal, error) {
+func (s *GoalService) GetGoal(ctx context.Context, agencyID string, key string) (*models.Goal, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {

@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,7 @@ import (
 //   - Methods handle: request parsing, validation, calling AI services, returning responses
 //
 // Standard Context Builder Signature Pattern:
-//   func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *agency.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error)
+//   func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *models.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error)
 //
 // Where:
 //   - ctx: Go context for cancellation and deadlines
@@ -162,7 +162,7 @@ type ContextBuilderInterface interface {
 	//   - error: Any critical error encountered during data gathering (non-critical errors are logged and ignored)
 	BuildBuilderContext(
 		ctx context.Context,
-		agencyObj *agency.Agency,
+		agencyObj *models.Agency,
 		currentIntroduction string,
 		userRequest string,
 	) (builder.BuilderContext, error)

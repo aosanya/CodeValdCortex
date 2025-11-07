@@ -2,11 +2,11 @@ package agency_designer
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // GoalItem renders a single goal in the list as a table row with selection checkbox
-templ GoalItem(goal *agency.Goal) {
+templ GoalItem(goal *models.Goal) {
 	<tr 
 		class="table-item context-selectable" 
 		data-item-key={ goal.Key }
@@ -58,7 +58,7 @@ templ GoalItem(goal *agency.Goal) {
 }
 
 // GoalsList renders all goals as table rows
-templ GoalsList(goals []*agency.Goal) {
+templ GoalsList(goals []*models.Goal) {
 	if len(goals) == 0 {
 		<tr>
 			<td colspan="4" class="has-text-grey has-text-centered py-5">

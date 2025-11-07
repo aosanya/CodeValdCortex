@@ -9,6 +9,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
@@ -87,8 +88,8 @@ func main() {
 }
 
 // discoverUseCases scans the usecases directory and creates agency records
-func discoverUseCases(rootDir string) ([]*agency.Agency, error) {
-	var agencies []*agency.Agency
+func discoverUseCases(rootDir string) ([]*models.Agency, error) {
+	var agencies []*models.Agency
 
 	entries, err := os.ReadDir(rootDir)
 	if err != nil {
@@ -117,21 +118,21 @@ func discoverUseCases(rootDir string) ([]*agency.Agency, error) {
 		namePart := strings.Join(parts[3:], " ")
 
 		// Create agency record
-		ag := &agency.Agency{
+		ag := &models.Agency{
 			ID:          ucID,
 			Name:        formatName(namePart),
 			DisplayName: formatDisplayName(namePart),
 			Description: fmt.Sprintf("Use case: %s", formatName(namePart)),
 			Category:    category,
 			Icon:        getIconForCategory(category),
-			Status:      agency.AgencyStatusActive,
-			Metadata: agency.AgencyMetadata{
+			Status:      models.AgencyStatusActive,
+			Metadata: models.AgencyMetadata{
 				Roles:       []string{},
 				TotalAgents: 0,
 				Tags:        []string{category},
 				APIEndpoint: fmt.Sprintf("/api/v1/agencies/%s", ucID),
 			},
-			Settings: agency.AgencySettings{
+			Settings: models.AgencySettings{
 				AutoStart:         false,
 				MonitoringEnabled: true,
 				DashboardEnabled:  true,

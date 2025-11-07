@@ -1,19 +1,19 @@
 package builder
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RefineGoalRequest contains the context for refining a goal
 type RefineGoalRequest struct {
 	AgencyID       string             `json:"agency_id"`
-	CurrentGoal    *agency.Goal       `json:"current_goal"`
+	CurrentGoal    *models.Goal       `json:"current_goal"`
 	Description    string             `json:"description"`
 	Scope          string             `json:"scope"`
 	SuccessMetrics []string           `json:"success_metrics"`
-	ExistingGoals  []*agency.Goal     `json:"existing_goals"`
-	WorkItems      []*agency.WorkItem `json:"work_items"`
-	AgencyContext  *agency.Agency     `json:"agency_context"`
+	ExistingGoals  []*models.Goal     `json:"existing_goals"`
+	WorkItems      []*models.WorkItem `json:"work_items"`
+	AgencyContext  *models.Agency     `json:"agency_context"`
 }
 
 // RefineGoalResponse contains the AI-refined goal
@@ -32,9 +32,9 @@ type RefineGoalResponse struct {
 type GenerateGoalRequest struct {
 	AgencyID      string             `json:"agency_id"`
 	UserInput     string             `json:"user_input"`
-	ExistingGoals []*agency.Goal     `json:"existing_goals"`
-	WorkItems     []*agency.WorkItem `json:"work_items"`
-	AgencyContext *agency.Agency     `json:"agency_context"`
+	ExistingGoals []*models.Goal     `json:"existing_goals"`
+	WorkItems     []*models.WorkItem `json:"work_items"`
+	AgencyContext *models.Agency     `json:"agency_context"`
 }
 
 // GenerateGoalResponse contains the AI-generated goal
@@ -58,9 +58,9 @@ type GenerateGoalsResponse struct {
 // ConsolidateGoalsRequest contains the context for consolidating goals
 type ConsolidateGoalsRequest struct {
 	AgencyID      string             `json:"agency_id"`
-	AgencyContext *agency.Agency     `json:"agency_context"`
-	CurrentGoals  []*agency.Goal     `json:"current_goals"`
-	WorkItems     []*agency.WorkItem `json:"work_items"`
+	AgencyContext *models.Agency     `json:"agency_context"`
+	CurrentGoals  []*models.Goal     `json:"current_goals"`
+	WorkItems     []*models.WorkItem `json:"work_items"`
 }
 
 // ConsolidateGoalsResponse contains the consolidated goals
@@ -88,10 +88,10 @@ type ConsolidatedGoal struct {
 type RefineGoalsRequest struct {
 	AgencyID      string             `json:"agency_id"`
 	UserMessage   string             `json:"user_message"`   // Natural language instruction from user
-	TargetGoals   []*agency.Goal     `json:"target_goals"`   // Optional: specific goals to operate on
-	ExistingGoals []*agency.Goal     `json:"existing_goals"` // All existing goals for context
-	WorkItems     []*agency.WorkItem `json:"work_items"`     // Work items for context
-	AgencyContext *agency.Agency     `json:"agency_context"`
+	TargetGoals   []*models.Goal     `json:"target_goals"`   // Optional: specific goals to operate on
+	ExistingGoals []*models.Goal     `json:"existing_goals"` // All existing goals for context
+	WorkItems     []*models.WorkItem `json:"work_items"`     // Work items for context
+	AgencyContext *models.Agency     `json:"agency_context"`
 }
 
 // RefineGoalsResponse contains the results of dynamic goal processing

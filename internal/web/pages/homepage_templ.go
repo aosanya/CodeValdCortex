@@ -10,11 +10,11 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
-func Homepage(agencies []*agency.Agency) templ.Component {
+func Homepage(agencies []*models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -78,7 +78,7 @@ func Homepage(agencies []*agency.Agency) templ.Component {
 	})
 }
 
-func AgencyCard(ag agency.Agency) templ.Component {
+func AgencyCard(ag models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -413,7 +413,7 @@ func CategoryBadge(category string) templ.Component {
 	})
 }
 
-func StatusBadge(status agency.AgencyStatus) templ.Component {
+func StatusBadge(status models.AgencyStatus) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -435,22 +435,22 @@ func StatusBadge(status agency.AgencyStatus) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch status {
-		case agency.AgencyStatusActive:
+		case models.AgencyStatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<span class=\"tag is-success\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Active</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case agency.AgencyStatusInactive:
+		case models.AgencyStatusInactive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<span class=\"tag is-light\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Inactive</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case agency.AgencyStatusPaused:
+		case models.AgencyStatusPaused:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<span class=\"tag is-warning\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg></span> <span>Paused</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case agency.AgencyStatusArchived:
+		case models.AgencyStatusArchived:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<span class=\"tag is-dark\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4\"></path></svg></span> <span>Archived</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

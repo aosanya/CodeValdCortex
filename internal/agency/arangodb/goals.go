@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 )
 
 // CreateGoal creates a new goal in the agency's goals collection
-func (r *Repository) CreateGoal(ctx context.Context, goal *agency.Goal) error {
+func (r *Repository) CreateGoal(ctx context.Context, goal *models.Goal) error {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, goal.AgencyID)
 	if err != nil {
@@ -71,7 +71,7 @@ func (r *Repository) CreateGoal(ctx context.Context, goal *agency.Goal) error {
 }
 
 // GetGoals retrieves all goals for an agency
-func (r *Repository) GetGoals(ctx context.Context, agencyID string) ([]*agency.Goal, error) {
+func (r *Repository) GetGoals(ctx context.Context, agencyID string) ([]*models.Goal, error) {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -109,9 +109,9 @@ func (r *Repository) GetGoals(ctx context.Context, agencyID string) ([]*agency.G
 	}
 	defer cursor.Close()
 
-	var goals []*agency.Goal
+	var goals []*models.Goal
 	for cursor.HasMore() {
-		var goal agency.Goal
+		var goal models.Goal
 		_, err := cursor.ReadDocument(ctx, &goal)
 		if err != nil {
 			return nil, fmt.Errorf("failed to read goal: %w", err)
@@ -123,7 +123,7 @@ func (r *Repository) GetGoals(ctx context.Context, agencyID string) ([]*agency.G
 }
 
 // GetGoal retrieves a single goal by key
-func (r *Repository) GetGoal(ctx context.Context, agencyID string, key string) (*agency.Goal, error) {
+func (r *Repository) GetGoal(ctx context.Context, agencyID string, key string) (*models.Goal, error) {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -149,7 +149,7 @@ func (r *Repository) GetGoal(ctx context.Context, agencyID string, key string) (
 	}
 
 	// Read the document
-	var goal agency.Goal
+	var goal models.Goal
 	_, err = goalsColl.ReadDocument(ctx, key, &goal)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read goal: %w", err)
@@ -159,7 +159,7 @@ func (r *Repository) GetGoal(ctx context.Context, agencyID string, key string) (
 }
 
 // UpdateGoal updates an existing goal
-func (r *Repository) UpdateGoal(ctx context.Context, goal *agency.Goal) error {
+func (r *Repository) UpdateGoal(ctx context.Context, goal *models.Goal) error {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, goal.AgencyID)
 	if err != nil {
@@ -223,7 +223,7 @@ func (r *Repository) DeleteGoal(ctx context.Context, agencyID string, key string
 	}
 
 	// Get the goal to find its number
-	var goalToDelete agency.Goal
+	var goalToDelete models.Goal
 	_, err = goalsColl.ReadDocument(ctx, key, &goalToDelete)
 	if err != nil {
 		return fmt.Errorf("failed to read goal: %w", err)

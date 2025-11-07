@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
 )
@@ -48,7 +48,7 @@ func (h *AgencyHandler) GetWorkItemsHTML(c *gin.Context) {
 func (h *AgencyHandler) CreateWorkItem(c *gin.Context) {
 	id := c.Param("id")
 
-	var req agency.CreateWorkItemRequest
+	var req models.CreateWorkItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -68,7 +68,7 @@ func (h *AgencyHandler) UpdateWorkItem(c *gin.Context) {
 	id := c.Param("id")
 	key := c.Param("key")
 
-	var req agency.UpdateWorkItemRequest
+	var req models.UpdateWorkItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return

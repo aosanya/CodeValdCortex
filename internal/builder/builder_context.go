@@ -3,7 +3,7 @@ package builder
 import (
 	"time"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
@@ -26,9 +26,9 @@ type BuilderContext struct {
 
 	// Agency working data
 	Introduction string                   `json:"introduction,omitempty"`
-	Goals        []*agency.Goal           `json:"goals,omitempty"`
-	WorkItems    []*agency.WorkItem       `json:"work_items,omitempty"`
+	Goals        []*models.Goal           `json:"goals,omitempty"`
+	WorkItems    []*models.WorkItem       `json:"work_items,omitempty"`
 	Roles        []*registry.Role         `json:"roles,omitempty"`
-	Assignments  []*agency.RACIAssignment `json:"assignments,omitempty"`
+	Assignments  []*models.RACIAssignment `json:"assignments,omitempty"`
 	UserInput    string                   `json:"user_input,omitempty"`
 }

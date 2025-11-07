@@ -1,7 +1,7 @@
 package builder
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
@@ -44,8 +44,8 @@ type RefineRolesRequest struct {
 	UserMessage   string             `json:"user_message"`
 	TargetRoles   []*registry.Role   `json:"target_roles"`   // Specific roles to operate on (nil means all)
 	ExistingRoles []*registry.Role   `json:"existing_roles"` // All current roles for context
-	WorkItems     []*agency.WorkItem `json:"work_items"`     // Work items for context
-	AgencyContext *agency.Agency     `json:"agency_context"`
+	WorkItems     []*models.WorkItem `json:"work_items"`     // Work items for context
+	AgencyContext *models.Agency     `json:"agency_context"`
 }
 
 // RefineRolesResponse contains the dynamic role processing results

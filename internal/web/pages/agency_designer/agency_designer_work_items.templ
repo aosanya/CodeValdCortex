@@ -3,11 +3,11 @@ package agency_designer
 import (
 	"fmt"
 	"strings"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // WorkItemItem renders a single work item in the list as a table row
-templ WorkItemItem(workItem *agency.WorkItem) {
+templ WorkItemItem(workItem *models.WorkItem) {
 	<tr 
 		class="table-item" 
 		data-item-key={ workItem.Key }>
@@ -61,7 +61,7 @@ templ WorkItemItem(workItem *agency.WorkItem) {
 }
 
 // WorkItemsList renders all work items as table rows
-templ WorkItemsList(workItems []*agency.WorkItem) {
+templ WorkItemsList(workItems []*models.WorkItem) {
 	if len(workItems) == 0 {
 		<tr>
 			<td colspan="4" class="has-text-grey has-text-centered py-5">
@@ -76,7 +76,7 @@ templ WorkItemsList(workItems []*agency.WorkItem) {
 }
 
 // Helper function to get context text (description or title as fallback)
-func getWorkItemContextText(workItem *agency.WorkItem) string {
+func getWorkItemContextText(workItem *models.WorkItem) string {
 	if workItem.Description != "" {
 		return workItem.Description
 	}

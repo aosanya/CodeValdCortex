@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RACIService handles RACI assignment business logic
@@ -19,27 +20,27 @@ func NewRACIService(repo agency.Repository) *RACIService {
 }
 
 // CreateRACIAssignment creates a new RACI assignment edge
-func (s *RACIService) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *agency.RACIAssignment) error {
+func (s *RACIService) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *models.RACIAssignment) error {
 	return s.repo.CreateRACIAssignment(ctx, agencyID, assignment)
 }
 
 // GetRACIAssignmentsForWorkItem retrieves all RACI assignments for a work item
-func (s *RACIService) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*agency.RACIAssignment, error) {
+func (s *RACIService) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*models.RACIAssignment, error) {
 	return s.repo.GetRACIAssignmentsForWorkItem(ctx, agencyID, workItemKey)
 }
 
 // GetRACIAssignmentsForRole retrieves all RACI assignments for a role
-func (s *RACIService) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*agency.RACIAssignment, error) {
+func (s *RACIService) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*models.RACIAssignment, error) {
 	return s.repo.GetRACIAssignmentsForRole(ctx, agencyID, roleID)
 }
 
 // GetAllRACIAssignments retrieves all RACI assignments for an agency
-func (s *RACIService) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*agency.RACIAssignment, error) {
+func (s *RACIService) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*models.RACIAssignment, error) {
 	return s.repo.GetAllRACIAssignments(ctx, agencyID)
 }
 
 // UpdateRACIAssignment updates an existing RACI assignment
-func (s *RACIService) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *agency.RACIAssignment) error {
+func (s *RACIService) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *models.RACIAssignment) error {
 	return s.repo.UpdateRACIAssignment(ctx, agencyID, key, assignment)
 }
 

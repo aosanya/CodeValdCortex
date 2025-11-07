@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -110,11 +110,11 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 	existingWorkItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch existing work items")
-		existingWorkItems = []*agency.WorkItem{}
+		existingWorkItems = []*models.WorkItem{}
 	}
 
 	// Filter target work items if specific keys were provided
-	var targetWorkItems []*agency.WorkItem
+	var targetWorkItems []*models.WorkItem
 	if len(req.WorkItemKeys) > 0 {
 		workItemKeyMap := make(map[string]bool)
 		for _, key := range req.WorkItemKeys {
@@ -250,7 +250,7 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 		}).Info("AI determined this is an update operation")
 
 		// Update the work item
-		updateReq := agency.UpdateWorkItemRequest{
+		updateReq := models.UpdateWorkItemRequest{
 			Title:        workItemData.Title,
 			Description:  workItemData.Description,
 			Deliverables: workItemData.Deliverables,
@@ -347,7 +347,7 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 
 		if !found {
 			// Create a placeholder work item for this dependency so the reference can be satisfied
-			placeholderReq := agency.CreateWorkItemRequest{
+			placeholderReq := models.CreateWorkItemRequest{
 				Title:       depTrim,
 				Description: "Placeholder work item created automatically as a dependency.",
 			}
@@ -363,7 +363,7 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 	}
 
 	// Create the work item in the database
-	createReq := agency.CreateWorkItemRequest{
+	createReq := models.CreateWorkItemRequest{
 		Title:        workItemData.Title,
 		Description:  workItemData.Description,
 		Deliverables: workItemData.Deliverables,
@@ -438,12 +438,12 @@ func (h *Handler) RefineWorkItems(c *gin.Context) {
 
 // processWorkItemRequest uses AI to intelligently process work item requests
 // The AI determines whether to create a new work item or refine an existing one based on context
-func (h *Handler) processWorkItemRequest(ctx context.Context, userMessage string, targetWorkItems, existingWorkItems []*agency.WorkItem, ag *agency.Agency) (*workItemProcessResult, error) {
+func (h *Handler) processWorkItemRequest(ctx context.Context, userMessage string, targetWorkItems, existingWorkItems []*models.WorkItem, ag *models.Agency) (*workItemProcessResult, error) {
 	// Get agency overview for context
 	overview, err := h.agencyService.GetAgencyOverview(ctx, ag.ID)
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to get agency overview, continuing without it")
-		overview = &agency.Overview{}
+		overview = &models.Overview{}
 	}
 
 	systemPrompt := `You are an AI assistant that helps manage work items in a project management system.

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -60,12 +61,18 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.PUT("/:id/work-items/:key", h.UpdateWorkItem)
 		agencies.DELETE("/:id/work-items/:key", h.DeleteWorkItem)
 		agencies.POST("/:id/work-items/validate-deps", h.ValidateWorkItemDependencies)
+
+		// Work item-goal link routes
+		agencies.GET("/:id/work-items/:key/goals", h.GetWorkItemGoalLinks)
+		agencies.POST("/:id/work-items/:key/goals", h.CreateWorkItemGoalLink)
+		agencies.DELETE("/:id/work-items/:key/goals", h.DeleteWorkItemGoalLinks)
+		agencies.DELETE("/:id/work-items/:key/goals/:linkKey", h.DeleteWorkItemGoalLink)
 	}
 }
 
 // CreateAgency handles POST /api/v1/agencies
 func (h *AgencyHandler) CreateAgency(c *gin.Context) {
-	var req agency.CreateAgencyRequest
+	var req models.CreateAgencyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -98,7 +105,7 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 	// Set default settings
 	settings := req.Settings
 	if !hasSettings(req.Settings) {
-		settings = agency.AgencySettings{
+		settings = models.AgencySettings{
 			AutoStart:         false,
 			MonitoringEnabled: true,
 			DashboardEnabled:  true,
@@ -106,14 +113,14 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		}
 	}
 
-	newAgency := &agency.Agency{
+	newAgency := &models.Agency{
 		ID:          req.ID,
 		Name:        req.Name,
 		DisplayName: req.DisplayName,
 		Description: req.Description,
 		Category:    req.Category,
 		Icon:        icon,
-		Status:      agency.AgencyStatusActive,
+		Status:      models.AgencyStatusActive,
 		// Database field will be set by service with proper prefix
 		Metadata:  metadata,
 		Settings:  settings,
@@ -129,7 +136,7 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 }
 
 // hasSettings checks if settings have been provided
-func hasSettings(settings agency.AgencySettings) bool {
+func hasSettings(settings models.AgencySettings) bool {
 	return settings.AutoStart || settings.MonitoringEnabled || settings.DashboardEnabled || settings.VisualizerEnabled
 }
 
@@ -171,9 +178,9 @@ func (h *AgencyHandler) GetAgency(c *gin.Context) {
 // ListAgencies handles GET /api/v1/agencies
 func (h *AgencyHandler) ListAgencies(c *gin.Context) {
 	// Parse query parameters
-	filters := agency.AgencyFilters{
+	filters := models.AgencyFilters{
 		Category: c.Query("category"),
-		Status:   agency.AgencyStatus(c.Query("status")),
+		Status:   models.AgencyStatus(c.Query("status")),
 		Search:   c.Query("search"),
 	}
 
@@ -204,13 +211,13 @@ func (h *AgencyHandler) ListAgencies(c *gin.Context) {
 func (h *AgencyHandler) UpdateAgency(c *gin.Context) {
 	id := c.Param("id")
 
-	var req agency.UpdateAgencyRequest
+	var req models.UpdateAgencyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	updates := agency.AgencyUpdates(req)
+	updates := models.AgencyUpdates(req)
 
 	if err := h.service.UpdateAgency(c.Request.Context(), id, updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

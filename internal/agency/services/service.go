@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // CompositeService combines all sub-services and implements the agency.Service interface
@@ -42,19 +43,19 @@ var _ agency.Service = (*CompositeService)(nil)
 
 // Forwarding methods to maintain the interface
 
-func (c *CompositeService) CreateAgency(ctx context.Context, agencyDoc *agency.Agency) error {
+func (c *CompositeService) CreateAgency(ctx context.Context, agencyDoc *models.Agency) error {
 	return c.AgencyService.CreateAgency(ctx, agencyDoc)
 }
 
-func (c *CompositeService) GetAgency(ctx context.Context, id string) (*agency.Agency, error) {
+func (c *CompositeService) GetAgency(ctx context.Context, id string) (*models.Agency, error) {
 	return c.AgencyService.GetAgency(ctx, id)
 }
 
-func (c *CompositeService) ListAgencies(ctx context.Context, filters agency.AgencyFilters) ([]*agency.Agency, error) {
+func (c *CompositeService) ListAgencies(ctx context.Context, filters models.AgencyFilters) ([]*models.Agency, error) {
 	return c.AgencyService.ListAgencies(ctx, filters)
 }
 
-func (c *CompositeService) UpdateAgency(ctx context.Context, id string, updates agency.AgencyUpdates) error {
+func (c *CompositeService) UpdateAgency(ctx context.Context, id string, updates models.AgencyUpdates) error {
 	return c.AgencyService.UpdateAgency(ctx, id, updates)
 }
 
@@ -66,15 +67,15 @@ func (c *CompositeService) SetActiveAgency(ctx context.Context, id string) error
 	return c.AgencyService.SetActiveAgency(ctx, id)
 }
 
-func (c *CompositeService) GetActiveAgency(ctx context.Context) (*agency.Agency, error) {
+func (c *CompositeService) GetActiveAgency(ctx context.Context) (*models.Agency, error) {
 	return c.AgencyService.GetActiveAgency(ctx)
 }
 
-func (c *CompositeService) GetAgencyStatistics(ctx context.Context, id string) (*agency.AgencyStatistics, error) {
+func (c *CompositeService) GetAgencyStatistics(ctx context.Context, id string) (*models.AgencyStatistics, error) {
 	return c.AgencyService.GetAgencyStatistics(ctx, id)
 }
 
-func (c *CompositeService) GetAgencyOverview(ctx context.Context, agencyID string) (*agency.Overview, error) {
+func (c *CompositeService) GetAgencyOverview(ctx context.Context, agencyID string) (*models.Overview, error) {
 	return c.OverviewService.GetAgencyOverview(ctx, agencyID)
 }
 
@@ -82,15 +83,15 @@ func (c *CompositeService) UpdateAgencyOverview(ctx context.Context, agencyID st
 	return c.OverviewService.UpdateAgencyOverview(ctx, agencyID, introduction)
 }
 
-func (c *CompositeService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*agency.Goal, error) {
+func (c *CompositeService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*models.Goal, error) {
 	return c.GoalService.CreateGoal(ctx, agencyID, code, description)
 }
 
-func (c *CompositeService) GetGoals(ctx context.Context, agencyID string) ([]*agency.Goal, error) {
+func (c *CompositeService) GetGoals(ctx context.Context, agencyID string) ([]*models.Goal, error) {
 	return c.GoalService.GetGoals(ctx, agencyID)
 }
 
-func (c *CompositeService) GetGoal(ctx context.Context, agencyID string, key string) (*agency.Goal, error) {
+func (c *CompositeService) GetGoal(ctx context.Context, agencyID string, key string) (*models.Goal, error) {
 	return c.GoalService.GetGoal(ctx, agencyID, key)
 }
 
@@ -104,23 +105,23 @@ func (c *CompositeService) DeleteGoal(ctx context.Context, agencyID string, key 
 
 // WorkItem forwarding methods
 
-func (c *CompositeService) CreateWorkItem(ctx context.Context, agencyID string, req agency.CreateWorkItemRequest) (*agency.WorkItem, error) {
+func (c *CompositeService) CreateWorkItem(ctx context.Context, agencyID string, req models.CreateWorkItemRequest) (*models.WorkItem, error) {
 	return c.WorkItemService.CreateWorkItem(ctx, agencyID, req)
 }
 
-func (c *CompositeService) GetWorkItems(ctx context.Context, agencyID string) ([]*agency.WorkItem, error) {
+func (c *CompositeService) GetWorkItems(ctx context.Context, agencyID string) ([]*models.WorkItem, error) {
 	return c.WorkItemService.GetWorkItems(ctx, agencyID)
 }
 
-func (c *CompositeService) GetWorkItem(ctx context.Context, agencyID string, key string) (*agency.WorkItem, error) {
+func (c *CompositeService) GetWorkItem(ctx context.Context, agencyID string, key string) (*models.WorkItem, error) {
 	return c.WorkItemService.GetWorkItem(ctx, agencyID, key)
 }
 
-func (c *CompositeService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*agency.WorkItem, error) {
+func (c *CompositeService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error) {
 	return c.WorkItemService.GetWorkItemByCode(ctx, agencyID, code)
 }
 
-func (c *CompositeService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req agency.UpdateWorkItemRequest) error {
+func (c *CompositeService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req models.UpdateWorkItemRequest) error {
 	return c.WorkItemService.UpdateWorkItem(ctx, agencyID, key, req)
 }
 

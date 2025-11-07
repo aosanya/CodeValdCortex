@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
@@ -55,7 +56,7 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 	}
 
 	// Try to load the overview so we can pre-fill the introduction editor server-side
-	var overview *agency.Overview
+	var overview *models.Overview
 	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
 		overview = ov
 	}
@@ -98,7 +99,7 @@ func (h *AgencyDesignerWebHandler) ShowConversation(c *gin.Context) {
 	}
 
 	// Try to load the overview so we can pre-fill the introduction editor server-side
-	var overview *agency.Overview
+	var overview *models.Overview
 	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
 		overview = ov
 	}

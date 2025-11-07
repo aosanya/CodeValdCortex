@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // OverviewService handles agency overview operations
@@ -21,7 +22,7 @@ func NewOverviewService(repo agency.Repository) *OverviewService {
 }
 
 // GetAgencyOverview retrieves the overview for an agency
-func (s *OverviewService) GetAgencyOverview(ctx context.Context, agencyID string) (*agency.Overview, error) {
+func (s *OverviewService) GetAgencyOverview(ctx context.Context, agencyID string) (*models.Overview, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -49,7 +50,7 @@ func (s *OverviewService) UpdateAgencyOverview(ctx context.Context, agencyID str
 	overview, err := s.repo.GetOverview(ctx, agencyID)
 	if err != nil {
 		// If overview doesn't exist, create a new one
-		overview = &agency.Overview{
+		overview = &models.Overview{
 			AgencyID:     agencyID,
 			Introduction: introduction,
 			UpdatedAt:    time.Now(),

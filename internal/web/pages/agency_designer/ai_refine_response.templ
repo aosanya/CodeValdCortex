@@ -2,11 +2,11 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // AIRefineResponse renders the response after AI refinement of introduction
-templ AIRefineResponse(response *builder.RefineIntroductionResponse, currentAgency *agency.Agency, overview *agency.Overview) {
+templ AIRefineResponse(response *builder.RefineIntroductionResponse, currentAgency *models.Agency, overview *models.Overview) {
 	<div class="ai-refine-response" 
 		hx-trigger="load delay:500ms" 
 		hx-get={ "/agencies/" + currentAgency.ID + "/chat-messages?agencyName=" + currentAgency.Name }

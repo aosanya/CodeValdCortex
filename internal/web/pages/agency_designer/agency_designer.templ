@@ -2,12 +2,12 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 // AgencyDesignerPage renders the AI-powered agency designer interface with VS Code-like layout
-templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
+templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) {
 	@components.LayoutWithAgency("AI Agency Designer", currentAgency) {
 		<!-- Agency Designer Specific CSS -->
 		<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>

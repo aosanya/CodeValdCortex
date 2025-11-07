@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 )
 
 // GetOverview retrieves the overview document for an agency
-func (r *Repository) GetOverview(ctx context.Context, agencyID string) (*agency.Overview, error) {
+func (r *Repository) GetOverview(ctx context.Context, agencyID string) (*models.Overview, error) {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, agencyID)
 	if err != nil {
@@ -36,12 +36,12 @@ func (r *Repository) GetOverview(ctx context.Context, agencyID string) (*agency.
 	}
 
 	// Try to read the overview document (using "main" as the key)
-	var overview agency.Overview
+	var overview models.Overview
 	_, err = overviewColl.ReadDocument(ctx, "main", &overview)
 	if err != nil {
 		if driver.IsNotFound(err) {
 			// Create a default overview if it doesn't exist
-			overview = agency.Overview{
+			overview = models.Overview{
 				Key:          "main",
 				AgencyID:     agencyID,
 				Introduction: "",
@@ -60,7 +60,7 @@ func (r *Repository) GetOverview(ctx context.Context, agencyID string) (*agency.
 }
 
 // UpdateOverview updates the overview document for an agency
-func (r *Repository) UpdateOverview(ctx context.Context, overview *agency.Overview) error {
+func (r *Repository) UpdateOverview(ctx context.Context, overview *models.Overview) error {
 	// Get the agency-specific database
 	agencyDoc, err := r.GetByID(ctx, overview.AgencyID)
 	if err != nil {

@@ -56,12 +56,12 @@ service := agency.NewService(repo, validator)
 ### Creating an Agency
 
 ```go
-newAgency := &agency.Agency{
+newAgency := &models.Agency{
     ID:          "UC-INFRA-001",
     Name:        "Water Distribution Network",
     DisplayName: "💧 Water Distribution",
     Category:    "infrastructure",
-    Status:      agency.AgencyStatusActive,
+    Status:      models.AgencyStatusActive,
 }
 
 err := service.CreateAgency(ctx, newAgency)
@@ -74,9 +74,9 @@ err := service.CreateAgency(ctx, newAgency)
 agency, err := service.GetAgency(ctx, "UC-INFRA-001")
 
 // List with filters
-filters := agency.AgencyFilters{
+filters := models.AgencyFilters{
     Category: "infrastructure",
-    Status:   agency.AgencyStatusActive,
+    Status:   models.AgencyStatusActive,
     Search:   "water",
     Limit:    10,
 }

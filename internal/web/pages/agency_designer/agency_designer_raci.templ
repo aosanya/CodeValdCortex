@@ -1,12 +1,12 @@
 package agency_designer
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 // AgencyDesignerRACIPage renders the RACI matrix editor page
-templ AgencyDesignerRACIPage(currentAgency *agency.Agency) {
+templ AgencyDesignerRACIPage(currentAgency *models.Agency) {
 	@components.LayoutWithAgency("RACI Matrix", currentAgency) {
 		<!-- RACI Matrix Specific CSS -->
 		<link rel="stylesheet" href="/static/css/agency-designer.css"/>

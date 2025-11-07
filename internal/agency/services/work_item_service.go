@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // WorkItemService handles work item operations
@@ -20,7 +21,7 @@ func NewWorkItemService(repo agency.Repository) *WorkItemService {
 }
 
 // CreateWorkItem creates a new work item for an agency
-func (s *WorkItemService) CreateWorkItem(ctx context.Context, agencyID string, req agency.CreateWorkItemRequest) (*agency.WorkItem, error) {
+func (s *WorkItemService) CreateWorkItem(ctx context.Context, agencyID string, req models.CreateWorkItemRequest) (*models.WorkItem, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -34,7 +35,7 @@ func (s *WorkItemService) CreateWorkItem(ctx context.Context, agencyID string, r
 		}
 	}
 
-	workItem := &agency.WorkItem{
+	workItem := &models.WorkItem{
 		AgencyID:     agencyID,
 		Title:        req.Title,
 		Description:  req.Description,
@@ -51,7 +52,7 @@ func (s *WorkItemService) CreateWorkItem(ctx context.Context, agencyID string, r
 }
 
 // GetWorkItems retrieves all work items for an agency
-func (s *WorkItemService) GetWorkItems(ctx context.Context, agencyID string) ([]*agency.WorkItem, error) {
+func (s *WorkItemService) GetWorkItems(ctx context.Context, agencyID string) ([]*models.WorkItem, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -67,7 +68,7 @@ func (s *WorkItemService) GetWorkItems(ctx context.Context, agencyID string) ([]
 }
 
 // GetWorkItem retrieves a single work item by key
-func (s *WorkItemService) GetWorkItem(ctx context.Context, agencyID string, key string) (*agency.WorkItem, error) {
+func (s *WorkItemService) GetWorkItem(ctx context.Context, agencyID string, key string) (*models.WorkItem, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -83,7 +84,7 @@ func (s *WorkItemService) GetWorkItem(ctx context.Context, agencyID string, key 
 }
 
 // GetWorkItemByCode retrieves a single work item by code
-func (s *WorkItemService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*agency.WorkItem, error) {
+func (s *WorkItemService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error) {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -99,7 +100,7 @@ func (s *WorkItemService) GetWorkItemByCode(ctx context.Context, agencyID string
 }
 
 // UpdateWorkItem updates a work item
-func (s *WorkItemService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req agency.UpdateWorkItemRequest) error {
+func (s *WorkItemService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req models.UpdateWorkItemRequest) error {
 	// Verify agency exists
 	_, err := s.repo.GetByID(ctx, agencyID)
 	if err != nil {
@@ -158,4 +159,59 @@ func (s *WorkItemService) ValidateDependencies(ctx context.Context, agencyID str
 	}
 
 	return s.repo.ValidateDependencies(ctx, agencyID, workItemCode, dependencies)
+}
+
+// CreateWorkItemGoalLink creates a new link between a work item and a goal
+func (s *WorkItemService) CreateWorkItemGoalLink(ctx context.Context, agencyID string, link *models.WorkItemGoalLink) error {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	return s.repo.CreateWorkItemGoalLink(ctx, agencyID, link)
+}
+
+// GetWorkItemGoalLinks retrieves all goal links for a work item
+func (s *WorkItemService) GetWorkItemGoalLinks(ctx context.Context, agencyID, workItemKey string) ([]*models.WorkItemGoalLink, error) {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	return s.repo.GetWorkItemGoalLinks(ctx, agencyID, workItemKey)
+}
+
+// GetGoalWorkItems retrieves all work items linked to a goal
+func (s *WorkItemService) GetGoalWorkItems(ctx context.Context, agencyID, goalKey string) ([]*models.WorkItemGoalLink, error) {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	return s.repo.GetGoalWorkItems(ctx, agencyID, goalKey)
+}
+
+// DeleteWorkItemGoalLink deletes a specific work item-goal link
+func (s *WorkItemService) DeleteWorkItemGoalLink(ctx context.Context, agencyID, linkKey string) error {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	return s.repo.DeleteWorkItemGoalLink(ctx, agencyID, linkKey)
+}
+
+// DeleteWorkItemGoalLinks deletes all goal links for a work item
+func (s *WorkItemService) DeleteWorkItemGoalLinks(ctx context.Context, agencyID, workItemKey string) error {
+	// Verify agency exists
+	_, err := s.repo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to verify agency: %w", err)
+	}
+
+	return s.repo.DeleteWorkItemGoalLinks(ctx, agencyID, workItemKey)
 }

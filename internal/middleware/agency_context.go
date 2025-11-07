@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // AgencyContext is middleware that injects agency context into requests
@@ -101,7 +102,7 @@ func ClearAgencyCookie(w http.ResponseWriter) {
 }
 
 // GetAgencyFromRequest is a helper to get agency from request context
-func GetAgencyFromRequest(r *http.Request) (*agency.Agency, error) {
+func GetAgencyFromRequest(r *http.Request) (*models.Agency, error) {
 	return agency.GetAgencyFromContext(r.Context())
 }
 

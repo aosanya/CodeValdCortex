@@ -3,7 +3,7 @@ package ai_refine
 import (
 	"net/http"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 )
@@ -47,7 +47,7 @@ func (h *Handler) RefineRACIMappings(c *gin.Context) {
 		assignments, err := h.agencyService.GetAllRACIAssignments(ctx, agencyID)
 		if err != nil {
 			h.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
-			assignments = []*agency.RACIAssignment{}
+			assignments = []*models.RACIAssignment{}
 		}
 		req.ExistingAssignments = assignments
 	}

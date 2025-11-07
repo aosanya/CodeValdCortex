@@ -1,16 +1,16 @@
 package builder
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // CreateRACIMappingsRequest contains the context for creating RACI mappings
 type CreateRACIMappingsRequest struct {
 	AgencyID      string             `json:"agency_id"`
-	WorkItems     []*agency.WorkItem `json:"work_items"`
+	WorkItems     []*models.WorkItem `json:"work_items"`
 	Roles         []*registry.Role   `json:"roles"`
-	AgencyContext *agency.Agency     `json:"agency_context"`
+	AgencyContext *models.Agency     `json:"agency_context"`
 }
 
 // RACIAssignment represents a role assignment with objective
@@ -28,9 +28,9 @@ type CreateRACIMappingsResponse struct {
 // ConsolidateRACIMappingsRequest contains the context for consolidating RACI mappings (placeholder for future implementation)
 type ConsolidateRACIMappingsRequest struct {
 	AgencyID           string                   `json:"agency_id"`
-	AgencyContext      *agency.Agency           `json:"agency_context"`
-	CurrentAssignments []*agency.RACIAssignment `json:"current_assignments"`
-	WorkItems          []*agency.WorkItem       `json:"work_items"`
+	AgencyContext      *models.Agency           `json:"agency_context"`
+	CurrentAssignments []*models.RACIAssignment `json:"current_assignments"`
+	WorkItems          []*models.WorkItem       `json:"work_items"`
 	Roles              []*registry.Role         `json:"roles"`
 }
 
@@ -48,10 +48,10 @@ type RefineRACIMappingsRequest struct {
 	UserMessage         string                   `json:"user_message"`
 	TargetWorkItemKeys  []string                 `json:"target_work_item_keys"` // Specific work items to operate on (nil means all)
 	TargetRoleKeys      []string                 `json:"target_role_keys"`      // Specific roles to operate on (nil means all)
-	ExistingAssignments []*agency.RACIAssignment `json:"existing_assignments"`  // All current RACI assignments for context
-	WorkItems           []*agency.WorkItem       `json:"work_items"`            // Work items for context
+	ExistingAssignments []*models.RACIAssignment `json:"existing_assignments"`  // All current RACI assignments for context
+	WorkItems           []*models.WorkItem       `json:"work_items"`            // Work items for context
 	Roles               []*registry.Role         `json:"roles"`                 // Roles for context
-	AgencyContext       *agency.Agency           `json:"agency_context"`
+	AgencyContext       *models.Agency           `json:"agency_context"`
 }
 
 // RefineRACIMappingsResponse contains the dynamic RACI processing results

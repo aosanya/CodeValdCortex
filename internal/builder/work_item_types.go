@@ -1,19 +1,19 @@
 package builder
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RefineWorkItemRequest contains the context for refining a work item
 type RefineWorkItemRequest struct {
 	AgencyID          string             `json:"agency_id"`
-	CurrentWorkItem   *agency.WorkItem   `json:"current_work_item"`
+	CurrentWorkItem   *models.WorkItem   `json:"current_work_item"`
 	Title             string             `json:"title"`
 	Description       string             `json:"description"`
 	Deliverables      []string           `json:"deliverables"`
-	ExistingWorkItems []*agency.WorkItem `json:"existing_work_items"`
-	Goals             []*agency.Goal     `json:"goals"`
-	AgencyContext     *agency.Agency     `json:"agency_context"`
+	ExistingWorkItems []*models.WorkItem `json:"existing_work_items"`
+	Goals             []*models.Goal     `json:"goals"`
+	AgencyContext     *models.Agency     `json:"agency_context"`
 }
 
 // RefineWorkItemResponse contains the AI-refined work item
@@ -32,9 +32,9 @@ type RefineWorkItemResponse struct {
 // GenerateWorkItemRequest contains the context for generating a new work item
 type GenerateWorkItemRequest struct {
 	AgencyID          string             `json:"agency_id"`
-	AgencyContext     *agency.Agency     `json:"agency_context"`
-	ExistingWorkItems []*agency.WorkItem `json:"existing_work_items"`
-	Goals             []*agency.Goal     `json:"goals"`
+	AgencyContext     *models.Agency     `json:"agency_context"`
+	ExistingWorkItems []*models.WorkItem `json:"existing_work_items"`
+	Goals             []*models.Goal     `json:"goals"`
 	UserInput         string             `json:"user_input"`
 }
 
@@ -60,9 +60,9 @@ type GenerateWorkItemsResponse struct {
 // ConsolidateWorkItemsRequest contains the context for consolidating work items
 type ConsolidateWorkItemsRequest struct {
 	AgencyID         string             `json:"agency_id"`
-	AgencyContext    *agency.Agency     `json:"agency_context"`
-	CurrentWorkItems []*agency.WorkItem `json:"current_work_items"`
-	Goals            []*agency.Goal     `json:"goals"`
+	AgencyContext    *models.Agency     `json:"agency_context"`
+	CurrentWorkItems []*models.WorkItem `json:"current_work_items"`
+	Goals            []*models.Goal     `json:"goals"`
 }
 
 // ConsolidateWorkItemsResponse contains the consolidated work items
@@ -91,10 +91,10 @@ type ConsolidatedWorkItem struct {
 type RefineWorkItemsRequest struct {
 	AgencyID          string             `json:"agency_id"`
 	UserMessage       string             `json:"user_message"`
-	TargetWorkItems   []*agency.WorkItem `json:"target_work_items"`   // Specific work items to operate on (nil means all)
-	ExistingWorkItems []*agency.WorkItem `json:"existing_work_items"` // All current work items for context
-	Goals             []*agency.Goal     `json:"goals"`               // Agency goals for context
-	AgencyContext     *agency.Agency     `json:"agency_context"`
+	TargetWorkItems   []*models.WorkItem `json:"target_work_items"`   // Specific work items to operate on (nil means all)
+	ExistingWorkItems []*models.WorkItem `json:"existing_work_items"` // All current work items for context
+	Goals             []*models.Goal     `json:"goals"`               // Agency goals for context
+	AgencyContext     *models.Agency     `json:"agency_context"`
 }
 
 // RefineWorkItemsResponse contains the dynamic work item processing results
