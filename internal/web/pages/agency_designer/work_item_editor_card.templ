@@ -76,13 +76,11 @@ placeholder="e.g., WI-001, WI-003">
 <div class="field">
 <label class="label">Linked Goals</label>
 <div class="control">
-<div class="select is-multiple is-fullwidth" style="width: 100%;">
-<select multiple id="work-item-goals-editor" style="width: 100%; min-height: 100px;">
-<!-- Goals will be populated dynamically -->
-</select>
+<div id="work-item-goals-editor" class="box" style="max-height: 300px; overflow-y: auto;">
+<!-- Goals will be populated dynamically as checkboxes -->
 </div>
 </div>
-<p class="help">Select one or more goals this work item addresses. Hold Ctrl/Cmd to select multiple.</p>
+<p class="help">Select one or more goals this work item addresses.</p>
 </div>
 
 <!-- Tags Field -->

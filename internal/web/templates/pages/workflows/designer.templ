@@ -1,12 +1,12 @@
 package workflows
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/web/templates/layouts"
 	"github.com/aosanya/CodeValdCortex/internal/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 templ WorkflowDesigner(workflow *models.Workflow, agencyID string) {
-	@layouts.Base("Workflow Designer") {
+	@components.Layout("Workflow Designer") {
 		<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
 		<!-- xyflow CSS -->
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xyflow/react@12/dist/style.css"/>
@@ -206,7 +206,7 @@ templ WorkflowDesigner(workflow *models.Workflow, agencyID string) {
 								placeholder="issue-{issue_id}-{slug}"
 							/>
 						</div>
-						<p class="help">Use {issue_id} and {slug} as placeholders</p>
+						<p class="help">Use &#123;issue_id&#125; and &#123;slug&#125; as placeholders</p>
 					</div>
 
 					<div class="field">

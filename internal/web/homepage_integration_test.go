@@ -198,6 +198,26 @@ func (m *mockAgencyService) ValidateWorkItemDependencies(ctx context.Context, ag
 	return nil
 }
 
+func (m *mockAgencyService) CreateWorkItemGoalLink(ctx context.Context, agencyID string, link *models.WorkItemGoalLink) error {
+	return nil
+}
+
+func (m *mockAgencyService) GetWorkItemGoalLinks(ctx context.Context, agencyID, workItemKey string) ([]*models.WorkItemGoalLink, error) {
+	return []*models.WorkItemGoalLink{}, nil
+}
+
+func (m *mockAgencyService) GetGoalWorkItems(ctx context.Context, agencyID, goalKey string) ([]*models.WorkItemGoalLink, error) {
+	return []*models.WorkItemGoalLink{}, nil
+}
+
+func (m *mockAgencyService) DeleteWorkItemGoalLink(ctx context.Context, agencyID, linkKey string) error {
+	return nil
+}
+
+func (m *mockAgencyService) DeleteWorkItemGoalLinks(ctx context.Context, agencyID, workItemKey string) error {
+	return nil
+}
+
 func (m *mockAgencyService) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *models.RACIAssignment) error {
 	return nil
 }

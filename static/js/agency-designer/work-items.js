@@ -12,7 +12,7 @@ let workItemEditorState = {
     originalData: {}
 };
 
-// Load goals for the multi-select dropdown
+// Load goals for the checkbox list
 async function loadGoalsForSelection() {
     const agencyId = getCurrentAgencyId();
     if (!agencyId) return;
@@ -22,18 +22,33 @@ async function loadGoalsForSelection() {
         if (!response.ok) throw new Error('Failed to fetch goals');
 
         const goals = await response.json();
-        const select = document.getElementById('work-item-goals-editor');
-        if (!select) return;
+        const container = document.getElementById('work-item-goals-editor');
+        if (!container) return;
 
-        // Clear existing options
-        select.innerHTML = '';
+        // Clear existing content
+        container.innerHTML = '';
 
-        // Add goals as options
+        if (goals.length === 0) {
+            container.innerHTML = '<p class="has-text-grey-light">No goals available. Create goals first.</p>';
+            return;
+        }
+
+        // Add goals as checkboxes
         goals.forEach(goal => {
-            const option = document.createElement('option');
-            option.value = goal._key || goal.key;
-            option.textContent = `${goal.code} - ${goal.description.substring(0, 60)}${goal.description.length > 60 ? '...' : ''}`;
-            select.appendChild(option);
+            const label = document.createElement('label');
+            label.className = 'checkbox is-block mb-2';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = goal._key || goal.key;
+            checkbox.className = 'mr-2';
+            checkbox.dataset.goalKey = goal._key || goal.key;
+            
+            const text = document.createTextNode(` ${goal.code} - ${goal.description.substring(0, 60)}${goal.description.length > 60 ? '...' : ''}`);
+            
+            label.appendChild(checkbox);
+            label.appendChild(text);
+            container.appendChild(label);
         });
     } catch (error) {
         console.error('Error loading goals:', error);
@@ -46,7 +61,7 @@ export function loadWorkItems() {
 }
 
 // Show work item editor
-export function showWorkItemEditor(mode, workItemKey = null) {
+export async function showWorkItemEditor(mode, workItemKey = null) {
     workItemEditorState.mode = mode;
     workItemEditorState.workItemKey = workItemKey;
 
@@ -60,13 +75,13 @@ export function showWorkItemEditor(mode, workItemKey = null) {
         'work-item-title-editor'
     );
 
-    // Load available goals for the dropdown
-    loadGoalsForSelection();
+    // Load available goals for the dropdown first
+    await loadGoalsForSelection();
 
     if (mode === 'add') {
         clearWorkItemForm();
     } else if (mode === 'edit') {
-        loadWorkItemData(workItemKey);
+        await loadWorkItemData(workItemKey);
     }
 }
 
@@ -110,13 +125,14 @@ async function loadLinkedGoals(workItemKey) {
         if (!response.ok) return; // No links yet, that's OK
 
         const links = await response.json();
-        const select = document.getElementById('work-item-goals-editor');
-        if (!select) return;
+        const container = document.getElementById('work-item-goals-editor');
+        if (!container) return;
 
-        // Select the linked goals
+        // Check the linked goals
         const linkedGoalKeys = links.map(link => link.goal_key);
-        Array.from(select.options).forEach(option => {
-            option.selected = linkedGoalKeys.includes(option.value);
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = linkedGoalKeys.includes(checkbox.value);
         });
     } catch (error) {
         console.error('Error loading goal links:', error);
@@ -144,6 +160,15 @@ function clearWorkItemForm() {
         'work-item-tags-editor'
     ]);
 
+    // Clear goals checkboxes
+    const container = document.getElementById('work-item-goals-editor');
+    if (container) {
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    }
+
     workItemEditorState.originalData = {};
 }
 
@@ -165,9 +190,10 @@ export async function saveWorkItemFromEditor() {
         .map(t => t.trim())
         .filter(t => t.length > 0);
 
-    // Get selected goals
-    const goalsSelect = document.getElementById('work-item-goals-editor');
-    const selectedGoals = Array.from(goalsSelect.selectedOptions).map(opt => opt.value);
+    // Get selected goals from checkboxes
+    const container = document.getElementById('work-item-goals-editor');
+    const checkboxes = container ? container.querySelectorAll('input[type="checkbox"]:checked') : [];
+    const selectedGoals = Array.from(checkboxes).map(cb => cb.value);
 
     // Validation
     if (!title) {
