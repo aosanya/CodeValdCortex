@@ -62,10 +62,14 @@ type NodeData struct {
 
 	// Work item node fields
 	WorkItemID   string                 `json:"work_item_id,omitempty"`
-	WorkItemType string                 `json:"work_item_type,omitempty"`
+	WorkItemType string                 `json:"work_item_type,omitempty"` // document, software, proposal, analysis
 	Role         string                 `json:"role,omitempty"`
 	SLAHours     int                    `json:"sla_hours,omitempty"`
 	Parameters   map[string]interface{} `json:"parameters,omitempty"`
+
+	// GitOps fields (for work items) - flexible for any Git backend
+	GitConfig *GitConfig `json:"git_config,omitempty"`
+	Labels    []string   `json:"labels,omitempty"` // Issue/MR labels (Gitea, GitLab, GitHub, etc.)
 
 	// Decision node fields
 	Condition string `json:"condition,omitempty"`
@@ -75,6 +79,18 @@ type NodeData struct {
 
 	// End node fields
 	Status string `json:"status,omitempty"` // success, failure
+}
+
+// GitConfig contains GitOps configuration for work item execution
+// Supports multiple Git backends: Gitea, GitLab, GitHub, etc.
+type GitConfig struct {
+	Backend        string `json:"backend,omitempty"`         // gitea, gitlab, github, etc.
+	Repo           string `json:"repo"`                      // Repository name
+	BranchPattern  string `json:"branch_pattern,omitempty"`  // e.g., "issue-{issue_id}-{slug}"
+	MergeStrategy  string `json:"merge_strategy,omitempty"`  // squash, merge, rebase
+	AutoMerge      bool   `json:"auto_merge,omitempty"`      // Auto-merge on CI success
+	RequireReviews int    `json:"require_reviews,omitempty"` // Number of required approvals
+	RequireCI      bool   `json:"require_ci,omitempty"`      // Require CI to pass
 }
 
 // EdgeData contains edge-specific configuration

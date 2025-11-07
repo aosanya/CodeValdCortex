@@ -81,6 +81,45 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string)
 	return &result, nil
 }
 
+// performWorkItemsProcessing delegates to the ai_refine handler for work items processing via chat
+// Returns the response HTML or nil if processing failed
+func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, userMessage string) (*string, error) {
+	h.logger.Info("🔵 DELEGATING: Work items processing to ai_refine.Handler (chat mode)")
+
+	// Get agencyID from context
+	agencyID := c.Param("id")
+
+	// Ensure conversation exists - start one if this is a new conversation
+	conversationID := c.Param("conversationId")
+	if conversationID == "" {
+		// Start conversation first for new conversations
+		ctx := c.Request.Context()
+		conversation, err := h.designerService.StartConversation(ctx, agencyID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to start conversation for work items processing")
+			return nil, err
+		}
+		conversationID = conversation.ID
+		// Store conversation ID in params so it's available downstream
+		c.Params = append(c.Params, gin.Param{Key: "conversationId", Value: conversationID})
+	}
+
+	h.logger.Info("Conversation ready for work items processing",
+		"agencyID", agencyID,
+		"conversationID", conversationID)
+
+	// Set the user request in the form so the ai_refine handler can access it
+	c.Request.PostForm.Set("user-request", userMessage)
+	c.Request.PostForm.Set("message", userMessage)
+
+	// Delegate to the ai_refine work items handler
+	h.aiRefineHandler.RefineWorkItems(c)
+
+	// If we got here without panic, consider it successful
+	result := "success"
+	return &result, nil
+}
+
 // handleContextSpecificProcessing handles context-specific processing for both new and existing conversations
 // Returns (handled bool, error) where handled=true means the request was fully processed
 func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, userMessage, context string, isNewConversation bool) (bool, error) {
@@ -116,6 +155,21 @@ func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, 
 		}
 
 		if refined != nil {
+			return true, nil // Successfully handled
+		}
+		return false, nil // Not handled, fall through to normal chat
+
+	case "work-items", "workflows":
+		h.logger.Info("User on work items/workflows section - performing direct work items processing")
+		// Perform the work items processing directly (conversation handling is inside)
+		h.logger.Info("🔵 CALLING: performWorkItemsProcessing", "agencyID", agencyID)
+		processed, err := h.performWorkItemsProcessing(c, userMessage)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to perform work items processing")
+			return false, err
+		}
+
+		if processed != nil {
 			return true, nil // Successfully handled
 		}
 		return false, nil // Not handled, fall through to normal chat

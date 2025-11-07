@@ -1,0 +1,286 @@
+package workflows
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/web/templates/layouts"
+	"github.com/aosanya/CodeValdCortex/internal/models"
+)
+
+templ WorkflowDesigner(workflow *models.Workflow, agencyID string) {
+	@layouts.Base("Workflow Designer") {
+		<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
+		<!-- xyflow CSS -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xyflow/react@12/dist/style.css"/>
+		
+		<div id="notification-container"></div>
+		
+		<div 
+			class="workflow-designer" 
+			x-data="workflowDesigner()"
+			data-agency-id={ agencyID }
+			data-workflow-id={ getWorkflowID(workflow) }
+		>
+			<!-- Workflow Metadata -->
+			<div class="workflow-metadata">
+				<div class="field is-horizontal">
+					<div class="field-label is-normal">
+						<label class="label">Name</label>
+					</div>
+					<div class="field-body">
+						<div class="field">
+							<div class="control is-expanded">
+								<input 
+									class="input" 
+									type="text" 
+									id="workflow-name"
+									placeholder="My Workflow"
+									value={ getWorkflowName(workflow) }
+								/>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="field is-horizontal">
+					<div class="field-label is-normal">
+						<label class="label">Description</label>
+					</div>
+					<div class="field-body">
+						<div class="field">
+							<div class="control is-expanded">
+								<textarea 
+									class="textarea" 
+									id="workflow-description"
+									placeholder="Workflow description..."
+									rows="2"
+								>{ getWorkflowDescription(workflow) }</textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Toolbar -->
+			<div class="toolbar">
+				<div class="node-palette">
+					<div class="buttons has-addons">
+						<button @click="addNode('document')" class="button is-small is-info is-light">
+							<span class="icon"><i class="fas fa-file-alt"></i></span>
+							<span>Document</span>
+						</button>
+						<button @click="addNode('software')" class="button is-small is-success is-light">
+							<span class="icon"><i class="fas fa-code"></i></span>
+							<span>Software</span>
+						</button>
+						<button @click="addNode('proposal')" class="button is-small is-warning is-light">
+							<span class="icon"><i class="fas fa-file-contract"></i></span>
+							<span>Proposal</span>
+						</button>
+						<button @click="addNode('analysis')" class="button is-small is-danger is-light">
+							<span class="icon"><i class="fas fa-chart-line"></i></span>
+							<span>Analysis</span>
+						</button>
+					</div>
+				</div>
+				
+				<div class="actions">
+					<div class="buttons">
+						<button @click="saveWorkflow()" class="button is-primary is-small">
+							<span class="icon"><i class="fas fa-save"></i></span>
+							<span>Save</span>
+						</button>
+						<button @click="validateWorkflow()" class="button is-info is-small">
+							<span class="icon"><i class="fas fa-check-circle"></i></span>
+							<span>Validate</span>
+						</button>
+						<button @click="executeWorkflow()" class="button is-success is-small">
+							<span class="icon"><i class="fas fa-play"></i></span>
+							<span>Execute</span>
+						</button>
+						<button @click="exportWorkflow()" class="button is-light is-small">
+							<span class="icon"><i class="fas fa-download"></i></span>
+							<span>Export</span>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Canvas -->
+			<div id="workflow-canvas" class="workflow-canvas"></div>
+
+			<!-- Properties Panel -->
+			<div class="properties-panel" x-show="selectedNode" x-cloak>
+				<div class="is-flex is-justify-content-between is-align-items-center mb-4">
+					<h3 class="title is-5 mb-0">Node Properties</h3>
+					<button @click="deleteNode()" class="button is-small is-danger is-light">
+						<span class="icon"><i class="fas fa-trash"></i></span>
+					</button>
+				</div>
+				
+				<div class="field">
+					<label class="label">Work Item Type</label>
+					<div class="control">
+						<span 
+							class="tag is-medium"
+							:class="{
+								'is-info': selectedNode?.data?.type === 'document',
+								'is-success': selectedNode?.data?.type === 'software',
+								'is-warning': selectedNode?.data?.type === 'proposal',
+								'is-danger': selectedNode?.data?.type === 'analysis'
+							}"
+							x-text="selectedNode?.data?.type"
+						></span>
+					</div>
+				</div>
+
+				<div class="field">
+					<label class="label">Title <span class="has-text-danger">*</span></label>
+					<div class="control">
+						<input 
+							class="input" 
+							type="text" 
+							x-model="selectedNode.data.title"
+							@input="updateNode()"
+							placeholder="Work item title"
+						/>
+					</div>
+				</div>
+
+				<div class="field">
+					<label class="label">Description <span class="has-text-danger">*</span></label>
+					<div class="control">
+						<textarea 
+							class="textarea" 
+							x-model="selectedNode.data.description"
+							@input="updateNode()"
+							rows="4"
+							placeholder="Detailed description of the work to be done"
+						></textarea>
+					</div>
+					<p class="help">This will become the Gitea issue body</p>
+				</div>
+
+				<div class="field">
+					<label class="label">Labels</label>
+					<div class="control">
+						<input 
+							class="input" 
+							type="text" 
+							x-model="selectedNode.data.labelsText"
+							@input="updateNode()"
+							placeholder="work-item, documentation, P1"
+						/>
+					</div>
+					<p class="help">Comma-separated labels for Gitea issue classification</p>
+				</div>
+
+				<!-- GitOps Configuration -->
+				<div class="box mt-4">
+					<h4 class="title is-6 mb-3">
+						<span class="icon-text">
+							<span class="icon"><i class="fab fa-git-alt"></i></span>
+							<span>GitOps Settings</span>
+						</span>
+					</h4>
+					
+					<div class="field">
+						<label class="label">Repository <span class="has-text-danger">*</span></label>
+						<div class="control">
+							<input 
+								class="input" 
+								type="text" 
+								x-model="selectedNode.data.gitea_config.repo"
+								@input="updateNode()"
+								placeholder="repo-name"
+							/>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="label">Branch Pattern</label>
+						<div class="control">
+							<input 
+								class="input" 
+								type="text" 
+								x-model="selectedNode.data.gitea_config.branch_pattern"
+								@input="updateNode()"
+								placeholder="issue-{issue_id}-{slug}"
+							/>
+						</div>
+						<p class="help">Use {issue_id} and {slug} as placeholders</p>
+					</div>
+
+					<div class="field">
+						<label class="label">Merge Strategy</label>
+						<div class="control">
+							<div class="select is-fullwidth">
+								<select x-model="selectedNode.data.gitea_config.merge_strategy" @change="updateNode()">
+									<option value="squash">Squash (single commit)</option>
+									<option value="merge">Merge (preserve history)</option>
+									<option value="rebase">Rebase (linear history)</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="field">
+						<label class="checkbox">
+							<input 
+								type="checkbox" 
+								x-model="selectedNode.data.gitea_config.auto_merge"
+								@change="updateNode()"
+							/>
+							Auto-merge on CI success
+						</label>
+					</div>
+
+					<div class="field">
+						<label class="label">Required Reviews</label>
+						<div class="control">
+							<input 
+								class="input" 
+								type="number" 
+								min="0" 
+								max="5"
+								x-model.number="selectedNode.data.gitea_config.require_reviews"
+								@input="updateNode()"
+							/>
+						</div>
+						<p class="help">Number of approvals required before merge</p>
+					</div>
+				</div>
+
+				<!-- Node Info -->
+				<div class="box mt-4 has-background-light">
+					<p class="is-size-7 has-text-grey">
+						<strong>Node ID:</strong> <code x-text="selectedNode?.id"></code>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="https://cdn.jsdelivr.net/npm/@xyflow/react@12/dist/umd/index.js"></script>
+		<script src="/static/js/workflow-designer.js"></script>
+	}
+}
+
+func getWorkflowID(w *models.Workflow) string {
+	if w == nil {
+		return ""
+	}
+	return w.Key
+}
+
+func getWorkflowName(w *models.Workflow) string {
+	if w == nil {
+		return ""
+	}
+	return w.Name
+}
+
+func getWorkflowDescription(w *models.Workflow) string {
+	if w == nil {
+		return ""
+	}
+	return w.Description
+}
