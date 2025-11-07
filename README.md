@@ -481,12 +481,13 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 ### 🔄 In Progress (Current Sprint)
 - 🔄 Management Dashboard with real-time monitoring (MVP-015)
 - 🔄 Agency Designer UI/UX refinements and performance optimization
+- 🔄 **MVP-052**: Work Items Documentation - GitOps-based workflow system with ArangoDB graph storage
 
 ### 📋 Planned - Core Operations & Infrastructure (High Priority)
 - 📋 **MVP-046**: Agency Admin & Configuration Page - Token budgets, rate limits, monitoring dashboards
 - 📋 **MVP-047**: Export System - PDF/Markdown/JSON export with custom templates
 - 📋 **MVP-042**: AI-Powered Agency Creator - Text upload and selective AI generation
-- � **MVP-030**: Work Items Core Schema & Registry - Work item types with JSON schemas
+- 📋 **MVP-030**: Work Items Core Schema & Registry - Work item types with JSON schemas
 - 📋 **MVP-023**: AI Agent Creator - Conversational interface for agent configuration
 - 📋 **MVP-014**: Kubernetes Deployment - Production-ready containerized deployment
 - 📋 **MVP-016-020**: Agent Property Broadcasting - Real-time agent state sharing with UC-TRACK-001 implementation
@@ -515,6 +516,7 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 - ✅ **Agency Operations Framework**: Complete Goals, Roles, and RACI matrix management
 - ✅ **AI Builder Architecture**: Major refactoring for maintainability and consistency
 - ✅ **Code Quality Enhancement**: Comprehensive dead code cleanup and tooling automation
+- ✅ **Work Items Architecture**: GitOps workflow system documented with Gitea + ArangoDB multi-graph design
 
 **Key Deliverables for Q4 2025**:
 1. Complete Agency Admin configuration and export systems (MVP-046, MVP-047)
