@@ -111,135 +111,107 @@ func (m *mockAgencyService) GetAgencyStatistics(ctx context.Context, id string) 
 	}, nil
 }
 
-func (m *mockAgencyService) GetAgencyOverview(ctx context.Context, id string) (*models.Overview, error) {
-	return &models.Overview{
-		AgencyID:     id,
+// Specification methods (unified document approach)
+func (m *mockAgencyService) GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
 		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      1,
+		UpdatedBy:    "mock",
 	}, nil
 }
 
-func (m *mockAgencyService) UpdateAgencyOverview(ctx context.Context, id string, introduction string) error {
-	return nil
+func (m *mockAgencyService) UpdateSpecification(ctx context.Context, agencyID string, req *models.SpecificationUpdateRequest) (*models.AgencySpecification, error) {
+	spec := &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    req.UpdatedBy,
+	}
+
+	if req.Introduction != nil {
+		spec.Introduction = *req.Introduction
+	}
+	if req.Goals != nil {
+		spec.Goals = *req.Goals
+	}
+	if req.WorkItems != nil {
+		spec.WorkItems = *req.WorkItems
+	}
+	if req.Roles != nil {
+		spec.Roles = *req.Roles
+	}
+	if req.RACIMatrix != nil {
+		spec.RACIMatrix = req.RACIMatrix
+	}
+
+	return spec, nil
 }
 
-func (m *mockAgencyService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*models.Goal, error) {
-	return &models.Goal{
-		Key:         "mock-goal-1",
-		AgencyID:    agencyID,
-		Number:      1,
-		Code:        code,
-		Description: description,
+func (m *mockAgencyService) UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: introduction,
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) GetGoals(ctx context.Context, agencyID string) ([]*models.Goal, error) {
-	return []*models.Goal{}, nil
-}
-
-func (m *mockAgencyService) GetGoal(ctx context.Context, agencyID string, key string) (*models.Goal, error) {
-	return &models.Goal{
-		Key:         key,
-		AgencyID:    agencyID,
-		Number:      1,
-		Code:        "GOAL-1",
-		Description: "Mock goal",
+func (m *mockAgencyService) UpdateSpecificationGoals(ctx context.Context, agencyID string, goals []models.Goal, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        goals,
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) UpdateGoal(ctx context.Context, agencyID string, goalKey string, code string, description string) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteGoal(ctx context.Context, agencyID string, goalKey string) error {
-	return nil
-}
-
-func (m *mockAgencyService) CreateWorkItem(ctx context.Context, agencyID string, req models.CreateWorkItemRequest) (*models.WorkItem, error) {
-	return &models.WorkItem{
-		Key:      "WI-001",
-		AgencyID: agencyID,
-		Number:   1,
-		Title:    req.Title,
+func (m *mockAgencyService) UpdateSpecificationWorkItems(ctx context.Context, agencyID string, workItems []models.WorkItem, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    workItems,
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) GetWorkItems(ctx context.Context, agencyID string) ([]*models.WorkItem, error) {
-	return []*models.WorkItem{}, nil
-}
-
-func (m *mockAgencyService) GetWorkItem(ctx context.Context, agencyID string, key string) (*models.WorkItem, error) {
-	return &models.WorkItem{
-		Key:      key,
-		AgencyID: agencyID,
-		Number:   1,
-		Title:    "Mock Work Item",
+func (m *mockAgencyService) UpdateSpecificationRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        roles,
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error) {
-	return &models.WorkItem{
-		Key:      "WI-001",
-		AgencyID: agencyID,
-		Number:   1,
-		Code:     code,
-		Title:    "Mock Work Item",
+func (m *mockAgencyService) UpdateSpecificationRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   matrix,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
-}
-
-func (m *mockAgencyService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req models.UpdateWorkItemRequest) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteWorkItem(ctx context.Context, agencyID string, key string) error {
-	return nil
-}
-
-func (m *mockAgencyService) CreateWorkItemGoalLink(ctx context.Context, agencyID string, link *models.WorkItemGoalLink) error {
-	return nil
-}
-
-func (m *mockAgencyService) GetWorkItemGoalLinks(ctx context.Context, agencyID, workItemKey string) ([]*models.WorkItemGoalLink, error) {
-	return []*models.WorkItemGoalLink{}, nil
-}
-
-func (m *mockAgencyService) GetGoalWorkItems(ctx context.Context, agencyID, goalKey string) ([]*models.WorkItemGoalLink, error) {
-	return []*models.WorkItemGoalLink{}, nil
-}
-
-func (m *mockAgencyService) DeleteWorkItemGoalLink(ctx context.Context, agencyID, linkKey string) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteWorkItemGoalLinks(ctx context.Context, agencyID, workItemKey string) error {
-	return nil
-}
-
-func (m *mockAgencyService) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *models.RACIAssignment) error {
-	return nil
-}
-
-func (m *mockAgencyService) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*models.RACIAssignment, error) {
-	return []*models.RACIAssignment{}, nil
-}
-
-func (m *mockAgencyService) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*models.RACIAssignment, error) {
-	return []*models.RACIAssignment{}, nil
-}
-
-func (m *mockAgencyService) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*models.RACIAssignment, error) {
-	return []*models.RACIAssignment{}, nil
-}
-
-func (m *mockAgencyService) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *models.RACIAssignment) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteRACIAssignment(ctx context.Context, agencyID string, key string) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) error {
-	return nil
 }
 
 // setupTestRouter creates a test router with the homepage handlers and middleware

@@ -1,11 +1,10 @@
 // HTMX events and interactions
 // Handles HTMX-related functionality
 
-import { scrollToBottom } from './chat.js';
-import { initializeAgentSelection } from './agents.js';
+// Uses global functions: scrollToBottom, initializeAgentSelection, loadEntityList
 
 // Initialize HTMX event listeners
-export function initializeHTMXEvents() {
+window.initializeHTMXEvents = function () {
     // Log context being sent with chat messages
     document.body.addEventListener('htmx:configRequest', function (evt) {
         if (evt.detail.path && evt.detail.path.includes('/messages/web')) {
@@ -214,10 +213,8 @@ export function initializeHTMXEvents() {
 
                 if (agencyId && goalsTableBody) {
                     console.log('[HTMX] Refreshing goals list after chat response');
-                    fetch(`/api/v1/agencies/${agencyId}/goals/html`)
-                        .then(response => response.text())
-                        .then(html => {
-                            goalsTableBody.innerHTML = html;
+                    window.loadEntityList('goals', 'goals-table-body', 3)
+                        .then(() => {
                             console.log('[HTMX] ✅ Goals list refreshed');
                         })
                         .catch(error => {
@@ -233,10 +230,8 @@ export function initializeHTMXEvents() {
 
                 if (agencyId && workItemsTableBody) {
                     console.log('[HTMX] Refreshing work items list after chat response');
-                    fetch(`/api/v1/agencies/${agencyId}/work-items/html`)
-                        .then(response => response.text())
-                        .then(html => {
-                            workItemsTableBody.innerHTML = html;
+                    window.loadEntityList('work-items', 'work-items-table-body', 3)
+                        .then(() => {
                             console.log('[HTMX] ✅ Work items list refreshed');
                         })
                         .catch(error => {

@@ -1,6 +1,7 @@
 /**
  * Workflow Designer - Visual workflow builder using jsPlumb
  * Integrates with Alpine.js for state management
+ * Uses global specificationAPI
  */
 
 // Alpine.js component for workflow designer
@@ -130,12 +131,9 @@ function workflowDesigner() {
         // Load available work items from API
         async loadWorkItems() {
             try {
-                const response = await fetch(`/api/v1/agencies/${this.agencyId}/work-items`);
-                if (response.ok) {
-                    const data = await response.json();
-                    this.availableWorkItems = data.work_items || [];
-                    console.log('Loaded work items:', this.availableWorkItems.length);
-                }
+                const workItems = await window.specificationAPI.getWorkItems();
+                this.availableWorkItems = workItems || [];
+                console.log('Loaded work items:', this.availableWorkItems.length);
             } catch (error) {
                 console.error('Failed to load work items:', error);
             }

@@ -31,18 +31,26 @@ func NewBuilderContextBuilder(agencyService agency.Service, roleService registry
 func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *models.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
 	b.logger.WithField("agency_id", agencyObj.ID).Debug("Building AI context data")
 
-	// Get all goals for context
-	goals, err := b.agencyService.GetGoals(ctx, agencyObj.ID)
+	// Get unified specification (replaces separate GetGoals, GetWorkItems, GetOverview calls)
+	spec, err := b.agencyService.GetSpecification(ctx, agencyObj.ID)
 	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch goals, continuing without them")
-		goals = []*models.Goal{}
+		b.logger.WithError(err).Warn("Failed to fetch specification, using empty context")
+		spec = &models.AgencySpecification{
+			Goals:     []models.Goal{},
+			WorkItems: []models.WorkItem{},
+		}
 	}
 
-	// Get all units of work for context
-	workItems, err := b.agencyService.GetWorkItems(ctx, agencyObj.ID)
-	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch units of work, continuing without them")
-		workItems = []*models.WorkItem{}
+	// Convert goals from []Goal to []*Goal for compatibility
+	goals := make([]*models.Goal, len(spec.Goals))
+	for i := range spec.Goals {
+		goals[i] = &spec.Goals[i]
+	}
+
+	// Convert work items from []WorkItem to []*WorkItem for compatibility
+	workItems := make([]*models.WorkItem, len(spec.WorkItems))
+	for i := range spec.WorkItems {
+		workItems[i] = &spec.WorkItems[i]
 	}
 
 	// Get all roles for context
@@ -50,13 +58,6 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 	if err != nil {
 		b.logger.WithError(err).Warn("Failed to fetch roles, continuing without them")
 		roles = []*registry.Role{}
-	}
-
-	// Get RACI assignments for context
-	assignments, err := b.agencyService.GetAllRACIAssignments(ctx, agencyObj.ID)
-	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
-		assignments = []*models.RACIAssignment{}
 	}
 
 	builderContext := builder.BuilderContext{
@@ -70,18 +71,17 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		Goals:        goals,
 		WorkItems:    workItems,
 		Roles:        roles,
-		Assignments:  assignments,
+		Assignments:  []*models.RACIAssignment{}, // RACI now in specification.RACIMatrix
 		UserInput:    userRequest,
 	}
 
 	b.logger.WithFields(logrus.Fields{
-		"agency_id":         agencyObj.ID,
-		"agency_name":       agencyObj.DisplayName,
-		"goals_count":       len(goals),
-		"work_items_count":  len(workItems),
-		"roles_count":       len(roles),
-		"assignments_count": len(assignments),
-		"has_user_input":    userRequest != "",
+		"agency_id":        agencyObj.ID,
+		"agency_name":      agencyObj.DisplayName,
+		"goals_count":      len(goals),
+		"work_items_count": len(workItems),
+		"roles_count":      len(roles),
+		"has_user_input":   userRequest != "",
 	}).Debug("AI context data built successfully")
 
 	return builderContext, nil

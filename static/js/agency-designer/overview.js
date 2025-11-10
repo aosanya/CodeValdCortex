@@ -1,14 +1,9 @@
 // Overview section functionality
 // Handles overview navigation and section switching
-
-import { loadIntroductionEditor } from './introduction.js';
-import { loadGoals } from './goals.js';
-import { loadWorkItems } from './work-items.js';
-import { loadRoles } from './roles.js';
-import { loadWorkflows } from './workflows.js';
+// Uses global functions: loadIntroductionEditor, loadGoals, loadWorkItems, loadRoles, loadWorkflows
 
 // Initialize overview section
-export function initializeOverview() {
+window.initializeOverview = function () {
     // Initialize global context list and set default to introduction
     if (typeof window !== 'undefined') {
         if (!window.AGENCY_CONTEXTS) {
@@ -85,13 +80,13 @@ export function initializeOverview() {
     if (overviewView && overviewView.classList.contains('is-active') && introEditor) {
         // Load introduction data if on introduction section
         if (!window.location.hash || window.location.hash === '#introduction') {
-            loadIntroductionEditor();
+            if (window.loadIntroductionEditor) window.loadIntroductionEditor();
         }
     }
 }
 
 // Handle overview section selection
-export function selectOverviewSection(element, section) {
+window.selectOverviewSection = function (element, section) {
     // Ensure a global default context list exists
     if (typeof window !== 'undefined') {
         if (!window.AGENCY_CONTEXTS) {
@@ -184,20 +179,20 @@ export function selectOverviewSection(element, section) {
 
         // Load data if needed
         if (section === 'introduction') {
-            loadIntroductionEditor();
+            if (window.loadIntroductionEditor) window.loadIntroductionEditor();
         } else if (section === 'goal-definition') {
-            loadGoals();
+            if (window.loadGoals) window.loadGoals();
         } else if (section === 'work-items') {
-            loadWorkItems();
+            if (window.loadWorkItems) window.loadWorkItems();
         } else if (section === 'roles') {
-            loadRoles();
+            if (window.loadRoles) window.loadRoles();
         } else if (section === 'raci-matrix') {
             // Load RACI matrix data
             if (window.loadRACIMatrix) {
                 window.loadRACIMatrix();
             }
         } else if (section === 'workflows') {
-            loadWorkflows();
+            if (window.loadWorkflows) window.loadWorkflows();
         }
     }
 }

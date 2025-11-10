@@ -1,9 +1,10 @@
 // Goals functionality
 // Handles goal definition management
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
-import { scrollToBottom } from './chat.js';
-import { loadEntityList, showEntityEditor, cancelEntityEdit, deleteEntity, saveEntity } from './crud-helpers.js';
+// Functions available from global window namespace
+// getCurrentAgencyId, showNotification from utils.js
+// specificationAPI from specification-api.js
+// loadEntityList, showEntityEditor, etc. from crud-helpers.js
 
 // Helper function to determine status message based on operations
 function getStatusMessage(operations, selectedCount = 0) {
@@ -30,7 +31,7 @@ function getStatusMessage(operations, selectedCount = 0) {
 
 // Helper function to reload chat messages
 async function reloadChatMessages() {
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     const chatContainer = document.getElementById('chat-messages');
 
     if (!chatContainer || !agencyId) {
@@ -63,12 +64,12 @@ let goalEditorState = {
 };
 
 // Load goals list
-export function loadGoals() {
-    return loadEntityList('goals', 'goals-table-body', 3);
+window.loadGoals = function () {
+    return window.loadEntityList('goals', 'goals-table-body', 4);
 }
 
 // Show goal editor
-export function showGoalEditor(mode, goalKey = null, code = '', description = '') {
+window.showGoalEditor = function (mode, goalKey = null, code = '', description = '') {
     goalEditorState.mode = mode;
     goalEditorState.goalKey = goalKey;
     goalEditorState.originalCode = code;
@@ -77,7 +78,7 @@ export function showGoalEditor(mode, goalKey = null, code = '', description = ''
     const addTitle = '<span class="icon"><i class="fas fa-plus"></i></span><span>Add New Goal</span>';
     const editTitle = '<span class="icon"><i class="fas fa-edit"></i></span><span>Edit Goal</span>';
 
-    showEntityEditor(mode, 'goal-editor-card', 'goals-list-card', 'goal-editor-title', addTitle, editTitle, 'goal-description-editor');
+    window.showEntityEditor(mode, 'goal-editor-card', 'goals-list-card', 'goal-editor-title', addTitle, editTitle, 'goal-description-editor');
 
     // Set field values
     const codeEditor = document.getElementById('goal-code-editor');
@@ -88,33 +89,33 @@ export function showGoalEditor(mode, goalKey = null, code = '', description = ''
 }
 
 // Save goal from editor
-export function saveGoalFromEditor() {
+window.saveGoalFromEditor = function () {
     const code = document.getElementById('goal-code-editor')?.value.trim();
     const description = document.getElementById('goal-description-editor')?.value.trim();
 
     if (!code) {
-        showNotification('Please enter a goal code', 'warning');
+        window.showNotification('Please enter a goal code', 'warning');
         document.getElementById('goal-code-editor')?.focus();
         return;
     }
 
     if (!description) {
-        showNotification('Please enter a goal description', 'warning');
+        window.showNotification('Please enter a goal description', 'warning');
         document.getElementById('goal-description-editor')?.focus();
         return;
     }
 
     const data = { code, description };
 
-    saveEntity('goals', goalEditorState.mode, goalEditorState.goalKey, data, 'save-goal-btn', () => {
+    window.saveEntity('goals', goalEditorState.mode, goalEditorState.goalKey, data, 'save-goal-btn', () => {
         cancelGoalEdit();
         loadGoals();
     });
 }
 
 // Cancel goal edit
-export function cancelGoalEdit() {
-    cancelEntityEdit('goal-editor-card', 'goals-list-card', ['goal-code-editor', 'goal-description-editor']);
+window.cancelGoalEdit = function () {
+    window.cancelEntityEdit('goal-editor-card', 'goals-list-card', ['goal-code-editor', 'goal-description-editor']);
 
     // Reset state
     goalEditorState = {
@@ -126,21 +127,21 @@ export function cancelGoalEdit() {
 }
 
 // Delete goal
-export function deleteGoal(goalKey, goalNumber) {
-    deleteEntity('goals', goalKey, `goal #${goalNumber}`, loadGoals);
+window.deleteGoal = function (goalKey, goalNumber) {
+    window.deleteEntity('goals', goalKey, `goal #${goalNumber}`, loadGoals);
 }
 
 // Process AI Goal Operation - Direct operation without modal
-export function processAIGoalOperation(operations, userRequest = '') {
-    const agencyId = getCurrentAgencyId();
+window.processAIGoalOperation = function (operations, userRequest = '') {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
     // Validate operations array
     if (!operations || operations.length === 0) {
-        showNotification('Error: No operation specified', 'error');
+        window.showNotification('Error: No operation specified', 'error');
         return;
     }
 
@@ -151,7 +152,7 @@ export function processAIGoalOperation(operations, userRequest = '') {
 
     // Validate selection for enhance/consolidate
     if ((operations.includes('enhance') || operations.includes('consolidate')) && selectedGoalKeys.length === 0) {
-        showNotification('Please select goals first', 'warning');
+        window.showNotification('Please select goals first', 'warning');
         return;
     }
 
@@ -196,7 +197,7 @@ export function processAIGoalOperation(operations, userRequest = '') {
             await loadGoals();
 
             // Clear selections and update buttons after reload
-            document.querySelectorAll('.goal-checkbox:checked').forEach(cb => cb.checked = false);
+            document.querySelectorAll('#goals-table-body input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
             updateGoalSelectionButtons();
 
             // Reload chat messages to show the AI explanation
@@ -217,7 +218,7 @@ export function processAIGoalOperation(operations, userRequest = '') {
                 }
             }).join(', ');
 
-            showNotification(`AI successfully ${operationText}!`, 'success');
+            window.showNotification(`AI successfully ${operationText}!`, 'success');
         })
         .catch(error => {
             console.error('Error processing AI goal operation:', error);
@@ -227,7 +228,7 @@ export function processAIGoalOperation(operations, userRequest = '') {
                 window.hideAIProcessStatus();
             }
 
-            showNotification('Failed to process AI goal operation. Please try again.', 'error');
+            window.showNotification('Failed to process AI goal operation. Please try again.', 'error');
         });
 }
 
@@ -235,18 +236,18 @@ export function processAIGoalOperation(operations, userRequest = '') {
 window.processAIGoalOperation = processAIGoalOperation;
 
 // Goal selection management
-function getSelectedGoalKeys() {
-    const checkboxes = document.querySelectorAll('.goal-checkbox:checked');
-    return Array.from(checkboxes).map(cb => cb.dataset.goalKey);
+window.getSelectedGoalKeys = function() {
+    const checkboxes = document.querySelectorAll('#goals-table-body input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
 }
 
-function updateGoalSelectionButtons() {
-    const selectedKeys = getSelectedGoalKeys();
+window.updateGoalSelectionButtons = function() {
+    const selectedKeys = window.getSelectedGoalKeys();
     const hasSelection = selectedKeys.length > 0;
 
     // Update "Select All" checkbox state
     const selectAllCheckbox = document.getElementById('select-all-goals');
-    const allCheckboxes = document.querySelectorAll('.goal-checkbox');
+    const allCheckboxes = document.querySelectorAll('#goals-table-body input[type="checkbox"]');
     if (selectAllCheckbox && allCheckboxes.length > 0) {
         const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
         const someChecked = Array.from(allCheckboxes).some(cb => cb.checked);
@@ -286,8 +287,8 @@ function updateGoalSelectionButtons() {
     updateSelectionCount(selectedKeys.length);
 }
 
-function toggleAllGoals(checked) {
-    const checkboxes = document.querySelectorAll('.goal-checkbox');
+window.toggleAllGoals = function(checked) {
+    const checkboxes = document.querySelectorAll('#goals-table-body input[type="checkbox"]');
     checkboxes.forEach(cb => {
         cb.checked = checked;
     });
@@ -308,7 +309,7 @@ function updateSelectionCount(count) {
 }
 
 // Filter goals by search text
-export function filterGoals() {
+window.filterGoals = function () {
     const searchInput = document.getElementById('goal-search')?.value.toLowerCase() || '';
     const tbody = document.getElementById('goals-table-body');
     if (!tbody) return;
@@ -330,19 +331,19 @@ export function filterGoals() {
 }
 
 // Refine goal description with AI
-export function refineGoalDescription() {
+window.refineGoalDescription = function () {
     const description = document.getElementById('goal-description-editor')?.value.trim();
 
     if (!description) {
-        showNotification('Please enter a description first', 'warning');
+        window.showNotification('Please enter a description first', 'warning');
         return;
     }
 
-    showNotification('AI refinement for goal descriptions coming soon!', 'info');
+    window.showNotification('AI refinement for goal descriptions coming soon!', 'info');
 }
 
 // Validate goal code format
-export function validateGoalCode(code) {
+window.validateGoalCode = function (code) {
     if (!code || code.trim().length === 0) {
         return { valid: false, error: 'Goal code cannot be empty' };
     }
@@ -364,16 +365,4 @@ document.addEventListener('DOMContentLoaded', function () {
     updateGoalSelectionButtons();
 });
 
-// Make functions available globally
-window.loadGoals = loadGoals;
-window.showGoalEditor = showGoalEditor;
-window.saveGoalFromEditor = saveGoalFromEditor;
-window.cancelGoalEdit = cancelGoalEdit;
-window.deleteGoal = deleteGoal;
-window.filterGoals = filterGoals;
-window.processAIGoalOperation = processAIGoalOperation;
-window.refineGoalDescription = refineGoalDescription;
-window.validateGoalCode = validateGoalCode;
-window.getSelectedGoalKeys = getSelectedGoalKeys;
-window.updateGoalSelectionButtons = updateGoalSelectionButtons;
-window.toggleAllGoals = toggleAllGoals;
+// Functions are already assigned to window namespace above

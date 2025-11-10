@@ -39,13 +39,12 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 		return
 	}
 
-	// Get current overview/introduction
-	overview, err := h.agencyService.GetAgencyOverview(c.Request.Context(), agencyID)
+	// Get current specification/introduction
+	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to fetch overview")
-		// Create empty overview if not found
-		overview = &models.Overview{
-			AgencyID:     agencyID,
+		h.logger.WithError(err).Error("Failed to fetch specification")
+		// Create empty spec if not found
+		spec = &models.AgencySpecification{
 			Introduction: "",
 		}
 	}
@@ -53,8 +52,7 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	// Get current introduction text from form (user might have edited it)
 	currentIntroduction := c.PostForm("introduction-editor")
 	if currentIntroduction == "" {
-		// Fallback to stored introduction if form is empty
-		currentIntroduction = overview.Introduction
+		currentIntroduction = spec.Introduction
 	}
 
 	// Check if there's a specific user request from the form
@@ -154,17 +152,17 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 	}
 
 	// Check if the introduction is different from what's in the database
-	needsSave := (introToSave != overview.Introduction)
+	needsSave := (introToSave != spec.Introduction)
 
 	if needsSave {
 		h.logger.WithFields(logrus.Fields{
 			"agency_id":           agencyID,
 			"ai_changed":          refinedResult.WasChanged,
 			"intro_length":        len(introToSave),
-			"stored_intro_length": len(overview.Introduction),
+			"stored_intro_length": len(spec.Introduction),
 		}).Info("Introduction differs from database, saving")
 
-		err = h.agencyService.UpdateAgencyOverview(c.Request.Context(), agencyID, introToSave)
+		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, introToSave, "ai-refine")
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to save introduction")
 			// Show error notification
@@ -238,9 +236,15 @@ func (h *Handler) RefineIntroduction(c *gin.Context) {
 			"agencyID", agencyID)
 	}
 
-	// Update overview object for template rendering
+	// Update spec object for template rendering
 	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
-		overview.Introduction = refinedResult.Data.Introduction
+		spec.Introduction = refinedResult.Data.Introduction
+	}
+
+	// Convert spec to overview format for template compatibility
+	overview := &models.Overview{
+		AgencyID:     agencyID,
+		Introduction: spec.Introduction,
 	}
 
 	// Render the refined introduction response

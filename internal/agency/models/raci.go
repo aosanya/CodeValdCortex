@@ -17,7 +17,7 @@ type RACIActivity struct {
 	ID          string              `json:"id"`
 	Name        string              `json:"name"`
 	Description string              `json:"description"`
-	Assignments map[string]RACIRole `json:"assignments"` // role_name -> RACI role
+	Assignments map[string]RACIRole `json:"assignments"` // role_code or role_name -> RACI role (R/A/C/I)
 	Order       int                 `json:"order"`       // For display ordering
 }
 
@@ -30,7 +30,7 @@ type RACIMatrix struct {
 	Name        string         `json:"name"`
 	Description string         `json:"description,omitempty"`
 	Activities  []RACIActivity `json:"activities"`
-	Roles       []string       `json:"roles"` // List of role names
+	Roles       []string       `json:"roles"` // List of role codes/names (references Role.Code from role.go)
 	TemplateID  string         `json:"template_id,omitempty"`
 	IsValid     bool           `json:"is_valid"`
 	Errors      []string       `json:"errors,omitempty"`
@@ -115,13 +115,14 @@ const (
 
 // RACIAssignment represents an edge between a work item and a role
 // Stored in ArangoDB as an edge in the raci_assignments collection within the agency's database
+// The RoleKey references a Role document (from role.go) stored in the specification
 type RACIAssignment struct {
 	Key         string    `json:"_key,omitempty"`
 	ID          string    `json:"_id,omitempty"`
 	From        string    `json:"_from"`         // Full ID: work_items/{work_item_key}
 	To          string    `json:"_to"`           // Full ID: roles/{role_key}
 	WorkItemKey string    `json:"work_item_key"` // Work item _key (denormalized for queries)
-	RoleKey     string    `json:"role_key"`      // Role _key (denormalized for queries)
+	RoleKey     string    `json:"role_key"`      // Role _key (references Role.Key from role.go)
 	RACI        string    `json:"raci"`          // "R", "A", "C", or "I"
 	Objective   string    `json:"objective"`     // Description of what the role does
 	CreatedAt   time.Time `json:"created_at"`
@@ -131,8 +132,8 @@ type RACIAssignment struct {
 // CreateRACIAssignmentRequest is the request to create a RACI assignment edge
 type CreateRACIAssignmentRequest struct {
 	WorkItemKey string `json:"work_item_key" binding:"required"`
-	RoleKey     string `json:"role_key" binding:"required"`
-	RACI        string `json:"raci" binding:"required"`
+	RoleKey     string `json:"role_key" binding:"required"` // References Role.Key from role.go
+	RACI        string `json:"raci" binding:"required"`     // Must be "R", "A", "C", or "I"
 	Objective   string `json:"objective"`
 }
 

@@ -2,7 +2,7 @@
 // Common helper functions used across modules
 
 // Get current agency ID from URL or data attributes
-export function getCurrentAgencyId() {
+window.getCurrentAgencyId = function () {
     // Try to get from URL path (e.g., /agencies/UC-CHAR-001/designer)
     const pathMatch = window.location.pathname.match(/\/agencies\/([^\/]+)/);
     if (pathMatch) {
@@ -25,7 +25,7 @@ export function getCurrentAgencyId() {
 }
 
 // Show notification message
-export function showNotification(message, type = 'info') {
+window.showNotification = function (message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification is-${type} is-light`;

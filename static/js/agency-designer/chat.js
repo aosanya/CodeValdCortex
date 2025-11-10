@@ -2,7 +2,7 @@
 // Handles chat interface and messaging
 
 // Initialize auto-scroll for chat messages
-export function initializeChatScroll() {
+window.initializeChatScroll = function() {
     const chatContainer = document.getElementById('chat-messages');
     if (chatContainer) {
         // Scroll to bottom on page load
@@ -11,7 +11,7 @@ export function initializeChatScroll() {
 }
 
 // Scroll chat container to bottom
-export function scrollToBottom(container) {
+window.scrollToBottom = function(container) {
     if (container) {
         container.scrollTop = container.scrollHeight;
     }

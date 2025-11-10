@@ -406,26 +406,15 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/activate", agencyHandler.ActivateAgency)
 		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
 		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
-		v1.GET("/agencies/:id/overview", agencyHandler.GetOverview)
-		v1.PUT("/agencies/:id/overview", agencyHandler.UpdateOverview)
-		v1.GET("/agencies/:id/goals", agencyHandler.GetGoals)
-		v1.GET("/agencies/:id/goals/html", agencyHandler.GetGoalsHTML)
-		v1.POST("/agencies/:id/goals", agencyHandler.CreateGoal)
-		v1.PUT("/agencies/:id/goals/:goalKey", agencyHandler.UpdateGoal)
-		v1.DELETE("/agencies/:id/goals/:goalKey", agencyHandler.DeleteGoal)
 
-		// Work Items endpoints
-		v1.GET("/agencies/:id/work-items", agencyHandler.GetWorkItems)
-		v1.GET("/agencies/:id/work-items/html", agencyHandler.GetWorkItemsHTML)
-		v1.POST("/agencies/:id/work-items", agencyHandler.CreateWorkItem)
-		v1.PUT("/agencies/:id/work-items/:key", agencyHandler.UpdateWorkItem)
-		v1.DELETE("/agencies/:id/work-items/:key", agencyHandler.DeleteWorkItem)
-
-		// Work Item-Goal Link endpoints
-		v1.GET("/agencies/:id/work-items/:key/goals", agencyHandler.GetWorkItemGoalLinks)
-		v1.POST("/agencies/:id/work-items/:key/goals", agencyHandler.CreateWorkItemGoalLink)
-		v1.DELETE("/agencies/:id/work-items/:key/goals", agencyHandler.DeleteWorkItemGoalLinks)
-		v1.DELETE("/agencies/:id/work-items/:key/goals/:linkKey", agencyHandler.DeleteWorkItemGoalLink)
+		// Unified Specification endpoints (replaces separate overview/goals/work-items)
+		v1.GET("/agencies/:id/specification", agencyHandler.GetSpecification)
+		v1.PUT("/agencies/:id/specification", agencyHandler.UpdateSpecification)
+		v1.PUT("/agencies/:id/specification/introduction", agencyHandler.UpdateIntroduction)
+		v1.PUT("/agencies/:id/specification/goals", agencyHandler.UpdateGoals)
+		v1.PUT("/agencies/:id/specification/work-items", agencyHandler.UpdateWorkItems)
+		v1.PUT("/agencies/:id/specification/roles", agencyHandler.UpdateRoles)
+		v1.PUT("/agencies/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
 
 		// Roles endpoints
 		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
@@ -435,9 +424,7 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/roles/:key", agencyHandler.UpdateAgencyRole)
 		v1.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
 
-		// RACI Matrix endpoints
-		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetAgencyRACIMatrix)
-		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveAgencyRACIMatrix)
+		// RACI Matrix is now part of unified specification endpoint
 
 		// Workflow endpoints
 		if a.workflowService != nil {
@@ -466,13 +453,14 @@ func (a *App) setupServer() error {
 				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoalsWithPrompt)
 			}
 			if a.workItemBuilder != nil {
+				// DISABLED: Work item AI handlers need refactoring for unified specification model
 				// Main dynamic router - handles all work item operations through natural language prompts
-				v1.POST("/agencies/:id/work-items/refine-dynamic", aiRefineHandler.RefineWorkItems)
-				// Convenience routes that use RefineWorkItems with preset prompts
-				v1.POST("/agencies/:id/work-items/refine-specific", aiRefineHandler.RefineSpecificWorkItem)
-				v1.POST("/agencies/:id/work-items/generate", aiRefineHandler.GenerateWorkItemWithPrompt)
-				v1.POST("/agencies/:id/work-items/consolidate", aiRefineHandler.ConsolidateWorkItemsWithPrompt)
-				v1.POST("/agencies/:id/work-items/enhance-all", aiRefineHandler.EnhanceAllWorkItems)
+				// v1.POST("/agencies/:id/work-items/refine-dynamic", aiRefineHandler.RefineWorkItems)
+				// v1.POST("/agencies/:id/work-items/refine-specific", aiRefineHandler.RefineSpecificWorkItem)
+				// v1.POST("/agencies/:id/work-items/generate", aiRefineHandler.GenerateWorkItemWithPrompt)
+				// v1.POST("/agencies/:id/work-items/consolidate", aiRefineHandler.ConsolidateWorkItemsWithPrompt)
+				// v1.POST("/agencies/:id/work-items/enhance-all", aiRefineHandler.EnhanceAllWorkItems)
+				a.logger.Warn("Work item AI refine endpoints disabled - need refactoring for unified specification")
 			}
 			if a.roleBuilder != nil {
 				// Main dynamic router - handles all role operations through natural language prompts
@@ -493,8 +481,9 @@ func (a *App) setupServer() error {
 				v1.POST("/agencies/:id/raci-matrix/create-complete", aiRefineHandler.CreateCompleteRACIMatrixWithPrompt)
 			}
 			if a.workflowBuilder != nil {
-				// Main dynamic router - handles all workflow operations through natural language prompts
-				v1.POST("/agencies/:id/workflows/refine-dynamic", aiRefineHandler.RefineWorkflows)
+				// DISABLED: Workflow handler needs refactoring for unified specification model
+				// v1.POST("/agencies/:id/workflows/refine-dynamic", aiRefineHandler.RefineWorkflows)
+				a.logger.Warn("Workflow AI refine endpoint disabled - needs refactoring for unified specification")
 			}
 			a.logger.Info("AI Refine endpoints registered")
 		}

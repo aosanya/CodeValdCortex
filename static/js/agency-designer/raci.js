@@ -1,5 +1,6 @@
 // RACI Matrix Editor for Agency Designer
 // Loads work items and roles, allows assignment of R/A/C/I responsibilities
+// Uses global specificationAPI
 
 let raciState = {
     agencyId: null,
@@ -45,28 +46,15 @@ window.loadRACIMatrix = function () {
     // Show simple loading state in table
     tableBody.innerHTML = '<tr><td colspan="3" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
 
-    // Fetch work items first
-    const workItemsUrl = `/api/v1/agencies/${raciState.agencyId}/work-items`;
-
-    fetch(workItemsUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch work items');
-            return response.json();
-        })
-        .then(workItems => {
+    // Fetch work items and roles using specification API
+    Promise.all([
+        window.specificationAPI.getWorkItems(),
+        window.specificationAPI.getRoles()
+    ])
+        .then(([workItems, roles]) => {
             raciState.workItems = workItems || [];
-
-            // Fetch roles
-            const rolesUrl = `/api/v1/agencies/${raciState.agencyId}/roles`;
-            return fetch(rolesUrl);
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch roles');
-            return response.json();
-        })
-        .then(roles => {
             raciState.roles = roles || [];
-
+            return fetch(rolesUrl);
             // Render work items immediately
             renderRACITable();
 

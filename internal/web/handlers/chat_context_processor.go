@@ -90,15 +90,14 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, agencyID, userMessa
 		c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
 	}
 
+	// DISABLED: Goal chat requires refactoring for unified specification model
 	// Set the user request in the form so the ai_refine handler can access it
-	c.Request.PostForm.Set("user-request", userMessage)
-	c.Request.PostForm.Set("message", userMessage)
+	// c.Request.PostForm.Set("user-request", userMessage)
+	// c.Request.PostForm.Set("message", userMessage)
+	// h.aiRefineHandler.ProcessGoalChatRequest(c)
 
-	// Delegate to the ai_refine chat-friendly goal handler
-	h.aiRefineHandler.ProcessGoalChatRequest(c)
-
-	// If we got here without panic, consider it successful
-	result := "success"
+	h.logger.Warn("Goal chat processing is temporarily disabled - needs refactoring for unified specification model")
+	result := "disabled"
 	return &result, nil
 }
 
@@ -140,15 +139,14 @@ func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, agencyID, userM
 		"agencyID", agencyID,
 		"conversationID", conversationID)
 
+	// DISABLED: Work item chat requires refactoring for unified specification model
 	// Set the user request in the form so the ai_refine handler can access it
-	c.Request.PostForm.Set("user-request", userMessage)
-	c.Request.PostForm.Set("message", userMessage)
+	// c.Request.PostForm.Set("user-request", userMessage)
+	// c.Request.PostForm.Set("message", userMessage)
+	// h.aiRefineHandler.RefineWorkItems(c)
 
-	// Delegate to the ai_refine work items handler
-	h.aiRefineHandler.RefineWorkItems(c)
-
-	// If we got here without panic, consider it successful
-	result := "success"
+	h.logger.Warn("Work item processing is temporarily disabled - needs refactoring for unified specification model")
+	result := "disabled"
 	return &result, nil
 }
 

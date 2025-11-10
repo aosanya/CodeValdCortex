@@ -10,31 +10,22 @@ import (
 // CompositeService combines all sub-services and implements the agency.Service interface
 type CompositeService struct {
 	*AgencyService
-	*OverviewService
-	*GoalService
-	*WorkItemService
-	*RACIService
+	*SpecificationService
 }
 
 // New creates a new composite service with all sub-services
 func New(repo agency.Repository, validator agency.Validator) agency.Service {
 	return &CompositeService{
-		AgencyService:   NewAgencyService(repo, validator, nil),
-		OverviewService: NewOverviewService(repo),
-		GoalService:     NewGoalService(repo),
-		WorkItemService: NewWorkItemService(repo),
-		RACIService:     NewRACIService(repo),
+		AgencyService:        NewAgencyService(repo, validator, nil),
+		SpecificationService: NewSpecificationService(repo),
 	}
 }
 
 // NewWithDBInit creates a new composite service with database initialization support
 func NewWithDBInit(repo agency.Repository, validator agency.Validator, dbInit agency.DatabaseInitializer) agency.Service {
 	return &CompositeService{
-		AgencyService:   NewAgencyService(repo, validator, dbInit),
-		OverviewService: NewOverviewService(repo),
-		GoalService:     NewGoalService(repo),
-		WorkItemService: NewWorkItemService(repo),
-		RACIService:     NewRACIService(repo),
+		AgencyService:        NewAgencyService(repo, validator, dbInit),
+		SpecificationService: NewSpecificationService(repo),
 	}
 }
 
@@ -75,56 +66,32 @@ func (c *CompositeService) GetAgencyStatistics(ctx context.Context, id string) (
 	return c.AgencyService.GetAgencyStatistics(ctx, id)
 }
 
-func (c *CompositeService) GetAgencyOverview(ctx context.Context, agencyID string) (*models.Overview, error) {
-	return c.OverviewService.GetAgencyOverview(ctx, agencyID)
+// Specification forwarding methods
+
+func (c *CompositeService) GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.GetSpecification(ctx, agencyID)
 }
 
-func (c *CompositeService) UpdateAgencyOverview(ctx context.Context, agencyID string, introduction string) error {
-	return c.OverviewService.UpdateAgencyOverview(ctx, agencyID, introduction)
+func (c *CompositeService) UpdateSpecification(ctx context.Context, agencyID string, req *models.SpecificationUpdateRequest) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateSpecification(ctx, agencyID, req)
 }
 
-func (c *CompositeService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*models.Goal, error) {
-	return c.GoalService.CreateGoal(ctx, agencyID, code, description)
+func (c *CompositeService) UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateIntroduction(ctx, agencyID, introduction, updatedBy)
 }
 
-func (c *CompositeService) GetGoals(ctx context.Context, agencyID string) ([]*models.Goal, error) {
-	return c.GoalService.GetGoals(ctx, agencyID)
+func (c *CompositeService) UpdateSpecificationGoals(ctx context.Context, agencyID string, goals []models.Goal, updatedBy string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateGoals(ctx, agencyID, goals, updatedBy)
 }
 
-func (c *CompositeService) GetGoal(ctx context.Context, agencyID string, key string) (*models.Goal, error) {
-	return c.GoalService.GetGoal(ctx, agencyID, key)
+func (c *CompositeService) UpdateSpecificationWorkItems(ctx context.Context, agencyID string, workItems []models.WorkItem, updatedBy string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateWorkItems(ctx, agencyID, workItems, updatedBy)
 }
 
-func (c *CompositeService) UpdateGoal(ctx context.Context, agencyID string, key string, code string, description string) error {
-	return c.GoalService.UpdateGoal(ctx, agencyID, key, code, description)
+func (c *CompositeService) UpdateSpecificationRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateRoles(ctx, agencyID, roles, updatedBy)
 }
 
-func (c *CompositeService) DeleteGoal(ctx context.Context, agencyID string, key string) error {
-	return c.GoalService.DeleteGoal(ctx, agencyID, key)
-}
-
-// WorkItem forwarding methods
-
-func (c *CompositeService) CreateWorkItem(ctx context.Context, agencyID string, req models.CreateWorkItemRequest) (*models.WorkItem, error) {
-	return c.WorkItemService.CreateWorkItem(ctx, agencyID, req)
-}
-
-func (c *CompositeService) GetWorkItems(ctx context.Context, agencyID string) ([]*models.WorkItem, error) {
-	return c.WorkItemService.GetWorkItems(ctx, agencyID)
-}
-
-func (c *CompositeService) GetWorkItem(ctx context.Context, agencyID string, key string) (*models.WorkItem, error) {
-	return c.WorkItemService.GetWorkItem(ctx, agencyID, key)
-}
-
-func (c *CompositeService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*models.WorkItem, error) {
-	return c.WorkItemService.GetWorkItemByCode(ctx, agencyID, code)
-}
-
-func (c *CompositeService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req models.UpdateWorkItemRequest) error {
-	return c.WorkItemService.UpdateWorkItem(ctx, agencyID, key, req)
-}
-
-func (c *CompositeService) DeleteWorkItem(ctx context.Context, agencyID string, key string) error {
-	return c.WorkItemService.DeleteWorkItem(ctx, agencyID, key)
+func (c *CompositeService) UpdateSpecificationRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix, updatedBy string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateRACIMatrix(ctx, agencyID, matrix, updatedBy)
 }

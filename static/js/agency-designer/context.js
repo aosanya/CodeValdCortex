@@ -1,7 +1,6 @@
 // Context Manager
 // Handles text selection and context building for AI conversations
-
-import { showNotification } from './utils.js';
+// Uses global showNotification function
 
 /**
  * @typedef {Object} ContextMetadata
@@ -60,7 +59,7 @@ function logContextStateChange(action, context = null) {
 }
 
 // Context types
-export const ContextType = {
+window.ContextType = {
     INTRODUCTION: 'Introduction',
     GOAL: 'Goal Definition',
     WORK_ITEM: 'Work Item',
@@ -77,7 +76,7 @@ export const ContextType = {
  * @param {ContextMetadata} [metadata={}] - Additional metadata (optional)
  * @returns {Context} Context object
  */
-export function createContext(type, code, content, metadata = {}) {
+window.createContext = function(type, code, content, metadata = {}) {
     /** @type {Context} */
     const context = {
         id: contextState.nextId++,
@@ -92,7 +91,7 @@ export function createContext(type, code, content, metadata = {}) {
     logContextStateChange('ADDED', context);
 
     updateContextDisplay();
-    showNotification(`Context added: ${type} ${code}`, 'success');
+    window.window.showNotification(`Context added: ${type} ${code}`, 'success');
 
     return context;
 }
@@ -102,7 +101,7 @@ export function createContext(type, code, content, metadata = {}) {
  * @param {string} goalCode - Goal code
  * @param {string} goalDescription - Full goal description
  */
-export function addGoalContext(goalCode, goalDescription) {
+window.addGoalContext = function(goalCode, goalDescription) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -115,7 +114,7 @@ export function addGoalContext(goalCode, goalDescription) {
     );
 
     if (exists) {
-        showNotification('This context is already added', 'warning');
+        window.showNotification('This context is already added', 'warning');
         return null;
     }
 
@@ -128,7 +127,7 @@ export function addGoalContext(goalCode, goalDescription) {
  * @param {string} workItemDescription - Full work item description
  * @param {boolean} [isNavigational=true] - If true, context is removed when navigating away from work items
  */
-export function addWorkItemContext(workItemCode, workItemDescription, isNavigational = true) {
+window.addWorkItemContext = function(workItemCode, workItemDescription, isNavigational = true) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -141,7 +140,7 @@ export function addWorkItemContext(workItemCode, workItemDescription, isNavigati
     );
 
     if (exists) {
-        showNotification('This context is already added', 'warning');
+        window.showNotification('This context is already added', 'warning');
         return null;
     }
 
@@ -156,7 +155,7 @@ export function addWorkItemContext(workItemCode, workItemDescription, isNavigati
  * Add context from introduction
  * @param {string} introText - Introduction text (full or selected)
  */
-export function addIntroductionContext(introText) {
+window.addIntroductionContext = function(introText) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -168,7 +167,7 @@ export function addIntroductionContext(introText) {
     );
 
     if (exists) {
-        showNotification('This context is already added', 'warning');
+        window.showNotification('This context is already added', 'warning');
         return null;
     }
 
@@ -180,7 +179,7 @@ export function addIntroductionContext(introText) {
  * @param {string} unitCode - Unit code
  * @param {string} unitDescription - Full unit description
  */
-export function addUnitContext(unitCode, unitDescription) {
+window.addUnitContext = function(unitCode, unitDescription) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -191,7 +190,7 @@ export function addUnitContext(unitCode, unitDescription) {
     );
 
     if (exists) {
-        showNotification('This context is already added', 'warning');
+        window.showNotification('This context is already added', 'warning');
         return null;
     }
 
@@ -203,7 +202,7 @@ export function addUnitContext(unitCode, unitDescription) {
  * @param {string} agentCode - Agent type code
  * @param {string} agentDescription - Full agent description
  */
-export function addAgentContext(agentCode, agentDescription) {
+window.addAgentContext = function(agentCode, agentDescription) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -214,7 +213,7 @@ export function addAgentContext(agentCode, agentDescription) {
     );
 
     if (exists) {
-        showNotification('This context is already added', 'warning');
+        window.showNotification('This context is already added', 'warning');
         return null;
     }
 
@@ -225,13 +224,13 @@ export function addAgentContext(agentCode, agentDescription) {
  * Remove context by ID
  * @param {number} contextId - Context ID to remove
  */
-export function removeContext(contextId) {
+window.removeContext = function(contextId) {
     const index = contextState.contexts.findIndex(ctx => ctx.id === contextId);
     if (index !== -1) {
         const removed = contextState.contexts.splice(index, 1)[0];
         logContextStateChange('REMOVED', removed);
         updateContextDisplay();
-        showNotification(`Context removed: ${removed.type} ${removed.code}`, 'info');
+        window.showNotification(`Context removed: ${removed.type} ${removed.code}`, 'info');
     }
 }
 
@@ -239,7 +238,7 @@ export function removeContext(contextId) {
  * Clear navigational contexts for a specific section
  * @param {string} [section] - Section to clear (e.g., 'work-items'). If not provided, clears all navigational contexts.
  */
-export function clearNavigationalContexts(section = null) {
+window.clearNavigationalContexts = function(section = null) {
     const beforeCount = contextState.contexts.length;
 
     if (section) {
@@ -265,32 +264,32 @@ export function clearNavigationalContexts(section = null) {
  * Remove selection by index
  * @param {number} index - Selection index to remove
  */
-export function removeSelection(index) {
+window.removeSelection = function(index) {
     if (index >= 0 && index < contextState.selections.length) {
         const removed = contextState.selections.splice(index, 1)[0];
         updateContextDisplay();
-        showNotification(`Selection removed: ${removed.type} ${removed.code}`, 'info');
+        window.showNotification(`Selection removed: ${removed.type} ${removed.code}`, 'info');
     }
 }
 
 /**
  * Clear all contexts
  */
-export function clearAllContexts() {
+window.clearAllContexts = function() {
     const previousCount = contextState.contexts.length;
     contextState.contexts = [];
     contextState.selections = []; // Also clear selections
     contextState.nextId = 1;
     logContextStateChange('CLEARED_ALL');
     updateContextDisplay();
-    showNotification('All contexts cleared', 'info');
+    window.showNotification('All contexts cleared', 'info');
 }
 
 /**
  * Get all contexts
  * @returns {Array} Array of context objects
  */
-export function getAllContexts() {
+window.getAllContexts = function() {
     return contextState.contexts;
 }
 
@@ -298,7 +297,7 @@ export function getAllContexts() {
  * Get contexts formatted for API/Chat
  * @returns {string} Formatted context string for AI
  */
-export function getFormattedContexts() {
+window.getFormattedContexts = function() {
     // Include both finalized contexts and pending selections
     const hasContexts = contextState.contexts.length > 0;
     const hasSelections = contextState.selections.length > 0;
@@ -476,7 +475,7 @@ function escapeHtml(text) {
 /**
  * Initialize context selection listeners
  */
-export function initializeContextSelection() {
+window.initializeContextSelection = function () {
     // Listen for text selection (mouseup event)
     document.addEventListener('mouseup', handleTextSelection);
 

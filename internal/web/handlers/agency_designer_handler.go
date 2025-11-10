@@ -55,10 +55,13 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 		conversation = existingConv
 	}
 
-	// Try to load the overview so we can pre-fill the introduction editor server-side
+	// Try to load the specification so we can pre-fill the introduction editor server-side
 	var overview *models.Overview
-	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
-		overview = ov
+	if spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID); err == nil {
+		overview = &models.Overview{
+			AgencyID:     agencyID,
+			Introduction: spec.Introduction,
+		}
 	}
 
 	// Render the designer page (pass overview so introduction is pre-filled)
@@ -98,10 +101,13 @@ func (h *AgencyDesignerWebHandler) ShowConversation(c *gin.Context) {
 		return
 	}
 
-	// Try to load the overview so we can pre-fill the introduction editor server-side
+	// Try to load the specification so we can pre-fill the introduction editor server-side
 	var overview *models.Overview
-	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
-		overview = ov
+	if spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID); err == nil {
+		overview = &models.Overview{
+			AgencyID:     agencyID,
+			Introduction: spec.Introduction,
+		}
 	}
 
 	// Render the designer page with the conversation (pass overview)

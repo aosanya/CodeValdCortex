@@ -77,11 +77,21 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 		return
 	}
 
-	// Get all existing goals for context
-	existingGoals, err := h.agencyService.GetGoals(c.Request.Context(), agencyID)
+	// Get unified specification (replaces separate GetGoals, GetWorkItems, GetOverview calls)
+	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch existing goals")
-		existingGoals = []*models.Goal{}
+		h.logger.WithError(err).Warn("Failed to fetch specification")
+		spec = &models.AgencySpecification{
+			Introduction: "",
+			Goals:        []models.Goal{},
+			WorkItems:    []models.WorkItem{},
+		}
+	}
+
+	// Convert goals from []Goal to []*Goal for compatibility
+	existingGoals := make([]*models.Goal, len(spec.Goals))
+	for i := range spec.Goals {
+		existingGoals[i] = &spec.Goals[i]
 	}
 
 	// Filter target goals if specific keys were provided
@@ -102,25 +112,17 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 		}).Info("Filtered target goals")
 	}
 
-	// Get work items for context
-	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch work items")
-		workItems = []*models.WorkItem{}
-	}
-
-	// Get overview for introduction context
-	overview, err := h.agencyService.GetAgencyOverview(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch overview")
-		overview = &models.Overview{AgencyID: agencyID}
+	// Convert work items from []WorkItem to []*WorkItem for compatibility
+	workItems := make([]*models.WorkItem, len(spec.WorkItems))
+	for i := range spec.WorkItems {
+		workItems[i] = &spec.WorkItems[i]
 	}
 
 	// Build the AI builder context
 	builderContext, err := h.contextBuilder.BuildBuilderContext(
 		c.Request.Context(),
 		ag,
-		overview.Introduction,
+		spec.Introduction,
 		req.UserMessage,
 	)
 	if err != nil {

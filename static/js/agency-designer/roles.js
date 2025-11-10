@@ -1,9 +1,10 @@
 // Roles functionality
 // Handles roles management in Agency Designer
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
-import { scrollToBottom } from './chat.js';
-import { loadEntityList, showEntityEditor, cancelEntityEdit, deleteEntity, saveEntity, populateForm, clearForm } from './crud-helpers.js';
+// Functions available from global window namespace
+// getCurrentAgencyId, showNotification from utils.js
+// scrollToBottom from chat.js  
+// loadEntityList, showEntityEditor, etc. from crud-helpers.js
 
 // Role editor state management
 let roleEditorState = {
@@ -13,16 +14,16 @@ let roleEditorState = {
 };
 
 // Load roles list
-export function loadRoles() {
-    return loadEntityList('roles', 'roles-table-body', 5);
+window.loadRoles = function () {
+    return window.loadEntityList('roles', 'roles-table-body', 5);
 }
 
 // Show role editor
-export function showRoleEditor(mode, roleKey = null) {
+window.showRoleEditor = function (mode, roleKey = null) {
     roleEditorState.mode = mode;
     roleEditorState.roleKey = roleKey;
 
-    showEntityEditor(
+    window.showEntityEditor(
         mode,
         'role-editor-card',
         'roles-list-card',
@@ -41,7 +42,7 @@ export function showRoleEditor(mode, roleKey = null) {
 
 // Load role data for editing
 function loadRoleData(roleKey) {
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
         return;
     }
@@ -61,13 +62,13 @@ function loadRoleData(roleKey) {
         })
         .catch(error => {
             console.error('[Roles] Error loading role data:', error);
-            showNotification('Error loading role data', 'danger');
+            window.showNotification('Error loading role data', 'danger');
         });
 }
 
 // Populate form with role data
 function populateRoleForm(role) {
-    populateForm({
+    window.populateForm({
         'role-name-editor': role.name || '',
         'role-tags-editor': (role.tags || []).join(', '),
         'role-description-editor': role.description || '',
@@ -82,7 +83,7 @@ function populateRoleForm(role) {
 
 // Clear role form
 function clearRoleForm() {
-    clearForm([
+    window.clearForm([
         'role-name-editor',
         'role-tags-editor',
         'role-description-editor',
@@ -99,7 +100,7 @@ function clearRoleForm() {
 }
 
 // Save role from editor
-export function saveRoleFromEditor() {
+window.saveRoleFromEditor = function () {
     // Gather form data
     const name = document.getElementById('role-name-editor')?.value.trim();
     const tagsText = document.getElementById('role-tags-editor')?.value.trim();
@@ -113,12 +114,12 @@ export function saveRoleFromEditor() {
 
     // Validation
     if (!name) {
-        showNotification('Please enter a role name', 'warning');
+        window.showNotification('Please enter a role name', 'warning');
         return;
     }
 
     if (!autonomyLevel) {
-        showNotification('Please select an autonomy level', 'warning');
+        window.showNotification('Please select an autonomy level', 'warning');
         return;
     }
 
@@ -152,16 +153,16 @@ export function saveRoleFromEditor() {
             : '1.0.0'
     };
 
-    saveEntity('roles', roleEditorState.mode, roleEditorState.roleKey, payload, 'save-role-btn', () => {
+    window.saveEntity('roles', roleEditorState.mode, roleEditorState.roleKey, payload, 'save-role-btn', () => {
         cancelRoleEdit();
         loadRoles();
-        scrollToBottom();
+        window.scrollToBottom();
     });
 }
 
 // Cancel role edit
-export function cancelRoleEdit() {
-    cancelEntityEdit('role-editor-card', 'roles-list-card', [
+window.cancelRoleEdit = function () {
+    window.cancelEntityEdit('role-editor-card', 'roles-list-card', [
         'role-name-editor',
         'role-tags-editor',
         'role-description-editor',
@@ -181,12 +182,12 @@ export function cancelRoleEdit() {
 }
 
 // Delete role
-export function deleteRole(roleKey) {
-    deleteEntity('roles', roleKey, 'this role', loadRoles);
+window.deleteRole = function (roleKey) {
+    window.deleteEntity('roles', roleKey, 'this role', loadRoles);
 }
 
 // Filter roles
-export function filterRoles() {
+window.filterRoles = function () {
     const searchInput = document.getElementById('roles-search');
     if (!searchInput) return;
 
@@ -204,10 +205,10 @@ export function filterRoles() {
 }
 
 // AI Role Operations
-export async function processAIRoleOperation(operations) {
-    const agencyId = getCurrentAgencyId();
+window.processAIRoleOperation = async function (operations) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
@@ -218,7 +219,7 @@ export async function processAIRoleOperation(operations) {
 
     // Validate selection for operations that require it
     if ((operations.includes('enhance') || operations.includes('consolidate')) && selectedRoleKeys.length === 0) {
-        showNotification('Please select roles first', 'warning');
+        window.showNotification('Please select roles first', 'warning');
         return;
     }
 
@@ -282,7 +283,7 @@ export async function processAIRoleOperation(operations) {
                     const chatHtml = await chatResp.text();
                     chatContainer.innerHTML = chatHtml;
                     // Scroll to bottom to show latest assistant message
-                    try { scrollToBottom(); } catch (e) { /* ignore */ }
+                    try { window.scrollToBottom(); } catch (e) { /* ignore */ }
                 }
             }
         } catch (err) {
@@ -294,7 +295,7 @@ export async function processAIRoleOperation(operations) {
             window.hideAIProcessStatus();
         }
 
-        showNotification('AI operation completed', 'success');
+        window.showNotification('AI operation completed', 'success');
 
     } catch (error) {
         console.error('[Roles] Error processing AI operation:', error);
@@ -304,7 +305,7 @@ export async function processAIRoleOperation(operations) {
             window.hideAIProcessStatus();
         }
 
-        showNotification('Error processing AI operation', 'danger');
+        window.showNotification('Error processing AI operation', 'danger');
     }
 }
 

@@ -1,39 +1,6 @@
 // AI Agency Designer - Main Entry Point
 // Handles initialization and module coordination
-
-// Import all modules
-import { initializeChatScroll, scrollToBottom } from './chat.js';
-import { initializeHTMXEvents } from './htmx.js';
-import { initializeViewSwitcher, switchView } from './views.js';
-import { initializeOverview, selectOverviewSection } from './overview.js';
-import {
-    loadIntroductionEditor,
-    saveOverviewIntroduction,
-    undoOverviewIntroduction
-} from './introduction.js';
-import {
-    showGoalEditor,
-    saveGoalFromEditor,
-    cancelGoalEdit,
-    deleteGoal,
-    loadGoals
-} from './goals.js';
-import {
-    showWorkItemEditor,
-    saveWorkItemFromEditor,
-    cancelWorkItemEdit,
-    deleteWorkItem,
-    filterWorkItems
-} from './work-items.js';
-import {
-    showRoleEditor,
-    saveRoleFromEditor,
-    cancelRoleEdit,
-    deleteRole,
-    filterRoles
-} from './roles.js';
-import { getCurrentAgencyId, showNotification } from './utils.js';
-import { initializeContextSelection } from './context.js';
+// Uses global functions from other script files loaded before this one
 
 // Check if DOM is already loaded
 if (document.readyState === 'loading') {
@@ -44,16 +11,16 @@ if (document.readyState === 'loading') {
 
 function initializeAgencyDesigner() {
     try {
-        // Initialize all modules
-        initializeChatScroll();
-        initializeHTMXEvents();
-        initializeViewSwitcher();
-        initializeOverview();
+        // Initialize all modules using global functions
+        if (window.initializeChatScroll) window.initializeChatScroll();
+        if (window.initializeHTMXEvents) window.initializeHTMXEvents();
+        if (window.initializeViewSwitcher) window.initializeViewSwitcher();
+        if (window.initializeOverview) window.initializeOverview();
 
         // Listen for introduction updates from chat refinement
         document.body.addEventListener('introductionUpdated', function () {
             console.log('[Main] Introduction updated event received - reloading editor');
-            loadIntroductionEditor();
+            if (window.loadIntroductionEditor) window.loadIntroductionEditor();
         });
 
         // Listen for goals updates from chat processing
@@ -66,7 +33,11 @@ function initializeAgencyDesigner() {
 
         loadIntroductionEditor(); // Initialize introduction editor
         initializeAIProcessControls();
-        initializeContextSelection(); // Initialize context selection system
+        if (typeof window.initializeContextSelection === 'function') {
+            window.initializeContextSelection(); // Initialize context selection system
+        } else {
+            console.warn('initializeContextSelection function not available');
+        }
     } catch (error) {
         console.error('❌ Error during initialization:', error);
         console.error('Error stack:', error.stack);
@@ -148,28 +119,8 @@ function hideAIProcessStatus() {
     }
 }
 
-// Export functions to global scope for onclick handlers
-if (typeof selectOverviewSection !== 'undefined') {
-    window.selectOverviewSection = selectOverviewSection;
-} else {
-    console.error('[Main] selectOverviewSection is undefined!');
-}
-window.saveOverviewIntroduction = saveOverviewIntroduction;
-window.undoOverviewIntroduction = undoOverviewIntroduction;
-window.showGoalEditor = showGoalEditor;
-window.saveGoalFromEditor = saveGoalFromEditor;
-window.cancelGoalEdit = cancelGoalEdit;
-window.deleteGoal = deleteGoal;
-window.showWorkItemEditor = showWorkItemEditor;
-window.saveWorkItemFromEditor = saveWorkItemFromEditor;
-window.cancelWorkItemEdit = cancelWorkItemEdit;
-window.deleteWorkItem = deleteWorkItem;
-window.filterWorkItems = filterWorkItems;
-window.showRoleEditor = showRoleEditor;
-window.saveRoleFromEditor = saveRoleFromEditor;
-window.cancelRoleEdit = cancelRoleEdit;
-window.deleteRole = deleteRole;
-window.filterRoles = filterRoles;
+// Functions are defined globally in their respective files
+// No need to re-assign them here
 
 // Export AI process control functions
 window.showAIProcessStatus = showAIProcessStatus;
@@ -183,7 +134,7 @@ window.AgencyDesigner = {
         const activeSection = document.querySelector('.overview-section-button.is-active');
         if (activeSection) {
             const section = activeSection.getAttribute('data-section');
-            return section || 'overview';
+            return section || 'introduction';
         }
 
         // Fallback to checking view tabs
@@ -192,7 +143,7 @@ window.AgencyDesigner = {
             return activeViewTab.getAttribute('data-view') || 'overview';
         }
 
-        // Default to overview
-        return 'overview';
+        // Default to introduction
+        return 'introduction';
     }
 };

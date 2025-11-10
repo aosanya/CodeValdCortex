@@ -1,9 +1,7 @@
 // Work Items functionality
 // Handles work items management
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
-import { scrollToBottom } from './chat.js';
-import { loadEntityList, showEntityEditor, cancelEntityEdit, deleteEntity, saveEntity, populateForm, clearForm } from './crud-helpers.js';
+// Uses global functions: getCurrentAgencyId, showNotification, scrollToBottom, loadEntityList, etc., specificationAPI
 
 // Work item editor state management
 let workItemEditorState = {
@@ -14,14 +12,11 @@ let workItemEditorState = {
 
 // Load goals for the checkbox list
 async function loadGoalsForSelection() {
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) return;
 
     try {
-        const response = await fetch(`/api/v1/agencies/${agencyId}/goals`);
-        if (!response.ok) throw new Error('Failed to fetch goals');
-
-        const goals = await response.json();
+        const goals = await window.specificationAPI.getGoals();
         const container = document.getElementById('work-item-goals-editor');
         if (!container) return;
 
@@ -56,12 +51,12 @@ async function loadGoalsForSelection() {
 }
 
 // Load work items list
-export function loadWorkItems() {
+window.loadWorkItems = function() {
     return loadEntityList('work-items', 'work-items-table-body', 4);
 }
 
 // Show work item editor
-export async function showWorkItemEditor(mode, workItemKey = null) {
+window.showWorkItemEditor = async function(mode, workItemKey = null) {
     workItemEditorState.mode = mode;
     workItemEditorState.workItemKey = workItemKey;
 
@@ -87,15 +82,14 @@ export async function showWorkItemEditor(mode, workItemKey = null) {
 
 // Load work item data for editing
 async function loadWorkItemData(workItemKey) {
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId || !workItemKey) {
         return;
     }
 
     try {
-        // Fetch work item data
-        const response = await fetch(`/api/v1/agencies/${agencyId}/work-items`);
-        const workItems = await response.json();
+        // Fetch work item data using specification API
+        const workItems = await window.specificationAPI.getWorkItems();
 
         // The key field comes as "_key" from JSON
         const workItem = workItems.find(wi => wi._key === workItemKey || wi.key === workItemKey);
@@ -107,36 +101,21 @@ async function loadWorkItemData(workItemKey) {
             // Load linked goals for this work item
             await loadLinkedGoals(workItemKey);
         } else {
-            showNotification('Work item not found', 'error');
+            window.showNotification('Work item not found', 'error');
         }
     } catch (error) {
         console.error('Error loading work item:', error);
-        showNotification('Error loading work item data', 'error');
+        window.showNotification('Error loading work item data', 'error');
     }
 }
 
 // Load and select linked goals for a work item
+// NOTE: In the unified specification model, work items don't have explicit goal links
+// This functionality is temporarily disabled for the single-document architecture
 async function loadLinkedGoals(workItemKey) {
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId || !workItemKey) return;
-
-    try {
-        const response = await fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}/goals`);
-        if (!response.ok) return; // No links yet, that's OK
-
-        const links = await response.json();
-        const container = document.getElementById('work-item-goals-editor');
-        if (!container) return;
-
-        // Check the linked goals
-        const linkedGoalKeys = links.map(link => link.goal_key);
-        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = linkedGoalKeys.includes(checkbox.value);
-        });
-    } catch (error) {
-        console.error('Error loading goal links:', error);
-    }
+    console.log('Goal linking temporarily disabled in unified specification model');
+    // TODO: Implement goal linking within the unified specification structure
+    // or remove this feature if not needed in the new architecture
 }
 
 // Populate form with work item data
@@ -171,7 +150,7 @@ function clearWorkItemForm() {
 }
 
 // Save work item from editor
-export async function saveWorkItemFromEditor() {
+window.saveWorkItemFromEditor = async function() {
     // Get form values
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
@@ -191,13 +170,13 @@ export async function saveWorkItemFromEditor() {
 
     // Validation
     if (!title) {
-        showNotification('Please enter a work item title', 'warning');
+        window.showNotification('Please enter a work item title', 'warning');
         document.getElementById('work-item-title-editor')?.focus();
         return;
     }
 
     if (!description) {
-        showNotification('Please enter a work item description', 'warning');
+        window.showNotification('Please enter a work item description', 'warning');
         document.getElementById('work-item-description-editor')?.focus();
         return;
     }
@@ -209,71 +188,41 @@ export async function saveWorkItemFromEditor() {
         tags
     };
 
-    // Save the work item first
+    // Save the work item using specification API
     try {
-        const agencyId = getCurrentAgencyId();
-        const url = workItemEditorState.mode === 'add'
-            ? `/api/v1/agencies/${agencyId}/work-items`
-            : `/api/v1/agencies/${agencyId}/work-items/${workItemEditorState.workItemKey}`;
+        const agencyId = window.getCurrentAgencyId();
 
-        const method = workItemEditorState.mode === 'add' ? 'POST' : 'PUT';
-
-        const response = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to save work item');
+        let savedWorkItem;
+        if (workItemEditorState.mode === 'add') {
+            savedWorkItem = await window.specificationAPI.addWorkItem(data);
+        } else {
+            savedWorkItem = await window.specificationAPI.updateWorkItem(workItemEditorState.workItemKey, data);
         }
 
-        const savedWorkItem = await response.json();
-        const workItemKey = savedWorkItem._key || savedWorkItem.key || workItemEditorState.workItemKey;
+        const workItemKey = data.key || workItemEditorState.workItemKey;
 
         // Save goal links
         await saveGoalLinks(workItemKey, selectedGoals);
 
-        showNotification('Work item saved successfully', 'success');
+        window.showNotification('Work item saved successfully', 'success');
         cancelWorkItemEdit();
         loadWorkItems();
     } catch (error) {
         console.error('Error saving work item:', error);
-        showNotification('Error saving work item', 'error');
+        window.showNotification('Error saving work item', 'error');
     }
 }
 
 // Save goal links for a work item
+// NOTE: Goal linking is disabled in the unified specification model
 async function saveGoalLinks(workItemKey, selectedGoalKeys) {
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId || !workItemKey) return;
-
-    try {
-        // Delete existing links
-        await fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}/goals`, {
-            method: 'DELETE'
-        });
-
-        // Create new links
-        for (const goalKey of selectedGoalKeys) {
-            await fetch(`/api/v1/agencies/${agencyId}/work-items/${workItemKey}/goals`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    work_item_key: workItemKey,
-                    goal_key: goalKey,
-                    relationship: 'addresses'
-                })
-            });
-        }
-    } catch (error) {
-        console.error('Error saving goal links:', error);
-        // Don't throw - work item was saved, links are optional
-    }
+    console.log('Goal linking disabled in unified specification model');
+    // TODO: Consider if goal linking should be implemented within unified specification
+    // or if this feature should be removed entirely from the new architecture
 }
 
 // Cancel work item edit
-export function cancelWorkItemEdit() {
+window.cancelWorkItemEdit = function() {
     cancelEntityEdit('work-item-editor-card', 'work-items-list-card', [
         'work-item-title-editor',
         'work-item-description-editor',
@@ -296,12 +245,12 @@ export function cancelWorkItemEdit() {
 }
 
 // Delete work item
-export function deleteWorkItem(workItemKey) {
+window.deleteWorkItem = function(workItemKey) {
     deleteEntity('work-items', workItemKey, 'this work item', loadWorkItems);
 }
 
 // Filter work items
-export function filterWorkItems() {
+window.filterWorkItems = function() {
     const searchInput = document.getElementById('work-item-search')?.value.toLowerCase() || '';
     const typeFilter = document.getElementById('filter-type')?.value || '';
     const tbody = document.getElementById('work-items-tbody');
@@ -324,16 +273,16 @@ export function filterWorkItems() {
 }
 
 // AI Work Item Operations
-export async function processAIWorkItemOperation(operations) {
-    const agencyId = getCurrentAgencyId();
+window.processAIWorkItemOperation = async function(operations) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
     // Validate operations array
     if (!operations || operations.length === 0) {
-        showNotification('Error: No operation specified', 'error');
+        window.showNotification('Error: No operation specified', 'error');
         return;
     }
 
@@ -342,7 +291,7 @@ export async function processAIWorkItemOperation(operations) {
     if (operations.includes('enhance') || operations.includes('consolidate')) {
         selectedWorkItemKeys = getSelectedWorkItemKeys();
         if (selectedWorkItemKeys.length === 0) {
-            showNotification('Please select work items first', 'warning');
+            window.showNotification('Please select work items first', 'warning');
             return;
         }
     }
@@ -421,13 +370,13 @@ export async function processAIWorkItemOperation(operations) {
 
         // Show success message with results
         if (data.created_count > 0) {
-            showNotification(`Successfully created ${data.created_count} work items!`, 'success');
+            window.showNotification(`Successfully created ${data.created_count} work items!`, 'success');
         } else if (data.enhanced_count > 0) {
-            showNotification(`Successfully enhanced ${data.enhanced_count} work items!`, 'success');
+            window.showNotification(`Successfully enhanced ${data.enhanced_count} work items!`, 'success');
         } else if (data.results && data.results.consolidate_success) {
-            showNotification(data.results.consolidate_success, 'success');
+            window.showNotification(data.results.consolidate_success, 'success');
         } else {
-            showNotification('AI operations completed!', 'success');
+            window.showNotification('AI operations completed!', 'success');
         }
 
     } catch (error) {
@@ -436,20 +385,20 @@ export async function processAIWorkItemOperation(operations) {
             window.hideAIProcessStatus();
         }
 
-        showNotification(`AI processing failed: ${error.message}`, 'danger');
+        window.showNotification(`AI processing failed: ${error.message}`, 'danger');
     }
 }
 
 // Refine work item description with AI
-export function refineWorkItemDescription() {
+window.refineWorkItemDescription = function() {
     const description = document.getElementById('work-item-description-editor')?.value.trim();
 
     if (!description) {
-        showNotification('Please enter a description first', 'warning');
+        window.showNotification('Please enter a description first', 'warning');
         return;
     }
 
-    showNotification('AI refinement for work items coming soon!', 'info');
+    window.showNotification('AI refinement for work items coming soon!', 'info');
 }
 
 // Get selected work item keys from checkboxes
@@ -459,7 +408,7 @@ function getSelectedWorkItemKeys() {
 }
 
 // Update selection buttons based on checkbox state
-function updateWorkItemSelectionButtons() {
+window.updateWorkItemSelectionButtons = function() {
     const selectedKeys = getSelectedWorkItemKeys();
     const hasSelection = selectedKeys.length > 0;
 

@@ -44,12 +44,8 @@ func (h *Handler) RefineRACIMappings(c *gin.Context) {
 
 	// Set context data in the request if not provided
 	if req.ExistingAssignments == nil {
-		assignments, err := h.agencyService.GetAllRACIAssignments(ctx, agencyID)
-		if err != nil {
-			h.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
-			assignments = []*models.RACIAssignment{}
-		}
-		req.ExistingAssignments = assignments
+		// RACI assignments are now in the specification.RACIMatrix, not separate edges
+		req.ExistingAssignments = []*models.RACIAssignment{}
 	}
 	if req.WorkItems == nil {
 		req.WorkItems = builderContext.WorkItems

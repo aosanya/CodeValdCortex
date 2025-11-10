@@ -43,29 +43,14 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.GET("/active", h.GetActiveAgency)
 		agencies.GET("/:id/statistics", h.GetAgencyStatistics)
 
-		// Overview routes
-		agencies.GET("/:id/overview", h.GetOverview)
-		agencies.PUT("/:id/overview", h.UpdateOverview)
-
-		// Goals routes
-		agencies.GET("/:id/goals", h.GetGoals)
-		agencies.GET("/:id/goals/html", h.GetGoalsHTML)
-		agencies.POST("/:id/goals", h.CreateGoal)
-		agencies.PUT("/:id/goals/:goalKey", h.UpdateGoal)
-		agencies.DELETE("/:id/goals/:goalKey", h.DeleteGoal)
-
-		// Work items routes
-		agencies.GET("/:id/work-items", h.GetWorkItems)
-		agencies.GET("/:id/work-items/html", h.GetWorkItemsHTML)
-		agencies.POST("/:id/work-items", h.CreateWorkItem)
-		agencies.PUT("/:id/work-items/:key", h.UpdateWorkItem)
-		agencies.DELETE("/:id/work-items/:key", h.DeleteWorkItem)
-
-		// Work item-goal link routes
-		agencies.GET("/:id/work-items/:key/goals", h.GetWorkItemGoalLinks)
-		agencies.POST("/:id/work-items/:key/goals", h.CreateWorkItemGoalLink)
-		agencies.DELETE("/:id/work-items/:key/goals", h.DeleteWorkItemGoalLinks)
-		agencies.DELETE("/:id/work-items/:key/goals/:linkKey", h.DeleteWorkItemGoalLink)
+		// Unified Specification routes (replaces separate overview/goals/work-items)
+		agencies.GET("/:id/specification", h.GetSpecification)
+		agencies.PUT("/:id/specification", h.UpdateSpecification)
+		agencies.PUT("/:id/specification/introduction", h.UpdateIntroduction)
+		agencies.PUT("/:id/specification/goals", h.UpdateGoals)
+		agencies.PUT("/:id/specification/work-items", h.UpdateWorkItems)
+		agencies.PUT("/:id/specification/roles", h.UpdateRoles)
+		agencies.PUT("/:id/specification/raci-matrix", h.UpdateRACIMatrixSection)
 	}
 }
 
@@ -287,25 +272,45 @@ func (h *AgencyHandler) GetAgencyStatistics(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-// GetOverview handles GET /api/v1/agencies/:id/overview
-func (h *AgencyHandler) GetOverview(c *gin.Context) {
+// GetSpecification handles GET /api/v1/agencies/:id/specification
+func (h *AgencyHandler) GetSpecification(c *gin.Context) {
 	id := c.Param("id")
 
-	overview, err := h.service.GetAgencyOverview(c.Request.Context(), id)
+	spec, err := h.service.GetSpecification(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, overview)
+	c.JSON(http.StatusOK, spec)
 }
 
-// UpdateOverview handles PUT /api/v1/agencies/:id/overview
-func (h *AgencyHandler) UpdateOverview(c *gin.Context) {
+// UpdateSpecification handles PUT /api/v1/agencies/:id/specification
+func (h *AgencyHandler) UpdateSpecification(c *gin.Context) {
+	id := c.Param("id")
+
+	var req models.SpecificationUpdateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	spec, err := h.service.UpdateSpecification(c.Request.Context(), id, &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, spec)
+}
+
+// UpdateIntroduction handles PUT /api/v1/agencies/:id/specification/introduction
+func (h *AgencyHandler) UpdateIntroduction(c *gin.Context) {
 	id := c.Param("id")
 
 	var req struct {
 		Introduction string `json:"introduction"`
+		UpdatedBy    string `json:"updated_by"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -313,17 +318,103 @@ func (h *AgencyHandler) UpdateOverview(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.UpdateAgencyOverview(c.Request.Context(), id, req.Introduction); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Return updated overview
-	overview, err := h.service.GetAgencyOverview(c.Request.Context(), id)
+	spec, err := h.service.UpdateIntroduction(c.Request.Context(), id, req.Introduction, req.UpdatedBy)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, overview)
+	c.JSON(http.StatusOK, spec)
+}
+
+// UpdateGoals handles PUT /api/v1/agencies/:id/specification/goals
+func (h *AgencyHandler) UpdateGoals(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Goals     []models.Goal `json:"goals"`
+		UpdatedBy string        `json:"updated_by"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	spec, err := h.service.UpdateSpecificationGoals(c.Request.Context(), id, req.Goals, req.UpdatedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, spec)
+}
+
+// UpdateWorkItems handles PUT /api/v1/agencies/:id/specification/work-items
+func (h *AgencyHandler) UpdateWorkItems(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		WorkItems []models.WorkItem `json:"work_items"`
+		UpdatedBy string            `json:"updated_by"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	spec, err := h.service.UpdateSpecificationWorkItems(c.Request.Context(), id, req.WorkItems, req.UpdatedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, spec)
+}
+
+// UpdateRoles handles PUT /api/v1/agencies/:id/specification/roles
+func (h *AgencyHandler) UpdateRoles(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Roles     []models.Role `json:"roles"`
+		UpdatedBy string        `json:"updated_by"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	spec, err := h.service.UpdateSpecificationRoles(c.Request.Context(), id, req.Roles, req.UpdatedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, spec)
+}
+
+// UpdateRACIMatrixSection handles PUT /api/v1/agencies/:id/specification/raci-matrix
+func (h *AgencyHandler) UpdateRACIMatrixSection(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		RACIMatrix *models.RACIMatrix `json:"raci_matrix"`
+		UpdatedBy  string             `json:"updated_by"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	spec, err := h.service.UpdateSpecificationRACIMatrix(c.Request.Context(), id, req.RACIMatrix, req.UpdatedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, spec)
 }

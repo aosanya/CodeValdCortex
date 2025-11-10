@@ -1,9 +1,10 @@
 // Workflows functionality
 // Handles workflow management
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
-import { scrollToBottom } from './chat.js';
-import { loadEntityList, showEntityEditor, cancelEntityEdit, populateForm, clearForm } from './crud-helpers.js';
+// Functions available from global window namespace
+// getCurrentAgencyId, showNotification from utils.js
+// scrollToBottom from chat.js  
+// loadEntityList, showEntityEditor, etc. from crud-helpers.js
 
 // Workflow editor state management
 let workflowEditorState = {
@@ -13,16 +14,16 @@ let workflowEditorState = {
 };
 
 // Load workflows list
-export function loadWorkflows() {
-    return loadEntityList('workflows', 'workflows-table-body', 5);
+window.loadWorkflows = function () {
+    return window.loadEntityList('workflows', 'workflows-table-body', 5);
 }
 
 // Show workflow editor
-export function showWorkflowEditor(mode, workflowId = null) {
+window.showWorkflowEditor = function (mode, workflowId = null) {
     workflowEditorState.mode = mode;
     workflowEditorState.workflowId = workflowId;
 
-    showEntityEditor(
+    window.showEntityEditor(
         mode,
         'workflow-editor-card',
         'workflows-list-card',
@@ -41,7 +42,7 @@ export function showWorkflowEditor(mode, workflowId = null) {
 
 // Load workflow data for editing
 function loadWorkflowData(workflowId) {
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId || !workflowId) {
         return;
     }
@@ -66,13 +67,13 @@ function loadWorkflowData(workflowId) {
         })
         .catch(error => {
             console.error('Error loading workflow:', error);
-            showNotification('Error loading workflow data', 'error');
+            window.showNotification('Error loading workflow data', 'error');
         });
 }
 
 // Populate form with workflow data
 function populateWorkflowForm(workflow) {
-    populateForm({
+    window.populateForm({
         'workflow-name-editor': workflow.name || '',
         'workflow-description-editor': workflow.description || '',
         'workflow-version-editor': workflow.version || '1.0.0',
@@ -91,7 +92,7 @@ function populateWorkflowForm(workflow) {
 
 // Clear workflow form
 function clearWorkflowForm() {
-    clearForm([
+    window.clearForm([
         'workflow-name-editor',
         'workflow-description-editor',
         'workflow-version-editor',
@@ -112,7 +113,7 @@ function clearWorkflowForm() {
 }
 
 // Save workflow from editor
-export function saveWorkflowFromEditor() {
+window.saveWorkflowFromEditor = function () {
     // Get form values
     const name = document.getElementById('workflow-name-editor').value.trim();
     const description = document.getElementById('workflow-description-editor').value.trim();
@@ -122,12 +123,12 @@ export function saveWorkflowFromEditor() {
 
     // Validate required fields
     if (!name) {
-        showNotification('Please provide a workflow name', 'error');
+        window.showNotification('Please provide a workflow name', 'error');
         return;
     }
 
     if (!description) {
-        showNotification('Please provide a workflow description', 'error');
+        window.showNotification('Please provide a workflow description', 'error');
         return;
     }
 
@@ -140,14 +141,14 @@ export function saveWorkflowFromEditor() {
             nodes = structure.nodes || [];
             edges = structure.edges || [];
         } catch (e) {
-            showNotification('Invalid workflow structure JSON', 'error');
+            window.showNotification('Invalid workflow structure JSON', 'error');
             return;
         }
     }
 
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
@@ -188,24 +189,24 @@ export function saveWorkflowFromEditor() {
             return response.json();
         })
         .then(() => {
-            showNotification(`Workflow ${method === 'POST' ? 'created' : 'updated'} successfully`, 'success');
+            window.showNotification(`Workflow ${method === 'POST' ? 'created' : 'updated'} successfully`, 'success');
             cancelWorkflowEdit();
             loadWorkflows();
         })
         .catch(error => {
             console.error('Error saving workflow:', error);
-            showNotification(`Error ${method === 'POST' ? 'creating' : 'updating'} workflow`, 'error');
+            window.showNotification(`Error ${method === 'POST' ? 'creating' : 'updating'} workflow`, 'error');
         });
 }
 
 // Cancel workflow editing
-export function cancelWorkflowEdit() {
-    cancelEntityEdit('workflow-editor-card', 'workflows-list-card');
+window.cancelWorkflowEdit = function () {
+    window.cancelEntityEdit('workflow-editor-card', 'workflows-list-card');
     clearWorkflowForm();
 }
 
 // Delete workflow
-export function deleteWorkflow(workflowId) {
+window.deleteWorkflow = function (workflowId) {
     const confirmDelete = confirm('Are you sure you want to delete this workflow?');
     if (!confirmDelete) {
         return;
@@ -221,20 +222,20 @@ export function deleteWorkflow(workflowId) {
             return response.json();
         })
         .then(() => {
-            showNotification('Workflow deleted successfully', 'success');
+            window.showNotification('Workflow deleted successfully', 'success');
             loadWorkflows();
         })
         .catch(error => {
             console.error('Error deleting workflow:', error);
-            showNotification('Error deleting workflow', 'error');
+            window.showNotification('Error deleting workflow', 'error');
         });
 }
 
 // Duplicate workflow
-export function duplicateWorkflow(workflowId) {
-    const agencyId = getCurrentAgencyId();
+window.duplicateWorkflow = function (workflowId) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Unable to determine current agency', 'error');
+        window.showNotification('Unable to determine current agency', 'error');
         return;
     }
 
@@ -251,17 +252,17 @@ export function duplicateWorkflow(workflowId) {
             return response.json();
         })
         .then(() => {
-            showNotification('Workflow duplicated successfully', 'success');
+            window.showNotification('Workflow duplicated successfully', 'success');
             loadWorkflows();
         })
         .catch(error => {
             console.error('Error duplicating workflow:', error);
-            showNotification('Error duplicating workflow', 'error');
+            window.showNotification('Error duplicating workflow', 'error');
         });
 }
 
 // Filter workflows based on search input
-export function filterWorkflows() {
+window.filterWorkflows = function () {
     const searchInput = document.getElementById('workflows-search').value.toLowerCase();
     const rows = document.querySelectorAll('#workflows-table-body tr');
 
@@ -279,7 +280,7 @@ export function filterWorkflows() {
 }
 
 // Toggle all workflows selection
-export function toggleAllWorkflows(checked) {
+window.toggleAllWorkflows = function (checked) {
     const checkboxes = document.querySelectorAll('#workflows-table-body input[type="checkbox"]');
     checkboxes.forEach(cb => {
         cb.checked = checked;
@@ -321,10 +322,10 @@ function updateWorkflowSelectionUI() {
 }
 
 // AI Workflow Operations
-export function processAIWorkflowOperation(operation) {
-    const agencyId = getCurrentAgencyId();
+window.processAIWorkflowOperation = function (operation) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Unable to determine current agency', 'error');
+        window.showNotification('Unable to determine current agency', 'error');
         return;
     }
 
@@ -342,20 +343,20 @@ export function processAIWorkflowOperation(operation) {
             break;
         case 'refine':
             if (selectedKeys.length !== 1) {
-                showNotification('Please select exactly one workflow to refine', 'warning');
+                window.showNotification('Please select exactly one workflow to refine', 'warning');
                 return;
             }
             userMessage = 'Refine this workflow to improve its structure and efficiency';
             break;
         case 'suggest':
             if (selectedKeys.length !== 1) {
-                showNotification('Please select exactly one workflow to analyze', 'warning');
+                window.showNotification('Please select exactly one workflow to analyze', 'warning');
                 return;
             }
             userMessage = 'Analyze this workflow and suggest improvements';
             break;
         default:
-            showNotification('Unknown operation', 'error');
+            window.showNotification('Unknown operation', 'error');
             return;
     }
 
@@ -400,15 +401,15 @@ export function processAIWorkflowOperation(operation) {
 }
 
 // Generate workflow with AI from description
-export function generateWorkflowWithAI() {
+window.generateWorkflowWithAI = function () {
     const description = document.getElementById('workflow-description-editor').value.trim();
 
     if (!description) {
-        showNotification('Please provide a workflow description first', 'warning');
+        window.showNotification('Please provide a workflow description first', 'warning');
         return;
     }
 
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     const userMessage = `Generate a workflow structure for: ${description}`;
 
     // Make AI request
@@ -429,24 +430,24 @@ export function generateWorkflowWithAI() {
             return response.text();
         })
         .then(html => {
-            showNotification('Workflow generated! Check the workflows list.', 'success');
+            window.showNotification('Workflow generated! Check the workflows list.', 'success');
             cancelWorkflowEdit();
             loadWorkflows();
         })
         .catch(error => {
             console.error('AI workflow generation error:', error);
-            showNotification('Failed to generate workflow with AI', 'error');
+            window.showNotification('Failed to generate workflow with AI', 'error');
         });
 }
 
 // Refine workflow with AI
-export function refineWorkflowWithAI() {
+window.refineWorkflowWithAI = function () {
     if (workflowEditorState.mode !== 'edit' || !workflowEditorState.workflowId) {
-        showNotification('Please load a workflow first', 'warning');
+        window.showNotification('Please load a workflow first', 'warning');
         return;
     }
 
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     const userMessage = 'Refine and improve this workflow';
 
     fetch(`/api/v1/agencies/${agencyId}/workflows/refine-dynamic`, {
@@ -466,13 +467,13 @@ export function refineWorkflowWithAI() {
             return response.text();
         })
         .then(html => {
-            showNotification('Workflow refined successfully!', 'success');
+            window.showNotification('Workflow refined successfully!', 'success');
             // Reload the workflow data
             loadWorkflowData(workflowEditorState.workflowId);
         })
         .catch(error => {
             console.error('AI workflow refinement error:', error);
-            showNotification('Failed to refine workflow with AI', 'error');
+            window.showNotification('Failed to refine workflow with AI', 'error');
         });
 }
 
