@@ -236,12 +236,12 @@ window.processAIGoalOperation = function (operations, userRequest = '') {
 window.processAIGoalOperation = processAIGoalOperation;
 
 // Goal selection management
-window.getSelectedGoalKeys = function() {
+window.getSelectedGoalKeys = function () {
     const checkboxes = document.querySelectorAll('#goals-table-body input[type="checkbox"]:checked');
     return Array.from(checkboxes).map(cb => cb.value);
 }
 
-window.updateGoalSelectionButtons = function() {
+window.updateGoalSelectionButtons = function () {
     const selectedKeys = window.getSelectedGoalKeys();
     const hasSelection = selectedKeys.length > 0;
 
@@ -287,7 +287,7 @@ window.updateGoalSelectionButtons = function() {
     updateSelectionCount(selectedKeys.length);
 }
 
-window.toggleAllGoals = function(checked) {
+window.toggleAllGoals = function (checked) {
     const checkboxes = document.querySelectorAll('#goals-table-body input[type="checkbox"]');
     checkboxes.forEach(cb => {
         cb.checked = checked;

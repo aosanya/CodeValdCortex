@@ -51,12 +51,12 @@ async function loadGoalsForSelection() {
 }
 
 // Load work items list
-window.loadWorkItems = function() {
+window.loadWorkItems = function () {
     return loadEntityList('work-items', 'work-items-table-body', 4);
 }
 
 // Show work item editor
-window.showWorkItemEditor = async function(mode, workItemKey = null) {
+window.showWorkItemEditor = async function (mode, workItemKey = null) {
     workItemEditorState.mode = mode;
     workItemEditorState.workItemKey = workItemKey;
 
@@ -150,7 +150,7 @@ function clearWorkItemForm() {
 }
 
 // Save work item from editor
-window.saveWorkItemFromEditor = async function() {
+window.saveWorkItemFromEditor = async function () {
     // Get form values
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
@@ -222,7 +222,7 @@ async function saveGoalLinks(workItemKey, selectedGoalKeys) {
 }
 
 // Cancel work item edit
-window.cancelWorkItemEdit = function() {
+window.cancelWorkItemEdit = function () {
     cancelEntityEdit('work-item-editor-card', 'work-items-list-card', [
         'work-item-title-editor',
         'work-item-description-editor',
@@ -245,12 +245,12 @@ window.cancelWorkItemEdit = function() {
 }
 
 // Delete work item
-window.deleteWorkItem = function(workItemKey) {
+window.deleteWorkItem = function (workItemKey) {
     deleteEntity('work-items', workItemKey, 'this work item', loadWorkItems);
 }
 
 // Filter work items
-window.filterWorkItems = function() {
+window.filterWorkItems = function () {
     const searchInput = document.getElementById('work-item-search')?.value.toLowerCase() || '';
     const typeFilter = document.getElementById('filter-type')?.value || '';
     const tbody = document.getElementById('work-items-tbody');
@@ -273,7 +273,7 @@ window.filterWorkItems = function() {
 }
 
 // AI Work Item Operations
-window.processAIWorkItemOperation = async function(operations) {
+window.processAIWorkItemOperation = async function (operations) {
     const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
         window.showNotification('Error: No agency selected', 'error');
@@ -390,7 +390,7 @@ window.processAIWorkItemOperation = async function(operations) {
 }
 
 // Refine work item description with AI
-window.refineWorkItemDescription = function() {
+window.refineWorkItemDescription = function () {
     const description = document.getElementById('work-item-description-editor')?.value.trim();
 
     if (!description) {
@@ -408,7 +408,7 @@ function getSelectedWorkItemKeys() {
 }
 
 // Update selection buttons based on checkbox state
-window.updateWorkItemSelectionButtons = function() {
+window.updateWorkItemSelectionButtons = function () {
     const selectedKeys = getSelectedWorkItemKeys();
     const hasSelection = selectedKeys.length > 0;
 
