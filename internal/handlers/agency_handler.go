@@ -489,7 +489,7 @@ func (h *AgencyHandler) SaveRACIMatrix(c *gin.Context) {
 
 	var req struct {
 		Assignments map[string]map[string]builder.RACIAssignment `json:"assignments"`
-		UpdatedBy   string                                        `json:"updated_by,omitempty"`
+		UpdatedBy   string                                       `json:"updated_by,omitempty"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
