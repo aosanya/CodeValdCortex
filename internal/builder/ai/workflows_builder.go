@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
-	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,7 +25,7 @@ func NewAIWorkflowsBuilder(llmClient LLMClient, logger *logrus.Logger) *Workflow
 }
 
 // GenerateWorkflowsFromContext generates workflow suggestions based on agency context
-func (b *WorkflowsBuilder) GenerateWorkflowsFromContext(ctx context.Context, ag *models.Agency, overview *models.Overview, workItems []models.WorkItem) ([]workflow.Workflow, error) {
+func (b *WorkflowsBuilder) GenerateWorkflowsFromContext(ctx context.Context, ag *models.Agency, overview *models.Overview, workItems []models.WorkItem) ([]models.Workflow, error) {
 	prompt := b.buildContextPrompt(ag, overview, workItems)
 
 	systemPrompt := `You are an expert workflow architect specializing in designing efficient work item orchestration flows.
@@ -100,7 +99,7 @@ Create ONLY 1 simple workflow that makes sense for this agency. Keep it minimal 
 }
 
 // GenerateWorkflowWithPrompt generates a workflow based on user's natural language prompt
-func (b *WorkflowsBuilder) GenerateWorkflowWithPrompt(ctx context.Context, ag *models.Agency, userPrompt string, workItems []models.WorkItem) (*workflow.Workflow, error) {
+func (b *WorkflowsBuilder) GenerateWorkflowWithPrompt(ctx context.Context, ag *models.Agency, userPrompt string, workItems []models.WorkItem) (*models.Workflow, error) {
 	prompt := b.buildPromptWithContext(ag, userPrompt, workItems)
 
 	systemPrompt := `You are an expert workflow designer. Based on the user's request and available work items, create a single workflow.
@@ -146,7 +145,7 @@ Ensure the workflow:
 }
 
 // RefineWorkflow refines an existing workflow based on user feedback
-func (b *WorkflowsBuilder) RefineWorkflow(ctx context.Context, wf *workflow.Workflow, refinementPrompt string) (*workflow.Workflow, error) {
+func (b *WorkflowsBuilder) RefineWorkflow(ctx context.Context, wf *models.Workflow, refinementPrompt string) (*models.Workflow, error) {
 	currentJSON, err := json.MarshalIndent(wf, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal current workflow: %w", err)
@@ -227,7 +226,7 @@ func (b *WorkflowsBuilder) buildPromptWithContext(ag *models.Agency, userPrompt 
 }
 
 // parseWorkflowsResponse parses AI response into workflow array
-func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]workflow.Workflow, error) {
+func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]models.Workflow, error) {
 	// Clean response
 	cleaned := b.cleanJSONResponse(response)
 
@@ -237,7 +236,7 @@ func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]workflow.W
 		return nil, fmt.Errorf("invalid JSON response: response appears truncated (likely too large). Try creating fewer or simpler workflows")
 	}
 
-	var workflows []workflow.Workflow
+	var workflows []models.Workflow
 	if err := json.Unmarshal([]byte(cleaned), &workflows); err != nil {
 		b.logger.WithError(err).WithField("response", cleaned).Error("Failed to parse workflows JSON")
 
@@ -253,11 +252,11 @@ func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]workflow.W
 }
 
 // parseSingleWorkflowResponse parses AI response into single workflow
-func (b *WorkflowsBuilder) parseSingleWorkflowResponse(response string) (*workflow.Workflow, error) {
+func (b *WorkflowsBuilder) parseSingleWorkflowResponse(response string) (*models.Workflow, error) {
 	// Clean response
 	cleaned := b.cleanJSONResponse(response)
 
-	var wf workflow.Workflow
+	var wf models.Workflow
 	if err := json.Unmarshal([]byte(cleaned), &wf); err != nil {
 		b.logger.WithError(err).WithField("response", cleaned).Error("Failed to parse workflow JSON")
 		return nil, fmt.Errorf("invalid JSON response: %w", err)
@@ -279,7 +278,7 @@ func (b *WorkflowsBuilder) cleanJSONResponse(response string) string {
 }
 
 // SuggestWorkflowImprovements suggests improvements for an existing workflow
-func (b *WorkflowsBuilder) SuggestWorkflowImprovements(ctx context.Context, wf *workflow.Workflow) ([]string, error) {
+func (b *WorkflowsBuilder) SuggestWorkflowImprovements(ctx context.Context, wf *models.Workflow) ([]string, error) {
 	currentJSON, err := json.MarshalIndent(wf, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal workflow: %w", err)

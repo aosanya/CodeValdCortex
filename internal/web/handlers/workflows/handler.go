@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/database"
-	"github.com/aosanya/CodeValdCortex/internal/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/templates/pages/workflows"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -256,21 +256,27 @@ func (h *Handler) getWorkflowByID(ctx context.Context, workflowID string) (*mode
 func (h *Handler) validateWorkflowStructure(workflow *models.Workflow) models.WorkflowValidationResult {
 	result := models.WorkflowValidationResult{
 		Valid:    true,
-		Errors:   []string{},
+		Errors:   []models.ValidationError{},
 		Warnings: []string{},
 	}
 
 	// Check if workflow has nodes
 	if len(workflow.Nodes) == 0 {
 		result.Valid = false
-		result.Errors = append(result.Errors, "Workflow must have at least one node")
+		result.Errors = append(result.Errors, models.ValidationError{
+			Field:   "nodes",
+			Message: "Workflow must have at least one node",
+		})
 		return result
 	}
 
 	// Check for cycles
 	if h.hasCycle(workflow) {
 		result.Valid = false
-		result.Errors = append(result.Errors, "Workflow contains circular dependencies")
+		result.Errors = append(result.Errors, models.ValidationError{
+			Field:   "edges",
+			Message: "Workflow contains circular dependencies",
+		})
 	}
 
 	// Check for orphaned nodes (except root nodes)
@@ -283,15 +289,27 @@ func (h *Handler) validateWorkflowStructure(workflow *models.Workflow) models.Wo
 	for _, node := range workflow.Nodes {
 		if node.Data.Title == "" {
 			result.Valid = false
-			result.Errors = append(result.Errors, fmt.Sprintf("Node %s is missing a title", node.ID))
+			result.Errors = append(result.Errors, models.ValidationError{
+				Field:   "title",
+				Message: fmt.Sprintf("Node %s is missing a title", node.ID),
+				NodeID:  node.ID,
+			})
 		}
 		if node.Data.Description == "" {
 			result.Valid = false
-			result.Errors = append(result.Errors, fmt.Sprintf("Node %s is missing a description", node.ID))
+			result.Errors = append(result.Errors, models.ValidationError{
+				Field:   "description",
+				Message: fmt.Sprintf("Node %s is missing a description", node.ID),
+				NodeID:  node.ID,
+			})
 		}
-		if node.Data.GiteaConfig.Repo == "" {
+		if node.Data.GiteaConfig != nil && node.Data.GiteaConfig.Repo == "" {
 			result.Valid = false
-			result.Errors = append(result.Errors, fmt.Sprintf("Node %s is missing a repository", node.ID))
+			result.Errors = append(result.Errors, models.ValidationError{
+				Field:   "repository",
+				Message: fmt.Sprintf("Node %s is missing a repository", node.ID),
+				NodeID:  node.ID,
+			})
 		}
 	}
 

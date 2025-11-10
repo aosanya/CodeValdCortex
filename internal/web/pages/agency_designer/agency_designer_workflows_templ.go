@@ -9,11 +9,11 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/workflow"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // WorkflowsList renders the workflows table rows
-func WorkflowsList(workflows []*workflow.Workflow) templ.Component {
+func WorkflowsList(workflows []*models.Workflow) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -52,7 +52,7 @@ func WorkflowsList(workflows []*workflow.Workflow) templ.Component {
 }
 
 // WorkflowItem renders a single workflow row
-func WorkflowItem(wf *workflow.Workflow) templ.Component {
+func WorkflowItem(wf *models.Workflow) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -233,7 +233,7 @@ func WorkflowItem(wf *workflow.Workflow) templ.Component {
 }
 
 // WorkflowStatusBadge renders a status badge based on workflow status
-func WorkflowStatusBadge(status workflow.WorkflowStatus) templ.Component {
+func WorkflowStatusBadge(status models.WorkflowStatus) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -255,27 +255,27 @@ func WorkflowStatusBadge(status workflow.WorkflowStatus) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch status {
-		case workflow.WorkflowStatusDraft:
+		case models.WorkflowStatusDraft:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<span class=\"tag is-light\">Draft</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case workflow.WorkflowStatusActive:
+		case models.WorkflowStatusActive:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<span class=\"tag is-success is-light\">Active</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case workflow.WorkflowStatusPaused:
+		case models.WorkflowStatusPaused:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<span class=\"tag is-warning is-light\">Paused</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case workflow.WorkflowStatusCompleted:
+		case models.WorkflowStatusCompleted:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<span class=\"tag is-info is-light\">Completed</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case workflow.WorkflowStatusFailed:
+		case models.WorkflowStatusFailed:
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<span class=\"tag is-danger is-light\">Failed</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

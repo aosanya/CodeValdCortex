@@ -1,11 +1,11 @@
 package agency_designer
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/workflow"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // WorkflowsList renders the workflows table rows
-templ WorkflowsList(workflows []*workflow.Workflow) {
+templ WorkflowsList(workflows []*models.Workflow) {
 	if len(workflows) == 0 {
 		<tr>
 			<td colspan="5" class="has-text-grey has-text-centered py-5">
@@ -20,7 +20,7 @@ templ WorkflowsList(workflows []*workflow.Workflow) {
 }
 
 // WorkflowItem renders a single workflow row
-templ WorkflowItem(wf *workflow.Workflow) {
+templ WorkflowItem(wf *models.Workflow) {
 	<tr data-workflow-id={ wf.ID }>
 		<td style="width: 50px; text-align: center;">
 			<label class="checkbox">
@@ -77,17 +77,17 @@ templ WorkflowItem(wf *workflow.Workflow) {
 }
 
 // WorkflowStatusBadge renders a status badge based on workflow status
-templ WorkflowStatusBadge(status workflow.WorkflowStatus) {
+templ WorkflowStatusBadge(status models.WorkflowStatus) {
 	switch status {
-		case workflow.WorkflowStatusDraft:
+		case models.WorkflowStatusDraft:
 			<span class="tag is-light">Draft</span>
-		case workflow.WorkflowStatusActive:
+		case models.WorkflowStatusActive:
 			<span class="tag is-success is-light">Active</span>
-		case workflow.WorkflowStatusPaused:
+		case models.WorkflowStatusPaused:
 			<span class="tag is-warning is-light">Paused</span>
-		case workflow.WorkflowStatusCompleted:
+		case models.WorkflowStatusCompleted:
 			<span class="tag is-info is-light">Completed</span>
-		case workflow.WorkflowStatusFailed:
+		case models.WorkflowStatusFailed:
 			<span class="tag is-danger is-light">Failed</span>
 		default:
 			<span class="tag is-light">{ string(status) }</span>

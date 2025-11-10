@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 	"github.com/sirupsen/logrus"
 )
@@ -133,12 +134,12 @@ func (r *ArangoRepository) ensureIndexes(ctx context.Context) error {
 		return fmt.Errorf("failed to create execution status index: %w", err)
 	}
 
-	r.logger.Info("Workflow indexes created successfully")
+	r.logger.Info("models.Workflow indexes created successfully")
 	return nil
 }
 
 // Create creates a new workflow
-func (r *ArangoRepository) Create(ctx context.Context, workflow *Workflow) error {
+func (r *ArangoRepository) Create(ctx context.Context, workflow *models.Workflow) error {
 	col, err := r.db.Collection(ctx, workflowsCollection)
 	if err != nil {
 		return fmt.Errorf("failed to get collection: %w", err)
@@ -151,15 +152,15 @@ func (r *ArangoRepository) Create(ctx context.Context, workflow *Workflow) error
 
 	// Set default status if not provided
 	if workflow.Status == "" {
-		workflow.Status = WorkflowStatusDraft
+		workflow.Status = models.WorkflowStatusDraft
 	}
 
 	// Initialize empty arrays if nil
 	if workflow.Nodes == nil {
-		workflow.Nodes = []Node{}
+		workflow.Nodes = []models.WorkflowNode{}
 	}
 	if workflow.Edges == nil {
-		workflow.Edges = []Edge{}
+		workflow.Edges = []models.WorkflowEdge{}
 	}
 	if workflow.Variables == nil {
 		workflow.Variables = make(map[string]interface{})
@@ -181,13 +182,13 @@ func (r *ArangoRepository) Create(ctx context.Context, workflow *Workflow) error
 }
 
 // GetByID retrieves a workflow by its ID
-func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*Workflow, error) {
+func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*models.Workflow, error) {
 	col, err := r.db.Collection(ctx, workflowsCollection)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collection: %w", err)
 	}
 
-	var workflow Workflow
+	var workflow models.Workflow
 	_, err = col.ReadDocument(ctx, id, &workflow)
 	if err != nil {
 		if driver.IsNotFound(err) {
@@ -201,7 +202,7 @@ func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*Workflow, e
 }
 
 // GetByAgencyID retrieves all workflows for a specific agency
-func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) ([]*Workflow, error) {
+func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) ([]*models.Workflow, error) {
 	query := `
 		FOR w IN @@collection
 		FILTER w.agency_id == @agency_id
@@ -220,9 +221,9 @@ func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) (
 	}
 	defer cursor.Close()
 
-	var workflows []*Workflow
+	var workflows []*models.Workflow
 	for {
-		var workflow Workflow
+		var workflow models.Workflow
 		meta, err := cursor.ReadDocument(ctx, &workflow)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -239,7 +240,7 @@ func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) (
 }
 
 // Update updates an existing workflow
-func (r *ArangoRepository) Update(ctx context.Context, workflow *Workflow) error {
+func (r *ArangoRepository) Update(ctx context.Context, workflow *models.Workflow) error {
 	col, err := r.db.Collection(ctx, workflowsCollection)
 	if err != nil {
 		return fmt.Errorf("failed to get collection: %w", err)
@@ -284,7 +285,7 @@ func (r *ArangoRepository) Delete(ctx context.Context, id string) error {
 }
 
 // List retrieves workflows with pagination
-func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*Workflow, error) {
+func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*models.Workflow, error) {
 	query := `
 		FOR w IN @@collection
 		SORT w.created_at DESC
@@ -304,9 +305,9 @@ func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*Work
 	}
 	defer cursor.Close()
 
-	var workflows []*Workflow
+	var workflows []*models.Workflow
 	for {
-		var workflow Workflow
+		var workflow models.Workflow
 		meta, err := cursor.ReadDocument(ctx, &workflow)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -323,7 +324,7 @@ func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*Work
 }
 
 // CreateExecution creates a new workflow execution
-func (r *ArangoRepository) CreateExecution(ctx context.Context, execution *WorkflowExecution) error {
+func (r *ArangoRepository) CreateExecution(ctx context.Context, execution *models.WorkflowExecution) error {
 	col, err := r.db.Collection(ctx, workflowExecutionsCollection)
 	if err != nil {
 		return fmt.Errorf("failed to get collection: %w", err)
@@ -334,7 +335,7 @@ func (r *ArangoRepository) CreateExecution(ctx context.Context, execution *Workf
 
 	// Initialize arrays if nil
 	if execution.NodeExecutions == nil {
-		execution.NodeExecutions = []NodeExecution{}
+		execution.NodeExecutions = []models.NodeExecution{}
 	}
 	if execution.Errors == nil {
 		execution.Errors = []string{}
@@ -358,13 +359,13 @@ func (r *ArangoRepository) CreateExecution(ctx context.Context, execution *Workf
 }
 
 // GetExecution retrieves an execution by its ID
-func (r *ArangoRepository) GetExecution(ctx context.Context, id string) (*WorkflowExecution, error) {
+func (r *ArangoRepository) GetExecution(ctx context.Context, id string) (*models.WorkflowExecution, error) {
 	col, err := r.db.Collection(ctx, workflowExecutionsCollection)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collection: %w", err)
 	}
 
-	var execution WorkflowExecution
+	var execution models.WorkflowExecution
 	_, err = col.ReadDocument(ctx, id, &execution)
 	if err != nil {
 		if driver.IsNotFound(err) {
@@ -378,7 +379,7 @@ func (r *ArangoRepository) GetExecution(ctx context.Context, id string) (*Workfl
 }
 
 // GetExecutionsByWorkflowID retrieves all executions for a specific workflow
-func (r *ArangoRepository) GetExecutionsByWorkflowID(ctx context.Context, workflowID string) ([]*WorkflowExecution, error) {
+func (r *ArangoRepository) GetExecutionsByWorkflowID(ctx context.Context, workflowID string) ([]*models.WorkflowExecution, error) {
 	query := `
 		FOR e IN @@collection
 		FILTER e.workflow_id == @workflow_id
@@ -397,9 +398,9 @@ func (r *ArangoRepository) GetExecutionsByWorkflowID(ctx context.Context, workfl
 	}
 	defer cursor.Close()
 
-	var executions []*WorkflowExecution
+	var executions []*models.WorkflowExecution
 	for {
-		var execution WorkflowExecution
+		var execution models.WorkflowExecution
 		meta, err := cursor.ReadDocument(ctx, &execution)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -416,7 +417,7 @@ func (r *ArangoRepository) GetExecutionsByWorkflowID(ctx context.Context, workfl
 }
 
 // UpdateExecution updates an existing execution
-func (r *ArangoRepository) UpdateExecution(ctx context.Context, execution *WorkflowExecution) error {
+func (r *ArangoRepository) UpdateExecution(ctx context.Context, execution *models.WorkflowExecution) error {
 	col, err := r.db.Collection(ctx, workflowExecutionsCollection)
 	if err != nil {
 		return fmt.Errorf("failed to get collection: %w", err)
@@ -434,7 +435,7 @@ func (r *ArangoRepository) UpdateExecution(ctx context.Context, execution *Workf
 }
 
 // UpdateNodeExecution updates a specific node execution within a workflow execution
-func (r *ArangoRepository) UpdateNodeExecution(ctx context.Context, executionID string, nodeExecution *NodeExecution) error {
+func (r *ArangoRepository) UpdateNodeExecution(ctx context.Context, executionID string, nodeExecution *models.NodeExecution) error {
 	// Get the execution
 	execution, err := r.GetExecution(ctx, executionID)
 	if err != nil {

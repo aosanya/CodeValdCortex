@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -27,7 +28,7 @@ func NewWorkflowHandler(service *workflow.Service, logger *logrus.Logger) *Workf
 func (h *WorkflowHandler) CreateWorkflow(c *gin.Context) {
 	agencyID := c.Param("id")
 
-	var req workflow.Workflow
+	var req models.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -80,7 +81,7 @@ func (h *WorkflowHandler) GetWorkflow(c *gin.Context) {
 func (h *WorkflowHandler) UpdateWorkflow(c *gin.Context) {
 	id := c.Param("id")
 
-	var req workflow.Workflow
+	var req models.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -126,7 +127,7 @@ func (h *WorkflowHandler) DuplicateWorkflow(c *gin.Context) {
 
 // ValidateWorkflow handles POST /api/v1/workflows/validate
 func (h *WorkflowHandler) ValidateWorkflow(c *gin.Context) {
-	var req workflow.Workflow
+	var req models.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
