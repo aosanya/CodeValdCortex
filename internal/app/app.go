@@ -421,6 +421,12 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/work-items/:key", agencyHandler.UpdateWorkItem)
 		v1.DELETE("/agencies/:id/work-items/:key", agencyHandler.DeleteWorkItem)
 
+		// Work Item-Goal Link endpoints
+		v1.GET("/agencies/:id/work-items/:key/goals", agencyHandler.GetWorkItemGoalLinks)
+		v1.POST("/agencies/:id/work-items/:key/goals", agencyHandler.CreateWorkItemGoalLink)
+		v1.DELETE("/agencies/:id/work-items/:key/goals", agencyHandler.DeleteWorkItemGoalLinks)
+		v1.DELETE("/agencies/:id/work-items/:key/goals/:linkKey", agencyHandler.DeleteWorkItemGoalLink)
+
 		// Roles endpoints
 		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
 		v1.GET("/agencies/:id/roles/html", agencyHandler.GetAgencyRolesHTML)

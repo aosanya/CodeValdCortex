@@ -6,11 +6,8 @@ import (
 
 // performIntroductionRefinement delegates to the ai_refine handler for introduction refinement
 // Returns the response HTML or nil if refinement failed
-func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, userMessage string) (*string, error) {
+func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID, userMessage string) (*string, error) {
 	h.logger.Info("🔵 DELEGATING: Introduction refinement to ai_refine.Handler")
-
-	// Get agencyID from context
-	agencyID := c.Param("id")
 
 	// Ensure conversation exists - start one if this is a new conversation
 	conversationID := c.Param("conversationId")
@@ -31,6 +28,20 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, userMessage 
 		"agencyID", agencyID,
 		"conversationID", conversationID)
 
+	// Set the agencyID in the params so the ai_refine handler can access it
+	// Need to add/update the :id param since the URL path is /conversations/:conversationId/messages/web
+	paramFound := false
+	for i, param := range c.Params {
+		if param.Key == "id" {
+			c.Params[i].Value = agencyID
+			paramFound = true
+			break
+		}
+	}
+	if !paramFound {
+		c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
+	}
+
 	// Set the user request in the form so the ai_refine handler can access it
 	c.Request.PostForm.Set("user-request", userMessage)
 
@@ -44,11 +55,8 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, userMessage 
 
 // performGoalsRefinement delegates to the ai_refine handler for goals processing via chat
 // Returns the response HTML or nil if refinement failed
-func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string) (*string, error) {
+func (h *ChatHandler) performGoalsRefinement(c *gin.Context, agencyID, userMessage string) (*string, error) {
 	h.logger.Info("🔵 DELEGATING: Goals processing to ai_refine.Handler (chat mode)")
-
-	// Get agencyID from context
-	agencyID := c.Param("id")
 
 	// Ensure conversation exists - start one if this is a new conversation
 	conversationID := c.Param("conversationId")
@@ -69,6 +77,19 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string)
 		"agencyID", agencyID,
 		"conversationID", conversationID)
 
+	// Set the agencyID in the params
+	paramFound := false
+	for i, param := range c.Params {
+		if param.Key == "id" {
+			c.Params[i].Value = agencyID
+			paramFound = true
+			break
+		}
+	}
+	if !paramFound {
+		c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
+	}
+
 	// Set the user request in the form so the ai_refine handler can access it
 	c.Request.PostForm.Set("user-request", userMessage)
 	c.Request.PostForm.Set("message", userMessage)
@@ -83,22 +104,10 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, userMessage string)
 
 // performWorkItemsProcessing delegates to the ai_refine handler for work items processing via chat
 // Returns the response HTML or nil if processing failed
-func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, userMessage string) (*string, error) {
+func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, agencyID, userMessage string) (*string, error) {
 	h.logger.Info("🔵 DELEGATING: Work items processing to ai_refine.Handler (chat mode)")
 
-	// Get agencyID from context - try param first, then conversation
-	agencyID := c.Param("id")
 	conversationID := c.Param("conversationId")
-
-	// If no agencyID in params (follow-up message), get it from conversation
-	if agencyID == "" && conversationID != "" {
-		conversation, err := h.designerService.GetConversation(conversationID)
-		if err != nil {
-			h.logger.WithError(err).Error("Failed to get conversation for agency ID")
-			return nil, err
-		}
-		agencyID = conversation.AgencyID
-	}
 
 	// Ensure conversation exists - start one if this is a new conversation
 	if conversationID == "" {
@@ -115,18 +124,16 @@ func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, userMessage str
 	}
 
 	// Store agencyID in params so RefineWorkItems can access it
-	if agencyID != "" {
-		// Check if already exists
-		hasID := false
-		for _, p := range c.Params {
-			if p.Key == "id" {
-				hasID = true
-				break
-			}
+	paramFound := false
+	for i, param := range c.Params {
+		if param.Key == "id" {
+			c.Params[i].Value = agencyID
+			paramFound = true
+			break
 		}
-		if !hasID {
-			c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
-		}
+	}
+	if !paramFound {
+		c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
 	}
 
 	h.logger.Info("Conversation ready for work items processing",
@@ -158,7 +165,7 @@ func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, 
 		h.logger.Info("User on introduction section - performing direct refinement")
 		// Perform the refinement directly (conversation handling is inside)
 		h.logger.Info("🔵 CALLING: performIntroductionRefinement", "agencyID", agencyID)
-		refined, err := h.performIntroductionRefinement(c, userMessage)
+		refined, err := h.performIntroductionRefinement(c, agencyID, userMessage)
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to perform introduction refinement")
 			return false, err
@@ -173,7 +180,7 @@ func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, 
 		h.logger.Info("User on goal-definition section - performing direct goals processing")
 		// Perform the goals processing directly (conversation handling is inside)
 		h.logger.Info("🔵 CALLING: performGoalsRefinement", "agencyID", agencyID)
-		refined, err := h.performGoalsRefinement(c, userMessage)
+		refined, err := h.performGoalsRefinement(c, agencyID, userMessage)
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to perform goals processing")
 			return false, err
@@ -188,7 +195,7 @@ func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, 
 		h.logger.Info("User on work items/workflows section - performing direct work items processing")
 		// Perform the work items processing directly (conversation handling is inside)
 		h.logger.Info("🔵 CALLING: performWorkItemsProcessing", "agencyID", agencyID)
-		processed, err := h.performWorkItemsProcessing(c, userMessage)
+		processed, err := h.performWorkItemsProcessing(c, agencyID, userMessage)
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to perform work items processing")
 			return false, err

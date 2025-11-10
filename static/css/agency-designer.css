@@ -1696,3 +1696,12 @@ a.overview-nav-link:hover {
 .select.is-small select {
     font-size: 0.75rem !important;
 }
+
+/* Make work item goals checkboxes smaller */
+#work-item-goals-editor .checkbox {
+    font-size: 0.75rem !important;
+}
+
+#work-item-goals-editor .checkbox input[type="checkbox"] {
+    transform: scale(0.9);
+}

@@ -123,8 +123,20 @@ func (h *Handler) ProcessGoalChatRequest(c *gin.Context) {
 		h.logger.WithError(err).Error("Failed to add user message to conversation")
 	}
 
-	// Build AI context data using shared context builder
-	builderContext, err := h.contextBuilder.BuildBuilderContext(ctx, ag, "", userRequest)
+	// Get current introduction from agency overview
+	overview, err := h.agencyService.GetAgencyOverview(ctx, agencyID)
+	if err != nil {
+		h.logger.WithError(err).Warn("Failed to get agency overview, continuing without introduction")
+		overview = nil
+	}
+
+	currentIntroduction := ""
+	if overview != nil && overview.Introduction != "" {
+		currentIntroduction = overview.Introduction
+	}
+
+	// Build AI context data using shared context builder (WITH introduction!)
+	builderContext, err := h.contextBuilder.BuildBuilderContext(ctx, ag, currentIntroduction, userRequest)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to build context")
 		c.Header("Content-Type", "text/html")
@@ -159,7 +171,68 @@ func (h *Handler) ProcessGoalChatRequest(c *gin.Context) {
 
 	result, err := h.goalRefiner.RefineGoals(ctx, refineReq, builderContext)
 	if err != nil {
+		// Log original error
 		h.logger.WithError(err).Error("Failed to process goal request dynamically")
+
+		// Detect common provider/billing errors and attempt a safe local fallback
+		errMsg := strings.ToLower(err.Error())
+		aiUnavailable := strings.Contains(errMsg, "credit") || strings.Contains(errMsg, "balance") || strings.Contains(errMsg, "anthropic") || strings.Contains(errMsg, "api error")
+
+		// If AI is unavailable and the user intent is explicit (e.g., remove all goals), perform the action directly
+		lowered := strings.ToLower(userRequest)
+		wantsRemoveAll := strings.Contains(lowered, "remove all goals") || strings.Contains(lowered, "delete all goals") || (strings.Contains(lowered, "remove all") && strings.Contains(lowered, "goals")) || strings.Contains(lowered, "clear goals")
+
+		if aiUnavailable && wantsRemoveAll {
+			h.logger.WithFields(logrus.Fields{"agency_id": agencyID}).Warn("AI unavailable - performing direct goals removal as fallback")
+			deletedCount := 0
+			deletedCodes := []string{}
+
+			for _, goal := range existingGoals {
+				if delErr := h.agencyService.DeleteGoal(ctx, agencyID, goal.Key); delErr != nil {
+					h.logger.WithError(delErr).Error("Failed to delete goal during fallback", "goalKey", goal.Key)
+					continue
+				}
+				deletedCount++
+				deletedCodes = append(deletedCodes, goal.Code)
+			}
+
+			var responseMessage string
+			if deletedCount > 0 {
+				responseMessage = fmt.Sprintf("🗑️ **Removed %d Goal(s)**\n\n**Removed**: %s\n\n(Performed directly because AI provider was unavailable)", deletedCount, strings.Join(deletedCodes, ", "))
+			} else {
+				responseMessage = fmt.Sprintf("❌ **Failed to Remove Goals**\n\nAI provider error: %s", err.Error())
+			}
+
+			// Add AI (fallback) response to conversation
+			if addErr := h.designerService.AddMessage(conv.ID, "assistant", responseMessage); addErr != nil {
+				h.logger.WithError(addErr).Error("Failed to add fallback AI response to conversation")
+			}
+
+			// Render user + assistant messages
+			c.Header("Content-Type", "text/html")
+			updatedConv, gerr := h.designerService.GetConversation(conv.ID)
+			if gerr != nil {
+				h.logger.WithError(gerr).Error("Failed to get updated conversation after fallback action")
+				c.String(http.StatusInternalServerError, "Failed to render messages")
+				return
+			}
+			messageCount := len(updatedConv.Messages)
+			if messageCount >= 2 {
+				userMsg := &updatedConv.Messages[messageCount-2]
+				if renderErr := agency_designer.UserMessage(*userMsg).Render(ctx, c.Writer); renderErr != nil {
+					h.logger.WithError(renderErr).Error("Failed to render user message")
+				}
+				aiMsg := &updatedConv.Messages[messageCount-1]
+				if renderErr := agency_designer.AIMessage(*aiMsg).Render(ctx, c.Writer); renderErr != nil {
+					h.logger.WithError(renderErr).Error("Failed to render AI message")
+				}
+			}
+
+			h.logger.Info("Processed goal request using local fallback", "agencyID", agencyID, "deleted_count", deletedCount)
+			return
+		}
+
+		// Default: return original AI failure UI
 		c.Header("Content-Type", "text/html")
 		c.String(http.StatusInternalServerError, `
 			<div class="notification is-danger">

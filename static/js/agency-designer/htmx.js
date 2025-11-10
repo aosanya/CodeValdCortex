@@ -225,6 +225,25 @@ export function initializeHTMXEvents() {
                         });
                 }
             }
+
+            // Refresh work items list if we're in work-items context
+            if (context === 'work-items') {
+                const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
+                const workItemsTableBody = document.getElementById('work-items-table-body');
+
+                if (agencyId && workItemsTableBody) {
+                    console.log('[HTMX] Refreshing work items list after chat response');
+                    fetch(`/api/v1/agencies/${agencyId}/work-items/html`)
+                        .then(response => response.text())
+                        .then(html => {
+                            workItemsTableBody.innerHTML = html;
+                            console.log('[HTMX] ✅ Work items list refreshed');
+                        })
+                        .catch(error => {
+                            console.error('[HTMX] ❌ Error refreshing work items list:', error);
+                        });
+                }
+            }
         }
 
         // Re-initialize agent selection if sidebar was updated
