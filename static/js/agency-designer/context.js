@@ -76,7 +76,7 @@ window.ContextType = {
  * @param {ContextMetadata} [metadata={}] - Additional metadata (optional)
  * @returns {Context} Context object
  */
-window.createContext = function(type, code, content, metadata = {}) {
+window.createContext = function (type, code, content, metadata = {}) {
     /** @type {Context} */
     const context = {
         id: contextState.nextId++,
@@ -101,7 +101,7 @@ window.createContext = function(type, code, content, metadata = {}) {
  * @param {string} goalCode - Goal code
  * @param {string} goalDescription - Full goal description
  */
-window.addGoalContext = function(goalCode, goalDescription) {
+window.addGoalContext = function (goalCode, goalDescription) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -127,7 +127,7 @@ window.addGoalContext = function(goalCode, goalDescription) {
  * @param {string} workItemDescription - Full work item description
  * @param {boolean} [isNavigational=true] - If true, context is removed when navigating away from work items
  */
-window.addWorkItemContext = function(workItemCode, workItemDescription, isNavigational = true) {
+window.addWorkItemContext = function (workItemCode, workItemDescription, isNavigational = true) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -155,7 +155,7 @@ window.addWorkItemContext = function(workItemCode, workItemDescription, isNaviga
  * Add context from introduction
  * @param {string} introText - Introduction text (full or selected)
  */
-window.addIntroductionContext = function(introText) {
+window.addIntroductionContext = function (introText) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -179,7 +179,7 @@ window.addIntroductionContext = function(introText) {
  * @param {string} unitCode - Unit code
  * @param {string} unitDescription - Full unit description
  */
-window.addUnitContext = function(unitCode, unitDescription) {
+window.addUnitContext = function (unitCode, unitDescription) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -202,7 +202,7 @@ window.addUnitContext = function(unitCode, unitDescription) {
  * @param {string} agentCode - Agent type code
  * @param {string} agentDescription - Full agent description
  */
-window.addAgentContext = function(agentCode, agentDescription) {
+window.addAgentContext = function (agentCode, agentDescription) {
     const selection = window.getSelection();
     const selectedText = selection.toString().trim();
 
@@ -224,7 +224,7 @@ window.addAgentContext = function(agentCode, agentDescription) {
  * Remove context by ID
  * @param {number} contextId - Context ID to remove
  */
-window.removeContext = function(contextId) {
+window.removeContext = function (contextId) {
     const index = contextState.contexts.findIndex(ctx => ctx.id === contextId);
     if (index !== -1) {
         const removed = contextState.contexts.splice(index, 1)[0];
@@ -238,7 +238,7 @@ window.removeContext = function(contextId) {
  * Clear navigational contexts for a specific section
  * @param {string} [section] - Section to clear (e.g., 'work-items'). If not provided, clears all navigational contexts.
  */
-window.clearNavigationalContexts = function(section = null) {
+window.clearNavigationalContexts = function (section = null) {
     const beforeCount = contextState.contexts.length;
 
     if (section) {
@@ -264,7 +264,7 @@ window.clearNavigationalContexts = function(section = null) {
  * Remove selection by index
  * @param {number} index - Selection index to remove
  */
-window.removeSelection = function(index) {
+window.removeSelection = function (index) {
     if (index >= 0 && index < contextState.selections.length) {
         const removed = contextState.selections.splice(index, 1)[0];
         updateContextDisplay();
@@ -275,21 +275,20 @@ window.removeSelection = function(index) {
 /**
  * Clear all contexts
  */
-window.clearAllContexts = function() {
+window.clearAllContexts = function () {
     const previousCount = contextState.contexts.length;
     contextState.contexts = [];
     contextState.selections = []; // Also clear selections
     contextState.nextId = 1;
     logContextStateChange('CLEARED_ALL');
     updateContextDisplay();
-    window.showNotification('All contexts cleared', 'info');
 }
 
 /**
  * Get all contexts
  * @returns {Array} Array of context objects
  */
-window.getAllContexts = function() {
+window.getAllContexts = function () {
     return contextState.contexts;
 }
 
@@ -297,7 +296,7 @@ window.getAllContexts = function() {
  * Get contexts formatted for API/Chat
  * @returns {string} Formatted context string for AI
  */
-window.getFormattedContexts = function() {
+window.getFormattedContexts = function () {
     // Include both finalized contexts and pending selections
     const hasContexts = contextState.contexts.length > 0;
     const hasSelections = contextState.selections.length > 0;

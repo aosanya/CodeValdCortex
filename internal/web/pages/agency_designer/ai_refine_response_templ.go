@@ -14,7 +14,7 @@ import (
 )
 
 // AIRefineResponse renders the response after AI refinement of introduction
-func AIRefineResponse(response *builder.RefineIntroductionResponse, currentAgency *models.Agency, overview *models.Overview) templ.Component {
+func AIRefineResponse(response *builder.RefineIntroductionResponse, currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,74 +35,46 @@ func AIRefineResponse(response *builder.RefineIntroductionResponse, currentAgenc
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"ai-refine-response\" hx-trigger=\"load delay:500ms\" hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- HTMX will swap this into #introduction-content using innerHTML --><!-- Updated introduction content --><div class=\"field\"><label class=\"label\">Introduction</label><div class=\"control\"><textarea class=\"textarea context-selectable\" id=\"introduction-editor\" name=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("/agencies/" + currentAgency.ID + "/chat-messages?agencyName=" + currentAgency.Name)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(response.Data.Introduction)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 12, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 22, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" hx-target=\"#chat-messages\" hx-swap=\"innerHTML\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if response.WasChanged {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Introduction was refined --> <div class=\"notification is-success is-light mb-4\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-success mr-2\"><i class=\"fas fa-magic\"></i></span> <span><strong>Introduction refined by AI and saved automatically</strong></span></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Introduction was already good --> <div class=\"notification is-info is-light mb-4\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-info mr-2\"><i class=\"fas fa-check-circle\"></i></span> <span><strong>Introduction looks great!</strong></span></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Updated introduction content --><div class=\"field\"><label class=\"label\">Introduction</label><div class=\"control\"><textarea class=\"textarea context-selectable\" id=\"introduction-editor\" name=\"introduction-editor\" placeholder=\"Enter introduction text for this agency...\" rows=\"20\" style=\"font-family: monospace; font-size: 14px;\" data-intro-text=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" title=\"Highlight text to add as context\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(response.Data.Introduction)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 48, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 23, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" title=\"Highlight text to add as context\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p><!-- Action buttons --><div class=\"buttons is-right\"><button class=\"button is-small is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-small is-info\" id=\"ai-sparkle-btn\" onclick=\"handleAIRefineClick()\" title=\"Refine with AI\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> <span>Refine</span></button> <button class=\"button is-small\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div><!-- Loading indicator for AI refine --><div id=\"ai-refine-loading\" class=\"htmx-indicator\"><div class=\"notification is-info is-light\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-info mr-2\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>AI is refining your introduction...</span></div></div></div><!-- Trigger post-refinement updates (handled by introduction.js) --><div id=\"ai-refine-complete\" data-agency-name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(response.Data.Introduction)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 49, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 68, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></div></div><p class=\"help\">Use this section to provide an overview and introduction to your agency. Highlight text to add it as context.</p><!-- Action buttons --><div class=\"buttons is-right\"><button class=\"button is-small is-primary\" onclick=\"saveOverviewIntroduction()\" id=\"save-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button><!-- AI Refine / Sparkle button (triggers AI refine flow) --><button class=\"button is-small is-info\" hx-post=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("/api/v1/agencies/" + currentAgency.ID + "/overview/refine")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/ai_refine_response.templ`, Line: 66, Col: 73}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hx-include=\"#introduction-editor\" hx-target=\"#introduction-content\" hx-indicator=\"#ai-process-status\" hx-on::after-request=\"\n\t\t\t\t\tif (window.hideAIProcessStatus) {\n\t\t\t\t\t\twindow.hideAIProcessStatus();\n\t\t\t\t\t} else {\n\t\t\t\t\t\tconst status = document.getElementById('ai-process-status');\n\t\t\t\t\t\tif (status) {\n\t\t\t\t\t\t\tstatus.style.display = 'none';\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\" id=\"ai-sparkle-btn\" onclick=\"window.handleRefineClick && window.handleRefineClick()\" title=\"Refine with AI\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> <span>Refine</span></button> <button class=\"button is-small\" onclick=\"undoOverviewIntroduction()\" id=\"undo-introduction-btn\"><span class=\"icon\"><i class=\"fas fa-undo\"></i></span> <span>Undo</span></button></div><!-- Loading indicator for AI refine --><div id=\"ai-refine-loading\" class=\"htmx-indicator\"><div class=\"notification is-info is-light\"><div class=\"is-flex is-align-items-center\"><span class=\"icon has-text-info mr-2\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>AI is refining your introduction...</span></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" style=\"display: none;\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

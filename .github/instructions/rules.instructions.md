@@ -27,23 +27,34 @@ applyTo: '**'
 - HTML markup should be defined in `.templ` files (using the templ template engine)
 - **NEVER generate HTML strings in Go handler files** - use `.templ` files instead
 - **NEVER generate HTML strings in JavaScript files** - use `.templ` files or server-side rendering
+- **NEVER put JavaScript logic in `.templ` files** - keep `.templ` files for HTML structure only
 - JavaScript should only handle:
   - Event handling
   - Data fetching
   - DOM manipulation (show/hide, updates)
   - State management
+  - Business logic for UI interactions
+- JavaScript belongs in `.js` files in the `static/js/` directory
 - Go handlers should:
   - Process business logic
   - Call services
   - Return data structures (JSON) or render `.templ` templates
   - Never contain HTML strings or fmt.Sprintf with HTML
+- `.templ` files should only contain:
+  - HTML structure and markup
+  - Templ template directives (if/else, for loops, etc.)
+  - Data attributes for JavaScript hooks
+  - CSS classes
+  - **NO inline JavaScript** (no `<script>` tags with logic)
+  - **NO event handler logic** (onclick should call named functions defined in .js files)
 - Pre-render all content sections in templates, then toggle visibility with JavaScript
 - Benefits:
   - Type safety
   - Server-side rendering capability
   - Better maintainability
-  - Separation of concerns
+  - Clear separation of concerns
   - Easier testing
+  - Reusable JavaScript functions
 
 **Example of WRONG approach:**
 ```go
@@ -58,6 +69,20 @@ func (h *Handler) SomeHandler(c *gin.Context) {
 }
 ```
 
+```templ
+// ❌ NEVER DO THIS - JavaScript logic in templ file
+templ MyComponent(data string) {
+    <div id="container">{ data }</div>
+    <script>
+        // Don't put JavaScript logic here!
+        async function handleClick() {
+            const response = await fetch('/api/data');
+            // ... more logic
+        }
+    </script>
+}
+```
+
 **Example of CORRECT approach:**
 ```go
 // ✅ CORRECT - Use templ file
@@ -68,6 +93,29 @@ func (h *Handler) SomeHandler(c *gin.Context) {
     // Render template
     component := templates.SomeComponent(data)
     component.Render(c.Request.Context(), c.Writer)
+}
+```
+
+```templ
+// ✅ CORRECT - Clean HTML structure only
+templ MyComponent(data string) {
+    <div id="container" data-initial-value={ data }>{ data }</div>
+    <button onclick="handleMyComponentClick()" id="my-button">
+        Click Me
+    </button>
+    <!-- JavaScript logic is in static/js/my-component.js -->
+}
+```
+
+```javascript
+// ✅ CORRECT - JavaScript in separate .js file
+// static/js/my-component.js
+window.handleMyComponentClick = async function() {
+    const container = document.getElementById('container');
+    const initialValue = container.dataset.initialValue;
+    
+    const response = await fetch('/api/data');
+    // ... handle response
 }
 ```
 

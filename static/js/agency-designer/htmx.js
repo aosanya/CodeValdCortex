@@ -60,18 +60,17 @@ window.initializeHTMXEvents = function () {
             if (message && message.length > 0) {
                 const chatContainer = document.getElementById('chat-messages');
                 if (chatContainer) {
+                    // Add to global state
+                    if (window.addChatMessage) {
+                        window.addChatMessage('user', message);
+                    }
+
                     // Create user message element
                     const userMessageDiv = document.createElement('div');
-                    userMessageDiv.className = 'message is-user';
+                    userMessageDiv.className = 'message user-message';
                     userMessageDiv.innerHTML = `
-                        <div class="message-header">
-                            <span class="icon has-text-info">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <span>You</span>
-                        </div>
-                        <div class="message-body">
-                            <div class="content">
+                        <div class="message-content">
+                            <div class="message-bubble">
                                 <p>${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                             </div>
                         </div>
@@ -156,6 +155,12 @@ window.initializeHTMXEvents = function () {
 
     // Hide typing indicator and scroll when new message arrives
     document.body.addEventListener('htmx:afterSwap', function (evt) {
+        console.log('🔵 [HTMX] afterSwap event triggered', {
+            targetId: evt.detail.target.id,
+            targetClass: evt.detail.target.className,
+            xhr: evt.detail.xhr?.status
+        });
+
         const indicator = document.getElementById('typing-indicator');
         if (indicator && evt.detail.target.id === 'chat-messages') {
             indicator.style.display = 'none';
@@ -167,22 +172,26 @@ window.initializeHTMXEvents = function () {
             evt.detail.target.classList.contains('introduction-content')
         );
 
+        console.log('🔵 [HTMX] isIntroductionRefine:', isIntroductionRefine);
+
         // For introduction refine, refresh chat messages to show AI explanation
         if (isIntroductionRefine) {
-            const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
-            const chatContainer = document.getElementById('chat-messages');
+            console.log('✅ [HTMX] Introduction refine detected - checking textarea');
 
-            if (agencyId && chatContainer) {
-                fetch(`/agencies/${agencyId}/chat-messages`)
-                    .then(response => response.text())
-                    .then(html => {
-                        chatContainer.innerHTML = html;
-                        scrollToBottom(chatContainer);
-                    })
-                    .catch(error => {
-                        console.error('Error refreshing chat after introduction refine:', error);
-                    });
+            const textarea = document.getElementById('introduction-editor');
+            if (textarea) {
+                console.log('📊 [HTMX] Textarea found after swap:');
+                console.log('  - textarea.value length:', textarea.value.length);
+                console.log('  - data-intro-text length:', (textarea.getAttribute('data-intro-text') || '').length);
+                console.log('  - textarea.value preview:', textarea.value.substring(0, 100));
+            } else {
+                console.warn('⚠️ [HTMX] introduction-editor NOT FOUND after swap');
             }
+
+            // NOTE: We don't refresh chat messages here anymore
+            // The AI message is already appended by HTMX via OOB swap or separate response
+            // Refreshing would remove the user message that was added by JavaScript
+            console.log('ℹ️ [HTMX] Skipping chat refresh to preserve user messages');
         }
 
         // Hide AI process status only for specific targets that indicate completion
@@ -203,7 +212,35 @@ window.initializeHTMXEvents = function () {
         // Scroll to bottom to show new message
         const chatContainer = document.getElementById('chat-messages');
         if (chatContainer && evt.detail.target.id === 'chat-messages') {
-            setTimeout(() => scrollToBottom(chatContainer), 100);
+            // Track AI message in global state if it was just added
+            if (window.addChatMessage) {
+                const newMessages = chatContainer.querySelectorAll('.message.ai-message');
+                if (newMessages.length > 0) {
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    const bubble = lastMessage.querySelector('.message-bubble');
+                    if (bubble) {
+                        const content = bubble.textContent.trim();
+                        // Check if this message is already in our global state
+                        const existingMessages = window.getChatMessages ? window.getChatMessages() : [];
+                        const isDuplicate = existingMessages.some(msg =>
+                            msg.role === 'assistant' && msg.content === content
+                        );
+                        if (!isDuplicate) {
+                            window.addChatMessage('assistant', content);
+                        }
+                    }
+                }
+            }
+
+            // Check if messages were lost and restore from global state
+            if (window.restoreChatMessagesFromState) {
+                setTimeout(() => {
+                    window.restoreChatMessagesFromState();
+                    scrollToBottom(chatContainer);
+                }, 50);
+            } else {
+                setTimeout(() => scrollToBottom(chatContainer), 100);
+            }
 
             // Refresh goals list if we're in goal-definition context
             const context = window.currentAgencyContext || '';

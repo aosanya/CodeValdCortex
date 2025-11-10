@@ -59,22 +59,10 @@ templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationConte
 // WelcomeMessage displays the initial greeting
 templ WelcomeMessage(agencyName string) {
 	<div class="message ai-message welcome-message">
-		<div class="message-avatar">
-			<span class="icon is-large has-text-primary">
-				<i class="fas fa-robot fa-2x"></i>
-			</span>
-		</div>
 		<div class="message-content">
 			<div class="message-bubble">
 				<p><strong>Hi! I'm your AI Agency Designer.</strong> 🤖</p>
-				<p>I'll help you create a complete multi-agent architecture for <strong>{ agencyName }</strong>.</p>
-				<p>Let's start by understanding your use case:</p>
-				<ul>
-					<li>What problem are you trying to solve?</li>
-					<li>What are the main processes or workflows?</li>
-					<li>Who are the key actors or stakeholders?</li>
-				</ul>
-				<p class="mt-4"><em>💡 Tip: Be as detailed as you can - I'll help you refine the details as we go!</em></p>
+				<p>How can I help?</p>
 			</div>
 		</div>
 	</div>
@@ -103,22 +91,12 @@ templ UserMessage(msg ai.Message) {
 				{ msg.Timestamp.Format("3:04 PM") }
 			</div>
 		</div>
-		<div class="message-avatar">
-			<span class="icon is-medium has-text-info">
-				<i class="fas fa-user"></i>
-			</span>
-		</div>
 	</div>
 }
 
 // AIMessage renders an AI assistant message bubble
 templ AIMessage(msg ai.Message) {
 	<div class="message ai-message">
-		<div class="message-avatar">
-			<span class="icon is-medium has-text-primary">
-				<i class="fas fa-robot"></i>
-			</span>
-		</div>
 		<div class="message-content">
 			<div class="message-bubble">
 				@templ.Raw(formatAIMessage(msg.Content))
@@ -143,6 +121,23 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 		hx-vals='js:{"context": window.currentAgencyContext || "introduction"}'
 		hx-on::before-request="
 			console.log('[Chat Form] Submitting with context:', window.currentAgencyContext, 'Message:', document.getElementById('user-input').value);
+			
+			// Include the current editor content based on context
+			const context = window.currentAgencyContext || 'introduction';
+			const form = event.target;
+			
+			if (context === 'introduction') {
+				const editor = document.getElementById('introduction-editor');
+				if (editor && editor.value) {
+					// Create a hidden input to include the editor content
+					const hiddenInput = document.createElement('input');
+					hiddenInput.type = 'hidden';
+					hiddenInput.name = 'introduction-editor';
+					hiddenInput.value = editor.value;
+					form.appendChild(hiddenInput);
+				}
+			}
+			
 			// Append formatted contexts to message if available
 			const messageInput = document.getElementById('user-input');
 			const originalMessage = messageInput.value;

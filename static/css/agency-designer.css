@@ -673,15 +673,6 @@ body {
     }
 }
 
-.message-avatar {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .message-content {
     flex: 1;
     display: flex;
@@ -724,16 +715,18 @@ body {
 /* User Message */
 .user-message {
     flex-direction: row-reverse;
+    background-color: transparent !important;
 }
 
 .user-message .message-content {
     align-items: flex-end;
+    background-color: transparent !important;
 }
 
 .user-message .message-bubble {
-    background: var(--vscode-accent);
-    border-color: var(--vscode-accent);
-    color: white;
+    background: #d1ecf1 !important;
+    border: 1px solid #bee5eb !important;
+    color: #0c5460 !important;
 }
 
 .user-message .message-time {
@@ -744,6 +737,15 @@ body {
 .ai-message .message-bubble {
     background: var(--vscode-sidebar-bg);
     border: 1px solid var(--vscode-border);
+}
+
+/* User Message (Bulma message component style) */
+.message.is-user .message-body {
+    background: var(--vscode-accent);
+    border-color: var(--vscode-accent);
+    color: white;
+    font-size: 0.85rem;
+    line-height: 1.5;
 }
 
 /* Welcome Message */

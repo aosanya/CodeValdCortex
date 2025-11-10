@@ -128,46 +128,14 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 		"response_length": len(response.Content),
 	}).Info("AI response received")
 
-	// Get the updated conversation to retrieve the user message that was added
-	conversation, err = h.designerService.GetConversation(conversationID)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to get conversation")
-		c.String(http.StatusInternalServerError, "Failed to get conversation")
-		return
-	}
-
-	// Find the user message (should be second to last, before the assistant response)
-	var userMsg *ai.Message
-	if len(conversation.Messages) >= 2 {
-		// Get the second to last message (user message)
-		userMsg = &conversation.Messages[len(conversation.Messages)-2]
-	}
-
-	// Render both user message and AI response
+	// Render only AI response (user message is already added by JavaScript)
 	c.Header("Content-Type", "text/html")
-
-	userRole := "none"
-	if userMsg != nil {
-		userRole = userMsg.Role
-	}
 
 	h.logger.WithFields(logrus.Fields{
 		"conversation_id": conversationID,
-		"user_msg_found":  userMsg != nil,
-		"user_msg_role":   userRole,
-	}).Info("Rendering messages for existing conversation")
+	}).Info("Rendering AI message only (user message added by JS)")
 
-	// Render user message if found
-	if userMsg != nil && userMsg.Role == "user" {
-		err = agency_designer.UserMessage(*userMsg).Render(c.Request.Context(), c.Writer)
-		if err != nil {
-			h.logger.WithError(err).Error("Failed to render user message")
-			return
-		}
-		h.logger.Info("User message rendered successfully")
-	}
-
-	// Render AI response
+	// Render AI response only
 	err = agency_designer.AIMessage(*response).Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render AI message")
@@ -231,49 +199,14 @@ func (h *ChatHandler) StartConversation(c *gin.Context) {
 		"response_length": len(response.Content),
 	}).Info("Conversation started and AI response received")
 
-	// Get the updated conversation to retrieve messages
-	conversation, err = h.designerService.GetConversation(conversation.ID)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to get conversation")
-		c.String(http.StatusInternalServerError, "Failed to get conversation")
-		return
-	}
-
-	// Find the user message (should be second to last, before the assistant response)
-	// Skip system message (first message)
-	var userMsg *ai.Message
-	for i := len(conversation.Messages) - 1; i >= 0; i-- {
-		if conversation.Messages[i].Role == "user" {
-			userMsg = &conversation.Messages[i]
-			break
-		}
-	}
-
-	// Render both user message and AI response
+	// Render only AI response (user message is already added by JavaScript)
 	c.Header("Content-Type", "text/html")
-
-	userRole := "none"
-	if userMsg != nil {
-		userRole = userMsg.Role
-	}
 
 	h.logger.WithFields(logrus.Fields{
 		"conversation_id": conversation.ID,
-		"user_msg_found":  userMsg != nil,
-		"user_msg_role":   userRole,
-	}).Info("Rendering messages for new conversation")
+	}).Info("Rendering AI message only for new conversation (user message added by JS)")
 
-	// Render user message if found
-	if userMsg != nil {
-		err = agency_designer.UserMessage(*userMsg).Render(c.Request.Context(), c.Writer)
-		if err != nil {
-			h.logger.WithError(err).Error("Failed to render user message")
-			return
-		}
-		h.logger.Info("User message rendered successfully")
-	}
-
-	// Render AI response
+	// Render AI response only
 	err = agency_designer.AIMessage(*response).Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render AI message")

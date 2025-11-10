@@ -57,18 +57,18 @@ templ IntroductionCard(currentAgency *models.Agency, conversation *ai.Conversati
 					class="button is-small is-info"
 					hx-post={ "/api/v1/agencies/" + currentAgency.ID + "/overview/refine" }
 					hx-include="#introduction-editor"
-				hx-target="#introduction-content"
-				hx-indicator="#ai-process-status"
-				hx-on::after-request="
-					if (window.hideAIProcessStatus) {
-						window.hideAIProcessStatus();
-					} else {
-						const status = document.getElementById('ai-process-status');
-						if (status) {
-							status.style.display = 'none';
+					hx-target="#introduction-content"
+					hx-indicator="#ai-process-status"
+					hx-on::after-request="
+						if (window.hideAIProcessStatus) {
+							window.hideAIProcessStatus();
+						} else {
+							const status = document.getElementById('ai-process-status');
+							if (status) {
+								status.style.display = 'none';
+							}
 						}
-					}
-				"
+					"
 				id="ai-sparkle-btn"
 				onclick="window.handleRefineClick && window.handleRefineClick()"
 					title="Refine with AI">
