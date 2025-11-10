@@ -54,7 +54,7 @@ window.loadRACIMatrix = function () {
         .then(([workItems, roles]) => {
             raciState.workItems = workItems || [];
             raciState.roles = roles || [];
-            return fetch(rolesUrl);
+
             // Render work items immediately
             renderRACITable();
 

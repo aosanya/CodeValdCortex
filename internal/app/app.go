@@ -416,6 +416,10 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/specification/roles", agencyHandler.UpdateRoles)
 		v1.PUT("/agencies/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
 
+		// RACI Matrix CRUD endpoints
+		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetRACIMatrix)
+		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveRACIMatrix)
+
 		// Roles endpoints
 		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
 		v1.GET("/agencies/:id/roles/html", agencyHandler.GetAgencyRolesHTML)

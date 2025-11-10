@@ -226,7 +226,7 @@ func (b *WorkflowsBuilder) buildPromptWithContext(ag *models.Agency, userPrompt 
 }
 
 // parseWorkflowsResponse parses AI response into workflow array
-func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]models.workflow, error) {
+func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]models.Workflow, error) {
 	// Clean response
 	cleaned := b.cleanJSONResponse(response)
 
@@ -236,7 +236,7 @@ func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]models.wor
 		return nil, fmt.Errorf("invalid JSON response: response appears truncated (likely too large). Try creating fewer or simpler workflows")
 	}
 
-	var workflows []models.workflow
+	var workflows []models.Workflow
 	if err := json.Unmarshal([]byte(cleaned), &workflows); err != nil {
 		b.logger.WithError(err).WithField("response", cleaned).Error("Failed to parse workflows JSON")
 
@@ -252,11 +252,11 @@ func (b *WorkflowsBuilder) parseWorkflowsResponse(response string) ([]models.wor
 }
 
 // parseSingleWorkflowResponse parses AI response into single workflow
-func (b *WorkflowsBuilder) parseSingleWorkflowResponse(response string) (*models.workflow, error) {
+func (b *WorkflowsBuilder) parseSingleWorkflowResponse(response string) (*models.Workflow, error) {
 	// Clean response
 	cleaned := b.cleanJSONResponse(response)
 
-	var wf models.workflow
+	var wf models.Workflow
 	if err := json.Unmarshal([]byte(cleaned), &wf); err != nil {
 		b.logger.WithError(err).WithField("response", cleaned).Error("Failed to parse workflow JSON")
 		return nil, fmt.Errorf("invalid JSON response: %w", err)
@@ -278,7 +278,7 @@ func (b *WorkflowsBuilder) cleanJSONResponse(response string) string {
 }
 
 // SuggestWorkflowImprovements suggests improvements for an existing workflow
-func (b *WorkflowsBuilder) SuggestWorkflowImprovements(ctx context.Context, wf *models.workflow) ([]string, error) {
+func (b *WorkflowsBuilder) SuggestWorkflowImprovements(ctx context.Context, wf *models.Workflow) ([]string, error) {
 	currentJSON, err := json.MarshalIndent(wf, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal workflow: %w", err)

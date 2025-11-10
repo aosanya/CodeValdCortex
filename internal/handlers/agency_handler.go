@@ -8,6 +8,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -51,6 +52,10 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.PUT("/:id/specification/work-items", h.UpdateWorkItems)
 		agencies.PUT("/:id/specification/roles", h.UpdateRoles)
 		agencies.PUT("/:id/specification/raci-matrix", h.UpdateRACIMatrixSection)
+
+		// RACI Matrix CRUD endpoints
+		agencies.GET("/:id/raci-matrix", h.GetRACIMatrix)
+		agencies.POST("/:id/raci-matrix", h.SaveRACIMatrix)
 	}
 }
 
@@ -433,4 +438,104 @@ func (h *AgencyHandler) UpdateRACIMatrixSection(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, spec)
+}
+
+// GetRACIMatrix handles GET /api/v1/agencies/:id/raci-matrix
+func (h *AgencyHandler) GetRACIMatrix(c *gin.Context) {
+	id := c.Param("id")
+
+	spec, err := h.service.GetSpecification(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if spec == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Agency specification not found"})
+		return
+	}
+
+	// Extract assignments from the RACI matrix if it exists
+	assignments := make(map[string]interface{})
+	if spec.RACIMatrix != nil && len(spec.RACIMatrix.Activities) > 0 {
+		// Convert the RACI matrix activities to the format expected by JavaScript
+		for _, activity := range spec.RACIMatrix.Activities {
+			if len(activity.Assignments) > 0 {
+				// Convert to JavaScript format: map[roleKey]RACIRole -> map[roleKey]builder.RACIAssignment
+				jsAssignments := make(map[string]builder.RACIAssignment)
+				for roleKey, raciRole := range activity.Assignments {
+					jsAssignments[roleKey] = builder.RACIAssignment{
+						RACI:      string(raciRole),
+						Objective: "", // TODO: Store objectives in the model
+					}
+				}
+				// Use activity ID as the work item key
+				assignments[activity.ID] = jsAssignments
+			}
+		}
+	}
+
+	// Return the RACI assignments in the format expected by JavaScript
+	response := gin.H{
+		"assignments": assignments,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// SaveRACIMatrix handles POST /api/v1/agencies/:id/raci-matrix
+func (h *AgencyHandler) SaveRACIMatrix(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Assignments map[string]map[string]builder.RACIAssignment `json:"assignments"`
+		UpdatedBy   string                                        `json:"updated_by,omitempty"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	// Convert the assignments to RACIMatrix format
+	activities := make([]models.RACIActivity, 0)
+	for workItemKey, roleAssignments := range req.Assignments {
+		// Convert the JavaScript format to models.RACIRole format
+		modelAssignments := make(map[string]models.RACIRole)
+		for roleKey, assignment := range roleAssignments {
+			modelAssignments[roleKey] = models.RACIRole(assignment.RACI)
+		}
+
+		activity := models.RACIActivity{
+			ID:          workItemKey,
+			Name:        workItemKey, // Use work item key as name for now
+			Assignments: modelAssignments,
+		}
+		activities = append(activities, activity)
+	}
+
+	raciMatrix := &models.RACIMatrix{
+		AgencyID:   id,
+		Name:       "RACI Matrix",
+		Activities: activities,
+		IsValid:    true, // TODO: Add validation
+	}
+
+	// Use default user if not provided
+	updatedBy := req.UpdatedBy
+	if updatedBy == "" {
+		updatedBy = "system"
+	}
+
+	spec, err := h.service.UpdateSpecificationRACIMatrix(c.Request.Context(), id, raciMatrix, updatedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return success response
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "RACI matrix saved successfully",
+		"raci_matrix": spec.RACIMatrix,
+	})
 }
