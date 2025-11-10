@@ -2,6 +2,7 @@ package arangodb
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -90,21 +91,35 @@ func (r *Repository) GetSpecification(ctx context.Context, agencyID string) (*mo
 	defer cursor.Close()
 
 	var spec models.AgencySpecification
-	if _, err := cursor.ReadDocument(ctx, &spec); err != nil {
-		if driver.IsNoMoreDocuments(err) {
-			// No specification exists, create a default one
-			return r.CreateSpecification(ctx, agencyID, &models.CreateSpecificationRequest{
-				Introduction: "",
-				Goals:        []models.Goal{},
-				WorkItems:    []models.WorkItem{},
-				Roles:        []models.Role{},
-				RACIMatrix:   nil,
-			})
+	if cursor.HasMore() {
+		// First read as raw map to handle type conversions
+		var rawDoc map[string]interface{}
+		_, err := cursor.ReadDocument(ctx, &rawDoc)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read raw document: %w", err)
 		}
-		return nil, fmt.Errorf("failed to read specification document: %w", err)
-	}
 
-	return &spec, nil
+		// Convert raw document to JSON and then unmarshal properly
+		jsonData, err := json.Marshal(rawDoc)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal document to JSON: %w", err)
+		}
+
+		if err := json.Unmarshal(jsonData, &spec); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal specification document: %w", err)
+		}
+
+		return &spec, nil
+	} else {
+		// No specification exists, create a default one
+		return r.CreateSpecification(ctx, agencyID, &models.CreateSpecificationRequest{
+			Introduction: "",
+			Goals:        []models.Goal{},
+			WorkItems:    []models.WorkItem{},
+			Roles:        []models.Role{},
+			RACIMatrix:   nil,
+		})
+	}
 }
 
 // CreateSpecification creates a new specification document for an agency

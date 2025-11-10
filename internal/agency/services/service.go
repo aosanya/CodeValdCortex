@@ -5,6 +5,7 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/sirupsen/logrus"
 )
 
 // CompositeService combines all sub-services and implements the agency.Service interface
@@ -14,18 +15,18 @@ type CompositeService struct {
 }
 
 // New creates a new composite service with all sub-services
-func New(repo agency.Repository, validator agency.Validator) agency.Service {
+func New(repo agency.Repository, validator agency.Validator, logger *logrus.Logger) agency.Service {
 	return &CompositeService{
 		AgencyService:        NewAgencyService(repo, validator, nil),
-		SpecificationService: NewSpecificationService(repo),
+		SpecificationService: NewSpecificationService(repo, logger),
 	}
 }
 
 // NewWithDBInit creates a new composite service with database initialization support
-func NewWithDBInit(repo agency.Repository, validator agency.Validator, dbInit agency.DatabaseInitializer) agency.Service {
+func NewWithDBInit(repo agency.Repository, validator agency.Validator, dbInit agency.DatabaseInitializer, logger *logrus.Logger) agency.Service {
 	return &CompositeService{
 		AgencyService:        NewAgencyService(repo, validator, dbInit),
-		SpecificationService: NewSpecificationService(repo),
+		SpecificationService: NewSpecificationService(repo, logger),
 	}
 }
 

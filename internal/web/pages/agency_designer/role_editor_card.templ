@@ -17,6 +17,20 @@ templ RoleEditorCard() {
 			</button>
 		</header>
 		<div class="card-content">
+			<!-- Code Field -->
+			<div class="field">
+				<label class="label">Role Code</label>
+				<div class="control">
+					<input 
+						class="input"
+						type="text"
+						id="role-code-editor"
+						placeholder="e.g., SA01, SENSOR-AGENT, etc."
+						maxlength="50"/>
+				</div>
+				<p class="help">A unique code identifier for this role.</p>
+			</div>
+
 			<!-- Name Field -->
 			<div class="field">
 				<label class="label">Role Name</label>
@@ -29,19 +43,6 @@ templ RoleEditorCard() {
 						maxlength="100"/>
 				</div>
 				<p class="help">A descriptive name for this role.</p>
-			</div>
-
-			<!-- Tags Field -->
-			<div class="field">
-				<label class="label">Tags</label>
-				<div class="control">
-					<input 
-						class="input"
-						type="text"
-						id="role-tags-editor"
-						placeholder="e.g., monitoring, infrastructure, core"/>
-				</div>
-				<p class="help">Comma-separated tags for categorizing this role.</p>
 			</div>
 
 			<!-- Description Field -->
@@ -142,6 +143,19 @@ templ RoleEditorCard() {
 						value="#3298dc"/>
 				</div>
 				<p class="help">Visual identification color.</p>
+			</div>
+
+			<!-- Tags Field -->
+			<div class="field">
+				<label class="label">Tags</label>
+				<div class="control">
+					<input 
+						class="input"
+						type="text"
+						id="role-tags-editor"
+						placeholder="e.g., monitoring, infrastructure, core"/>
+				</div>
+				<p class="help">Comma-separated tags for categorizing this role.</p>
 			</div>
 		</div>
 		<footer class="card-footer">

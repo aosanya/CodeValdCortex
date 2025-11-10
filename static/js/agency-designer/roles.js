@@ -30,7 +30,7 @@ window.showRoleEditor = function (mode, roleKey = null) {
         'role-editor-title',
         'Add New Role',
         'Edit Role',
-        'role-name-editor'
+        'role-code-editor'
     );
 
     if (mode === 'add') {
@@ -41,34 +41,39 @@ window.showRoleEditor = function (mode, roleKey = null) {
 }
 
 // Load role data for editing
-function loadRoleData(roleKey) {
-    const agencyId = window.getCurrentAgencyId();
-    if (!agencyId) {
-        return;
-    }
+async function loadRoleData(roleKey) {
+    console.log('[Roles] Loading role data for key:', roleKey);
 
-    const url = `/api/v1/agencies/${agencyId}/roles/${roleKey}`;
+    try {
+        const spec = await window.specificationAPI.getSpecification();
+        const roles = spec.roles || [];
 
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load role data');
-            }
-            return response.json();
-        })
-        .then(role => {
-            roleEditorState.originalData = role;
-            populateRoleForm(role);
-        })
-        .catch(error => {
-            console.error('[Roles] Error loading role data:', error);
-            window.showNotification('Error loading role data', 'danger');
+        console.log('[Roles] Available roles:', roles);
+
+        // Find role by _key or other identifier
+        const role = roles.find(r => {
+            const id = r._key || r.key || r._id || r.code || r.id || r.name;
+            return id === roleKey;
         });
+
+        if (!role) {
+            throw new Error(`Role with key ${roleKey} not found`);
+        }
+
+        console.log('[Roles] Found role:', role);
+        roleEditorState.originalData = role;
+        populateRoleForm(role);
+
+    } catch (error) {
+        console.error('[Roles] Error loading role data:', error);
+        window.showNotification('Error loading role data', 'danger');
+    }
 }
 
 // Populate form with role data
 function populateRoleForm(role) {
-    window.populateForm({
+    const formData = {
+        'role-code-editor': role.code || '',
         'role-name-editor': role.name || '',
         'role-tags-editor': (role.tags || []).join(', '),
         'role-description-editor': role.description || '',
@@ -78,12 +83,16 @@ function populateRoleForm(role) {
         'role-token-budget-editor': role.token_budget || 0,
         'role-icon-editor': role.icon || '',
         'role-color-editor': role.color || '#3298dc'
-    });
+    };
+    console.log('[Roles] Populating form with role data:', role);
+    console.log('[Roles] Form data being populated:', formData);
+    populateForm(formData);
 }
 
 // Clear role form
 function clearRoleForm() {
     window.clearForm([
+        'role-code-editor',
         'role-name-editor',
         'role-tags-editor',
         'role-description-editor',
@@ -101,7 +110,10 @@ function clearRoleForm() {
 
 // Save role from editor
 window.saveRoleFromEditor = function () {
+    console.log('[Roles] Saving role from editor, mode:', roleEditorState.mode);
+
     // Gather form data
+    const code = document.getElementById('role-code-editor')?.value.trim();
     const name = document.getElementById('role-name-editor')?.value.trim();
     const tagsText = document.getElementById('role-tags-editor')?.value.trim();
     const description = document.getElementById('role-description-editor')?.value.trim();
@@ -113,6 +125,11 @@ window.saveRoleFromEditor = function () {
     const color = document.getElementById('role-color-editor')?.value;
 
     // Validation
+    if (!code) {
+        window.showNotification('Please enter a role code', 'warning');
+        return;
+    }
+
     if (!name) {
         window.showNotification('Please enter a role name', 'warning');
         return;
@@ -138,6 +155,7 @@ window.saveRoleFromEditor = function () {
 
     // Construct payload
     const payload = {
+        code: code,  // Use code field for the role code
         name,
         tags,
         description,
@@ -147,11 +165,18 @@ window.saveRoleFromEditor = function () {
         token_budget: tokenBudget,
         icon,
         color,
+        // Preserve _key and timestamps for edit mode
+        ...(roleEditorState.mode === 'edit' && roleEditorState.originalData?._key ? {
+            _key: roleEditorState.originalData._key,
+            created_at: roleEditorState.originalData.created_at,
+        } : {}),
         // Include version: preserve existing for edit, default for add
         version: roleEditorState.mode === 'edit' && roleEditorState.originalData?.version
             ? roleEditorState.originalData.version
             : '1.0.0'
     };
+
+    console.log('[Roles] Payload:', payload);
 
     window.saveEntity('roles', roleEditorState.mode, roleEditorState.roleKey, payload, 'save-role-btn', () => {
         cancelRoleEdit();
@@ -163,6 +188,7 @@ window.saveRoleFromEditor = function () {
 // Cancel role edit
 window.cancelRoleEdit = function () {
     window.cancelEntityEdit('role-editor-card', 'roles-list-card', [
+        'role-code-editor',
         'role-name-editor',
         'role-tags-editor',
         'role-description-editor',

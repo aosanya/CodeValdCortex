@@ -256,7 +256,7 @@ window.SpecificationAPI = class SpecificationAPI {
     async updateGoal(goalKey, updatedGoal, updatedBy = 'user') {
         const spec = await this.getSpecification();
         const goals = spec.goals || [];
-        const goalIndex = goals.findIndex(g => g.key === goalKey || g._key === goalKey);
+        const goalIndex = goals.findIndex(g => g._key === goalKey);
 
         if (goalIndex === -1) {
             throw new Error(`Goal with key ${goalKey} not found`);
@@ -272,7 +272,7 @@ window.SpecificationAPI = class SpecificationAPI {
     async deleteGoal(goalKey, updatedBy = 'user') {
         const spec = await this.getSpecification();
         const goals = spec.goals || [];
-        const filteredGoals = goals.filter(g => g.key !== goalKey && g._key !== goalKey);
+        const filteredGoals = goals.filter(g => g._key !== goalKey);
         return await this.updateGoals(filteredGoals, updatedBy);
     }
 
@@ -291,7 +291,7 @@ window.SpecificationAPI = class SpecificationAPI {
     async updateWorkItem(workItemKey, updatedWorkItem, updatedBy = 'user') {
         const spec = await this.getSpecification();
         const workItems = spec.work_items || [];
-        const workItemIndex = workItems.findIndex(wi => wi.key === workItemKey || wi._key === workItemKey);
+        const workItemIndex = workItems.findIndex(wi => wi._key === workItemKey);
 
         if (workItemIndex === -1) {
             throw new Error(`Work item with key ${workItemKey} not found`);
@@ -307,7 +307,7 @@ window.SpecificationAPI = class SpecificationAPI {
     async deleteWorkItem(workItemKey, updatedBy = 'user') {
         const spec = await this.getSpecification();
         const workItems = spec.work_items || [];
-        const filteredWorkItems = workItems.filter(wi => wi.key !== workItemKey && wi._key !== workItemKey);
+        const filteredWorkItems = workItems.filter(wi => wi._key !== workItemKey);
         return await this.updateWorkItems(filteredWorkItems, updatedBy);
     }
 }

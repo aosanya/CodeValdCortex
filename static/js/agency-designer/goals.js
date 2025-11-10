@@ -127,8 +127,10 @@ window.cancelGoalEdit = function () {
 }
 
 // Delete goal
-window.deleteGoal = function (goalKey, goalNumber) {
-    window.deleteEntity('goals', goalKey, `goal #${goalNumber}`, loadGoals);
+window.deleteGoal = function (goalKey) {
+    // Use generic "goal" as display name since we're using _key (not user-friendly)
+    const displayName = `goal`;
+    window.deleteEntity('goals', goalKey, displayName, loadGoals);
 }
 
 // Process AI Goal Operation - Direct operation without modal

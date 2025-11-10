@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // AgencySpecification represents the complete specification document for an agency
 // This is a single unified document containing all agency definition data:
@@ -101,18 +105,54 @@ func (s *AgencySpecification) UpdateIntroduction(intro string, updatedBy string)
 
 // SetGoals replaces all goals
 func (s *AgencySpecification) SetGoals(goals []Goal, updatedBy string) {
+	// Generate keys for goals that don't have them
+	for i := range goals {
+		if goals[i].Key == "" {
+			goals[i].Key = uuid.New().String()
+		}
+		// Set timestamps
+		if goals[i].CreatedAt.IsZero() {
+			goals[i].CreatedAt = time.Now()
+		}
+		goals[i].UpdatedAt = time.Now()
+	}
+
 	s.Goals = goals
 	s.IncrementVersion(updatedBy)
 }
 
 // SetWorkItems replaces all work items
 func (s *AgencySpecification) SetWorkItems(items []WorkItem, updatedBy string) {
+	// Generate keys for work items that don't have them
+	for i := range items {
+		if items[i].Key == "" {
+			items[i].Key = uuid.New().String()
+		}
+		// Set timestamps
+		if items[i].CreatedAt.IsZero() {
+			items[i].CreatedAt = time.Now()
+		}
+		items[i].UpdatedAt = time.Now()
+	}
+
 	s.WorkItems = items
 	s.IncrementVersion(updatedBy)
 }
 
 // SetRoles replaces all roles
 func (s *AgencySpecification) SetRoles(roles []Role, updatedBy string) {
+	// Generate keys for roles that don't have them
+	for i := range roles {
+		if roles[i].Key == "" {
+			roles[i].Key = uuid.New().String()
+		}
+		// Set timestamps
+		if roles[i].CreatedAt.IsZero() {
+			roles[i].CreatedAt = time.Now()
+		}
+		roles[i].UpdatedAt = time.Now()
+	}
+
 	s.Roles = roles
 	s.IncrementVersion(updatedBy)
 }

@@ -77,11 +77,15 @@ function generateEntityListHTML(entityType, entities) {
 
     switch (entityType) {
         case 'goals':
-            return entities.map(goal => `
+            return entities.map(goal => {
+                // Use _key as the primary unique identifier for goals (guaranteed unique by ArangoDB)
+                const id = goal._key;
+
+                return `
                 <tr>
                     <td>
                         <label class="checkbox">
-                            <input type="checkbox" value="${goal._key || goal.key}" onchange="window.updateGoalSelectionButtons && window.updateGoalSelectionButtons()">
+                            <input type="checkbox" value="${id}" onchange="window.updateGoalSelectionButtons && window.updateGoalSelectionButtons()">
                         </label>
                     </td>
                     <td>
@@ -90,62 +94,82 @@ function generateEntityListHTML(entityType, entities) {
                     <td>${escapeHtml(goal.description || '')}</td>
                     <td>
                         <div class="buttons">
-                            <button class="button is-small" onclick="window.showGoalEditor('edit', '${goal._key || goal.key}', '${escapeHtml(goal.code)}', '${escapeHtml(goal.description)}')">
+                            <button class="button is-small" onclick="window.showGoalEditor('edit', '${id}', '${escapeHtml(goal.code)}', '${escapeHtml(goal.description)}')">
                                 <span class="icon"><i class="fas fa-edit"></i></span>
                             </button>
-                            <button class="button is-small is-danger" onclick="window.deleteGoal('${goal._key || goal.key}')">
+                            <button class="button is-small is-danger" onclick="window.deleteGoal('${id}')">
                                 <span class="icon"><i class="fas fa-trash"></i></span>
                             </button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
         case 'work-items':
-            return entities.map(item => `
+            return entities.map(item => {
+                // Use _key as the primary unique identifier for work items (guaranteed unique by UUID)
+                const id = item._key;
+
+                return `
                 <tr>
                     <td>
                         <label class="checkbox">
-                            <input type="checkbox" value="${item._key || item.key}" onchange="window.updateWorkItemSelectionButtons && window.updateWorkItemSelectionButtons()">
+                            <input type="checkbox" value="${id}" onchange="window.updateWorkItemSelectionButtons && window.updateWorkItemSelectionButtons()">
                         </label>
                     </td>
                     <td><strong>${escapeHtml(item.code || '')}</strong></td>
-                    <td>${escapeHtml(item.description || '')}</td>
+                    <td>
+                        <div>
+                            <strong>${escapeHtml(item.title || '')}</strong>
+                            ${item.description ? `<br><small class="has-text-grey">${escapeHtml(item.description)}</small>` : ''}
+                        </div>
+                    </td>
                     <td>
                         <div class="buttons">
-                            <button class="button is-small" onclick="window.showWorkItemEditor('edit', '${item._key || item.key}')">
+                            <button class="button is-small" onclick="window.showWorkItemEditor('edit', '${id}')">
                                 <span class="icon"><i class="fas fa-edit"></i></span>
                             </button>
-                            <button class="button is-small is-danger" onclick="window.deleteWorkItem('${item._key || item.key}')">
+                            <button class="button is-small is-danger" onclick="window.deleteWorkItem('${id}')">
                                 <span class="icon"><i class="fas fa-trash"></i></span>
                             </button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
         case 'roles':
-            return entities.map(role => `
-                <tr>
+            return entities.map(role => {
+                // Use _key as primary identifier for roles
+                const id = role._key || role.key || role._id || role.code || role.id || role.name;
+
+                return `
+                <tr class="table-item">
                     <td>
                         <label class="checkbox">
-                            <input type="checkbox" value="${role._key || role.key}" onchange="window.updateRoleSelectionButtons && window.updateRoleSelectionButtons()">
+                            <input type="checkbox" class="role-checkbox" value="${id}" data-role-key="${id}" onchange="window.updateRoleSelectionButtons && window.updateRoleSelectionButtons()">
                         </label>
                     </td>
-                    <td><strong>${escapeHtml(role.name || '')}</strong></td>
-                    <td>${escapeHtml(role.description || '')}</td>
+                    <td><code>${escapeHtml(role.code || '')}</code></td>
+                    <td>
+                        <strong>${escapeHtml(role.name || '')}</strong><br>
+                        <small class="has-text-grey">${escapeHtml(role.description || '')}</small>
+                    </td>
+                    <td><span class="tag is-small">${escapeHtml(role.autonomy_level || '')}</span></td>
                     <td>
                         <div class="buttons">
-                            <button class="button is-small" onclick="window.showRoleEditor('edit', '${role._key || role.key}')">
+                            <button class="button is-small" onclick="window.showRoleEditor('edit', '${id}')">
                                 <span class="icon"><i class="fas fa-edit"></i></span>
                             </button>
-                            <button class="button is-small is-danger" onclick="window.deleteRole('${role._key || role.key}')">
+                            <button class="button is-small is-danger" onclick="window.deleteRole('${id}')">
                                 <span class="icon"><i class="fas fa-trash"></i></span>
                             </button>
                         </div>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
 
         default:
             return '<tr><td colspan="3" class="has-text-danger">Unknown entity type</td></tr>';
@@ -250,7 +274,10 @@ window.deleteEntity = async function (entityType, entityKey, entityName, reloadC
             case 'roles':
                 // For roles, we need to get current roles and filter out the deleted one
                 const spec = await window.specificationAPI.getSpecification();
-                const updatedRoles = (spec.roles || []).filter(r => r.key !== entityKey && r._key !== entityKey);
+                const updatedRoles = (spec.roles || []).filter(r => {
+                    const id = r._key || r.key || r._id || r.name;
+                    return id !== entityKey;
+                });
                 await window.specificationAPI.updateRoles(updatedRoles);
                 break;
             default:
@@ -319,7 +346,10 @@ window.saveEntity = async function (entityType, mode, entityKey, data, saveBtnId
                 case 'roles':
                     const spec = await window.specificationAPI.getSpecification();
                     const roles = spec.roles || [];
-                    const roleIndex = roles.findIndex(r => r.key === entityKey || r._key === entityKey);
+                    const roleIndex = roles.findIndex(r => {
+                        const id = r._key || r.key || r._id || r.name;
+                        return id === entityKey;
+                    });
                     if (roleIndex === -1) {
                         throw new Error(`Role with key ${entityKey} not found`);
                     }

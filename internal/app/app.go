@@ -136,7 +136,7 @@ func New(cfg *config.Config) *App {
 	}
 	agencyValidator := agency.NewValidator()
 	agencyDBInit := agency.NewDatabaseInitializer(dbClient.Client(), logger)
-	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
+	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit, logger)
 	logger.Info("Agency management service initialized successfully")
 
 	// Initialize AI services

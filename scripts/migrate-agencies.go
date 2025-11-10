@@ -13,6 +13,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -41,7 +42,8 @@ func main() {
 
 	// Create service
 	validator := agency.NewValidator()
-	service := services.New(repo, validator)
+	logger := logrus.New()
+	service := services.New(repo, validator, logger)
 
 	// Discover use cases
 	usecasesDir := "/workspaces/CodeValdCortex/usecases"

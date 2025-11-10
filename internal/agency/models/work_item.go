@@ -19,6 +19,7 @@ type WorkItem struct {
 
 // CreateWorkItemRequest is the request body for creating a work item
 type CreateWorkItemRequest struct {
+	Code         string   `json:"code" binding:"required"`
 	Title        string   `json:"title" binding:"required"`
 	Description  string   `json:"description" binding:"required"`
 	Deliverables []string `json:"deliverables"`
@@ -27,6 +28,7 @@ type CreateWorkItemRequest struct {
 
 // UpdateWorkItemRequest is the request body for updating a work item
 type UpdateWorkItemRequest struct {
+	Code         string   `json:"code" binding:"required"`
 	Title        string   `json:"title" binding:"required"`
 	Description  string   `json:"description" binding:"required"`
 	Deliverables []string `json:"deliverables"`

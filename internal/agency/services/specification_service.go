@@ -5,23 +5,46 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/sirupsen/logrus"
 )
 
 // SpecificationService handles agency specification operations
 type SpecificationService struct {
-	repo agency.Repository
+	repo   agency.Repository
+	logger *logrus.Logger
 }
 
 // NewSpecificationService creates a new specification service
-func NewSpecificationService(repo agency.Repository) *SpecificationService {
+func NewSpecificationService(repo agency.Repository, logger *logrus.Logger) *SpecificationService {
 	return &SpecificationService{
-		repo: repo,
+		repo:   repo,
+		logger: logger,
 	}
 }
 
 // GetSpecification retrieves the complete specification for an agency
 func (s *SpecificationService) GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error) {
-	return s.repo.GetSpecification(ctx, agencyID)
+	s.logger.WithFields(logrus.Fields{
+		"agency_id": agencyID,
+		"method":    "SpecificationService.GetSpecification",
+	}).Info("Calling repository GetSpecification")
+
+	spec, err := s.repo.GetSpecification(ctx, agencyID)
+	if err != nil {
+		s.logger.WithFields(logrus.Fields{
+			"agency_id": agencyID,
+			"error":     err.Error(),
+			"method":    "SpecificationService.GetSpecification",
+		}).Error("Repository GetSpecification failed")
+		return nil, err
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"agency_id": agencyID,
+		"method":    "SpecificationService.GetSpecification",
+	}).Info("Repository GetSpecification completed successfully")
+
+	return spec, nil
 }
 
 // CreateSpecification creates a new specification for an agency
