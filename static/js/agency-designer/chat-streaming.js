@@ -20,9 +20,13 @@ function convertToStopButton() {
         // Don't disable - allow stopping
         submitBtn.onclick = function (e) {
             e.preventDefault();
+            console.log('Stop button clicked');
             window.stopChatProcessing();
             return false;
         };
+        console.log('Converted to stop button');
+    } else {
+        console.error('Submit button not found');
     }
 }
 
@@ -46,7 +50,10 @@ function restoreSendButton() {
  * Stop the current chat processing
  */
 window.stopChatProcessing = function () {
+    console.log('stopChatProcessing called', { hasController: !!currentAbortController });
+
     if (currentAbortController) {
+        console.log('Aborting request...');
         currentAbortController.abort();
         currentAbortController = null;
 
@@ -63,6 +70,8 @@ window.stopChatProcessing = function () {
 
         // Restore send button
         restoreSendButton();
+    } else {
+        console.warn('No active abort controller to cancel');
     }
 };
 
@@ -122,6 +131,7 @@ window.handleChatSubmit = async function (event) {
 
     // Create new abort controller for this request
     currentAbortController = new AbortController();
+    console.log('Created new AbortController', currentAbortController);
 
     // Clear input and convert send button to stop button
     messageInput.value = '';
