@@ -15,13 +15,11 @@ let unitEditorState = {
 export function loadUnits() {
     const agencyId = getCurrentAgencyId();
     if (!agencyId) {
-        console.error('No agency ID found');
         return;
     }
 
     const unitsTableBody = document.getElementById('units-table-body');
     if (!unitsTableBody) {
-        console.error('Units table body not found');
         return;
     }
 
@@ -40,7 +38,6 @@ export function loadUnits() {
             unitsTableBody.innerHTML = html;
         })
         .catch(error => {
-            console.error('Error loading units:', error);
             unitsTableBody.innerHTML = '<tr><td colspan="3" class="has-text-danger has-text-centered py-5"><p>Error loading units of work</p></td></tr>';
         });
 }
@@ -59,7 +56,6 @@ export function showUnitEditor(mode, unitKey = null, code = '', description = ''
     const descriptionEditor = document.getElementById('unit-description-input');
 
     if (!editorCard || !listCard || !editorTitle || !codeEditor || !descriptionEditor) {
-        console.error('Unit editor elements not found');
         return;
     }
 
@@ -93,7 +89,6 @@ export function saveUnitFromEditor() {
     const codeEditor = document.getElementById('unit-code-input');
     const descriptionEditor = document.getElementById('unit-description-input');
     if (!codeEditor || !descriptionEditor) {
-        console.error('Editor elements not found');
         return;
     }
 
@@ -145,7 +140,6 @@ export function saveUnitFromEditor() {
             loadUnits(); // Reload the list
         })
         .catch(error => {
-            console.error(`Error ${isAddMode ? 'creating' : 'updating'} unit:`, error);
             showNotification(`Error ${isAddMode ? 'adding' : 'updating'} unit`, 'error');
         })
         .finally(() => {
@@ -202,7 +196,6 @@ export function deleteUnit(unitKey, unitNumber) {
             loadUnits(); // Reload the list
         })
         .catch(error => {
-            console.error('Error deleting unit:', error);
             showNotification('Error deleting unit', 'error');
         });
 }

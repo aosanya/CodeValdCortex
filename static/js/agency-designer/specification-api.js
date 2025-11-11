@@ -23,7 +23,6 @@ window.SpecificationAPI = class SpecificationAPI {
             }
             return await response.json();
         } catch (error) {
-            console.error('Error fetching specification:', error);
             // Return empty specification as fallback
             return {
                 introduction: '',
@@ -59,7 +58,6 @@ window.SpecificationAPI = class SpecificationAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating specification:', error);
             throw error;
         }
     }
@@ -86,7 +84,6 @@ window.SpecificationAPI = class SpecificationAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating introduction:', error);
             throw error;
         }
     }
@@ -113,7 +110,6 @@ window.SpecificationAPI = class SpecificationAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating goals:', error);
             throw error;
         }
     }
@@ -140,7 +136,6 @@ window.SpecificationAPI = class SpecificationAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating work items:', error);
             throw error;
         }
     }
@@ -167,7 +162,6 @@ window.SpecificationAPI = class SpecificationAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating roles:', error);
             throw error;
         }
     }
@@ -194,7 +188,6 @@ window.SpecificationAPI = class SpecificationAPI {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating RACI matrix:', error);
             throw error;
         }
     }

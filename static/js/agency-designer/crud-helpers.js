@@ -12,13 +12,11 @@
 window.loadEntityList = async function (entityType, tableBodyId, colspan = 3) {
     const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        console.error('No agency ID found');
         return;
     }
 
     const tableBody = document.getElementById(tableBodyId);
     if (!tableBody) {
-        console.error(`Table body not found: ${tableBodyId}`);
         return;
     }
 
@@ -59,7 +57,6 @@ window.loadEntityList = async function (entityType, tableBodyId, colspan = 3) {
         const html = generateEntityListHTML(entityType, entities);
         tableBody.innerHTML = html;
     } catch (error) {
-        console.error(`Error loading ${entityType}:`, error);
         tableBody.innerHTML = `<tr><td colspan="${colspan}" class="has-text-danger has-text-centered py-5"><p>Error loading ${entityType}</p></td></tr>`;
     }
 }
@@ -201,7 +198,6 @@ window.showEntityEditor = function (mode, editorCardId, listCardId, titleElement
     const editorTitle = document.getElementById(titleElementId);
 
     if (!editorCard || !listCard) {
-        console.error('Editor or list card not found');
         return;
     }
 
@@ -289,7 +285,6 @@ window.deleteEntity = async function (entityType, entityKey, entityName, reloadC
             reloadCallback();
         }
     } catch (error) {
-        console.error(`Error deleting ${entityType}:`, error);
         window.showNotification(`Error deleting ${entityType.slice(0, -1)}`, 'error');
     }
 }
@@ -367,7 +362,6 @@ window.saveEntity = async function (entityType, mode, entityKey, data, saveBtnId
             successCallback();
         }
     } catch (error) {
-        console.error(`Error ${isAddMode ? 'creating' : 'updating'} ${entityType}:`, error);
         window.showNotification(`Error ${isAddMode ? 'adding' : 'updating'} ${entityType.slice(0, -1)}`, 'error');
     } finally {
         if (saveBtn) {

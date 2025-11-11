@@ -38,8 +38,6 @@ window.showNotification = function (message, type = 'info') {
     const statusBarRight = document.querySelector('.vscode-status-bar .status-bar-right');
 
     if (!statusBarRight) {
-        console.warn('Status bar not found - element may not be loaded yet. DOM ready:', document.readyState);
-        console.log('Available status bars:', document.querySelectorAll('.vscode-status-bar').length);
 
         // Fallback to old notification method if status bar not found
         const notification = document.createElement('div');

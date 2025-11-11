@@ -42,13 +42,10 @@ window.showRoleEditor = function (mode, roleKey = null) {
 
 // Load role data for editing
 async function loadRoleData(roleKey) {
-    console.log('[Roles] Loading role data for key:', roleKey);
 
     try {
         const spec = await window.specificationAPI.getSpecification();
         const roles = spec.roles || [];
-
-        console.log('[Roles] Available roles:', roles);
 
         // Find role by _key or other identifier
         const role = roles.find(r => {
@@ -60,12 +57,10 @@ async function loadRoleData(roleKey) {
             throw new Error(`Role with key ${roleKey} not found`);
         }
 
-        console.log('[Roles] Found role:', role);
         roleEditorState.originalData = role;
         populateRoleForm(role);
 
     } catch (error) {
-        console.error('[Roles] Error loading role data:', error);
         window.showNotification('Error loading role data', 'danger');
     }
 }
@@ -84,8 +79,6 @@ function populateRoleForm(role) {
         'role-icon-editor': role.icon || '',
         'role-color-editor': role.color || '#3298dc'
     };
-    console.log('[Roles] Populating form with role data:', role);
-    console.log('[Roles] Form data being populated:', formData);
     populateForm(formData);
 }
 
@@ -110,7 +103,6 @@ function clearRoleForm() {
 
 // Save role from editor
 window.saveRoleFromEditor = function () {
-    console.log('[Roles] Saving role from editor, mode:', roleEditorState.mode);
 
     // Gather form data
     const code = document.getElementById('role-code-editor')?.value.trim();
@@ -175,8 +167,6 @@ window.saveRoleFromEditor = function () {
             ? roleEditorState.originalData.version
             : '1.0.0'
     };
-
-    console.log('[Roles] Payload:', payload);
 
     window.saveEntity('roles', roleEditorState.mode, roleEditorState.roleKey, payload, 'save-role-btn', () => {
         cancelRoleEdit();
@@ -313,7 +303,6 @@ window.processAIRoleOperation = async function (operations) {
                 }
             }
         } catch (err) {
-            console.error('[Roles] Error refreshing chat messages:', err);
         }
 
         // Hide AI processing status after roles and chat are updated
@@ -324,7 +313,6 @@ window.processAIRoleOperation = async function (operations) {
         window.showNotification('AI operation completed', 'success');
 
     } catch (error) {
-        console.error('[Roles] Error processing AI operation:', error);
 
         // Hide processing status on error
         if (window.hideAIProcessStatus) {

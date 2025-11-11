@@ -46,7 +46,6 @@ async function loadGoalsForSelection() {
             container.appendChild(label);
         });
     } catch (error) {
-        console.error('Error loading goals:', error);
     }
 }
 
@@ -95,7 +94,6 @@ async function loadWorkItemData(workItemKey) {
         const workItem = workItems.find(wi => wi._key === workItemKey);
 
         if (workItem) {
-            console.log('Loading work item for editing:', workItem);
             populateWorkItemForm(workItem);
             workItemEditorState.originalData = workItem;
 
@@ -105,7 +103,6 @@ async function loadWorkItemData(workItemKey) {
             window.showNotification('Work item not found', 'error');
         }
     } catch (error) {
-        console.error('Error loading work item:', error);
         window.showNotification('Error loading work item data', 'error');
     }
 }
@@ -114,7 +111,6 @@ async function loadWorkItemData(workItemKey) {
 // NOTE: In the unified specification model, work items don't have explicit goal links
 // This functionality is temporarily disabled for the single-document architecture
 async function loadLinkedGoals(workItemKey) {
-    console.log('Goal linking temporarily disabled in unified specification model');
     // TODO: Implement goal linking within the unified specification structure
     // or remove this feature if not needed in the new architecture
 }
@@ -128,7 +124,6 @@ function populateWorkItemForm(workItem) {
         'work-item-deliverables-editor': workItem.deliverables ? workItem.deliverables.join('\n') : '',
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
     };
-    console.log('Populating work item form with:', formData);
     populateForm(formData);
 }
 
@@ -221,7 +216,6 @@ window.saveWorkItemFromEditor = async function () {
         cancelWorkItemEdit();
         loadWorkItems();
     } catch (error) {
-        console.error('Error saving work item:', error);
         window.showNotification('Error saving work item', 'error');
     }
 }
@@ -229,7 +223,6 @@ window.saveWorkItemFromEditor = async function () {
 // Save goal links for a work item
 // NOTE: Goal linking is disabled in the unified specification model
 async function saveGoalLinks(workItemKey, selectedGoalKeys) {
-    console.log('Goal linking disabled in unified specification model');
     // TODO: Consider if goal linking should be implemented within unified specification
     // or if this feature should be removed entirely from the new architecture
 }
@@ -247,7 +240,6 @@ window.cancelWorkItemEdit = function () {
     // Clear all navigational contexts when returning to work items list
     if (window.ContextManager) {
         window.ContextManager.clearNavigationalContexts();
-        console.log('[WorkItems] Cleared navigational contexts when returning to list');
     }
 
     // Reset state

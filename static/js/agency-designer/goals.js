@@ -51,7 +51,6 @@ async function reloadChatMessages() {
             }
         }
     } catch (err) {
-        console.error('[Goals] Error refreshing chat messages:', err);
     }
 }
 
@@ -242,7 +241,6 @@ window.processAIGoalOperation = function (operations, userRequest = '') {
             window.showNotification(`AI successfully ${operationText}!`, 'success');
         })
         .catch(error => {
-            console.error('Error processing AI goal operation:', error);
 
             // Hide AI process status
             if (window.hideAIProcessStatus) {
@@ -386,13 +384,11 @@ window.validateGoalCode = function (code) {
 function attachGoalsContextClearListener() {
     const goalsTable = document.getElementById('goals-table-body');
     if (!goalsTable) {
-        console.warn('[Goals] Goals table not found - cannot attach context clear listener');
         return;
     }
 
     // Check if already attached
     if (goalsTable._contextClearAttached) {
-        console.log('[Goals] Context clear listener already attached');
         return;
     }
 
@@ -408,27 +404,21 @@ function attachGoalsContextClearListener() {
             return;
         }
 
-        console.log('[Goals] Table changes detected - clearing contexts and selections');
-
         if (!window.ContextManager) {
-            console.warn('[Goals] ContextManager not available');
             return;
         }
 
         const contexts = window.ContextManager.getAllContexts();
         const selections = window.ContextManager.getSelections();
-        console.log('[Goals] Current contexts:', contexts, 'selections:', selections);
 
         const hasContextsOrSelections = (contexts && contexts.length > 0) || (selections && selections.length > 0);
 
         if (hasContextsOrSelections) {
-            console.log('[Goals] Clearing contexts and selections due to table edit');
 
             // Clear both contexts and selections
             window.ContextManager.clearAllContexts();
             window.ContextManager.clearSelections();
 
-            console.log('[Goals] ✅ Contexts and selections cleared');
         }
     });
 
@@ -441,7 +431,6 @@ function attachGoalsContextClearListener() {
 
     // Mark as attached
     goalsTable._contextClearAttached = true;
-    console.log('[Goals] Context clear listener (MutationObserver) attached to goals table');
 }
 
 // Initialize button states on page load

@@ -24,13 +24,11 @@ window.initializeOverview = function () {
         // Set default context based on hash or default to introduction
         if (hash && validSections.includes(hash)) {
             window.currentAgencyContext = hash;
-            console.log('[Overview] Initialized context from URL hash:', hash);
 
             // Update hidden context field in chat form
             const contextField = document.getElementById('chat-context-field');
             if (contextField) {
                 contextField.value = hash;
-                console.log('[Overview] Initialized chat context field to:', hash);
             }
 
             // Update the context display
@@ -56,13 +54,11 @@ window.initializeOverview = function () {
             // Set default context to introduction
             window.currentAgencyContext = 'introduction';
             window.location.hash = 'introduction';
-            console.log('[Overview] Initialized context to default: introduction');
 
             // Update hidden context field in chat form
             const contextField = document.getElementById('chat-context-field');
             if (contextField) {
                 contextField.value = 'introduction';
-                console.log('[Overview] Initialized chat context field to: introduction');
             }
 
             // Update the context display to show Introduction
@@ -109,18 +105,15 @@ window.selectOverviewSection = function (element, section) {
         // When entering work-items, clear ALL navigational contexts
         if (section === 'work-items' && window.ContextManager) {
             window.ContextManager.clearNavigationalContexts();
-            console.log('[Overview] Cleared all navigational contexts when entering work-items');
         }
 
         // Track current selected context (for backend calls to include as `context`)
         window.currentAgencyContext = section;
-        console.log('[Overview] Context changed to:', section);
 
         // Update hidden context field in chat form immediately
         const contextField = document.getElementById('chat-context-field');
         if (contextField) {
             contextField.value = section;
-            console.log('[Overview] Updated chat context field to:', section);
         }
     }
 

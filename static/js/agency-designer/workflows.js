@@ -66,7 +66,6 @@ function loadWorkflowData(workflowId) {
             }
         })
         .catch(error => {
-            console.error('Error loading workflow:', error);
             window.showNotification('Error loading workflow data', 'error');
         });
 }
@@ -194,7 +193,6 @@ window.saveWorkflowFromEditor = function () {
             loadWorkflows();
         })
         .catch(error => {
-            console.error('Error saving workflow:', error);
             window.showNotification(`Error ${method === 'POST' ? 'creating' : 'updating'} workflow`, 'error');
         });
 }
@@ -226,7 +224,6 @@ window.deleteWorkflow = function (workflowId) {
             loadWorkflows();
         })
         .catch(error => {
-            console.error('Error deleting workflow:', error);
             window.showNotification('Error deleting workflow', 'error');
         });
 }
@@ -256,7 +253,6 @@ window.duplicateWorkflow = function (workflowId) {
             loadWorkflows();
         })
         .catch(error => {
-            console.error('Error duplicating workflow:', error);
             window.showNotification('Error duplicating workflow', 'error');
         });
 }
@@ -395,7 +391,6 @@ window.processAIWorkflowOperation = function (operation) {
             }
         })
         .catch(error => {
-            console.error('AI workflow operation error:', error);
             responseContainer.innerHTML = '<div class="notification is-danger"><i class="fas fa-exclamation-triangle mr-2"></i>Failed to process AI request. The response may have been too large or the AI service encountered an error.</div>';
         });
 }
@@ -435,7 +430,6 @@ window.generateWorkflowWithAI = function () {
             loadWorkflows();
         })
         .catch(error => {
-            console.error('AI workflow generation error:', error);
             window.showNotification('Failed to generate workflow with AI', 'error');
         });
 }
@@ -472,7 +466,6 @@ window.refineWorkflowWithAI = function () {
             loadWorkflowData(workflowEditorState.workflowId);
         })
         .catch(error => {
-            console.error('AI workflow refinement error:', error);
             window.showNotification('Failed to refine workflow with AI', 'error');
         });
 }

@@ -24,9 +24,7 @@ window.showAIProcessStatus = function (message = 'AI is working on your request.
             processStatus._hideTimeout = null;
         }
 
-        console.log('[AI Status] Showing:', message);
     } else {
-        console.warn('[AI Status] Element #ai-process-status not found');
     }
 };
 
@@ -44,7 +42,6 @@ window.hideAIProcessStatus = function () {
         // Add htmx-indicator class back
         processStatus.classList.add('htmx-indicator');
 
-        console.log('[AI Status] Hidden');
     }
 };
 
@@ -168,7 +165,6 @@ window.handleRefineClick = function () {
 import('./agency-designer/main.js').then((module) => {
     // Module loaded successfully
 }).catch(error => {
-    console.error('[agency-designer.js] Error loading main module:', error);
 });
 
 // Overview functions are loaded directly as global functions from overview.js script

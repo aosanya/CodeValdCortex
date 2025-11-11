@@ -73,7 +73,6 @@ window.loadChatMessagesFromDOM = function () {
         }
     });
 
-    console.log('Loaded', window.chatMessages.length, 'messages from DOM');
 }
 
 // Initialize auto-scroll for chat messages
@@ -106,11 +105,8 @@ window.restoreChatMessagesFromState = function () {
     const currentDOMMessages = chatContainer.querySelectorAll('.message').length;
     const stateMessages = window.chatMessages.length;
 
-    console.log('Chat state check:', { stateMessages, currentDOMMessages });
-
     // If we have more messages in state than in DOM, restore them
     if (stateMessages > currentDOMMessages) {
-        console.warn('⚠️ Messages missing from DOM! Restoring from global state...');
 
         // Clear and rebuild
         chatContainer.innerHTML = '';
@@ -135,7 +131,6 @@ window.restoreChatMessagesFromState = function () {
             chatContainer.appendChild(messageDiv);
         });
 
-        console.log('✅ Restored', window.chatMessages.length, 'messages from global state');
         window.scrollToBottom(chatContainer);
     }
 }

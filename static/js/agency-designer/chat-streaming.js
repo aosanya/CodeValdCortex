@@ -13,14 +13,11 @@ window.handleChatSubmit = async function (event) {
     const agencyID = form.dataset.agencyId;
     const hasExistingConversation = form.dataset.hasConversation === 'true';
 
-    console.log('💬 [CHAT] Form submitted', { agencyID, hasExistingConversation });
-
     const messageInput = document.getElementById('user-input');
     const chatMessages = document.getElementById('chat-messages');
     const submitBtn = document.getElementById('chat-submit-btn');
 
     if (!messageInput || !chatMessages) {
-        console.error('Required elements not found');
         return false;
     }
 
@@ -31,7 +28,6 @@ window.handleChatSubmit = async function (event) {
 
     // Get current context
     const context = window.currentAgencyContext || 'introduction';
-    console.log('  📍 Context:', context);
 
     // Build form data
     const formData = new URLSearchParams();
@@ -43,7 +39,6 @@ window.handleChatSubmit = async function (event) {
         const editor = document.getElementById('introduction-editor');
         if (editor && editor.value) {
             formData.append('introduction-editor', editor.value);
-            console.log('  📝 Included introduction editor content');
         }
     }
 
@@ -54,7 +49,6 @@ window.handleChatSubmit = async function (event) {
         if (formattedContexts) {
             fullMessage = originalMessage + formattedContexts;
             formData.set('message', fullMessage);
-            console.log('  🔗 Added context selections');
         }
     }
 
@@ -86,7 +80,6 @@ window.handleChatSubmit = async function (event) {
 
         // Check if streaming is enabled
         const useStreaming = window.isStreamingEnabled && window.isStreamingEnabled();
-        console.log('  🌊 Streaming enabled:', useStreaming);
 
         if (useStreaming && context === 'introduction') {
             // Use streaming for introduction refinement
@@ -105,7 +98,6 @@ window.handleChatSubmit = async function (event) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
     } catch (error) {
-        console.error('❌ Chat submission error:', error);
         addErrorMessageToChat('Failed to send message. Please try again.', chatMessages);
     } finally {
         // Re-enable button
@@ -126,7 +118,6 @@ window.handleChatSubmit = async function (event) {
  * For chat, we stream JSON and extract the message at the end
  */
 async function handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID) {
-    console.log('  📡 Using STREAMING mode for chat');
 
     // Add streaming query parameter
     const streamEndpoint = `${endpoint}?stream=true`;
@@ -160,7 +151,6 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages, age
             // If we get a 500 error with an existing conversation, it might be lost (server restart)
             // Try again with a new conversation
             if (response.status === 500 && streamEndpoint.includes('/conversations/')) {
-                console.warn('  ⚠️  Existing conversation failed, retrying with new conversation...');
                 chatMessages.dataset.conversationId = ''; // Clear the old conversation ID
                 const newEndpoint = `/api/v1/agencies/${agencyID}/designer/conversations/web?stream=true`;
                 const retryResponse = await fetch(newEndpoint, {
@@ -179,7 +169,6 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages, age
         return await processStreamingResponse(response, messageBubble, streamingText, chatMessages);
 
     } catch (error) {
-        console.error('Streaming failed:', error);
         messageBubble.innerHTML = `<p class="has-text-danger">❌ ${error.message}</p>`;
         throw error;
     }
@@ -195,12 +184,9 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
     let currentEvent = '';
     let finalResult = null;
 
-    console.log('  🔍 Starting SSE stream parsing...');
-
     while (true) {
         const { done, value } = await reader.read();
         if (done) {
-            console.log('  ✅ Stream reading complete');
             break;
         }
 
@@ -212,16 +198,12 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
             if (!line.trim()) {
                 // Empty line - don't reset event immediately, just log
                 if (currentEvent) {
-                    console.log(`  📦 Empty line after event: ${currentEvent}`);
                 }
                 continue; // Keep currentEvent for next data line
             }
 
-            console.log(`  📥 Received line: "${line.substring(0, 100)}${line.length > 100 ? '...' : ''}"`);
-
             if (line.startsWith('event:')) {
                 currentEvent = line.substring(6).trim();
-                console.log(`  🏷️  Event type: ${currentEvent}`);
             } else if (line.startsWith('data:')) {
                 const data = line.substring(5).trim();
 
@@ -230,78 +212,53 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                     currentEvent = 'chunk';
                 }
 
-                console.log(`  📊 Data for event '${currentEvent}': ${data.substring(0, 100)}${data.length > 100 ? '...(truncated for log)' : ''}`);
-
                 if (currentEvent === 'chunk') {
                     // Display streaming text
                     streamingText.textContent += data;
                 } else if (currentEvent === 'complete') {
                     // Parse final result
-                    console.log('  🎯 Parsing completion data...');
-                    console.log('  📄 Full completion JSON (length:', data.length, ')');
                     try {
                         finalResult = JSON.parse(data);
-                        console.log('  ✅ Successfully parsed completion:', finalResult);
                     } catch (e) {
-                        console.error('  ❌ Failed to parse completion data:', e);
-                        console.error('  📄 Problematic data (first 500 chars):', data.substring(0, 500));
                     }
                 } else if (currentEvent === 'error') {
-                    console.error('  ❌ Server sent error event:', data);
                 } else if (currentEvent === 'start') {
-                    console.log('  🎬 Stream started:', data);
                 }
             }
         }
     }
 
-    console.log('  📋 Final result:', finalResult);
-
     // Display the final message
     if (finalResult) {
-        console.log('  📝 Processing final result...');
         const message = finalResult.explanation || finalResult.message || 'Changes applied successfully';
 
         // Store conversation ID if this was the first message
         if (finalResult.conversation_id) {
-            console.log('  💾 Storing conversation ID:', finalResult.conversation_id);
             chatMessages.dataset.conversationId = finalResult.conversation_id;
         } else {
-            console.log('  ⚠️  No conversation_id in final result');
         }
 
         // Update the introduction textarea if it was changed
         if (finalResult.was_changed && finalResult.introduction) {
-            console.log('  📝 Updating introduction textarea with new content');
-            console.log('  📏 New introduction length:', finalResult.introduction.length);
             const introTextarea = document.getElementById('introduction-editor');
             if (introTextarea) {
                 introTextarea.value = finalResult.introduction;
-                console.log('  ✅ Textarea updated successfully');
             } else {
-                console.error('  ❌ Could not find introduction-editor textarea');
             }
         } else {
-            console.log('  ℹ️  No introduction update needed:', {
-                was_changed: finalResult.was_changed,
-                has_introduction: !!finalResult.introduction
-            });
         }
 
         // Show if changes were made
         if (finalResult.was_changed && finalResult.changed_sections) {
-            console.log('  ✅ Changes detected in sections:', finalResult.changed_sections);
             const sections = finalResult.changed_sections.join(', ');
             messageBubble.innerHTML = `
                 <p><strong>${message}</strong></p>
                 <p class="has-text-grey-light mt-2"><small>✓ Updated: ${sections}</small></p>
             `;
         } else {
-            console.log('  ℹ️  No changes made');
             messageBubble.innerHTML = `<p>${message}</p>`;
         }
     } else {
-        console.error('  ❌ No final result received from stream!');
         messageBubble.innerHTML = '<p class="has-text-grey">Response received</p>';
     }
 
@@ -319,7 +276,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
  * Handle non-streaming chat response
  */
 async function handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation) {
-    console.log('  📄 Using NON-STREAMING mode');
 
     const response = await fetch(endpoint, {
         method: 'POST',
@@ -334,7 +290,6 @@ async function handleNonStreamingChatResponse(endpoint, formData, chatMessages, 
     }
 
     const html = await response.text();
-    console.log('  📥 Received HTML response');
 
     // For new conversations, replace entire chat
     // For existing conversations, append new messages
@@ -372,7 +327,6 @@ function addUserMessageToChat(message, container) {
     `;
 
     container.appendChild(messageDiv);
-    console.log('  💬 Added user message to chat');
 }
 
 /**
@@ -461,16 +415,10 @@ function initializeChat() {
     // 1. Backend says no conversation exists, OR
     // 2. Frontend has no conversation ID but backend thinks there is one
     if (!backendHasConversation || (!frontendConversationId && backendHasConversation)) {
-        console.log('🧹 Clearing stale conversation state from DOM');
         delete chatMessages.dataset.conversationId;
         chatForm.dataset.hasConversation = 'false'; // Reset the form flag
     }
 
-    console.log('💬 Chat initialized:', {
-        backendHasConversation,
-        frontendConversationId: frontendConversationId || 'none',
-        finalState: chatForm.dataset.hasConversation
-    });
 }
 
 // Initialize chat when DOM is ready
@@ -480,4 +428,3 @@ if (document.readyState === 'loading') {
     initializeChat();
 }
 
-console.log('✅ Chat streaming utilities loaded');

@@ -19,7 +19,6 @@ function initializeAgencyDesigner() {
 
         // Listen for introduction updates from chat refinement
         document.body.addEventListener('introductionUpdated', function () {
-            console.log('[Main] Introduction updated event received - reloading editor');
             if (window.loadIntroductionEditor) window.loadIntroductionEditor();
         });
 
@@ -35,11 +34,8 @@ function initializeAgencyDesigner() {
         if (typeof window.initializeContextSelection === 'function') {
             window.initializeContextSelection(); // Initialize context selection system
         } else {
-            console.warn('initializeContextSelection function not available');
         }
     } catch (error) {
-        console.error('❌ Error during initialization:', error);
-        console.error('Error stack:', error.stack);
     }
 }
 

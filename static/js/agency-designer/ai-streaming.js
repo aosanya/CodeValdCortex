@@ -28,14 +28,9 @@ window.executeAIStream = async function (options) {
         onStart = () => { },
         onChunk = () => { },
         onComplete = () => { },
-        onError = (error) => console.error('Streaming error:', error),
+        onError = () => { },
         displayElement = null
     } = options;
-
-    console.log('🌊 [AI STREAMING] Starting stream request');
-    console.log('  📍 URL:', url);
-    console.log('  📝 FormData:', formData.toString());
-    console.log('  🖼️ Display Element:', displayElement);
 
     // Track accumulated text
     let accumulatedText = '';
@@ -43,20 +38,15 @@ window.executeAIStream = async function (options) {
 
     try {
         // Call onStart callback
-        console.log('  ▶️ Calling onStart callback');
         onStart();
 
         // Create streaming display if displayElement provided
         if (displayElement) {
-            console.log('  🎨 Creating streaming display in element:', displayElement.id);
             streamingTextElement = createStreamingDisplay(displayElement);
-            console.log('  ✅ Streaming text element created:', streamingTextElement);
         } else {
-            console.warn('  ⚠️ No display element provided - streaming will not be visible');
         }
 
         // Make streaming request
-        console.log('  🌐 Sending POST request to:', url);
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -65,19 +55,11 @@ window.executeAIStream = async function (options) {
             body: formData
         });
 
-        console.log('  📥 Response received - Status:', response.status);
-        console.log('  📋 Response headers:', {
-            contentType: response.headers.get('Content-Type'),
-            cacheControl: response.headers.get('Cache-Control'),
-            connection: response.headers.get('Connection')
-        });
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         // Read streaming response
-        console.log('  📖 Starting to read stream...');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let finalResult = null;
@@ -87,108 +69,82 @@ window.executeAIStream = async function (options) {
         while (true) {
             const { done, value } = await reader.read();
             if (done) {
-                console.log('  ✅ Stream complete - Total chunks:', chunkCount, 'Total lines:', lineCount);
                 break;
             }
 
             chunkCount++;
             const chunk = decoder.decode(value, { stream: true });
-            console.log(`  📦 Chunk ${chunkCount} received (${chunk.length} bytes):`, chunk.substring(0, 100));
 
             const lines = chunk.split('\n');
-            console.log(`  📄 Split into ${lines.length} lines`);
 
             for (const line of lines) {
                 lineCount++;
 
                 // Skip empty lines
                 if (!line.trim()) {
-                    console.log(`    ⏭️ Line ${lineCount}: Empty, skipping`);
                     continue;
                 }
-
-                console.log(`    📝 Line ${lineCount}:`, line.substring(0, 80));
 
                 // Parse SSE format
                 if (line.startsWith('event: ')) {
                     const eventType = line.substring(7).trim();
-                    console.log(`    🏷️ Event type: ${eventType}`);
                     continue;
                 }
 
                 if (line.startsWith('data: ')) {
                     const data = line.substring(6);
-                    console.log(`    💾 Data field (${data.length} chars):`, data.substring(0, 100));
 
                     try {
                         const parsed = JSON.parse(data);
-                        console.log('    ✅ Parsed as JSON:', parsed);
 
                         // Handle error events
                         if (parsed.error) {
-                            console.error('    ❌ Error event received:', parsed.error);
                             throw new Error(parsed.error);
                         }
 
                         // Handle start event
                         if (parsed.status === 'streaming') {
-                            console.log('    🎬 Start event received');
                             if (streamingTextElement) {
                                 streamingTextElement.textContent = 'Connecting to AI...';
-                                console.log('    ✅ Updated streaming text element');
                             }
                         }
                         // Handle complete event (has was_changed or similar completion fields)
                         else if (parsed.was_changed !== undefined || parsed.complete) {
-                            console.log('    🏁 Complete event received:', parsed);
                             finalResult = parsed;
                             if (displayElement) {
-                                console.log('    🎨 Showing completion result in display element');
                                 showCompletionResult(parsed, displayElement);
                             }
-                            console.log('    📞 Calling onComplete callback');
                             onComplete(parsed);
                             break;
                         }
                     } catch (e) {
                         // Not JSON, it's a text chunk
-                        console.log('    📝 Not JSON - treating as text chunk:', data.substring(0, 50));
                         accumulatedText += data;
-                        console.log(`    📊 Accumulated text now ${accumulatedText.length} chars`);
 
                         // Update display
                         if (streamingTextElement) {
                             streamingTextElement.textContent = accumulatedText;
                             // Auto-scroll to bottom
                             streamingTextElement.scrollTop = streamingTextElement.scrollHeight;
-                            console.log('    ✅ Updated streaming display');
                         } else {
-                            console.warn('    ⚠️ No streaming text element to update!');
                         }
 
                         // Call chunk callback
-                        console.log('    📞 Calling onChunk callback');
                         onChunk(data, accumulatedText);
                     }
                 } else {
-                    console.log(`    ⚠️ Unexpected line format:`, line.substring(0, 50));
                 }
             }
         }
 
-        console.log('  🎯 Final result:', finalResult);
         return finalResult;
     } catch (error) {
-        console.error('  ❌ Streaming error:', error);
-        console.error('  📚 Error stack:', error.stack);
         onError(error);
         if (displayElement) {
-            console.log('  🎨 Showing error in display element');
             showErrorResult(error.message, displayElement);
         }
         throw error;
     } finally {
-        console.log('🌊 [AI STREAMING] Request complete');
     }
 }
 
@@ -198,8 +154,6 @@ window.executeAIStream = async function (options) {
  * @returns {HTMLElement} The text display element
  */
 function createStreamingDisplay(container) {
-    console.log('    🎨 Creating streaming display UI');
-    console.log('    📦 Container:', container);
 
     const streamingDisplay = document.createElement('div');
     streamingDisplay.innerHTML = `
@@ -212,13 +166,10 @@ function createStreamingDisplay(container) {
         <div id="streaming-text" class="content" style="white-space: pre-wrap; font-size: 0.9em;"></div>
     `;
 
-    console.log('    🗑️ Clearing container');
     container.innerHTML = '';
-    console.log('    ➕ Appending streaming display');
     container.appendChild(streamingDisplay);
 
     const textElement = streamingDisplay.querySelector('#streaming-text');
-    console.log('    🔍 Found streaming text element:', textElement);
 
     return textElement;
 }/**
@@ -303,24 +254,17 @@ window.executeAIRefine = async function (options) {
         url,
         formData,
         onComplete = () => { },
-        onError = (error) => console.error('AI refine error:', error),
+        onError = () => { },
         displayElement = null
     } = options;
 
     const useStreaming = window.isStreamingEnabled();
 
-    console.log('🔀 [AI REFINE] Routing request');
-    console.log('  ⚙️ Streaming enabled:', useStreaming);
-    console.log('  � Base URL:', url);
-    console.log('  �️ Display element:', displayElement);
-
     // Add stream query parameter if streaming is enabled
     const requestUrl = useStreaming ? `${url}?stream=true` : url;
-    console.log('  � Request URL:', requestUrl);
 
     if (useStreaming) {
         // Use streaming version
-        console.log('  ➡️ Using STREAMING version');
         return await window.executeAIStream({
             url: requestUrl,
             formData: formData,
@@ -330,7 +274,6 @@ window.executeAIRefine = async function (options) {
         });
     } else {
         // Use non-streaming version
-        console.log('  ➡️ Using NON-STREAMING version');
         const response = await fetch(requestUrl, {
             method: 'POST',
             headers: {
@@ -339,25 +282,19 @@ window.executeAIRefine = async function (options) {
             body: formData
         });
 
-        console.log('  📥 Non-streaming response status:', response.status);
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         // For non-streaming, response is HTML to replace content
         const html = await response.text();
-        console.log('  📝 Received HTML response (length:', html.length, ')');
 
         if (displayElement) {
-            console.log('  🎨 Updating display element with HTML');
             displayElement.innerHTML = html;
         }
 
-        console.log('  📞 Calling onComplete callback');
         onComplete({ html });
         return { html };
     }
 }
 
-console.log('✅ AI Streaming utilities loaded');

@@ -32,14 +32,12 @@ window.loadRACIMatrix = function () {
     if (!raciState.agencyId) {
         raciState.agencyId = getAgencyId();
         if (!raciState.agencyId) {
-            console.error('[RACI] Unable to determine agency ID');
             return;
         }
     }
 
     const tableBody = document.getElementById('raci-matrix-body');
     if (!tableBody) {
-        console.error('[RACI] Table body element not found');
         return;
     }
 
@@ -62,7 +60,6 @@ window.loadRACIMatrix = function () {
             loadExistingAssignments();
         })
         .catch(error => {
-            console.error('[RACI] Error loading RACI matrix:', error);
             tableBody.innerHTML = '<tr><td colspan="3" class="has-text-danger has-text-centered py-5"><p>Error loading work items</p></td></tr>';
         });
 }
@@ -82,7 +79,6 @@ function loadExistingAssignments() {
             renderRACITable();
         })
         .catch(error => {
-            console.error('[RACI] Error loading RACI assignments:', error);
             raciState.assignments = {};
         });
 }
@@ -93,7 +89,6 @@ function renderRACITable() {
     const tableContainer = document.getElementById('raci-matrix-table');
 
     if (!tableBody) {
-        console.error('[RACI] Table body not found in renderRACITable');
         return;
     }
 
@@ -407,7 +402,6 @@ window.saveRACIAssignment = async function (workItemKey, roleKey) {
         showNotification('Changes saved', 'success');
 
     } catch (error) {
-        console.error('[RACI] Error saving assignment:', error);
         showNotification('Failed to save changes. Click "Save Matrix" to retry.', 'warning');
     }
 }
@@ -589,7 +583,6 @@ window.saveRACIMatrix = async function () {
 
         window.showNotification('RACI matrix saved successfully', 'success');
     } catch (error) {
-        console.error('Error saving RACI matrix:', error);
         window.showNotification('Failed to save RACI matrix', 'danger');
     }
 }
@@ -765,7 +758,6 @@ window.createRACIMappings = async function () {
                 }
             }
         } catch (err) {
-            console.error('[RACI] Error refreshing chat:', err);
         }
 
         // Hide AI processing status
@@ -786,7 +778,6 @@ window.createRACIMappings = async function () {
         btn.innerHTML = originalHTML;
 
     } catch (error) {
-        console.error('[RACI] Error creating mappings:', error);
 
         // Hide AI processing status
         if (window.hideAIProcessStatus) {
@@ -809,7 +800,6 @@ window.exportRACIMatrix = async function (format) {
         const url = `/api/v1/agencies/${raciState.agencyId}/raci-matrix/export/${format}`;
         window.open(url, '_blank');
     } catch (error) {
-        console.error(`Error exporting RACI matrix as ${format}:`, error);
         window.showNotification(`Failed to export as ${format}`, 'danger');
     }
 }
@@ -846,7 +836,6 @@ async function loadTemplates() {
         `).join('<br>');
 
     } catch (error) {
-        console.error('Error loading templates:', error);
         window.showNotification('Failed to load templates', 'danger');
     }
 }
@@ -864,7 +853,6 @@ function showLoading(show) {
         table.style.display = 'table';
     }
 }
-
 
 function escapeHtml(text) {
     const div = document.createElement('div');

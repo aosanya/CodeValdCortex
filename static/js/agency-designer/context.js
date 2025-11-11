@@ -256,7 +256,6 @@ window.clearNavigationalContexts = function (section = null) {
     if (removedCount > 0) {
         logContextStateChange('CLEARED_NAVIGATIONAL');
         updateContextDisplay();
-        console.log(`[ContextManager] Cleared ${removedCount} navigational context(s)${section ? ` from section: ${section}` : ''}`);
     }
 }
 
@@ -301,15 +300,9 @@ window.getFormattedContexts = function () {
     const hasContexts = contextState.contexts.length > 0;
     const hasSelections = contextState.selections.length > 0;
 
-    console.log('[ContextManager] getFormattedContexts called:', {
-        contexts: contextState.contexts.length,
-        selections: contextState.selections.length
-    });
-
     // If no explicit contexts/selections, return empty string
     // (Context is already being appended by the backend/form handler)
     if (!hasContexts && !hasSelections) {
-        console.log('[ContextManager] No contexts or selections, returning empty');
         return '';
     }
 
@@ -328,7 +321,6 @@ window.getFormattedContexts = function () {
         formatted += `   ${sel.text}\n`;
     });
 
-    console.log('[ContextManager] Formatted context:', formatted.substring(0, 200));
     return formatted;
 }
 

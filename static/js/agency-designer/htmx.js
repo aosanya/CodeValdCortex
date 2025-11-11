@@ -8,37 +8,17 @@ window.initializeHTMXEvents = function () {
     // Log context being sent with chat messages
     document.body.addEventListener('htmx:configRequest', function (evt) {
         if (evt.detail.path && evt.detail.path.includes('/messages/web')) {
-            console.log('[HTMX] Chat message request config:', {
-                path: evt.detail.path,
-                verb: evt.detail.verb,
-                parameters: evt.detail.parameters,
-                headers: evt.detail.headers
-            });
         }
     });
 
     // Log what's actually being sent
     document.body.addEventListener('htmx:beforeRequest', function (evt) {
-        console.log('[HTMX] beforeRequest event:', {
-            path: evt.detail.path,
-            eltTag: evt.detail.elt.tagName,
-            eltClass: evt.detail.elt.className,
-            matchesConversations: evt.detail.elt.matches('form[hx-post*="conversations"]'),
-            matchesMessages: evt.detail.elt.matches('form[hx-post*="messages"]')
-        });
 
         if (evt.detail.path && (evt.detail.path.includes('/messages/web') || evt.detail.path.includes('/conversations/web'))) {
-            console.log('[HTMX] Chat request detected:', {
-                path: evt.detail.path,
-                parameters: evt.detail.parameters,
-                target: evt.detail.target
-            });
 
             // Try to log the actual form data
             const formData = new FormData(evt.detail.elt);
-            console.log('[HTMX] Form data entries:');
             for (let [key, value] of formData.entries()) {
-                console.log(`  ${key}: ${value}`);
             }
         }
 
@@ -46,11 +26,7 @@ window.initializeHTMXEvents = function () {
         const isChatForm = evt.detail.elt.matches('form[hx-post*="conversations"]') ||
             evt.detail.elt.matches('form[hx-post*="messages"]');
 
-        console.log('[HTMX] Indicator element:', indicator ? 'found' : 'NOT FOUND');
-        console.log('[HTMX] Is chat form?', isChatForm);
-
         if (isChatForm) {
-            console.log('[HTMX] ✅ Chat form detected');
 
             // Get the input field and message
             const input = evt.detail.elt.querySelector('input[name="message"]');
@@ -84,14 +60,12 @@ window.initializeHTMXEvents = function () {
                 // Clear the input immediately
                 if (input) {
                     input.value = '';
-                    console.log('[HTMX] ✅ Input cleared and message added to chat');
                 }
             }
 
             // Show typing indicator if it exists
             if (indicator) {
                 indicator.style.display = 'block';
-                console.log('[HTMX] ✅ Typing indicator shown');
             }
 
             // Show AI process status for chat requests with context-aware message
@@ -120,10 +94,8 @@ window.initializeHTMXEvents = function () {
                         statusMessage = 'AI is processing your message...';
                 }
 
-                console.log('[HTMX] ✅ Calling showAIProcessStatus:', statusMessage);
                 window.showAIProcessStatus(statusMessage);
             } else {
-                console.warn('[HTMX] ❌ window.showAIProcessStatus is not defined!');
             }
 
             // Scroll to show typing indicator
@@ -132,7 +104,6 @@ window.initializeHTMXEvents = function () {
                 setTimeout(() => scrollToBottom(chatContainer), 100);
             }
         } else {
-            console.log('[HTMX] ❌ Not a chat form, skipping status display');
         }
 
         // Handle other AI operations
@@ -155,11 +126,6 @@ window.initializeHTMXEvents = function () {
 
     // Hide typing indicator and scroll when new message arrives
     document.body.addEventListener('htmx:afterSwap', function (evt) {
-        console.log('🔵 [HTMX] afterSwap event triggered', {
-            targetId: evt.detail.target.id,
-            targetClass: evt.detail.target.className,
-            xhr: evt.detail.xhr?.status
-        });
 
         const indicator = document.getElementById('typing-indicator');
         if (indicator && evt.detail.target.id === 'chat-messages') {
@@ -172,26 +138,17 @@ window.initializeHTMXEvents = function () {
             evt.detail.target.classList.contains('introduction-content')
         );
 
-        console.log('🔵 [HTMX] isIntroductionRefine:', isIntroductionRefine);
-
         // For introduction refine, refresh chat messages to show AI explanation
         if (isIntroductionRefine) {
-            console.log('✅ [HTMX] Introduction refine detected - checking textarea');
 
             const textarea = document.getElementById('introduction-editor');
             if (textarea) {
-                console.log('📊 [HTMX] Textarea found after swap:');
-                console.log('  - textarea.value length:', textarea.value.length);
-                console.log('  - data-intro-text length:', (textarea.getAttribute('data-intro-text') || '').length);
-                console.log('  - textarea.value preview:', textarea.value.substring(0, 100));
             } else {
-                console.warn('⚠️ [HTMX] introduction-editor NOT FOUND after swap');
             }
 
             // NOTE: We don't refresh chat messages here anymore
             // The AI message is already appended by HTMX via OOB swap or separate response
             // Refreshing would remove the user message that was added by JavaScript
-            console.log('ℹ️ [HTMX] Skipping chat refresh to preserve user messages');
         }
 
         // Hide AI process status only for specific targets that indicate completion
@@ -249,13 +206,10 @@ window.initializeHTMXEvents = function () {
                 const goalsTableBody = document.getElementById('goals-table-body');
 
                 if (agencyId && goalsTableBody) {
-                    console.log('[HTMX] Refreshing goals list after chat response');
                     window.loadEntityList('goals', 'goals-table-body', 3)
                         .then(() => {
-                            console.log('[HTMX] ✅ Goals list refreshed');
                         })
                         .catch(error => {
-                            console.error('[HTMX] ❌ Error refreshing goals list:', error);
                         });
                 }
             }
@@ -266,13 +220,10 @@ window.initializeHTMXEvents = function () {
                 const workItemsTableBody = document.getElementById('work-items-table-body');
 
                 if (agencyId && workItemsTableBody) {
-                    console.log('[HTMX] Refreshing work items list after chat response');
                     window.loadEntityList('work-items', 'work-items-table-body', 3)
                         .then(() => {
-                            console.log('[HTMX] ✅ Work items list refreshed');
                         })
                         .catch(error => {
-                            console.error('[HTMX] ❌ Error refreshing work items list:', error);
                         });
                 }
             }

@@ -30,7 +30,6 @@ function workflowDesigner() {
 
         // Initialize
         init() {
-            console.log('Initializing workflow designer...');
 
             // Load workflow data from global variable
             if (typeof workflowData !== 'undefined') {
@@ -103,7 +102,6 @@ function workflowDesigner() {
                     this.onConnectionRemoved(info);
                 });
 
-                console.log('jsPlumb initialized');
             });
         },
 
@@ -125,7 +123,6 @@ function workflowDesigner() {
                 }
             });
 
-            console.log('Pan/zoom initialized');
         },
 
         // Load available work items from API
@@ -133,9 +130,7 @@ function workflowDesigner() {
             try {
                 const workItems = await window.specificationAPI.getWorkItems();
                 this.availableWorkItems = workItems || [];
-                console.log('Loaded work items:', this.availableWorkItems.length);
             } catch (error) {
-                console.error('Failed to load work items:', error);
             }
         },
 
@@ -204,7 +199,6 @@ function workflowDesigner() {
             this.renderNode(node);
             this.saveToHistory();
 
-            console.log('Created node:', node);
         },
 
         // Render all nodes
@@ -383,7 +377,6 @@ function workflowDesigner() {
             this.edges.push(edge);
             this.saveToHistory();
 
-            console.log('Connection created:', edge);
         },
 
         // Connection removed
@@ -393,7 +386,6 @@ function workflowDesigner() {
             );
             this.saveToHistory();
 
-            console.log('Connection removed');
         },
 
         // Zoom controls
@@ -505,7 +497,6 @@ function workflowDesigner() {
                     alert('Failed to save workflow: ' + (error.error || 'Unknown error'));
                 }
             } catch (error) {
-                console.error('Save error:', error);
                 alert('Failed to save workflow');
             } finally {
                 this.saving = false;
