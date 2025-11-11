@@ -24,11 +24,6 @@ func NewSpecificationService(repo agency.Repository, logger *logrus.Logger) *Spe
 
 // GetSpecification retrieves the complete specification for an agency
 func (s *SpecificationService) GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error) {
-	s.logger.WithFields(logrus.Fields{
-		"agency_id": agencyID,
-		"method":    "SpecificationService.GetSpecification",
-	}).Info("Calling repository GetSpecification")
-
 	spec, err := s.repo.GetSpecification(ctx, agencyID)
 	if err != nil {
 		s.logger.WithFields(logrus.Fields{
@@ -38,11 +33,6 @@ func (s *SpecificationService) GetSpecification(ctx context.Context, agencyID st
 		}).Error("Repository GetSpecification failed")
 		return nil, err
 	}
-
-	s.logger.WithFields(logrus.Fields{
-		"agency_id": agencyID,
-		"method":    "SpecificationService.GetSpecification",
-	}).Info("Repository GetSpecification completed successfully")
 
 	return spec, nil
 }

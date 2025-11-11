@@ -281,12 +281,6 @@ func (h *AgencyHandler) GetAgencyStatistics(c *gin.Context) {
 func (h *AgencyHandler) GetSpecification(c *gin.Context) {
 	id := c.Param("id")
 
-	h.logger.WithFields(logrus.Fields{
-		"agency_id": id,
-		"method":    "GetSpecification",
-		"endpoint":  c.Request.URL.Path,
-	}).Info("Starting GetSpecification request")
-
 	spec, err := h.service.GetSpecification(c.Request.Context(), id)
 	if err != nil {
 		h.logger.WithFields(logrus.Fields{
@@ -297,11 +291,6 @@ func (h *AgencyHandler) GetSpecification(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	h.logger.WithFields(logrus.Fields{
-		"agency_id": id,
-		"method":    "GetSpecification",
-	}).Info("Successfully retrieved specification")
 
 	c.JSON(http.StatusOK, spec)
 }
