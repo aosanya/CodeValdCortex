@@ -133,6 +133,30 @@ git branch -d feature/MVP-XXX_description
 
 **Note**: Complete technical specifications available in `/documents/3-SofwareDevelopment/core-systems/agent-property-broadcasting.md`
 
+## A2A Protocol Integration (P1 - Strategic)
+
+*Transform CodeValdCortex into the "Kubernetes of Multi-Vendor AI Agents" - enabling seamless interoperability with external A2A-compatible agents*
+
+| Task ID | Title                                    | Description                                                                                                      | Status      | Priority | Effort | Skills Required            | Dependencies |
+| ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | -------------------------- | ------------ |
+| MVP-A2A-001 | A2A Agent Card Generator | Implement A2A-compliant Agent Card generation, validation, and HTTP endpoint to serve cards for all internal agents | Not Started | P0       | Medium | Go, Backend Dev, REST API  | MVP-028, MVP-026, MVP-027 |
+| MVP-A2A-002 | External Agent Registry | Build external agent registration API, health check system (60s intervals), discovery UI, and ArangoDB storage | Not Started | P0       | Medium | Go, Backend Dev, Frontend Dev | MVP-A2A-001 |
+| MVP-A2A-003 | A2A Gateway Service | Implement bidirectional HTTP/SSE gateway for protocol translation between internal Go channels and external A2A protocol | Not Started | P0       | Medium | Go, HTTP/SSE, Backend Dev | MVP-A2A-002 |
+| MVP-A2A-004 | Task Delegation System | Build sync/async task execution, retry logic (exponential backoff), timeout enforcement, audit logging, and fallback chains | Not Started | P0       | High   | Go, Backend Dev, Orchestration | MVP-A2A-003 |
+| MVP-A2A-005 | Enhanced Orchestration | Implement intelligent agent selection algorithm (capability, trust, cost, latency), configurable weights, A/B testing support | Not Started | P1       | High   | Go, Backend Dev, Algorithms | MVP-A2A-004 |
+| MVP-A2A-006 | Security & Compliance | Implement OAuth 2.0 server, JWT validation, API key management, RBAC integration, compliance audit reports | Not Started | P0       | Medium | Go, Security, OAuth 2.0 | MVP-A2A-005 |
+| MVP-A2A-007 | Monitoring & Observability | Add Prometheus metrics, Grafana dashboards, distributed tracing (OpenTelemetry), structured logging, and alerting rules | Not Started | P1       | Medium | Go, Prometheus, Grafana, DevOps | MVP-A2A-006 |
+| MVP-A2A-008 | Performance Optimization | Implement connection pooling, Redis caching for agent cards, serialization optimization, load testing, and tuning | Not Started | P1       | Medium | Go, Performance, Redis | MVP-A2A-007 |
+| MVP-A2A-009 | Documentation & Developer Experience | Create OpenAPI/Swagger specs, integration guide, sample implementations (Python, Node.js), troubleshooting playbook, video tutorials | Not Started | P1       | Medium | Technical Writing, Developer Relations | MVP-A2A-008 |
+
+**Strategic Value**: 
+- 40% reduction in custom integration costs
+- 60% faster time-to-value for new capabilities
+- 3x expansion of addressable agent ecosystem
+- Aligns with Linux Foundation open standards
+
+**Complete Technical Specification**: See [`/documents/2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md`](../../2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md)
+
 ---
 
 **Note**: This document contains only active and pending tasks. All completed tasks are moved to `mvp_done.md` to maintain a clean, actionable backlog.
