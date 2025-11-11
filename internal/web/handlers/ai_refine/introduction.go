@@ -100,10 +100,22 @@ func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
 		return
 	}
 
+	// Get or create conversation
+	conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
+	if err != nil {
+		h.logger.Warn("No conversation exists, creating new one", "agencyID", agencyID)
+		conversation, err = h.designerService.StartConversation(c.Request.Context(), agencyID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to create conversation")
+			c.SSEvent("error", `{"error": "Failed to initialize conversation"}`)
+			return
+		}
+	}
+
 	// Setup SSE
 	h.setupSSE(c)
 
-	// Stream refinement
+	// Stream refinement (real AI streaming from backend)
 	chunkCount := 0
 	result, err := h.introductionRefiner.RefineIntroductionStream(
 		c.Request.Context(),
@@ -135,23 +147,28 @@ func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
 		}
 	}
 
-	// Add to conversation history
-	h.addToConversation(agencyID, result)
+	// Format message for conversation history
+	chatMessage := result.Explanation
+	if result.WasChanged {
+		chatMessage = "✨ **Introduction Refined & Saved**\n\n" + chatMessage
+	} else {
+		chatMessage = "✅ **Introduction Review Complete**\n\n" + chatMessage
+	}
+
+	// Add to conversation
+	if err := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); err != nil {
+		h.logger.WithError(err).Error("Failed to add message to conversation")
+	}
 
 	// Send completion
 	completionData := map[string]interface{}{
 		"was_changed":      result.WasChanged,
 		"explanation":      result.Explanation,
 		"changed_sections": result.ChangedSections,
+		"conversation_id":  conversation.ID,
 	}
 	if result.Data != nil {
 		completionData["introduction"] = result.Data.Introduction
-	}
-
-	// Include conversation ID if available
-	conversationID := c.Param("conversationId")
-	if conversationID != "" {
-		completionData["conversation_id"] = conversationID
 	}
 
 	c.SSEvent("complete", completionData)

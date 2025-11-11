@@ -3,6 +3,7 @@ package ai_refine
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
@@ -195,4 +196,95 @@ func SSEvent(c *gin.Context, event string, data interface{}) {
 	c.Writer.WriteString(fmt.Sprintf("event: %s\n", event))
 	c.Writer.WriteString(fmt.Sprintf("data: %s\n\n", dataStr))
 	c.Writer.Flush()
+}
+
+// ChatStreamingOptions contains configuration for chat-based streaming operations
+type ChatStreamingOptions struct {
+	AgencyID       string
+	UserMessage    string
+	ProcessFunc    func(c *gin.Context) (interface{}, error) // Function that processes and returns response
+	FormatFunc     func(response interface{}) string         // Function that formats response for chat
+	WasChangedFunc func(response interface{}) bool           // Function that determines if changes were made
+}
+
+// ExecuteChatStreaming is a generic handler for chat-based streaming operations
+// It handles conversation management, SSE setup, streaming, and completion
+func (h *Handler) ExecuteChatStreaming(c *gin.Context, options ChatStreamingOptions) {
+	h.logger.Info("🌊 Executing chat streaming for agency", "agency_id", options.AgencyID)
+
+	// Get or create conversation
+	conversation, err := h.designerService.GetConversationByAgencyID(options.AgencyID)
+	if err != nil {
+		h.logger.Warn("No conversation exists, creating new one", "agencyID", options.AgencyID)
+		conversation, err = h.designerService.StartConversation(c.Request.Context(), options.AgencyID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to create conversation")
+			c.SSEvent("error", `{"error": "Failed to initialize conversation"}`)
+			return
+		}
+	}
+
+	// Setup SSE headers
+	h.setupSSE(c)
+
+	// Track streaming chunks
+	chunkCount := 0
+	streamCallback := func(chunk string) error {
+		chunkCount++
+		c.SSEvent("chunk", chunk)
+		c.Writer.Flush()
+		return nil
+	}
+
+	// Send initial progress message
+	streamCallback("🎯 Analyzing your request...\n\n")
+
+	// Call the processing function and capture response
+	response, err := options.ProcessFunc(c)
+	if err != nil {
+		h.logger.WithError(err).Error("Processing failed")
+		c.SSEvent("error", fmt.Sprintf(`{"error": "%s"}`, err.Error()))
+		return
+	}
+
+	// Send processing complete message
+	streamCallback("✨ Generating response...\n\n")
+
+	// Format the response for chat display
+	formattedMessage := options.FormatFunc(response)
+
+	// Stream the message in chunks for better UX
+	words := strings.Fields(formattedMessage)
+	currentChunk := ""
+	for i, word := range words {
+		currentChunk += word + " "
+
+		// Send in batches of 5-8 words for smoother streaming
+		if i%6 == 5 || i == len(words)-1 {
+			streamCallback(currentChunk)
+			currentChunk = ""
+		}
+	}
+
+	h.logger.WithField("total_chunks", chunkCount).Info("✅ Streaming completed")
+
+	// Add the message to the conversation
+	if err := h.designerService.AddMessage(conversation.ID, "assistant", formattedMessage); err != nil {
+		h.logger.WithError(err).Error("Failed to add message to conversation")
+	}
+
+	// Determine if changes were made
+	wasChanged := options.WasChangedFunc(response)
+
+	// Send completion event
+	completionData := map[string]interface{}{
+		"was_changed":     wasChanged,
+		"message":         formattedMessage,
+		"conversation_id": conversation.ID,
+	}
+
+	c.SSEvent("complete", completionData)
+	c.Writer.Flush()
+
+	h.logger.Info("✅ Chat streaming completed")
 }

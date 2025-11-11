@@ -120,6 +120,69 @@ func (r *GoalsBuilder) RefineGoals(ctx context.Context, req *builder.RefineGoals
 	return &result, nil
 }
 
+// RefineGoalsStream performs dynamic goal refinement with streaming support
+// Similar to RefineGoals but streams chunks to the callback as they arrive from the LLM
+func (r *GoalsBuilder) RefineGoalsStream(ctx context.Context, req *builder.RefineGoalsRequest, builderContext builder.BuilderContext, streamCallback StreamCallback) (*builder.RefineGoalsResponse, error) {
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":      req.AgencyID,
+		"user_message":   req.UserMessage,
+		"target_goals":   len(req.TargetGoals),
+		"existing_goals": len(req.ExistingGoals),
+	}).Info("Starting streaming dynamic goal refinement")
+
+	// Build the prompt
+	prompt := r.buildDynamicGoalsPrompt(req, builderContext)
+
+	// Stream the LLM response
+	var contentBuilder strings.Builder
+	err := r.llmClient.ChatStream(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: dynamicGoalsSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		Stream: true,
+	}, func(chunk string) error {
+		// Accumulate content for final parsing
+		contentBuilder.WriteString(chunk)
+
+		// Forward chunk to the callback (for SSE streaming)
+		if streamCallback != nil {
+			return streamCallback(chunk)
+		}
+		return nil
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Error("Failed to stream AI response for dynamic goal refinement")
+		return nil, fmt.Errorf("AI streaming refinement failed: %w", err)
+	}
+
+	// Parse the accumulated response
+	fullContent := contentBuilder.String()
+	cleanedContent := stripMarkdownFences(fullContent)
+
+	var result builder.RefineGoalsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
+		r.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse streamed goals response")
+		return nil, fmt.Errorf("failed to parse streamed response: %w", err)
+	}
+
+	r.logger.WithFields(logrus.Fields{
+		"action":           result.Action,
+		"refined_count":    len(result.RefinedGoals),
+		"generated_count":  len(result.GeneratedGoals),
+		"no_action_needed": result.NoActionNeeded,
+	}).Info("Streaming dynamic goal refinement completed")
+
+	return &result, nil
+}
+
 // buildDynamicGoalsPrompt creates the prompt for dynamic goal processing
 func (r *GoalsBuilder) buildDynamicGoalsPrompt(req *builder.RefineGoalsRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder

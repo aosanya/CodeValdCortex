@@ -258,7 +258,7 @@ func formatGoalsChatMessage(resp GoalsResponse) string {
 }
 
 // ProcessGoalsChatRequestStreaming handles chat-based goal interactions with streaming
-// Similar to ProcessGoalsChatRequest but uses SSE for real-time updates
+// Uses the shared ExecuteChatStreaming helper for consistency with introduction
 func (h *Handler) ProcessGoalsChatRequestStreaming(c *gin.Context) {
 	h.logger.Info("🌊 HANDLER CALLED: ProcessGoalsChatRequestStreaming")
 
@@ -295,88 +295,51 @@ func (h *Handler) ProcessGoalsChatRequestStreaming(c *gin.Context) {
 		"goal_keys":    req.GoalKeys,
 	}).Info("Processing streaming chat-based goal request")
 
-	// Get or create conversation
-	conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
-	if err != nil {
-		h.logger.Warn("No conversation exists, creating new one", "agencyID", agencyID)
-		conversation, err = h.designerService.StartConversation(c.Request.Context(), agencyID)
-		if err != nil {
-			h.logger.WithError(err).Error("Failed to create conversation")
-			c.SSEvent("error", `{"error": "Failed to initialize conversation"}`)
-			return
-		}
-	}
+	// Use shared streaming helper
+	h.ExecuteChatStreaming(c, ChatStreamingOptions{
+		AgencyID:    agencyID,
+		UserMessage: userMessage,
 
-	// Setup SSE headers
-	h.setupSSE(c)
-	c.SSEvent("start", `{"message": "Processing goals..."}`)
-	c.Writer.Flush()
+		// Process function: calls RefineGoals and captures response
+		ProcessFunc: func(c *gin.Context) (interface{}, error) {
+			// Store original writer to capture response
+			originalWriter := c.Writer
+			captureBuffer := &bytes.Buffer{}
+			c.Writer = &responseCapture{
+				ResponseWriter: c.Writer,
+				body:           captureBuffer,
+			}
 
-	// Build message that explains what AI is doing
-	var streamMessage strings.Builder
-	streamMessage.WriteString(fmt.Sprintf("**Processing:** %s\n\n", userMessage))
+			// Call RefineGoals (it will write JSON response)
+			h.RefineGoals(c)
 
-	// Send initial chunk
-	c.SSEvent("chunk", "Analyzing goals...")
-	c.Writer.Flush()
+			// Restore original writer
+			c.Writer = originalWriter
 
-	// TODO: Call actual streaming goal refinement when backend supports it
-	// For now, call non-streaming version and simulate streaming
+			// Check for errors
+			if c.Writer.Status() >= 400 {
+				return nil, fmt.Errorf("goals processing failed")
+			}
 
-	// Store original writer and capture response
-	originalWriter := c.Writer
-	captureBuffer := &bytes.Buffer{}
-	c.Writer = &responseCapture{
-		ResponseWriter: c.Writer,
-		body:           captureBuffer,
-	}
+			// Parse the captured JSON response
+			var goalsResp GoalsResponse
+			if err := json.Unmarshal(captureBuffer.Bytes(), &goalsResp); err != nil {
+				return nil, fmt.Errorf("failed to parse goals response: %w", err)
+			}
 
-	// Call RefineGoals
-	h.RefineGoals(c)
+			return &goalsResp, nil
+		},
 
-	// Restore original writer
-	c.Writer = originalWriter
+		// Format function: formats GoalsResponse for chat display
+		FormatFunc: func(response interface{}) string {
+			goalsResp := response.(*GoalsResponse)
+			return formatGoalsChatMessage(*goalsResp)
+		},
 
-	// Check if RefineGoals returned an error
-	if c.Writer.Status() >= 400 {
-		h.logger.Error("RefineGoals returned an error")
-		c.SSEvent("error", `{"error": "Goals processing failed"}`)
-		return
-	}
-
-	// Parse the captured JSON response
-	var goalsResp GoalsResponse
-	if err := json.Unmarshal(captureBuffer.Bytes(), &goalsResp); err != nil {
-		h.logger.WithError(err).Error("Failed to parse RefineGoals response")
-		c.SSEvent("error", `{"error": "Failed to process AI response"}`)
-		return
-	}
-
-	// Stream the explanation as chunks
-	explanation := formatGoalsChatMessage(goalsResp)
-	chunks := strings.Split(explanation, "\n")
-	for _, chunk := range chunks {
-		if chunk != "" {
-			c.SSEvent("chunk", chunk)
-			c.Writer.Flush()
-		}
-	}
-
-	// Add the message to the conversation
-	if err := h.designerService.AddMessage(conversation.ID, "assistant", explanation); err != nil {
-		h.logger.WithError(err).Error("Failed to add message to conversation")
-	}
-
-	// Send completion event
-	completionData := map[string]interface{}{
-		"was_changed":     !goalsResp.NoActionNeeded,
-		"explanation":     goalsResp.Explanation,
-		"message":         explanation,
-		"conversation_id": conversation.ID,
-	}
-
-	c.SSEvent("complete", completionData)
-	c.Writer.Flush()
-
-	h.logger.Info("✅ Streaming goals chat completed")
+		// WasChanged function: determines if goals were modified
+		WasChangedFunc: func(response interface{}) bool {
+			goalsResp := response.(*GoalsResponse)
+			return !goalsResp.NoActionNeeded
+		},
+	})
 }
