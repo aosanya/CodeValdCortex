@@ -136,6 +136,9 @@ func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
 		}
 	}
 
+	// Add to conversation history
+	h.addToConversation(agencyID, result)
+
 	// Send completion
 	completionData := map[string]interface{}{
 		"was_changed":      result.WasChanged,
@@ -144,6 +147,12 @@ func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
 	}
 	if result.Data != nil {
 		completionData["introduction"] = result.Data.Introduction
+	}
+
+	// Include conversation ID if available
+	conversationID := c.Param("conversationId")
+	if conversationID != "" {
+		completionData["conversation_id"] = conversationID
 	}
 
 	c.SSEvent("complete", completionData)

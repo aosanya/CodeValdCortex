@@ -202,7 +202,6 @@ function createStreamingDisplay(container) {
     console.log('    📦 Container:', container);
 
     const streamingDisplay = document.createElement('div');
-    streamingDisplay.className = 'notification is-info is-light';
     streamingDisplay.innerHTML = `
         <div class="is-flex is-align-items-center mb-2">
             <span class="icon has-text-info mr-2">
@@ -210,7 +209,7 @@ function createStreamingDisplay(container) {
             </span>
             <strong>AI is thinking...</strong>
         </div>
-        <div id="streaming-text" class="content" style="white-space: pre-wrap; font-family: monospace; font-size: 0.9em; max-height: 300px; overflow-y: auto;"></div>
+        <div id="streaming-text" class="content" style="white-space: pre-wrap; font-size: 0.9em;"></div>
     `;
 
     console.log('    🗑️ Clearing container');

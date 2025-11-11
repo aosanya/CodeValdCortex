@@ -29,10 +29,15 @@ func NewAIIntroductionBuilder(llmClient LLMClient, logger *logrus.Logger) *Intro
 
 // aiRefinementResponse represents the JSON structure returned by the AI
 type aiRefinementResponse struct {
-	Data            *builder.AgencyDataResponse `json:"data"`
-	Explanation     string                      `json:"explanation"`
-	Changed         bool                        `json:"changed"`
-	ChangedSections []string                    `json:"changed_sections"`
+	Data            *aiIntroductionData `json:"data"`
+	Explanation     string              `json:"explanation"`
+	Changed         bool                `json:"changed"`
+	ChangedSections []string            `json:"changed_sections"`
+}
+
+// aiIntroductionData contains only the introduction field (lighter response)
+type aiIntroductionData struct {
+	Introduction string `json:"introduction"`
 }
 
 // RefineIntroduction uses AI to refine the agency introduction based on all available context
@@ -68,7 +73,7 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 			},
 		},
 		Temperature: 0.0,  // Completely deterministic - no creativity
-		MaxTokens:   2048, // Increased to handle full agency data structure in response
+		MaxTokens:   4096, // Increased to handle detailed responses without truncation
 	})
 	if err != nil {
 		return nil, fmt.Errorf("AI refinement request failed: %w", err)
@@ -153,7 +158,7 @@ func (r *IntroductionBuilder) RefineIntroductionStream(ctx context.Context, req 
 			},
 		},
 		Temperature: 0.0,  // Completely deterministic - no creativity
-		MaxTokens:   2048, // Increased to handle full agency data structure in response
+		MaxTokens:   4096, // Increased to handle detailed responses without truncation
 	}, func(chunk string) error {
 		// Call the user's callback with each chunk
 		if err := streamCallback(chunk); err != nil {
@@ -232,7 +237,7 @@ EXAMPLE 1:
 INPUT: {"introduction": "This system manages agents, goals, and work items, enabling real-time processing.", "instruction": "remove: 'goals, and work items'"}
 YOUR OUTPUT:
 {
-  "data": {"introduction": "This system manages agents, enabling real-time processing.", "goals": [], "work_items": [], "roles": [], "assignments": []},
+  "data": {"introduction": "This system manages agents, enabling real-time processing."},
   "explanation": "Removed specified text and adjusted grammar",
   "changed": true,
   "changed_sections": ["introduction"]

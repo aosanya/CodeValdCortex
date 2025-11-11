@@ -8,7 +8,7 @@
  */
 window.handleChatSubmit = async function (event) {
     event.preventDefault();
-    
+
     const form = event.target;
     const agencyID = form.dataset.agencyId;
     const hasExistingConversation = form.dataset.hasConversation === 'true';
@@ -90,7 +90,7 @@ window.handleChatSubmit = async function (event) {
 
         if (useStreaming && context === 'introduction') {
             // Use streaming for introduction refinement
-            await handleStreamingChatResponse(endpoint, formData, chatMessages);
+            await handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID);
         } else {
             // Use non-streaming for other contexts or when disabled
             await handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation);
@@ -123,9 +123,10 @@ window.handleChatSubmit = async function (event) {
 
 /**
  * Handle streaming chat response using SSE
+ * For chat, we stream JSON and extract the message at the end
  */
-async function handleStreamingChatResponse(endpoint, formData, chatMessages) {
-    console.log('  📡 Using STREAMING mode');
+async function handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID) {
+    console.log('  📡 Using STREAMING mode for chat');
 
     // Add streaming query parameter
     const streamEndpoint = `${endpoint}?stream=true`;
@@ -134,31 +135,183 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages) {
     const aiMessageDiv = createAIMessageContainer(chatMessages);
     const messageBubble = aiMessageDiv.querySelector('.message-bubble');
 
+    // Create streaming content area
+    messageBubble.innerHTML = `
+        <div class="streaming-content">
+            <div class="is-flex is-align-items-center mb-2">
+                <span class="icon has-text-info mr-2">
+                    <i class="fas fa-brain fa-pulse"></i>
+                </span>
+                <strong>AI is processing...</strong>
+            </div>
+            <div class="streaming-text" style="white-space: pre-wrap; font-family: inherit;"></div>
+        </div>
+    `;
+
+    const streamingText = messageBubble.querySelector('.streaming-text');
+
     try {
-        // Use shared streaming utility
-        await window.executeAIStream({
-            url: streamEndpoint,
-            formData: formData,
-            displayElement: messageBubble,
-            onComplete: (result) => {
-                console.log('  ✅ Streaming complete', result);
-                // Update timestamp
-                const timeDiv = aiMessageDiv.querySelector('.message-time');
-                if (timeDiv) {
-                    timeDiv.textContent = new Date().toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    });
-                }
-            },
-            onError: (error) => {
-                console.error('  ❌ Streaming error:', error);
-                messageBubble.innerHTML = '<p class="has-text-danger">⚠️ Error processing message</p>';
-            }
+        const response = await fetch(streamEndpoint, {
+            method: 'POST',
+            body: formData
         });
+
+        if (!response.ok) {
+            // If we get a 500 error with an existing conversation, it might be lost (server restart)
+            // Try again with a new conversation
+            if (response.status === 500 && streamEndpoint.includes('/conversations/')) {
+                console.warn('  ⚠️  Existing conversation failed, retrying with new conversation...');
+                chatMessages.dataset.conversationId = ''; // Clear the old conversation ID
+                const newEndpoint = `/api/v1/agencies/${agencyID}/designer/conversations/web?stream=true`;
+                const retryResponse = await fetch(newEndpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!retryResponse.ok) {
+                    throw new Error(`HTTP error! status: ${retryResponse.status}`);
+                }
+                // Use the retry response
+                return await processStreamingResponse(retryResponse, messageBubble, streamingText, chatMessages);
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await processStreamingResponse(response, messageBubble, streamingText, chatMessages);
+
     } catch (error) {
         console.error('Streaming failed:', error);
+        messageBubble.innerHTML = `<p class="has-text-danger">❌ ${error.message}</p>`;
         throw error;
+    }
+}
+
+/**
+ * Process the streaming response from the server
+ */
+async function processStreamingResponse(response, messageBubble, streamingText, chatMessages) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let currentEvent = '';
+    let finalResult = null;
+
+    console.log('  🔍 Starting SSE stream parsing...');
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+            console.log('  ✅ Stream reading complete');
+            break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+            if (!line.trim()) {
+                // Empty line - don't reset event immediately, just log
+                if (currentEvent) {
+                    console.log(`  📦 Empty line after event: ${currentEvent}`);
+                }
+                continue; // Keep currentEvent for next data line
+            }
+
+            console.log(`  📥 Received line: "${line.substring(0, 100)}${line.length > 100 ? '...' : ''}"`);
+
+            if (line.startsWith('event:')) {
+                currentEvent = line.substring(6).trim();
+                console.log(`  🏷️  Event type: ${currentEvent}`);
+            } else if (line.startsWith('data:')) {
+                const data = line.substring(5).trim();
+
+                // If no event type yet, treat as chunk continuation
+                if (!currentEvent) {
+                    currentEvent = 'chunk';
+                }
+
+                console.log(`  📊 Data for event '${currentEvent}': ${data.substring(0, 100)}${data.length > 100 ? '...(truncated for log)' : ''}`);
+
+                if (currentEvent === 'chunk') {
+                    // Display streaming text
+                    streamingText.textContent += data;
+                } else if (currentEvent === 'complete') {
+                    // Parse final result
+                    console.log('  🎯 Parsing completion data...');
+                    console.log('  📄 Full completion JSON (length:', data.length, ')');
+                    try {
+                        finalResult = JSON.parse(data);
+                        console.log('  ✅ Successfully parsed completion:', finalResult);
+                    } catch (e) {
+                        console.error('  ❌ Failed to parse completion data:', e);
+                        console.error('  📄 Problematic data (first 500 chars):', data.substring(0, 500));
+                    }
+                } else if (currentEvent === 'error') {
+                    console.error('  ❌ Server sent error event:', data);
+                } else if (currentEvent === 'start') {
+                    console.log('  🎬 Stream started:', data);
+                }
+            }
+        }
+    }
+
+    console.log('  📋 Final result:', finalResult);
+
+    // Display the final message
+    if (finalResult) {
+        console.log('  📝 Processing final result...');
+        const message = finalResult.explanation || finalResult.message || 'Changes applied successfully';
+
+        // Store conversation ID if this was the first message
+        if (finalResult.conversation_id) {
+            console.log('  💾 Storing conversation ID:', finalResult.conversation_id);
+            chatMessages.dataset.conversationId = finalResult.conversation_id;
+        } else {
+            console.log('  ⚠️  No conversation_id in final result');
+        }
+
+        // Update the introduction textarea if it was changed
+        if (finalResult.was_changed && finalResult.introduction) {
+            console.log('  📝 Updating introduction textarea with new content');
+            console.log('  📏 New introduction length:', finalResult.introduction.length);
+            const introTextarea = document.getElementById('introduction-editor');
+            if (introTextarea) {
+                introTextarea.value = finalResult.introduction;
+                console.log('  ✅ Textarea updated successfully');
+            } else {
+                console.error('  ❌ Could not find introduction-editor textarea');
+            }
+        } else {
+            console.log('  ℹ️  No introduction update needed:', {
+                was_changed: finalResult.was_changed,
+                has_introduction: !!finalResult.introduction
+            });
+        }
+
+        // Show if changes were made
+        if (finalResult.was_changed && finalResult.changed_sections) {
+            console.log('  ✅ Changes detected in sections:', finalResult.changed_sections);
+            const sections = finalResult.changed_sections.join(', ');
+            messageBubble.innerHTML = `
+                <p><strong>${message}</strong></p>
+                <p class="has-text-grey-light mt-2"><small>✓ Updated: ${sections}</small></p>
+            `;
+        } else {
+            console.log('  ℹ️  No changes made');
+            messageBubble.innerHTML = `<p>${message}</p>`;
+        }
+    } else {
+        console.error('  ❌ No final result received from stream!');
+        messageBubble.innerHTML = '<p class="has-text-grey">Response received</p>';
+    }
+
+    // Update timestamp
+    const timeDiv = messageBubble.closest('.ai-message').querySelector('.message-time');
+    if (timeDiv) {
+        timeDiv.textContent = new Date().toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
     }
 }
 
@@ -286,6 +439,45 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Initialize chat on page load
+ * Clears stale conversation state that might persist in DOM after page refresh
+ */
+function initializeChat() {
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+
+    if (!chatMessages || !chatForm) {
+        return; // Chat not present on this page
+    }
+
+    // Get conversation state from backend and frontend
+    const backendHasConversation = chatForm.dataset.hasConversation === 'true';
+    const frontendConversationId = chatMessages.dataset.conversationId;
+
+    // Clear stale state if:
+    // 1. Backend says no conversation exists, OR
+    // 2. Frontend has no conversation ID but backend thinks there is one
+    if (!backendHasConversation || (!frontendConversationId && backendHasConversation)) {
+        console.log('🧹 Clearing stale conversation state from DOM');
+        delete chatMessages.dataset.conversationId;
+        chatForm.dataset.hasConversation = 'false'; // Reset the form flag
+    }
+
+    console.log('💬 Chat initialized:', {
+        backendHasConversation,
+        frontendConversationId: frontendConversationId || 'none',
+        finalState: chatForm.dataset.hasConversation
+    });
+}
+
+// Initialize chat when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeChat);
+} else {
+    initializeChat();
 }
 
 console.log('✅ Chat streaming utilities loaded');
