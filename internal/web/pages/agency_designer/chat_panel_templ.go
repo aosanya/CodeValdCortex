@@ -79,7 +79,7 @@ func ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContex
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><!-- Chat Input (Independent) --><div class=\"chat-input-container\"><!-- AI Process Status Bar (inside input panel) --><div class=\"ai-process-status htmx-indicator\" id=\"ai-process-status\" style=\"display: none;\"><div class=\"process-content\"><div class=\"process-info\"><span class=\"icon has-text-info\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span class=\"process-text\" id=\"ai-status-message\">AI is working on your request...</span></div><button class=\"button is-small is-danger is-outlined\" id=\"stop-ai-process\" title=\"Stop AI processing\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><!-- Chat Input (Independent) --><div class=\"chat-input-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -197,7 +197,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 96, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 78, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -210,7 +210,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 99, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 81, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -261,7 +261,7 @@ func AIMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 113, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 95, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -304,7 +304,7 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(agencyID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 123, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 105, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -317,7 +317,7 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getBoolString(conversation != nil))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 124, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 106, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

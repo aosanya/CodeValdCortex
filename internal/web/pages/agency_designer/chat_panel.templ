@@ -41,24 +41,6 @@ templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationConte
 		@ContextPanel()
 	</div>		<!-- Chat Input (Independent) -->
 		<div class="chat-input-container">
-			<!-- AI Process Status Bar (inside input panel) -->
-			<div class="ai-process-status htmx-indicator" id="ai-process-status" style="display: none;">
-				<div class="process-content">
-					<div class="process-info">
-						<span class="icon has-text-info">
-							<i class="fas fa-spinner fa-spin"></i>
-						</span>
-						<span class="process-text" id="ai-status-message">AI is working on your request...</span>
-					</div>
-					<button class="button is-small is-danger is-outlined" id="stop-ai-process" title="Stop AI processing">
-						<span class="icon is-small">
-							<i class="fas fa-stop"></i>
-						</span>
-						<span>Stop</span>
-					</button>
-				</div>
-			</div>
-			
 			@ChatInput(currentAgency.ID, conversation)
 		</div>
 	</aside>
