@@ -46,6 +46,7 @@ func (h *ChatHandler) performIntroductionRefinement(c *gin.Context, agencyID, us
 	c.Request.PostForm.Set("user-request", userMessage)
 
 	// Delegate to the ai_refine handler which has the full logic
+	// The handler will check for ?stream=true query parameter
 	h.aiRefineHandler.RefineIntroduction(c)
 
 	// If we got here without panic, consider it successful
@@ -91,12 +92,13 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, agencyID, userMessa
 	}
 
 	// Set the user request in a dynamic request structure for goals chat processing
+	// userMessage is used here in the struct (linter false positive for unused param)
 	dynamicReq := struct {
 		UserMessage string   `json:"user_message"`
 		GoalKeys    []string `json:"goal_keys"`
 	}{
-		UserMessage: userMessage,
-		GoalKeys:    []string{}, // Empty means process all goals based on message context
+		UserMessage: userMessage, // Used here - not unused!
+		GoalKeys:    []string{},  // Empty means process all goals based on message context
 	}
 
 	// Store the request in the context so ProcessGoalsChatRequest can access it

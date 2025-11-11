@@ -138,64 +138,86 @@ window.saveOverviewIntroduction = async function () {
 
 // Handle AI refine button click
 window.handleAIRefineClick = async function () {
+    console.log('🎯 [INTRODUCTION] AI Refine button clicked');
+
     const agencyId = window.getCurrentAgencyId();
+    console.log('  🏢 Agency ID:', agencyId);
     if (!agencyId) {
-        console.error('No agency ID found');
+        console.error('  ❌ No agency ID found');
         return;
     }
 
     const editor = document.getElementById('introduction-editor');
+    console.log('  ✏️ Editor element:', editor);
     if (!editor) {
-        console.error('Introduction editor not found');
+        console.error('  ❌ Introduction editor not found');
+        return;
+    }
+
+    const contentElement = document.getElementById('introduction-content');
+    console.log('  📄 Content element:', contentElement);
+    if (!contentElement) {
+        console.error('  ❌ Introduction content element not found');
         return;
     }
 
     try {
         // Show AI processing status
+        console.log('  🔄 Showing AI processing status');
         if (window.showAIProcessStatus) {
             window.showAIProcessStatus('AI is refining your introduction...');
         }
 
         // Check if there's a pending user request from chat
         const pendingRequest = window.sessionStorage.getItem('pendingIntroductionRequest');
+        console.log('  💬 Pending request from chat:', pendingRequest);
+
         const formData = new URLSearchParams({
             'introduction-editor': editor.value
         });
+        console.log('  📝 Introduction text length:', editor.value.length);
 
         if (pendingRequest) {
             formData.append('user-request', pendingRequest);
-            // Clear the pending request
             window.sessionStorage.removeItem('pendingIntroductionRequest');
+            console.log('  ✅ Added pending request to form data');
         }
 
-        // Call the refine API
-        const response = await fetch(`/api/v1/agencies/${agencyId}/overview/refine`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+        console.log('  🚀 Calling executeAIRefine with streaming utility');
+        // Use shared streaming utility with single endpoint
+        await window.executeAIRefine({
+            url: `/api/v1/agencies/${agencyId}/overview/refine`,
+            formData: formData,
+            displayElement: contentElement,
+            onComplete: (result) => {
+                console.log('  ✅ AI Refine completed');
+                console.log('  📊 Result:', result);
+
+                // Update editor with new content if available
+                if (result.introduction) {
+                    console.log('  ✏️ Updating editor with new introduction (length:', result.introduction.length, ')');
+                    editor.value = result.introduction;
+                } else {
+                    console.log('  ℹ️ No introduction in result');
+                }
+
+                // Handle post-refinement tasks
+                console.log('  🔄 Calling handlePostRefinement');
+                handlePostRefinement();
             },
-            body: formData
+            onError: (error) => {
+                console.error('  ❌ Error refining introduction:', error);
+                window.showNotification('Failed to refine introduction. Please try again.', 'error');
+            }
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        // Get the HTML response and update the introduction content
-        const html = await response.text();
-        const contentElement = document.getElementById('introduction-content');
-        if (contentElement) {
-            contentElement.innerHTML = html;
-
-            // After DOM update, handle post-refinement tasks
-            handlePostRefinement();
-        }
-
     } catch (error) {
-        console.error('Error refining introduction:', error);
+        console.error('  ❌ Caught error in handleAIRefineClick:', error);
+        console.error('  📚 Error stack:', error.stack);
         window.showNotification('Failed to refine introduction. Please try again.', 'error');
     } finally {
         // Hide AI processing status
+        console.log('  🔚 Hiding AI processing status');
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();
         }

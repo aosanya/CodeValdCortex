@@ -67,8 +67,8 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 				Content: prompt,
 			},
 		},
-		Temperature: 0.0, // Completely deterministic - no creativity
-		MaxTokens:   2048,
+		Temperature: 0.0,  // Completely deterministic - no creativity
+		MaxTokens:   2048, // Increased to handle full agency data structure in response
 	})
 	if err != nil {
 		return nil, fmt.Errorf("AI refinement request failed: %w", err)
@@ -104,6 +104,88 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 	fmt.Printf("  - Sections: %v\n", changedSections)
 	fmt.Printf("  - Refined length: %d chars\n", len(refined))
 	fmt.Printf("========================================\n\n")
+
+	return &builder.RefineIntroductionResponse{
+		WasChanged:      wasChanged,
+		Explanation:     explanation,
+		ChangedSections: changedSections,
+		Data: &builder.AgencyDataResponse{
+			Introduction: refined,
+			Goals:        builderContext.Goals,
+			WorkItems:    builderContext.WorkItems,
+			Roles:        builderContext.Roles,
+			Assignments:  builderContext.Assignments,
+		},
+	}, nil
+}
+
+// RefineIntroductionStream uses AI streaming to refine the agency introduction
+// It calls the streamCallback with each chunk of the response as it arrives
+func (r *IntroductionBuilder) RefineIntroductionStream(ctx context.Context, req *builder.RefineIntroductionRequest, builderContext builder.BuilderContext, streamCallback func(chunk string) error) (*builder.RefineIntroductionResponse, error) {
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":           req.AgencyID,
+		"current_intro_chars": len(builderContext.Introduction),
+		"goals_count":         len(builderContext.Goals),
+		"work_items_count":    len(builderContext.WorkItems),
+	}).Info("Starting streaming introduction refinement")
+
+	// Build comprehensive prompt with all context
+	prompt := r.buildRefinementPrompt(builderContext)
+
+	r.logger.WithFields(logrus.Fields{
+		"prompt_length": len(prompt),
+		"user_request":  builderContext.UserInput,
+	}).Info("Built refinement prompt for streaming")
+
+	// Accumulate the full response
+	var fullResponse strings.Builder
+
+	// Request AI refinement with streaming
+	err := r.llmClient.ChatStream(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: r.getSystemPrompt(),
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		Temperature: 0.0,  // Completely deterministic - no creativity
+		MaxTokens:   2048, // Increased to handle full agency data structure in response
+	}, func(chunk string) error {
+		// Call the user's callback with each chunk
+		if err := streamCallback(chunk); err != nil {
+			return err
+		}
+		// Also accumulate for final parsing
+		fullResponse.WriteString(chunk)
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("AI streaming refinement request failed: %w", err)
+	}
+
+	responseContent := fullResponse.String()
+
+	r.logger.WithFields(logrus.Fields{
+		"response_length": len(responseContent),
+		"response_full":   responseContent,
+	}).Info("==== RECEIVED FROM AI - Full streamed response ====")
+
+	// Parse the complete response
+	refined, wasChanged, explanation, changedSections := r.parseAIResponse(responseContent, builderContext.Introduction)
+
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":        req.AgencyID,
+		"was_changed":      wasChanged,
+		"refined_chars":    len(refined),
+		"refined_text":     refined,
+		"explanation":      explanation,
+		"changed_sections": changedSections,
+	}).Info("==== PARSED RESULT - Streaming introduction refinement completed ====")
 
 	return &builder.RefineIntroductionResponse{
 		WasChanged:      wasChanged,

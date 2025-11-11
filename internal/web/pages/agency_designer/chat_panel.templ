@@ -5,6 +5,14 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
+// Helper function to convert bool to string for JavaScript
+func getBoolString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
 // ChatPanel renders the AI chat panel for the agency designer
 templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<aside class="chat-panel">
@@ -111,53 +119,10 @@ templ AIMessage(msg ai.Message) {
 // ChatInput renders the message input form
 templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 	<form 
-		hx-post={ getMessageEndpoint(agencyID, conversation) }
-		hx-target="#chat-messages"
-		if conversation == nil || len(conversation.Messages) == 0 {
-			hx-swap="innerHTML"
-		} else {
-			hx-swap="beforeend"
-		}
-		hx-vals='js:{"context": window.currentAgencyContext || "introduction"}'
-		hx-on::before-request="
-			console.log('[Chat Form] Submitting with context:', window.currentAgencyContext, 'Message:', document.getElementById('user-input').value);
-			
-			// Include the current editor content based on context
-			const context = window.currentAgencyContext || 'introduction';
-			const form = event.target;
-			
-			if (context === 'introduction') {
-				const editor = document.getElementById('introduction-editor');
-				if (editor && editor.value) {
-					// Create a hidden input to include the editor content
-					const hiddenInput = document.createElement('input');
-					hiddenInput.type = 'hidden';
-					hiddenInput.name = 'introduction-editor';
-					hiddenInput.value = editor.value;
-					form.appendChild(hiddenInput);
-				}
-			}
-			// For other contexts (goals, work-items, etc.), rely on ContextManager selections
-			// which are already appended to the message via getFormattedContexts()
-			
-			// Append formatted contexts to message if available
-			const messageInput = document.getElementById('user-input');
-			const originalMessage = messageInput.value;
-			if (window.ContextManager) {
-				const formattedContexts = window.ContextManager.getFormattedContexts();
-				if (formattedContexts) {
-					messageInput.value = originalMessage + formattedContexts;
-				}
-			}
-		"
-		hx-on::after-request="
-			document.getElementById('user-input').value = ''; 
-			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-			// Clear selections after message is sent
-			if (window.ContextManager) {
-				window.ContextManager.clearSelections();
-			}
-		">
+		id="chat-form"
+		data-agency-id={ agencyID }
+		data-has-conversation={ getBoolString(conversation != nil) }
+		onsubmit="return handleChatSubmit(event)">
 		
 		<div class="field has-addons">
 			<div class="control is-expanded">
@@ -171,7 +136,7 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 					autocomplete="off"/>
 			</div>
 			<div class="control">
-				<button class="button is-primary" type="submit">
+				<button class="button is-primary" type="submit" id="chat-submit-btn">
 					<span class="icon">
 						<i class="fas fa-paper-plane"></i>
 					</span>

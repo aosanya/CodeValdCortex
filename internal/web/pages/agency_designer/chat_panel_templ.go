@@ -13,6 +13,14 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 )
 
+// Helper function to convert bool to string for JavaScript
+func getBoolString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
 // ChatPanel renders the AI chat panel for the agency designer
 func ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -42,7 +50,7 @@ func ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContex
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 18, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 26, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -189,7 +197,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 88, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 96, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -202,7 +210,7 @@ func UserMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 91, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 99, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -253,7 +261,7 @@ func AIMessage(msg ai.Message) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(msg.Timestamp.Format("3:04 PM"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 105, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 113, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -289,35 +297,33 @@ func ChatInput(agencyID string, conversation *ai.ConversationContext) templ.Comp
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<form hx-post=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<form id=\"chat-form\" data-agency-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(getMessageEndpoint(agencyID, conversation))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(agencyID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 114, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 123, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" hx-target=\"#chat-messages\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" data-has-conversation=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if conversation == nil || len(conversation.Messages) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, " hx-swap=\"innerHTML\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " hx-swap=\"beforeend\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(getBoolString(conversation != nil))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/chat_panel.templ`, Line: 124, Col: 60}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, " hx-vals='js:{\"context\": window.currentAgencyContext || \"introduction\"}' hx-on::before-request=\"\n\t\t\tconsole.log('[Chat Form] Submitting with context:', window.currentAgencyContext, 'Message:', document.getElementById('user-input').value);\n\t\t\t\n\t\t\t// Include the current editor content based on context\n\t\t\tconst context = window.currentAgencyContext || 'introduction';\n\t\t\tconst form = event.target;\n\t\t\t\n\t\t\tif (context === 'introduction') {\n\t\t\t\tconst editor = document.getElementById('introduction-editor');\n\t\t\t\tif (editor && editor.value) {\n\t\t\t\t\t// Create a hidden input to include the editor content\n\t\t\t\t\tconst hiddenInput = document.createElement('input');\n\t\t\t\t\thiddenInput.type = 'hidden';\n\t\t\t\t\thiddenInput.name = 'introduction-editor';\n\t\t\t\t\thiddenInput.value = editor.value;\n\t\t\t\t\tform.appendChild(hiddenInput);\n\t\t\t\t}\n\t\t\t}\n\t\t\t// For other contexts (goals, work-items, etc.), rely on ContextManager selections\n\t\t\t// which are already appended to the message via getFormattedContexts()\n\t\t\t\n\t\t\t// Append formatted contexts to message if available\n\t\t\tconst messageInput = document.getElementById('user-input');\n\t\t\tconst originalMessage = messageInput.value;\n\t\t\tif (window.ContextManager) {\n\t\t\t\tconst formattedContexts = window.ContextManager.getFormattedContexts();\n\t\t\t\tif (formattedContexts) {\n\t\t\t\t\tmessageInput.value = originalMessage + formattedContexts;\n\t\t\t\t}\n\t\t\t}\n\t\t\" hx-on::after-request=\"\n\t\t\tdocument.getElementById('user-input').value = ''; \n\t\t\tdocument.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;\n\t\t\t// Clear selections after message is sent\n\t\t\tif (window.ContextManager) {\n\t\t\t\twindow.ContextManager.clearSelections();\n\t\t\t}\n\t\t\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Describe your requirements...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-primary\" type=\"submit\"><span class=\"icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><!-- Context indicator --><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" onsubmit=\"return handleChatSubmit(event)\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Describe your requirements...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-primary\" type=\"submit\" id=\"chat-submit-btn\"><span class=\"icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><!-- Context indicator --><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
