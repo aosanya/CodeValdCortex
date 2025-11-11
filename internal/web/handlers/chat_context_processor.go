@@ -90,14 +90,23 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, agencyID, userMessa
 		c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
 	}
 
-	// DISABLED: Goal chat requires refactoring for unified specification model
-	// Set the user request in the form so the ai_refine handler can access it
-	// c.Request.PostForm.Set("user-request", userMessage)
-	// c.Request.PostForm.Set("message", userMessage)
-	// h.aiRefineHandler.ProcessGoalChatRequest(c)
+	// Set the user request in a dynamic request structure for goals chat processing
+	dynamicReq := struct {
+		UserMessage string   `json:"user_message"`
+		GoalKeys    []string `json:"goal_keys"`
+	}{
+		UserMessage: userMessage,
+		GoalKeys:    []string{}, // Empty means process all goals based on message context
+	}
 
-	h.logger.Warn("Goal chat processing is temporarily disabled - needs refactoring for unified specification model")
-	result := "disabled"
+	// Store the request in the context so ProcessGoalsChatRequest can access it
+	c.Set("dynamic_request", dynamicReq)
+
+	// Delegate to the ProcessGoalsChatRequest handler which wraps RefineGoals with chat formatting
+	h.aiRefineHandler.ProcessGoalsChatRequest(c)
+
+	// If we got here without panic, consider it successful
+	result := "success"
 	return &result, nil
 }
 

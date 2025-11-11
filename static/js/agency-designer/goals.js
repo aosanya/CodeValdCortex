@@ -362,9 +362,73 @@ window.validateGoalCode = function (code) {
     return { valid: true };
 }
 
+// Attach context clear listener to goals table
+// Similar to introduction.js, but for table-based editing
+function attachGoalsContextClearListener() {
+    const goalsTable = document.getElementById('goals-table-body');
+    if (!goalsTable) {
+        console.warn('[Goals] Goals table not found - cannot attach context clear listener');
+        return;
+    }
+
+    // Check if already attached
+    if (goalsTable._contextClearAttached) {
+        console.log('[Goals] Context clear listener already attached');
+        return;
+    }
+
+    // Use MutationObserver to detect changes to the goals table
+    const observer = new MutationObserver(function (mutations) {
+        // Check if there are actual goal row changes
+        const hasGoalChanges = mutations.some(mutation => {
+            return mutation.type === 'childList' ||
+                (mutation.type === 'characterData' && mutation.target.parentElement);
+        });
+
+        if (!hasGoalChanges) {
+            return;
+        }
+
+        console.log('[Goals] Table changes detected - clearing contexts and selections');
+
+        if (!window.ContextManager) {
+            console.warn('[Goals] ContextManager not available');
+            return;
+        }
+
+        const contexts = window.ContextManager.getAllContexts();
+        const selections = window.ContextManager.getSelections();
+        console.log('[Goals] Current contexts:', contexts, 'selections:', selections);
+
+        const hasContextsOrSelections = (contexts && contexts.length > 0) || (selections && selections.length > 0);
+
+        if (hasContextsOrSelections) {
+            console.log('[Goals] Clearing contexts and selections due to table edit');
+
+            // Clear both contexts and selections
+            window.ContextManager.clearAllContexts();
+            window.ContextManager.clearSelections();
+
+            console.log('[Goals] ✅ Contexts and selections cleared');
+        }
+    });
+
+    // Observe the table for changes
+    observer.observe(goalsTable, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+
+    // Mark as attached
+    goalsTable._contextClearAttached = true;
+    console.log('[Goals] Context clear listener (MutationObserver) attached to goals table');
+}
+
 // Initialize button states on page load
 document.addEventListener('DOMContentLoaded', function () {
     updateGoalSelectionButtons();
+    attachGoalsContextClearListener();
 });
 
 // Functions are already assigned to window namespace above

@@ -109,8 +109,8 @@ func (h *Handler) GenerateGoalsFromIntroduction(c *gin.Context) {
 		AdditionalContext string `json:"additional_context"`
 		GoalCount         int    `json:"goal_count"` // Suggested number of goals (optional)
 	}
-	// Don't require binding - this is optional
-	c.ShouldBindJSON(&req)
+	// Don't require binding - this is optional, ignore binding errors
+	_ = c.ShouldBindJSON(&req)
 
 	// Create a dynamic request for comprehensive goal generation
 	message := "Generate 3-5 strategic goals based on the agency's introduction and purpose. Create comprehensive goals that cover all major aspects of the agency's mission and capabilities."

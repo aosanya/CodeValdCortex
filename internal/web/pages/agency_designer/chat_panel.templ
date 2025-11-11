@@ -137,6 +137,8 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 					form.appendChild(hiddenInput);
 				}
 			}
+			// For other contexts (goals, work-items, etc.), rely on ContextManager selections
+			// which are already appended to the message via getFormattedContexts()
 			
 			// Append formatted contexts to message if available
 			const messageInput = document.getElementById('user-input');

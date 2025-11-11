@@ -25,7 +25,6 @@ function initializeAgencyDesigner() {
 
         // Listen for goals updates from chat processing
         document.body.addEventListener('goalsUpdated', function () {
-            console.log('[Main] Goals updated event received - reloading goals list');
             if (typeof loadGoals === 'function') {
                 loadGoals();
             }
