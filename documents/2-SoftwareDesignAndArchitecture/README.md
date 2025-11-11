@@ -13,7 +13,8 @@ This directory contains the comprehensive software design and architecture docum
 - **[frontend-architecture.md](frontend-architecture.md)**: Management interface architecture and React/TypeScript implementation
 - **[usecase-architecture.md](usecase-architecture.md)**: **Use case design principles - configuration-only approach (no custom code)**
 - **[agency-operations-framework.md](agency-operations-framework.md)**: **Agency goals, work items, and RACI matrix framework**
-- **[a2a-protocol-integration.md](a2a-protocol-integration.md)**: **A2A Protocol integration - Multi-vendor agent interoperability** ⭐ NEW
+- **[a2a-protocol-integration.md](a2a-protocol-integration.md)**: **A2A Protocol integration - Multi-vendor agent interoperability** ⭐
+- **[a2a-go-sdk-integration.md](a2a-go-sdk-integration.md)**: **a2a-go SDK integration strategy and implementation guide** ⭐ NEW
 
 ## Architectural Principles
 
