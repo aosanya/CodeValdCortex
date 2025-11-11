@@ -102,7 +102,7 @@ func (s *AgencyDesignerService) SendMessage(ctx context.Context, conversationID,
 		"conversation_id": conversationID,
 		"phase":           conversation.Phase,
 		"tokens":          response.Usage.TotalTokens,
-	}).Debug("Processed message")
+	}).Info("Processed message")
 
 	return &assistantMsg, nil
 }

@@ -523,7 +523,6 @@ func (a *App) setupServer() error {
 func loadRolesFromDirectory(ctx context.Context, dir string, service registry.RoleService, logger *logrus.Logger) error {
 	// Check if directory exists
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		logger.WithField("dir", dir).Debug("Roles directory does not exist, skipping")
 		return nil
 	}
 
@@ -534,7 +533,6 @@ func loadRolesFromDirectory(ctx context.Context, dir string, service registry.Ro
 	}
 
 	if len(files) == 0 {
-		logger.WithField("dir", dir).Debug("No role files found")
 		return nil
 	}
 
@@ -587,7 +585,6 @@ func loadRoleFromFile(ctx context.Context, filename string, service registry.Rol
 func loadAgentInstancesFromDirectory(ctx context.Context, dir string, repo *registry.Repository, logger *logrus.Logger) error {
 	// Check if directory exists
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		logger.WithField("dir", dir).Debug("Agent instances directory does not exist, skipping")
 		return nil
 	}
 
@@ -598,7 +595,6 @@ func loadAgentInstancesFromDirectory(ctx context.Context, dir string, repo *regi
 	}
 
 	if len(files) == 0 {
-		logger.WithField("dir", dir).Debug("No agent instance files found")
 		return nil
 	}
 
@@ -656,12 +652,10 @@ func loadAgentInstancesFromFile(ctx context.Context, filename string, repo *regi
 				"id":   ag.ID,
 				"name": ag.Name,
 				"type": ag.Type,
-			}).Debug("Agent instance already exists, skipping")
+			}).Info("Agent instance already exists, skipping")
 			skippedCount++
 			continue
-		}
-
-		// Create the agent
+		} // Create the agent
 		if err := repo.Create(ctx, ag); err != nil {
 			logger.WithError(err).WithFields(logrus.Fields{
 				"id":   ag.ID,

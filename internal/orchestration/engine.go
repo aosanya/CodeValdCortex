@@ -159,8 +159,6 @@ func (e *Engine) ExecuteWorkflow(ctx context.Context, workflow *Workflow) (*Work
 func (e *Engine) executeWorkflowAsync(ctx context.Context, workflow *Workflow, execution *WorkflowExecution) {
 	defer e.wg.Done()
 
-	e.logger.WithField("execution_id", execution.ID).Debug("Starting async workflow execution")
-
 	// Update status to running
 	execution.Status = WorkflowStatusRunning
 	e.updateExecution(ctx, execution)
@@ -218,13 +216,7 @@ func (e *Engine) executeTasks(ctx context.Context, workflow *Workflow, execution
 	// Get execution batches (tasks that can run in parallel)
 	batches := depGraph.GetExecutionBatches()
 
-	for batchIndex, batch := range batches {
-		e.logger.WithFields(log.Fields{
-			"execution_id": execution.ID,
-			"batch_index":  batchIndex,
-			"batch_size":   len(batch),
-		}).Debug("Executing task batch")
-
+	for _, batch := range batches {
 		// Execute all tasks in this batch concurrently
 		var batchWg sync.WaitGroup
 		batchErrors := make(chan error, len(batch))
@@ -278,12 +270,6 @@ func (e *Engine) executeTasks(ctx context.Context, workflow *Workflow, execution
 // executeTask executes a single workflow task
 func (e *Engine) executeTask(ctx context.Context, task *WorkflowTask, execution *WorkflowExecution) error {
 	taskExecution := execution.TaskExecutions[task.ID]
-
-	e.logger.WithFields(log.Fields{
-		"execution_id": execution.ID,
-		"task_id":      task.ID,
-		"task_type":    task.Type,
-	}).Debug("Executing task")
 
 	// Check task conditions
 	if !e.shouldExecuteTask(task, execution) {
@@ -368,13 +354,6 @@ func (e *Engine) executeTaskWithRetry(ctx context.Context, task *WorkflowTask, t
 			// Calculate retry delay
 			delay := e.calculateRetryDelay(task.RetryPolicy, attempt)
 
-			e.logger.WithFields(log.Fields{
-				"execution_id": execution.ID,
-				"task_id":      task.ID,
-				"attempt":      attempt,
-				"delay":        delay,
-			}).Debug("Retrying task after delay")
-
 			// Update status to retrying
 			taskExecution.Status = TaskStatusRetrying
 			e.updateExecution(ctx, execution)
@@ -404,18 +383,12 @@ func (e *Engine) assignAndExecuteTask(ctx context.Context, task *WorkflowTask, t
 }
 
 // simulateTaskExecution simulates task execution (placeholder for real implementation)
-func (e *Engine) simulateTaskExecution(ctx context.Context, task *WorkflowTask, taskExecution *TaskExecution, agent *agent.Agent, execution *WorkflowExecution) error {
+func (e *Engine) simulateTaskExecution(ctx context.Context, task *WorkflowTask, taskExecution *TaskExecution, agent *agent.Agent, _ *WorkflowExecution) error {
 	// This is a simulation - in real implementation, this would:
 	// 1. Convert WorkflowTask to agent.Task
 	// 2. Submit to agent's task system
 	// 3. Wait for completion
 	// 4. Capture results and outputs
-
-	e.logger.WithFields(log.Fields{
-		"task_id":  task.ID,
-		"agent_id": agent.ID,
-		"type":     task.Type,
-	}).Debug("Simulating task execution")
 
 	// Simulate processing time
 	select {
@@ -508,7 +481,7 @@ func (e *Engine) evaluateCondition(condition TaskCondition, execution *WorkflowE
 	}
 }
 
-func (e *Engine) shouldStopOnFailure(workflow *Workflow, execution *WorkflowExecution) bool {
+func (e *Engine) shouldStopOnFailure(workflow *Workflow, _ *WorkflowExecution) bool {
 	policy := workflow.Configuration.FailurePolicy
 
 	switch policy.OnTaskFailure {
@@ -628,23 +601,15 @@ func (e *Engine) countTasksByStatus(execution *WorkflowExecution, status TaskSta
 
 // Worker methods
 
-func (e *Engine) taskProcessorWorker(workerID int) {
+func (e *Engine) taskProcessorWorker(_ int) {
 	defer e.wg.Done()
-
-	e.logger.WithField("worker_id", workerID).Debug("Task processor worker started")
 
 	for {
 		select {
 		case <-e.ctx.Done():
 			return
-		case taskExecution := <-e.taskQueue:
+		case <-e.taskQueue:
 			// Process task execution
-			e.logger.WithFields(log.Fields{
-				"worker_id":    workerID,
-				"task_id":      taskExecution.TaskID,
-				"execution_id": "unknown", // Would need to pass execution context
-			}).Debug("Processing task")
-
 			// Task processing logic would go here
 			// For now, this is handled directly in executeTask
 		}
@@ -654,16 +619,12 @@ func (e *Engine) taskProcessorWorker(workerID int) {
 func (e *Engine) completionProcessorWorker() {
 	defer e.wg.Done()
 
-	e.logger.Debug("Completion processor worker started")
-
 	for {
 		select {
 		case <-e.ctx.Done():
 			return
-		case taskExecution := <-e.completionQueue:
+		case <-e.completionQueue:
 			// Process task completion
-			e.logger.WithField("task_id", taskExecution.TaskID).Debug("Processing task completion")
-
 			// Completion processing logic would go here
 		}
 	}
@@ -671,8 +632,6 @@ func (e *Engine) completionProcessorWorker() {
 
 func (e *Engine) executionMonitorWorker() {
 	defer e.wg.Done()
-
-	e.logger.Debug("Execution monitor worker started")
 
 	ticker := time.NewTicker(10 * time.Second) // Monitor every 10 seconds
 	defer ticker.Stop()

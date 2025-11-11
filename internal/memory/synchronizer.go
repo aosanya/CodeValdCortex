@@ -89,24 +89,15 @@ func (s *Synchronizer) syncLoop(ctx context.Context, agentID string) {
 		select {
 		case <-ticker.C:
 			// Perform sync
-			result, err := s.SyncAgent(ctx, agentID)
+			_, err := s.SyncAgent(ctx, agentID)
 			if err != nil {
 				log.WithError(err).Error("Periodic sync failed")
-			} else {
-				log.WithFields(log.Fields{
-					"agent_id":     agentID,
-					"items_synced": result.ItemsSynced,
-					"conflicts":    len(result.Conflicts),
-					"duration_ms":  result.DurationMs,
-				}).Debug("Periodic sync completed")
 			}
 
 		case <-s.stopChan:
-			log.Debug("Sync loop stopped")
 			return
 
 		case <-ctx.Done():
-			log.Debug("Sync loop context cancelled")
 			return
 		}
 	}
@@ -127,8 +118,6 @@ func (s *Synchronizer) SyncAgent(ctx context.Context, agentID string) (*SyncResu
 		Errors:      []string{},
 		Success:     false,
 	}
-
-	log.WithField("agent_id", agentID).Debug("Starting agent memory sync")
 
 	// Get current sync status
 	status, err := s.repo.GetSyncStatus(ctx, agentID, s.instanceID)
@@ -235,8 +224,6 @@ func (s *Synchronizer) DetectConflicts(ctx context.Context, agentID string) ([]M
 
 	conflicts := []MemoryConflict{}
 
-	log.WithField("agent_id", agentID).Debug("Detecting memory conflicts")
-
 	// Get sync status to check for known conflicts
 	status, err := s.repo.GetSyncStatus(ctx, agentID, s.instanceID)
 	if err != nil {
@@ -251,11 +238,6 @@ func (s *Synchronizer) DetectConflicts(ctx context.Context, agentID string) ([]M
 	// 2. Compare local longterm memory with remote
 	// 3. Check version numbers and timestamps
 	// 4. Identify any discrepancies
-
-	log.WithFields(log.Fields{
-		"agent_id":  agentID,
-		"conflicts": len(conflicts),
-	}).Debug("Conflict detection completed")
 
 	return conflicts, nil
 }

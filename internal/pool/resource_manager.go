@@ -315,10 +315,6 @@ func (rm *ResourceMonitor) RegisterAllocation(allocation *ResourceAllocation) {
 
 	rm.allocations[allocation.AgentID] = allocation
 
-	rm.logger.Debug("Registered resource allocation",
-		"agent_id", allocation.AgentID,
-		"cpu", allocation.AllocatedCPU,
-		"memory", allocation.AllocatedMemory)
 }
 
 // UnregisterAllocation removes an allocation from monitoring
@@ -328,7 +324,6 @@ func (rm *ResourceMonitor) UnregisterAllocation(agentID string) {
 
 	delete(rm.allocations, agentID)
 
-	rm.logger.Debug("Unregistered resource allocation", "agent_id", agentID)
 }
 
 // UpdateUtilization updates resource utilization for an agent
@@ -402,15 +397,9 @@ func (rm *ResourceMonitor) collectMetrics() {
 	rm.mutex.RLock()
 	defer rm.mutex.RUnlock()
 
-	for agentID, allocation := range rm.allocations {
-		// In a real implementation, this would collect actual metrics
-		// from the agent or system monitoring
-		rm.logger.Debug("Collecting metrics for agent",
-			"agent_id", agentID,
-			"cpu_utilization", allocation.UtilizedCPU,
-			"memory_utilization", allocation.UtilizedMemory,
-			"active_tasks", allocation.ActiveTasks)
-	}
+	// In a real implementation, this would collect actual metrics
+	// from the agent or system monitoring for all allocations
+	// For now, this is a placeholder for future implementation
 }
 
 // Helper methods
@@ -444,7 +433,7 @@ func (rm *ResourceManager) canAllocateResources(pool *AgentPool, request *Alloca
 }
 
 // generateRecommendations generates optimization recommendations
-func (rm *ResourceManager) generateRecommendations(pool *AgentPool, request *AllocationRequest) []string {
+func (rm *ResourceManager) generateRecommendations(pool *AgentPool, _ *AllocationRequest) []string {
 	var recommendations []string
 
 	metrics := pool.GetMetrics(context.Background())
@@ -485,7 +474,7 @@ func (rm *ResourceManager) optimizePoolResources(ctx context.Context, poolID str
 }
 
 // triggerScaleUp initiates scale up for a pool
-func (rm *ResourceManager) triggerScaleUp(ctx context.Context, poolID string, pool *AgentPool) error {
+func (rm *ResourceManager) triggerScaleUp(_ context.Context, poolID string, pool *AgentPool) error {
 	rm.logger.Info("Triggering scale up for pool",
 		"pool_id", poolID,
 		"current_agents", pool.Metrics.TotalAgents,
@@ -501,7 +490,7 @@ func (rm *ResourceManager) triggerScaleUp(ctx context.Context, poolID string, po
 }
 
 // triggerScaleDown initiates scale down for a pool
-func (rm *ResourceManager) triggerScaleDown(ctx context.Context, poolID string, pool *AgentPool) error {
+func (rm *ResourceManager) triggerScaleDown(_ context.Context, poolID string, pool *AgentPool) error {
 	rm.logger.Info("Triggering scale down for pool",
 		"pool_id", poolID,
 		"current_agents", pool.Metrics.TotalAgents,

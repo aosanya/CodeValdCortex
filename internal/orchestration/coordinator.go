@@ -117,10 +117,6 @@ func (c *Coordinator) Stop() error {
 
 // SelectAgents chooses agents for task execution based on criteria
 func (c *Coordinator) SelectAgents(ctx context.Context, selector AgentSelector, count int) ([]*agent.Agent, error) {
-	c.logger.WithFields(log.Fields{
-		"strategy": selector.Strategy,
-		"count":    count,
-	}).Debug("Selecting agents for task execution")
 
 	// Get available agents
 	availableAgents, err := c.GetAvailableAgents(ctx)
@@ -148,23 +144,11 @@ func (c *Coordinator) SelectAgents(ctx context.Context, selector AgentSelector, 
 		return nil, fmt.Errorf("failed to select agents by strategy: %w", err)
 	}
 
-	c.logger.WithFields(log.Fields{
-		"strategy":     selector.Strategy,
-		"candidates":   len(candidateAgents),
-		"selected":     len(selectedAgents),
-		"selected_ids": c.getAgentIDs(selectedAgents),
-	}).Debug("Agent selection completed")
-
 	return selectedAgents, nil
 }
 
 // AssignTask assigns a task to a specific agent
 func (c *Coordinator) AssignTask(ctx context.Context, agentID string, task *WorkflowTask, execution *WorkflowExecution) error {
-	c.logger.WithFields(log.Fields{
-		"agent_id":     agentID,
-		"task_id":      task.ID,
-		"execution_id": execution.ID,
-	}).Debug("Assigning task to agent")
 
 	// Get agent load
 	agentLoad, err := c.GetAgentLoad(ctx, agentID)
@@ -237,11 +221,6 @@ func (c *Coordinator) GetAvailableAgents(ctx context.Context) ([]*agent.Agent, e
 		}
 	}
 
-	c.logger.WithFields(log.Fields{
-		"total_agents":     len(agents),
-		"available_agents": len(availableAgents),
-	}).Debug("Retrieved available agents")
-
 	return availableAgents, nil
 }
 
@@ -256,7 +235,6 @@ func (c *Coordinator) RebalanceLoad(ctx context.Context) error {
 	}
 
 	if len(agents) < 2 {
-		c.logger.Debug("Not enough agents for load balancing")
 		return nil
 	}
 
@@ -275,17 +253,11 @@ func (c *Coordinator) RebalanceLoad(ctx context.Context) error {
 	}
 
 	if totalTasks == 0 {
-		c.logger.Debug("No tasks to rebalance")
 		return nil
 	}
 
 	// Calculate target load per agent
 	targetLoad := totalTasks / len(agents)
-	c.logger.WithFields(log.Fields{
-		"total_tasks":  totalTasks,
-		"total_agents": len(agents),
-		"target_load":  targetLoad,
-	}).Debug("Load rebalancing analysis")
 
 	// For now, just log the analysis - actual task migration would require
 	// integration with the task management system
@@ -511,14 +483,6 @@ func (c *Coordinator) hasRequiredCapabilities(agentCapabilities, requiredCapabil
 	return true
 }
 
-func (c *Coordinator) getAgentIDs(agents []*agent.Agent) []string {
-	ids := make([]string, len(agents))
-	for i, ag := range agents {
-		ids[i] = ag.ID
-	}
-	return ids
-}
-
 func (c *Coordinator) updateAgentLoad(agentID string, activeTasks, queuedTasks int) {
 	c.loadMutex.Lock()
 	defer c.loadMutex.Unlock()
@@ -543,7 +507,7 @@ func (c *Coordinator) updateAgentLoad(agentID string, activeTasks, queuedTasks i
 	load.LastUpdated = time.Now()
 }
 
-func (c *Coordinator) refreshAgentLoad(ctx context.Context, agentID string) error {
+func (c *Coordinator) refreshAgentLoad(_ context.Context, agentID string) error {
 	// In a real implementation, this would:
 	// 1. Query the agent's task manager for current task counts
 	// 2. Get resource usage from the runtime manager
@@ -580,8 +544,6 @@ func (c *Coordinator) refreshAgentLoad(ctx context.Context, agentID string) erro
 func (c *Coordinator) loadMonitorWorker() {
 	defer c.wg.Done()
 
-	c.logger.Debug("Load monitor worker started")
-
 	ticker := time.NewTicker(c.config.LoadUpdateInterval)
 	defer ticker.Stop()
 
@@ -608,5 +570,4 @@ func (c *Coordinator) updateAllAgentLoads() {
 		}
 	}
 
-	c.logger.WithField("agent_count", len(agents)).Debug("Updated agent loads")
 }

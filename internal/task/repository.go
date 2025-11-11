@@ -202,16 +202,12 @@ func (r *Repository) createIndexes() error {
 // StoreTask saves a task to the database
 func (r *Repository) StoreTask(ctx context.Context, task *Task) error {
 	// Use task ID as document key
-	meta, err := r.tasks.CreateDocument(ctx, task)
+	_, err := r.tasks.CreateDocument(ctx, task)
 	if err != nil {
 		return fmt.Errorf("failed to store task: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"task_id":     task.ID,
-		"agent_id":    task.AgentID,
-		"document_id": meta.ID,
-	}).Debug("Stored task")
+	log.WithField("task_id", task.ID).Info("Stored task")
 
 	return nil
 }
@@ -235,12 +231,6 @@ func (r *Repository) UpdateTask(ctx context.Context, task *Task) error {
 	if err != nil {
 		return fmt.Errorf("failed to update task: %w", err)
 	}
-
-	log.WithFields(log.Fields{
-		"task_id":  task.ID,
-		"agent_id": task.AgentID,
-		"status":   task.Status,
-	}).Debug("Updated task")
 
 	return nil
 }
@@ -329,17 +319,12 @@ func (r *Repository) ListTasks(ctx context.Context, agentID string, filters Task
 // StoreResult saves a task result
 func (r *Repository) StoreResult(ctx context.Context, result *TaskResult) error {
 	// Use task ID as document key for easy lookup
-	meta, err := r.results.CreateDocument(ctx, result)
+	_, err := r.results.CreateDocument(ctx, result)
 	if err != nil {
 		return fmt.Errorf("failed to store result: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"task_id":     result.TaskID,
-		"agent_id":    result.AgentID,
-		"status":      result.Status,
-		"document_id": meta.ID,
-	}).Debug("Stored task result")
+	log.WithField("task_id", result.TaskID).Info("Stored task result")
 
 	return nil
 }
@@ -390,13 +375,6 @@ func (r *Repository) UpdateMetrics(ctx context.Context, metrics *AgentTaskMetric
 			return fmt.Errorf("failed to update metrics: %w", err)
 		}
 	}
-
-	log.WithFields(log.Fields{
-		"agent_id":    metrics.AgentID,
-		"total_tasks": metrics.TotalTasks,
-		"completed":   metrics.CompletedTasks,
-		"failed":      metrics.FailedTasks,
-	}).Debug("Updated task metrics")
 
 	return nil
 }

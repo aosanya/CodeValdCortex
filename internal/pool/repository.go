@@ -355,9 +355,6 @@ func (r *Repository) StoreMembership(ctx context.Context, poolID string, member 
 		}
 	}
 
-	r.logger.Debug("Stored pool membership",
-		"pool_id", poolID,
-		"agent_id", member.Agent.ID)
 
 	return nil
 }
@@ -397,9 +394,6 @@ func (r *Repository) RemoveMembership(ctx context.Context, poolID, agentID strin
 		return fmt.Errorf("failed to remove membership: %w", err)
 	}
 
-	r.logger.Debug("Removed pool membership",
-		"pool_id", poolID,
-		"agent_id", agentID)
 
 	return nil
 }
@@ -427,7 +421,6 @@ func (r *Repository) StoreMetrics(ctx context.Context, poolID string, metrics *P
 		return fmt.Errorf("failed to store metrics: %w", err)
 	}
 
-	r.logger.Debug("Stored pool metrics", "pool_id", poolID)
 
 	return nil
 }

@@ -29,7 +29,6 @@ func NewBuilderContextBuilder(agencyService agency.Service, roleService registry
 // BuildBuilderContext gathers all agency context data and returns it as a structured BuilderContext
 // This is the centralized function used by all AI operations to ensure consistent context
 func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *models.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
-	b.logger.WithField("agency_id", agencyObj.ID).Debug("Building AI context data")
 
 	// Get unified specification (replaces separate GetGoals, GetWorkItems, GetOverview calls)
 	spec, err := b.agencyService.GetSpecification(ctx, agencyObj.ID)
@@ -82,7 +81,7 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		"work_items_count": len(workItems),
 		"roles_count":      len(roles),
 		"has_user_input":   userRequest != "",
-	}).Debug("AI context data built successfully")
+	}).Info("Built refine context")
 
 	return builderContext, nil
 }

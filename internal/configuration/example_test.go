@@ -78,8 +78,8 @@ func (c *MockCache) Clear() {
 	c.data = make(map[string]*configuration.AgentConfiguration)
 }
 
-// ExampleConfigurationUsage demonstrates how to use the configuration management system
-func ExampleConfigurationUsage() {
+// TestConfigurationUsage demonstrates how to use the configuration management system
+func TestConfigurationUsage(t *testing.T) {
 	ctx := context.Background()
 
 	// Set up dependencies

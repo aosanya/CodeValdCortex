@@ -42,7 +42,6 @@ func NewLoadBalancer(strategy LoadBalancingStrategy, pool *AgentPool) (LoadBalan
 type RoundRobinBalancer struct {
 	pool     *AgentPool
 	position int64
-	mutex    sync.Mutex
 }
 
 // NewRoundRobinBalancer creates a new round-robin load balancer
@@ -83,8 +82,7 @@ func (rb *RoundRobinBalancer) Reset() {
 
 // LeastConnectionBalancer implements least-connection load balancing
 type LeastConnectionBalancer struct {
-	pool  *AgentPool
-	mutex sync.RWMutex
+	pool *AgentPool
 }
 
 // NewLeastConnectionBalancer creates a new least-connection load balancer

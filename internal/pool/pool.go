@@ -482,7 +482,7 @@ func (p *AgentPool) performHealthChecks() {
 	now := time.Now()
 	healthyCount := 0
 
-	for agentID, member := range p.Members {
+	for _, member := range p.Members {
 		// Check agent health (simplified - could integrate with agent health system)
 		isHealthy := p.checkAgentHealth(member.Agent)
 
@@ -492,11 +492,6 @@ func (p *AgentPool) performHealthChecks() {
 		if isHealthy {
 			healthyCount++
 		}
-
-		p.logger.Debug("Health check completed",
-			"pool_id", p.ID,
-			"agent_id", agentID,
-			"healthy", isHealthy)
 	}
 
 	// Update metrics

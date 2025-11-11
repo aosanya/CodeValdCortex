@@ -28,9 +28,6 @@ func NewLifecycleIntegration(poolManager *Manager, logger Logger) *LifecycleInte
 func (li *LifecycleIntegration) OnAgentCreated(ctx context.Context, agent *agent.Agent) error {
 	// For now, we don't automatically add agents to pools on creation
 	// This should be done explicitly through pool management APIs
-	li.logger.Debug("Agent created, available for pool assignment",
-		"agent_id", agent.ID,
-		"agent_type", agent.Type)
 
 	return nil
 }
@@ -210,10 +207,6 @@ func (li *LifecycleIntegration) OnAgentHealthChanged(ctx context.Context, agentI
 				// Update health status
 				member.Healthy = healthy
 
-				li.logger.Debug("Updated pool member health status",
-					"pool_id", pool.ID,
-					"agent_id", agentID,
-					"healthy", healthy)
 				break
 			}
 		}
@@ -335,7 +328,7 @@ func (li *LifecycleIntegration) AutoAssignAgent(ctx context.Context, agent *agen
 }
 
 // calculatePoolScore calculates a suitability score for an agent-pool combination
-func (li *LifecycleIntegration) calculatePoolScore(pool *AgentPool, agent *agent.Agent) float64 {
+func (li *LifecycleIntegration) calculatePoolScore(pool *AgentPool, _ *agent.Agent) float64 {
 	score := 0.0
 
 	// Check capacity - higher score for pools with more available space

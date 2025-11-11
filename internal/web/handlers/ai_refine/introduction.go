@@ -111,7 +111,6 @@ func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
 		builderContextData,
 		func(chunk string) error {
 			chunkCount++
-			h.logger.WithField("chunk_num", chunkCount).Debug("📦 Sending chunk")
 			c.SSEvent("chunk", chunk)
 			c.Writer.Flush()
 			return nil

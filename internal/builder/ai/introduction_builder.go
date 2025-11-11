@@ -280,7 +280,7 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 	r.logger.WithFields(logrus.Fields{
 		"response_length": len(response),
 		"response_text":   response,
-	}).Debug("Parsing AI response")
+	}).Info("Parsing AI response")
 
 	fmt.Printf("\n[DEBUG] Starting to parse AI response...\n")
 	fmt.Printf("[DEBUG] Response length: %d characters\n", len(response))

@@ -72,7 +72,6 @@ func (m *AgencyMiddleware) RequireAgency() gin.HandlerFunc {
 		_, exists := c.Get(contextKeyAgency)
 		if !exists {
 			// No agency selected - redirect to homepage
-			m.logger.Debug("No agency selected, redirecting to homepage")
 
 			// Check if it's an API request
 			if isAPIRequest(c) {

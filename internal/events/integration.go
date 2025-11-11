@@ -87,7 +87,7 @@ func (i *Integrator) registerBuiltinHandlers() error {
 }
 
 // setupMessageIntegration configures message service to publish events
-func (i *Integrator) setupMessageIntegration(ctx context.Context) error {
+func (i *Integrator) setupMessageIntegration(_ context.Context) error {
 	// Note: This would typically involve modifying the MessageService
 	// to publish events when messages are sent, received, or fail.
 	// For now, we'll just log that the integration is set up.
@@ -97,7 +97,7 @@ func (i *Integrator) setupMessageIntegration(ctx context.Context) error {
 }
 
 // setupLifecycleIntegration configures lifecycle manager to publish events
-func (i *Integrator) setupLifecycleIntegration(ctx context.Context) error {
+func (i *Integrator) setupLifecycleIntegration(_ context.Context) error {
 	// Note: This would typically involve modifying the LifecycleManager
 	// to publish events when agents change state.
 	// For now, we'll just log that the integration is set up.
@@ -107,7 +107,7 @@ func (i *Integrator) setupLifecycleIntegration(ctx context.Context) error {
 }
 
 // setupTaskIntegration configures task scheduler to publish events
-func (i *Integrator) setupTaskIntegration(ctx context.Context) error {
+func (i *Integrator) setupTaskIntegration(_ context.Context) error {
 	// Note: This would typically involve modifying the TaskScheduler
 	// to publish events when tasks are created, started, completed, or fail.
 	// For now, we'll just log that the integration is set up.

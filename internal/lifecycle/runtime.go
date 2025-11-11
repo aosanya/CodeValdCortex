@@ -15,7 +15,6 @@ func (m *Manager) startAgentRuntime(a *agent.Agent) error {
 	// Start task processing goroutine
 	go m.taskProcessingLoop(a)
 
-	log.WithField("agent_id", a.ID).Debug("Agent runtime started")
 	return nil
 }
 
@@ -26,22 +25,19 @@ func (m *Manager) stopAgentRuntime(a *agent.Agent) error {
 
 	// Wait for goroutines to finish
 	<-a.Done()
-	log.WithField("agent_id", a.ID).Debug("Agent runtime stopped gracefully")
 	return nil
 }
 
 // pauseAgentRuntime temporarily stops task processing
-func (m *Manager) pauseAgentRuntime(a *agent.Agent) error {
+func (m *Manager) pauseAgentRuntime(_ *agent.Agent) error {
 	// For now, pausing just changes state - tasks won't be processed
 	// The task processing loop checks the state before processing
-	log.WithField("agent_id", a.ID).Debug("Agent runtime paused")
 	return nil
 }
 
 // resumeAgentRuntime resumes task processing
-func (m *Manager) resumeAgentRuntime(a *agent.Agent) error {
+func (m *Manager) resumeAgentRuntime(_ *agent.Agent) error {
 	// State change is handled by caller - this is a no-op for now
-	log.WithField("agent_id", a.ID).Debug("Agent runtime resumed")
 	return nil
 }
 
@@ -63,7 +59,6 @@ func (m *Manager) heartbeatLoop(a *agent.Agent) {
 			}).Trace("Agent heartbeat")
 
 		case <-a.Context().Done():
-			log.WithField("agent_id", a.ID).Debug("Heartbeat loop stopped")
 			return
 		}
 	}
@@ -72,8 +67,6 @@ func (m *Manager) heartbeatLoop(a *agent.Agent) {
 // taskProcessingLoop processes tasks from the agent's task channel
 func (m *Manager) taskProcessingLoop(a *agent.Agent) {
 	defer a.CloseDone()
-
-	log.WithField("agent_id", a.ID).Debug("Task processing loop started")
 
 	for {
 		select {
@@ -98,7 +91,6 @@ func (m *Manager) taskProcessingLoop(a *agent.Agent) {
 			}
 
 		case <-a.Context().Done():
-			log.WithField("agent_id", a.ID).Debug("Task processing loop stopped")
 			return
 		}
 	}

@@ -89,7 +89,7 @@ func (h *MessageHandler) Name() string {
 	return h.name
 }
 
-func (h *MessageHandler) handleMessageReceived(ctx context.Context, event *Event) error {
+func (h *MessageHandler) handleMessageReceived(_ context.Context, event *Event) error {
 	data, ok := event.Data.(*MessageEventData)
 	if !ok {
 		return fmt.Errorf("invalid event data type for message received event")
@@ -108,22 +108,18 @@ func (h *MessageHandler) handleMessageReceived(ctx context.Context, event *Event
 	return nil
 }
 
-func (h *MessageHandler) handleMessageSent(ctx context.Context, event *Event) error {
-	data, ok := event.Data.(*MessageEventData)
+func (h *MessageHandler) handleMessageSent(_ context.Context, event *Event) error {
+	_, ok := event.Data.(*MessageEventData)
 	if !ok {
 		return fmt.Errorf("invalid event data type for message sent event")
 	}
 
-	log.WithFields(log.Fields{
-		"message_id": data.Message.ID,
-		"from":       data.Message.FromAgentID,
-		"to":         data.Message.ToAgentID,
-	}).Debug("Message sent successfully")
+	log.WithField("event_id", event.ID).Info("Message sent successfully")
 
 	return nil
 }
 
-func (h *MessageHandler) handleMessageFailed(ctx context.Context, event *Event) error {
+func (h *MessageHandler) handleMessageFailed(_ context.Context, event *Event) error {
 	data, ok := event.Data.(*MessageEventData)
 	if !ok {
 		return fmt.Errorf("invalid event data type for message failed event")
@@ -191,7 +187,7 @@ func (h *StateChangeHandler) Name() string {
 	return h.name
 }
 
-func (h *StateChangeHandler) handleAgentStateChange(ctx context.Context, event *Event) error {
+func (h *StateChangeHandler) handleAgentStateChange(_ context.Context, event *Event) error {
 	data, ok := event.Data.(*AgentEventData)
 	if !ok {
 		return fmt.Errorf("invalid event data type for agent state change event")
@@ -209,7 +205,7 @@ func (h *StateChangeHandler) handleAgentStateChange(ctx context.Context, event *
 	return nil
 }
 
-func (h *StateChangeHandler) handlePoolStateChange(ctx context.Context, event *Event) error {
+func (h *StateChangeHandler) handlePoolStateChange(_ context.Context, event *Event) error {
 	data, ok := event.Data.(*PoolEventData)
 	if !ok {
 		return fmt.Errorf("invalid event data type for pool state change event")
@@ -227,7 +223,7 @@ func (h *StateChangeHandler) handlePoolStateChange(ctx context.Context, event *E
 	return nil
 }
 
-func (h *StateChangeHandler) handleTaskStateChange(ctx context.Context, event *Event) error {
+func (h *StateChangeHandler) handleTaskStateChange(_ context.Context, event *Event) error {
 	data, ok := event.Data.(*TaskEventData)
 	if !ok {
 		return fmt.Errorf("invalid event data type for task state change event")

@@ -442,15 +442,10 @@ func (m *Manager) loadPools(ctx context.Context) error {
 			// Note: In a real implementation, you would need to
 			// reconcile these memberships with actual agent instances
 			// from the agent registry
-			for _, membership := range memberships {
-				m.logger.Debug("Found pool membership",
-					"pool_id", poolDoc.ID,
-					"agent_id", membership.AgentID,
-					"weight", membership.Weight)
+			for range memberships {
+				// TODO: Reconcile membership with agent registry
 			}
-		}
-
-		// Store in memory
+		} // Store in memory
 		m.pools[pool.ID] = pool
 
 		// Register with resource manager

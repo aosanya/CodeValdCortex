@@ -149,11 +149,12 @@ func (ac *ArangoClient) Close() error {
 
 // Ping verifies the connection to ArangoDB
 func (ac *ArangoClient) Ping() error {
-	version, err := ac.client.Version(ac.ctx)
+	_, err := ac.client.Version(ac.ctx)
 	if err != nil {
 		return fmt.Errorf("failed to ping ArangoDB: %w", err)
 	}
 
-	log.WithField("version", version.Version).Debug("ArangoDB ping successful")
+	log.Info("ArangoDB ping successful")
+
 	return nil
 }

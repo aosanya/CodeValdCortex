@@ -72,13 +72,6 @@ func (ms *MessageService) SendMessage(ctx context.Context, fromAgentID, toAgentI
 		return "", fmt.Errorf("failed to store message: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"message_id": msg.ID,
-		"from":       fromAgentID,
-		"to":         toAgentID,
-		"type":       msgType,
-		"priority":   msg.Priority,
-	}).Debug("Message sent successfully")
 
 	return msg.ID, nil
 }
@@ -100,10 +93,6 @@ func (ms *MessageService) GetPendingMessages(ctx context.Context, agentID string
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"count":    len(messages),
-	}).Debug("Retrieved pending messages")
 
 	return messages, nil
 }
@@ -116,7 +105,6 @@ func (ms *MessageService) MarkDelivered(ctx context.Context, messageID string) e
 		return err
 	}
 
-	log.WithField("message_id", messageID).Debug("Message marked as delivered")
 	return nil
 }
 
@@ -139,7 +127,6 @@ func (ms *MessageService) AcknowledgeMessage(ctx context.Context, messageID stri
 		return err
 	}
 
-	log.WithField("message_id", messageID).Debug("Message acknowledged")
 	return nil
 }
 
@@ -151,10 +138,6 @@ func (ms *MessageService) GetConversationHistory(ctx context.Context, correlatio
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"correlation_id": correlationID,
-		"count":          len(messages),
-	}).Debug("Retrieved conversation history")
 
 	return messages, nil
 }

@@ -59,7 +59,7 @@ func skipIfNoDatabase(t *testing.T) *database.ArangoClient {
 }
 
 // cleanupTestData removes all test data from collections
-func cleanupTestData(t *testing.T, repo *Repository) {
+func cleanupTestData(_ *testing.T, repo *Repository) {
 	ctx := context.Background()
 
 	// Delete all documents from test collections
