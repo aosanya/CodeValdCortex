@@ -55,11 +55,23 @@ window.handleChatSubmit = async function (event) {
     // Add user message to chat immediately
     addUserMessageToChat(originalMessage, chatMessages);
 
-    // Clear input and disable button
+    // Clear input and convert send button to stop button
     messageInput.value = '';
     if (submitBtn) {
-        submitBtn.classList.add('is-loading');
-        submitBtn.disabled = true;
+        const submitIcon = document.getElementById('chat-submit-icon');
+        if (submitIcon) {
+            // Change to stop icon
+            submitIcon.innerHTML = '<i class="fas fa-stop"></i>';
+        }
+        submitBtn.classList.remove('is-primary');
+        submitBtn.classList.add('is-danger');
+        // Don't disable - allow stopping
+        submitBtn.onclick = function (e) {
+            e.preventDefault();
+            // TODO: Implement stop functionality
+            console.log('Stop button clicked - stopping AI processing');
+            return false;
+        };
     }
 
     // Show processing indicator
@@ -100,10 +112,16 @@ window.handleChatSubmit = async function (event) {
     } catch (error) {
         addErrorMessageToChat('Failed to send message. Please try again.', chatMessages);
     } finally {
-        // Re-enable button
+        // Restore send button
         if (submitBtn) {
-            submitBtn.classList.remove('is-loading');
-            submitBtn.disabled = false;
+            const submitIcon = document.getElementById('chat-submit-icon');
+            if (submitIcon) {
+                // Change back to send icon
+                submitIcon.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            }
+            submitBtn.classList.remove('is-danger');
+            submitBtn.classList.add('is-primary');
+            submitBtn.onclick = null; // Remove stop handler
         }
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();

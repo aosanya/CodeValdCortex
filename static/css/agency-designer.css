@@ -864,7 +864,7 @@ body {
     background: var(--vscode-panel-bg);
     border-color: var(--vscode-border);
     color: var(--vscode-text);
-    font-size: 0.85rem;
+    font-size: 1rem !important;
 }
 
 .chat-input-container input::placeholder {
