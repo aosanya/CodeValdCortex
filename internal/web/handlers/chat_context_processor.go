@@ -104,8 +104,16 @@ func (h *ChatHandler) performGoalsRefinement(c *gin.Context, agencyID, userMessa
 	// Store the request in the context so ProcessGoalsChatRequest can access it
 	c.Set("dynamic_request", dynamicReq)
 
-	// Delegate to the ProcessGoalsChatRequest handler which wraps RefineGoals with chat formatting
-	h.aiRefineHandler.ProcessGoalsChatRequest(c)
+	// Check if streaming is requested
+	streamMode := c.Query("stream") == "true"
+
+	if streamMode {
+		// Delegate to streaming version
+		h.aiRefineHandler.ProcessGoalsChatRequestStreaming(c)
+	} else {
+		// Delegate to the ProcessGoalsChatRequest handler which wraps RefineGoals with chat formatting
+		h.aiRefineHandler.ProcessGoalsChatRequest(c)
+	}
 
 	// If we got here without panic, consider it successful
 	result := "success"

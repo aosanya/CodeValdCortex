@@ -153,14 +153,14 @@ window.handleChatSubmit = async function (event) {
             endpoint = `/api/v1/agencies/${agencyID}/designer/conversations/web`;
         }
 
-        // Check if streaming is enabled
-        const useStreaming = window.isStreamingEnabled && window.isStreamingEnabled();
+        // Check if streaming is enabled (enabled by default for all contexts)
+        const useStreaming = window.isStreamingEnabled ? window.isStreamingEnabled() : true;
 
-        if (useStreaming && context === 'introduction') {
-            // Use streaming for introduction refinement
+        if (useStreaming) {
+            // Use streaming for all contexts
             await handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID, currentAbortController);
         } else {
-            // Use non-streaming for other contexts or when disabled
+            // Use non-streaming when explicitly disabled
             await handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation, currentAbortController);
         }
 
@@ -326,7 +326,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
             // Store conversation ID if this was the first message
             if (finalResult.conversation_id) {
                 chatMessages.dataset.conversationId = finalResult.conversation_id;
-            } else {
             }
 
             // Update the introduction textarea if it was changed
@@ -334,9 +333,22 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                 const introTextarea = document.getElementById('introduction-editor');
                 if (introTextarea) {
                     introTextarea.value = finalResult.introduction;
-                } else {
                 }
-            } else {
+            }
+
+            // Refresh goals list if goals were changed
+            const context = window.currentAgencyContext || '';
+            if (finalResult.was_changed && context === 'goal-definition') {
+                const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
+                const goalsTableBody = document.getElementById('goals-table-body');
+
+                if (agencyId && goalsTableBody && window.loadEntityList) {
+                    console.log('Refreshing goals list after update');
+                    window.loadEntityList('goals', 'goals-table-body', 3)
+                        .catch(error => {
+                            console.error('Failed to refresh goals list:', error);
+                        });
+                }
             }
 
             // Show if changes were made
