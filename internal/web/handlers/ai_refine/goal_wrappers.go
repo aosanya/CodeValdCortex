@@ -71,7 +71,7 @@ func (h *Handler) GenerateGoalWithPrompt(c *gin.Context) {
 		UserMessage string   `json:"user_message"`
 		GoalKeys    []string `json:"goal_keys"`
 	}{
-		UserMessage: "Generate one or more strategic goals based on this user request. Consider the agency's introduction and overall purpose to create comprehensive goals that cover the topic thoroughly: " + req.UserInput,
+		UserMessage: "Generate one or more agent-oriented goals based on this user request. Remember: This is a multi-agent system, so goals should describe what AGENTS DO (tasks, activities, responsibilities), not what systems implement. Focus on agent actions and behaviors. User request: " + req.UserInput,
 		GoalKeys:    []string{}, // Empty - we're creating new goals
 	}
 
@@ -113,14 +113,14 @@ func (h *Handler) GenerateGoalsFromIntroduction(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 
 	// Create a dynamic request for comprehensive goal generation
-	message := "Generate 3-5 strategic goals based on the agency's introduction and purpose. Create comprehensive goals that cover all major aspects of the agency's mission and capabilities."
+	message := "Generate 3-5 agent-oriented goals based on the agency's introduction. Remember: This is a multi-agent system where autonomous agents perform tasks. Goals should describe what AGENTS WILL DO (collect data, monitor systems, process requests, coordinate activities, etc.), not what we will implement. Focus on agent tasks and responsibilities that align with the agency's mission."
 
 	if req.AdditionalContext != "" {
 		message += " Additional context: " + req.AdditionalContext
 	}
 
 	if req.GoalCount > 0 {
-		message = fmt.Sprintf("Generate %d strategic goals based on the agency's introduction and purpose. Create comprehensive goals that cover all major aspects of the agency's mission and capabilities.", req.GoalCount)
+		message = fmt.Sprintf("Generate %d agent-oriented goals based on the agency's introduction. Remember: This is a multi-agent system where autonomous agents perform tasks. Goals should describe what AGENTS WILL DO (collect data, monitor systems, process requests, coordinate activities, etc.), not what we will implement. Focus on agent tasks and responsibilities that align with the agency's mission.", req.GoalCount)
 		if req.AdditionalContext != "" {
 			message += " Additional context: " + req.AdditionalContext
 		}

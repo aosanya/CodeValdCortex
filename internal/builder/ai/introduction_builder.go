@@ -121,7 +121,9 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 
 // getSystemPrompt returns the system prompt for introduction refinement
 func (r *IntroductionBuilder) getSystemPrompt() string {
-	return `You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
+	return SharedAgencyContext + `
+
+You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
 
 INPUT: JSON with introduction field and modification instruction
 OUTPUT: JSON with modified introduction field

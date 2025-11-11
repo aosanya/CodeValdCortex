@@ -8,6 +8,23 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 )
 
+// SharedAgencyContext provides critical context about the multi-agent system architecture
+// that should be included at the beginning of all AI system prompts for consistency.
+const SharedAgencyContext = `CRITICAL CONTEXT: This system builds MULTI-AGENT AGENCIES where autonomous agents (both AI and human workers) perform tasks.
+Agents operate at different autonomy levels (L0-L4):
+- L0 (Manual): Agent provides recommendations only; human executes all actions
+- L1 (Assisted): Agent performs routine actions; human approves high-risk actions  
+- L2 (Conditional): Agent operates autonomously under defined constraints
+- L3 (High Automation): Agent handles most scenarios independently; human on-call for edge cases
+- L4 (Full Autonomy): Agent operates completely independently; human notified post-facto
+
+When designing agency components (goals, work items, roles, workflows):
+- Goals are HIGH-LEVEL OBJECTIVES describing what agents will accomplish (realized through multiple work items)
+- Work Items are the ACTUAL TO-DOs that agents are tasked with performing
+- Roles define AGENT CAPABILITIES and autonomy levels
+- RACI defines WHO (which role/agent) does WHAT for each work item
+`
+
 // System prompts for different conversation phases
 
 // getSystemPrompt returns the system prompt for a given phase
