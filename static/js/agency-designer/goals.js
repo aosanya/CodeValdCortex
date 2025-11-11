@@ -164,19 +164,38 @@ window.processAIGoalOperation = function (operations, userRequest = '') {
         window.showAIProcessStatus(statusMessage);
     }
 
-    // Build request body
-    const requestBody = {
-        operations: operations,
-        goal_keys: selectedGoalKeys
-    };
+    // Determine endpoint based on operation
+    let endpoint;
+    let requestBody;
 
-    // Add user request if provided
-    if (userRequest && userRequest.trim() !== '') {
-        requestBody.user_request = userRequest.trim();
+    if (operations.includes('create')) {
+        // Use generate endpoint for creating new goals
+        endpoint = `/api/v1/agencies/${agencyId}/goals/generate`;
+        requestBody = {
+            userInput: userRequest || "Generate 3-5 strategic goals based on the agency's introduction and purpose"
+        };
+    } else if (operations.includes('consolidate')) {
+        // Use consolidate endpoint
+        endpoint = `/api/v1/agencies/${agencyId}/goals/consolidate`;
+        requestBody = {}; // Consolidate endpoint uses preset prompt
+    } else if (operations.includes('enhance')) {
+        // Use refine-dynamic endpoint for enhance
+        endpoint = `/api/v1/agencies/${agencyId}/goals/refine-dynamic`;
+        requestBody = {
+            user_message: userRequest || "Enhance and improve the selected goals to be clearer, more specific, and better aligned with the agency's purpose",
+            goal_keys: selectedGoalKeys
+        };
+    } else {
+        // Default to refine-dynamic for other operations
+        endpoint = `/api/v1/agencies/${agencyId}/goals/refine-dynamic`;
+        requestBody = {
+            user_message: userRequest || "Process the goals based on the context",
+            goal_keys: selectedGoalKeys
+        };
     }
 
-    // Call AI endpoint with operations and selected goal keys
-    fetch(`/api/v1/agencies/${agencyId}/goals/ai-process`, {
+    // Call AI endpoint
+    fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

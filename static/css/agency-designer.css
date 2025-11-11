@@ -7,6 +7,7 @@ html,
 body {
     overflow: hidden;
     height: 100%;
+    font-size: 0.9rem;
 }
 
 /* Override Bulma's default section and container padding/margin */
@@ -1706,4 +1707,16 @@ a.overview-nav-link:hover {
 
 #work-item-goals-editor .checkbox input[type="checkbox"] {
     transform: scale(0.9);
+}
+
+/* Small table styling - applies to all tables with is-small class */
+table.is-small td:not([align]),
+table.is-small th:not([align]) {
+    font-size: 0.875rem;
+    padding: 0.5em 0.75em;
+}
+
+table.is-small td,
+table.is-small th {
+    text-align: inherit;
 }
