@@ -1,6 +1,71 @@
 // Chat streaming functionality
 // Handles chat form submission with SSE streaming support
 
+// Global abort controller for stopping requests
+let currentAbortController = null;
+
+/**
+ * Convert send button to stop button
+ */
+function convertToStopButton() {
+    const submitBtn = document.getElementById('chat-submit-btn');
+    if (submitBtn) {
+        const submitIcon = document.getElementById('chat-submit-icon');
+        if (submitIcon) {
+            // Change to stop icon
+            submitIcon.innerHTML = '<i class="fas fa-stop"></i>';
+        }
+        submitBtn.classList.remove('is-primary');
+        submitBtn.classList.add('is-danger');
+        // Don't disable - allow stopping
+        submitBtn.onclick = function (e) {
+            e.preventDefault();
+            window.stopChatProcessing();
+            return false;
+        };
+    }
+}
+
+/**
+ * Restore the send button to its default state
+ */
+function restoreSendButton() {
+    const submitBtn = document.getElementById('chat-submit-btn');
+    if (submitBtn) {
+        const submitIcon = document.getElementById('chat-submit-icon');
+        if (submitIcon) {
+            submitIcon.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+        submitBtn.classList.remove('is-danger');
+        submitBtn.classList.add('is-primary');
+        submitBtn.onclick = null;
+    }
+}
+
+/**
+ * Stop the current chat processing
+ */
+window.stopChatProcessing = function () {
+    if (currentAbortController) {
+        currentAbortController.abort();
+        currentAbortController = null;
+
+        // Show cancellation message
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+            addErrorMessageToChat('Request cancelled by user.', chatMessages);
+        }
+
+        // Hide AI status
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+
+        // Restore send button
+        restoreSendButton();
+    }
+};
+
 /**
  * Handle chat form submission with streaming support
  * @param {Event} event - Form submit event
@@ -55,24 +120,12 @@ window.handleChatSubmit = async function (event) {
     // Add user message to chat immediately
     addUserMessageToChat(originalMessage, chatMessages);
 
+    // Create new abort controller for this request
+    currentAbortController = new AbortController();
+
     // Clear input and convert send button to stop button
     messageInput.value = '';
-    if (submitBtn) {
-        const submitIcon = document.getElementById('chat-submit-icon');
-        if (submitIcon) {
-            // Change to stop icon
-            submitIcon.innerHTML = '<i class="fas fa-stop"></i>';
-        }
-        submitBtn.classList.remove('is-primary');
-        submitBtn.classList.add('is-danger');
-        // Don't disable - allow stopping
-        submitBtn.onclick = function (e) {
-            e.preventDefault();
-            // TODO: Implement stop functionality
-            console.log('Stop button clicked - stopping AI processing');
-            return false;
-        };
-    }
+    convertToStopButton();
 
     // Show processing indicator
     if (window.showAIProcessStatus) {
@@ -95,10 +148,10 @@ window.handleChatSubmit = async function (event) {
 
         if (useStreaming && context === 'introduction') {
             // Use streaming for introduction refinement
-            await handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID);
+            await handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID, currentAbortController);
         } else {
             // Use non-streaming for other contexts or when disabled
-            await handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation);
+            await handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation, currentAbortController);
         }
 
         // Clear context selections
@@ -110,19 +163,20 @@ window.handleChatSubmit = async function (event) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
     } catch (error) {
-        addErrorMessageToChat('Failed to send message. Please try again.', chatMessages);
-    } finally {
-        // Restore send button
-        if (submitBtn) {
-            const submitIcon = document.getElementById('chat-submit-icon');
-            if (submitIcon) {
-                // Change back to send icon
-                submitIcon.innerHTML = '<i class="fas fa-paper-plane"></i>';
-            }
-            submitBtn.classList.remove('is-danger');
-            submitBtn.classList.add('is-primary');
-            submitBtn.onclick = null; // Remove stop handler
+        // Check if it was an abort
+        if (error.name === 'AbortError') {
+            console.log('Request was cancelled');
+            // Message already shown in stopChatProcessing
+        } else {
+            addErrorMessageToChat('Failed to send message. Please try again.', chatMessages);
         }
+    } finally {
+        // Clear abort controller
+        currentAbortController = null;
+
+        // Restore send button
+        restoreSendButton();
+
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();
         }
@@ -135,7 +189,7 @@ window.handleChatSubmit = async function (event) {
  * Handle streaming chat response using SSE
  * For chat, we stream JSON and extract the message at the end
  */
-async function handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID) {
+async function handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID, abortController) {
 
     // Add streaming query parameter
     const streamEndpoint = `${endpoint}?stream=true`;
@@ -162,7 +216,8 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages, age
     try {
         const response = await fetch(streamEndpoint, {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: abortController.signal
         });
 
         if (!response.ok) {
@@ -173,18 +228,19 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages, age
                 const newEndpoint = `/api/v1/agencies/${agencyID}/designer/conversations/web?stream=true`;
                 const retryResponse = await fetch(newEndpoint, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    signal: abortController.signal
                 });
                 if (!retryResponse.ok) {
                     throw new Error(`HTTP error! status: ${retryResponse.status}`);
                 }
                 // Use the retry response
-                return await processStreamingResponse(retryResponse, messageBubble, streamingText, chatMessages);
+                return await processStreamingResponse(retryResponse, messageBubble, streamingText, chatMessages, abortController);
             }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return await processStreamingResponse(response, messageBubble, streamingText, chatMessages);
+        return await processStreamingResponse(response, messageBubble, streamingText, chatMessages, abortController);
 
     } catch (error) {
         messageBubble.innerHTML = `<p class="has-text-danger">❌ ${error.message}</p>`;
@@ -195,112 +251,130 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages, age
 /**
  * Process the streaming response from the server
  */
-async function processStreamingResponse(response, messageBubble, streamingText, chatMessages) {
+async function processStreamingResponse(response, messageBubble, streamingText, chatMessages, abortController) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
     let currentEvent = '';
     let finalResult = null;
 
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-            break;
-        }
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-        for (const line of lines) {
-            if (!line.trim()) {
-                // Empty line - don't reset event immediately, just log
-                if (currentEvent) {
-                }
-                continue; // Keep currentEvent for next data line
+    try {
+        while (true) {
+            // Check if aborted
+            if (abortController.signal.aborted) {
+                reader.cancel();
+                throw new DOMException('Request aborted', 'AbortError');
             }
 
-            if (line.startsWith('event:')) {
-                currentEvent = line.substring(6).trim();
-            } else if (line.startsWith('data:')) {
-                const data = line.substring(5).trim();
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
 
-                // If no event type yet, treat as chunk continuation
-                if (!currentEvent) {
-                    currentEvent = 'chunk';
-                }
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || ''; // Keep incomplete line in buffer
 
-                if (currentEvent === 'chunk') {
-                    // Display streaming text
-                    streamingText.textContent += data;
-                } else if (currentEvent === 'complete') {
-                    // Parse final result
-                    try {
-                        finalResult = JSON.parse(data);
-                    } catch (e) {
+            for (const line of lines) {
+                if (!line.trim()) {
+                    // Empty line - don't reset event immediately, just log
+                    if (currentEvent) {
                     }
-                } else if (currentEvent === 'error') {
-                } else if (currentEvent === 'start') {
+                    continue; // Keep currentEvent for next data line
+                }
+
+                if (line.startsWith('event:')) {
+                    currentEvent = line.substring(6).trim();
+                } else if (line.startsWith('data:')) {
+                    const data = line.substring(5).trim();
+
+                    // If no event type yet, treat as chunk continuation
+                    if (!currentEvent) {
+                        currentEvent = 'chunk';
+                    }
+
+                    if (currentEvent === 'chunk') {
+                        // Display streaming text
+                        streamingText.textContent += data;
+                    } else if (currentEvent === 'complete') {
+                        // Parse final result
+                        try {
+                            finalResult = JSON.parse(data);
+                        } catch (e) {
+                        }
+                    } else if (currentEvent === 'error') {
+                    } else if (currentEvent === 'start') {
+                    }
                 }
             }
         }
-    }
 
-    // Display the final message
-    if (finalResult) {
-        const message = finalResult.explanation || finalResult.message || 'Changes applied successfully';
+        // Display the final message
+        if (finalResult) {
+            const message = finalResult.explanation || finalResult.message || 'Changes applied successfully';
 
-        // Store conversation ID if this was the first message
-        if (finalResult.conversation_id) {
-            chatMessages.dataset.conversationId = finalResult.conversation_id;
-        } else {
-        }
-
-        // Update the introduction textarea if it was changed
-        if (finalResult.was_changed && finalResult.introduction) {
-            const introTextarea = document.getElementById('introduction-editor');
-            if (introTextarea) {
-                introTextarea.value = finalResult.introduction;
+            // Store conversation ID if this was the first message
+            if (finalResult.conversation_id) {
+                chatMessages.dataset.conversationId = finalResult.conversation_id;
             } else {
             }
+
+            // Update the introduction textarea if it was changed
+            if (finalResult.was_changed && finalResult.introduction) {
+                const introTextarea = document.getElementById('introduction-editor');
+                if (introTextarea) {
+                    introTextarea.value = finalResult.introduction;
+                } else {
+                }
+            } else {
+            }
+
+            // Show if changes were made
+            if (finalResult.was_changed && finalResult.changed_sections) {
+                const sections = finalResult.changed_sections.join(', ');
+                messageBubble.innerHTML = `
+                    <p><strong>${message}</strong></p>
+                    <p class="has-text-grey-light mt-2"><small>✓ Updated: ${sections}</small></p>
+                `;
+            } else {
+                messageBubble.innerHTML = `<p>${message}</p>`;
+            }
         } else {
+            messageBubble.innerHTML = '<p class="has-text-grey">Response received</p>';
         }
 
-        // Show if changes were made
-        if (finalResult.was_changed && finalResult.changed_sections) {
-            const sections = finalResult.changed_sections.join(', ');
-            messageBubble.innerHTML = `
-                <p><strong>${message}</strong></p>
-                <p class="has-text-grey-light mt-2"><small>✓ Updated: ${sections}</small></p>
-            `;
-        } else {
-            messageBubble.innerHTML = `<p>${message}</p>`;
+        // Update timestamp
+        const timeDiv = messageBubble.closest('.ai-message').querySelector('.message-time');
+        if (timeDiv) {
+            timeDiv.textContent = new Date().toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
         }
-    } else {
-        messageBubble.innerHTML = '<p class="has-text-grey">Response received</p>';
-    }
-
-    // Update timestamp
-    const timeDiv = messageBubble.closest('.ai-message').querySelector('.message-time');
-    if (timeDiv) {
-        timeDiv.textContent = new Date().toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit'
-        });
+    } catch (error) {
+        // If aborted, clean up and re-throw
+        if (error.name === 'AbortError') {
+            reader.cancel();
+            throw error;
+        }
+        // For other errors, display them
+        messageBubble.innerHTML = `<p class="has-text-danger">❌ ${error.message}</p>`;
+        throw error;
     }
 }
 
 /**
  * Handle non-streaming chat response
  */
-async function handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation) {
+async function handleNonStreamingChatResponse(endpoint, formData, chatMessages, hasExistingConversation, abortController) {
 
     const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: formData
+        body: formData,
+        signal: abortController.signal
     });
 
     if (!response.ok) {
