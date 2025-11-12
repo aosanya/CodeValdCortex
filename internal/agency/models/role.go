@@ -11,52 +11,46 @@ import (
 // These are the roles referenced in RACI assignments and work item responsibilities
 // Different from agent roles (internal/registry/roles.go) which define agent types/schemas
 type Role struct {
-	Key            string    `json:"_key,omitempty"`            // ArangoDB document key
-	ID             string    `json:"_id,omitempty"`             // Full document ID: "roles/{_key}"
-	AgencyID       string    `json:"agency_id"`                 // Reference to parent agency
-	Code           string    `json:"code"`                      // Unique role code (e.g., "TECH-LEAD", "QA-ENGINEER")
-	Name           string    `json:"name"`                      // Display name (e.g., "Technical Lead")
-	Description    string    `json:"description"`               // Role responsibilities and purpose
-	Tags           []string  `json:"tags,omitempty"`            // Tags for categorizing and filtering roles
-	AutonomyLevel  string    `json:"autonomy_level,omitempty"`  // Level of autonomy (L0-L4)
-	Capabilities   []string  `json:"capabilities,omitempty"`    // List of capabilities
-	RequiredSkills []string  `json:"required_skills,omitempty"` // Required skills/capabilities
-	TokenBudget    int64     `json:"token_budget,omitempty"`    // Token budget for agents in this role
-	Icon           string    `json:"icon,omitempty"`            // Visual icon (emoji or FontAwesome class)
-	Color          string    `json:"color,omitempty"`           // Visual identification color
-	IsActive       bool      `json:"is_active"`                 // Whether role is currently active
-	CreatedAt      time.Time `json:"created_at"`                // Creation timestamp
-	UpdatedAt      time.Time `json:"updated_at"`                // Last update timestamp
+	Key           string    `json:"_key,omitempty"`           // ArangoDB document key
+	ID            string    `json:"_id,omitempty"`            // Full document ID: "roles/{_key}"
+	AgencyID      string    `json:"agency_id"`                // Reference to parent agency
+	Code          string    `json:"code"`                     // Unique role code (e.g., "TECH-LEAD", "QA-ENGINEER")
+	Name          string    `json:"name"`                     // Display name (e.g., "Technical Lead")
+	Description   string    `json:"description"`              // Role responsibilities and purpose
+	Tags          []string  `json:"tags,omitempty"`           // Tags for categorizing and filtering roles
+	AutonomyLevel string    `json:"autonomy_level,omitempty"` // Level of autonomy (L0-L4)
+	TokenBudget   int64     `json:"token_budget,omitempty"`   // Token budget for agents in this role
+	Icon          string    `json:"icon,omitempty"`           // Visual icon (emoji or FontAwesome class)
+	Color         string    `json:"color,omitempty"`          // Visual identification color
+	IsActive      bool      `json:"is_active"`                // Whether role is currently active
+	CreatedAt     time.Time `json:"created_at"`               // Creation timestamp
+	UpdatedAt     time.Time `json:"updated_at"`               // Last update timestamp
 }
 
 // CreateRoleRequest is the request body for creating a role
 type CreateRoleRequest struct {
-	Code           string   `json:"code" binding:"required"`
-	Name           string   `json:"name" binding:"required"`
-	Description    string   `json:"description"`
-	Tags           []string `json:"tags"`
-	AutonomyLevel  string   `json:"autonomy_level"`
-	Capabilities   []string `json:"capabilities"`
-	RequiredSkills []string `json:"required_skills"`
-	TokenBudget    int64    `json:"token_budget"`
-	Icon           string   `json:"icon"`
-	Color          string   `json:"color"`
-	IsActive       bool     `json:"is_active"` // Default: true
+	Code          string   `json:"code" binding:"required"`
+	Name          string   `json:"name" binding:"required"`
+	Description   string   `json:"description"`
+	Tags          []string `json:"tags"`
+	AutonomyLevel string   `json:"autonomy_level"`
+	TokenBudget   int64    `json:"token_budget"`
+	Icon          string   `json:"icon"`
+	Color         string   `json:"color"`
+	IsActive      bool     `json:"is_active"` // Default: true
 }
 
 // UpdateRoleRequest is the request body for updating a role
 type UpdateRoleRequest struct {
-	Code           string   `json:"code" binding:"required"`
-	Name           string   `json:"name" binding:"required"`
-	Description    string   `json:"description"`
-	Tags           []string `json:"tags"`
-	AutonomyLevel  string   `json:"autonomy_level"`
-	Capabilities   []string `json:"capabilities"`
-	RequiredSkills []string `json:"required_skills"`
-	TokenBudget    int64    `json:"token_budget"`
-	Icon           string   `json:"icon"`
-	Color          string   `json:"color"`
-	IsActive       bool     `json:"is_active"`
+	Code          string   `json:"code" binding:"required"`
+	Name          string   `json:"name" binding:"required"`
+	Description   string   `json:"description"`
+	Tags          []string `json:"tags"`
+	AutonomyLevel string   `json:"autonomy_level"`
+	TokenBudget   int64    `json:"token_budget"`
+	Icon          string   `json:"icon"`
+	Color         string   `json:"color"`
+	IsActive      bool     `json:"is_active"`
 }
 
 // StandardAgencyRoles defines the common roles used in agency operations
@@ -116,22 +110,20 @@ var StandardAgencyRoles = []Role{
 func (r *Role) UnmarshalJSON(data []byte) error {
 	// Define a temporary struct with the same fields but Code as interface{}
 	type TempRole struct {
-		Key            string      `json:"_key,omitempty"`
-		ID             string      `json:"_id,omitempty"`
-		AgencyID       string      `json:"agency_id"`
-		Code           interface{} `json:"code"` // Can be string or number
-		Name           string      `json:"name"`
-		Description    string      `json:"description"`
-		Tags           []string    `json:"tags,omitempty"`
-		AutonomyLevel  string      `json:"autonomy_level,omitempty"`
-		Capabilities   []string    `json:"capabilities,omitempty"`
-		RequiredSkills []string    `json:"required_skills,omitempty"`
-		TokenBudget    int64       `json:"token_budget,omitempty"`
-		Icon           string      `json:"icon,omitempty"`
-		Color          string      `json:"color,omitempty"`
-		IsActive       bool        `json:"is_active"`
-		CreatedAt      time.Time   `json:"created_at"`
-		UpdatedAt      time.Time   `json:"updated_at"`
+		Key           string      `json:"_key,omitempty"`
+		ID            string      `json:"_id,omitempty"`
+		AgencyID      string      `json:"agency_id"`
+		Code          interface{} `json:"code"` // Can be string or number
+		Name          string      `json:"name"`
+		Description   string      `json:"description"`
+		Tags          []string    `json:"tags,omitempty"`
+		AutonomyLevel string      `json:"autonomy_level,omitempty"`
+		TokenBudget   int64       `json:"token_budget,omitempty"`
+		Icon          string      `json:"icon,omitempty"`
+		Color         string      `json:"color,omitempty"`
+		IsActive      bool        `json:"is_active"`
+		CreatedAt     time.Time   `json:"created_at"`
+		UpdatedAt     time.Time   `json:"updated_at"`
 	}
 
 	var temp TempRole
@@ -147,8 +139,6 @@ func (r *Role) UnmarshalJSON(data []byte) error {
 	r.Description = temp.Description
 	r.Tags = temp.Tags
 	r.AutonomyLevel = temp.AutonomyLevel
-	r.Capabilities = temp.Capabilities
-	r.RequiredSkills = temp.RequiredSkills
 	r.TokenBudget = temp.TokenBudget
 	r.Icon = temp.Icon
 	r.Color = temp.Color

@@ -73,8 +73,6 @@ function populateRoleForm(role) {
         'role-tags-editor': (role.tags || []).join(', '),
         'role-description-editor': role.description || '',
         'role-autonomy-level-editor': role.autonomy_level || '',
-        'role-capabilities-editor': (role.capabilities || []).join('\n'),
-        'role-required-skills-editor': (role.required_skills || []).join(', '),
         'role-token-budget-editor': role.token_budget || 0,
         'role-icon-editor': role.icon || '',
         'role-color-editor': role.color || '#3298dc'
@@ -90,8 +88,6 @@ function clearRoleForm() {
         'role-tags-editor',
         'role-description-editor',
         'role-autonomy-level-editor',
-        'role-capabilities-editor',
-        'role-required-skills-editor',
         'role-token-budget-editor',
         'role-icon-editor',
         'role-color-editor'
@@ -110,8 +106,6 @@ window.saveRoleFromEditor = function () {
     const tagsText = document.getElementById('role-tags-editor')?.value.trim();
     const description = document.getElementById('role-description-editor')?.value.trim();
     const autonomyLevel = document.getElementById('role-autonomy-level-editor')?.value;
-    const capabilitiesText = document.getElementById('role-capabilities-editor')?.value.trim();
-    const requiredSkillsText = document.getElementById('role-required-skills-editor')?.value.trim();
     const tokenBudget = parseInt(document.getElementById('role-token-budget-editor')?.value || '0');
     const icon = document.getElementById('role-icon-editor')?.value.trim();
     const color = document.getElementById('role-color-editor')?.value;
@@ -132,17 +126,9 @@ window.saveRoleFromEditor = function () {
         return;
     }
 
-    // Parse tags, capabilities and skills
+    // Parse tags
     const tags = tagsText
         ? tagsText.split(',').map(t => t.trim()).filter(t => t)
-        : [];
-
-    const capabilities = capabilitiesText
-        ? capabilitiesText.split('\n').map(c => c.trim().replace(/^-\s*/, '')).filter(c => c)
-        : [];
-
-    const requiredSkills = requiredSkillsText
-        ? requiredSkillsText.split(',').map(s => s.trim()).filter(s => s)
         : [];
 
     // Construct payload
@@ -152,8 +138,6 @@ window.saveRoleFromEditor = function () {
         tags,
         description,
         autonomy_level: autonomyLevel,
-        capabilities,
-        required_skills: requiredSkills,
         token_budget: tokenBudget,
         icon,
         color,
@@ -183,8 +167,6 @@ window.cancelRoleEdit = function () {
         'role-tags-editor',
         'role-description-editor',
         'role-autonomy-level-editor',
-        'role-capabilities-editor',
-        'role-required-skills-editor',
         'role-token-budget-editor',
         'role-icon-editor',
         'role-color-editor'
