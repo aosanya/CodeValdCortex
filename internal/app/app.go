@@ -2,19 +2,16 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
-	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
@@ -393,7 +390,6 @@ func (a *App) setupServer() error {
 			v1.DELETE("/workflows/:id", workflowHandler.DeleteWorkflow)
 			v1.POST("/workflows/:id/duplicate", workflowHandler.DuplicateWorkflow)
 			v1.POST("/workflows/validate", workflowHandler.ValidateWorkflow)
-			v1.POST("/workflows/:id/execute", workflowHandler.StartExecution)
 			a.logger.Info("Workflow endpoints registered")
 		}
 
@@ -469,101 +465,4 @@ func (a *App) setupServer() error {
 	}
 
 	return nil
-}
-
-// loadAgentInstancesFromDirectory loads agent instance definitions from JSON files in a directory
-func loadAgentInstancesFromDirectory(ctx context.Context, dir string, repo *registry.Repository, logger *logrus.Logger) error {
-	// Check if directory exists
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return nil
-	}
-
-	// Read all JSON files from directory
-	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
-	if err != nil {
-		return fmt.Errorf("failed to read agent instances directory: %w", err)
-	}
-
-	if len(files) == 0 {
-		return nil
-	}
-
-	logger.WithFields(logrus.Fields{
-		"dir":   dir,
-		"count": len(files),
-	}).Info("Loading use case agent instances")
-
-	loadedCount := 0
-	skippedCount := 0
-
-	// Load each agent instance file
-	for _, file := range files {
-		count, skipped, err := loadAgentInstancesFromFile(ctx, file, repo, logger)
-		if err != nil {
-			logger.WithError(err).WithField("file", file).Error("Failed to load agent instances")
-			continue
-		}
-		loadedCount += count
-		skippedCount += skipped
-	}
-
-	logger.WithFields(logrus.Fields{
-		"loaded":  loadedCount,
-		"skipped": skippedCount,
-	}).Info("Completed loading agent instances")
-
-	return nil
-}
-
-// loadAgentInstancesFromFile loads agent instances from a JSON file
-func loadAgentInstancesFromFile(ctx context.Context, filename string, repo *registry.Repository, logger *logrus.Logger) (int, int, error) {
-	// Read file
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Parse JSON as array of agents
-	var agents []agent.Agent
-	if err := json.Unmarshal(data, &agents); err != nil {
-		return 0, 0, fmt.Errorf("failed to parse JSON: %w", err)
-	}
-
-	loadedCount := 0
-	skippedCount := 0
-
-	// Create each agent instance
-	for i := range agents {
-		ag := &agents[i]
-		// Check if agent already exists
-		existing, err := repo.Get(ctx, ag.ID)
-		if err == nil && existing != nil {
-			logger.WithFields(logrus.Fields{
-				"id":   ag.ID,
-				"name": ag.Name,
-				"type": ag.Type,
-			}).Info("Agent instance already exists, skipping")
-			skippedCount++
-			continue
-		} // Create the agent
-		if err := repo.Create(ctx, ag); err != nil {
-			logger.WithError(err).WithFields(logrus.Fields{
-				"id":   ag.ID,
-				"name": ag.Name,
-				"type": ag.Type,
-			}).Error("Failed to create agent instance")
-			continue
-		}
-
-		logger.WithFields(logrus.Fields{
-			"id":   ag.ID,
-			"name": ag.Name,
-			"type": ag.Type,
-			"file": filepath.Base(filename),
-		}).Info("Loaded agent instance")
-
-		loadedCount++
-	}
-
-	return loadedCount, skippedCount, nil
 }

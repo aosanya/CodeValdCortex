@@ -12,64 +12,49 @@ const (
 	RACIInformed    RACIRole = "I" // Kept in the loop
 )
 
-// RACIActivity represents a single activity/task in the RACI matrix
-type RACIActivity struct {
-	ID          string              `json:"id"`
-	Name        string              `json:"name"`
-	Description string              `json:"description"`
-	Assignments map[string]RACIRole `json:"assignments"` // role_code or role_name -> RACI role (R/A/C/I)
-	Order       int                 `json:"order"`       // For display ordering
+// RACIRoleAssignment represents a role assignment within a RACI activity
+type RACIRoleAssignment struct {
+	RoleKey     string   `json:"role_key"`              // Reference to Role.Key
+	RoleName    string   `json:"role_name,omitempty"`   // Denormalized for display
+	RACI        RACIRole `json:"raci"`                  // R, A, C, or I
+	Description string   `json:"description,omitempty"` // Optional: what this role does for this activity
 }
 
 // RACIMatrix represents a complete RACI matrix for an agency
 type RACIMatrix struct {
-	Key         string         `json:"_key,omitempty"`
-	ID          string         `json:"_id,omitempty"`
-	AgencyID    string         `json:"agency_id"`
-	WorkItemKey string         `json:"work_item_key,omitempty"` // Optional: link to specific work item
-	Name        string         `json:"name"`
-	Description string         `json:"description,omitempty"`
-	Activities  []RACIActivity `json:"activities"`
-	Roles       []string       `json:"roles"` // List of role codes/names (references Role.Code from role.go)
-	TemplateID  string         `json:"template_id,omitempty"`
-	IsValid     bool           `json:"is_valid"`
-	Errors      []string       `json:"errors,omitempty"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	Key         string               `json:"_key,omitempty"`
+	ID          string               `json:"_id,omitempty"`
+	AgencyID    string               `json:"agency_id"`
+	WorkItemKey string               `json:"work_item_key,omitempty"` // Optional: link to specific work item
+	Assignments []RACIRoleAssignment `json:"assignments"`             // All role assignments for this matrix
+	CreatedAt   time.Time            `json:"created_at"`
+	UpdatedAt   time.Time            `json:"updated_at"`
 }
 
 // RACITemplate represents a reusable RACI matrix template
 type RACITemplate struct {
-	Key         string         `json:"_key,omitempty"`
-	ID          string         `json:"_id,omitempty"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Category    string         `json:"category"` // e.g., "Software Development", "Research", "Infrastructure"
-	Activities  []RACIActivity `json:"activities"`
-	Roles       []string       `json:"roles"`
-	IsPublic    bool           `json:"is_public"` // Available to all agencies
-	AgencyID    string         `json:"agency_id,omitempty"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	Key         string               `json:"_key,omitempty"`
+	ID          string               `json:"_id,omitempty"`
+	Name        string               `json:"name"`
+	Description string               `json:"description"`
+	Category    string               `json:"category"` // e.g., "Software Development", "Research", "Infrastructure"
+	Assignments []RACIRoleAssignment `json:"assignments"`
+	IsPublic    bool                 `json:"is_public"` // Available to all agencies
+	AgencyID    string               `json:"agency_id,omitempty"`
+	CreatedAt   time.Time            `json:"created_at"`
+	UpdatedAt   time.Time            `json:"updated_at"`
 }
 
 // CreateRACIMatrixRequest is the request body for creating a RACI matrix
 type CreateRACIMatrixRequest struct {
-	Name        string         `json:"name" binding:"required"`
-	Description string         `json:"description"`
-	WorkItemKey string         `json:"work_item_key,omitempty"`
-	Activities  []RACIActivity `json:"activities"`
-	Roles       []string       `json:"roles"`
-	TemplateID  string         `json:"template_id,omitempty"`
+	WorkItemKey string               `json:"work_item_key,omitempty"`
+	Assignments []RACIRoleAssignment `json:"assignments"`
 }
 
 // UpdateRACIMatrixRequest is the request body for updating a RACI matrix
 type UpdateRACIMatrixRequest struct {
-	Name        string         `json:"name" binding:"required"`
-	Description string         `json:"description"`
-	WorkItemKey string         `json:"work_item_key,omitempty"`
-	Activities  []RACIActivity `json:"activities"`
-	Roles       []string       `json:"roles"`
+	WorkItemKey string               `json:"work_item_key,omitempty"`
+	Assignments []RACIRoleAssignment `json:"assignments"`
 }
 
 // RACIValidationResult contains validation results for a RACI matrix

@@ -151,28 +151,3 @@ func (h *WorkflowHandler) ListWorkflows(c *gin.Context) {
 
 	c.JSON(http.StatusOK, workflows)
 }
-
-// StartExecution handles POST /api/v1/workflows/:id/execute
-func (h *WorkflowHandler) StartExecution(c *gin.Context) {
-	id := c.Param("id")
-
-	var req struct {
-		Context map[string]interface{} `json:"context"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	// TODO: Get user from context/session
-	startedBy := "system"
-
-	execution, err := h.service.StartExecution(c.Request.Context(), id, startedBy, req.Context)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to start execution")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start execution", "details": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, execution)
-}

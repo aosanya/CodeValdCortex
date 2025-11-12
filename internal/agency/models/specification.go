@@ -40,6 +40,7 @@ type AgencySpecification struct {
 	WorkItems    []WorkItem  `json:"work_items"`   // Tasks and activities (reuses existing WorkItem model)
 	Roles        []Role      `json:"roles"`        // Team roles and structure (uses Role model from role.go)
 	RACIMatrix   *RACIMatrix `json:"raci_matrix"`  // Responsibility assignments (reuses existing RACIMatrix model)
+	Workflows    []Workflow  `json:"workflows"`    // Process orchestration and work item flow
 }
 
 // SpecificationUpdateRequest represents a request to update the entire specification
@@ -49,12 +50,13 @@ type SpecificationUpdateRequest struct {
 	WorkItems    *[]WorkItem `json:"work_items,omitempty"`
 	Roles        *[]Role     `json:"roles,omitempty"`
 	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
+	Workflows    *[]Workflow `json:"workflows,omitempty"`
 	UpdatedBy    string      `json:"updated_by,omitempty"`
 }
 
 // SpecificationPatchRequest represents a partial update to specific sections
 type SpecificationPatchRequest struct {
-	Section   string      `json:"section"` // "introduction", "goals", "work_items", "roles", "raci_matrix"
+	Section   string      `json:"section"` // "introduction", "goals", "work_items", "roles", "raci_matrix", "workflows"
 	Data      interface{} `json:"data"`    // Section-specific data
 	UpdatedBy string      `json:"updated_by,omitempty"`
 }
@@ -72,6 +74,7 @@ type CreateSpecificationRequest struct {
 	WorkItems    []WorkItem  `json:"work_items,omitempty"`
 	Roles        []Role      `json:"roles,omitempty"`
 	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
+	Workflows    []Workflow  `json:"workflows,omitempty"`
 }
 
 // NewAgencySpecification creates a new specification with default values
@@ -87,6 +90,7 @@ func NewAgencySpecification(agencyID string) *AgencySpecification {
 		WorkItems:    []WorkItem{},
 		Roles:        []Role{},
 		RACIMatrix:   nil,
+		Workflows:    []Workflow{},
 	}
 }
 
@@ -160,5 +164,26 @@ func (s *AgencySpecification) SetRoles(roles []Role, updatedBy string) {
 // SetRACIMatrix replaces the RACI matrix
 func (s *AgencySpecification) SetRACIMatrix(matrix *RACIMatrix, updatedBy string) {
 	s.RACIMatrix = matrix
+	s.IncrementVersion(updatedBy)
+}
+
+// SetWorkflows replaces all workflows
+func (s *AgencySpecification) SetWorkflows(workflows []Workflow, updatedBy string) {
+	// Generate keys for workflows that don't have them
+	for i := range workflows {
+		if workflows[i].Key == "" {
+			workflows[i].Key = uuid.New().String()
+		}
+		// Set timestamps
+		if workflows[i].CreatedAt.IsZero() {
+			workflows[i].CreatedAt = time.Now()
+		}
+		workflows[i].UpdatedAt = time.Now()
+
+		// Ensure agency ID is set
+		workflows[i].AgencyID = s.AgencyID
+	}
+
+	s.Workflows = workflows
 	s.IncrementVersion(updatedBy)
 }

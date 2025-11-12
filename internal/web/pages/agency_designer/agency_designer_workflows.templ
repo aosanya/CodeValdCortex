@@ -83,12 +83,6 @@ templ WorkflowStatusBadge(status models.WorkflowStatus) {
 			<span class="tag is-light">Draft</span>
 		case models.WorkflowStatusActive:
 			<span class="tag is-success is-light">Active</span>
-		case models.WorkflowStatusPaused:
-			<span class="tag is-warning is-light">Paused</span>
-		case models.WorkflowStatusCompleted:
-			<span class="tag is-info is-light">Completed</span>
-		case models.WorkflowStatusFailed:
-			<span class="tag is-danger is-light">Failed</span>
 		default:
 			<span class="tag is-light">{ string(status) }</span>
 	}

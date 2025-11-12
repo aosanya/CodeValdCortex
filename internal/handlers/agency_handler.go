@@ -443,21 +443,26 @@ func (h *AgencyHandler) GetRACIMatrix(c *gin.Context) {
 
 	// Extract assignments from the RACI matrix if it exists
 	assignments := make(map[string]interface{})
-	if spec.RACIMatrix != nil && len(spec.RACIMatrix.Activities) > 0 {
-		// Convert the RACI matrix activities to the format expected by JavaScript
-		for _, activity := range spec.RACIMatrix.Activities {
-			if len(activity.Assignments) > 0 {
-				// Convert to JavaScript format: map[roleKey]RACIRole -> map[roleKey]builder.RACIAssignment
-				jsAssignments := make(map[string]builder.RACIAssignment)
-				for roleKey, raciRole := range activity.Assignments {
-					jsAssignments[roleKey] = builder.RACIAssignment{
-						RACI:      string(raciRole),
-						Objective: "", // TODO: Store objectives in the model
-					}
-				}
-				// Use activity ID as the work item key
-				assignments[activity.ID] = jsAssignments
+	if spec.RACIMatrix != nil && len(spec.RACIMatrix.Assignments) > 0 {
+		// Group assignments by work item key for JavaScript
+		for _, assignment := range spec.RACIMatrix.Assignments {
+			workItemKey := spec.RACIMatrix.WorkItemKey
+			if workItemKey == "" {
+				workItemKey = "default"
 			}
+
+			// Initialize the work item assignments map if needed
+			if assignments[workItemKey] == nil {
+				assignments[workItemKey] = make(map[string]builder.RACIAssignment)
+			}
+
+			// Add the assignment
+			workItemAssignments := assignments[workItemKey].(map[string]builder.RACIAssignment)
+			workItemAssignments[assignment.RoleKey] = builder.RACIAssignment{
+				RACI:      string(assignment.RACI),
+				Objective: assignment.Description,
+			}
+			assignments[workItemKey] = workItemAssignments
 		}
 	}
 
@@ -483,28 +488,21 @@ func (h *AgencyHandler) SaveRACIMatrix(c *gin.Context) {
 		return
 	}
 
-	// Convert the assignments to RACIMatrix format
-	activities := make([]models.RACIActivity, 0)
-	for workItemKey, roleAssignments := range req.Assignments {
-		// Convert the JavaScript format to models.RACIRole format
-		modelAssignments := make(map[string]models.RACIRole)
+	// Convert the assignments to RACI Matrix format
+	allAssignments := make([]models.RACIRoleAssignment, 0)
+	for _, roleAssignments := range req.Assignments {
 		for roleKey, assignment := range roleAssignments {
-			modelAssignments[roleKey] = models.RACIRole(assignment.RACI)
+			allAssignments = append(allAssignments, models.RACIRoleAssignment{
+				RoleKey:     roleKey,
+				RACI:        models.RACIRole(assignment.RACI),
+				Description: assignment.Objective,
+			})
 		}
-
-		activity := models.RACIActivity{
-			ID:          workItemKey,
-			Name:        workItemKey, // Use work item key as name for now
-			Assignments: modelAssignments,
-		}
-		activities = append(activities, activity)
 	}
 
 	raciMatrix := &models.RACIMatrix{
-		AgencyID:   id,
-		Name:       "RACI Matrix",
-		Activities: activities,
-		IsValid:    true, // TODO: Add validation
+		AgencyID:    id,
+		Assignments: allAssignments,
 	}
 
 	// Use default user if not provided

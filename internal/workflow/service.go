@@ -63,21 +63,8 @@ func (s *Service) UpdateWorkflow(ctx context.Context, workflow *models.Workflow)
 	return nil
 }
 
-// DeleteWorkflow deletes a workflow
+// DeleteWorkflow deletes a workflow (soft delete)
 func (s *Service) DeleteWorkflow(ctx context.Context, id string) error {
-	// Check for active executions
-	executions, err := s.repo.GetExecutionsByWorkflowID(ctx, id)
-	if err != nil {
-		return fmt.Errorf("failed to check executions: %w", err)
-	}
-
-	for _, exec := range executions {
-		if exec.Status == models.WorkflowStatusActive {
-			return fmt.Errorf("cannot delete workflow with active executions")
-		}
-	}
-
-	// Delete workflow
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return fmt.Errorf("failed to delete workflow: %w", err)
 	}
@@ -101,7 +88,6 @@ func (s *Service) DuplicateWorkflow(ctx context.Context, id string) (*models.Wor
 		Status:      models.WorkflowStatusDraft,
 		Nodes:       make([]models.WorkflowNode, len(original.Nodes)),
 		Edges:       make([]models.WorkflowEdge, len(original.Edges)),
-		Variables:   make(map[string]interface{}),
 		AgencyID:    original.AgencyID,
 		CreatedBy:   original.CreatedBy,
 	}
@@ -111,11 +97,6 @@ func (s *Service) DuplicateWorkflow(ctx context.Context, id string) (*models.Wor
 
 	// Deep copy edges
 	copy(duplicate.Edges, original.Edges)
-
-	// Deep copy variables
-	for k, v := range original.Variables {
-		duplicate.Variables[k] = v
-	}
 
 	// Create the duplicate
 	if err := s.CreateWorkflow(ctx, duplicate); err != nil {
@@ -175,13 +156,10 @@ func (s *Service) ValidateWorkflowStructure(workflow *models.Workflow) *models.W
 
 	// Validate status
 	validStatuses := map[models.WorkflowStatus]bool{
-		models.WorkflowStatusDraft:     true,
-		models.WorkflowStatusActive:    true,
-		models.WorkflowStatusPaused:    true,
-		models.WorkflowStatusCompleted: true,
-		models.WorkflowStatusFailed:    true,
+		models.WorkflowStatusDraft:  true,
+		models.WorkflowStatusActive: true,
 	}
-	if !validStatuses[workflow.Status] {
+	if workflow.Status != "" && !validStatuses[workflow.Status] {
 		result.Valid = false
 		result.Errors = append(result.Errors, models.ValidationError{
 			Field:   "status",
@@ -230,38 +208,23 @@ func (s *Service) validateNodes(workflow *models.Workflow, result *models.Workfl
 		}
 		nodeIDs[node.ID] = true
 
-		// Track start and end nodes
-		if node.Type == models.NodeTypeStart {
-			hasStart = true
-		}
-		if node.Type == models.NodeTypeEnd {
-			hasEnd = true
-		}
-
-		// Validate node type
-		validNodeTypes := map[models.NodeType]bool{
-			models.NodeTypeStart:    true,
-			models.NodeTypeWorkItem: true,
-			models.NodeTypeDecision: true,
-			models.NodeTypeParallel: true,
-			models.NodeTypeEnd:      true,
-		}
-		if !validNodeTypes[node.Type] {
+		// Validate node type - only work_item nodes are supported
+		if node.Type != models.NodeTypeWorkItem {
 			result.Valid = false
 			result.Errors = append(result.Errors, models.ValidationError{
 				Field:   "nodes",
-				Message: fmt.Sprintf("Invalid node type: %s", node.Type),
+				Message: fmt.Sprintf("Invalid node type: %s. Only 'work_item' nodes are supported", node.Type),
 				NodeID:  node.ID,
 			})
 		}
 
 		// Validate node-specific data
 		if node.Type == models.NodeTypeWorkItem {
-			if node.Data.WorkItemID == "" {
+			if node.Data.WorkItemKey == "" {
 				result.Valid = false
 				result.Errors = append(result.Errors, models.ValidationError{
 					Field:   "nodes",
-					Message: "Work item node must have work_item_id",
+					Message: "Work item node must have work_item_key",
 					NodeID:  node.ID,
 				})
 			}
@@ -329,34 +292,9 @@ func (s *Service) validateEdges(workflow *models.Workflow, result *models.Workfl
 				EdgeID:  edge.ID,
 			})
 		}
-
-		// Validate edge type
-		validEdgeTypes := map[models.EdgeType]bool{
-			models.EdgeTypeSequential:  true,
-			models.EdgeTypeConditional: true,
-			models.EdgeTypeDataFlow:    true,
-		}
-		if !validEdgeTypes[edge.Type] {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "edges",
-				Message: fmt.Sprintf("Invalid edge type: %s", edge.Type),
-				EdgeID:  edge.ID,
-			})
-		}
-
-		// Validate conditional edges have conditions
-		if edge.Type == models.EdgeTypeConditional && edge.Data.Condition == "" {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "edges",
-				Message: "Conditional edge must have a condition",
-				EdgeID:  edge.ID,
-			})
-		}
 	}
 
-	// Check for orphaned nodes (nodes with no incoming or outgoing edges)
+	// Validate edges
 	if len(workflow.Edges) > 0 {
 		s.checkOrphanedNodes(workflow, result)
 	}
@@ -373,16 +311,7 @@ func (s *Service) checkOrphanedNodes(workflow *models.Workflow, result *models.W
 	}
 
 	for _, node := range workflow.Nodes {
-		// Start nodes don't need incoming edges
-		if node.Type == models.NodeTypeStart {
-			continue
-		}
-		// End nodes don't need outgoing edges
-		if node.Type == models.NodeTypeEnd {
-			continue
-		}
-
-		// Other nodes should have both
+		// All work item nodes should have connections
 		if !hasIncoming[node.ID] && !hasOutgoing[node.ID] {
 			result.Valid = false
 			result.Errors = append(result.Errors, models.ValidationError{
@@ -392,40 +321,4 @@ func (s *Service) checkOrphanedNodes(workflow *models.Workflow, result *models.W
 			})
 		}
 	}
-}
-
-// StartExecution starts a new workflow execution
-func (s *Service) StartExecution(ctx context.Context, workflowID, startedBy string, context map[string]interface{}) (*models.WorkflowExecution, error) {
-	// Get workflow
-	workflow, err := s.repo.GetByID(ctx, workflowID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get workflow: %w", err)
-	}
-
-	// Validate workflow
-	if err := s.ValidateWorkflow(workflow); err != nil {
-		return nil, fmt.Errorf("workflow validation failed: %w", err)
-	}
-
-	// Create execution
-	execution := &models.WorkflowExecution{
-		WorkflowID:      workflowID,
-		WorkflowVersion: workflow.Version,
-		Status:          models.WorkflowStatusActive,
-		StartedBy:       startedBy,
-		Context:         context,
-		NodeExecutions:  []models.NodeExecution{},
-		Errors:          []string{},
-	}
-
-	if err := s.repo.CreateExecution(ctx, execution); err != nil {
-		return nil, fmt.Errorf("failed to create execution: %w", err)
-	}
-
-	s.logger.WithFields(logrus.Fields{
-		"workflow_id":  workflowID,
-		"execution_id": execution.ID,
-	}).Info("Started workflow execution")
-
-	return execution, nil
 }

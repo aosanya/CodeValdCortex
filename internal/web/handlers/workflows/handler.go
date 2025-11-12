@@ -198,44 +198,6 @@ func (h *Handler) ValidateWorkflow(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// ExecuteWorkflow triggers workflow execution by creating Gitea issues
-func (h *Handler) ExecuteWorkflow(c *gin.Context) {
-	var req models.WorkflowExecutionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Load workflow
-	workflow, err := h.getWorkflowByID(c.Request.Context(), req.WorkflowID)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Workflow not found"})
-		return
-	}
-
-	// Validate workflow first
-	validation := h.validateWorkflowStructure(workflow)
-	if !validation.Valid {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":  "Workflow validation failed",
-			"errors": validation.Errors,
-		})
-		return
-	}
-
-	// TODO: Implement Gitea issue creation in next phase
-	// For now, return a placeholder response
-	result := models.WorkflowExecutionResult{
-		WorkflowID:   workflow.Key,
-		ExecutionID:  uuid.New().String(),
-		Status:       "pending",
-		CreatedNodes: []models.WorkflowNodeResult{},
-		StartedAt:    time.Now(),
-	}
-
-	c.JSON(http.StatusOK, result)
-}
-
 // Helper functions
 
 func (h *Handler) getWorkflowByID(ctx context.Context, workflowID string) (*models.Workflow, error) {
@@ -283,34 +245,6 @@ func (h *Handler) validateWorkflowStructure(workflow *models.Workflow) models.Wo
 	orphanedNodes := h.findOrphanedNodes(workflow)
 	if len(orphanedNodes) > 0 {
 		result.Warnings = append(result.Warnings, fmt.Sprintf("Found %d orphaned nodes that have no incoming or outgoing edges", len(orphanedNodes)))
-	}
-
-	// Validate node data
-	for _, node := range workflow.Nodes {
-		if node.Data.Title == "" {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "title",
-				Message: fmt.Sprintf("Node %s is missing a title", node.ID),
-				NodeID:  node.ID,
-			})
-		}
-		if node.Data.Description == "" {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "description",
-				Message: fmt.Sprintf("Node %s is missing a description", node.ID),
-				NodeID:  node.ID,
-			})
-		}
-		if node.Data.GiteaConfig != nil && node.Data.GiteaConfig.Repo == "" {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "repository",
-				Message: fmt.Sprintf("Node %s is missing a repository", node.ID),
-				NodeID:  node.ID,
-			})
-		}
 	}
 
 	return result
