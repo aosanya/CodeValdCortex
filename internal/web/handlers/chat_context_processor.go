@@ -158,14 +158,32 @@ func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, agencyID, userM
 		"agencyID", agencyID,
 		"conversationID", conversationID)
 
-	// DISABLED: Work item chat requires refactoring for unified specification model
-	// Set the user request in the form so the ai_refine handler can access it
-	// c.Request.PostForm.Set("user-request", userMessage)
-	// c.Request.PostForm.Set("message", userMessage)
-	// h.aiRefineHandler.RefineWorkItems(c)
+	// Set the user request in a dynamic request structure for work items chat processing
+	dynamicReq := struct {
+		UserMessage  string   `json:"user_message"`
+		WorkItemKeys []string `json:"work_item_keys"`
+	}{
+		UserMessage:  userMessage,
+		WorkItemKeys: []string{}, // Empty means process all work items based on message context
+	}
 
-	h.logger.Warn("Work item processing is temporarily disabled - needs refactoring for unified specification model")
-	result := "disabled"
+	// Store the request in the context so ProcessWorkItemsChatRequestStreaming can access it
+	c.Set("dynamic_request", dynamicReq)
+
+	// Check if streaming is requested
+	streamMode := c.Query("stream") == "true"
+
+	if streamMode {
+		// Delegate to streaming version
+		h.aiRefineHandler.ProcessWorkItemsChatRequestStreaming(c)
+	} else {
+		h.logger.Warn("Non-streaming work item processing not yet implemented")
+		result := "non_streaming_not_implemented"
+		return &result, nil
+	}
+
+	// If we got here without panic, consider it successful
+	result := "success"
 	return &result, nil
 }
 

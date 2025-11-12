@@ -27,22 +27,152 @@ func NewAIWorkItemsBuilder(llmClient LLMClient, logger *logrus.Logger) *WorkItem
 	}
 }
 
-// RefineWorkItems is the main dynamic method for all work item operations
-// It analyzes the user message to determine what action to take and handles
-// work item refinement, generation, consolidation, and enhancement
+// RefineWorkItems dynamically determines and executes the appropriate work item operation based on user message
 func (w *WorkItemsBuilder) RefineWorkItems(ctx context.Context, req *builder.RefineWorkItemsRequest, builderContext builder.BuilderContext) (*builder.RefineWorkItemsResponse, error) {
-	w.logger.WithField("agency_id", req.AgencyID).Info("Starting dynamic work item processing")
+	w.logger.WithFields(logrus.Fields{
+		"agency_id":           req.AgencyID,
+		"user_message":        req.UserMessage,
+		"target_work_items":   len(req.TargetWorkItems),
+		"existing_work_items": len(req.ExistingWorkItems),
+	}).Info("Starting dynamic work item refinement")
 
-	// For now, return a placeholder response
-	// TODO: Implement dynamic work item processing following the pattern from goals_builder.go
-	response := &builder.RefineWorkItemsResponse{
-		Action:         "under_construction",
-		Explanation:    "Work item processing is under construction. This will analyze the user message to determine whether to refine existing work items, generate new work items, consolidate duplicate work items, or enhance all work items.",
-		NoActionNeeded: false,
+	// Build the prompt to determine what action to take
+	prompt := w.buildDynamicWorkItemsPrompt(req, builderContext)
+
+	// Make the LLM request to determine action
+	response, err := w.llmClient.Chat(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: dynamicWorkItemsSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+	})
+
+	if err != nil {
+		w.logger.WithError(err).Error("Failed to get AI response for dynamic work item refinement")
+		return nil, fmt.Errorf("AI refinement failed: %w", err)
 	}
 
-	w.logger.Info("Dynamic work item processing completed (placeholder)")
-	return response, nil
+	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
+	var result builder.RefineWorkItemsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
+		w.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse dynamic work items response")
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	w.logger.WithFields(logrus.Fields{
+		"action":           result.Action,
+		"refined_count":    len(result.RefinedWorkItems),
+		"generated_count":  len(result.GeneratedWorkItems),
+		"no_action_needed": result.NoActionNeeded,
+	}).Info("Dynamic work item refinement completed")
+
+	return &result, nil
+}
+
+// RefineWorkItemsStream performs dynamic work item refinement with streaming support
+// Similar to RefineWorkItems but streams chunks to the callback as they arrive from the LLM
+func (w *WorkItemsBuilder) RefineWorkItemsStream(ctx context.Context, req *builder.RefineWorkItemsRequest, builderContext builder.BuilderContext, streamCallback StreamCallback) (*builder.RefineWorkItemsResponse, error) {
+	w.logger.WithFields(logrus.Fields{
+		"agency_id":           req.AgencyID,
+		"user_message":        req.UserMessage,
+		"target_work_items":   len(req.TargetWorkItems),
+		"existing_work_items": len(req.ExistingWorkItems),
+	}).Info("Starting streaming dynamic work item refinement")
+
+	// Build the prompt
+	prompt := w.buildDynamicWorkItemsPrompt(req, builderContext)
+
+	// Stream the LLM response
+	var contentBuilder strings.Builder
+	err := w.llmClient.ChatStream(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: dynamicWorkItemsSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		Stream: true,
+	}, func(chunk string) error {
+		// Accumulate content for final parsing
+		contentBuilder.WriteString(chunk)
+
+		// Forward chunk to the callback (for SSE streaming)
+		if streamCallback != nil {
+			return streamCallback(chunk)
+		}
+		return nil
+	})
+
+	if err != nil {
+		w.logger.WithError(err).Error("Failed to stream AI response for dynamic work item refinement")
+		return nil, fmt.Errorf("AI streaming refinement failed: %w", err)
+	}
+
+	// Parse the accumulated response
+	fullContent := contentBuilder.String()
+	cleanedContent := stripMarkdownFences(fullContent)
+
+	var result builder.RefineWorkItemsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
+		w.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse streamed work items response")
+		return nil, fmt.Errorf("failed to parse streamed response: %w", err)
+	}
+
+	w.logger.WithFields(logrus.Fields{
+		"action":           result.Action,
+		"refined_count":    len(result.RefinedWorkItems),
+		"generated_count":  len(result.GeneratedWorkItems),
+		"no_action_needed": result.NoActionNeeded,
+	}).Info("Streaming dynamic work item refinement completed")
+
+	return &result, nil
+}
+
+// buildDynamicWorkItemsPrompt creates the prompt for dynamic work item processing
+func (w *WorkItemsBuilder) buildDynamicWorkItemsPrompt(req *builder.RefineWorkItemsRequest, contextData builder.BuilderContext) string {
+	var builder strings.Builder
+
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(contextData))
+
+	builder.WriteString("\n\n### USER REQUEST\n")
+	builder.WriteString(req.UserMessage)
+	builder.WriteString("\n\n")
+
+	if len(req.TargetWorkItems) > 0 {
+		builder.WriteString("### TARGET WORK ITEMS FOR OPERATION\n")
+		for _, item := range req.TargetWorkItems {
+			builder.WriteString(fmt.Sprintf("- **%s** (%s): %s\n", item.Key, item.Code, item.Title))
+			if item.Description != "" {
+				builder.WriteString(fmt.Sprintf("  Description: %s\n", item.Description))
+			}
+			if len(item.Deliverables) > 0 {
+				builder.WriteString("  Deliverables:\n")
+				for _, deliverable := range item.Deliverables {
+					builder.WriteString(fmt.Sprintf("    - %s\n", deliverable))
+				}
+			}
+			if len(item.Tags) > 0 {
+				builder.WriteString(fmt.Sprintf("  Tags: %v\n", item.Tags))
+			}
+		}
+		builder.WriteString("\n")
+	}
+
+	builder.WriteString("Based on the user's request and the agency context, determine what needs to be done with the work items and execute the appropriate action.")
+
+	return builder.String()
 }
 
 // aiWorkItemRefinementResponse represents the JSON structure returned by the AI
@@ -302,6 +432,65 @@ func (r *WorkItemsBuilder) buildWorkItemConsolidationPrompt(_ *builder.Consolida
 }
 
 // System prompts for work item operations
+const dynamicWorkItemsSystemPrompt = SharedAgencyContext + `
+
+Act as a strategic work item management AI. Modify work items based on user requests.
+
+CRITICAL: Work items are AGENT ACTIONS that appear on Kanban boards (To Do → In Progress → Done).
+They are NOT system implementation tasks or features to build.
+
+AGENT ACTION work items (✅): Operational tasks agents perform
+- "Review technical specification for API completeness"
+- "Execute unit test suite for authentication module"
+- "Deploy release v1.2.3 to staging environment"
+- "Analyze code coverage report and identify gaps"
+- "Process stakeholder feedback from requirements meeting"
+- "Validate gRPC service contract compliance"
+- "Generate weekly project status report"
+- "Scan codebase for security vulnerabilities"
+- "Monitor production system performance metrics"
+- "Respond to critical incident alert #1234"
+
+IMPLEMENTATION tasks (❌): System building (NOT work items)
+- "Build payment processing API"
+- "Create monitoring dashboard"
+- "Implement CI/CD pipeline"
+- "Design database schema"
+
+## Kanban-Ready Characteristics:
+- **Action verbs**: Review, Analyze, Execute, Test, Deploy, Monitor, Process, Validate, Generate, Scan, Track, Coordinate
+- **Specific scope**: Completable within a sprint
+- **Measurable completion**: Clear done criteria
+- **Agent-executable**: Autonomous or human-in-loop can perform
+
+## Actions:
+**remove** - Delete work items (return in consolidated_data.removed_work_items)
+**refine** - Improve existing work items to be more action-oriented
+**generate** - Create new agent action work items aligned with goals
+**consolidate** - Merge duplicate actions
+**enhance_all** - Refine all work items
+**no_action** - Already optimal
+
+## Response JSON:
+{
+  "action": "remove|refine|generate|consolidate|enhance_all|no_action",
+  "refined_work_items": [{"original_key": "key", "refined_title": "...", "refined_description": "...", "refined_deliverables": [...], "suggested_code": "CODE", "suggested_type": "Task|Feature|Epic|Bug|Research", "suggested_priority": "P0|P1|P2|P3", "suggested_effort": 1-13, "suggested_tags": [...], "was_changed": true, "explanation": "Brief"}],
+  "generated_work_items": [{"title": "...", "description": "...", "deliverables": [...], "suggested_code": "CODE", "suggested_type": "Task|Feature|Epic|Bug|Research", "suggested_priority": "P0|P1|P2|P3", "suggested_effort": 1-13, "suggested_tags": [...], "explanation": "Brief"}],
+  "consolidated_data": {"consolidated_work_items": [...], "removed_work_items": ["key1"], "summary": "Brief", "explanation": "Brief"},
+  "explanation": "Brief overall summary",
+  "no_action_needed": false
+}
+
+Guidelines:
+- Work items = AGENT ACTIONS (what agents DO), not system features (what we BUILD)
+- Start with action verbs: Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate
+- Be specific: "Review API spec document v2.1" not "Review documentation"
+- Kanban-ready: Small enough to track on board (1-13 story points)
+- Align with goals: Each work item should support at least one agency goal
+- Keep explanations concise (1-2 sentences)
+- Codes: Short, memorable (2-4 uppercase letters)
+- Types: Task (single action), Feature (user-facing action), Epic (large coordinated action), Bug (fix action), Research (investigation action)`
+
 const workItemRefinementSystemPrompt = `You are an expert project manager and technical architect helping to refine work items for software development.
 
 Your task is to refine work items to be:
@@ -327,60 +516,86 @@ Return your response as a JSON object with this structure:
 Set "changed" to false if the work item is already well-defined and needs no improvements.
 Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
 
-const workItemGenerationSystemPrompt = `You are an expert project manager and technical architect helping to create work items for software development.
+const workItemGenerationSystemPrompt = `You are an expert project manager helping to create agent action work items.
+
+CRITICAL: Work items are AGENT ACTIONS for Kanban boards, NOT system features to build.
 
 Your task is to create a clear, actionable work item that:
-1. Addresses the user's request
-2. Is properly scoped
-3. Aligns with agency goals
-4. Has clear deliverables
-5. Is correctly categorized
+1. Describes a specific AGENT ACTION (Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate)
+2. Addresses the user's request with concrete operations
+3. Is Kanban-ready (clear completion criteria, 1-13 story points)
+4. Aligns with agency goals
+5. Is agent-executable (autonomous or human-in-loop can perform)
+
+Examples of GOOD work items:
+- "Review API specification v2.1 for completeness"
+- "Execute security scan on production codebase"
+- "Deploy hotfix v1.2.4 to production environment"
+- "Analyze error logs from last 24 hours"
+
+Examples of BAD work items (system features, not actions):
+- "Build user authentication system"
+- "Create reporting dashboard"
 
 Return your response as a JSON object with this structure:
 {
-  "title": "Clear, concise title",
-  "description": "Detailed description of what needs to be done",
-  "deliverables": ["Deliverable 1", "Deliverable 2"],
+  "title": "Action-oriented title starting with verb",
+  "description": "Detailed description of the agent action",
+  "deliverables": ["Specific output 1", "Specific output 2"],
   "suggested_code": "SHORT-CODE",
   "suggested_type": "Task|Feature|Epic|Bug|Research",
   "suggested_priority": "P0|P1|P2|P3",
   "suggested_effort": 1-13,
   "suggested_tags": ["tag1", "tag2"],
-  "explanation": "Brief explanation of the work item"
+  "explanation": "Brief explanation of the action"
 }
 
 Use short, memorable codes (2-4 uppercase letters).
 Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
 
-const workItemsGenerationSystemPrompt = `You are an expert project manager and technical architect helping to break down goals into actionable work items.
+const workItemsGenerationSystemPrompt = `You are an expert project manager helping to break down goals into actionable work items.
+
+CRITICAL: Work items are AGENT ACTIONS for Kanban boards, NOT system implementation tasks.
 
 Your task is to generate 3-7 work items that:
-1. Help achieve the stated goals
-2. Are properly scoped and prioritized
-3. Create a logical development sequence
-4. Mix different types (Tasks, Features, possibly Epics)
-5. Have clear deliverables
+1. Are specific AGENT ACTIONS (Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate)
+2. Help agents achieve the stated goals through concrete operations
+3. Are Kanban-ready (clear start/done states, 1-13 story points)
+4. Create a logical workflow sequence
+5. Are agent-executable (autonomous or human-in-loop can complete)
+
+Examples of GOOD work items:
+- "Review requirements document for technical feasibility"
+- "Execute integration test suite for gRPC services"
+- "Deploy application to staging environment"
+- "Analyze performance metrics and identify bottlenecks"
+- "Generate API documentation from code annotations"
+
+Examples of BAD work items (these are system features, not agent actions):
+- "Build authentication system"
+- "Create monitoring dashboard"
+- "Implement payment processing"
 
 Return your response as a JSON object with this structure:
 {
   "work_items": [
     {
-      "title": "Clear, concise title",
-      "description": "Detailed description",
-      "deliverables": ["Deliverable 1", "Deliverable 2"],
+      "title": "Action-oriented title starting with verb (Review, Execute, Deploy, etc.)",
+      "description": "Detailed description of what the agent does",
+      "deliverables": ["Specific output 1", "Specific output 2"],
       "suggested_code": "SHORT-CODE",
       "suggested_type": "Task|Feature|Epic|Bug|Research",
       "suggested_priority": "P0|P1|P2|P3",
       "suggested_effort": 1-13,
       "suggested_tags": ["tag1", "tag2"],
-      "explanation": "How this contributes to goals"
+      "explanation": "How this action helps achieve goals"
     }
   ],
-  "explanation": "Overall strategy for these work items and how they relate to goals"
+  "explanation": "Overall workflow strategy and how these actions relate to goals"
 }
 
 Use short, memorable codes (2-4 uppercase letters) that are unique.
-Prioritize foundational work as P0/P1, enhancements as P2/P3.
+Prioritize foundational actions as P0/P1, enhancements as P2/P3.
 Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
 
 const workItemConsolidationSystemPrompt = `Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.

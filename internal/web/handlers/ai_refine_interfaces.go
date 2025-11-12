@@ -67,6 +67,12 @@ type GoalBuilderInterface interface {
 	// ProcessAIGoalRequest handles POST /api/v1/agencies/:id/ai/goals/process
 	// Processes batch AI operations on goals (create, enhance, consolidate).
 	ProcessAIGoalRequest(c *gin.Context)
+
+	// ProcessGoalsChatRequest handles chat-based goal interactions (non-streaming)
+	ProcessGoalsChatRequest(c *gin.Context)
+
+	// ProcessGoalsChatRequestStreaming handles chat-based goal interactions with streaming
+	ProcessGoalsChatRequestStreaming(c *gin.Context)
 }
 
 // WorkItemBuilderInterface defines the contract for all work item-related AI HTTP handlers.
@@ -90,6 +96,9 @@ type WorkItemBuilderInterface interface {
 	// ProcessAIWorkItemRequest handles POST /api/v1/agencies/:id/ai/work-items/process
 	// Processes batch AI operations on work items (create, enhance, consolidate).
 	ProcessAIWorkItemRequest(c *gin.Context)
+
+	// ProcessWorkItemsChatRequestStreaming handles chat-based work item interactions with streaming
+	ProcessWorkItemsChatRequestStreaming(c *gin.Context)
 }
 
 // RoleBuilderInterface defines the contract for all role-related AI HTTP handlers.
