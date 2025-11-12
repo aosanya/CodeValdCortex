@@ -2,7 +2,6 @@ package builder
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // GenerateRoleResponse contains the AI-generated role (used in dynamic responses)
@@ -42,8 +41,8 @@ type ConsolidatedRole struct {
 type RefineRolesRequest struct {
 	AgencyID      string             `json:"agency_id"`
 	UserMessage   string             `json:"user_message"`
-	TargetRoles   []*registry.Role   `json:"target_roles"`   // Specific roles to operate on (nil means all)
-	ExistingRoles []*registry.Role   `json:"existing_roles"` // All current roles for context
+	TargetRoles   []*models.Role     `json:"target_roles"`   // Specific roles to operate on (nil means all)
+	ExistingRoles []*models.Role     `json:"existing_roles"` // All current roles for context
 	WorkItems     []*models.WorkItem `json:"work_items"`     // Work items for context
 	AgencyContext *models.Agency     `json:"agency_context"`
 }

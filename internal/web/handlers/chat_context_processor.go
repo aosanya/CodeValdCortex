@@ -187,6 +187,73 @@ func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, agencyID, userM
 	return &result, nil
 }
 
+// performRolesProcessing delegates to the ai_refine handler for roles processing via chat
+// Returns the response HTML or nil if processing failed
+func (h *ChatHandler) performRolesProcessing(c *gin.Context, agencyID, userMessage string) (*string, error) {
+	h.logger.Info("🔵 DELEGATING: Roles processing to ai_refine.Handler (chat mode)")
+
+	conversationID := c.Param("conversationId")
+
+	// Ensure conversation exists - start one if this is a new conversation
+	if conversationID == "" {
+		// Start conversation first for new conversations
+		ctx := c.Request.Context()
+		conversation, err := h.designerService.StartConversation(ctx, agencyID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to start conversation for roles processing")
+			return nil, err
+		}
+		conversationID = conversation.ID
+		// Store conversation ID in params so it's available downstream
+		c.Params = append(c.Params, gin.Param{Key: "conversationId", Value: conversationID})
+	}
+
+	// Store agencyID in params so ProcessRolesChatRequestStreaming can access it
+	paramFound := false
+	for i, param := range c.Params {
+		if param.Key == "id" {
+			c.Params[i].Value = agencyID
+			paramFound = true
+			break
+		}
+	}
+	if !paramFound {
+		c.Params = append(c.Params, gin.Param{Key: "id", Value: agencyID})
+	}
+
+	h.logger.Info("Conversation ready for roles processing",
+		"agencyID", agencyID,
+		"conversationID", conversationID)
+
+	// Set the user request in a dynamic request structure for roles chat processing
+	dynamicReq := struct {
+		UserMessage string   `json:"user_message"`
+		RoleKeys    []string `json:"role_keys"`
+	}{
+		UserMessage: userMessage,
+		RoleKeys:    []string{}, // Empty means process all roles based on message context
+	}
+
+	// Store the request in the context so ProcessRolesChatRequestStreaming can access it
+	c.Set("dynamic_request", dynamicReq)
+
+	// Check if streaming is requested
+	streamMode := c.Query("stream") == "true"
+
+	if streamMode {
+		// Delegate to streaming version
+		h.aiRefineHandler.ProcessRolesChatRequestStreaming(c)
+	} else {
+		h.logger.Warn("Non-streaming role processing not yet implemented")
+		result := "non_streaming_not_implemented"
+		return &result, nil
+	}
+
+	// If we got here without panic, consider it successful
+	result := "success"
+	return &result, nil
+}
+
 // handleContextSpecificProcessing handles context-specific processing for both new and existing conversations
 // Returns (handled bool, error) where handled=true means the request was fully processed
 func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, userMessage, context string, isNewConversation bool) (bool, error) {
@@ -233,6 +300,21 @@ func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, 
 		processed, err := h.performWorkItemsProcessing(c, agencyID, userMessage)
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to perform work items processing")
+			return false, err
+		}
+
+		if processed != nil {
+			return true, nil // Successfully handled
+		}
+		return false, nil // Not handled, fall through to normal chat
+
+	case "roles":
+		h.logger.Info("User on roles section - performing direct roles processing")
+		// Perform the roles processing directly (conversation handling is inside)
+		h.logger.Info("🔵 CALLING: performRolesProcessing", "agencyID", agencyID)
+		processed, err := h.performRolesProcessing(c, agencyID, userMessage)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to perform roles processing")
 			return false, err
 		}
 

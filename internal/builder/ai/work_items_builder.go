@@ -78,7 +78,7 @@ func (w *WorkItemsBuilder) RefineWorkItems(ctx context.Context, req *builder.Ref
 
 // RefineWorkItemsStream performs dynamic work item refinement with streaming support
 // Similar to RefineWorkItems but streams chunks to the callback as they arrive from the LLM
-func (w *WorkItemsBuilder) RefineWorkItemsStream(ctx context.Context, req *builder.RefineWorkItemsRequest, builderContext builder.BuilderContext, streamCallback StreamCallback) (*builder.RefineWorkItemsResponse, error) {
+func (w *WorkItemsBuilder) RefineWorkItemsStream(ctx context.Context, req *builder.RefineWorkItemsRequest, builderContext builder.BuilderContext, streamCallback builder.StreamCallback) (*builder.RefineWorkItemsResponse, error) {
 	w.logger.WithFields(logrus.Fields{
 		"agency_id":           req.AgencyID,
 		"user_message":        req.UserMessage,
@@ -138,8 +138,6 @@ func (w *WorkItemsBuilder) RefineWorkItemsStream(ctx context.Context, req *build
 
 	return &result, nil
 }
-
-// buildDynamicWorkItemsPrompt creates the prompt for dynamic work item processing
 func (w *WorkItemsBuilder) buildDynamicWorkItemsPrompt(req *builder.RefineWorkItemsRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
 

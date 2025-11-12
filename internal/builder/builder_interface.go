@@ -4,6 +4,9 @@ import (
 	"context"
 )
 
+// StreamCallback is a function type for handling streaming chunks
+type StreamCallback func(chunk string) error
+
 // This file defines the standard interface signatures for all AI builder services.
 // All AI operations follow the same signature pattern to ensure consistency:
 //
@@ -38,11 +41,13 @@ type GoalBuilderInterface interface {
 // WorkItemBuilderInterface defines the contract for all work item-related AI operations (refinement, generation, consolidation)
 type WorkItemBuilderInterface interface {
 	RefineWorkItems(ctx context.Context, req *RefineWorkItemsRequest, builderContext BuilderContext) (*RefineWorkItemsResponse, error)
+	RefineWorkItemsStream(ctx context.Context, req *RefineWorkItemsRequest, builderContext BuilderContext, streamCallback StreamCallback) (*RefineWorkItemsResponse, error)
 }
 
 // RoleBuilderInterface for AI-powered role operations
 type RoleBuilderInterface interface {
 	RefineRoles(ctx context.Context, req *RefineRolesRequest, builderContext BuilderContext) (*RefineRolesResponse, error)
+	RefineRolesStream(ctx context.Context, req *RefineRolesRequest, builderContext BuilderContext, streamCallback StreamCallback) (*RefineRolesResponse, error)
 }
 
 // RACIBuilderInterface defines the contract for all RACI-related AI operations (refinement, generation, creation, consolidation)

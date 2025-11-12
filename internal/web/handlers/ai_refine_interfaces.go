@@ -122,6 +122,9 @@ type RoleBuilderInterface interface {
 	// ProcessAIRoleRequest handles POST /api/v1/agencies/:id/ai/roles/process
 	// Processes batch AI operations on roles (create roles based on agency needs).
 	ProcessAIRoleRequest(c *gin.Context)
+
+	// ProcessRolesChatRequestStreaming handles chat-based role interactions with streaming
+	ProcessRolesChatRequestStreaming(c *gin.Context)
 }
 
 // RACIBuilderInterface defines the contract for all RACI-related AI HTTP handlers.

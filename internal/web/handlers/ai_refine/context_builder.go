@@ -52,11 +52,10 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		workItems[i] = &spec.WorkItems[i]
 	}
 
-	// Get all roles for context
-	roles, err := b.roleService.ListTypes(ctx)
-	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch roles, continuing without them")
-		roles = []*registry.Role{}
+	// Convert roles from []Role to []*Role for compatibility
+	roles := make([]*models.Role, len(spec.Roles))
+	for i := range spec.Roles {
+		roles[i] = &spec.Roles[i]
 	}
 
 	builderContext := builder.BuilderContext{
