@@ -37,8 +37,6 @@ type App struct {
 	logger              *logrus.Logger
 	dbClient            *database.ArangoClient
 	registry            *registry.Repository
-	roleService         registry.RoleService
-	roleRepository      registry.RoleRepository
 	agencyService       agency.Service
 	agencyRepository    agency.Repository
 	runtimeManager      *runtime.Manager
@@ -75,34 +73,7 @@ func New(cfg *config.Config) *App {
 		logger.WithError(err).Fatal("Failed to initialize agent registry")
 	}
 
-	// Initialize role registry with ArangoDB persistence
-	logger.Info("Initializing role repository with ArangoDB")
-	roleRepo, err := registry.NewArangoRoleRepository(dbClient)
-	if err != nil {
-		logger.WithError(err).Fatal("Failed to initialize role repository")
-	}
-	roleService := registry.NewRoleService(roleRepo, logger)
-
-	// Register default roles
-	ctx := context.Background()
-	if err := registry.InitializeDefaultRoles(ctx, roleService, logger); err != nil {
-		logger.WithError(err).Warn("Failed to initialize default roles")
-	}
-
-	// Load use case-specific roles from config directory
-	useCaseConfigDir := os.Getenv("USECASE_CONFIG_DIR")
-	if useCaseConfigDir != "" {
-		rolesDir := filepath.Join(useCaseConfigDir, "config", "agents")
-		if err := loadRolesFromDirectory(ctx, rolesDir, roleService, logger); err != nil {
-			logger.WithError(err).Warn("Failed to load use case roles")
-		}
-
-		// Load use case-specific agent instances from data directory
-		agentDataDir := filepath.Join(useCaseConfigDir, "data")
-		if err := loadAgentInstancesFromDirectory(ctx, agentDataDir, reg, logger); err != nil {
-			logger.WithError(err).Warn("Failed to load use case agent instances")
-		}
-	}
+	// Note: Role registry removed - roles now managed via agency specifications
 
 	// Initialize communication repository and services
 	logger.Info("Initializing communication services")
@@ -189,8 +160,6 @@ func New(cfg *config.Config) *App {
 		logger:              logger,
 		dbClient:            dbClient,
 		registry:            reg,
-		roleRepository:      roleRepo,
-		roleService:         roleService,
 		agencyService:       agencyService,
 		agencyRepository:    agencyRepo,
 		runtimeManager:      runtimeManager,
@@ -296,7 +265,6 @@ func (a *App) setupServer() error {
 
 	// Register web dashboard handler
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
-	rolesWebHandler := webhandlers.NewRolesWebHandler(a.roleService, a.logger)
 	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
 	// Initialize homepage handler
 	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.runtimeManager, a.dbClient, a.registry, a.logger)
@@ -309,7 +277,6 @@ func (a *App) setupServer() error {
 		// Create AI refine handler (needed by chat handler and API routes)
 		aiRefineHandler = ai_refine.NewHandler(
 			a.agencyService,
-			a.roleService,
 			a.workflowService,
 			a.introductionRefiner,
 			a.goalRefiner,
@@ -322,7 +289,7 @@ func (a *App) setupServer() error {
 		)
 
 		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.workflowService, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	} // Agency middleware
 	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger) // Serve static files
@@ -330,7 +297,6 @@ func (a *App) setupServer() error {
 
 	// Web dashboard routes
 	router.GET("/", homepageHandler.ShowHomepage)
-	router.GET("/roles", rolesWebHandler.ShowRoles)
 	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
 	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
 
@@ -365,10 +331,6 @@ func (a *App) setupServer() error {
 		webAPI.GET("/agents/json", dashboardHandler.GetAgentsJSON) // JSON API for large datasets
 		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
 
-		// Roles web endpoints
-		webAPI.GET("/roles", rolesWebHandler.GetRolesLive)
-		webAPI.POST("/roles/:id/:action", rolesWebHandler.HandleRoleAction)
-
 		// Topology visualizer endpoints
 		webAPI.GET("/topology/data", topologyVisualizerHandler.GetTopologyData)
 		webAPI.GET("/topology/updates", topologyVisualizerHandler.GetTopologyUpdates)
@@ -386,18 +348,8 @@ func (a *App) setupServer() error {
 	// API routes
 	v1 := router.Group("/api/v1")
 	{
-		// Roles endpoints
-		roleHandler := handlers.NewRoleHandler(a.roleService, a.logger)
-		v1.GET("/roles", roleHandler.ListRoles)
-		v1.GET("/roles/:id", roleHandler.GetRole)
-		v1.POST("/roles", roleHandler.CreateRole)
-		v1.PUT("/roles/:id", roleHandler.UpdateRole)
-		v1.DELETE("/roles/:id", roleHandler.DeleteRole)
-		v1.POST("/roles/:id/enable", roleHandler.EnableRole)
-		v1.POST("/roles/:id/disable", roleHandler.DisableRole)
-
 		// Agency endpoints
-		agencyHandler := handlers.NewAgencyHandler(a.agencyService, a.roleService, a.logger)
+		agencyHandler := handlers.NewAgencyHandler(a.agencyService, a.logger)
 		v1.GET("/agencies", agencyHandler.ListAgencies)
 		v1.GET("/agencies/:id", agencyHandler.GetAgency)
 		v1.POST("/agencies", agencyHandler.CreateAgency)
@@ -515,68 +467,6 @@ func (a *App) setupServer() error {
 		ReadTimeout:  time.Duration(a.config.Server.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(a.config.Server.WriteTimeout) * time.Second,
 	}
-
-	return nil
-}
-
-// loadRolesFromDirectory loads role definitions from JSON files in a directory
-func loadRolesFromDirectory(ctx context.Context, dir string, service registry.RoleService, logger *logrus.Logger) error {
-	// Check if directory exists
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		return nil
-	}
-
-	// Read all JSON files from directory
-	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
-	if err != nil {
-		return fmt.Errorf("failed to read roles directory: %w", err)
-	}
-
-	if len(files) == 0 {
-		return nil
-	}
-
-	logger.WithFields(logrus.Fields{
-		"dir":   dir,
-		"count": len(files),
-	}).Info("Loading use case roles")
-
-	// Load each role file
-	for _, file := range files {
-		if err := loadRoleFromFile(ctx, file, service, logger); err != nil {
-			logger.WithError(err).WithField("file", file).Error("Failed to load role")
-			continue
-		}
-	}
-
-	return nil
-}
-
-// loadRoleFromFile loads a single role from a JSON file
-func loadRoleFromFile(ctx context.Context, filename string, service registry.RoleService, logger *logrus.Logger) error {
-	// Read file
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Parse JSON
-	var role registry.Role
-	if err := json.Unmarshal(data, &role); err != nil {
-		return fmt.Errorf("failed to parse JSON: %w", err)
-	}
-
-	// Register role
-	if err := service.RegisterType(ctx, &role); err != nil {
-		return fmt.Errorf("failed to register role: %w", err)
-	}
-
-	logger.WithFields(logrus.Fields{
-		"id":   role.ID,
-		"name": role.Name,
-		"tags": role.Tags,
-		"file": filepath.Base(filename),
-	}).Info("Loaded role")
 
 	return nil
 }

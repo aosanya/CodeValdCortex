@@ -9,24 +9,21 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 // AgencyHandler handles agency-related HTTP requests
 type AgencyHandler struct {
-	service     agency.Service
-	roleService registry.RoleService
-	logger      *logrus.Logger
+	service agency.Service
+	logger  *logrus.Logger
 }
 
 // NewAgencyHandler creates a new agency handler
-func NewAgencyHandler(service agency.Service, roleService registry.RoleService, logger *logrus.Logger) *AgencyHandler {
+func NewAgencyHandler(service agency.Service, logger *logrus.Logger) *AgencyHandler {
 	return &AgencyHandler{
-		service:     service,
-		roleService: roleService,
-		logger:      logger,
+		service: service,
+		logger:  logger,
 	}
 }
 

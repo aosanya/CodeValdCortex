@@ -6,22 +6,19 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
 
 // BuilderContextBuilder provides methods to build AI context from agency data
 type BuilderContextBuilder struct {
 	agencyService agency.Service
-	roleService   registry.RoleService
 	logger        *logrus.Logger
 }
 
 // NewBuilderContextBuilder creates a new AI context builder
-func NewBuilderContextBuilder(agencyService agency.Service, roleService registry.RoleService, logger *logrus.Logger) *BuilderContextBuilder {
+func NewBuilderContextBuilder(agencyService agency.Service, logger *logrus.Logger) *BuilderContextBuilder {
 	return &BuilderContextBuilder{
 		agencyService: agencyService,
-		roleService:   roleService,
 		logger:        logger,
 	}
 }

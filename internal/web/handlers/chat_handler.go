@@ -6,7 +6,6 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
@@ -17,7 +16,6 @@ import (
 type ChatHandler struct {
 	designerService     *ai.AgencyDesignerService
 	agencyService       agency.Service
-	roleService         registry.RoleService
 	introductionRefiner *ai.IntroductionBuilder
 	goalRefiner         *ai.GoalsBuilder
 	contextBuilder      *ai_refine.BuilderContextBuilder
@@ -29,19 +27,17 @@ type ChatHandler struct {
 func NewChatHandler(
 	designerService *ai.AgencyDesignerService,
 	agencyService agency.Service,
-	roleService registry.RoleService,
 	introductionRefiner *ai.IntroductionBuilder,
 	goalRefiner *ai.GoalsBuilder,
 	aiRefineHandler *ai_refine.Handler,
 	logger *logrus.Logger,
 ) *ChatHandler {
 	// Create context builder for shared AI context gathering
-	contextBuilder := ai_refine.NewBuilderContextBuilder(agencyService, roleService, logger)
+	contextBuilder := ai_refine.NewBuilderContextBuilder(agencyService, logger)
 
 	return &ChatHandler{
 		designerService:     designerService,
 		agencyService:       agencyService,
-		roleService:         roleService,
 		introductionRefiner: introductionRefiner,
 		goalRefiner:         goalRefiner,
 		contextBuilder:      contextBuilder,

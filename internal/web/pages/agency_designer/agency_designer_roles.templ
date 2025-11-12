@@ -2,11 +2,11 @@ package agency_designer
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RoleItem renders a single role in the list as a table row
-templ RoleItem(role *registry.Role) {
+templ RoleItem(role *models.Role) {
 	<tr 
 		class="table-item" 
 		data-item-key={ role.Key }>
@@ -71,7 +71,7 @@ templ RoleItem(role *registry.Role) {
 }
 
 // AgencyRolesList renders all roles as table rows
-templ AgencyRolesList(roles []*registry.Role) {
+templ AgencyRolesList(roles []*models.Role) {
 	if len(roles) == 0 {
 		<tr>
 			<td colspan="5" class="has-text-grey has-text-centered py-5">
@@ -86,14 +86,14 @@ templ AgencyRolesList(roles []*registry.Role) {
 }
 
 // Helper function to get autonomy level label
-func getAutonomyLabel(role *registry.Role) string {
+func getAutonomyLabel(role *models.Role) string {
 	// Autonomy level would be added to Role struct in MVP-044 implementation
 	// For now, return a placeholder
 	return "L2"
 }
 
 // Helper function to get context text (description or name as fallback)
-func getRoleContextText(role *registry.Role) string {
+func getRoleContextText(role *models.Role) string {
 	if role.Description != "" {
 		return role.Description
 	}

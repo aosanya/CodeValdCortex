@@ -1,182 +1,222 @@
 package handlers
 
 import (
-	"net/http"
-	"sort"
+"net/http"
+"sort"
 
-	"github.com/aosanya/CodeValdCortex/internal/registry"
-	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
-	"github.com/gin-gonic/gin"
+"github.com/aosanya/CodeValdCortex/internal/agency/models"
+"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
+"github.com/gin-gonic/gin"
 )
 
 // GetAgencyRoles handles GET /api/v1/agencies/:id/roles
 func (h *AgencyHandler) GetAgencyRoles(c *gin.Context) {
-	// For now, list all roles from the registry
-	// TODO: Filter by agency when agency-specific roles are implemented
-	roles, err := h.roleService.ListTypes(c.Request.Context())
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+agencyID := c.Param("id")
 
-	// Filter out system roles (core, monitoring, etc.)
-	userRoles := make([]*registry.Role, 0)
-	for _, role := range roles {
-		if !role.IsSystemType {
-			userRoles = append(userRoles, role)
-		}
-	}
+// Get agency specification which contains roles
+spec, err := h.service.GetSpecification(c.Request.Context(), agencyID)
+if err != nil {
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
 
-	// Sort roles by ID (code)
-	sort.Slice(userRoles, func(i, j int) bool {
-		return userRoles[i].ID < userRoles[j].ID
-	})
-
-	c.JSON(http.StatusOK, userRoles)
+c.JSON(http.StatusOK, spec.Roles)
 }
 
 // GetAgencyRolesHTML handles GET /api/v1/agencies/:id/roles/html
 // Returns rendered HTML fragment for HTMX/JavaScript rendering
 func (h *AgencyHandler) GetAgencyRolesHTML(c *gin.Context) {
-	// For now, list all roles from the registry
-	// TODO: Filter by agency when agency-specific roles are implemented
-	roles, err := h.roleService.ListTypes(c.Request.Context())
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to list roles")
-		c.String(http.StatusInternalServerError, "Error loading roles")
-		return
-	}
+agencyID := c.Param("id")
 
-	// Filter out system roles (core, monitoring, etc.)
-	userRoles := make([]*registry.Role, 0)
-	for _, role := range roles {
-		if !role.IsSystemType {
-			userRoles = append(userRoles, role)
-		}
-	}
+// Get agency specification which contains roles
+spec, err := h.service.GetSpecification(c.Request.Context(), agencyID)
+if err != nil {
+h.logger.WithError(err).Error("Failed to get specification")
+c.String(http.StatusInternalServerError, "Error loading roles")
+return
+}
 
-	// Sort roles by ID (code)
-	sort.Slice(userRoles, func(i, j int) bool {
-		return userRoles[i].ID < userRoles[j].ID
-	})
+// Convert to pointers for template
+rolePtrs := make([]*models.Role, len(spec.Roles))
+for i := range spec.Roles {
+rolePtrs[i] = &spec.Roles[i]
+}
 
-	h.logger.Infof("Returning %d user-defined roles for HTML rendering", len(userRoles))
+// Sort roles by Code
+sort.Slice(rolePtrs, func(i, j int) bool {
+return rolePtrs[i].Code < rolePtrs[j].Code
+})
 
-	// Render the roles list template
-	component := agency_designer.AgencyRolesList(userRoles)
-	c.Header("Content-Type", "text/html")
-	component.Render(c.Request.Context(), c.Writer)
+// Render the roles list template
+component := agency_designer.AgencyRolesList(rolePtrs)
+c.Header("Content-Type", "text/html")
+component.Render(c.Request.Context(), c.Writer)
 }
 
 // CreateAgencyRole handles POST /api/v1/agencies/:id/roles
 func (h *AgencyHandler) CreateAgencyRole(c *gin.Context) {
-	agencyID := c.Param("id")
+agencyID := c.Param("id")
 
-	var role registry.Role
-	if err := c.ShouldBindJSON(&role); err != nil {
-		h.logger.WithError(err).Error("Failed to bind role data")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role data"})
-		return
-	}
+var req models.CreateRoleRequest
+if err := c.ShouldBindJSON(&req); err != nil {
+h.logger.WithError(err).Error("Failed to bind role data")
+c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role data"})
+return
+}
 
-	// Set creation metadata
-	role.CreatedBy = "api"
-	role.IsSystemType = false
-	role.IsEnabled = true
+// Get current specification
+spec, err := h.service.GetSpecification(c.Request.Context(), agencyID)
+if err != nil {
+h.logger.WithError(err).Error("Failed to get specification", "agency_id", agencyID)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
 
-	// Register the role
-	if err := h.roleService.RegisterType(c.Request.Context(), &role); err != nil {
-		h.logger.WithError(err).Error("Failed to create role", "agency_id", agencyID)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+// Create new role
+newRole := models.Role{
+AgencyID:      agencyID,
+Code:          req.Code,
+Name:          req.Name,
+Description:   req.Description,
+Tags:          req.Tags,
+AutonomyLevel: req.AutonomyLevel,
+TokenBudget:   req.TokenBudget,
+Icon:          req.Icon,
+Color:         req.Color,
+IsActive:      req.IsActive,
+}
 
-	h.logger.Info("Role created", "agency_id", agencyID, "role_id", role.ID)
-	c.JSON(http.StatusCreated, role)
+// Append to existing roles
+updatedRoles := append(spec.Roles, newRole)
+
+// Update specification with new roles list
+_, err = h.service.UpdateSpecificationRoles(c.Request.Context(), agencyID, updatedRoles, "api")
+if err != nil {
+h.logger.WithError(err).Error("Failed to create role", "agency_id", agencyID)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
+
+h.logger.Info("Role created", "agency_id", agencyID, "role_code", newRole.Code)
+c.JSON(http.StatusCreated, newRole)
 }
 
 // GetAgencyRole handles GET /api/v1/agencies/:id/roles/:key
 func (h *AgencyHandler) GetAgencyRole(c *gin.Context) {
-	key := c.Param("key")
+agencyID := c.Param("id")
+key := c.Param("key")
 
-	role, err := h.roleService.GetType(c.Request.Context(), key)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to get role", "key", key)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
-		return
-	}
+// Get specification
+spec, err := h.service.GetSpecification(c.Request.Context(), agencyID)
+if err != nil {
+h.logger.WithError(err).Error("Failed to get specification", "key", key)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
 
-	c.JSON(http.StatusOK, role)
+// Find role by key
+for _, role := range spec.Roles {
+if role.Key == key {
+c.JSON(http.StatusOK, role)
+return
+}
+}
+
+c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
 }
 
 // UpdateAgencyRole handles PUT /api/v1/agencies/:id/roles/:key
 func (h *AgencyHandler) UpdateAgencyRole(c *gin.Context) {
-	agencyID := c.Param("id")
-	key := c.Param("key")
+agencyID := c.Param("id")
+key := c.Param("key")
 
-	// Check if role exists and is not a system role
-	existingRole, err := h.roleService.GetType(c.Request.Context(), key)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to get role for update", "key", key)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
-		return
-	}
+var req models.UpdateRoleRequest
+if err := c.ShouldBindJSON(&req); err != nil {
+h.logger.WithError(err).Error("Failed to bind role data")
+c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role data"})
+return
+}
 
-	// Prevent editing of system roles
-	if existingRole.IsSystemType {
-		h.logger.Warn("Attempted to update system role", "key", key)
-		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot edit system roles"})
-		return
-	}
+// Get current specification
+spec, err := h.service.GetSpecification(c.Request.Context(), agencyID)
+if err != nil {
+h.logger.WithError(err).Error("Failed to get specification", "key", key)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
 
-	var role registry.Role
-	if err := c.ShouldBindJSON(&role); err != nil {
-		h.logger.WithError(err).Error("Failed to bind role data")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role data"})
-		return
-	}
+// Find and update role
+found := false
+for i := range spec.Roles {
+if spec.Roles[i].Key == key {
+spec.Roles[i].Code = req.Code
+spec.Roles[i].Name = req.Name
+spec.Roles[i].Description = req.Description
+spec.Roles[i].Tags = req.Tags
+spec.Roles[i].AutonomyLevel = req.AutonomyLevel
+spec.Roles[i].TokenBudget = req.TokenBudget
+spec.Roles[i].Icon = req.Icon
+spec.Roles[i].Color = req.Color
+spec.Roles[i].IsActive = req.IsActive
+found = true
+break
+}
+}
 
-	// Set the key/ID
-	role.Key = key
-	role.ID = key
+if !found {
+c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+return
+}
 
-	// Update the role
-	if err := h.roleService.UpdateType(c.Request.Context(), &role); err != nil {
-		h.logger.WithError(err).Error("Failed to update role", "agency_id", agencyID, "key", key)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+// Update specification
+_, err = h.service.UpdateSpecificationRoles(c.Request.Context(), agencyID, spec.Roles, "api")
+if err != nil {
+h.logger.WithError(err).Error("Failed to update role", "agency_id", agencyID, "key", key)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
 
-	h.logger.Info("Role updated", "agency_id", agencyID, "role_key", key)
-	c.JSON(http.StatusOK, role)
+h.logger.Info("Role updated", "agency_id", agencyID, "role_key", key)
+c.JSON(http.StatusOK, gin.H{"message": "Role updated successfully"})
 }
 
 // DeleteAgencyRole handles DELETE /api/v1/agencies/:id/roles/:key
 func (h *AgencyHandler) DeleteAgencyRole(c *gin.Context) {
-	agencyID := c.Param("id")
-	key := c.Param("key")
+agencyID := c.Param("id")
+key := c.Param("key")
 
-	// Check if role exists and is not a system role
-	role, err := h.roleService.GetType(c.Request.Context(), key)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to get role for deletion", "key", key)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
-		return
-	}
+// Get current specification
+spec, err := h.service.GetSpecification(c.Request.Context(), agencyID)
+if err != nil {
+h.logger.WithError(err).Error("Failed to get specification", "key", key)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
 
-	// Prevent deletion of system roles
-	if role.IsSystemType {
-		h.logger.Warn("Attempted to delete system role", "key", key)
-		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete system roles"})
-		return
-	}
+// Find and remove role
+newRoles := make([]models.Role, 0, len(spec.Roles))
+found := false
+for _, role := range spec.Roles {
+if role.Key == key {
+found = true
+continue
+}
+newRoles = append(newRoles, role)
+}
 
-	if err := h.roleService.UnregisterType(c.Request.Context(), key); err != nil {
-		h.logger.WithError(err).Error("Failed to delete role", "agency_id", agencyID, "key", key)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+if !found {
+c.JSON(http.StatusNotFound, gin.H{"error": "Role not found"})
+return
+}
 
-	h.logger.Info("Role deleted", "agency_id", agencyID, "role_key", key)
-	c.JSON(http.StatusOK, gin.H{"message": "Role deleted successfully"})
+// Update specification
+_, err = h.service.UpdateSpecificationRoles(c.Request.Context(), agencyID, newRoles, "api")
+if err != nil {
+h.logger.WithError(err).Error("Failed to delete role", "agency_id", agencyID, "key", key)
+c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+return
+}
+
+h.logger.Info("Role deleted", "agency_id", agencyID, "role_key", key)
+c.JSON(http.StatusOK, gin.H{"message": "Role deleted successfully"})
 }

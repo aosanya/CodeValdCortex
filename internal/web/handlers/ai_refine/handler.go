@@ -3,7 +3,6 @@ package ai_refine
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/sirupsen/logrus"
 )
@@ -11,7 +10,6 @@ import (
 // Handler handles AI refinement requests for agency components
 type Handler struct {
 	agencyService       agency.Service
-	roleService         registry.RoleService
 	workflowService     *workflow.Service
 	introductionRefiner *ai.IntroductionBuilder
 	goalRefiner         *ai.GoalsBuilder
@@ -27,7 +25,6 @@ type Handler struct {
 // NewHandler creates a new AI refine handler
 func NewHandler(
 	agencyService agency.Service,
-	roleService registry.RoleService,
 	workflowService *workflow.Service,
 	introductionRefiner *ai.IntroductionBuilder,
 	goalRefiner *ai.GoalsBuilder,
@@ -39,11 +36,10 @@ func NewHandler(
 	logger *logrus.Logger,
 ) *Handler {
 	// Create context builder for shared AI context gathering
-	contextBuilder := NewBuilderContextBuilder(agencyService, roleService, logger)
+	contextBuilder := NewBuilderContextBuilder(agencyService, logger)
 
 	return &Handler{
 		agencyService:       agencyService,
-		roleService:         roleService,
 		workflowService:     workflowService,
 		introductionRefiner: introductionRefiner,
 		goalRefiner:         goalRefiner,

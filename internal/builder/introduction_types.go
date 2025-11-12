@@ -2,7 +2,6 @@ package builder
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // RefineIntroductionRequest contains the context for refining an introduction
@@ -24,6 +23,6 @@ type AgencyDataResponse struct {
 	Introduction string                   `json:"introduction"`
 	Goals        []*models.Goal           `json:"goals"`
 	WorkItems    []*models.WorkItem       `json:"work_items"`
-	Roles        []*registry.Role         `json:"roles"`
+	Roles        []*models.Role           `json:"roles"`
 	Assignments  []*models.RACIAssignment `json:"assignments"`
 }

@@ -2,14 +2,13 @@ package builder
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // CreateRACIMappingsRequest contains the context for creating RACI mappings
 type CreateRACIMappingsRequest struct {
 	AgencyID      string             `json:"agency_id"`
 	WorkItems     []*models.WorkItem `json:"work_items"`
-	Roles         []*registry.Role   `json:"roles"`
+	Roles         []*models.Role     `json:"roles"`
 	AgencyContext *models.Agency     `json:"agency_context"`
 }
 
@@ -31,7 +30,7 @@ type ConsolidateRACIMappingsRequest struct {
 	AgencyContext      *models.Agency           `json:"agency_context"`
 	CurrentAssignments []*models.RACIAssignment `json:"current_assignments"`
 	WorkItems          []*models.WorkItem       `json:"work_items"`
-	Roles              []*registry.Role         `json:"roles"`
+	Roles              []*models.Role           `json:"roles"`
 }
 
 // ConsolidateRACIMappingsResponse contains the consolidated RACI mappings (placeholder for future implementation)
@@ -50,7 +49,7 @@ type RefineRACIMappingsRequest struct {
 	TargetRoleKeys      []string                 `json:"target_role_keys"`      // Specific roles to operate on (nil means all)
 	ExistingAssignments []*models.RACIAssignment `json:"existing_assignments"`  // All current RACI assignments for context
 	WorkItems           []*models.WorkItem       `json:"work_items"`            // Work items for context
-	Roles               []*registry.Role         `json:"roles"`                 // Roles for context
+	Roles               []*models.Role           `json:"roles"`                 // Roles for context
 	AgencyContext       *models.Agency           `json:"agency_context"`
 }
 

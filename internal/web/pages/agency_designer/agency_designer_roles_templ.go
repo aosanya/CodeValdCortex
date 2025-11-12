@@ -10,11 +10,11 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RoleItem renders a single role in the list as a table row
-func RoleItem(role *registry.Role) templ.Component {
+func RoleItem(role *models.Role) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -208,7 +208,7 @@ func RoleItem(role *registry.Role) templ.Component {
 }
 
 // AgencyRolesList renders all roles as table rows
-func AgencyRolesList(roles []*registry.Role) templ.Component {
+func AgencyRolesList(roles []*models.Role) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -247,14 +247,14 @@ func AgencyRolesList(roles []*registry.Role) templ.Component {
 }
 
 // Helper function to get autonomy level label
-func getAutonomyLabel(role *registry.Role) string {
+func getAutonomyLabel(role *models.Role) string {
 	// Autonomy level would be added to Role struct in MVP-044 implementation
 	// For now, return a placeholder
 	return "L2"
 }
 
 // Helper function to get context text (description or name as fallback)
-func getRoleContextText(role *registry.Role) string {
+func getRoleContextText(role *models.Role) string {
 	if role.Description != "" {
 		return role.Description
 	}
