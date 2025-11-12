@@ -30,17 +30,29 @@ templ RoleItem(role *models.Role) {
 					}
 					<span class="has-text-weight-semibold">{ role.Name }</span>
 				</div>
-				<div class="tags">
+				if role.Description != "" {
+					<p class="is-size-7 has-text-grey mb-2">{ truncateText(role.Description, 100) }</p>
+				}
+				<div class="tags are-small">
+					if role.AutonomyLevel != "" {
+						<span class="tag is-primary is-light">
+							<span class="icon is-small"><i class="fas fa-robot"></i></span>
+							<span>{ role.AutonomyLevel }</span>
+						</span>
+					}
+					if role.TokenBudget > 0 {
+						<span class="tag is-info is-light">
+							<span class="icon is-small"><i class="fas fa-coins"></i></span>
+							<span>{ formatTokenBudget(role.TokenBudget) }</span>
+						</span>
+					}
 					if len(role.Tags) > 0 {
 						for _, tag := range role.Tags {
-							<span class="tag is-light is-small">{ tag }</span>
+							<span class="tag is-light">{ tag }</span>
 						}
 					}
 				</div>
 			</div>
-		</td>
-		<td style="vertical-align: middle;">
-			<span class="tag is-primary is-light">{ getAutonomyLabel(role) }</span>
 		</td>
 		<td style="vertical-align: middle;">
 			<div class="buttons">
@@ -74,7 +86,7 @@ templ RoleItem(role *models.Role) {
 templ AgencyRolesList(roles []*models.Role) {
 	if len(roles) == 0 {
 		<tr>
-			<td colspan="5" class="has-text-grey has-text-centered py-5">
+			<td colspan="4" class="has-text-grey has-text-centered py-5">
 				<p><i class="fas fa-info-circle"></i> No roles defined yet. Click the + button to add one.</p>
 			</td>
 		</tr>
@@ -85,10 +97,21 @@ templ AgencyRolesList(roles []*models.Role) {
 	}
 }
 
+// Helper function to format token budget
+func formatTokenBudget(budget int64) string {
+	if budget >= 1000000 {
+		return fmt.Sprintf("%.1fM", float64(budget)/1000000)
+	} else if budget >= 1000 {
+		return fmt.Sprintf("%.1fK", float64(budget)/1000)
+	}
+	return fmt.Sprintf("%d", budget)
+}
+
 // Helper function to get autonomy level label
 func getAutonomyLabel(role *models.Role) string {
-	// Autonomy level would be added to Role struct in MVP-044 implementation
-	// For now, return a placeholder
+	if role.AutonomyLevel != "" {
+		return role.AutonomyLevel
+	}
 	return "L2"
 }
 

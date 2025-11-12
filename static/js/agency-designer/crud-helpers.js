@@ -170,6 +170,36 @@ function generateEntityListHTML(entityType, entities) {
                 // Use _key as primary identifier for roles
                 const id = role._key || role.key || role._id || role.code || role.id || role.name;
 
+                // Build autonomy and tags HTML similar to work items' goal tags
+                let detailTagsHTML = '';
+                const hasAutonomy = role.autonomy_level && role.autonomy_level !== '';
+                const hasTokenBudget = role.token_budget && role.token_budget > 0;
+                const hasTags = role.tags && role.tags.length > 0;
+
+                if (hasAutonomy || hasTokenBudget || hasTags) {
+                    const tags = [];
+
+                    // Add autonomy level tag
+                    if (hasAutonomy) {
+                        tags.push(`<span class="tag is-primary is-light"><span class="icon is-small"><i class="fas fa-robot"></i></span><span>${escapeHtml(role.autonomy_level)}</span></span>`);
+                    }
+
+                    // Add token budget tag
+                    if (hasTokenBudget) {
+                        const budget = formatTokenBudget(role.token_budget);
+                        tags.push(`<span class="tag is-info is-light"><span class="icon is-small"><i class="fas fa-coins"></i></span><span>${budget}</span></span>`);
+                    }
+
+                    // Add custom tags
+                    if (hasTags) {
+                        role.tags.forEach(tag => {
+                            tags.push(`<span class="tag is-light">${escapeHtml(tag)}</span>`);
+                        });
+                    }
+
+                    detailTagsHTML = '<div class="mt-2"><div class="tags are-small">' + tags.join('') + '</div></div>';
+                }
+
                 return `
                 <tr class="table-item">
                     <td>
@@ -177,19 +207,28 @@ function generateEntityListHTML(entityType, entities) {
                             <input type="checkbox" class="role-checkbox" value="${id}" data-role-key="${id}" onchange="window.updateRoleSelectionButtons && window.updateRoleSelectionButtons()">
                         </label>
                     </td>
-                    <td><code>${escapeHtml(role.code || '')}</code></td>
+                    <td><strong>${escapeHtml(role.code || role.id || '')}</strong></td>
                     <td>
-                        <strong>${escapeHtml(role.name || '')}</strong><br>
-                        <small class="has-text-grey">${escapeHtml(role.description || '')}</small>
+                        <div>
+                            ${role.icon ? `<span style="font-size: 1.2em;" class="mr-1">${escapeHtml(role.icon)}</span>` : ''}
+                            <strong>${escapeHtml(role.name || '')}</strong>
+                            ${role.description ? `<br><small class="has-text-grey">${escapeHtml(truncateText(role.description, 100))}</small>` : ''}
+                            ${detailTagsHTML}
+                        </div>
                     </td>
-                    <td><span class="tag is-small">${escapeHtml(role.autonomy_level || '')}</span></td>
                     <td>
                         <div class="buttons">
-                            <button class="button is-small" onclick="window.showRoleEditor('edit', '${id}')">
-                                <span class="icon"><i class="fas fa-edit"></i></span>
+                            <button class="button is-small is-light is-fullwidth" onclick="window.ContextManager && window.ContextManager.addRoleContext('${escapeHtml(role.code || role.id || '')}', '${escapeHtml(role.description || role.name || '')}')">
+                                <span class="icon"><i class="fas fa-layer-group"></i></span>
+                                <span>Context</span>
                             </button>
-                            <button class="button is-small is-danger" onclick="window.deleteRole('${id}')">
+                            <button class="button is-small is-info is-fullwidth" onclick="window.showRoleEditor('edit', '${id}')">
+                                <span class="icon"><i class="fas fa-edit"></i></span>
+                                <span>Edit</span>
+                            </button>
+                            <button class="button is-small is-danger is-fullwidth" onclick="window.deleteRole('${id}')">
                                 <span class="icon"><i class="fas fa-trash"></i></span>
+                                <span>Delete</span>
                             </button>
                         </div>
                     </td>
@@ -209,6 +248,28 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Format token budget for display (K/M format)
+ */
+function formatTokenBudget(budget) {
+    if (budget >= 1000000) {
+        return (budget / 1000000).toFixed(1) + 'M';
+    } else if (budget >= 1000) {
+        return (budget / 1000).toFixed(1) + 'K';
+    }
+    return budget.toString();
+}
+
+/**
+ * Truncate text to specified length
+ */
+function truncateText(text, maxLength) {
+    if (!text || text.length <= maxLength) {
+        return text;
+    }
+    return text.substring(0, maxLength) + '...';
 }
 
 /**
