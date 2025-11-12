@@ -4,6 +4,62 @@
 // Global abort controller for stopping requests
 let currentAbortController = null;
 
+// Track if user is scrolled near bottom (for auto-scroll)
+let userIsNearBottom = true;
+let lastScrollTime = 0;
+
+/**
+ * Check if user is near the bottom of chat
+ */
+function isNearBottom(container) {
+    if (!container) return true;
+    const threshold = 100; // pixels from bottom
+    const scrollBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    return scrollBottom < threshold;
+}
+
+/**
+ * Auto-scroll to bottom if user hasn't manually scrolled away
+ */
+function autoScrollIfNearBottom(container) {
+    if (!container) return;
+
+    // Only auto-scroll if user is near bottom and hasn't scrolled recently
+    const now = Date.now();
+    const timeSinceLastScroll = now - lastScrollTime;
+
+    if (userIsNearBottom || timeSinceLastScroll < 500) {
+        container.scrollTop = container.scrollHeight;
+        userIsNearBottom = true;
+    }
+}
+
+/**
+ * Setup scroll tracking for chat container
+ */
+function setupScrollTracking(container) {
+    if (!container || container.dataset.scrollTracking === 'true') {
+        return; // Already setup
+    }
+
+    container.dataset.scrollTracking = 'true';
+
+    let scrollTimeout;
+    container.addEventListener('scroll', () => {
+        lastScrollTime = Date.now();
+
+        // Clear existing timeout
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+        }
+
+        // Check if user is near bottom after scroll settles
+        scrollTimeout = setTimeout(() => {
+            userIsNearBottom = isNearBottom(container);
+        }, 100);
+    });
+}
+
 /**
  * Convert send button to stop button
  */
@@ -99,6 +155,10 @@ window.handleChatSubmit = async function (event) {
     if (!originalMessage) {
         return false;
     }
+
+    // Setup scroll tracking and mark user as near bottom (they just submitted)
+    setupScrollTracking(chatMessages);
+    userIsNearBottom = true;
 
     // Get current context
     const context = window.currentAgencyContext || 'introduction';
@@ -201,12 +261,21 @@ window.handleChatSubmit = async function (event) {
  */
 async function handleStreamingChatResponse(endpoint, formData, chatMessages, agencyID, abortController) {
 
+    // Setup scroll tracking for auto-scroll
+    setupScrollTracking(chatMessages);
+
+    // User just submitted, so they're at bottom
+    userIsNearBottom = true;
+
     // Add streaming query parameter
     const streamEndpoint = `${endpoint}?stream=true`;
 
     // Create AI message container for streaming
     const aiMessageDiv = createAIMessageContainer(chatMessages);
     const messageBubble = aiMessageDiv.querySelector('.message-bubble');
+
+    // Scroll to new message
+    autoScrollIfNearBottom(chatMessages);
 
     // Create streaming content area
     messageBubble.innerHTML = `
@@ -306,6 +375,8 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                     if (currentEvent === 'chunk') {
                         // Display streaming text
                         streamingText.textContent += data;
+                        // Auto-scroll if user is near bottom
+                        autoScrollIfNearBottom(chatMessages);
                     } else if (currentEvent === 'complete') {
                         // Parse final result
                         try {
@@ -371,8 +442,12 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
             } else {
                 messageBubble.innerHTML = `<p>${message}</p>`;
             }
+
+            // Auto-scroll to show final message
+            autoScrollIfNearBottom(chatMessages);
         } else {
             messageBubble.innerHTML = '<p class="has-text-grey">Response received</p>';
+            autoScrollIfNearBottom(chatMessages);
         }
 
         // Update timestamp
@@ -451,6 +526,9 @@ function addUserMessageToChat(message, container) {
     `;
 
     container.appendChild(messageDiv);
+
+    // Auto-scroll to show new user message
+    autoScrollIfNearBottom(container);
 }
 
 /**
@@ -479,6 +557,10 @@ function createAIMessageContainer(container) {
     `;
 
     container.appendChild(messageDiv);
+
+    // Auto-scroll to show new AI message container
+    autoScrollIfNearBottom(container);
+
     return messageDiv;
 }
 
