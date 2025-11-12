@@ -108,11 +108,23 @@ async function loadWorkItemData(workItemKey) {
 }
 
 // Load and select linked goals for a work item
-// NOTE: In the unified specification model, work items don't have explicit goal links
-// This functionality is temporarily disabled for the single-document architecture
 async function loadLinkedGoals(workItemKey) {
-    // TODO: Implement goal linking within the unified specification structure
-    // or remove this feature if not needed in the new architecture
+    // In the unified specification model, work items have goal_keys array
+    // Check the checkboxes for goals that are linked to this work item
+    const container = document.getElementById('work-item-goals-editor');
+    if (!container) return;
+
+    const workItemData = workItemEditorState.originalData;
+    if (!workItemData || !workItemData.goal_keys) return;
+
+    // Get all checkboxes and check the ones that match goal_keys
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        const goalKey = checkbox.dataset.goalKey;
+        if (workItemData.goal_keys.includes(goalKey)) {
+            checkbox.checked = true;
+        }
+    });
 }
 
 // Populate form with work item data
@@ -193,6 +205,7 @@ window.saveWorkItemFromEditor = async function () {
         title,
         description,
         deliverables,
+        goal_keys: selectedGoals,
         tags
     };
 
@@ -207,10 +220,7 @@ window.saveWorkItemFromEditor = async function () {
             savedWorkItem = await window.specificationAPI.updateWorkItem(workItemEditorState.workItemKey, data);
         }
 
-        const workItemKey = data.key || workItemEditorState.workItemKey;
-
-        // Save goal links
-        await saveGoalLinks(workItemKey, selectedGoals);
+        // No need to save goal links separately - they're part of the work item now
 
         window.showNotification('Work item saved successfully', 'success');
         cancelWorkItemEdit();
@@ -221,10 +231,12 @@ window.saveWorkItemFromEditor = async function () {
 }
 
 // Save goal links for a work item
-// NOTE: Goal linking is disabled in the unified specification model
+// In the unified specification model, goal keys are stored directly in the work item
 async function saveGoalLinks(workItemKey, selectedGoalKeys) {
-    // TODO: Consider if goal linking should be implemented within unified specification
-    // or if this feature should be removed entirely from the new architecture
+    // Goal keys are now included in the work item data itself
+    // This function is kept for compatibility but doesn't need to do anything
+    // The goal_keys are saved as part of the work item in saveWorkItemFromEditor
+    return Promise.resolve();
 }
 
 // Cancel work item edit

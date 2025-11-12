@@ -21,9 +21,7 @@ type RefineWorkItemResponse struct {
 	RefinedTitle        string   `json:"refined_title"`
 	RefinedDescription  string   `json:"refined_description"`
 	RefinedDeliverables []string `json:"refined_deliverables"`
-	SuggestedType       string   `json:"suggested_type"`
-	SuggestedPriority   string   `json:"suggested_priority"`
-	SuggestedEffort     int      `json:"suggested_effort"`
+	GoalKeys            []string `json:"goal_keys"`
 	SuggestedTags       []string `json:"suggested_tags"`
 	WasChanged          bool     `json:"was_changed"`
 	Explanation         string   `json:"explanation"`
@@ -40,15 +38,13 @@ type GenerateWorkItemRequest struct {
 
 // GenerateWorkItemResponse contains the AI-generated work item
 type GenerateWorkItemResponse struct {
-	Title             string   `json:"title"`
-	Description       string   `json:"description"`
-	Deliverables      []string `json:"deliverables"`
-	SuggestedCode     string   `json:"suggested_code"`
-	SuggestedType     string   `json:"suggested_type"`
-	SuggestedPriority string   `json:"suggested_priority"`
-	SuggestedEffort   int      `json:"suggested_effort"`
-	SuggestedTags     []string `json:"suggested_tags"`
-	Explanation       string   `json:"explanation"`
+	Title         string   `json:"title"`
+	Description   string   `json:"description"`
+	Deliverables  []string `json:"deliverables"`
+	GoalKeys      []string `json:"goal_keys"`
+	SuggestedCode string   `json:"suggested_code"`
+	SuggestedTags []string `json:"suggested_tags"`
+	Explanation   string   `json:"explanation"`
 }
 
 // GenerateWorkItemsResponse contains multiple AI-generated work items
@@ -75,16 +71,14 @@ type ConsolidateWorkItemsResponse struct {
 
 // ConsolidatedWorkItem represents a work item after consolidation
 type ConsolidatedWorkItem struct {
-	Title             string   `json:"title"`
-	Description       string   `json:"description"`
-	Deliverables      []string `json:"deliverables"`
-	SuggestedCode     string   `json:"suggested_code"`
-	SuggestedType     string   `json:"suggested_type"`
-	SuggestedPriority string   `json:"suggested_priority"`
-	SuggestedEffort   int      `json:"suggested_effort"`
-	SuggestedTags     []string `json:"suggested_tags"`
-	ConsolidatedFrom  []string `json:"consolidated_from"` // Keys of original work items
-	Rationale         string   `json:"rationale"`
+	Title            string   `json:"title"`
+	Description      string   `json:"description"`
+	Deliverables     []string `json:"deliverables"`
+	GoalKeys         []string `json:"goal_keys"`
+	SuggestedCode    string   `json:"suggested_code"`
+	SuggestedTags    []string `json:"suggested_tags"`
+	ConsolidatedFrom []string `json:"consolidated_from"` // Keys of original work items
+	Rationale        string   `json:"rationale"`
 }
 
 // RefineWorkItemsRequest contains the context for dynamic work item processing
@@ -113,10 +107,8 @@ type RefinedWorkItemResult struct {
 	RefinedTitle        string   `json:"refined_title"`
 	RefinedDescription  string   `json:"refined_description"`
 	RefinedDeliverables []string `json:"refined_deliverables"`
+	GoalKeys            []string `json:"goal_keys"`
 	SuggestedCode       string   `json:"suggested_code"` // Updated work item code
-	SuggestedType       string   `json:"suggested_type"`
-	SuggestedPriority   string   `json:"suggested_priority"`
-	SuggestedEffort     int      `json:"suggested_effort"`
 	SuggestedTags       []string `json:"suggested_tags"`
 	WasChanged          bool     `json:"was_changed"`
 	Explanation         string   `json:"explanation"`

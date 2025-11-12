@@ -180,9 +180,7 @@ type aiWorkItemRefinementResponse struct {
 	RefinedTitle        string   `json:"refined_title"`
 	RefinedDescription  string   `json:"refined_description"`
 	RefinedDeliverables []string `json:"refined_deliverables"`
-	SuggestedType       string   `json:"suggested_type"`
-	SuggestedPriority   string   `json:"suggested_priority"`
-	SuggestedEffort     int      `json:"suggested_effort"`
+	GoalKeys            []string `json:"goal_keys"`
 	SuggestedTags       []string `json:"suggested_tags"`
 	Explanation         string   `json:"explanation"`
 	Changed             bool     `json:"changed"`
@@ -227,9 +225,7 @@ func (r *WorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.Refi
 		RefinedTitle:        aiResponse.RefinedTitle,
 		RefinedDescription:  aiResponse.RefinedDescription,
 		RefinedDeliverables: aiResponse.RefinedDeliverables,
-		SuggestedType:       aiResponse.SuggestedType,
-		SuggestedPriority:   aiResponse.SuggestedPriority,
-		SuggestedEffort:     aiResponse.SuggestedEffort,
+		GoalKeys:            aiResponse.GoalKeys,
 		SuggestedTags:       aiResponse.SuggestedTags,
 		WasChanged:          aiResponse.Changed,
 		Explanation:         aiResponse.Explanation,
@@ -283,7 +279,6 @@ func (r *WorkItemsBuilder) GenerateWorkItem(ctx context.Context, req *builder.Ge
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":      req.AgencyID,
 		"suggested_code": aiResponse.SuggestedCode,
-		"suggested_type": aiResponse.SuggestedType,
 		"title":          len(aiResponse.Title),
 		"description":    len(aiResponse.Description),
 	}).Info("AI work item generation completed")
@@ -474,8 +469,8 @@ IMPLEMENTATION tasks (❌): System building (NOT work items)
 ## Response JSON:
 {
   "action": "remove|refine|generate|consolidate|enhance_all|no_action",
-  "refined_work_items": [{"original_key": "key", "refined_title": "...", "refined_description": "...", "refined_deliverables": [...], "suggested_code": "CODE", "suggested_type": "Task|Feature|Epic|Bug|Research", "suggested_priority": "P0|P1|P2|P3", "suggested_effort": 1-13, "suggested_tags": [...], "was_changed": true, "explanation": "Brief"}],
-  "generated_work_items": [{"title": "...", "description": "...", "deliverables": [...], "suggested_code": "CODE", "suggested_type": "Task|Feature|Epic|Bug|Research", "suggested_priority": "P0|P1|P2|P3", "suggested_effort": 1-13, "suggested_tags": [...], "explanation": "Brief"}],
+  "refined_work_items": [{"original_key": "key", "refined_title": "...", "refined_description": "...", "refined_deliverables": [...], "goal_keys": ["goal_key1", "goal_key2"], "suggested_code": "CODE", "suggested_tags": [...], "was_changed": true, "explanation": "Brief"}],
+  "generated_work_items": [{"title": "...", "description": "...", "deliverables": [...], "goal_keys": ["goal_key1", "goal_key2"], "suggested_code": "CODE", "suggested_tags": [...], "explanation": "Brief"}],
   "consolidated_data": {"consolidated_work_items": [...], "removed_work_items": ["key1"], "summary": "Brief", "explanation": "Brief"},
   "explanation": "Brief overall summary",
   "no_action_needed": false
@@ -485,11 +480,12 @@ Guidelines:
 - Work items = AGENT ACTIONS (what agents DO), not system features (what we BUILD)
 - Start with action verbs: Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate
 - Be specific: "Review API spec document v2.1" not "Review documentation"
-- Kanban-ready: Small enough to track on board (1-13 story points)
+- Kanban-ready: Small enough to track on board
 - Align with goals: Each work item should support at least one agency goal
+- **IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses
+- Use existing goal keys from the context when linking work items to goals
 - Keep explanations concise (1-2 sentences)
-- Codes: Short, memorable (2-4 uppercase letters)
-- Types: Task (single action), Feature (user-facing action), Epic (large coordinated action), Bug (fix action), Research (investigation action)`
+- Codes: Short, memorable (2-4 uppercase letters)`
 
 const workItemRefinementSystemPrompt = `You are an expert project manager and technical architect helping to refine work items for software development.
 
@@ -498,23 +494,20 @@ Your task is to refine work items to be:
 2. Actionable with well-defined deliverables
 3. Properly scoped (not too large or too small)
 4. Aligned with agency goals
-5. Categorized correctly (Task, Feature, Epic, Bug, or Research)
 
 Return your response as a JSON object with this structure:
 {
   "refined_title": "Clear, concise title",
   "refined_description": "Detailed description of what needs to be done",
   "refined_deliverables": ["Deliverable 1", "Deliverable 2"],
-  "suggested_type": "Task|Feature|Epic|Bug|Research",
-  "suggested_priority": "P0|P1|P2|P3",
-  "suggested_effort": 1-13,
+  "goal_keys": ["goal_key1", "goal_key2"],
   "suggested_tags": ["tag1", "tag2"],
   "explanation": "Brief explanation of changes made",
   "changed": true|false
 }
 
 Set "changed" to false if the work item is already well-defined and needs no improvements.
-Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
+**IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses.`
 
 const workItemGenerationSystemPrompt = `You are an expert project manager helping to create agent action work items.
 
@@ -523,7 +516,7 @@ CRITICAL: Work items are AGENT ACTIONS for Kanban boards, NOT system features to
 Your task is to create a clear, actionable work item that:
 1. Describes a specific AGENT ACTION (Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate)
 2. Addresses the user's request with concrete operations
-3. Is Kanban-ready (clear completion criteria, 1-13 story points)
+3. Is Kanban-ready (clear completion criteria)
 4. Aligns with agency goals
 5. Is agent-executable (autonomous or human-in-loop can perform)
 
@@ -542,16 +535,14 @@ Return your response as a JSON object with this structure:
   "title": "Action-oriented title starting with verb",
   "description": "Detailed description of the agent action",
   "deliverables": ["Specific output 1", "Specific output 2"],
+  "goal_keys": ["goal_key1", "goal_key2"],
   "suggested_code": "SHORT-CODE",
-  "suggested_type": "Task|Feature|Epic|Bug|Research",
-  "suggested_priority": "P0|P1|P2|P3",
-  "suggested_effort": 1-13,
   "suggested_tags": ["tag1", "tag2"],
   "explanation": "Brief explanation of the action"
 }
 
 Use short, memorable codes (2-4 uppercase letters).
-Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
+**IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses.`
 
 const workItemsGenerationSystemPrompt = `You are an expert project manager helping to break down goals into actionable work items.
 
@@ -560,7 +551,7 @@ CRITICAL: Work items are AGENT ACTIONS for Kanban boards, NOT system implementat
 Your task is to generate 3-7 work items that:
 1. Are specific AGENT ACTIONS (Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate)
 2. Help agents achieve the stated goals through concrete operations
-3. Are Kanban-ready (clear start/done states, 1-13 story points)
+3. Are Kanban-ready (clear start/done states)
 4. Create a logical workflow sequence
 5. Are agent-executable (autonomous or human-in-loop can complete)
 
@@ -583,10 +574,8 @@ Return your response as a JSON object with this structure:
       "title": "Action-oriented title starting with verb (Review, Execute, Deploy, etc.)",
       "description": "Detailed description of what the agent does",
       "deliverables": ["Specific output 1", "Specific output 2"],
+      "goal_keys": ["goal_key1", "goal_key2"],
       "suggested_code": "SHORT-CODE",
-      "suggested_type": "Task|Feature|Epic|Bug|Research",
-      "suggested_priority": "P0|P1|P2|P3",
-      "suggested_effort": 1-13,
       "suggested_tags": ["tag1", "tag2"],
       "explanation": "How this action helps achieve goals"
     }
@@ -595,8 +584,8 @@ Return your response as a JSON object with this structure:
 }
 
 Use short, memorable codes (2-4 uppercase letters) that are unique.
-Prioritize foundational actions as P0/P1, enhancements as P2/P3.
-Effort should follow Fibonacci numbers (1, 2, 3, 5, 8, 13) representing story points.`
+**IMPORTANT**: Always include goal_keys array with the keys of goals each work item addresses.
+Link work items to the relevant goals from the agency context provided.`
 
 const workItemConsolidationSystemPrompt = `Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.
 
@@ -613,11 +602,10 @@ Evaluate if consolidation is needed:
 
 2. **When consolidation IS beneficial**:
    - Merge duplicate or overlapping work items
-   - Combine related tasks into Features or Epics when appropriate
+   - Combine related tasks when appropriate
    - Ensure each consolidated item remains actionable
    - Preserve all deliverables and requirements
    - Maintain clear acceptance criteria
-   - Keep effort estimates reasonable (1, 2, 3, 5, 8, 13 story points)
 
 3. **When consolidation is NOT beneficial**:
    - Return empty arrays for consolidated_work_items and removed_work_items
@@ -627,7 +615,6 @@ Evaluate if consolidation is needed:
 4. **Maintain work quality**:
    - Each work item should be SMART and actionable
    - Avoid creating overly broad or vague items
-   - Ensure proper categorization (Task, Feature, Epic, Bug, Research)
    - Balance scope and achievability
    - Support clear sprint planning
 
@@ -655,10 +642,8 @@ If consolidation IS beneficial:
       "title": "Clear, actionable title",
       "description": "Detailed description of what needs to be done",
       "deliverables": ["Deliverable 1", "Deliverable 2", "Deliverable 3"],
+      "goal_keys": ["goal_key1", "goal_key2"],
       "suggested_code": "SHORT-CODE",
-      "suggested_type": "Task|Feature|Epic|Bug|Research",
-      "suggested_priority": "P0|P1|P2|P3",
-      "suggested_effort": 1-13,
       "suggested_tags": ["tag1", "tag2"],
       "merged_from_keys": ["original_key1", "original_key2"],
       "explanation": "Brief explanation of what was consolidated and why"

@@ -121,16 +121,45 @@ window.executeAIStream = async function (options) {
                         // Not JSON, it's a text chunk
                         accumulatedText += data;
 
-                        // Update display
-                        if (streamingTextElement) {
-                            streamingTextElement.textContent = accumulatedText;
-                            // Auto-scroll to bottom
-                            streamingTextElement.scrollTop = streamingTextElement.scrollHeight;
-                        } else {
+                        // Try to parse accumulated text as JSON (for complete responses)
+                        let isCompleteJSON = false;
+                        try {
+                            const parsed = JSON.parse(accumulatedText);
+                            // If it parses successfully and has completion indicators, treat as final result
+                            if (parsed.action || parsed.was_changed !== undefined || parsed.complete) {
+                                finalResult = parsed;
+                                if (displayElement) {
+                                    showCompletionResult(parsed, displayElement);
+                                }
+                                onComplete(parsed);
+                                isCompleteJSON = true;
+                            }
+                        } catch (jsonError) {
+                            // Still accumulating, not complete JSON yet
                         }
 
-                        // Call chunk callback
-                        onChunk(data, accumulatedText);
+                        if (!isCompleteJSON) {
+                            // Update display with formatted text
+                            if (streamingTextElement) {
+                                // Try to format as JSON for display if it looks like JSON
+                                let displayText = accumulatedText;
+                                if (accumulatedText.trim().startsWith('{') || accumulatedText.trim().startsWith('[')) {
+                                    try {
+                                        const jsonObj = JSON.parse(accumulatedText);
+                                        displayText = JSON.stringify(jsonObj, null, 2);
+                                    } catch (e) {
+                                        // Not complete JSON yet, show raw with line breaks
+                                        displayText = accumulatedText.replace(/,/g, ',\n').replace(/{/g, '{\n').replace(/}/g, '\n}');
+                                    }
+                                }
+                                streamingTextElement.textContent = displayText;
+                                // Auto-scroll to bottom
+                                streamingTextElement.scrollTop = streamingTextElement.scrollHeight;
+                            }
+
+                            // Call chunk callback
+                            onChunk(data, accumulatedText);
+                        }
                     }
                 } else {
                 }
@@ -181,17 +210,49 @@ function showCompletionResult(result, container) {
     const wasChanged = result.was_changed || result.changed || false;
     const explanation = result.explanation || result.message || 'AI has processed your request.';
 
+    // Check if this is a work items refinement with multiple items
+    const hasRefinedItems = result.refined_work_items && result.refined_work_items.length > 0;
+    const hasGeneratedItems = result.generated_work_items && result.generated_work_items.length > 0;
+
+    let contentHTML = '';
+
+    if (hasRefinedItems) {
+        contentHTML += `<p class="mb-2"><strong>Refined ${result.refined_work_items.length} work item(s)</strong></p>`;
+        contentHTML += '<ul class="mb-3">';
+        result.refined_work_items.slice(0, 5).forEach(item => {
+            contentHTML += `<li><strong>${item.suggested_code || item.refined_title}:</strong> ${item.explanation || ''}</li>`;
+        });
+        if (result.refined_work_items.length > 5) {
+            contentHTML += `<li><em>... and ${result.refined_work_items.length - 5} more</em></li>`;
+        }
+        contentHTML += '</ul>';
+    }
+
+    if (hasGeneratedItems) {
+        contentHTML += `<p class="mb-2"><strong>Generated ${result.generated_work_items.length} new work item(s)</strong></p>`;
+        contentHTML += '<ul class="mb-3">';
+        result.generated_work_items.slice(0, 5).forEach(item => {
+            contentHTML += `<li><strong>${item.suggested_code || item.title}:</strong> ${item.explanation || ''}</li>`;
+        });
+        if (result.generated_work_items.length > 5) {
+            contentHTML += `<li><em>... and ${result.generated_work_items.length - 5} more</em></li>`;
+        }
+        contentHTML += '</ul>';
+    }
+
+    contentHTML += `<p class="mb-0"><em>${explanation}</em></p>`;
+
     const notification = document.createElement('div');
-    notification.className = wasChanged ? 'notification is-success' : 'notification is-info';
+    notification.className = wasChanged || hasRefinedItems || hasGeneratedItems ? 'notification is-success' : 'notification is-info';
     notification.innerHTML = `
-        <div class="is-flex is-align-items-center">
-            <span class="icon has-text-${wasChanged ? 'success' : 'info'} mr-2">
-                <i class="fas fa-${wasChanged ? 'check-circle' : 'info-circle'}"></i>
-            </span>
-            <div>
-                <strong>${wasChanged ? 'Updated Successfully' : 'No Changes Needed'}</strong>
-                <p class="mb-0">${explanation}</p>
+        <div>
+            <div class="is-flex is-align-items-center mb-2">
+                <span class="icon has-text-${wasChanged || hasRefinedItems || hasGeneratedItems ? 'success' : 'info'} mr-2">
+                    <i class="fas fa-${wasChanged || hasRefinedItems || hasGeneratedItems ? 'check-circle' : 'info-circle'}"></i>
+                </span>
+                <strong>${wasChanged || hasRefinedItems || hasGeneratedItems ? 'Processing Complete' : 'No Changes Needed'}</strong>
             </div>
+            ${contentHTML}
         </div>
     `;
 
