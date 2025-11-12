@@ -256,6 +256,9 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 				if len(refined.SuggestedTags) > 0 {
 					updatedWorkItem.Tags = refined.SuggestedTags
 				}
+				// Always update goal_keys from AI refinement (even if empty - goals may have been removed)
+				updatedWorkItem.GoalKeys = refined.GoalKeys
+
 				updatedWorkItems = append(updatedWorkItems, updatedWorkItem)
 				workItemsModified = true
 			} else {
@@ -282,8 +285,10 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 				Title:        gwi.Title,
 				Description:  gwi.Description,
 				Deliverables: gwi.Deliverables,
+				GoalKeys:     gwi.GoalKeys,
 				Tags:         gwi.SuggestedTags,
 			}
+
 			updatedWorkItems = append(updatedWorkItems, newWorkItem)
 			workItemsModified = true
 		}
@@ -325,16 +330,13 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 					Title:        cwi.Title,
 					Description:  cwi.Description,
 					Deliverables: cwi.Deliverables,
+					GoalKeys:     cwi.GoalKeys,
 					Tags:         cwi.SuggestedTags,
 				}
+
 				updatedWorkItems = append(updatedWorkItems, newWorkItem)
 				workItemsModified = true
 			}
-
-			h.logger.WithFields(logrus.Fields{
-				"work_items_modified":   workItemsModified,
-				"final_work_item_count": len(updatedWorkItems),
-			}).Info("🔍 DEBUG: Consolidation/removal complete")
 		}
 	}
 
