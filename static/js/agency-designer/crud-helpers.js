@@ -26,6 +26,10 @@ window.loadEntityList = async function (entityType, tableBodyId, colspan = 3) {
     try {
         // Use the specification API to get data and render HTML locally
         const specification = await window.specificationAPI.getSpecification();
+
+        // Cache specification for use in rendering (especially for goal tags in work items)
+        window._cachedSpecification = specification;
+
         let entities = [];
 
         // Handle workflows separately since they have their own API
@@ -108,6 +112,30 @@ function generateEntityListHTML(entityType, entities) {
                 // Use _key as the primary unique identifier for work items (guaranteed unique by UUID)
                 const id = item._key;
 
+                // Get goals data for displaying goal tags
+                const goalKeys = item.goal_keys || [];
+                let goalTagsHTML = '';
+
+                if (goalKeys.length > 0) {
+                    // We need to get the specification to map goal keys to goal codes
+                    // Since we're in a map function, we'll use the cached specification
+                    const goals = window._cachedSpecification?.goals || [];
+                    const goalMap = {};
+                    goals.forEach(g => {
+                        goalMap[g._key] = g.code || g._key;
+                    });
+
+                    goalTagsHTML = '<hr class="m-0"/><div class="mt-2">' +
+                        '<span class="has-text-grey is-size-6">Goals: </span>' +
+                        '<div class="tags is-inline">' +
+                        goalKeys.map(gk => {
+                            const goalCode = goalMap[gk] || gk.substring(0, 8);
+                            return `<span class="tag is-link is-light" title="Linked Goal: ${goalCode}">${goalCode}</span>`;
+                        }).join('') +
+                        '</div>' +
+                        '</div>';
+                }
+
                 return `
                 <tr>
                     <td>
@@ -120,6 +148,7 @@ function generateEntityListHTML(entityType, entities) {
                         <div>
                             <strong>${escapeHtml(item.title || '')}</strong>
                             ${item.description ? `<br><small class="has-text-grey">${escapeHtml(item.description)}</small>` : ''}
+                            ${goalTagsHTML}
                         </div>
                     </td>
                     <td>
