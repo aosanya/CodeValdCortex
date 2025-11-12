@@ -424,11 +424,15 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
 
             // Refresh work items list if work items were changed
             if (finalResult.was_changed && context === 'work-items') {
-                console.log('Refreshing work items list after update');
                 if (window.loadWorkItems) {
                     window.loadWorkItems();
-                } else {
-                    console.warn('loadWorkItems function not available');
+                }
+            }
+
+            // Refresh roles list if roles were changed
+            if (finalResult.was_changed && context === 'roles') {
+                if (window.loadRoles) {
+                    window.loadRoles();
                 }
             }
 
