@@ -190,6 +190,19 @@ func (m *mockAgencyService) UpdateSpecificationWorkItems(ctx context.Context, ag
 	}, nil
 }
 
+func (m *mockAgencyService) UpdateSpecificationWorkflows(ctx context.Context, agencyID string, workflows []models.Workflow, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Workflows:    workflows,
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
+	}, nil
+}
+
 func (m *mockAgencyService) UpdateSpecificationRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error) {
 	return &models.AgencySpecification{
 		Introduction: "Mock introduction",

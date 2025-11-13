@@ -89,6 +89,10 @@ func (c *CompositeService) UpdateSpecificationWorkItems(ctx context.Context, age
 	return c.SpecificationService.UpdateWorkItems(ctx, agencyID, workItems, updatedBy)
 }
 
+func (c *CompositeService) UpdateSpecificationWorkflows(ctx context.Context, agencyID string, workflows []models.Workflow, updatedBy string) (*models.AgencySpecification, error) {
+	return c.SpecificationService.UpdateWorkflows(ctx, agencyID, workflows, updatedBy)
+}
+
 func (c *CompositeService) UpdateSpecificationRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error) {
 	return c.SpecificationService.UpdateRoles(ctx, agencyID, roles, updatedBy)
 }

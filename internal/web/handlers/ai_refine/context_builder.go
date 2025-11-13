@@ -55,6 +55,12 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		roles[i] = &spec.Roles[i]
 	}
 
+	// Convert workflows from []Workflow to []*Workflow for compatibility
+	workflows := make([]*models.Workflow, len(spec.Workflows))
+	for i := range spec.Workflows {
+		workflows[i] = &spec.Workflows[i]
+	}
+
 	builderContext := builder.BuilderContext{
 		// Agency metadata
 		AgencyName:        agencyObj.DisplayName,
@@ -65,6 +71,7 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		Introduction: currentIntroduction,
 		Goals:        goals,
 		WorkItems:    workItems,
+		Workflows:    workflows,
 		Roles:        roles,
 		Assignments:  []*models.RACIAssignment{}, // RACI now in specification.RACIMatrix
 		UserInput:    userRequest,
@@ -75,6 +82,7 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		"agency_name":      agencyObj.DisplayName,
 		"goals_count":      len(goals),
 		"work_items_count": len(workItems),
+		"workflows_count":  len(workflows),
 		"roles_count":      len(roles),
 		"has_user_input":   userRequest != "",
 	}).Info("Built refine context")

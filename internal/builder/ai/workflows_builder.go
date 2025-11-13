@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
 
@@ -314,4 +315,239 @@ Return ONLY a JSON array of suggestion strings. Example: ["Add error handling af
 	}
 
 	return suggestions, nil
+}
+
+// RefineWorkflows dynamically determines and executes the appropriate workflow operation based on user message
+func (b *WorkflowsBuilder) RefineWorkflows(ctx context.Context, req *builder.RefineWorkflowsRequest, builderContext builder.BuilderContext) (*builder.RefineWorkflowsResponse, error) {
+	b.logger.WithFields(logrus.Fields{
+		"agency_id":          req.AgencyID,
+		"user_message":       req.UserMessage,
+		"target_workflows":   len(req.TargetWorkflows),
+		"existing_workflows": len(req.ExistingWorkflows),
+	}).Info("Starting dynamic workflow refinement")
+
+	// Build the prompt to determine what action to take
+	prompt := b.buildDynamicWorkflowsPrompt(req, builderContext)
+
+	// Make the LLM request to determine action
+	response, err := b.llmClient.Chat(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: dynamicWorkflowsSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+	})
+
+	if err != nil {
+		b.logger.WithError(err).Error("Failed to get AI response for dynamic workflow refinement")
+		return nil, fmt.Errorf("AI refinement failed: %w", err)
+	}
+
+	// Parse the AI response
+	cleanedContent := stripMarkdownFences(response.Content)
+	var result builder.RefineWorkflowsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
+		b.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse dynamic workflows response")
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	b.logger.WithFields(logrus.Fields{
+		"action":           result.Action,
+		"refined_count":    len(result.RefinedWorkflows),
+		"generated_count":  len(result.GeneratedWorkflows),
+		"no_action_needed": result.NoActionNeeded,
+	}).Info("Dynamic workflow refinement completed")
+
+	return &result, nil
+}
+
+// RefineWorkflowsStream performs dynamic workflow refinement with streaming support
+// Similar to RefineWorkflows but streams chunks to the callback as they arrive from the LLM
+func (b *WorkflowsBuilder) RefineWorkflowsStream(ctx context.Context, req *builder.RefineWorkflowsRequest, builderContext builder.BuilderContext, streamCallback StreamCallback) (*builder.RefineWorkflowsResponse, error) {
+	b.logger.WithFields(logrus.Fields{
+		"agency_id":          req.AgencyID,
+		"user_message":       req.UserMessage,
+		"target_workflows":   len(req.TargetWorkflows),
+		"existing_workflows": len(req.ExistingWorkflows),
+	}).Info("Starting streaming dynamic workflow refinement")
+
+	// Build the prompt
+	prompt := b.buildDynamicWorkflowsPrompt(req, builderContext)
+
+	// Stream the LLM response
+	var contentBuilder strings.Builder
+	chunkCount := 0
+	totalBytes := 0
+
+	err := b.llmClient.ChatStream(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: dynamicWorkflowsSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		Stream: true,
+	}, func(chunk string) error {
+		chunkCount++
+		chunkBytes := len(chunk)
+		totalBytes += chunkBytes
+
+		// Log every 10 chunks
+		if chunkCount%10 == 0 {
+			b.logger.WithFields(logrus.Fields{
+				"chunk_number": chunkCount,
+				"chunk_bytes":  chunkBytes,
+				"total_bytes":  totalBytes,
+			}).Debug("Streaming workflow chunk received")
+		}
+
+		// Accumulate content for final parsing
+		contentBuilder.WriteString(chunk)
+
+		// Forward chunk to the callback (for SSE streaming)
+		if streamCallback != nil {
+			return streamCallback(chunk)
+		}
+		return nil
+	})
+
+	if err != nil {
+		b.logger.WithError(err).WithFields(logrus.Fields{
+			"total_chunks": chunkCount,
+			"total_bytes":  totalBytes,
+		}).Error("Failed to stream AI response for dynamic workflow refinement")
+		return nil, fmt.Errorf("AI streaming refinement failed: %w", err)
+	}
+
+	// Parse the accumulated response
+	fullContent := contentBuilder.String()
+	contentLength := len(fullContent)
+
+	b.logger.WithFields(logrus.Fields{
+		"total_chunks":    chunkCount,
+		"total_bytes":     totalBytes,
+		"content_length":  contentLength,
+		"content_preview": truncateString(fullContent, 100),
+		"content_suffix":  getSuffix(fullContent, 100),
+	}).Info("🔍 DEBUG: Completed streaming, parsing accumulated content")
+
+	cleanedContent := stripMarkdownFences(fullContent)
+	cleanedLength := len(cleanedContent)
+
+	b.logger.WithFields(logrus.Fields{
+		"original_length": contentLength,
+		"cleaned_length":  cleanedLength,
+		"bytes_removed":   contentLength - cleanedLength,
+	}).Info("🔍 DEBUG: Content cleaned, attempting JSON parse")
+
+	var result builder.RefineWorkflowsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
+		// Log detailed error info
+		b.logger.WithError(err).WithFields(logrus.Fields{
+			"content_length": cleanedLength,
+			"content_start":  truncateString(cleanedContent, 200),
+			"content_end":    getSuffix(cleanedContent, 200),
+			"last_100_chars": getSuffix(cleanedContent, 100),
+			"is_truncated":   !strings.HasSuffix(strings.TrimSpace(cleanedContent), "}"),
+		}).Error("Failed to parse streamed workflows response")
+		return nil, fmt.Errorf("failed to parse streamed response: %w", err)
+	}
+
+	b.logger.WithFields(logrus.Fields{
+		"action":           result.Action,
+		"refined_count":    len(result.RefinedWorkflows),
+		"generated_count":  len(result.GeneratedWorkflows),
+		"no_action_needed": result.NoActionNeeded,
+	}).Info("Streaming dynamic workflow refinement completed")
+
+	return &result, nil
+}
+
+// buildDynamicWorkflowsPrompt creates the prompt for dynamic workflow processing
+func (b *WorkflowsBuilder) buildDynamicWorkflowsPrompt(req *builder.RefineWorkflowsRequest, contextData builder.BuilderContext) string {
+	var builder strings.Builder
+
+	// Use the reusable agency context formatter
+	builder.WriteString(FormatAgencyContextBlock(contextData))
+
+	builder.WriteString("\n\n### USER REQUEST\n")
+	builder.WriteString(req.UserMessage)
+	builder.WriteString("\n\n")
+
+	if len(req.TargetWorkflows) > 0 {
+		builder.WriteString("### TARGET WORKFLOWS FOR OPERATION\n")
+		for _, workflow := range req.TargetWorkflows {
+			builder.WriteString(fmt.Sprintf("- **%s** (v%s): %s\n", workflow.Name, workflow.Version, workflow.Description))
+			builder.WriteString(fmt.Sprintf("  Nodes: %d, Edges: %d\n", len(workflow.Nodes), len(workflow.Edges)))
+		}
+		builder.WriteString("\n")
+	}
+
+	builder.WriteString("Based on the user's request and the agency context, determine what needs to be done with the workflows and execute the appropriate action.")
+
+	return builder.String()
+}
+
+// System prompts for workflow operations
+const dynamicWorkflowsSystemPrompt = SharedAgencyContext + `
+
+Act as a strategic workflow management AI. Modify workflows based on user requests.
+
+CRITICAL: Workflows ORCHESTRATE work item sequences. They define how work items connect and flow.
+
+**IMPORTANT: When generating workflows, create a MAXIMUM of 3 workflows to keep response sizes manageable.**
+
+## Actions:
+**remove** - Delete workflows (return in consolidated_data.removed_workflows)
+**refine** - Improve existing workflow structures and connections
+**generate** - Create new workflows from work items and goals (MAX 3 workflows)
+**consolidate** - Merge duplicate or overlapping workflows
+**enhance_all** - Refine all workflows
+**no_action** - Already optimal
+
+## Response JSON:
+{
+  "action": "remove|refine|generate|consolidate|enhance_all|no_action",
+  "refined_workflows": [{"original_key": "key", "refined_name": "...", "refined_description": "...", "refined_nodes": [...], "refined_edges": [...], "was_changed": true, "explanation": "Brief"}],
+  "generated_workflows": [{"name": "...", "description": "...", "version": "1.0.0", "nodes": [...], "edges": [...], "explanation": "Brief"}],
+  "consolidated_data": {"consolidated_workflows": [...], "removed_workflows": ["key1"], "summary": "Brief", "explanation": "Brief"},
+  "explanation": "Brief overall summary",
+  "no_action_needed": false
+}
+
+Guidelines:
+- Workflows = ORCHESTRATION (how work items connect), not individual work items
+- Each workflow should connect 3-7 work items in a logical sequence
+- **Generate MAXIMUM 3 workflows** to avoid response truncation
+- Start with start node, end with end node
+- Use decision nodes for conditional branching
+- Align with goals: Each workflow should support agency objectives
+- Keep explanations concise (1-2 sentences)
+- Node positions should flow left-to-right (increment x by 200-250)
+- Prioritize the most important workflows that cover core agency operations
+`
+
+// truncateString returns the first n characters of a string, or the full string if shorter
+func truncateString(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "..."
+}
+
+// getSuffix returns the last n characters of a string, or the full string if shorter
+func getSuffix(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return "..." + s[len(s)-n:]
 }

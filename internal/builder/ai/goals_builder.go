@@ -29,7 +29,7 @@ func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *GoalsBuilder {
 
 // stripMarkdownFences removes markdown code fences from JSON responses
 // Some LLMs wrap JSON in ```json ... ``` blocks which need to be removed
-// Also handles cases where explanatory text appears before the JSON
+// Also handles cases where explanatory text appears before OR after the JSON
 func stripMarkdownFences(content string) string {
 	// Remove leading/trailing whitespace
 	content = strings.TrimSpace(content)
@@ -66,6 +66,12 @@ func stripMarkdownFences(content string) string {
 		if jsonStart := strings.Index(content, "{"); jsonStart != -1 {
 			content = content[jsonStart:]
 		}
+	}
+
+	// Remove any text AFTER the JSON ends
+	// Find the last closing brace and truncate everything after it
+	if lastBrace := strings.LastIndex(content, "}"); lastBrace != -1 {
+		content = content[:lastBrace+1]
 	}
 
 	return content

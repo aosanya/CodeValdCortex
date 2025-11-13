@@ -27,7 +27,8 @@ type BuilderContext struct {
 	Introduction string                   `json:"introduction,omitempty"`
 	Goals        []*models.Goal           `json:"goals,omitempty"`
 	WorkItems    []*models.WorkItem       `json:"work_items,omitempty"`
-	Roles        []*models.Role           `json:"roles,omitempty"` // Changed from registry.Role to models.Role
+	Workflows    []*models.Workflow       `json:"workflows,omitempty"`
+	Roles        []*models.Role           `json:"roles,omitempty"`
 	Assignments  []*models.RACIAssignment `json:"assignments,omitempty"`
 	UserInput    string                   `json:"user_input,omitempty"`
 }

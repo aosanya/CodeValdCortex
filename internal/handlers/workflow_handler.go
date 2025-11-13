@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
@@ -12,15 +13,17 @@ import (
 
 // WorkflowHandler handles HTTP requests for workflows
 type WorkflowHandler struct {
-	service *workflow.Service
-	logger  *logrus.Logger
+	service       *workflow.Service
+	agencyService agency.Service
+	logger        *logrus.Logger
 }
 
 // NewWorkflowHandler creates a new workflow handler
-func NewWorkflowHandler(service *workflow.Service, logger *logrus.Logger) *WorkflowHandler {
+func NewWorkflowHandler(service *workflow.Service, agencyService agency.Service, logger *logrus.Logger) *WorkflowHandler {
 	return &WorkflowHandler{
-		service: service,
-		logger:  logger,
+		service:       service,
+		agencyService: agencyService,
+		logger:        logger,
 	}
 }
 

@@ -62,6 +62,38 @@ func (s *SpecificationService) UpdateWorkItems(ctx context.Context, agencyID str
 	return s.repo.PatchSpecificationSection(ctx, agencyID, "work_items", workItems, updatedBy)
 }
 
+// UpdateWorkflows updates only the workflows section
+func (s *SpecificationService) UpdateWorkflows(ctx context.Context, agencyID string, workflows []models.Workflow, updatedBy string) (*models.AgencySpecification, error) {
+	s.logger.WithFields(logrus.Fields{
+		"agency_id":      agencyID,
+		"workflow_count": len(workflows),
+		"updated_by":     updatedBy,
+	}).Info("📋 UpdateWorkflows called")
+
+	for i, wf := range workflows {
+		s.logger.WithFields(logrus.Fields{
+			"index":       i,
+			"key":         wf.Key,
+			"name":        wf.Name,
+			"description": wf.Description,
+			"nodes_count": len(wf.Nodes),
+			"edges_count": len(wf.Edges),
+		}).Info("  🔹 Workflow to save")
+	}
+
+	result, err := s.repo.PatchSpecificationSection(ctx, agencyID, "workflows", workflows, updatedBy)
+	if err != nil {
+		s.logger.WithError(err).Error("❌ PatchSpecificationSection failed for workflows")
+		return nil, err
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"saved_workflows": len(result.Workflows),
+	}).Info("✅ UpdateWorkflows completed successfully")
+
+	return result, nil
+}
+
 // UpdateRoles updates only the roles section
 func (s *SpecificationService) UpdateRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error) {
 	return s.repo.PatchSpecificationSection(ctx, agencyID, "roles", roles, updatedBy)

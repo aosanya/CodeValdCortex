@@ -101,6 +101,16 @@ type WorkItemBuilderInterface interface {
 	ProcessWorkItemsChatRequestStreaming(c *gin.Context)
 }
 
+// WorkflowBuilderInterface defines the contract for all workflow-related AI HTTP handlers.
+type WorkflowBuilderInterface interface {
+	// RefineWorkflows handles POST /api/v1/agencies/:id/workflows/refine-dynamic
+	// Dynamically determines and executes the appropriate workflow operation based on user message.
+	RefineWorkflows(c *gin.Context)
+
+	// ProcessWorkflowsChatRequestStreaming handles chat-based workflow interactions with streaming
+	ProcessWorkflowsChatRequestStreaming(c *gin.Context)
+}
+
 // RoleBuilderInterface defines the contract for all role-related AI HTTP handlers.
 type RoleBuilderInterface interface {
 	// RefineRole handles POST /api/v1/agencies/:id/roles/:roleKey/refine

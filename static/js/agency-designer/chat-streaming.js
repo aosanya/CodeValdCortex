@@ -436,6 +436,13 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                 }
             }
 
+            // Refresh workflows list if workflows were changed
+            if (finalResult.was_changed && context === 'workflows') {
+                if (window.loadWorkflows) {
+                    window.loadWorkflows();
+                }
+            }
+
             // Show if changes were made
             if (finalResult.was_changed && finalResult.changed_sections) {
                 const sections = finalResult.changed_sections.join(', ');
