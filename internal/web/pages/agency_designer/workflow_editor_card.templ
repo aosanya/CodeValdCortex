@@ -59,46 +59,6 @@ maxlength="20">
 </div>
 <p class="help">Semantic version number (major.minor.patch).</p>
 </div>
-
-<!-- Status Field -->
-<div class="field">
-<label class="label">Status</label>
-<div class="control">
-<div class="select">
-<select id="workflow-status-editor">
-<option value="draft">Draft</option>
-<option value="active">Active</option>
-<option value="paused">Paused</option>
-<option value="completed">Completed</option>
-<option value="failed">Failed</option>
-</select>
-</div>
-</div>
-<p class="help">Current status of this workflow.</p>
-</div>
-
-<!-- AI Generate Button -->
-<div class="field">
-<div class="buttons">
-<button 
-class="button is-small is-link"
-onclick="generateWorkflowWithAI()"
-id="generate-workflow-btn"
-title="Use AI to generate workflow structure from description">
-<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
-<span>AI Generate</span>
-</button>
-<button 
-class="button is-small is-info"
-onclick="refineWorkflowWithAI()"
-id="refine-workflow-btn"
-title="Use AI to refine and improve workflow"
-disabled>
-<span class="icon"><i class="fas fa-sparkles"></i></span>
-<span>AI Refine</span>
-</button>
-</div>
-</div>
 </div>
 <footer class="card-footer">
 <div class="card-footer-item">

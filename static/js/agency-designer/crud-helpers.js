@@ -300,6 +300,22 @@ window.showEntityEditor = function (mode, editorCardId, listCardId, titleElement
     editorCard.classList.remove('is-hidden');
     listCard.classList.add('is-hidden');
 
+    // Hide AI operations toolbar based on editor type
+    const aiOperationsMap = {
+        'goal-editor-card': 'goal-ai-operations',
+        'work-item-editor-card': 'work-item-ai-operations',
+        'role-editor-card': 'role-ai-operations',
+        'workflow-editor-card': 'workflow-ai-operations'
+    };
+
+    const aiOperationsId = aiOperationsMap[editorCardId];
+    if (aiOperationsId) {
+        const aiOperations = document.getElementById(aiOperationsId);
+        if (aiOperations) {
+            aiOperations.classList.add('is-hidden');
+        }
+    }
+
     // Focus on specified element
     if (focusElementId) {
         setTimeout(() => {
@@ -320,6 +336,22 @@ window.cancelEntityEdit = function (editorCardId, listCardId, fieldIds = []) {
 
     if (editorCard) editorCard.classList.add('is-hidden');
     if (listCard) listCard.classList.remove('is-hidden');
+
+    // Show AI operations toolbar based on editor type
+    const aiOperationsMap = {
+        'goal-editor-card': 'goal-ai-operations',
+        'work-item-editor-card': 'work-item-ai-operations',
+        'role-editor-card': 'role-ai-operations',
+        'workflow-editor-card': 'workflow-ai-operations'
+    };
+
+    const aiOperationsId = aiOperationsMap[editorCardId];
+    if (aiOperationsId) {
+        const aiOperations = document.getElementById(aiOperationsId);
+        if (aiOperations) {
+            aiOperations.classList.remove('is-hidden');
+        }
+    }
 
     // Clear form fields
     fieldIds.forEach(id => {
@@ -365,6 +397,9 @@ window.deleteEntity = async function (entityType, entityKey, entityName, reloadC
                     return id !== entityKey;
                 });
                 await window.specificationAPI.updateRoles(updatedRoles);
+                break;
+            case 'workflows':
+                await window.specificationAPI.deleteWorkflow(entityKey);
                 break;
             default:
                 throw new Error(`Unknown entity type: ${entityType}`);
@@ -417,6 +452,9 @@ window.saveEntity = async function (entityType, mode, entityKey, data, saveBtnId
                     const updatedRoles = [...(spec.roles || []), data];
                     await window.specificationAPI.updateRoles(updatedRoles);
                     break;
+                case 'workflows':
+                    await window.specificationAPI.addWorkflow(data);
+                    break;
                 default:
                     throw new Error(`Unknown entity type: ${entityType}`);
             }
@@ -440,6 +478,9 @@ window.saveEntity = async function (entityType, mode, entityKey, data, saveBtnId
                     }
                     roles[roleIndex] = { ...roles[roleIndex], ...data };
                     await window.specificationAPI.updateRoles(roles);
+                    break;
+                case 'workflows':
+                    await window.specificationAPI.updateWorkflow(entityKey, data);
                     break;
                 default:
                     throw new Error(`Unknown entity type: ${entityType}`);

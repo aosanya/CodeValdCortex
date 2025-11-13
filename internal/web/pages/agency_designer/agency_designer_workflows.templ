@@ -8,7 +8,7 @@ import (
 templ WorkflowsList(workflows []*models.Workflow) {
 	if len(workflows) == 0 {
 		<tr>
-			<td colspan="5" class="has-text-grey has-text-centered py-5">
+			<td colspan="4" class="has-text-grey has-text-centered py-5">
 				<p><i class="fas fa-info-circle"></i> No workflows defined yet. Click the + button or use AI to generate workflows.</p>
 			</td>
 		</tr>
@@ -42,9 +42,7 @@ templ WorkflowItem(wf *models.Workflow) {
 		<td style="width: 120px;">
 			<span class="tag is-light">{ wf.Version }</span>
 		</td>
-		<td style="width: 120px;">
-			@WorkflowStatusBadge(wf.Status)
-		</td>
+		<!-- Status removed: workflows do not have a runtime status column -->
 		<td style="width: 200px;">
 			<div class="buttons is-flex is-flex-wrap-nowrap">
 				<button
@@ -76,17 +74,7 @@ templ WorkflowItem(wf *models.Workflow) {
 	</tr>
 }
 
-// WorkflowStatusBadge renders a status badge based on workflow status
-templ WorkflowStatusBadge(status models.WorkflowStatus) {
-	switch status {
-		case models.WorkflowStatusDraft:
-			<span class="tag is-light">Draft</span>
-		case models.WorkflowStatusActive:
-			<span class="tag is-success is-light">Active</span>
-		default:
-			<span class="tag is-light">{ string(status) }</span>
-	}
-}
+// Status column intentionally omitted: workflows do not have a runtime status
 
 // Helper function to truncate text
 func truncateText(text string, maxLen int) string {

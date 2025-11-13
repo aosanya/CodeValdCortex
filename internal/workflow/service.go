@@ -85,7 +85,6 @@ func (s *Service) DuplicateWorkflow(ctx context.Context, id string) (*models.Wor
 		Name:        original.Name + " (Copy)",
 		Version:     "1.0.0",
 		Description: original.Description,
-		Status:      models.WorkflowStatusDraft,
 		Nodes:       make([]models.WorkflowNode, len(original.Nodes)),
 		Edges:       make([]models.WorkflowEdge, len(original.Edges)),
 		AgencyID:    original.AgencyID,
@@ -152,19 +151,6 @@ func (s *Service) ValidateWorkflowStructure(workflow *models.Workflow) *models.W
 				Message: "Version must be in semantic versioning format (x.y.z)",
 			})
 		}
-	}
-
-	// Validate status
-	validStatuses := map[models.WorkflowStatus]bool{
-		models.WorkflowStatusDraft:  true,
-		models.WorkflowStatusActive: true,
-	}
-	if workflow.Status != "" && !validStatuses[workflow.Status] {
-		result.Valid = false
-		result.Errors = append(result.Errors, models.ValidationError{
-			Field:   "status",
-			Message: fmt.Sprintf("Invalid status: %s", workflow.Status),
-		})
 	}
 
 	// Validate agency_id

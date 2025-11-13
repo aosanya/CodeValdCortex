@@ -150,11 +150,6 @@ func (r *ArangoRepository) Create(ctx context.Context, workflow *models.Workflow
 	workflow.CreatedAt = now
 	workflow.UpdatedAt = now
 
-	// Set default status if not provided
-	if workflow.Status == "" {
-		workflow.Status = models.WorkflowStatusDraft
-	}
-
 	// Initialize empty arrays if nil
 	if workflow.Nodes == nil {
 		workflow.Nodes = []models.WorkflowNode{}

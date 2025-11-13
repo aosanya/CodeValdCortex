@@ -313,7 +313,6 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 				Version:     gwf.Version,
 				Nodes:       gwf.Nodes,
 				Edges:       gwf.Edges,
-				Status:      models.WorkflowStatusDraft,
 			}
 
 			updatedWorkflows = append(updatedWorkflows, newWorkflow)
@@ -361,7 +360,6 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 					Version:     cwf.Version,
 					Nodes:       cwf.Nodes,
 					Edges:       cwf.Edges,
-					Status:      models.WorkflowStatusDraft,
 				}
 
 				updatedWorkflows = append(updatedWorkflows, newWorkflow)

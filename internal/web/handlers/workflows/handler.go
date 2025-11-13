@@ -108,7 +108,6 @@ func (h *Handler) CreateWorkflow(c *gin.Context) {
 	// Set metadata
 	workflow.Key = uuid.New().String()
 	workflow.AgencyID = agencyID
-	workflow.Status = models.WorkflowStatusDraft
 	workflow.CreatedAt = time.Now()
 	workflow.UpdatedAt = time.Now()
 

@@ -60,15 +60,10 @@ async function loadWorkflowData(workflowKey) {
             throw new Error(`Workflow with key ${workflowKey} not found`);
         }
 
+        // Store the full workflow object
         workflowEditorState.originalData = workflow;
+
         populateWorkflowForm(workflow);
-
-        // Enable refine button when editing
-        const refineBtn = document.getElementById('refine-workflow-btn');
-        if (refineBtn) {
-            refineBtn.disabled = false;
-        }
-
     } catch (error) {
         console.error('Error loading workflow:', error);
         window.showNotification('Error loading workflow data', 'danger');
@@ -80,8 +75,7 @@ function populateWorkflowForm(workflow) {
     window.populateForm({
         'workflow-name-editor': workflow.name || '',
         'workflow-description-editor': workflow.description || '',
-        'workflow-version-editor': workflow.version || '1.0.0',
-        'workflow-status-editor': workflow.status || 'draft'
+        'workflow-version-editor': workflow.version || '1.0.0'
     });
 }
 
@@ -95,13 +89,6 @@ function clearWorkflowForm() {
 
     // Reset to defaults
     document.getElementById('workflow-version-editor').value = '1.0.0';
-    document.getElementById('workflow-status-editor').value = 'draft';
-
-    // Disable refine button
-    const refineBtn = document.getElementById('refine-workflow-btn');
-    if (refineBtn) {
-        refineBtn.disabled = true;
-    }
 
     workflowEditorState.originalData = {};
 }
@@ -112,8 +99,7 @@ window.saveWorkflowFromEditor = function () {
     const name = document.getElementById('workflow-name-editor').value.trim();
     const description = document.getElementById('workflow-description-editor').value.trim();
     const version = document.getElementById('workflow-version-editor').value.trim();
-    const status = document.getElementById('workflow-status-editor').value;
-    const structureJson = document.getElementById('workflow-structure-editor').value.trim();
+    // status field removed from model
 
     // Validate required fields
     if (!name) {
@@ -126,101 +112,38 @@ window.saveWorkflowFromEditor = function () {
         return;
     }
 
-    // Parse workflow structure
-    let nodes = [];
-    let edges = [];
-    if (structureJson) {
-        try {
-            const structure = JSON.parse(structureJson);
-            nodes = structure.nodes || [];
-            edges = structure.edges || [];
-        } catch (e) {
-            window.showNotification('Invalid workflow structure JSON', 'error');
-            return;
-        }
-    }
-
-    const agencyId = window.getCurrentAgencyId();
-    if (!agencyId) {
-        window.showNotification('Error: No agency selected', 'error');
-        return;
-    }
-
-    const workflow = {
+    const data = {
         name,
         description,
         version,
-        status,
-        nodes,
-        edges,
-        variables: {},
-        agency_id: agencyId // Always include agency_id
+        nodes: workflowEditorState.originalData?.nodes || [],
+        edges: workflowEditorState.originalData?.edges || [],
+        variables: workflowEditorState.originalData?.variables || {}
     };
 
-    // Determine endpoint and method
-    let url, method;
-    if (workflowEditorState.mode === 'add') {
-        url = `/api/v1/agencies/${agencyId}/workflows`;
-        method = 'POST';
-    } else {
-        url = `/api/v1/workflows/${workflowEditorState.workflowId}`;
-        method = 'PUT';
-        workflow.id = workflowEditorState.workflowId;
-    }
-
-    // Save workflow
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(workflow)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to ${method === 'POST' ? 'create' : 'update'} workflow`);
-            }
-            return response.json();
-        })
-        .then(() => {
-            window.showNotification(`Workflow ${method === 'POST' ? 'created' : 'updated'} successfully`, 'success');
-            cancelWorkflowEdit();
-            loadWorkflows();
-        })
-        .catch(error => {
-            window.showNotification(`Error ${method === 'POST' ? 'creating' : 'updating'} workflow`, 'error');
-        });
+    window.saveEntity('workflows', workflowEditorState.mode, workflowEditorState.workflowId, data, 'save-workflow-btn', () => {
+        cancelWorkflowEdit();
+        loadWorkflows();
+    });
 }
 
 // Cancel workflow editing
 window.cancelWorkflowEdit = function () {
     window.cancelEntityEdit('workflow-editor-card', 'workflows-list-card');
     clearWorkflowForm();
+
+    // Reset state
+    workflowEditorState = {
+        mode: 'add',
+        workflowId: null,
+        originalData: {}
+    };
 }
 
 // Delete workflow
-window.deleteWorkflow = function (workflowId) {
-    const confirmDelete = confirm('Are you sure you want to delete this workflow?');
-    if (!confirmDelete) {
-        return;
-    }
-
-    fetch(`/api/v1/workflows/${workflowId}`, {
-        method: 'DELETE'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to delete workflow');
-            }
-            return response.json();
-        })
-        .then(() => {
-            window.showNotification('Workflow deleted successfully', 'success');
-            loadWorkflows();
-        })
-        .catch(error => {
-            window.showNotification('Error deleting workflow', 'error');
-        });
+window.deleteWorkflow = function (workflowKey) {
+    const displayName = 'workflow';
+    window.deleteEntity('workflows', workflowKey, displayName, loadWorkflows);
 }
 
 // Duplicate workflow
@@ -260,9 +183,8 @@ window.filterWorkflows = function () {
     rows.forEach(row => {
         const name = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
         const version = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
-        const status = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
 
-        if (name.includes(searchInput) || version.includes(searchInput) || status.includes(searchInput)) {
+        if (name.includes(searchInput) || version.includes(searchInput)) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
@@ -390,81 +312,6 @@ window.processAIWorkflowOperation = function (operation) {
         });
 }
 
-// Generate workflow with AI from description
-window.generateWorkflowWithAI = function () {
-    const description = document.getElementById('workflow-description-editor').value.trim();
-
-    if (!description) {
-        window.showNotification('Please provide a workflow description first', 'warning');
-        return;
-    }
-
-    const agencyId = window.getCurrentAgencyId();
-    const userMessage = `Generate a workflow structure for: ${description}`;
-
-    // Make AI request
-    fetch(`/api/v1/agencies/${agencyId}/workflows/refine-dynamic`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            user_message: userMessage,
-            workflow_keys: []
-        })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('AI generation failed');
-            }
-            return response.text();
-        })
-        .then(html => {
-            window.showNotification('Workflow generated! Check the workflows list.', 'success');
-            cancelWorkflowEdit();
-            loadWorkflows();
-        })
-        .catch(error => {
-            window.showNotification('Failed to generate workflow with AI', 'error');
-        });
-}
-
-// Refine workflow with AI
-window.refineWorkflowWithAI = function () {
-    if (workflowEditorState.mode !== 'edit' || !workflowEditorState.workflowId) {
-        window.showNotification('Please load a workflow first', 'warning');
-        return;
-    }
-
-    const agencyId = window.getCurrentAgencyId();
-    const userMessage = 'Refine and improve this workflow';
-
-    fetch(`/api/v1/agencies/${agencyId}/workflows/refine-dynamic`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            user_message: userMessage,
-            workflow_keys: [workflowEditorState.workflowId]
-        })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('AI refinement failed');
-            }
-            return response.text();
-        })
-        .then(html => {
-            window.showNotification('Workflow refined successfully!', 'success');
-            // Reload the workflow data
-            loadWorkflowData(workflowEditorState.workflowId);
-        })
-        .catch(error => {
-            window.showNotification('Failed to refine workflow with AI', 'error');
-        });
-}
-
 // Make functions available globally
 window.showWorkflowEditor = showWorkflowEditor;
 window.saveWorkflowFromEditor = saveWorkflowFromEditor;
@@ -474,5 +321,3 @@ window.duplicateWorkflow = duplicateWorkflow;
 window.filterWorkflows = filterWorkflows;
 window.toggleAllWorkflows = toggleAllWorkflows;
 window.processAIWorkflowOperation = processAIWorkflowOperation;
-window.generateWorkflowWithAI = generateWorkflowWithAI;
-window.refineWorkflowWithAI = refineWorkflowWithAI;

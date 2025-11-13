@@ -407,18 +407,6 @@ window.processAIWorkItemOperation = async function (operations) {
     }
 }
 
-// Refine work item description with AI
-window.refineWorkItemDescription = function () {
-    const description = document.getElementById('work-item-description-editor')?.value.trim();
-
-    if (!description) {
-        window.showNotification('Please enter a description first', 'warning');
-        return;
-    }
-
-    window.showNotification('AI refinement for work items coming soon!', 'info');
-}
-
 // Get selected work item keys from checkboxes
 function getSelectedWorkItemKeys() {
     const checkboxes = document.querySelectorAll('.work-item-checkbox:checked');
@@ -508,7 +496,6 @@ window.cancelWorkItemEdit = cancelWorkItemEdit;
 window.deleteWorkItem = deleteWorkItem;
 window.filterWorkItems = filterWorkItems;
 window.processAIWorkItemOperation = processAIWorkItemOperation;
-window.refineWorkItemDescription = refineWorkItemDescription;
 window.getSelectedWorkItemKeys = getSelectedWorkItemKeys;
 window.updateWorkItemSelectionButtons = updateWorkItemSelectionButtons;
 window.toggleAllWorkItems = toggleAllWorkItems;

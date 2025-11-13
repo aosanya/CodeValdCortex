@@ -228,6 +228,9 @@ func (r *Repository) UpdateSpecification(ctx context.Context, agencyID string, r
 	if req.WorkItems != nil {
 		existing.SetWorkItems(*req.WorkItems, req.UpdatedBy)
 	}
+	if req.Workflows != nil {
+		existing.SetWorkflows(*req.Workflows, req.UpdatedBy)
+	}
 	if req.Roles != nil {
 		existing.SetRoles(*req.Roles, req.UpdatedBy)
 	}

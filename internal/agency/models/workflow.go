@@ -18,11 +18,12 @@ type Workflow struct {
 	Version     string         `json:"version"`
 	Nodes       []WorkflowNode `json:"nodes"`
 	Edges       []WorkflowEdge `json:"edges"`
-	Status      WorkflowStatus `json:"status"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	CreatedBy   string         `json:"created_by"`
-	UpdatedBy   string         `json:"updated_by"`
+	// Status intentionally omitted: workflows currently do not have a runtime status.
+	// Future: add published/draft states when workflow publishing is implemented.
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedBy string    `json:"created_by"`
+	UpdatedBy string    `json:"updated_by"`
 }
 
 // WorkflowNode represents a node in the workflow (combining both models)
@@ -76,16 +77,6 @@ type WorkflowNodeData struct {
 type EdgeData struct {
 	Label string `json:"label,omitempty"`
 }
-
-// ===== Workflow Status =====
-
-// WorkflowStatus represents the execution state of the workflow
-type WorkflowStatus string
-
-const (
-	WorkflowStatusDraft  WorkflowStatus = "draft"
-	WorkflowStatusActive WorkflowStatus = "active"
-)
 
 // ===== Validation =====
 

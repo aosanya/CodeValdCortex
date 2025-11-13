@@ -120,45 +120,7 @@ window.manualHideStatus = function () {
     return found;
 };
 
-// Add handleRefineClick function for the button
-// This function is called when the "Refine" button is clicked
-// It shows the AI process status indicator
-// The actual introduction text is taken from the textarea by HTMX via hx-include
-window.handleRefineClick = function () {
-    // Show AI processing status
-    if (window.showAIProcessStatus) {
-        window.showAIProcessStatus('AI is refining your introduction...');
-    }
-
-    // Check if there's a pending user request from chat
-    const pendingRequest = window.sessionStorage.getItem('pendingIntroductionRequest');
-    if (pendingRequest) {
-        // Add the user request to the form (create hidden input)
-        const form = document.getElementById('ai-sparkle-btn').closest('div');
-        let input = document.getElementById('user-request-input');
-        if (!input) {
-            input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'user-request';
-            input.id = 'user-request-input';
-            form.appendChild(input);
-        }
-        input.value = pendingRequest;
-
-        // Clear the pending request
-        window.sessionStorage.removeItem('pendingIntroductionRequest');
-
-        // Remove pulsing animation if present
-        const refineBtn = document.getElementById('ai-sparkle-btn');
-        if (refineBtn) {
-            refineBtn.classList.remove('is-pulsing');
-        }
-    }
-
-    // Note: The current textarea value is automatically included in the POST request
-    // by HTMX via the hx-include="#introduction-editor" attribute
-    // No need to manually read or send the textarea value here
-};// Since browsers don't fully support ES6 modules without bundling,
+// Since browsers don't fully support ES6 modules without bundling,
 // we'll create a simple loader that imports all functionality
 
 // Import main module which coordinates everything
