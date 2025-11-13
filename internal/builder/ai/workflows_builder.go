@@ -32,6 +32,11 @@ func (b *WorkflowsBuilder) GenerateWorkflowsFromContext(ctx context.Context, ag 
 	systemPrompt := `You are an expert workflow architect specializing in designing efficient work item orchestration flows.
 Your task is to analyze the agency's work items and create logical workflows that connect them.
 
+**CRITICAL REQUIREMENT: ALL work items provided must be included in at least one workflow.**
+- Review all work items in the context
+- Ensure every work item appears in at least one workflow
+- Work items without workflows represent wasted planning - they must all be orchestrated
+
 Return ONLY a valid JSON array of workflows. Each workflow should follow this structure:
 {
 	"name": "workflow name",
@@ -70,11 +75,12 @@ Return ONLY a valid JSON array of workflows. Each workflow should follow this st
 Create ONLY 1 simple workflow that makes sense for this agency. Keep it minimal and focused:
 - Maximum 5-7 nodes total
 - Each workflow must have exactly 1 start and 1 end node
-- Work items are connected in logical sequential order
+- **Include ALL available work items** by connecting them in logical sequential order
+- If you have many work items, prioritize the most critical ones, but aim to include all
 - Avoid complex decision trees - use decision nodes sparingly
 - NO parallel nodes unless absolutely essential
 - Position nodes in a simple left-to-right flow (increment x by 200-250 for each step)
-- Focus on the single most important workflow for this agency
+- Focus on the single most important workflow for this agency that covers maximum work items
 - Return a JSON array with ONLY 1 workflow object`
 
 	response, err := b.llmClient.Chat(ctx, &ChatRequest{
@@ -506,10 +512,17 @@ CRITICAL: Workflows ORCHESTRATE work item sequences. They define how work items 
 
 **IMPORTANT: When generating workflows, create a MAXIMUM of 3 workflows to keep response sizes manageable.**
 
+**WORK ITEM COVERAGE REQUIREMENT:**
+- ALL work items must be included in AT LEAST ONE workflow
+- Review the work_items list in the context
+- Ensure every work item is referenced in at least one workflow's nodes
+- If some work items don't fit existing workflows, create additional workflows to cover them
+- Work items without a workflow are wasted effort - they must all be orchestrated
+
 ## Actions:
 **remove** - Delete workflows (return in consolidated_data.removed_workflows)
 **refine** - Improve existing workflow structures and connections
-**generate** - Create new workflows from work items and goals (MAX 3 workflows)
+**generate** - Create new workflows from work items and goals (MAX 3 workflows, covering ALL work items)
 **consolidate** - Merge duplicate or overlapping workflows
 **enhance_all** - Refine all workflows
 **no_action** - Already optimal
@@ -526,14 +539,17 @@ CRITICAL: Workflows ORCHESTRATE work item sequences. They define how work items 
 
 Guidelines:
 - Workflows = ORCHESTRATION (how work items connect), not individual work items
+- **CRITICAL**: Every work item MUST appear in at least one workflow
 - Each workflow should connect 3-7 work items in a logical sequence
 - **Generate MAXIMUM 3 workflows** to avoid response truncation
+- If you have more work items than can fit in 3 workflows, combine related items into comprehensive workflows
 - Start with start node, end with end node
 - Use decision nodes for conditional branching
 - Align with goals: Each workflow should support agency objectives
 - Keep explanations concise (1-2 sentences)
 - Node positions should flow left-to-right (increment x by 200-250)
-- Prioritize the most important workflows that cover core agency operations
+- Prioritize workflows that cover the most critical work items first
+- List any uncovered work items in your explanation (there should be NONE)
 `
 
 // truncateString returns the first n characters of a string, or the full string if shorter
