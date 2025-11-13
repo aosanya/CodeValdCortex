@@ -362,6 +362,7 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/specification/introduction", agencyHandler.UpdateIntroduction)
 		v1.PUT("/agencies/:id/specification/goals", agencyHandler.UpdateGoals)
 		v1.PUT("/agencies/:id/specification/work-items", agencyHandler.UpdateWorkItems)
+		v1.PUT("/agencies/:id/specification/workflows", agencyHandler.UpdateWorkflows)
 		v1.PUT("/agencies/:id/specification/roles", agencyHandler.UpdateRoles)
 		v1.PUT("/agencies/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
 

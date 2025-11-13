@@ -9,6 +9,10 @@ function workflowDesigner() {
     return {
         // State
         workflowId: '',
+        workflowKey: '',
+        workflowName: '',
+        workflowDescription: '',
+        workflowVersion: '',
         agencyId: '',
         nodes: [],
         edges: [],
@@ -43,15 +47,16 @@ function workflowDesigner() {
             try {
                 this.agencyId = container.dataset.agencyId;
                 this.workflowId = container.dataset.workflowId || container.dataset.workflowKey; // Use key as fallback
-                const workflowKey = container.dataset.workflowKey;
-                const workflowName = container.dataset.workflowName;
-                const workflowVersion = container.dataset.workflowVersion;
+                this.workflowKey = container.dataset.workflowKey;
+                this.workflowName = container.dataset.workflowName;
+                this.workflowDescription = container.dataset.workflowDescription || '';
+                this.workflowVersion = container.dataset.workflowVersion;
 
                 console.log('📋 Workflow Info:', {
                     id: this.workflowId,
-                    key: workflowKey,
-                    name: workflowName,
-                    version: workflowVersion
+                    key: this.workflowKey,
+                    name: this.workflowName,
+                    version: this.workflowVersion
                 });
 
                 // Parse nodes and edges from JSON
@@ -183,6 +188,8 @@ function workflowDesigner() {
                 }
             });
 
+            // Debug: Log available methods
+            console.log('📋 Panzoom instance methods:', Object.keys(this.panzoomInstance));
         },
 
         // Load available work items from API
@@ -531,16 +538,36 @@ function workflowDesigner() {
         deleteSelectedNode() {
             if (!this.selectedNode) return;
 
+            // Don't allow deleting Start or End nodes
+            if (this.selectedNode.type === 'start' || this.selectedNode.type === 'end') {
+                alert('Cannot delete Start or End nodes');
+                return;
+            }
+
             if (confirm('Delete this node?')) {
-                // Remove connections
-                this.jsPlumbInstance.deleteConnectionsForElement(this.selectedNode.id);
+                const nodeId = this.selectedNode.id;
+
+                // Get the DOM element
+                const nodeEl = document.getElementById(nodeId);
+
+                if (nodeEl) {
+                    // Remove all connections first
+                    this.jsPlumbInstance.removeAllEndpoints(nodeEl);
+
+                    // Remove from jsPlumb management
+                    this.jsPlumbInstance.unmanage(nodeEl);
+
+                    // Remove from DOM
+                    nodeEl.remove();
+                }
 
                 // Remove from nodes array
-                this.nodes = this.nodes.filter(n => n.id !== this.selectedNode.id);
+                this.nodes = this.nodes.filter(n => n.id !== nodeId);
 
-                // Remove from DOM
-                const nodeEl = document.getElementById(this.selectedNode.id);
-                if (nodeEl) nodeEl.remove();
+                // Remove any edges connected to this node
+                this.edges = this.edges.filter(e =>
+                    e.source !== nodeId && e.target !== nodeId
+                );
 
                 this.selectedNode = null;
                 this.saveToHistory();
@@ -572,16 +599,24 @@ function workflowDesigner() {
 
         // Zoom controls
         zoomIn() {
-            this.panzoomInstance.zoomIn();
+            const transform = this.panzoomInstance.getTransform();
+            const newScale = transform.scale * 1.2;
+            // Use zoomAbs to set absolute zoom level
+            this.panzoomInstance.zoomAbs(0, 0, newScale);
+            console.log('🔍 Zoom In - new scale:', newScale);
         },
 
         zoomOut() {
-            this.panzoomInstance.zoomOut();
+            const transform = this.panzoomInstance.getTransform();
+            const newScale = transform.scale * 0.8;
+            // Use zoomAbs to set absolute zoom level
+            this.panzoomInstance.zoomAbs(0, 0, newScale);
+            console.log('🔎 Zoom Out - new scale:', newScale);
         },
 
         fitToScreen() {
             this.panzoomInstance.moveTo(0, 0);
-            this.panzoomInstance.zoomAbs(0, 0, 1);
+            this.panzoomInstance.zoomTo(0, 0, 1);
         },
 
         toggleMinimap() {
@@ -655,34 +690,75 @@ function workflowDesigner() {
             this.saving = true;
 
             try {
-                const workflowData = {
+                // First, fetch the current specification to get ALL workflows
+                console.log('📥 Fetching current specification...');
+                const specResponse = await fetch(`/api/v1/agencies/${this.agencyId}/specification`);
+                if (!specResponse.ok) {
+                    throw new Error('Failed to fetch current specification');
+                }
+
+                const spec = await specResponse.json();
+                const allWorkflows = spec.workflows || [];
+                console.log('📊 Current workflows count:', allWorkflows.length);
+
+                // Build the updated workflow object
+                const updatedWorkflow = {
+                    _key: this.workflowKey,
+                    name: this.workflowName,
+                    description: this.workflowDescription,
+                    agency_id: this.agencyId,
+                    version: this.workflowVersion,
                     nodes: this.nodes,
                     edges: this.edges
                 };
 
-                const response = await fetch(`/api/v1/workflows/${this.workflowId}`, {
+                // Find and update the specific workflow, or add if new
+                const workflowIndex = allWorkflows.findIndex(wf => wf._key === this.workflowKey || wf.key === this.workflowKey);
+
+                if (workflowIndex >= 0) {
+                    console.log(`� Updating existing workflow at index ${workflowIndex}`);
+                    allWorkflows[workflowIndex] = updatedWorkflow;
+                } else {
+                    console.log('➕ Adding new workflow');
+                    allWorkflows.push(updatedWorkflow);
+                }
+
+                console.log('💾 Saving all workflows:', allWorkflows.length, 'workflows');
+
+                // Save ALL workflows back to the specification
+                const response = await fetch(`/api/v1/agencies/${this.agencyId}/specification/workflows`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        agency_id: this.agencyId,
-                        nodes: this.nodes,
-                        edges: this.edges
+                        workflows: allWorkflows,  // Send ALL workflows
+                        updated_by: 'system'  // TODO: Get actual user
                     })
                 });
 
                 if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Workflow saved successfully');
                     alert('✓ Workflow saved successfully');
                 } else {
                     const error = await response.json();
+                    console.error('❌ Save failed:', error);
                     alert('Failed to save workflow: ' + (error.error || 'Unknown error'));
                 }
             } catch (error) {
-                alert('Failed to save workflow');
+                console.error('❌ Save error:', error);
+                alert('Failed to save workflow: ' + error.message);
             } finally {
                 this.saving = false;
             }
+        },
+
+        // Helper to find workflow index by key
+        findWorkflowIndexByKey(key) {
+            // This would be used if we're managing multiple workflows
+            // For now, we're just saving the current workflow
+            return 0;
         },
 
         // Execute workflow

@@ -259,15 +259,16 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			</style>
 		</head>
 		<body>
-			<div class="designer-container" 
-				x-data="workflowDesigner()"
-				data-agency-id={ agencyID }
-				data-workflow-id={ wf.ID }
-				data-workflow-key={ wf.Key }
-				data-workflow-name={ wf.Name }
-				data-workflow-version={ wf.Version }
-				data-workflow-nodes={ templ.JSONString(wf.Nodes) }
-				data-workflow-edges={ templ.JSONString(wf.Edges) }>
+		<div class="designer-container" 
+			x-data="workflowDesigner()"
+			data-agency-id={ agencyID }
+			data-workflow-id={ wf.ID }
+			data-workflow-key={ wf.Key }
+			data-workflow-name={ wf.Name }
+			data-workflow-description={ wf.Description }
+			data-workflow-version={ wf.Version }
+			data-workflow-nodes={ templ.JSONString(wf.Nodes) }
+			data-workflow-edges={ templ.JSONString(wf.Edges) }>
 				<!-- Toolbar -->
 				<div class="designer-toolbar">
 					<div class="level is-mobile">

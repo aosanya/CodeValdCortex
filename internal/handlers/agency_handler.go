@@ -47,6 +47,7 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 		agencies.PUT("/:id/specification/introduction", h.UpdateIntroduction)
 		agencies.PUT("/:id/specification/goals", h.UpdateGoals)
 		agencies.PUT("/:id/specification/work-items", h.UpdateWorkItems)
+		agencies.PUT("/:id/specification/workflows", h.UpdateWorkflows)
 		agencies.PUT("/:id/specification/roles", h.UpdateRoles)
 		agencies.PUT("/:id/specification/raci-matrix", h.UpdateRACIMatrixSection)
 
@@ -372,6 +373,29 @@ func (h *AgencyHandler) UpdateWorkItems(c *gin.Context) {
 	}
 
 	spec, err := h.service.UpdateSpecificationWorkItems(c.Request.Context(), id, req.WorkItems, req.UpdatedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, spec)
+}
+
+// UpdateWorkflows handles PUT /api/v1/agencies/:id/specification/workflows
+func (h *AgencyHandler) UpdateWorkflows(c *gin.Context) {
+	id := c.Param("id")
+
+	var req struct {
+		Workflows []models.Workflow `json:"workflows"`
+		UpdatedBy string            `json:"updated_by"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		return
+	}
+
+	spec, err := h.service.UpdateSpecificationWorkflows(c.Request.Context(), id, req.Workflows, req.UpdatedBy)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
