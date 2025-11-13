@@ -41,33 +41,38 @@ window.showWorkflowEditor = function (mode, workflowId = null) {
 }
 
 // Load workflow data for editing
-function loadWorkflowData(workflowId) {
-    const agencyId = window.getCurrentAgencyId();
-    if (!agencyId || !workflowId) {
+async function loadWorkflowData(workflowKey) {
+    if (!workflowKey) {
         return;
     }
 
-    // Fetch workflow data
-    fetch(`/api/v1/workflows/${workflowId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load workflow');
-            }
-            return response.json();
-        })
-        .then(workflow => {
-            populateWorkflowForm(workflow);
-            workflowEditorState.originalData = workflow;
+    try {
+        const spec = await window.specificationAPI.getSpecification();
+        const workflows = spec.workflows || [];
 
-            // Enable refine button when editing
-            const refineBtn = document.getElementById('refine-workflow-btn');
-            if (refineBtn) {
-                refineBtn.disabled = false;
-            }
-        })
-        .catch(error => {
-            window.showNotification('Error loading workflow data', 'error');
+        // Find workflow by key
+        const workflow = workflows.find(w => {
+            const id = w.key || w._key || w._id || w.id || w.name;
+            return id === workflowKey;
         });
+
+        if (!workflow) {
+            throw new Error(`Workflow with key ${workflowKey} not found`);
+        }
+
+        workflowEditorState.originalData = workflow;
+        populateWorkflowForm(workflow);
+
+        // Enable refine button when editing
+        const refineBtn = document.getElementById('refine-workflow-btn');
+        if (refineBtn) {
+            refineBtn.disabled = false;
+        }
+
+    } catch (error) {
+        console.error('Error loading workflow:', error);
+        window.showNotification('Error loading workflow data', 'danger');
+    }
 }
 
 // Populate form with workflow data
@@ -78,15 +83,6 @@ function populateWorkflowForm(workflow) {
         'workflow-version-editor': workflow.version || '1.0.0',
         'workflow-status-editor': workflow.status || 'draft'
     });
-
-    // Handle workflow structure (nodes and edges)
-    if (workflow.nodes || workflow.edges) {
-        const structure = {
-            nodes: workflow.nodes || [],
-            edges: workflow.edges || []
-        };
-        document.getElementById('workflow-structure-editor').value = JSON.stringify(structure, null, 2);
-    }
 }
 
 // Clear workflow form
@@ -94,8 +90,7 @@ function clearWorkflowForm() {
     window.clearForm([
         'workflow-name-editor',
         'workflow-description-editor',
-        'workflow-version-editor',
-        'workflow-structure-editor'
+        'workflow-version-editor'
     ]);
 
     // Reset to defaults

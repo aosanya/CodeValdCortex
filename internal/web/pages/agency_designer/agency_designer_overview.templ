@@ -380,18 +380,7 @@ templ WorkflowsContent(currentAgency *models.Agency) {
 			</div>
 		</div>
 
-		<!-- Workflows List Card -->
-		<div class="columns">
-			<div class="column">
-				@WorkflowsListCard()
-			</div>
-		</div>
-
-		<!-- Workflow Editor Card (Initially Hidden) -->
-		<div class="columns">
-			<div class="column">
-				@WorkflowEditorCard()
-			</div>
-		</div>
+		@WorkflowsListCard()
+		@WorkflowEditorCard()
 	</div>
 }

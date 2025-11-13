@@ -345,7 +345,7 @@ func WorkflowsContent(currentAgency *models.Agency) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\"><!-- AI Workflow Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Workflow Operations:</p><span id=\"workflow-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkflowOperation('create')\" id=\"ai-create-workflows-btn\" title=\"Generate workflows from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkflowOperation('refine')\" id=\"ai-refine-workflows-btn\" title=\"Select a workflow to refine\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Refine</span></button> <button class=\"button is-small is-success is-static\" onclick=\"processAIWorkflowOperation('suggest')\" id=\"ai-suggest-workflows-btn\" title=\"Select a workflow to get improvement suggestions\" disabled><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> <span>Suggest Improvements</span></button></div></div><!-- AI Response Container --><div id=\"workflow-ai-response\" class=\"mt-3\" style=\"display: none;\"></div></div><!-- Workflows List Card --><div class=\"columns\"><div class=\"column\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\"><!-- AI Workflow Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Workflow Operations:</p><span id=\"workflow-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkflowOperation('create')\" id=\"ai-create-workflows-btn\" title=\"Generate workflows from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkflowOperation('refine')\" id=\"ai-refine-workflows-btn\" title=\"Select a workflow to refine\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Refine</span></button> <button class=\"button is-small is-success is-static\" onclick=\"processAIWorkflowOperation('suggest')\" id=\"ai-suggest-workflows-btn\" title=\"Select a workflow to get improvement suggestions\" disabled><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> <span>Suggest Improvements</span></button></div></div><!-- AI Response Container --><div id=\"workflow-ai-response\" class=\"mt-3\" style=\"display: none;\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -353,15 +353,11 @@ func WorkflowsContent(currentAgency *models.Agency) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><!-- Workflow Editor Card (Initially Hidden) --><div class=\"columns\"><div class=\"column\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = WorkflowEditorCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
