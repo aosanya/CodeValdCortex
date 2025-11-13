@@ -94,7 +94,8 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 					border: 2px solid #dbdbdb;
 					border-radius: 8px;
 					padding: 12px;
-					min-width: 180px;
+					min-width: 120px;
+					max-width: 180px;
 					box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 					cursor: move;
 					user-select: none;
@@ -156,6 +157,10 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 				.node-title {
 					font-weight: 600;
 					font-size: 0.9rem;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					max-width: 150px;
 				}
 				
 				.node-description {
@@ -312,49 +317,18 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 				<div class="designer-content">
 					<!-- Toolbox Panel -->
 					<div class="toolbox-panel">
-						<div class="toolbox-category">Flow Control</div>
-						
-						<div class="toolbox-item" data-node-type="start" draggable="true" @dragstart="onToolboxDragStart($event)">
-							<div class="node-header">
-								<span class="node-icon has-text-success"><i class="fas fa-play-circle"></i></span>
-								<span class="node-title">Start</span>
-							</div>
-							<div class="node-description">Workflow entry point</div>
-						</div>
-						
-						<div class="toolbox-item" data-node-type="end" draggable="true" @dragstart="onToolboxDragStart($event)">
-							<div class="node-header">
-								<span class="node-icon has-text-danger"><i class="fas fa-stop-circle"></i></span>
-								<span class="node-title">End</span>
-							</div>
-							<div class="node-description">Workflow termination</div>
-						</div>
-						
-						<div class="toolbox-item" data-node-type="decision" draggable="true" @dragstart="onToolboxDragStart($event)">
-							<div class="node-header">
-								<span class="node-icon has-text-warning"><i class="fas fa-question-circle"></i></span>
-								<span class="node-title">Decision</span>
-							</div>
-							<div class="node-description">Conditional branching</div>
-						</div>
-						
-						<div class="toolbox-item" data-node-type="parallel" draggable="true" @dragstart="onToolboxDragStart($event)">
-							<div class="node-header">
-								<span class="node-icon has-text-info"><i class="fas fa-code-branch"></i></span>
-								<span class="node-title">Parallel Gateway</span>
-							</div>
-							<div class="node-description">Fork/join execution</div>
-						</div>
-						
 						<div class="toolbox-category">Work Items</div>
 						
-						<template x-for="workItem in availableWorkItems" :key="workItem.key">
-							<div class="toolbox-item" :data-work-item-key="workItem.key" data-node-type="work-item" draggable="true" @dragstart="onToolboxDragStart($event)">
+						<template x-for="(workItem, index) in availableWorkItems" :key="`workitem-${index}-${workItem.key || workItem.title}`">
+							<div class="toolbox-item" 
+								x-bind:data-work-item-key="workItem.key" 
+								data-node-type="work-item" 
+								draggable="true" 
+								@dragstart="onToolboxDragStart($event)">
 								<div class="node-header">
 									<span class="node-icon has-text-link"><i class="fas fa-tasks"></i></span>
-									<span class="node-title" x-text="workItem.name"></span>
+									<span class="node-title" x-text="workItem.title"></span>
 								</div>
-								<div class="node-description" x-text="workItem.description || 'Work item task'"></div>
 							</div>
 						</template>
 					</div>

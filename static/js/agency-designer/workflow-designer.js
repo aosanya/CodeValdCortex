@@ -31,7 +31,7 @@ function workflowDesigner() {
         // Initialize
         init() {
             console.log('🎬 Workflow Designer init() called');
-            
+
             // Get the designer container element
             const container = document.querySelector('.designer-container');
             if (!container) {
@@ -57,9 +57,28 @@ function workflowDesigner() {
                 // Parse nodes and edges from JSON
                 const nodesData = container.dataset.workflowNodes;
                 const edgesData = container.dataset.workflowEdges;
-                
+
                 this.nodes = nodesData ? JSON.parse(nodesData) : [];
                 this.edges = edgesData ? JSON.parse(edgesData) : [];
+
+                // If workflow is empty, initialize with Start and End nodes
+                if (this.nodes.length === 0) {
+                    console.log('📝 Initializing empty workflow with Start and End nodes');
+                    this.nodes = [
+                        {
+                            id: 'start',
+                            type: 'start',
+                            position: { x: 100, y: 200 },
+                            data: {}
+                        },
+                        {
+                            id: 'end',
+                            type: 'end',
+                            position: { x: 800, y: 200 },
+                            data: {}
+                        }
+                    ];
+                }
 
                 console.log('✅ Loaded nodes:', this.nodes.length);
                 console.log('✅ Loaded edges:', this.edges.length);
@@ -173,29 +192,82 @@ function workflowDesigner() {
                 const workItems = await window.specificationAPI.getWorkItems();
                 this.availableWorkItems = workItems || [];
                 console.log('✅ Work items loaded:', this.availableWorkItems.length);
+
+                // Update node titles with work item names
+                if (this.availableWorkItems.length > 0) {
+                    this.updateWorkItemNodeTitles();
+                }
             } catch (error) {
                 console.error('❌ Failed to load work items:', error);
             }
         },
 
+        // Update work item node titles after work items are loaded
+        updateWorkItemNodeTitles() {
+            console.log('🔄 Updating work item node titles...');
+            let updatedCount = 0;
+
+            this.nodes.forEach(node => {
+                if ((node.type === 'work_item' || node.type === 'work-item') && node.data.work_item_key) {
+                    // ArangoDB uses _key as the primary identifier
+                    const workItem = this.availableWorkItems.find(wi => wi._key === node.data.work_item_key || wi.key === node.data.work_item_key);
+                    const nodeEl = document.getElementById(node.id);
+
+                    if (nodeEl && workItem) {
+                        const titleEl = nodeEl.querySelector('.node-title');
+                        if (titleEl) {
+                            titleEl.textContent = workItem.title;
+                            updatedCount++;
+                            console.log(`  ✅ Updated node ${node.id} with title: ${workItem.title}`);
+                        }
+                    } else if (!workItem) {
+                        console.warn(`  ⚠️ Work item not found for key: ${node.data.work_item_key}`);
+                    }
+                }
+            });
+
+            console.log(`✅ Updated ${updatedCount} work item node titles`);
+        },
+
         // Toolbox drag start
         onToolboxDragStart(event) {
-            const nodeType = event.target.closest('.toolbox-item').dataset.nodeType;
-            const workItemKey = event.target.closest('.toolbox-item').dataset.workItemKey;
+            const toolboxItem = event.target.closest('.toolbox-item');
+            const nodeType = toolboxItem.dataset.nodeType;
+
+            // For work items, find the work item key from Alpine data
+            let workItemKey = toolboxItem.dataset.workItemKey;
+
+            // If we're dragging a work item and the key is empty, try to get it from the element's index
+            if (nodeType === 'work-item' && (!workItemKey || workItemKey === '')) {
+                // Get the index of this toolbox item
+                const toolboxItems = Array.from(document.querySelectorAll('.toolbox-item[data-node-type="work-item"]'));
+                const itemIndex = toolboxItems.indexOf(toolboxItem);
+
+                if (itemIndex >= 0 && itemIndex < this.availableWorkItems.length) {
+                    const workItem = this.availableWorkItems[itemIndex];
+                    console.log(`📍 Work item at index ${itemIndex}:`, workItem);
+
+                    // Try different possible key properties
+                    workItemKey = workItem.key || workItem._key || workItem.id || workItem._id;
+                    console.log(`📍 Extracted work item key:`, workItemKey);
+                }
+            }
+
+            console.log('🎯 Drag started:', { nodeType, workItemKey });
 
             event.dataTransfer.effectAllowed = 'copy';
             event.dataTransfer.setData('nodeType', nodeType);
             if (workItemKey) {
                 event.dataTransfer.setData('workItemKey', workItemKey);
             }
-        },
-
-        // Canvas drop handler
+        },        // Canvas drop handler
         onCanvasDrop(event) {
             event.preventDefault();
 
             const nodeType = event.dataTransfer.getData('nodeType');
             const workItemKey = event.dataTransfer.getData('workItemKey');
+
+            console.log('🎯 Drop received:', { nodeType, workItemKey });
 
             if (!nodeType) return;
 
@@ -212,6 +284,8 @@ function workflowDesigner() {
 
         // Create a new node
         createNode(type, x, y, workItemKey = null) {
+            console.log('🏗️ createNode called:', { type, workItemKey, availableWorkItemsCount: this.availableWorkItems.length });
+
             this.nodeCounter++;
             const nodeId = `node_${Date.now()}_${this.nodeCounter}`;
 
@@ -220,16 +294,31 @@ function workflowDesigner() {
 
             // If it's a work item node, get the work item details
             if (type === 'work-item' && workItemKey) {
-                const workItem = this.availableWorkItems.find(wi => wi.key === workItemKey);
+                // ArangoDB uses _key as the primary identifier
+                const workItem = this.availableWorkItems.find(wi => wi._key === workItemKey || wi.key === workItemKey);
+                console.log('  🔍 Looking for work item with key:', workItemKey);
+                console.log('  📦 Found work item:', workItem);
+
                 if (workItem) {
-                    nodeName = workItem.name;
+                    // Work item found - use its details
+                    nodeName = workItem.title;
                     nodeData = {
-                        name: workItem.name,
+                        name: workItem.title,
                         description: workItem.description || '',
-                        workItemKey: workItemKey,
+                        work_item_key: workItemKey,
                         type: workItem.type
                     };
+                    console.log('  ✅ Using work item details:', nodeData);
+                } else {
+                    // Work item not found yet, but still store the key
+                    console.log('  ⚠️ Work item not found yet, storing key for later lookup');
+                    nodeData = {
+                        name: 'Loading...',
+                        work_item_key: workItemKey
+                    };
                 }
+            } else {
+                console.log('  ℹ️ Not a work-item or no workItemKey provided');
             }
 
             const node = {
@@ -238,6 +327,8 @@ function workflowDesigner() {
                 position: { x, y },
                 data: nodeData
             };
+
+            console.log('  📝 Final node data:', node);
 
             this.nodes.push(node);
             this.renderNode(node);
@@ -303,13 +394,48 @@ function workflowDesigner() {
                     break;
             }
 
+            // Get display name for the node
+            let displayName = node.data.name || node.type;
+
+            // For work items, prioritize the title lookup from availableWorkItems
+            if ((node.type === 'work_item' || node.type === 'work-item') && node.data.work_item_key) {
+                console.log(`🔍 Processing work item node: ${node.id}`);
+                console.log('  - Node type:', node.type);
+                console.log('  - Work item key:', node.data.work_item_key);
+                console.log('  - Node data:', node.data);
+                console.log('  - Available work items count:', this.availableWorkItems.length);
+
+                // ArangoDB uses _key as the primary identifier
+                const workItem = this.availableWorkItems.find(wi => wi._key === node.data.work_item_key || wi.key === node.data.work_item_key);
+
+                if (workItem) {
+                    // Found in availableWorkItems - use the current title
+                    console.log('  ✅ Found work item:', workItem);
+                    displayName = workItem.title;
+                    console.log('  - Display name set to:', displayName);
+                } else if (node.data.name && node.data.name !== 'work_item' && node.data.name !== 'work-item') {
+                    // Use stored name if it exists and isn't just the type name
+                    console.log('  📝 Using stored name:', node.data.name);
+                    displayName = node.data.name;
+                } else if (this.availableWorkItems.length === 0) {
+                    // Work items haven't loaded yet
+                    console.log('  ⏳ Work items not loaded yet');
+                    displayName = 'Loading...';
+                } else {
+                    // Work item key not found in loaded items
+                    console.log('  ⚠️ Work item not found in available items');
+                    displayName = `Work Item (${node.data.work_item_key.substring(0, 8)}...)`;
+                }
+            }
+
+            console.log(`📌 Final display name for ${node.id}: "${displayName}"`);
+
             nodeEl.innerHTML = `
                 <div class="node-content">
                     <div class="node-header">
                         <span class="node-icon ${iconColor}"><i class="fas ${icon}"></i></span>
-                        <span class="node-title">${node.data.name || node.type}</span>
+                        <span class="node-title">${displayName}</span>
                     </div>
-                    ${node.data.description ? `<div class="node-description">${node.data.description}</div>` : ''}
                 </div>
             `;
 
@@ -318,7 +444,7 @@ function workflowDesigner() {
 
             // Make node draggable using jsPlumb v6 API
             this.jsPlumbInstance.setDraggable(nodeEl, true);
-            
+
             // Add drag stop listener to update position
             this.jsPlumbInstance.on(nodeEl, 'stop', (params) => {
                 // Update node position
