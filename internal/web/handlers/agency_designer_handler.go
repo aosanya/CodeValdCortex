@@ -251,28 +251,57 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 // ShowWorkflowDesigner renders the visual workflow designer page
 func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 	agencyID := c.Param("id")
-	workflowID := c.Param("workflowId")
+	workflowKey := c.Param("workflowId") // This is actually the workflow key, not ID
 
-	// Get workflow from service
-	wf, err := h.workflowService.GetWorkflow(c.Request.Context(), workflowID)
+	// Get agency specification to access workflows
+	spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to get workflow")
-		c.HTML(http.StatusNotFound, "error.html", gin.H{
+		h.logger.WithError(err).Error("Failed to get agency specification")
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Agency specification not found",
+		})
+		return
+	}
+
+	// Find workflow by key
+	var workflow *models.Workflow
+	for i := range spec.Workflows {
+		if spec.Workflows[i].Key == workflowKey {
+			workflow = &spec.Workflows[i]
+			break
+		}
+	}
+
+	if workflow == nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":    agencyID,
+			"workflow_key": workflowKey,
+		}).Error("Workflow not found in specification")
+		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Workflow not found",
 		})
 		return
 	}
 
-	// Verify workflow belongs to agency
-	if wf.AgencyID != agencyID {
-		h.logger.Warn("Workflow does not belong to agency")
-		c.HTML(http.StatusForbidden, "error.html", gin.H{
-			"error": "Access denied",
-		})
-		return
+	// Log workflow details before rendering
+	h.logger.WithFields(logrus.Fields{
+		"workflow_id":   workflow.ID,
+		"workflow_key":  workflow.Key,
+		"workflow_name": workflow.Name,
+		"agency_id":     agencyID,
+		"nodes_count":   len(workflow.Nodes),
+		"edges_count":   len(workflow.Edges),
+	}).Info("🎨 Rendering workflow designer")
+
+	if len(workflow.Nodes) > 0 {
+		h.logger.WithFields(logrus.Fields{
+			"first_node_id":            workflow.Nodes[0].ID,
+			"first_node_type":          workflow.Nodes[0].Type,
+			"first_node_work_item_key": workflow.Nodes[0].Data.WorkItemKey,
+		}).Info("  📌 Sample node data")
 	}
 
 	// Render designer page
-	component := agency_designer.WorkflowDesigner(agencyID, wf)
+	component := agency_designer.WorkflowDesigner(agencyID, workflow)
 	component.Render(c.Request.Context(), c.Writer)
 }

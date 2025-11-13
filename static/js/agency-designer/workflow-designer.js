@@ -30,13 +30,52 @@ function workflowDesigner() {
 
         // Initialize
         init() {
+            console.log('🎬 Workflow Designer init() called');
+            
+            // Get the designer container element
+            const container = document.querySelector('.designer-container');
+            if (!container) {
+                console.error('❌ Designer container not found');
+                return;
+            }
 
-            // Load workflow data from global variable
-            if (typeof workflowData !== 'undefined') {
-                this.workflowId = workflowData.id;
-                this.agencyId = workflowData.agencyId;
-                this.nodes = workflowData.nodes || [];
-                this.edges = workflowData.edges || [];
+            // Read workflow data from data attributes
+            try {
+                this.agencyId = container.dataset.agencyId;
+                this.workflowId = container.dataset.workflowId || container.dataset.workflowKey; // Use key as fallback
+                const workflowKey = container.dataset.workflowKey;
+                const workflowName = container.dataset.workflowName;
+                const workflowVersion = container.dataset.workflowVersion;
+
+                console.log('📋 Workflow Info:', {
+                    id: this.workflowId,
+                    key: workflowKey,
+                    name: workflowName,
+                    version: workflowVersion
+                });
+
+                // Parse nodes and edges from JSON
+                const nodesData = container.dataset.workflowNodes;
+                const edgesData = container.dataset.workflowEdges;
+                
+                this.nodes = nodesData ? JSON.parse(nodesData) : [];
+                this.edges = edgesData ? JSON.parse(edgesData) : [];
+
+                console.log('✅ Loaded nodes:', this.nodes.length);
+                console.log('✅ Loaded edges:', this.edges.length);
+
+                if (this.nodes.length > 0) {
+                    console.log('🔸 First node:', this.nodes[0]);
+                }
+
+                // Initialize specification API with agency ID
+                if (window.specificationAPI) {
+                    window.specificationAPI.agencyId = this.agencyId;
+                    console.log('✅ Specification API initialized with agency:', this.agencyId);
+                }
+            } catch (error) {
+                console.error('❌ Error loading workflow data:', error);
+                console.error('Data attributes:', container.dataset);
             }
 
             // Initialize jsPlumb
@@ -53,6 +92,8 @@ function workflowDesigner() {
 
             // Set up keyboard shortcuts
             this.setupKeyboardShortcuts();
+
+            console.log('✨ Workflow Designer initialization complete');
         },
 
         // Initialize jsPlumb instance
@@ -127,10 +168,13 @@ function workflowDesigner() {
 
         // Load available work items from API
         async loadWorkItems() {
+            console.log('📥 Loading work items for agency:', this.agencyId);
             try {
                 const workItems = await window.specificationAPI.getWorkItems();
                 this.availableWorkItems = workItems || [];
+                console.log('✅ Work items loaded:', this.availableWorkItems.length);
             } catch (error) {
+                console.error('❌ Failed to load work items:', error);
             }
         },
 
@@ -203,10 +247,22 @@ function workflowDesigner() {
 
         // Render all nodes
         renderNodes() {
-            this.nodes.forEach(node => this.renderNode(node));
+            console.log('🎨 renderNodes() called');
+            console.log('🔢 Number of nodes to render:', this.nodes.length);
+
+            if (this.nodes.length === 0) {
+                console.warn('⚠️ No nodes to render!');
+                return;
+            }
+
+            this.nodes.forEach((node, index) => {
+                console.log(`🔸 Rendering node ${index + 1}/${this.nodes.length}:`, node.id, node.type, node.data?.name);
+                this.renderNode(node);
+            });
 
             // Restore connections after nodes are rendered
             this.$nextTick(() => {
+                console.log('🔗 Rendering connections...');
                 this.renderConnections();
             });
         },
@@ -240,7 +296,8 @@ function workflowDesigner() {
                     icon = 'fa-code-branch';
                     iconColor = 'has-text-info';
                     break;
-                case 'work-item':
+                case 'work_item': // Handle underscore version
+                case 'work-item':  // Handle hyphen version
                     icon = 'fa-tasks';
                     iconColor = 'has-text-link';
                     break;
@@ -259,18 +316,17 @@ function workflowDesigner() {
             // Add to canvas
             this.$refs.canvasViewport.appendChild(nodeEl);
 
-            // Make node draggable
-            this.jsPlumbInstance.draggable(nodeEl, {
-                containment: true,
-                grid: [10, 10],
-                stop: (params) => {
-                    // Update node position
-                    const nodeObj = this.nodes.find(n => n.id === node.id);
-                    if (nodeObj) {
-                        nodeObj.position.x = params.pos[0];
-                        nodeObj.position.y = params.pos[1];
-                        this.saveToHistory();
-                    }
+            // Make node draggable using jsPlumb v6 API
+            this.jsPlumbInstance.setDraggable(nodeEl, true);
+            
+            // Add drag stop listener to update position
+            this.jsPlumbInstance.on(nodeEl, 'stop', (params) => {
+                // Update node position
+                const nodeObj = this.nodes.find(n => n.id === node.id);
+                if (nodeObj) {
+                    nodeObj.position.x = params.pos.x;
+                    nodeObj.position.y = params.pos.y;
+                    this.saveToHistory();
                 }
             });
 

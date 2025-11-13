@@ -20,7 +20,12 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			<script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.3/dist/panzoom.min.js"></script>
 			<!-- Alpine.js -->
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			<!-- Specification API for work items -->
+			<script src="/static/js/agency-designer/specification-api.js"></script>
 			<style>
+				/* Alpine.js cloak */
+				[x-cloak] { display: none !important; }
+				
 				/* Workflow Designer Layout */
 				html, body {
 					height: 100%;
@@ -249,7 +254,15 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			</style>
 		</head>
 		<body>
-			<div class="designer-container" x-data="workflowDesigner()">
+			<div class="designer-container" 
+				x-data="workflowDesigner()"
+				data-agency-id={ agencyID }
+				data-workflow-id={ wf.ID }
+				data-workflow-key={ wf.Key }
+				data-workflow-name={ wf.Name }
+				data-workflow-version={ wf.Version }
+				data-workflow-nodes={ templ.JSONString(wf.Nodes) }
+				data-workflow-edges={ templ.JSONString(wf.Edges) }>
 				<!-- Toolbar -->
 				<div class="designer-toolbar">
 					<div class="level is-mobile">
@@ -383,43 +396,47 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 							</p>
 						</div>
 						
-						<div x-show="selectedNode">
+						<div x-show="selectedNode" x-cloak>
 							<div class="field">
 								<label class="label">Node Type</label>
 								<div class="control">
-									<input class="input is-static" type="text" x-model="selectedNode?.type" readonly/>
+									<input class="input is-static" type="text" :value="selectedNode ? selectedNode.type : ''" readonly/>
 								</div>
 							</div>
 							
 							<div class="field">
 								<label class="label">Name</label>
 								<div class="control">
-									<input class="input" type="text" x-model="selectedNode?.data.name" @input="updateNodeProperty('name', $event.target.value)"/>
+									<input class="input" type="text" :value="selectedNode && selectedNode.data ? selectedNode.data.name : ''" @input="updateNodeProperty('name', $event.target.value)"/>
 								</div>
 							</div>
 							
-							<div class="field" x-show="selectedNode?.type === 'work-item'">
-								<label class="label">Description</label>
-								<div class="control">
-									<textarea class="textarea" rows="3" x-model="selectedNode?.data.description" @input="updateNodeProperty('description', $event.target.value)"></textarea>
+							<template x-if="selectedNode && selectedNode.type === 'work-item'">
+								<div class="field">
+									<label class="label">Description</label>
+									<div class="control">
+										<textarea class="textarea" rows="3" :value="selectedNode && selectedNode.data ? selectedNode.data.description : ''" @input="updateNodeProperty('description', $event.target.value)"></textarea>
+									</div>
 								</div>
-							</div>
+							</template>
 							
-							<div class="field" x-show="selectedNode?.type === 'decision'">
-								<label class="label">Condition</label>
-								<div class="control">
-									<textarea class="textarea" rows="4" x-model="selectedNode?.data.condition" @input="updateNodeProperty('condition', $event.target.value)" placeholder="e.g., status === 'approved'"></textarea>
+							<template x-if="selectedNode && selectedNode.type === 'decision'">
+								<div class="field">
+									<label class="label">Condition</label>
+									<div class="control">
+										<textarea class="textarea" rows="4" :value="selectedNode && selectedNode.data ? selectedNode.data.condition : ''" @input="updateNodeProperty('condition', $event.target.value)" placeholder="e.g., status === 'approved'"></textarea>
+									</div>
 								</div>
-							</div>
+							</template>
 							
 							<div class="field">
 								<label class="label">Position</label>
 								<div class="control">
 									<div class="tags has-addons">
 										<span class="tag">X:</span>
-										<span class="tag is-light" x-text="Math.round(selectedNode?.position.x || 0)"></span>
+										<span class="tag is-light" x-text="selectedNode && selectedNode.position ? Math.round(selectedNode.position.x || 0) : 0"></span>
 										<span class="tag">Y:</span>
-										<span class="tag is-light" x-text="Math.round(selectedNode?.position.y || 0)"></span>
+										<span class="tag is-light" x-text="selectedNode && selectedNode.position ? Math.round(selectedNode.position.y || 0) : 0"></span>
 									</div>
 								</div>
 							</div>
@@ -438,19 +455,9 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			</div>
 			
 			<!-- Workflow Designer Script -->
+			
+			<!-- Workflow Designer Script -->
 			<script src="/static/js/agency-designer/workflow-designer.js"></script>
-			<script type="text/javascript">
-				// Initialize with workflow data
-				const workflowData = {
-					id: { templ.JSONString(wf.ID) },
-					agencyId: { templ.JSONString(agencyID) },
-					name: { templ.JSONString(wf.Name) },
-					version: { templ.JSONString(wf.Version) },
-					status: { templ.JSONString(string(wf.Status)) },
-					nodes: { templ.JSONScript(wf.Nodes) },
-					edges: { templ.JSONScript(wf.Edges) }
-				};
-			</script>
 		</body>
 	</html>
 }

@@ -8,8 +8,19 @@
  */
 window.SpecificationAPI = class SpecificationAPI {
     constructor() {
-        this.agencyId = window.getCurrentAgencyId ? window.getCurrentAgencyId() : null;
-        this.baseUrl = `/api/v1/agencies/${this.agencyId}/specification`;
+        this._agencyId = window.getCurrentAgencyId ? window.getCurrentAgencyId() : null;
+    }
+
+    get agencyId() {
+        return this._agencyId;
+    }
+
+    set agencyId(value) {
+        this._agencyId = value;
+    }
+
+    get baseUrl() {
+        return `/api/v1/agencies/${this._agencyId}/specification`;
     }
 
     /**
