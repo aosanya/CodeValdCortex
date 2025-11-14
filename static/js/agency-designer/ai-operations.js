@@ -116,14 +116,12 @@ window.processAIOperation = function (entityType, operations) {
     const handlerFunction = functionMap[entityType];
 
     if (!handlerFunction) {
-        console.error(`Unknown entity type: ${entityType}`);
         window.showNotification(`Unknown entity type: ${entityType}`, 'error');
         return;
     }
 
     // Check if the handler function exists
     if (typeof window[handlerFunction] !== 'function') {
-        console.error(`Handler function not found: ${handlerFunction}`);
         window.showNotification(`Handler function not found for ${entityType}`, 'error');
         return;
     }

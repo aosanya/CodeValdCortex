@@ -182,21 +182,13 @@ window.SpecificationAPI = class SpecificationAPI {
      */
     async updateWorkflows(workflows, updatedBy = 'user') {
         try {
-            console.log('🚀 updateWorkflows called with', workflows.length, 'workflows');
-            console.log('📦 Workflows to save:', workflows.map(w => ({
-                key: w.key,
-                _key: w._key,
-                id: w.id,
-                name: w.name,
-                description: w.description?.substring(0, 50) + '...'
-            })));
+
 
             // Workflows are stored in the specification, so we need to update them there
             const spec = await this.getSpecification();
             spec.workflows = workflows;
             spec.updated_by = updatedBy;
 
-            console.log('📤 Sending PUT request to:', this.baseUrl);
 
             const response = await fetch(this.baseUrl, {
                 method: 'PUT',
@@ -207,15 +199,13 @@ window.SpecificationAPI = class SpecificationAPI {
             });
 
             if (!response.ok) {
-                console.error('❌ Failed to update workflows:', response.status);
                 throw new Error(`Failed to update workflows: ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('✅ Workflows updated successfully');
+
             return result;
         } catch (error) {
-            console.error('❌ Error updating workflows:', error);
             throw error;
         }
     }
@@ -379,34 +369,24 @@ window.SpecificationAPI = class SpecificationAPI {
      * Update a specific workflow in the specification
      */
     async updateWorkflow(workflowKey, updatedWorkflow, updatedBy = 'user') {
-        console.log('🔧 updateWorkflow called:', { workflowKey, updatedWorkflow });
 
         const spec = await this.getSpecification();
         const workflows = spec.workflows || [];
 
-        console.log('📋 Current workflows:', workflows.map(w => ({
-            key: w.key,
-            _key: w._key,
-            id: w.id,
-            name: w.name
-        })));
+
 
         const workflowIndex = workflows.findIndex(w => {
             // Match the pattern used for goals - check _key first
             const match = w._key === workflowKey || w.key === workflowKey || w.id === workflowKey;
-            console.log(`  Checking workflow: _key=${w._key}, key=${w.key}, id=${w.id} against ${workflowKey}: ${match}`);
             return match;
         });
 
-        console.log('🔍 Found workflow at index:', workflowIndex);
 
         if (workflowIndex === -1) {
-            console.error('❌ Workflow not found:', workflowKey);
             throw new Error(`Workflow with key ${workflowKey} not found`);
         }
 
         const originalWorkflow = workflows[workflowIndex];
-        console.log('📝 Original workflow:', originalWorkflow);
 
         // Match goals pattern: simple merge preserving original fields
         workflows[workflowIndex] = {
@@ -414,7 +394,6 @@ window.SpecificationAPI = class SpecificationAPI {
             ...updatedWorkflow
         };
 
-        console.log('✅ Updated workflow:', workflows[workflowIndex]);
 
         return await this.updateWorkflows(workflows, updatedBy);
     }

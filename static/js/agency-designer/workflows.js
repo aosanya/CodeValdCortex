@@ -65,7 +65,6 @@ async function loadWorkflowData(workflowKey) {
 
         populateWorkflowForm(workflow);
     } catch (error) {
-        console.error('Error loading workflow:', error);
         window.showNotification('Error loading workflow data', 'danger');
     }
 }

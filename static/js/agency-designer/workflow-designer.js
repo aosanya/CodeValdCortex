@@ -34,12 +34,9 @@ function workflowDesigner() {
 
         // Initialize
         init() {
-            console.log('🎬 Workflow Designer init() called');
-
             // Get the designer container element
             const container = document.querySelector('.designer-container');
             if (!container) {
-                console.error('❌ Designer container not found');
                 return;
             }
 
@@ -52,13 +49,6 @@ function workflowDesigner() {
                 this.workflowDescription = container.dataset.workflowDescription || '';
                 this.workflowVersion = container.dataset.workflowVersion;
 
-                console.log('📋 Workflow Info:', {
-                    id: this.workflowId,
-                    key: this.workflowKey,
-                    name: this.workflowName,
-                    version: this.workflowVersion
-                });
-
                 // Parse nodes and edges from JSON
                 const nodesData = container.dataset.workflowNodes;
                 const edgesData = container.dataset.workflowEdges;
@@ -68,7 +58,6 @@ function workflowDesigner() {
 
                 // If workflow is empty, initialize with Start and End nodes
                 if (this.nodes.length === 0) {
-                    console.log('📝 Initializing empty workflow with Start and End nodes');
                     this.nodes = [
                         {
                             id: 'start',
@@ -85,21 +74,11 @@ function workflowDesigner() {
                     ];
                 }
 
-                console.log('✅ Loaded nodes:', this.nodes.length);
-                console.log('✅ Loaded edges:', this.edges.length);
-
-                if (this.nodes.length > 0) {
-                    console.log('🔸 First node:', this.nodes[0]);
-                }
-
                 // Initialize specification API with agency ID
                 if (window.specificationAPI) {
                     window.specificationAPI.agencyId = this.agencyId;
-                    console.log('✅ Specification API initialized with agency:', this.agencyId);
                 }
             } catch (error) {
-                console.error('❌ Error loading workflow data:', error);
-                console.error('Data attributes:', container.dataset);
             }
 
             // Initialize jsPlumb
@@ -116,8 +95,6 @@ function workflowDesigner() {
 
             // Set up keyboard shortcuts
             this.setupKeyboardShortcuts();
-
-            console.log('✨ Workflow Designer initialization complete');
         },
 
         // Initialize jsPlumb instance
@@ -187,31 +164,24 @@ function workflowDesigner() {
                     return shouldIgnore;
                 }
             });
-
-            // Debug: Log available methods
-            console.log('📋 Panzoom instance methods:', Object.keys(this.panzoomInstance));
         },
 
         // Load available work items from API
         async loadWorkItems() {
-            console.log('📥 Loading work items for agency:', this.agencyId);
             try {
                 const workItems = await window.specificationAPI.getWorkItems();
                 this.availableWorkItems = workItems || [];
-                console.log('✅ Work items loaded:', this.availableWorkItems.length);
 
                 // Update node titles with work item names
                 if (this.availableWorkItems.length > 0) {
                     this.updateWorkItemNodeTitles();
                 }
             } catch (error) {
-                console.error('❌ Failed to load work items:', error);
             }
         },
 
         // Update work item node titles after work items are loaded
         updateWorkItemNodeTitles() {
-            console.log('🔄 Updating work item node titles...');
             let updatedCount = 0;
 
             this.nodes.forEach(node => {
@@ -225,15 +195,10 @@ function workflowDesigner() {
                         if (titleEl) {
                             titleEl.textContent = workItem.title;
                             updatedCount++;
-                            console.log(`  ✅ Updated node ${node.id} with title: ${workItem.title}`);
                         }
-                    } else if (!workItem) {
-                        console.warn(`  ⚠️ Work item not found for key: ${node.data.work_item_key}`);
                     }
                 }
             });
-
-            console.log(`✅ Updated ${updatedCount} work item node titles`);
         },
 
         // Toolbox drag start
@@ -252,15 +217,11 @@ function workflowDesigner() {
 
                 if (itemIndex >= 0 && itemIndex < this.availableWorkItems.length) {
                     const workItem = this.availableWorkItems[itemIndex];
-                    console.log(`📍 Work item at index ${itemIndex}:`, workItem);
 
                     // Try different possible key properties
                     workItemKey = workItem.key || workItem._key || workItem.id || workItem._id;
-                    console.log(`📍 Extracted work item key:`, workItemKey);
                 }
             }
-
-            console.log('🎯 Drag started:', { nodeType, workItemKey });
 
             event.dataTransfer.effectAllowed = 'copy';
             event.dataTransfer.setData('nodeType', nodeType);
@@ -273,8 +234,6 @@ function workflowDesigner() {
 
             const nodeType = event.dataTransfer.getData('nodeType');
             const workItemKey = event.dataTransfer.getData('workItemKey');
-
-            console.log('🎯 Drop received:', { nodeType, workItemKey });
 
             if (!nodeType) return;
 
@@ -291,8 +250,6 @@ function workflowDesigner() {
 
         // Create a new node
         createNode(type, x, y, workItemKey = null) {
-            console.log('🏗️ createNode called:', { type, workItemKey, availableWorkItemsCount: this.availableWorkItems.length });
-
             this.nodeCounter++;
             const nodeId = `node_${Date.now()}_${this.nodeCounter}`;
 
@@ -303,8 +260,6 @@ function workflowDesigner() {
             if (type === 'work-item' && workItemKey) {
                 // ArangoDB uses _key as the primary identifier
                 const workItem = this.availableWorkItems.find(wi => wi._key === workItemKey || wi.key === workItemKey);
-                console.log('  🔍 Looking for work item with key:', workItemKey);
-                console.log('  📦 Found work item:', workItem);
 
                 if (workItem) {
                     // Work item found - use its details
@@ -315,17 +270,13 @@ function workflowDesigner() {
                         work_item_key: workItemKey,
                         type: workItem.type
                     };
-                    console.log('  ✅ Using work item details:', nodeData);
                 } else {
                     // Work item not found yet, but still store the key
-                    console.log('  ⚠️ Work item not found yet, storing key for later lookup');
                     nodeData = {
                         name: 'Loading...',
                         work_item_key: workItemKey
                     };
                 }
-            } else {
-                console.log('  ℹ️ Not a work-item or no workItemKey provided');
             }
 
             const node = {
@@ -335,8 +286,6 @@ function workflowDesigner() {
                 data: nodeData
             };
 
-            console.log('  📝 Final node data:', node);
-
             this.nodes.push(node);
             this.renderNode(node);
             this.saveToHistory();
@@ -345,22 +294,16 @@ function workflowDesigner() {
 
         // Render all nodes
         renderNodes() {
-            console.log('🎨 renderNodes() called');
-            console.log('🔢 Number of nodes to render:', this.nodes.length);
-
             if (this.nodes.length === 0) {
-                console.warn('⚠️ No nodes to render!');
                 return;
             }
 
             this.nodes.forEach((node, index) => {
-                console.log(`🔸 Rendering node ${index + 1}/${this.nodes.length}:`, node.id, node.type, node.data?.name);
                 this.renderNode(node);
             });
 
             // Restore connections after nodes are rendered
             this.$nextTick(() => {
-                console.log('🔗 Rendering connections...');
                 this.renderConnections();
             });
         },
@@ -406,36 +349,23 @@ function workflowDesigner() {
 
             // For work items, prioritize the title lookup from availableWorkItems
             if ((node.type === 'work_item' || node.type === 'work-item') && node.data.work_item_key) {
-                console.log(`🔍 Processing work item node: ${node.id}`);
-                console.log('  - Node type:', node.type);
-                console.log('  - Work item key:', node.data.work_item_key);
-                console.log('  - Node data:', node.data);
-                console.log('  - Available work items count:', this.availableWorkItems.length);
-
                 // ArangoDB uses _key as the primary identifier
                 const workItem = this.availableWorkItems.find(wi => wi._key === node.data.work_item_key || wi.key === node.data.work_item_key);
 
                 if (workItem) {
                     // Found in availableWorkItems - use the current title
-                    console.log('  ✅ Found work item:', workItem);
                     displayName = workItem.title;
-                    console.log('  - Display name set to:', displayName);
                 } else if (node.data.name && node.data.name !== 'work_item' && node.data.name !== 'work-item') {
                     // Use stored name if it exists and isn't just the type name
-                    console.log('  📝 Using stored name:', node.data.name);
                     displayName = node.data.name;
                 } else if (this.availableWorkItems.length === 0) {
                     // Work items haven't loaded yet
-                    console.log('  ⏳ Work items not loaded yet');
                     displayName = 'Loading...';
                 } else {
                     // Work item key not found in loaded items
-                    console.log('  ⚠️ Work item not found in available items');
                     displayName = `Work Item (${node.data.work_item_key.substring(0, 8)}...)`;
                 }
             }
-
-            console.log(`📌 Final display name for ${node.id}: "${displayName}"`);
 
             nodeEl.innerHTML = `
                 <div class="node-content">
@@ -603,7 +533,6 @@ function workflowDesigner() {
             const newScale = transform.scale * 1.2;
             // Use zoomAbs to set absolute zoom level
             this.panzoomInstance.zoomAbs(0, 0, newScale);
-            console.log('🔍 Zoom In - new scale:', newScale);
         },
 
         zoomOut() {
@@ -611,7 +540,6 @@ function workflowDesigner() {
             const newScale = transform.scale * 0.8;
             // Use zoomAbs to set absolute zoom level
             this.panzoomInstance.zoomAbs(0, 0, newScale);
-            console.log('🔎 Zoom Out - new scale:', newScale);
         },
 
         fitToScreen() {
@@ -691,7 +619,6 @@ function workflowDesigner() {
 
             try {
                 // First, fetch the current specification to get ALL workflows
-                console.log('📥 Fetching current specification...');
                 const specResponse = await fetch(`/api/v1/agencies/${this.agencyId}/specification`);
                 if (!specResponse.ok) {
                     throw new Error('Failed to fetch current specification');
@@ -699,7 +626,6 @@ function workflowDesigner() {
 
                 const spec = await specResponse.json();
                 const allWorkflows = spec.workflows || [];
-                console.log('📊 Current workflows count:', allWorkflows.length);
 
                 // Build the updated workflow object
                 const updatedWorkflow = {
@@ -716,14 +642,10 @@ function workflowDesigner() {
                 const workflowIndex = allWorkflows.findIndex(wf => wf._key === this.workflowKey || wf.key === this.workflowKey);
 
                 if (workflowIndex >= 0) {
-                    console.log(`� Updating existing workflow at index ${workflowIndex}`);
                     allWorkflows[workflowIndex] = updatedWorkflow;
                 } else {
-                    console.log('➕ Adding new workflow');
                     allWorkflows.push(updatedWorkflow);
                 }
-
-                console.log('💾 Saving all workflows:', allWorkflows.length, 'workflows');
 
                 // Save ALL workflows back to the specification
                 const response = await fetch(`/api/v1/agencies/${this.agencyId}/specification/workflows`, {
@@ -739,15 +661,12 @@ function workflowDesigner() {
 
                 if (response.ok) {
                     const result = await response.json();
-                    console.log('✅ Workflow saved successfully');
                     alert('✓ Workflow saved successfully');
                 } else {
                     const error = await response.json();
-                    console.error('❌ Save failed:', error);
                     alert('Failed to save workflow: ' + (error.error || 'Unknown error'));
                 }
             } catch (error) {
-                console.error('❌ Save error:', error);
                 alert('Failed to save workflow: ' + error.message);
             } finally {
                 this.saving = false;
