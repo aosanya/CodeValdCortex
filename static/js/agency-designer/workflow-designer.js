@@ -2,10 +2,36 @@
  * Workflow Designer - Visual workflow builder using jsPlumb
  * Integrates with Alpine.js for state management
  * Uses global specificationAPI
+ * 
+ * ============================================================================
+ * MODULAR VERSION AVAILABLE
+ * ============================================================================
+ * This file has been split into smaller modules in ./workflow-designer/
+ * See ./workflow-designer/README.md for module documentation and migration guide
+ * 
+ * Modules:
+ * - state.js       (36 lines)   - State management & data structures
+ * - init.js        (~150 lines) - Initialization (jsPlumb, panzoom, data)
+ * - nodes.js       (~280 lines) - Node rendering, CRUD operations
+ * - edges.js       (~350 lines) - Edge/connection management, auto-split
+ * - drag-drop.js   (~110 lines) - Drag and drop from toolbox
+ * - canvas.js      (~76 lines)  - Canvas controls (zoom, pan, layout)
+ * - history.js     (~70 lines)  - Undo/redo functionality
+ * - workflow.js    (~150 lines) - Save, validate, execute operations
+ * - index.js       (~65 lines)  - Main entry combining all modules
+ * 
+ * Migration Status: PENDING
+ * - Modules created using ES6 exports
+ * - Needs conversion to browser-compatible format OR build step
+ * - Current file (this one) remains active until migration complete
+ * 
+ * See: workflow-designer-README.md for migration options
+ * ============================================================================
  */
 
 // Alpine.js component for workflow designer
 function workflowDesigner() {
+
     return {
         // State
         workflowId: '',
@@ -22,6 +48,11 @@ function workflowDesigner() {
         panzoomInstance: null,
         showMinimap: false,
         saving: false,
+
+        // Drag state tracking for edge splitting
+        lastDragOverEdge: null,
+        lastDragOverTime: null,
+        dragOverEdgeTimeout: 2000, // milliseconds - 2 seconds to allow for slow/careful drags
 
         // Undo/Redo
         history: [],
@@ -74,11 +105,28 @@ function workflowDesigner() {
                     ];
                 }
 
+                // If we have start and end nodes but no edges, create default edge
+                const hasStartNode = this.nodes.some(n => n.id === 'start' || n.type === 'start');
+                const hasEndNode = this.nodes.some(n => n.id === 'end' || n.type === 'end');
+                const hasStartToEndEdge = this.edges.some(e =>
+                    (e.source === 'start' && e.target === 'end')
+                );
+
+                if (hasStartNode && hasEndNode && !hasStartToEndEdge && this.edges.length === 0) {
+                    this.edges.push({
+                        id: 'edge_start_end',
+                        source: 'start',
+                        target: 'end',
+                        type: 'sequential'
+                    });
+                }
+
                 // Initialize specification API with agency ID
                 if (window.specificationAPI) {
                     window.specificationAPI.agencyId = this.agencyId;
                 }
             } catch (error) {
+                // Error parsing workflow data
             }
 
             // Initialize jsPlumb
@@ -177,6 +225,7 @@ function workflowDesigner() {
                     this.updateWorkItemNodeTitles();
                 }
             } catch (error) {
+                // Error loading work items
             }
         },
 
@@ -228,14 +277,55 @@ function workflowDesigner() {
             if (workItemKey) {
                 event.dataTransfer.setData('workItemKey', workItemKey);
             }
-        },        // Canvas drop handler
+        },
+
+        // Canvas dragover handler - for visual feedback while dragging
+        onCanvasDragOver(event) {
+            event.preventDefault();
+
+            try {
+                // Calculate current drag position
+                const canvasRect = this.$refs.canvasViewport.getBoundingClientRect();
+                const transform = this.panzoomInstance.getTransform();
+                const x = (event.clientX - canvasRect.left - transform.x) / transform.scale;
+                const y = (event.clientY - canvasRect.top - transform.y) / transform.scale;
+
+                // Check if dragging over an edge (with node dimensions)
+                // Center the node box on the cursor position for accurate intersection detection
+                const nodeWidth = 150;
+                const nodeHeight = 70;
+                const nodeBoxX = x - nodeWidth / 2;
+                const nodeBoxY = y - nodeHeight / 2;
+
+                const nearEdge = this.findNearbyEdgeWithBox(nodeBoxX, nodeBoxY, nodeWidth, nodeHeight);
+
+                // Cache the edge and timestamp for use in drop handler
+                if (nearEdge) {
+                    this.lastDragOverEdge = nearEdge;
+                    this.lastDragOverTime = Date.now();
+                    this.highlightEdge(nearEdge.id);
+                } else {
+                    // Only clear the visual highlight, but keep the cache for drop handler
+                    this.clearEdgeHighlights();
+                }
+            } catch (error) {
+                // Error in drag over handler
+            }
+        },
+
+        // Canvas drop handler
         onCanvasDrop(event) {
             event.preventDefault();
+
+            // Clear any edge highlights
+            this.clearEdgeHighlights();
 
             const nodeType = event.dataTransfer.getData('nodeType');
             const workItemKey = event.dataTransfer.getData('workItemKey');
 
-            if (!nodeType) return;
+            if (!nodeType) {
+                return;
+            }
 
             // Calculate drop position relative to canvas viewport
             const canvasRect = this.$refs.canvasViewport.getBoundingClientRect();
@@ -244,11 +334,49 @@ function workflowDesigner() {
             const x = (event.clientX - canvasRect.left - transform.x) / transform.scale;
             const y = (event.clientY - canvasRect.top - transform.y) / transform.scale;
 
-            // Create node
-            this.createNode(nodeType, x, y, workItemKey);
-        },
+            // Determine which edge to split:
+            // NOTE: The x,y coordinates are where the cursor is during drop.
+            // We need to check intersection using the node's bounding box centered on the cursor,
+            // not from the top-left corner where the node will be created.
+            // Offset by half the node dimensions to get the top-left of the node box centered on cursor.
+            const nodeWidth = 150;
+            const nodeHeight = 70;
+            const nodeBoxX = x - nodeWidth / 2;  // Center the box horizontally on cursor
+            const nodeBoxY = y - nodeHeight / 2; // Center the box vertically on cursor
 
-        // Create a new node
+            // 1. First, try to use the cached edge from dragover (if recent enough AND still exists)
+            // 2. Fallback to real-time detection at drop position
+            let nearEdge = null;
+            const now = Date.now();
+            const timeSinceLastDragOver = this.lastDragOverTime ? (now - this.lastDragOverTime) : Infinity;
+
+            if (this.lastDragOverEdge && timeSinceLastDragOver < this.dragOverEdgeTimeout) {
+                // Validate that the cached edge still exists (it may have been split/deleted)
+                const edgeStillExists = this.edges.find(e => e.id === this.lastDragOverEdge.id);
+
+                if (edgeStillExists) {
+                    // Use cached edge from dragover event
+                    nearEdge = this.lastDragOverEdge;
+                } else {
+                    nearEdge = this.findNearbyEdgeWithBox(nodeBoxX, nodeBoxY, nodeWidth, nodeHeight);
+                }
+            } else {
+                // Fallback: Check if dropped on an existing edge (using node box dimensions centered on cursor)
+                nearEdge = this.findNearbyEdgeWithBox(nodeBoxX, nodeBoxY, nodeWidth, nodeHeight);
+            }
+
+            // Clear the cache
+            this.lastDragOverEdge = null;
+            this.lastDragOverTime = null;
+
+            // Create node at the top-left corner of the centered box
+            const nodeId = this.createNode(nodeType, nodeBoxX, nodeBoxY, workItemKey);
+
+            // If dropped on an edge, split it
+            if (nearEdge && nodeId) {
+                this.splitEdge(nearEdge, nodeId);
+            }
+        },        // Create a new node
         createNode(type, x, y, workItemKey = null) {
             this.nodeCounter++;
             const nodeId = `node_${Date.now()}_${this.nodeCounter}`;
@@ -289,6 +417,8 @@ function workflowDesigner() {
             this.nodes.push(node);
             this.renderNode(node);
             this.saveToHistory();
+
+            return nodeId; // Return the node ID for edge splitting
 
         },
 
@@ -389,6 +519,13 @@ function workflowDesigner() {
                 if (nodeObj) {
                     nodeObj.position.x = params.pos.x;
                     nodeObj.position.y = params.pos.y;
+
+                    // Check if node was auto-connected and should be disconnected
+                    this.checkAutoDisconnect(node.id);
+
+                    // Check if unconnected node was dropped on an edge
+                    this.checkAutoConnect(node.id);
+
                     this.saveToHistory();
                 }
             });
@@ -428,7 +565,8 @@ function workflowDesigner() {
                     this.jsPlumbInstance.connect({
                         source: sourceNode,
                         target: targetNode,
-                        type: edge.type || 'sequential'
+                        type: edge.type || 'sequential',
+                        data: { edgeId: edge.id }
                     });
                 }
             });
@@ -504,6 +642,245 @@ function workflowDesigner() {
             }
         },
 
+        // Find nearby edge when dropping a node box (checks if node box intersects edge line)
+        findNearbyEdgeWithBox(x, y, nodeWidth = 150, nodeHeight = 70) {
+            // Node box bounds (x, y is top-left corner)
+            const boxLeft = x;
+            const boxRight = x + nodeWidth;
+            const boxTop = y;
+            const boxBottom = y + nodeHeight;
+
+            for (const edge of this.edges) {
+                const sourceNode = this.nodes.find(n => n.id === edge.source);
+                const targetNode = this.nodes.find(n => n.id === edge.target);
+
+                if (!sourceNode || !targetNode) continue;
+
+                // Get node centers
+                const sourceX = sourceNode.position.x + 75;
+                const sourceY = sourceNode.position.y + 35;
+                const targetX = targetNode.position.x + 75;
+                const targetY = targetNode.position.y + 35;
+
+                // Check if line segment intersects with the node box
+                const intersects = this.lineIntersectsBox(
+                    sourceX, sourceY, targetX, targetY,
+                    boxLeft, boxTop, boxRight, boxBottom
+                );
+
+                if (intersects) {
+                    return edge;
+                }
+            }
+
+            return null;
+        },
+
+        // Find nearby edge for node drop (point-based, kept for compatibility)
+        findNearbyEdge(x, y, threshold = 120) {
+            for (const edge of this.edges) {
+                const sourceNode = this.nodes.find(n => n.id === edge.source);
+                const targetNode = this.nodes.find(n => n.id === edge.target);
+
+                if (!sourceNode || !targetNode) {
+                    continue;
+                }
+
+                // Get node positions (approximate center)
+                const sourceX = sourceNode.position.x + 75; // node width ~150px / 2
+                const sourceY = sourceNode.position.y + 35; // node height ~70px / 2
+                const targetX = targetNode.position.x + 75;
+                const targetY = targetNode.position.y + 35;
+
+                // Calculate distance from point to line segment
+                const distance = this.pointToLineDistance(
+                    x, y,
+                    sourceX, sourceY,
+                    targetX, targetY
+                );
+
+                if (distance < threshold) {
+                    return edge;
+                }
+            }
+
+            return null;
+        },
+
+        // Calculate distance from point to line segment
+        pointToLineDistance(px, py, x1, y1, x2, y2) {
+            const A = px - x1;
+            const B = py - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D;
+            let param = -1;
+
+            if (lenSq !== 0) {
+                param = dot / lenSq;
+            }
+
+            // If the point is outside the line segment bounds, return a large distance
+            // This ensures edge splitting only happens when dropping ON the line segment
+            if (param < 0 || param > 1) {
+                return Infinity; // Point is not between source and target
+            }
+
+            // Point is on the line segment, calculate perpendicular distance
+            const xx = x1 + param * C;
+            const yy = y1 + param * D;
+
+            const dx = px - xx;
+            const dy = py - yy;
+
+            return Math.sqrt(dx * dx + dy * dy);
+        },
+
+        // Check if a line segment intersects with a rectangular box
+        lineIntersectsBox(x1, y1, x2, y2, boxLeft, boxTop, boxRight, boxBottom) {
+            // Check if either endpoint is inside the box
+            const p1Inside = (x1 >= boxLeft && x1 <= boxRight && y1 >= boxTop && y1 <= boxBottom);
+            const p2Inside = (x2 >= boxLeft && x2 <= boxRight && y2 >= boxTop && y2 <= boxBottom);
+
+            if (p1Inside || p2Inside) {
+                return true;
+            }
+
+            // Check if line intersects any of the four box edges
+            const boxEdges = [
+                [boxLeft, boxTop, boxRight, boxTop],       // Top edge
+                [boxRight, boxTop, boxRight, boxBottom],   // Right edge
+                [boxRight, boxBottom, boxLeft, boxBottom], // Bottom edge
+                [boxLeft, boxBottom, boxLeft, boxTop]      // Left edge
+            ];
+
+            for (let i = 0; i < boxEdges.length; i++) {
+                const [bx1, by1, bx2, by2] = boxEdges[i];
+                if (this.lineSegmentsIntersect(x1, y1, x2, y2, bx1, by1, bx2, by2)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        // Check if two line segments intersect
+        lineSegmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4) {
+            const denom = ((y4 - y3) * (x2 - x1)) - ((x4 - x3) * (y2 - y1));
+            if (denom === 0) return false; // Parallel lines
+
+            const ua = (((x4 - x3) * (y1 - y3)) - ((y4 - y3) * (x1 - x3))) / denom;
+            const ub = (((x2 - x1) * (y1 - y3)) - ((y2 - y1) * (x1 - x3))) / denom;
+
+            return (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1);
+        },
+
+        // Highlight an edge (visual feedback during drag)
+        highlightEdge(edgeId) {
+            // Find all jsPlumb connections
+            const connections = this.jsPlumbInstance.getConnections();
+
+            connections.forEach(conn => {
+                const connEdgeId = conn.getData()?.edgeId;
+
+                if (connEdgeId === edgeId) {
+                    // Highlight this edge
+                    conn.setPaintStyle({
+                        stroke: '#ffdd57',  // Yellow highlight
+                        strokeWidth: 4
+                    });
+                } else {
+                    // Reset other edges to normal
+                    conn.setPaintStyle({
+                        stroke: '#3273dc',
+                        strokeWidth: 2
+                    });
+                }
+            });
+        },
+
+        // Clear all edge highlights
+        clearEdgeHighlights() {
+            const connections = this.jsPlumbInstance.getConnections();
+
+            connections.forEach(conn => {
+                conn.setPaintStyle({
+                    stroke: '#3273dc',
+                    strokeWidth: 2
+                });
+            });
+        },
+
+        // Split an edge by inserting a node
+        splitEdge(edge, newNodeId) {
+            // Remove the original edge from edges array
+            this.edges = this.edges.filter(e => e.id !== edge.id);
+
+            // Get the connection object from jsPlumb and remove it
+            const connections = this.jsPlumbInstance.getConnections({
+                source: edge.source,
+                target: edge.target
+            });
+
+            connections.forEach(conn => {
+                this.jsPlumbInstance.deleteConnection(conn);
+            });
+
+            // Create two new edges: source -> newNode and newNode -> target
+            this.$nextTick(() => {
+                const sourceEl = document.getElementById(edge.source);
+                const targetEl = document.getElementById(edge.target);
+                const newNodeEl = document.getElementById(newNodeId);
+
+                if (sourceEl && targetEl && newNodeEl) {
+                    // Connect source to new node
+                    const edgeId1 = `edge_${Date.now()}`;
+                    const conn1 = this.jsPlumbInstance.connect({
+                        source: sourceEl,
+                        target: newNodeEl,
+                        type: edge.type || 'sequential',
+                        data: { edgeId: edgeId1 }
+                    });
+
+                    // Add edge to array
+                    this.edges.push({
+                        id: edgeId1,
+                        source: edge.source,
+                        target: newNodeId,
+                        type: edge.type || 'sequential'
+                    });
+
+                    // Connect new node to target
+                    const edgeId2 = `edge_${Date.now() + 1}`;
+                    const conn2 = this.jsPlumbInstance.connect({
+                        source: newNodeEl,
+                        target: targetEl,
+                        type: edge.type || 'sequential',
+                        data: { edgeId: edgeId2 }
+                    });
+
+                    // Add edge to array
+                    this.edges.push({
+                        id: edgeId2,
+                        source: newNodeId,
+                        target: edge.target,
+                        type: edge.type || 'sequential'
+                    });
+
+                    // Mark node as auto-connected for tracking
+                    const newNode = this.nodes.find(n => n.id === newNodeId);
+                    if (newNode) {
+                        newNode.data.autoConnected = {
+                            source: edge.source,
+                            target: edge.target
+                        };
+                    }
+                }
+            });
+        },
+
         // Connection created
         onConnectionCreated(info) {
             const edge = {
@@ -525,6 +902,99 @@ function workflowDesigner() {
             );
             this.saveToHistory();
 
+        },
+
+        // Check if auto-connected node should be disconnected
+        checkAutoDisconnect(nodeId) {
+            const node = this.nodes.find(n => n.id === nodeId);
+
+            if (!node || !node.data.autoConnected) return;
+
+            const sourceNode = this.nodes.find(n => n.id === node.data.autoConnected.source);
+            const targetNode = this.nodes.find(n => n.id === node.data.autoConnected.target);
+
+            if (!sourceNode || !targetNode) {
+                return;
+            }
+
+            // Calculate if node is still near the original line
+            const sourceX = sourceNode.position.x + 75;
+            const sourceY = sourceNode.position.y + 35;
+            const targetX = targetNode.position.x + 75;
+            const targetY = targetNode.position.y + 35;
+            const nodeX = node.position.x + 75;
+            const nodeY = node.position.y + 35;
+
+            const distance = this.pointToLineDistance(
+                nodeX, nodeY,
+                sourceX, sourceY,
+                targetX, targetY
+            );
+
+            // If node moved too far (threshold: 50px), disconnect it
+            if (distance > 50) {
+                // Remove connections
+                const connections = this.jsPlumbInstance.getConnections({
+                    source: node.data.autoConnected.source,
+                    target: nodeId
+                });
+                connections.forEach(conn => {
+                    this.jsPlumbInstance.deleteConnection(conn);
+                });
+
+                const connections2 = this.jsPlumbInstance.getConnections({
+                    source: nodeId,
+                    target: node.data.autoConnected.target
+                });
+                connections2.forEach(conn => {
+                    this.jsPlumbInstance.deleteConnection(conn);
+                });
+
+                // Reconnect original edge
+                const sourceEl = document.getElementById(node.data.autoConnected.source);
+                const targetEl = document.getElementById(node.data.autoConnected.target);
+
+                if (sourceEl && targetEl) {
+                    this.jsPlumbInstance.connect({
+                        source: sourceEl,
+                        target: targetEl,
+                        type: 'sequential'
+                    });
+                }
+
+                // Remove auto-connected flag
+                delete node.data.autoConnected;
+            }
+        },
+
+        // Check if unconnected node should be auto-connected to a nearby edge
+        checkAutoConnect(nodeId) {
+            const node = this.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            // Skip if node already has auto-connected flag
+            if (node.data.autoConnected) return;
+
+            // Check if node has any connections
+            const hasConnections = this.edges.some(e =>
+                e.source === nodeId || e.target === nodeId
+            );
+
+            // Only auto-connect if node has no connections
+            if (hasConnections) {
+                return;
+            }
+
+            // Calculate node center position
+            const nodeX = node.position.x + 75;
+            const nodeY = node.position.y + 35;
+
+            // Check if node is near any edge
+            const nearEdge = this.findNearbyEdge(nodeX, nodeY, 50);
+
+            if (nearEdge) {
+                this.splitEdge(nearEdge, nodeId);
+            }
         },
 
         // Zoom controls

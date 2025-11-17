@@ -335,8 +335,13 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 					</div>
 					
 					<!-- Canvas Area -->
-					<div class="canvas-area" @drop="onCanvasDrop($event)" @dragover.prevent>
-						<div class="canvas-viewport" id="canvas-viewport" x-ref="canvasViewport">
+					<div class="canvas-area" 
+						@dragover.prevent>
+						<div class="canvas-viewport" 
+							id="canvas-viewport" 
+							x-ref="canvasViewport"
+							@drop.stop="onCanvasDrop($event)" 
+							@dragover.prevent="onCanvasDragOver($event)">
 							<!-- Nodes will be dynamically added here -->
 						</div>
 						

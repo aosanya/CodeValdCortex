@@ -282,10 +282,6 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 		"response_text":   response,
 	}).Info("Parsing AI response")
 
-	fmt.Printf("\n[DEBUG] Starting to parse AI response...\n")
-	fmt.Printf("[DEBUG] Response length: %d characters\n", len(response))
-	fmt.Printf("[DEBUG] First 200 chars: %s\n", response[:min(200, len(response))])
-
 	// Check for conversational patterns that indicate AI didn't follow instructions
 	conversationalPatterns := []string{
 		"i see you want",
@@ -306,20 +302,16 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 	lowerResponse := strings.ToLower(response)
 	for _, pattern := range conversationalPatterns {
 		if strings.Contains(lowerResponse, pattern) {
-			fmt.Printf("\n[DEBUG] ❌ DETECTED FORBIDDEN PATTERN: '%s'\n", pattern)
 			r.logger.WithField("pattern", pattern).Error("AI returned forbidden conversational text - rejecting response")
 			return original, false, fmt.Sprintf("Error: AI failed to follow instructions (detected pattern: '%s'). The modification was not applied. Please report this issue.", pattern), []string{}
 		}
 	}
-	fmt.Printf("[DEBUG] ✓ No conversational patterns detected\n")
 
 	// Try to parse as JSON
-	fmt.Printf("[DEBUG] Attempting to parse as JSON...\n")
 	var aiResponse aiRefinementResponse
 	err := json.Unmarshal([]byte(strings.TrimSpace(response)), &aiResponse)
 
 	if err != nil {
-		fmt.Printf("[DEBUG] ❌ Initial JSON parse failed: %v\n", err)
 		r.logger.WithError(err).Warn("Failed to parse AI response as JSON, trying to extract JSON from response")
 
 		// Try to find JSON within the response (sometimes AI adds extra text)
@@ -328,19 +320,13 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 
 		if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
 			jsonStr := response[startIdx : endIdx+1]
-			fmt.Printf("[DEBUG] Found JSON boundaries at %d to %d\n", startIdx, endIdx)
-			fmt.Printf("[DEBUG] Extracted JSON: %s\n", jsonStr[:min(200, len(jsonStr))])
 			err = json.Unmarshal([]byte(jsonStr), &aiResponse)
 		}
 
 		if err != nil {
-			fmt.Printf("[DEBUG] ❌ JSON extraction also failed: %v\n", err)
 			r.logger.WithError(err).Error("Could not parse AI response as JSON")
 			return original, false, "Could not parse AI response, keeping original introduction.", []string{}
 		}
-		fmt.Printf("[DEBUG] ✓ Successfully extracted and parsed JSON\n")
-	} else {
-		fmt.Printf("[DEBUG] ✓ Successfully parsed JSON on first attempt\n")
 	}
 
 	// Extract refined introduction from data
