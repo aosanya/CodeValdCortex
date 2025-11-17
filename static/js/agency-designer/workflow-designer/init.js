@@ -21,7 +21,7 @@
             /**
              * Main initialization - loads data, sets up jsPlumb and panzoom
              */
-            init() {
+            initWorkflow() {
                 const container = document.querySelector('.designer-container');
                 if (!container) {
                     return;
@@ -170,7 +170,10 @@
             async loadWorkItems() {
                 try {
                     const workItems = await window.specificationAPI.getWorkItems();
+
+                    // Update both state and context (Alpine component) for reactivity
                     state.availableWorkItems = workItems || [];
+                    context.availableWorkItems = workItems || [];
 
                     // Update node titles with work item names if we have them
                     if (state.availableWorkItems.length > 0) {

@@ -55,8 +55,8 @@
                 // Bind all module methods to this component
                 Object.assign(this, initModule, nodesModule, edgesModule, workflowUIModule);
 
-                // Call initialization
-                this.init();
+                // Call the initialization method from initModule
+                initModule.initWorkflow.call(this);
             }
         });
 
