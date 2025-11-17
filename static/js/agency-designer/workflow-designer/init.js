@@ -43,6 +43,26 @@
                     state.nodes = nodesData ? JSON.parse(nodesData) : [];
                     state.edges = edgesData ? JSON.parse(edgesData) : [];
 
+                    // Deduplicate edges - remove duplicates with same source and target
+                    const edgesBefore = state.edges.length;
+                    const uniqueEdges = [];
+                    const edgeKeys = new Set();
+
+                    state.edges.forEach(edge => {
+                        const key = `${edge.source}_${edge.target}`;
+                        if (!edgeKeys.has(key)) {
+                            edgeKeys.add(key);
+                            uniqueEdges.push(edge);
+                        }
+                    });
+
+                    state.edges = uniqueEdges;
+
+                    if (edgesBefore > state.edges.length) {
+                        console.log(`[MVP-052][DEDUP] Removed ${edgesBefore - state.edges.length} duplicate edges`);
+                        console.log(`[MVP-052][DEDUP] Edges before: ${edgesBefore}, after: ${state.edges.length}`);
+                    }
+
                     // Initialize with Start and End nodes if empty
                     if (state.nodes.length === 0) {
                         state.nodes = [
@@ -91,6 +111,14 @@
                 // Render existing nodes and set up shortcuts
                 context.renderNodes();
                 this.setupKeyboardShortcuts();
+
+                // Debug: Log all edges to check for duplicates
+                console.log('[MVP-052][INIT] Total edges in state:', state.edges.length);
+                console.log('[MVP-052][INIT] Edge details:', state.edges.map(e => ({
+                    id: e.id,
+                    source: e.source,
+                    target: e.target
+                })));
             },
 
             /**
@@ -141,10 +169,97 @@
                     state.jsPlumbInstance.bind('connectionDetached', (info) => {
                         context.onConnectionRemoved(info);
                     });
-                });
-            },
 
-            /**
+                    // Drag event handlers for edge highlighting
+                    state.jsPlumbInstance.bind('drag:move', (params) => {
+                        const nodeWidth = params.el.offsetWidth;
+                        const x = params.pos.x;
+                        const left = x;
+                        const right = x + nodeWidth;
+
+                        console.log('[MVP-052][DRAG]', {
+                            nodeId: params.el.id,
+                            left: left,
+                            right: right
+                        });
+
+                        // Check all edges to see if node overlaps horizontally
+                        const edgesWithinXBounds = [];
+                        state.edges.forEach(edge => {
+                            const sourceEl = document.getElementById(edge.source);
+                            const targetEl = document.getElementById(edge.target);
+
+                            if (sourceEl && targetEl) {
+                                const sourceRect = sourceEl.getBoundingClientRect();
+                                const targetRect = targetEl.getBoundingClientRect();
+                                const canvasRect = context.$refs.canvasViewport.getBoundingClientRect();
+                                const transform = state.panzoomInstance.getTransform();
+
+                                // Calculate edge endpoints in canvas coordinates
+                                const x1 = (sourceRect.left + sourceRect.width - canvasRect.left - transform.x) / transform.scale;
+                                const x2 = (targetRect.left - canvasRect.left - transform.x) / transform.scale;
+
+                                // Check if the node overlaps with edge's horizontal span
+                                const edgeLeft = Math.min(x1, x2);
+                                const edgeRight = Math.max(x1, x2);
+                                const nodeIsBetweenEdge = left <= edgeRight && right >= edgeLeft;
+
+                                console.log('[MVP-052][EDGE-CHECK]', {
+                                    edgeId: edge.id,
+                                    edgeLeft: edgeLeft,
+                                    edgeRight: edgeRight,
+                                    nodeLeft: left,
+                                    nodeRight: right,
+                                    overlap: nodeIsBetweenEdge
+                                });
+
+                                if (nodeIsBetweenEdge) {
+                                    edgesWithinXBounds.push(edge);
+                                }
+                            }
+                        });
+
+                        // First, clear all previous highlights
+                        state.edges.forEach(edge => {
+                            const connections = state.jsPlumbInstance.getConnections({
+                                source: edge.source,
+                                target: edge.target
+                            });
+                            if (connections && connections.length > 0) {
+                                connections[0].removeClass('edge-highlight');
+                                // Reset to default paint style
+                                connections[0].setPaintStyle({
+                                    stroke: '#3273dc',
+                                    strokeWidth: 2
+                                });
+                            }
+                        });
+
+                        if (edgesWithinXBounds.length > 0) {
+                            console.log('[MVP-052][EDGES-IN-X-BOUNDS]', edgesWithinXBounds.length, 'edges');
+
+                            // Highlight edges that overlap with dragged node
+                            edgesWithinXBounds.forEach(edge => {
+                                const connection = state.jsPlumbInstance.getConnections({
+                                    source: edge.source,
+                                    target: edge.target
+                                })[0];
+
+                                if (connection) {
+                                    console.log('[MVP-052][HIGHLIGHT-EDGE]', edge.id, 'RED 6px');
+                                    connection.setPaintStyle({
+                                        stroke: '#ff3860',
+                                        strokeWidth: 6
+                                    });
+                                    state.lastDragOverEdge = edge;
+                                }
+                            });
+                        } else {
+                            state.lastDragOverEdge = null;
+                        }
+                    });
+                });
+            },            /**
              * Initialize pan/zoom functionality for canvas
              */
             initPanZoom() {

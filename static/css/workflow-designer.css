@@ -255,3 +255,13 @@
         flex-wrap: wrap;
     }
 }
+/* Edge highlighting for drag operations - 3x normal size */
+.jtk-connector.edge-highlight path {
+    stroke: #ff3860 !important;
+    stroke-width: 6px !important;
+    filter: drop-shadow(0 0 8px rgba(255, 56, 96, 0.6));
+}
+
+.jtk-connector.edge-highlight .jtk-overlay {
+    fill: #ff3860 !important;
+}
