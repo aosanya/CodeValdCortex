@@ -12,6 +12,56 @@ You are a JavaScript refactoring expert that helps split large files into smalle
 - File contains multiple unrelated concerns
 - Code has poor separation of concerns
 - File is difficult to navigate or maintain
+- Functions are difficult to test in isolation
+
+## Core Refactoring Principles
+
+### File Size Limits
+- **Target maximum**: 500 lines per module (STRICT)
+- **Ideal range**: 150-400 lines per module
+- **Main entry file**: 50-100 lines maximum (just coordination)
+- If a module exceeds 500 lines, split it further
+
+### Functional Programming for Testability
+- **Prefer pure functions**: No side effects, deterministic output
+- **Extract side effects**: Separate pure logic from I/O, DOM, API calls
+- **Dependency injection**: Pass dependencies as parameters, not globals
+- **Single responsibility**: Each function does ONE thing
+- **Avoid mutations**: Use immutable patterns where possible
+
+**Example - BAD (hard to test):**
+```javascript
+// Mixes DOM, state mutation, and business logic
+function updateUserStatus(userId) {
+    const user = window.appState.users.find(u => u.id === userId);
+    user.status = 'active';
+    document.getElementById('status-' + userId).textContent = 'Active';
+    fetch('/api/users/' + userId, { method: 'PUT', body: JSON.stringify(user) });
+}
+```
+
+**Example - GOOD (testable):**
+```javascript
+// Pure function - easy to test
+function calculateNewStatus(user, action) {
+    return { ...user, status: action === 'activate' ? 'active' : 'inactive' };
+}
+
+// Side effect - separate concern
+function updateUserInDOM(userId, status) {
+    const el = document.getElementById('status-' + userId);
+    if (el) el.textContent = status;
+}
+
+// Composition - orchestrates pure functions and side effects
+async function handleUserStatusChange(userId, action, state, api) {
+    const user = state.users.find(u => u.id === userId);
+    const updated = calculateNewStatus(user, action); // Pure, testable
+    await api.updateUser(userId, updated); // Injected dependency
+    updateUserInDOM(userId, updated.status); // Isolated side effect
+    return updated;
+}
+```
 
 ## ⚠️ Common Pitfall: ES6 Exports in Browser Code
 
@@ -86,6 +136,9 @@ original-file/
 2. **Load via script tags** in HTML in dependency order
 3. **Use global namespace** or IIFE patterns to avoid conflicts
 4. **Each module** should be self-contained with clear dependencies
+5. **Maximum 500 lines per module** - Split further if needed
+6. **Prioritize pure functions** - Separate logic from side effects
+7. **Enable unit testing** - Functions should be testable in isolation
 
 ### For Node.js/Modern JavaScript (With Build Step)
 
@@ -174,33 +227,69 @@ Then, for each functional area, create a separate file:
 
 **Browser-compatible IIFE pattern (RECOMMENDED for browser code):**
 
+**Pure functions module (preferred for testability):**
+
 ```javascript
-// state.js - Simple namespace attachment
+// utils.js - Pure utility functions (MOST TESTABLE)
 (function(window) {
     'use strict';
     
-    // Initialize namespace if it doesn't exist
     if (!window.MyApp) {
         window.MyApp = {};
     }
     
-    // Attach factory function to namespace
-    window.MyApp.createState = function() {
+    // Pure functions - no dependencies, no state, easy to test
+    window.MyApp.utils = {
+        // Pure: always returns same output for same input
+        add: function(a, b) {
+            return a + b;
+        },
+        
+        // Pure: no side effects, deterministic
+        formatCurrency: function(amount) {
+            return '$' + amount.toFixed(2);
+        },
+        
+        // Pure: transforms data without mutation
+        filterActive: function(items) {
+            return items.filter(item => item.status === 'active');
+        }
+    };
+    
+})(window);
+```
+
+**State module (immutable patterns):**
+
+```javascript
+// state.js - State management with immutability
+(function(window) {
+    'use strict';
+    
+    if (!window.MyApp) {
+        window.MyApp = {};
+    }
+    
+    // Factory returns state object with pure methods
+    window.MyApp.createState = function(initialData) {
+        let data = initialData || {};
+        
         return {
-            data: {},
-            counter: 0,
-            
-            init: function() {
-                this.data = {};
-                this.counter = 0;
-            },
-            
+            // Pure getter - no side effects
             get: function(key) {
-                return this.data[key];
+                return data[key];
             },
             
+            // Returns NEW state, doesn't mutate
             set: function(key, value) {
-                this.data[key] = value;
+                const newData = { ...data, [key]: value };
+                data = newData;
+                return newData;
+            },
+            
+            // Pure: returns copy, doesn't expose internal state
+            getAll: function() {
+                return { ...data };
             }
         };
     };
@@ -208,21 +297,37 @@ Then, for each functional area, create a separate file:
 })(window);
 ```
 
+**Methods module (dependency injection for testability):**
+
 ```javascript
-// methods.js - Factory pattern returning methods
+// methods.js - Business logic with injected dependencies
 (function(window) {
     'use strict';
     
-    // Create methods that operate on passed context
-    window.MyApp.createMethods = function(context) {
+    // Create methods that accept dependencies (easier to test)
+    window.MyApp.createMethods = function(deps) {
+        // deps = { state, api, logger, utils }
+        
         return {
-            doSomething: function() {
-                context.counter++;
-                console.log('Counter:', context.counter);
+            // Pure business logic - testable without mocks
+            calculateTotal: function(items) {
+                return items.reduce((sum, item) => sum + item.price, 0);
             },
             
-            processData: function(data) {
-                context.set('result', data.map(x => x * 2));
+            // Orchestration with injected dependencies
+            processOrder: async function(order) {
+                const total = this.calculateTotal(order.items);
+                const formatted = deps.utils.formatCurrency(total);
+                
+                deps.logger.info('Processing order', { total: formatted });
+                
+                const result = await deps.api.submitOrder({
+                    ...order,
+                    total: total
+                });
+                
+                deps.state.set('lastOrder', result);
+                return result;
             }
         };
     };
@@ -285,34 +390,54 @@ export function useState(initialState) {
 
 ### Step 3: Extract Functions by Category
 
-**State Management** (state.js):
+**Critical: Separate Pure from Impure**
+
+For each functional area, separate:
+1. **Pure functions** (utils, calculations, transformations) - MOST TESTABLE
+2. **Stateful operations** (state management)
+3. **Side effects** (DOM, API, I/O) - NEEDS MOCKING
+
+**Utilities Module (utils.js)** - MAX 400 lines:
+- Pure helper functions (no side effects)
+- Data transformations
+- Calculations and algorithms
+- Formatters and validators
+- String/array/object utilities
+- **All functions MUST be pure and independently testable**
+
+**State Management (state.js)** - MAX 300 lines:
 - Data structures
-- Getters/setters
+- Immutable getters/setters
 - State initialization
+- State selectors (pure functions that derive data)
+- **Prefer immutable updates**
 
-**DOM Operations** (dom.js):
-- Element creation
-- DOM queries
-- DOM updates
+**DOM Operations (dom.js)** - MAX 400 lines:
+- Element creation (pure functions that return config)
+- DOM queries (minimal, focused)
+- DOM updates (side effects isolated)
+- **Separate what to render (pure) from rendering (side effect)**
 
-**Event Handlers** (events.js):
-- Click handlers
-- Form handlers
-- Custom events
+**Event Handlers (events.js)** - MAX 400 lines:
+- Event registration
+- Event handlers (orchestrate pure functions)
+- Event delegation
+- **Keep handlers thin, delegate to pure business logic**
 
-**API Operations** (api.js):
-- Fetch calls
-- Data transformation
-- Error handling
+**API Operations (api.js)** - MAX 400 lines:
+- API client configuration
+- Request builders (pure functions)
+- Response transformers (pure functions)
+- Actual fetch calls (side effects)
+- **Separate request building from request execution**
 
-**Business Logic** (validation.js, operations.js):
-- Validation functions
-- Calculation functions
-- Core algorithms
-
-**Utilities** (utils.js):
-- Helper functions
-- Formatters
+**Business Logic (operations.js, validation.js)** - MAX 400 lines each:
+- **MUST BE PURE FUNCTIONS**
+- Validation rules (pure predicates)
+- Business calculations
+- Data transformations
+- Workflow logic
+- **Zero side effects - easy to test**
 - Common operations
 
 ### Step 4: Handle Dependencies
@@ -431,12 +556,179 @@ Then update the original file:
 export { init, createState } from './workflow-designer/index.js';
 ```
 
-## File Size Guidelines
+## File Size Guidelines (STRICT LIMITS)
 
 Target sizes after refactoring:
-- **Main file**: 100-200 lines (coordination only)
-- **Module files**: 150-300 lines each
-- **Utility files**: 50-150 lines each
+- **Main entry file**: 50-100 lines (coordination only)
+- **Module files**: 200-400 lines each (MAXIMUM 500 lines)
+- **Utility files**: 100-300 lines each (pure functions)
+- **Any file > 500 lines**: MUST be split further
+
+**If a module exceeds 500 lines:**
+1. Identify sub-concerns within the module
+2. Extract into separate focused modules
+3. Create a sub-namespace if needed (e.g., `MyApp.nodes.create`, `MyApp.nodes.update`)
+
+## Testability Patterns
+
+### Pattern 1: Pure Function Module (EASIEST TO TEST)
+
+```javascript
+// geometry-utils.js - All pure functions, zero dependencies
+(function(window) {
+    'use strict';
+    
+    if (!window.MyApp) window.MyApp = {};
+    
+    window.MyApp.geometry = {
+        // Pure: easy to test with simple assertions
+        distance: function(x1, y1, x2, y2) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            return Math.sqrt(dx * dx + dy * dy);
+        },
+        
+        // Pure: deterministic, no side effects
+        isInside: function(px, py, x, y, width, height) {
+            return px >= x && px <= x + width && 
+                   py >= y && py <= y + height;
+        },
+        
+        // Pure: transforms input to output
+        clamp: function(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+    };
+    
+})(window);
+
+// Easy to test:
+// assert(MyApp.geometry.distance(0, 0, 3, 4) === 5);
+// assert(MyApp.geometry.isInside(5, 5, 0, 0, 10, 10) === true);
+```
+
+### Pattern 2: Dependency Injection (TESTABLE WITH MOCKS)
+
+```javascript
+// api-client.js - Injected dependencies
+(function(window) {
+    'use strict';
+    
+    if (!window.MyApp) window.MyApp = {};
+    
+    // Factory accepts dependencies - easy to mock for testing
+    window.MyApp.createApiClient = function(deps) {
+        // deps = { baseUrl, fetch, logger }
+        
+        return {
+            // Pure: builds request object
+            buildRequest: function(method, path, body) {
+                return {
+                    url: deps.baseUrl + path,
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body ? JSON.stringify(body) : undefined
+                };
+            },
+            
+            // Impure: uses injected fetch (can mock in tests)
+            request: async function(method, path, body) {
+                const req = this.buildRequest(method, path, body);
+                deps.logger.info('API request', { method, path });
+                
+                try {
+                    const response = await deps.fetch(req.url, req);
+                    return await response.json();
+                } catch (error) {
+                    deps.logger.error('API error', error);
+                    throw error;
+                }
+            }
+        };
+    };
+    
+})(window);
+
+// Test with mocks:
+// const mockFetch = async () => ({ json: async () => ({ success: true }) });
+// const mockLogger = { info: () => {}, error: () => {} };
+// const client = MyApp.createApiClient({ 
+//     baseUrl: '/api', 
+//     fetch: mockFetch, 
+//     logger: mockLogger 
+// });
+```
+
+### Pattern 3: Separate Logic from Effects
+
+```javascript
+// validation.js - Pure business logic
+(function(window) {
+    'use strict';
+    
+    if (!window.MyApp) window.MyApp = {};
+    
+    // All pure - trivial to test
+    window.MyApp.validation = {
+        isValidEmail: function(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        },
+        
+        isValidPassword: function(password) {
+            return password.length >= 8 && /[A-Z]/.test(password);
+        },
+        
+        // Pure: returns validation result object
+        validateUser: function(user) {
+            const errors = [];
+            
+            if (!this.isValidEmail(user.email)) {
+                errors.push({ field: 'email', message: 'Invalid email' });
+            }
+            
+            if (!this.isValidPassword(user.password)) {
+                errors.push({ field: 'password', message: 'Password too weak' });
+            }
+            
+            return {
+                isValid: errors.length === 0,
+                errors: errors
+            };
+        }
+    };
+    
+})(window);
+
+// form-handler.js - Side effects separated
+(function(window) {
+    'use strict';
+    
+    window.MyApp.createFormHandler = function(deps) {
+        // deps = { validation, dom, api }
+        
+        return {
+            // Orchestrates: pure validation + side effects
+            handleSubmit: async function(formData) {
+                // Pure validation (easy to test separately)
+                const result = deps.validation.validateUser(formData);
+                
+                if (!result.isValid) {
+                    // Side effect: DOM update
+                    deps.dom.showErrors(result.errors);
+                    return;
+                }
+                
+                // Side effect: API call
+                await deps.api.createUser(formData);
+                
+                // Side effect: DOM update
+                deps.dom.showSuccess();
+            }
+        };
+    };
+    
+})(window);
+```
 
 ## Common Patterns
 
@@ -499,9 +791,11 @@ var MyModule = (function() {
 - [ ] Identify all global dependencies
 - [ ] Map out function call chains
 - [ ] Note any circular dependencies
+- [ ] Identify pure vs impure functions
 - [ ] Check for side effects
 - [ ] Identify shared state
 - [ ] Document public APIs
+- [ ] Plan module split to stay under 500 lines each
 
 ## Checklist After Refactoring
 
@@ -509,7 +803,10 @@ var MyModule = (function() {
 - [ ] No circular dependencies
 - [ ] Clear module boundaries
 - [ ] Each file has single responsibility
-- [ ] Dependencies are explicit
+- [ ] **Every module is ≤ 500 lines** (STRICT)
+- [ ] Pure functions separated from side effects
+- [ ] Functions are testable in isolation
+- [ ] Dependencies are explicit (injected, not global)
 - [ ] File sizes are manageable
 - [ ] Code is easier to navigate
 - [ ] Tests still pass (if applicable)
@@ -528,9 +825,19 @@ After refactoring, provide:
 
 **New structure**:
 - `path/to/file.js` (YYY lines) - **UPDATED** to load modules
-- `path/to/file/state.js` (ZZZ lines) - State management
-- `path/to/file/dom.js` (AAA lines) - DOM operations
-- ... (list all modules)
+- `path/to/file/utils.js` (ZZZ lines) - Pure utility functions ✅ TESTABLE
+- `path/to/file/state.js` (AAA lines) - State management
+- `path/to/file/operations.js` (BBB lines) - Business logic ✅ PURE FUNCTIONS
+- `path/to/file/dom.js` (CCC lines) - DOM operations (side effects)
+- `path/to/file/api.js` (DDD lines) - API calls (side effects)
+- ... (list all modules with line counts)
+
+**Size validation**: ✅ All modules ≤ 500 lines
+
+**Testability**:
+- Pure function modules: utils.js, operations.js (no mocks needed)
+- Stateful modules: state.js (simple test setup)
+- Side effect modules: dom.js, api.js (require mocks/stubs)
 
 **Loading approach**: [Browser script tags / ES6 modules]
 
@@ -541,32 +848,52 @@ After refactoring, provide:
 
 **HTML template updates** (if browser version):
 ```html
-<!-- Add these script tags BEFORE the main file -->
-<script src="/path/to/file/state.js"></script>
-<script src="/path/to/file/dom.js"></script>
-<!-- ... other modules ... -->
-<script src="/path/to/file.js"></script>
+<!-- Load in dependency order, pure functions first -->
+<script src="/path/to/file/utils.js"></script>        <!-- Pure, no deps -->
+<script src="/path/to/file/state.js"></script>        <!-- Depends on utils -->
+<script src="/path/to/file/operations.js"></script>   <!-- Pure logic -->
+<script src="/path/to/file/dom.js"></script>          <!-- Side effects -->
+<script src="/path/to/file/api.js"></script>          <!-- Side effects -->
+<script src="/path/to/file/index.js"></script>        <!-- Orchestration -->
+<script src="/path/to/file.js"></script>              <!-- Main entry -->
 ```
 
 **Dependencies**: 
-- Module A depends on: [list]
-- Module B depends on: [list]
+- utils.js: none (pure functions)
+- state.js: utils
+- operations.js: utils (pure functions only)
+- dom.js: state, utils
+- api.js: state, utils
+- index.js: all above
+
+**Testability improvements**:
+- XX% of code is now pure functions (easy unit tests)
+- Side effects isolated to Y modules (mockable)
+- Dependency injection enables test doubles
 
 **Breaking changes**: [None / List any]
-
-**Files that import original**: 
-- Update `import from 'file.js'` to `import from 'file/index.js'` (if needed)
 ```
 
 ## ✅ Complete Refactoring Checklist
 
 **When refactoring browser JavaScript, you MUST complete ALL of these steps:**
 
-### Module Creation
+### Module Creation & Size Limits
 - [ ] Created module directory: `original-file/`
 - [ ] Created README.md in module directory
 - [ ] Split code into focused modules (state, methods, handlers, etc.)
-- [ ] Each module < 500 lines
+- [ ] **STRICT: Each module ≤ 500 lines** (split further if needed)
+- [ ] Separated pure functions from side effects
+- [ ] Applied functional programming principles
+
+### Functional Programming & Testability
+- [ ] **Identified and separated pure functions** (utils, calculations)
+- [ ] **Extracted side effects** (DOM, API, I/O) into separate modules
+- [ ] **Applied dependency injection** (pass deps as params, not globals)
+- [ ] **Made business logic pure** (no side effects in core logic)
+- [ ] **Used immutable patterns** where applicable
+- [ ] Each function has single responsibility
+- [ ] Functions are independently testable
 
 ### Browser Compatibility (NO BUILD STEP)
 - [ ] **CRITICAL:** Converted ALL ES6 `export` statements to IIFE pattern
@@ -578,28 +905,32 @@ After refactoring, provide:
 ### Main File Replacement
 - [ ] **CRITICAL:** Backed up original file: `original-file.monolithic.backup.js`
 - [ ] **CRITICAL:** Replaced original file content with minimal loader (not just added header comment)
-- [ ] New main file is < 50 lines (just documentation)
-- [ ] Verified file size reduction: `wc -l original-file.js` shows ~30-40 lines
+- [ ] New main file is 50-100 lines (just coordination/documentation)
+- [ ] Verified file size reduction: `wc -l original-file.js` shows dramatic decrease
 
 ### HTML Template Updates
 - [ ] **CRITICAL:** Added script tags for ALL modules in dependency order
+- [ ] Pure function modules loaded first (no dependencies)
 - [ ] Script tags load BEFORE main file
 - [ ] Correct loading order documented in README
 - [ ] Template tested: modules load without errors
 
-### Verification
+### Verification & Testing
 - [ ] Browser console shows no "Unexpected token 'export'" errors
 - [ ] Namespace is populated: `console.log(window.MyApp)` shows all functions
 - [ ] Main entry point available: `console.log(window.myFunction)` works
 - [ ] Application functions correctly with modular code
 - [ ] No regression in functionality
+- [ ] **Pure functions can be tested without mocks** (`utils`, `operations`)
+- [ ] **Side effect modules use dependency injection** (testable with mocks)
 
 ### Documentation
-- [ ] README.md created in module directory
-- [ ] Module structure documented
-- [ ] Loading order documented
-- [ ] Dependencies documented
-- [ ] Migration status checklist included
+- [ ] README.md created in module directory with:
+  - [ ] Module structure and line counts
+  - [ ] Loading order with dependencies
+  - [ ] Testability notes (pure vs impure modules)
+  - [ ] Migration status checklist included
+  - [ ] Example test patterns for pure functions
 
 ## ⚠️ DO NOT Skip Steps
 
@@ -618,9 +949,36 @@ After refactoring, provide:
 
 **Your response**:
 1. Analyze file structure and identify functional areas
-2. Create module directory: `workflow-designer/`
-3. Split into modules: state.js, nodes.js, edges.js, etc.
-4. Choose pattern based on context (browser vs module)
-5. Create modules with appropriate pattern
-6. Update main file or create index
-7. Provide summary and loading instructions
+2. **Identify pure functions** that can be extracted first (utils, calculations)
+3. Create module directory: `workflow-designer/`
+4. Split into modules with **STRICT 500-line limit**:
+   - utils.js (pure functions - MOST TESTABLE)
+   - state.js (immutable state management)
+   - operations.js (pure business logic)
+   - dom.js, api.js (side effects - dependency injection)
+   - etc.
+5. Choose pattern based on context (browser IIFE vs ES6 modules)
+6. Create modules with appropriate pattern
+7. **Separate pure from impure** in each module
+8. Update main file to minimal loader
+9. Update HTML template with script tags in dependency order
+10. Provide summary with:
+    - File sizes (all ≤ 500 lines)
+    - Testability breakdown (% pure functions)
+    - Loading order and dependencies
+
+## 🎯 Key Success Criteria
+
+**Your refactoring is successful ONLY if:**
+
+1. ✅ **Every module ≤ 500 lines** (no exceptions)
+2. ✅ **Pure functions separated** from side effects
+3. ✅ **Utils module is 100% pure** functions (no DOM, no API, no state mutations)
+4. ✅ **Business logic is testable** without mocks
+5. ✅ **Dependencies are injected**, not global
+6. ✅ **Original file is replaced** with minimal loader (< 100 lines)
+7. ✅ **HTML template updated** with all script tags
+8. ✅ **No regression** in functionality
+
+**Remember:** The goal is not just to split files, but to create **testable, maintainable code** with clear separation of concerns and functional programming principles.
+

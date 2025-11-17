@@ -434,10 +434,15 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 				</div>
 			</div>
 			
-			<!-- Workflow Designer Script -->
-			
-			<!-- Workflow Designer Script -->
-			<script src="/static/js/agency-designer/workflow-designer.js"></script>
+			<!-- Workflow Designer - Modular Scripts (load in dependency order) -->
+			<script src="/static/js/agency-designer/workflow-designer/utils.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer/state.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer/init.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer/nodes.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer/edges.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer/workflow-ui.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer/index.js"></script>
+			<script src="/static/js/agency-designer/workflow-designer-new.js"></script>
 		</body>
 	</html>
 }
