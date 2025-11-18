@@ -14,6 +14,9 @@ window.workflowDesigner = function () {
         workflowVersion: '',
         workflowSteps: [],
 
+        // All agency workflows (for specification update)
+        allWorkflows: [],
+
         // Available work items
         availableWorkItems: [],
         filteredWorkItems: [],
@@ -73,15 +76,20 @@ window.workflowDesigner = function () {
                     const spec = await window.specificationAPI.getSpecification(this.agencyID);
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
+
+                    // Load all workflows for specification updates
+                    this.allWorkflows = spec.workflows || [];
                 } else {
                     console.warn('Specification API not available, using mock data');
                     this.availableWorkItems = [];
                     this.filteredWorkItems = [];
+                    this.allWorkflows = [];
                 }
             } catch (error) {
                 console.error('Failed to load work items:', error);
                 this.availableWorkItems = [];
                 this.filteredWorkItems = [];
+                this.allWorkflows = [];
             }
         },
 
@@ -312,33 +320,62 @@ window.workflowDesigner = function () {
         },
 
         /**
-         * Save workflow to backend
+         * Save workflow to backend (via specification workflows endpoint)
          */
         async saveWorkflow() {
             this.saving = true;
 
             try {
-                const response = await fetch(`/api/agencies/${this.agencyID}/workflows/${this.workflowID}`, {
+                // Find and update the current workflow in the allWorkflows array
+                const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
+
+                if (workflowIndex >= 0) {
+                    // Update existing workflow
+                    this.allWorkflows[workflowIndex] = {
+                        ...this.allWorkflows[workflowIndex],
+                        name: this.workflowName,
+                        description: this.workflowDescription,
+                        version: this.workflowVersion,
+                        steps: this.workflowSteps
+                    };
+                } else {
+                    // Workflow not found in allWorkflows, add it
+                    this.allWorkflows.push({
+                        key: this.workflowKey,
+                        agency_id: this.agencyID,
+                        name: this.workflowName,
+                        description: this.workflowDescription,
+                        version: this.workflowVersion,
+                        steps: this.workflowSteps
+                    });
+                }
+
+                // Save all workflows via specification endpoint
+                const response = await fetch(`/api/v1/agencies/${this.agencyID}/specification/workflows`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        name: this.workflowName,
-                        description: this.workflowDescription,
-                        version: this.workflowVersion,
-                        steps: this.workflowSteps
+                        workflows: this.allWorkflows,
+                        updated_by: 'system' // TODO: Get from auth context
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to save workflow: ${response.statusText}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Failed to save workflow: ${response.statusText}`);
                 }
 
-                console.log('Workflow saved successfully');
+                const updatedSpec = await response.json();
+                console.log('Workflow saved successfully to specification');
+
+                // Update allWorkflows with the response to stay in sync
+                this.allWorkflows = updatedSpec.workflows || [];
+
             } catch (error) {
                 console.error('Failed to save workflow:', error);
-                alert('Failed to save workflow. Please try again.');
+                alert(`Failed to save workflow: ${error.message}`);
             } finally {
                 this.saving = false;
             }
