@@ -386,19 +386,35 @@ window.workflowDesigner = function () {
             this.saving = true;
 
             try {
+                console.log('🔍 saveWorkflow DEBUG:', {
+                    workflowKey: this.workflowKey,
+                    allWorkflowsCount: this.allWorkflows.length,
+                    allWorkflowKeys: this.allWorkflows.map(wf => ({ key: wf.key, name: wf.name }))
+                });
+
                 // Find and update the current workflow in the allWorkflows array
                 const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
 
+                console.log('🔍 Workflow search result:', { 
+                    workflowIndex, 
+                    found: workflowIndex >= 0,
+                    searchKey: this.workflowKey 
+                });
+
                 if (workflowIndex >= 0) {
-                    // Update existing workflow
+                    // Update existing workflow - preserve the key explicitly!
+                    const existingKey = this.allWorkflows[workflowIndex].key;
                     this.allWorkflows[workflowIndex] = {
                         ...this.allWorkflows[workflowIndex],
+                        key: existingKey,  // Explicitly preserve the key
                         name: this.workflowName,
                         description: this.workflowDescription,
                         version: this.workflowVersion,
                         steps: this.workflowSteps
                     };
+                    console.log('✅ Updated existing workflow at index', workflowIndex, 'with key:', existingKey);
                 } else {
+                    console.warn('⚠️ Workflow NOT found in allWorkflows, adding new entry');
                     // Workflow not found in allWorkflows, add it
                     this.allWorkflows.push({
                         key: this.workflowKey,
@@ -409,6 +425,12 @@ window.workflowDesigner = function () {
                         steps: this.workflowSteps
                     });
                 }
+
+                console.log('📤 Sending workflows to server:', this.allWorkflows.map(wf => ({ 
+                    key: wf.key, 
+                    name: wf.name,
+                    hasKey: !!wf.key 
+                })));
 
                 // Save all workflows via specification endpoint
                 const response = await fetch(`/api/v1/agencies/${this.agencyID}/specification/workflows`, {
@@ -428,13 +450,17 @@ window.workflowDesigner = function () {
                 }
 
                 const updatedSpec = await response.json();
-                console.log('Workflow saved successfully to specification');
+                console.log('✅ Workflow saved successfully to specification');
+                console.log('📥 Server returned workflows:', updatedSpec.workflows?.map(wf => ({ 
+                    key: wf.key, 
+                    name: wf.name 
+                })));
 
                 // Update allWorkflows with the response to stay in sync
                 this.allWorkflows = updatedSpec.workflows || [];
 
             } catch (error) {
-                console.error('Failed to save workflow:', error);
+                console.error('❌ Failed to save workflow:', error);
                 alert(`Failed to save workflow: ${error.message}`);
             } finally {
                 this.saving = false;
