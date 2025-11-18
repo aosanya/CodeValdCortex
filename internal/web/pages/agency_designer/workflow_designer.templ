@@ -230,9 +230,20 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }"
 														></div>
 													</div>
-												</template>
-												<template x-if="step.items.length > 1">
-													<!-- Multiple Items (Parallel) -->
+											</template>
+											<template x-if="step.items.length > 1">
+												<!-- Multiple Items (Parallel) -->
+												<div 
+													class="step-item-container"
+													@dragover.prevent="handleItemDragOver($event, stepIndex)"
+													@dragleave="handleItemDragLeave($event)"
+												>
+													<!-- Side Drop Zones for Parallel -->
+													<div
+														class="side-drop-zone left-drop-zone"
+														@drop.stop="handleDrop($event, stepIndex, 'left')"
+														:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }"
+													></div>
 													<div class="parallel-items-container">
 														<div class="parallel-label">
 															<span class="tag is-info is-light">
@@ -280,9 +291,16 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															</template>
 														</div>
 													</div>
-												</template>
-											</div>
+													<!-- Right Side Drop Zone for Parallel -->
+													<div
+														class="side-drop-zone right-drop-zone"
+														@drop.stop="handleDrop($event, stepIndex, 'right')"
+														:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }"
+													></div>
+												</div>
+											</template>
 										</div>
+									</div>
 									</template>
 									<!-- Drop Zone After Last Step -->
 									<div
