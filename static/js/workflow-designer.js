@@ -73,12 +73,20 @@ window.workflowDesigner = function () {
             try {
                 // Use existing specification API
                 if (typeof window.specificationAPI !== 'undefined') {
-                    const spec = await window.specificationAPI.getSpecification(this.agencyID);
+                    // Set the agency ID on the API instance
+                    window.specificationAPI.agencyId = this.agencyID;
+
+                    const spec = await window.specificationAPI.getSpecification();
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
 
                     // Load all workflows for specification updates
                     this.allWorkflows = spec.workflows || [];
+
+                    console.log('Loaded specification:', {
+                        workItems: this.availableWorkItems.length,
+                        workflows: this.allWorkflows.length
+                    });
                 } else {
                     console.warn('Specification API not available, using mock data');
                     this.availableWorkItems = [];
