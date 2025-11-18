@@ -174,33 +174,15 @@ window.deleteSelectedWorkflows = async function () {
         const spec = await window.specificationAPI.getSpecification();
         const allWorkflows = spec.workflows || [];
 
-        console.log('🔍 DEBUG - Before delete:', {
-            totalWorkflows: allWorkflows.length,
-            selectedKeys,
-            selectedCount: selectedKeys.length
-        });
-
-        // Debug: Check actual workflow keys in spec vs selected keys
-        console.log('🔍 DEBUG - Workflow keys in spec (wf.key):', allWorkflows.map(wf => wf.key));
-        console.log('🔍 DEBUG - Workflow keys in spec (wf._key):', allWorkflows.map(wf => wf._key));
-        console.log('🔍 DEBUG - Selected keys from checkboxes:', selectedKeys);
-        console.log('🔍 DEBUG - First workflow in spec:', allWorkflows[0]);
-
         // Filter out the selected workflows - use _key field instead of key
         const remainingWorkflows = allWorkflows.filter(wf => !selectedKeys.includes(wf._key));
 
-        console.log('🔍 DEBUG - After filter:', {
-            remainingCount: remainingWorkflows.length,
-            removedCount: allWorkflows.length - remainingWorkflows.length
-        });
 
         // Update specification with remaining workflows
         const payload = {
             workflows: remainingWorkflows,
             updated_by: 'system'
         };
-
-        console.log('🔍 DEBUG - Sending payload:', payload);
 
         const response = await fetch(`/api/v1/agencies/${agencyId}/specification/workflows`, {
             method: 'PUT',
@@ -234,7 +216,6 @@ window.deleteSelectedWorkflows = async function () {
         updateWorkflowSelectionUI();
 
     } catch (error) {
-        console.error('❌ Failed to delete workflows:', error);
         window.showNotification('Failed to delete workflows: ' + error.message, 'danger');
     }
 }

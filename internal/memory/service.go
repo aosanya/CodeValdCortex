@@ -48,7 +48,6 @@ func (s *Service) StoreWorking(ctx context.Context, agentID, key string, value i
 		return fmt.Errorf("failed to store working memory: %w", err)
 	}
 
-
 	return nil
 }
 
@@ -100,7 +99,6 @@ func (s *Service) UpdateWorking(ctx context.Context, agentID, key string, value 
 		return fmt.Errorf("failed to update working memory: %w", err)
 	}
 
-
 	return nil
 }
 
@@ -117,7 +115,6 @@ func (s *Service) DeleteWorking(ctx context.Context, agentID, key string) error 
 	if err != nil {
 		return fmt.Errorf("failed to delete working memory: %w", err)
 	}
-
 
 	return nil
 }
@@ -525,7 +522,6 @@ func (s *Service) DeleteSnapshot(ctx context.Context, snapshotID string) error {
 		return fmt.Errorf("failed to delete snapshot: %w", err)
 	}
 
-
 	return nil
 }
 
@@ -573,7 +569,6 @@ func (s *Service) SyncMemory(ctx context.Context, agentID string) (*SyncResult, 
 
 	result.DurationMs = time.Since(startTime).Milliseconds()
 	result.Success = true
-
 
 	return result, nil
 }

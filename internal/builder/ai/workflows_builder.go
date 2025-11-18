@@ -436,30 +436,14 @@ func (b *WorkflowsBuilder) RefineWorkflowsStream(ctx context.Context, req *build
 
 	// Parse the accumulated response
 	fullContent := contentBuilder.String()
-	contentLength := len(fullContent)
-
-	b.logger.WithFields(logrus.Fields{
-		"total_chunks":    chunkCount,
-		"total_bytes":     totalBytes,
-		"content_length":  contentLength,
-		"content_preview": truncateString(fullContent, 100),
-		"content_suffix":  getSuffix(fullContent, 100),
-	}).Info("🔍 DEBUG: Completed streaming, parsing accumulated content")
 
 	cleanedContent := stripMarkdownFences(fullContent)
-	cleanedLength := len(cleanedContent)
-
-	b.logger.WithFields(logrus.Fields{
-		"original_length": contentLength,
-		"cleaned_length":  cleanedLength,
-		"bytes_removed":   contentLength - cleanedLength,
-	}).Info("🔍 DEBUG: Content cleaned, attempting JSON parse")
 
 	var result builder.RefineWorkflowsResponse
 	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
 		// Log detailed error info
 		b.logger.WithError(err).WithFields(logrus.Fields{
-			"content_length": cleanedLength,
+			"content_length": len(cleanedContent),
 			"content_start":  truncateString(cleanedContent, 200),
 			"content_end":    getSuffix(cleanedContent, 200),
 			"last_100_chars": getSuffix(cleanedContent, 100),

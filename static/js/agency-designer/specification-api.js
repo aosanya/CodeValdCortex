@@ -402,46 +402,16 @@ window.SpecificationAPI = class SpecificationAPI {
      * Remove a workflow from the specification
      */
     async deleteWorkflow(workflowKey, updatedBy = 'user') {
-        console.log('🗑️ deleteWorkflow BEFORE:', {
-            workflowKeyToDelete: workflowKey,
-            updatedBy: updatedBy
-        });
-
         const spec = await this.getSpecification();
         const workflows = spec.workflows || [];
-
-        console.log('📋 Current workflows BEFORE delete:', {
-            totalCount: workflows.length,
-            workflows: workflows.map(w => ({
-                key: w.key || w._key || w.id,
-                name: w.name,
-                matchesTarget: (w.key || w._key || w.id) === workflowKey
-            }))
-        });
 
         const filteredWorkflows = workflows.filter(w => {
             const id = w.key || w._key || w.id;
             const keep = id !== workflowKey;
-            if (!keep) {
-                console.log('❌ Removing workflow:', { key: id, name: w.name });
-            }
             return keep;
         });
 
-        console.log('📋 Workflows AFTER filter:', {
-            totalCount: filteredWorkflows.length,
-            removedCount: workflows.length - filteredWorkflows.length,
-            workflows: filteredWorkflows.map(w => ({
-                key: w.key || w._key || w.id,
-                name: w.name
-            }))
-        });
-
         const result = await this.updateWorkflows(filteredWorkflows, updatedBy);
-
-        console.log('✅ deleteWorkflow AFTER update:', {
-            returnedWorkflowCount: result.workflows?.length || 0
-        });
 
         return result;
     }

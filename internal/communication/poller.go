@@ -136,7 +136,6 @@ func (mp *MessagePoller) poll() {
 		return
 	}
 
-
 	for _, msg := range messages {
 		// Handle message
 		if err := mp.handler(msg); err != nil {
@@ -285,7 +284,6 @@ func (pp *PublicationPoller) poll() {
 	if len(publications) == 0 {
 		return
 	}
-
 
 	for _, pub := range publications {
 		// Handle publication

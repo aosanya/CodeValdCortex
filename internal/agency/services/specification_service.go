@@ -70,34 +70,6 @@ func (s *SpecificationService) UpdateWorkflows(ctx context.Context, agencyID str
 		"updated_by":     updatedBy,
 	}).Info("📋 UpdateWorkflows called")
 
-	// Get current state BEFORE update
-	currentSpec, err := s.repo.GetSpecification(ctx, agencyID)
-	if err == nil && currentSpec != nil {
-		s.logger.WithFields(logrus.Fields{
-			"current_workflow_count": len(currentSpec.Workflows),
-		}).Info("📊 BEFORE UPDATE - Current state")
-
-		for i, wf := range currentSpec.Workflows {
-			s.logger.WithFields(logrus.Fields{
-				"index": i,
-				"key":   wf.Key,
-				"name":  wf.Name,
-			}).Info("  📦 Existing workflow")
-		}
-	}
-
-	s.logger.Info("🔄 NEW workflows to save:")
-	for i, wf := range workflows {
-		s.logger.WithFields(logrus.Fields{
-			"index":       i,
-			"key":         wf.Key,
-			"name":        wf.Name,
-			"description": wf.Description,
-			"steps_count": len(wf.Steps),
-			"has_key":     wf.Key != "",
-		}).Info("  🔹 Workflow to save")
-	}
-
 	result, err := s.repo.PatchSpecificationSection(ctx, agencyID, "workflows", workflows, updatedBy)
 	if err != nil {
 		s.logger.WithError(err).Error("❌ PatchSpecificationSection failed for workflows")
@@ -107,16 +79,6 @@ func (s *SpecificationService) UpdateWorkflows(ctx context.Context, agencyID str
 	s.logger.WithFields(logrus.Fields{
 		"saved_workflows": len(result.Workflows),
 	}).Info("✅ UpdateWorkflows completed successfully")
-
-	s.logger.Info("📊 AFTER UPDATE - Final state:")
-	// Log what was actually saved
-	for i, wf := range result.Workflows {
-		s.logger.WithFields(logrus.Fields{
-			"index": i,
-			"key":   wf.Key,
-			"name":  wf.Name,
-		}).Info("  💾 Saved workflow")
-	}
 
 	return result, nil
 }

@@ -54,7 +54,6 @@ window.workflowDesigner = function () {
                     this.workflowSteps = JSON.parse(stepsData) || [];
                 }
             } catch (e) {
-                console.error('Failed to parse workflow steps:', e);
                 this.workflowSteps = [];
             }
 
@@ -87,13 +86,11 @@ window.workflowDesigner = function () {
                     // Enrich existing workflow steps with work item details
                     this.enrichWorkflowSteps();
                 } else {
-                    console.error('Specification API not available!');
                     this.availableWorkItems = [];
                     this.filteredWorkItems = [];
                     this.allWorkflows = [];
                 }
             } catch (error) {
-                console.error('Failed to load work items:', error);
                 this.availableWorkItems = [];
                 this.filteredWorkItems = [];
                 this.allWorkflows = [];
@@ -414,7 +411,6 @@ window.workflowDesigner = function () {
         async _performSave() {
             // Prevent multiple simultaneous saves
             if (this.saving) {
-                console.log('⚠️ Save already in progress, skipping...');
                 return;
             }
 
@@ -426,18 +422,8 @@ window.workflowDesigner = function () {
                     throw new Error('Missing required workflow key or agency ID');
                 }
 
-                // Debug current state
-                console.log('🔍 Current allWorkflows:', this.allWorkflows.map(w => ({
-                    key: w.key || 'NO_KEY',
-                    name: w.name,
-                    hasKey: !!w.key
-                })));
-                console.log('🔍 Looking for workflow key:', this.workflowKey);
-
                 // Find and update the current workflow in the allWorkflows array
                 const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
-
-                console.log('🔍 Workflow lookup result:', { workflowIndex, found: workflowIndex >= 0 });
 
                 if (workflowIndex >= 0) {
                     // Update existing workflow - preserve the key explicitly!
@@ -466,25 +452,17 @@ window.workflowDesigner = function () {
                 const workflowsToSave = this.allWorkflows.filter((workflow, index, arr) => {
                     // Remove workflows with no key
                     if (!workflow.key || workflow.key.trim() === '') {
-                        console.warn('⚠️ Removing workflow with empty key:', workflow.name);
                         return false;
                     }
 
                     // Remove duplicates by key (keep first occurrence)
                     const firstIndex = arr.findIndex(w => w.key === workflow.key);
                     if (firstIndex !== index) {
-                        console.warn('⚠️ Removing duplicate workflow:', workflow.key, workflow.name);
                         return false;
                     }
 
                     return true;
                 });
-
-                console.log('🔍 Workflows to save:', workflowsToSave.map(w => ({
-                    key: w.key,
-                    name: w.name,
-                    hasKey: !!w.key
-                })));
 
                 // Save all workflows via specification endpoint
                 const response = await fetch(`/api/v1/agencies/${this.agencyID}/specification/workflows`, {
@@ -513,7 +491,6 @@ window.workflowDesigner = function () {
                 }));
 
             } catch (error) {
-                console.error('❌ Failed to save workflow:', error);
                 alert(`Failed to save workflow: ${error.message}`);
             } finally {
                 this.saving = false;

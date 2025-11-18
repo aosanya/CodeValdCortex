@@ -297,19 +297,12 @@ func (h *Handler) applyAndSaveRoles(ctx context.Context, agencyID string, result
 			removedKeys := make(map[string]bool)
 			for _, removedKey := range result.ConsolidatedData.RemovedRoles {
 				removedKeys[removedKey] = true
-				h.logger.Info("🔍 DEBUG: Marking role for removal", "key", removedKey)
 			}
-
-			h.logger.WithFields(logrus.Fields{
-				"total_existing_roles": len(existingRoles),
-				"roles_to_remove":      len(removedKeys),
-			}).Info("🔍 DEBUG: Processing role removal/consolidation")
 
 			// Keep roles that are NOT in the removed list
 			for _, role := range existingRoles {
 				if !removedKeys[role.Key] {
 					updatedRoles = append(updatedRoles, *role)
-					h.logger.Info("🔍 DEBUG: Keeping role", "key", role.Key, "name", role.Name)
 				} else {
 					h.logger.Info("🗑️ Removing role", "key", role.Key, "name", role.Name)
 					rolesModified = true
@@ -334,20 +327,11 @@ func (h *Handler) applyAndSaveRoles(ctx context.Context, agencyID string, result
 				updatedRoles = append(updatedRoles, newRole)
 				rolesModified = true
 			}
-
-			h.logger.WithFields(logrus.Fields{
-				"roles_modified":   rolesModified,
-				"final_role_count": len(updatedRoles),
-			}).Info("🔍 DEBUG: Consolidation/removal complete")
 		}
 	}
 
 	// Save the updated roles list if modified
 	if rolesModified {
-		h.logger.WithFields(logrus.Fields{
-			"previous_count": len(existingRoles),
-			"updated_count":  len(updatedRoles),
-		}).Info("💾 Saving updated roles to database")
 
 		_, err := h.agencyService.UpdateSpecificationRoles(ctx, agencyID, updatedRoles, "ai-refine")
 		if err != nil {
