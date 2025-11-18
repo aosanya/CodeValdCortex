@@ -76,8 +76,7 @@ func (s *SpecificationService) UpdateWorkflows(ctx context.Context, agencyID str
 			"key":         wf.Key,
 			"name":        wf.Name,
 			"description": wf.Description,
-			"nodes_count": len(wf.Nodes),
-			"edges_count": len(wf.Edges),
+			"steps_count": len(wf.Steps),
 		}).Info("  🔹 Workflow to save")
 	}
 
