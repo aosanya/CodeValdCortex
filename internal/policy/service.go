@@ -102,21 +102,34 @@ func (s *Service) validatePolicy(policy *AIPolicy) error {
 		return fmt.Errorf("invalid default autonomy level: %s", policy.Autonomy.DefaultLevel)
 	}
 
+	// Filter out empty role overrides
+	validOverrides := []RoleOverride{}
 	for _, override := range policy.Autonomy.RoleOverrides {
-		if !isValidAutonomyLevel(override.Level) {
-			return fmt.Errorf("invalid autonomy level in override: %s", override.Level)
+		if override.RoleName != "" {
+			if !isValidAutonomyLevel(override.Level) {
+				return fmt.Errorf("invalid autonomy level in override: %s", override.Level)
+			}
+			validOverrides = append(validOverrides, override)
 		}
 	}
+	policy.Autonomy.RoleOverrides = validOverrides
 
-	// Validate model providers
-	if len(policy.Models.AllowedProviders) == 0 {
+	// Validate model providers - filter out empty providers first
+	validProviders := []AllowedProvider{}
+	for _, provider := range policy.Models.AllowedProviders {
+		if provider.Provider != "" {
+			validProviders = append(validProviders, provider)
+		}
+	}
+	
+	if len(validProviders) == 0 {
 		return fmt.Errorf("at least one allowed provider is required")
 	}
+	
+	// Update policy with only valid providers
+	policy.Models.AllowedProviders = validProviders
 
 	for _, provider := range policy.Models.AllowedProviders {
-		if provider.Provider == "" {
-			return fmt.Errorf("provider name is required")
-		}
 		if len(provider.Models) == 0 {
 			return fmt.Errorf("at least one model is required for provider %s", provider.Provider)
 		}
