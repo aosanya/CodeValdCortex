@@ -93,16 +93,34 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 							</div>
 							<!-- Work Items List -->
 							<div class="work-items-list">
-								<template x-for="item in filteredWorkItems" :key="item.key">
-									<div
-										class="panel-block work-item-card"
-										draggable="true"
-										@dragstart="handleDragStart($event, item)"
-										@dragend="handleDragEnd($event)"
+								<template x-for="(item, index) in filteredWorkItems" :key="index">
+									<div 
+										class="work-item-card"
+										x-data="{ expanded: false }"
 									>
-										<div class="work-item-content">
-											<p class="has-text-weight-semibold" x-text="item.name"></p>
-											<p class="is-size-7 has-text-grey" x-text="item.description"></p>
+										<div 
+											class="card"
+											draggable="true"
+											@dragstart="handleDragStart($event, item)"
+											@dragend="handleDragEnd($event)"
+										>
+											<div class="card-content py-2 px-3 p-2 m-1">
+												<div class="is-flex is-justify-content-space-between is-align-items-center">
+													<p class="has-text-weight-semibold is-size-6 mb-0" x-text="item.title"></p>
+													<button 
+														class="button is-small is-ghost"
+														@click.stop="expanded = !expanded"
+														:title="expanded ? 'Hide description' : 'Show description'"
+													>
+														<span class="icon is-small">
+															<i class="fas" :class="expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+														</span>
+													</button>
+												</div>
+												<div x-show="expanded" x-collapse>
+													<p class="is-size-6 has-text-grey mt-2" x-text="item.description"></p>
+												</div>
+											</div>
 										</div>
 									</div>
 								</template>

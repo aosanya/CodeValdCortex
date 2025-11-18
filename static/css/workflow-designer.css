@@ -37,31 +37,43 @@ flex-direction: column;
 }
 
 .work-items-list {
-overflow-y: auto;
-flex: 1;
+	overflow-y: auto;
+	flex: 1;
+	padding: 0.5rem;
 }
 
 .work-item-card {
-cursor: move;
-border-left: 3px solid transparent;
-transition: all 0.2s;
+	margin-bottom: 0.5rem;
+	cursor: move;
+	transition: all 0.2s;
 }
 
-.work-item-card:hover {
-background-color: #f0f0f0;
-border-left-color: #3273dc;
+.work-item-card .card {
+	border-left: 3px solid transparent;
+	transition: all 0.2s;
 }
 
-.work-item-card[draggable="true"]:active {
-opacity: 0.5;
-cursor: grabbing;
+.work-item-card .card:hover {
+	border-left-color: #3273dc;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transform: translateX(2px);
 }
 
-.work-item-content {
-flex: 1;
+.work-item-card .card[draggable="true"]:active {
+	opacity: 0.5;
+	cursor: grabbing;
 }
 
-/* Workflow Canvas */
+.work-item-card .button.is-ghost {
+	background: transparent;
+	border: none;
+	color: #7a7a7a;
+}
+
+.work-item-card .button.is-ghost:hover {
+	background: rgba(0, 0, 0, 0.05);
+	color: #3273dc;
+}/* Workflow Canvas */
 .workflow-canvas {
 background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px), linear-gradient(#f0f0f0 1px, transparent 1px);
 background-size: 20px 20px;
@@ -270,10 +282,10 @@ margin-bottom: 1rem;
 }
 
 .parallel-items {
-display: flex;
-gap: 1rem;
-justify-center;
-flex-wrap: wrap;
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	flex-wrap: wrap;
 }
 
 .parallel-item {

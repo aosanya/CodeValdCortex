@@ -38,12 +38,23 @@ window.workflowDesigner = function () {
         async init() {
             // Get workflow data from data attributes
             const container = this.$el;
+
+            console.log('Container element:', container);
+            console.log('All data attributes:', container.dataset);
+
             this.agencyID = container.dataset.agencyId;
             this.workflowID = container.dataset.workflowId;
             this.workflowKey = container.dataset.workflowKey;
             this.workflowName = container.dataset.workflowName;
             this.workflowDescription = container.dataset.workflowDescription;
             this.workflowVersion = container.dataset.workflowVersion;
+
+            console.log('Parsed workflow data:', {
+                agencyID: this.agencyID,
+                workflowID: this.workflowID,
+                workflowKey: this.workflowKey,
+                workflowName: this.workflowName
+            });
 
             // Parse existing workflow steps
             try {
@@ -70,13 +81,20 @@ window.workflowDesigner = function () {
          * Load available work items from specification
          */
         async loadWorkItems() {
+            console.log('loadWorkItems called with agencyID:', this.agencyID);
+
             try {
                 // Use existing specification API
                 if (typeof window.specificationAPI !== 'undefined') {
                     // Set the agency ID on the API instance
                     window.specificationAPI.agencyId = this.agencyID;
 
+                    console.log('Fetching specification from:', window.specificationAPI.baseUrl);
+
                     const spec = await window.specificationAPI.getSpecification();
+
+                    console.log('Raw specification response:', spec);
+
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
 
@@ -85,10 +103,11 @@ window.workflowDesigner = function () {
 
                     console.log('Loaded specification:', {
                         workItems: this.availableWorkItems.length,
-                        workflows: this.allWorkflows.length
+                        workflows: this.allWorkflows.length,
+                        firstWorkItem: this.availableWorkItems[0]
                     });
                 } else {
-                    console.warn('Specification API not available, using mock data');
+                    console.error('Specification API not available!');
                     this.availableWorkItems = [];
                     this.filteredWorkItems = [];
                     this.allWorkflows = [];
