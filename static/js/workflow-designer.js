@@ -1,484 +1,527 @@
-// Workflow Designer - Alpine.js Component with jsPlumb
-// Integrates with GitOps work items architecture
+/**
+ * Simplified Workflow Designer with Alpine.js
+ * Uses vertical column layout with HTML5 drag-and-drop
+ */
 
-function workflowDesigner() {
+window.workflowDesigner = function () {
     return {
-        jsPlumbInstance: null,
-        selectedNode: null,
-        nodes: [],
-        edges: [],
-        workflowId: null,
-        agencyId: null,
-        nodeCounter: 0,
+        // Workflow data
+        agencyID: '',
+        workflowID: '',
+        workflowKey: '',
+        workflowName: '',
+        workflowDescription: '',
+        workflowVersion: '',
+        workflowSteps: [],
 
-        init() {
-            this.agencyId = this.$el.dataset.agencyId;
-            this.workflowId = this.$el.dataset.workflowId;
-            this.initializeJsPlumb();
-            if (this.workflowId) {
-                this.loadWorkflow();
+        // All agency workflows (for specification update)
+        allWorkflows: [],
+
+        // Available work items
+        availableWorkItems: [],
+        filteredWorkItems: [],
+        searchQuery: '',
+
+        // Drag state
+        isDragging: false,
+        draggedItem: null,
+        draggedFromStep: null, // { stepIndex, itemIndex } if dragging from workflow
+        dragOverTarget: null,
+        sideDropTarget: null,
+
+        // UI state
+        saving: false,
+        saveTimeout: null,
+
+        /**
+         * Initialize the designer
+         */
+        async init() {
+            // Get workflow data from data attributes
+            const container = this.$el;
+
+            this.agencyID = container.dataset.agencyId;
+            this.workflowID = container.dataset.workflowId;
+            this.workflowKey = container.dataset.workflowKey;
+            this.workflowName = container.dataset.workflowName;
+            this.workflowDescription = container.dataset.workflowDescription;
+            this.workflowVersion = container.dataset.workflowVersion;
+
+            // Parse workflow steps if available
+            try {
+                const stepsData = container.dataset.workflowSteps;
+                if (stepsData && stepsData !== 'null') {
+                    this.workflowSteps = JSON.parse(stepsData) || [];
+                }
+            } catch (e) {
+                this.workflowSteps = [];
+            }
+
+            // Load available work items from specification API
+            await this.loadWorkItems();
+        },
+
+        /**
+         * Load available work items from specification
+         */
+        async loadWorkItems() {
+            try {
+                // Use existing specification API
+                if (typeof window.specificationAPI !== 'undefined') {
+                    // Set the agency ID on the API instance
+                    window.specificationAPI.agencyId = this.agencyID;
+
+                    const spec = await window.specificationAPI.getSpecification();
+
+                    this.availableWorkItems = spec.work_items || [];
+                    this.filteredWorkItems = [...this.availableWorkItems];
+
+                    // Load all workflows for specification updates
+                    // Normalize workflows to ensure they have a 'key' property
+                    this.allWorkflows = (spec.workflows || []).map(wf => ({
+                        ...wf,
+                        key: wf._key
+                    }));
+
+                    // Enrich existing workflow steps with work item details
+                    this.enrichWorkflowSteps();
+                } else {
+                    this.availableWorkItems = [];
+                    this.filteredWorkItems = [];
+                    this.allWorkflows = [];
+                }
+            } catch (error) {
+                this.availableWorkItems = [];
+                this.filteredWorkItems = [];
+                this.allWorkflows = [];
             }
         },
 
-        initializeJsPlumb() {
-            const container = document.getElementById('workflow-canvas');
-
-            // Initialize jsPlumb instance
-            this.jsPlumbInstance = jsPlumb.newInstance({
-                container: container,
-                connector: ['Bezier', { curviness: 50 }],
-                paintStyle: { stroke: '#3273dc', strokeWidth: 2 },
-                hoverPaintStyle: { stroke: '#48c774', strokeWidth: 3 },
-                endpoint: ['Dot', { radius: 5 }],
-                endpointStyle: { fill: '#3273dc' },
-                endpointHoverStyle: { fill: '#48c774' },
-                dragOptions: { cursor: 'move', zIndex: 2000 },
-                connectionsDetachable: true,
-                reattachConnections: true,
-            });
-
-            // Connection event handler
-            this.jsPlumbInstance.bind('connection', (info) => {
-                this.onConnectionCreated(info);
-            });
-
-            // Connection detach handler
-            this.jsPlumbInstance.bind('connectionDetached', (info) => {
-                this.onConnectionDetached(info);
-            });
-
-            // Add minimap
-            const minimap = new XYFlow.MiniMap({
-                nodeColor: (node) => {
-                    const colors = {
-                        document: '#3298dc',
-                        software: '#48c774',
-                        proposal: '#ffdd57',
-                        analysis: '#f14668'
-                    };
-                    return colors[node.data.type] || '#ccc';
-                }
-            });
-            container.appendChild(minimap);
-        },
-
-        createWorkItemNode() {
-            const self = this;
-            return {
-                render: (node) => {
-                    const typeIcons = {
-                        document: 'fa-file-alt',
-                        software: 'fa-code',
-                        proposal: 'fa-file-contract',
-                        analysis: 'fa-chart-line'
-                    };
-
-                    const typeColors = {
-                        document: 'has-background-info-light',
-                        software: 'has-background-success-light',
-                        proposal: 'has-background-warning-light',
-                        analysis: 'has-background-danger-light'
-                    };
-
-                    const typeBorderColors = {
-                        document: 'has-border-info',
-                        software: 'has-border-success',
-                        proposal: 'has-border-warning',
-                        analysis: 'has-border-danger'
-                    };
-
-                    const autoMergeIcon = node.data.gitea_config?.auto_merge
-                        ? '<i class="fas fa-bolt has-text-success" title="Auto-merge enabled"></i>'
-                        : '<i class="fas fa-hand-paper has-text-grey" title="Manual merge required"></i>';
-
-                    return `
-            <div class="work-item-node box p-3 ${typeColors[node.data.type]} ${typeBorderColors[node.data.type]}" style="min-width: 200px; border-left: 4px solid;">
-              <div class="is-flex is-justify-content-between is-align-items-center mb-2">
-                <div class="is-flex is-align-items-center">
-                  <span class="icon mr-2">
-                    <i class="fas ${typeIcons[node.data.type]}"></i>
-                  </span>
-                  <strong class="is-size-6">${node.data.title || 'Untitled'}</strong>
-                </div>
-                ${autoMergeIcon}
-              </div>
-              <p class="is-size-7 has-text-grey mb-2" style="max-width: 180px; overflow: hidden; text-overflow: ellipsis;">
-                ${node.data.description?.substring(0, 60) || 'No description'}${node.data.description?.length > 60 ? '...' : ''}
-              </p>
-              <div class="tags are-small">
-                ${node.data.labels?.slice(0, 3).map(l => `<span class="tag">${l}</span>`).join('') || ''}
-                ${node.data.labels?.length > 3 ? `<span class="tag">+${node.data.labels.length - 3}</span>` : ''}
-              </div>
-            </div>
-          `;
-                }
-            };
-        },
-
-        addNode(type) {
-            const nodeId = `node-${Date.now()}`;
-            const position = this.getNextNodePosition();
-
-            const newNode = {
-                id: nodeId,
-                type: 'workItem',
-                position: position,
-                data: {
-                    type: type,
-                    title: `New ${type} work item`,
-                    description: '',
-                    labels: ['work-item', type],
-                    labelsText: `work-item, ${type}`,
-                    gitea_config: {
-                        repo: 'main-repo',
-                        branch_pattern: 'issue-{issue_id}-{slug}',
-                        merge_strategy: type === 'document' ? 'squash' : 'merge',
-                        auto_merge: type === 'document',
-                        require_reviews: type === 'document' ? 0 : 1
-                    }
-                }
-            };
-
-            this.nodes.push(newNode);
-            this.flowInstance.setNodes([...this.nodes]);
-            this.selectedNode = newNode;
-        },
-
-        getNextNodePosition() {
-            if (this.nodes.length === 0) {
-                return { x: 250, y: 100 };
-            }
-
-            // Place new node to the right of the last node
-            const lastNode = this.nodes[this.nodes.length - 1];
-            return {
-                x: lastNode.position.x + 300,
-                y: lastNode.position.y
-            };
-        },
-
-        addEdge(params) {
-            // Check if edge already exists
-            const edgeExists = this.edges.some(e =>
-                e.source === params.source && e.target === params.target
-            );
-
-            if (edgeExists) {
-                this.showNotification('Connection already exists', 'warning');
+        /**
+         * Enrich workflow steps with work item details
+         */
+        enrichWorkflowSteps() {
+            if (!this.availableWorkItems || this.availableWorkItems.length === 0) {
                 return;
             }
 
-            // Check for circular dependency
-            if (this.wouldCreateCycle(params.source, params.target)) {
-                this.showNotification('Cannot create circular dependency', 'danger');
+            this.workflowSteps.forEach(step => {
+                if (step.items) {
+                    step.items.forEach(item => {
+                        // Find the work item in availableWorkItems
+                        const workItem = this.availableWorkItems.find(wi =>
+                            wi._key === item.work_item_id ||
+                            wi.key === item.work_item_id ||
+                            wi._key === item.work_item_key ||
+                            wi.key === item.work_item_key
+                        );
+
+                        if (workItem) {
+                            // Enrich with work item details
+                            item.work_item_title = workItem.title || workItem.name || item.work_item_name || 'Unnamed Work Item';
+                            item.description = workItem.description || '';
+                            item.showDescription = item.showDescription || false;
+                        } else {
+                            // Fallback to existing name or default
+                            item.work_item_title = item.work_item_name || 'Unknown Work Item';
+                            item.description = item.description || '';
+                            item.showDescription = item.showDescription || false;
+                        }
+                    });
+                }
+            });
+        },
+
+        /**
+         * Toggle work item description visibility
+         */
+        toggleItemDescription(itemKey) {
+            const item = this.filteredWorkItems.find(i => i._key === itemKey);
+            if (item) {
+                item.showDescription = !item.showDescription;
+            }
+        },
+
+        /**
+         * Toggle step item description visibility
+         */
+        toggleStepItemDescription(stepId, workItemId) {
+            const step = this.workflowSteps.find(s => s.id === stepId);
+            if (step) {
+                const item = step.items.find(i => i.work_item_id === workItemId);
+                if (item) {
+                    item.showDescription = !item.showDescription;
+                }
+            }
+        },
+
+        /**
+         * Filter work items based on search query
+         */
+        filterWorkItems() {
+            const query = this.searchQuery.toLowerCase().trim();
+            if (!query) {
+                this.filteredWorkItems = [...this.availableWorkItems];
                 return;
             }
 
-            const newEdge = {
-                id: `edge-${params.source}-${params.target}`,
-                source: params.source,
-                target: params.target,
-                type: 'smoothstep',
-                animated: true,
-                label: 'depends on',
-                markerEnd: {
-                    type: 'arrowclosed',
-                }
-            };
-
-            this.edges.push(newEdge);
-            this.flowInstance.setEdges([...this.edges]);
+            this.filteredWorkItems = this.availableWorkItems.filter(item => {
+                const title = (item.title || '').toLowerCase();
+                const description = (item.description || '').toLowerCase();
+                return title.includes(query) || description.includes(query);
+            });
         },
 
-        wouldCreateCycle(source, target) {
-            // Check if adding edge from source to target would create a cycle
-            const visited = new Set();
-            const recStack = new Set();
-
-            const dfs = (nodeId) => {
-                visited.add(nodeId);
-                recStack.add(nodeId);
-
-                // Get all outgoing edges from this node
-                const outgoing = this.edges.filter(e => e.source === nodeId);
-
-                // Add the potential new edge
-                if (nodeId === source) {
-                    outgoing.push({ source, target });
-                }
-
-                for (const edge of outgoing) {
-                    if (!visited.has(edge.target)) {
-                        if (dfs(edge.target)) return true;
-                    } else if (recStack.has(edge.target)) {
-                        return true;
-                    }
-                }
-
-                recStack.delete(nodeId);
-                return false;
-            };
-
-            return dfs(source);
+        /**
+         * Handle drag start from work items panel
+         */
+        handleDragStart(event, item) {
+            this.isDragging = true;
+            this.draggedItem = item;
+            this.draggedFromStep = null; // Not from workflow
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', JSON.stringify(item));
+            event.target.classList.add('is-dragging');
         },
 
-        updateNode() {
-            if (this.selectedNode) {
-                // Parse labels text
-                this.selectedNode.data.labels = this.selectedNode.data.labelsText
-                    .split(',')
-                    .map(l => l.trim())
-                    .filter(l => l);
+        /**
+         * Handle drag start from existing step item
+         */
+        handleStepDragStart(event, stepIndex, itemIndex) {
+            const step = this.workflowSteps[stepIndex];
+            if (!step) return;
 
-                // Update flow
-                this.flowInstance.setNodes([...this.nodes]);
+            const item = step.items[itemIndex];
+            if (!item) return;
+
+            this.isDragging = true;
+            this.draggedItem = item;
+            this.draggedFromStep = { stepIndex, itemIndex };
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', JSON.stringify(item));
+            event.target.classList.add('is-dragging');
+        },
+
+        /**
+         * Handle drag end
+         */
+        handleDragEnd(event) {
+            this.isDragging = false;
+            this.draggedItem = null;
+            this.draggedFromStep = null;
+            this.dragOverTarget = null;
+            this.sideDropTarget = null;
+            event.target.classList.remove('is-dragging');
+        },
+
+        /**
+         * Handle drag over drop zone
+         */
+        handleDragOver(event, target) {
+            event.preventDefault();
+            this.dragOverTarget = target;
+        },
+
+        /**
+         * Handle drag over item for side drop zones
+         */
+        handleItemDragOver(event, stepIndex) {
+            if (!this.isDragging) return;
+            event.preventDefault();
+
+            // Determine which side based on mouse position
+            const rect = event.currentTarget.getBoundingClientRect();
+            const midX = rect.left + rect.width / 2;
+            const side = event.clientX < midX ? 'left' : 'right';
+
+            this.sideDropTarget = { stepIndex, side };
+        },
+
+        /**
+         * Handle drag leave
+         */
+        handleDragLeave(event) {
+            // Only clear if we're actually leaving the drop zone
+            if (event.currentTarget === event.target) {
+                this.dragOverTarget = null;
             }
         },
 
-        deleteNode() {
-            if (!this.selectedNode) return;
+        /**
+         * Handle drag leave from item
+         */
+        handleItemDragLeave(event) {
+            if (event.currentTarget === event.target) {
+                this.sideDropTarget = null;
+            }
+        },
 
-            if (confirm(`Delete node "${this.selectedNode.data.title}"?`)) {
-                // Remove node
-                this.nodes = this.nodes.filter(n => n.id !== this.selectedNode.id);
+        /**
+         * Handle drop on workflow
+         */
+        handleDrop(event, position, dropType) {
+            event.preventDefault();
+            event.stopPropagation();
 
-                // Remove connected edges
-                this.edges = this.edges.filter(e =>
-                    e.source !== this.selectedNode.id && e.target !== this.selectedNode.id
+            if (!this.draggedItem) return;
+
+            // Remove from original position if dragging from workflow
+            if (this.draggedFromStep !== null) {
+                this.removeItemFromStep(
+                    this.draggedFromStep.stepIndex,
+                    this.draggedFromStep.itemIndex,
+                    false // Don't save yet
                 );
-
-                this.flowInstance.setNodes([...this.nodes]);
-                this.flowInstance.setEdges([...this.edges]);
-                this.selectedNode = null;
             }
+
+            // Add to new position based on drop type
+            switch (dropType) {
+                case 'empty':
+                    // First item in empty workflow
+                    this.addStepAt(0, [this.draggedItem]);
+                    break;
+
+                case 'before':
+                    // Insert new step before position
+                    this.addStepAt(position, [this.draggedItem]);
+                    break;
+
+                case 'after':
+                    // Insert new step after last position
+                    this.addStepAt(position, [this.draggedItem]);
+                    break;
+
+                case 'left':
+                case 'right':
+                    // Add as parallel item
+                    this.addParallelItem(position, this.draggedItem, dropType);
+                    break;
+
+                case 'parallel':
+                    // Add to existing parallel execution
+                    this.addParallelItem(position, this.draggedItem, 'add');
+                    break;
+            }
+
+            // Clear drag state
+            this.isDragging = false;
+            this.draggedItem = null;
+            this.draggedFromStep = null;
+            this.dragOverTarget = null;
+            this.sideDropTarget = null;
+
+            // Save workflow
+            this.saveWorkflow();
         },
 
-        async saveWorkflow() {
-            if (!this.validateWorkflow()) {
-                return;
-            }
-
-            const workflow = {
-                id: this.workflowId,
-                agency_id: this.agencyId,
-                name: document.getElementById('workflow-name')?.value || 'Untitled Workflow',
-                description: document.getElementById('workflow-description')?.value || '',
-                nodes: this.nodes.map(n => ({
-                    id: n.id,
-                    type: n.data.type,
-                    title: n.data.title,
-                    description: n.data.description,
-                    labels: n.data.labels,
-                    position: n.position,
-                    gitea_config: n.data.gitea_config
-                })),
-                edges: this.edges.map(e => ({
-                    id: e.id,
-                    source: e.source,
-                    target: e.target
+        /**
+         * Add a new step at specified position
+         */
+        addStepAt(position, items) {
+            const newStep = {
+                id: this.generateID(),
+                order: position,
+                items: items.map(item => ({
+                    id: this.generateID(),
+                    work_item_id: item.key || item._key,
+                    work_item_title: item.title,
+                    description: item.description || '',
+                    showDescription: false
                 }))
             };
 
+            // Insert at position
+            this.workflowSteps.splice(position, 0, newStep);
+
+            // Reorder all steps
+            this.reorderSteps();
+        },
+
+        /**
+         * Add parallel item to existing step
+         */
+        addParallelItem(stepIndex, item, side) {
+            const step = this.workflowSteps[stepIndex];
+            if (!step) return;
+
+            const newItem = {
+                id: this.generateID(),
+                work_item_id: item.key || item._key,
+                work_item_title: item.title,
+                description: item.description || '',
+                showDescription: false
+            };
+
+            // Add to items array (left = prepend, right/add = append)
+            if (side === 'left') {
+                step.items.unshift(newItem);
+            } else {
+                // 'right' or 'add' both append to the end
+                step.items.push(newItem);
+            }
+        },
+
+        /**
+         * Remove item from step
+         */
+        removeItemFromStep(stepIndex, itemIndex, shouldSave = true) {
+            const step = this.workflowSteps[stepIndex];
+            if (!step) return;
+
+            // Remove the item
+            step.items.splice(itemIndex, 1);
+
+            // If step is now empty, remove the step
+            if (step.items.length === 0) {
+                this.workflowSteps.splice(stepIndex, 1);
+                this.reorderSteps();
+            }
+
+            if (shouldSave) {
+                this.saveWorkflow();
+            }
+        },
+
+        /**
+         * Reorder steps to have sequential order values
+         */
+        reorderSteps() {
+            this.workflowSteps.forEach((step, index) => {
+                step.order = index;
+            });
+        },
+
+        /**
+         * Save workflow to backend (via specification workflows endpoint)
+         */
+        async saveWorkflow() {
+            // Debounce: Cancel previous save timer and set a new one
+            if (this.saveTimeout) {
+                clearTimeout(this.saveTimeout);
+            }
+
+            this.saveTimeout = setTimeout(async () => {
+                await this._performSave();
+            }, 300); // 300ms debounce
+        },
+
+        /**
+         * Perform the actual save operation
+         */
+        async _performSave() {
+            // Prevent multiple simultaneous saves
+            if (this.saving) {
+                return;
+            }
+
+            this.saving = true;
+
             try {
-                const url = this.workflowId
-                    ? `/api/v1/agencies/${this.agencyId}/workflows/${this.workflowId}`
-                    : `/api/v1/agencies/${this.agencyId}/workflows`;
+                // Validate required data
+                if (!this.workflowKey || !this.agencyID) {
+                    throw new Error('Missing required workflow key or agency ID');
+                }
 
-                const method = this.workflowId ? 'PUT' : 'POST';
+                // Find and update the current workflow in the allWorkflows array
+                const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(workflow)
+                if (workflowIndex >= 0) {
+                    // Update existing workflow - preserve the key explicitly!
+                    const existingKey = this.allWorkflows[workflowIndex].key;
+                    this.allWorkflows[workflowIndex] = {
+                        ...this.allWorkflows[workflowIndex],
+                        key: existingKey,  // Explicitly preserve the key
+                        name: this.workflowName,
+                        description: this.workflowDescription,
+                        version: this.workflowVersion,
+                        steps: this.workflowSteps
+                    };
+                } else {
+                    // Workflow not found in allWorkflows, add it
+                    this.allWorkflows.push({
+                        key: this.workflowKey,
+                        agency_id: this.agencyID,
+                        name: this.workflowName,
+                        description: this.workflowDescription,
+                        version: this.workflowVersion,
+                        steps: this.workflowSteps
+                    });
+                }
+
+                // Filter out workflows with empty keys and remove duplicates
+                const workflowsToSave = this.allWorkflows.filter((workflow, index, arr) => {
+                    // Remove workflows with no key
+                    if (!workflow.key || workflow.key.trim() === '') {
+                        return false;
+                    }
+
+                    // Remove duplicates by key (keep first occurrence)
+                    const firstIndex = arr.findIndex(w => w.key === workflow.key);
+                    if (firstIndex !== index) {
+                        return false;
+                    }
+
+                    return true;
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    this.workflowId = data._key;
-                    this.showNotification('Workflow saved successfully', 'success');
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Save failed');
+                // Save all workflows via specification endpoint
+                const response = await fetch(`/api/v1/agencies/${this.agencyID}/specification/workflows`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        workflows: workflowsToSave,
+                        updated_by: 'system' // TODO: Get from auth context
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Failed to save workflow: ${response.statusText}`);
                 }
+
+                const updatedSpec = await response.json();
+
+                // Update allWorkflows with the response to stay in sync
+                // Normalize workflows to ensure they have a 'key' property
+                this.allWorkflows = (updatedSpec.workflows || []).map(wf => ({
+                    ...wf,
+                    key: wf._key
+                }));
+
             } catch (error) {
-                this.showNotification(`Failed to save: ${error.message}`, 'danger');
+                alert(`Failed to save workflow: ${error.message}`);
+            } finally {
+                this.saving = false;
             }
         },
 
-        validateWorkflow() {
-            // Check if workflow has nodes
-            if (this.nodes.length === 0) {
-                this.showNotification('Workflow must have at least one node', 'warning');
-                return false;
-            }
-
-            // Check for cycles
-            if (this.detectCycle()) {
-                this.showNotification('Workflow has circular dependencies', 'danger');
-                return false;
-            }
-
-            // Check required fields
-            const invalidNodes = this.nodes.filter(n =>
-                !n.data.title || !n.data.description || !n.data.gitea_config.repo
-            );
-
-            if (invalidNodes.length > 0) {
-                this.showNotification(`${invalidNodes.length} node(s) missing required fields`, 'danger');
-                return false;
-            }
-
-            return true;
-        },
-
-        detectCycle() {
-            const visited = new Set();
-            const recStack = new Set();
-
-            const hasCycleUtil = (nodeId) => {
-                visited.add(nodeId);
-                recStack.add(nodeId);
-
-                const outgoingEdges = this.edges.filter(e => e.source === nodeId);
-                for (const edge of outgoingEdges) {
-                    if (!visited.has(edge.target)) {
-                        if (hasCycleUtil(edge.target)) return true;
-                    } else if (recStack.has(edge.target)) {
-                        return true;
-                    }
-                }
-
-                recStack.delete(nodeId);
-                return false;
+        /**
+         * Export workflow as JSON
+         */
+        exportWorkflow() {
+            const data = {
+                name: this.workflowName,
+                description: this.workflowDescription,
+                version: this.workflowVersion,
+                steps: this.workflowSteps
             };
 
-            for (const node of this.nodes) {
-                if (!visited.has(node.id)) {
-                    if (hasCycleUtil(node.id)) return true;
-                }
-            }
-
-            return false;
-        },
-
-        async exportWorkflow() {
-            const workflow = {
-                version: '1.0',
-                name: document.getElementById('workflow-name')?.value || 'Untitled Workflow',
-                description: document.getElementById('workflow-description')?.value || '',
-                nodes: this.nodes,
-                edges: this.edges,
-                metadata: {
-                    created: new Date().toISOString(),
-                    generator: 'CodeValdCortex Workflow Designer',
-                    agency_id: this.agencyId
-                }
-            };
-
-            const blob = new Blob([JSON.stringify(workflow, null, 2)], {
-                type: 'application/json'
-            });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `workflow-${this.workflowId || 'new'}.json`;
+            a.download = `${this.workflowKey}-${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-
-            this.showNotification('Workflow exported', 'success');
         },
 
-        async loadWorkflow() {
-            if (!this.workflowId) return;
-
-            try {
-                const response = await fetch(`/api/v1/agencies/${this.agencyId}/workflows/${this.workflowId}`);
-
-                if (!response.ok) {
-                    throw new Error('Failed to load workflow');
-                }
-
-                const workflow = await response.json();
-
-                // Set workflow metadata
-                if (document.getElementById('workflow-name')) {
-                    document.getElementById('workflow-name').value = workflow.name || '';
-                }
-                if (document.getElementById('workflow-description')) {
-                    document.getElementById('workflow-description').value = workflow.description || '';
-                }
-
-                // Load nodes
-                this.nodes = workflow.nodes.map(n => ({
-                    ...n,
-                    type: 'workItem',
-                    data: {
-                        ...n,
-                        labelsText: n.labels?.join(', ') || ''
-                    }
-                }));
-
-                // Load edges
-                this.edges = workflow.edges;
-
-                this.flowInstance.setNodes(this.nodes);
-                this.flowInstance.setEdges(this.edges);
-                this.flowInstance.fitView();
-
-            } catch (error) {
-                this.showNotification(`Failed to load workflow: ${error.message}`, 'danger');
-            }
-        },
-
-        async executeWorkflow() {
-            if (!this.workflowId) {
-                this.showNotification('Save workflow first', 'warning');
-                return;
-            }
-
-            if (!confirm('Execute this workflow? This will create Gitea issues for all nodes.')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(
-                    `/api/v1/agencies/${this.agencyId}/workflows/${this.workflowId}/execute`,
-                    { method: 'POST' }
-                );
-
-                if (response.ok) {
-                    this.showNotification('Workflow execution started', 'success');
-                } else {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Execution failed');
-                }
-            } catch (error) {
-                this.showNotification(`Execution failed: ${error.message}`, 'danger');
-            }
-        },
-
-        showNotification(message, type) {
-            const container = document.getElementById('notification-container') || document.body;
-            const notification = document.createElement('div');
-            notification.className = `notification is-${type} is-light`;
-            notification.innerHTML = `
-        <button class="delete"></button>
-        ${message}
-      `;
-
-            container.appendChild(notification);
-
-            // Delete button handler
-            notification.querySelector('.delete').addEventListener('click', () => {
-                notification.remove();
-            });
-
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
-            }, 5000);
+        /**
+         * Generate unique ID
+         */
+        generateID() {
+            return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         }
     };
-}
+};

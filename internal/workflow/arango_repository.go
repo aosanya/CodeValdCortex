@@ -150,12 +150,9 @@ func (r *ArangoRepository) Create(ctx context.Context, workflow *models.Workflow
 	workflow.CreatedAt = now
 	workflow.UpdatedAt = now
 
-	// Initialize empty arrays if nil
-	if workflow.Nodes == nil {
-		workflow.Nodes = []models.WorkflowNode{}
-	}
-	if workflow.Edges == nil {
-		workflow.Edges = []models.WorkflowEdge{}
+	// Initialize empty steps array if nil
+	if workflow.Steps == nil {
+		workflow.Steps = models.Steps{}
 	}
 
 	meta, err := col.CreateDocument(ctx, workflow)

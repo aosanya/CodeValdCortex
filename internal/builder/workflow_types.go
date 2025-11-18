@@ -18,12 +18,11 @@ type RefineWorkflowRequest struct {
 
 // RefineWorkflowResponse contains the AI-refined workflow
 type RefineWorkflowResponse struct {
-	RefinedName        string                `json:"refined_name"`
-	RefinedDescription string                `json:"refined_description"`
-	RefinedNodes       []models.WorkflowNode `json:"refined_nodes"`
-	RefinedEdges       []models.WorkflowEdge `json:"refined_edges"`
-	WasChanged         bool                  `json:"was_changed"`
-	Explanation        string                `json:"explanation"`
+	RefinedName        string       `json:"refined_name"`
+	RefinedDescription string       `json:"refined_description"`
+	RefinedSteps       models.Steps `json:"refined_steps"`
+	WasChanged         bool         `json:"was_changed"`
+	Explanation        string       `json:"explanation"`
 }
 
 // GenerateWorkflowRequest contains the context for generating a new workflow
@@ -38,12 +37,11 @@ type GenerateWorkflowRequest struct {
 
 // GenerateWorkflowResponse contains the AI-generated workflow
 type GenerateWorkflowResponse struct {
-	Name        string                `json:"name"`
-	Description string                `json:"description"`
-	Version     string                `json:"version"`
-	Nodes       []models.WorkflowNode `json:"nodes"`
-	Edges       []models.WorkflowEdge `json:"edges"`
-	Explanation string                `json:"explanation"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Version     string       `json:"version"`
+	Steps       models.Steps `json:"steps"`
+	Explanation string       `json:"explanation"`
 }
 
 // GenerateWorkflowsResponse contains multiple AI-generated workflows
@@ -71,13 +69,12 @@ type ConsolidateWorkflowsResponse struct {
 
 // ConsolidatedWorkflow represents a workflow after consolidation
 type ConsolidatedWorkflow struct {
-	Name             string                `json:"name"`
-	Description      string                `json:"description"`
-	Version          string                `json:"version"`
-	Nodes            []models.WorkflowNode `json:"nodes"`
-	Edges            []models.WorkflowEdge `json:"edges"`
-	ConsolidatedFrom []string              `json:"consolidated_from"` // Keys of original workflows
-	Rationale        string                `json:"rationale"`
+	Name             string       `json:"name"`
+	Description      string       `json:"description"`
+	Version          string       `json:"version"`
+	Steps            models.Steps `json:"steps"`
+	ConsolidatedFrom []string     `json:"consolidated_from"` // Keys of original workflows
+	Rationale        string       `json:"rationale"`
 }
 
 // RefineWorkflowsRequest contains the context for dynamic workflow processing
@@ -103,11 +100,10 @@ type RefineWorkflowsResponse struct {
 
 // RefinedWorkflowResult represents a single refined workflow
 type RefinedWorkflowResult struct {
-	OriginalKey        string                `json:"original_key"`
-	RefinedName        string                `json:"refined_name"`
-	RefinedDescription string                `json:"refined_description"`
-	RefinedNodes       []models.WorkflowNode `json:"refined_nodes"`
-	RefinedEdges       []models.WorkflowEdge `json:"refined_edges"`
-	WasChanged         bool                  `json:"was_changed"`
-	Explanation        string                `json:"explanation"`
+	OriginalKey        string       `json:"original_key"`
+	RefinedName        string       `json:"refined_name"`
+	RefinedDescription string       `json:"refined_description"`
+	RefinedSteps       models.Steps `json:"refined_steps"`
+	WasChanged         bool         `json:"was_changed"`
+	Explanation        string       `json:"explanation"`
 }

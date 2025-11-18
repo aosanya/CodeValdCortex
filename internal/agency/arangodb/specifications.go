@@ -109,13 +109,6 @@ func (r *Repository) GetSpecification(ctx context.Context, agencyID string) (*mo
 			return nil, fmt.Errorf("failed to unmarshal specification document: %w", err)
 		}
 
-		// Debug logging for workflows
-		fmt.Printf("🔍 DEBUG [GetSpecification]: Retrieved spec with %d workflows\n", len(spec.Workflows))
-		for i, wf := range spec.Workflows {
-			fmt.Printf("  🔹 Workflow[%d]: Key=%q Name=%q AgencyID=%q NodesCount=%d\n",
-				i, wf.Key, wf.Name, wf.AgencyID, len(wf.Nodes))
-		}
-
 		return &spec, nil
 	} else {
 		// No specification exists, create a default one

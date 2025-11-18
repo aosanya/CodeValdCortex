@@ -27,8 +27,6 @@
              * @returns {string} Node ID
              */
             createNode(type, x, y, workItemKey = null) {
-                console.log('[MVP-052][CREATE-NODE] Starting', { type, x, y, workItemKey });
-
                 state.nodeCounter++;
                 const nodeId = `node_${Date.now()}_${state.nodeCounter}`;
 
@@ -65,9 +63,7 @@
                 };
 
                 state.nodes.push(node);
-                console.log('[MVP-052][CREATE-NODE] Calling renderNode', nodeId);
                 this.renderNode(node);
-                console.log('[MVP-052][CREATE-NODE] Node created', nodeId);
                 context.saveToHistory();
 
                 return nodeId;
@@ -96,12 +92,6 @@
              * @param {Object} node - Node object to render
              */
             renderNode(node) {
-                console.log('[MVP-052][RENDER-NODE] Starting', {
-                    nodeId: node.id,
-                    hasViewport: !!context.$refs?.canvasViewport,
-                    hasJsPlumb: !!state.jsPlumbInstance
-                });
-
                 const nodeEl = document.createElement('div');
                 nodeEl.id = node.id;
                 nodeEl.className = `workflow-node node-${node.type}`;
@@ -124,9 +114,7 @@
                 `;
 
                 // Add to canvas
-                console.log('[MVP-052][RENDER-NODE] Appending to DOM');
                 context.$refs.canvasViewport.appendChild(nodeEl);
-                console.log('[MVP-052][RENDER-NODE] Appended successfully');
 
                 // Make node draggable using jsPlumb v6 API
                 state.jsPlumbInstance.setDraggable(nodeEl, true);

@@ -289,16 +289,15 @@ func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 		"workflow_key":  workflow.Key,
 		"workflow_name": workflow.Name,
 		"agency_id":     agencyID,
-		"nodes_count":   len(workflow.Nodes),
-		"edges_count":   len(workflow.Edges),
+		"steps_count":   len(workflow.Steps),
 	}).Info("🎨 Rendering workflow designer")
 
-	if len(workflow.Nodes) > 0 {
+	if len(workflow.Steps) > 0 && len(workflow.Steps[0].Items) > 0 {
 		h.logger.WithFields(logrus.Fields{
-			"first_node_id":            workflow.Nodes[0].ID,
-			"first_node_type":          workflow.Nodes[0].Type,
-			"first_node_work_item_key": workflow.Nodes[0].Data.WorkItemKey,
-		}).Info("  📌 Sample node data")
+			"first_step_id":      workflow.Steps[0].ID,
+			"first_step_order":   workflow.Steps[0].Order,
+			"first_item_work_id": workflow.Steps[0].Items[0].WorkItemID,
+		}).Info("  📌 Sample step data")
 	}
 
 	// Render designer page

@@ -1,267 +1,443 @@
 /* Workflow Designer Styles */
 
-.workflow-designer {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 100px);
-    position: relative;
+/* Alpine.js cloak */
+[x-cloak] {
+    display: none !important;
 }
 
-.workflow-designer .toolbar {
+/* Main Container Layout */
+.designer-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Toolbar */
+.designer-toolbar {
     background: #f5f5f5;
     border-bottom: 1px solid #dbdbdb;
+    padding: 0.75rem 1rem;
     flex-shrink: 0;
 }
 
-.workflow-designer .node-palette {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.workflow-designer .actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.workflow-canvas {
+/* Content Area */
+.designer-content {
     flex: 1;
+    overflow: hidden;
+}
+
+/* Work Items Panel */
+.work-items-panel {
     background: #fafafa;
-    background-image:
-        linear-gradient(#e5e5e5 1px, transparent 1px),
-        linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
-    background-size: 20px 20px;
-    position: relative;
-}
-
-.properties-panel {
-    position: absolute;
-    right: 0;
-    top: 60px;
-    bottom: 0;
-    width: 350px;
-    background: white;
-    border-left: 1px solid #dbdbdb;
-    padding: 1.5rem;
+    border-right: 1px solid #dbdbdb;
     overflow-y: auto;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
-    z-index: 10;
+    display: flex;
+    flex-direction: column;
 }
 
-.properties-panel .field:not(:last-child) {
-    margin-bottom: 1rem;
+.work-items-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem;
 }
 
-.work-item-node {
-    cursor: pointer;
-    transition: all 0.2s ease;
-    user-select: none;
-}
-
-.work-item-node:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.work-item-node.selected {
-    box-shadow: 0 0 0 3px rgba(50, 152, 220, 0.5);
-}
-
-/* Border color helpers */
-.has-border-info {
-    border-left-color: #3298dc !important;
-}
-
-.has-border-success {
-    border-left-color: #48c774 !important;
-}
-
-.has-border-warning {
-    border-left-color: #ffdd57 !important;
-}
-
-.has-border-danger {
-    border-left-color: #f14668 !important;
-}
-
-/* Node handles (connection points) */
-.react-flow__handle {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #3298dc;
-    border: 2px solid white;
-}
-
-.react-flow__handle-left {
-    left: -5px;
-}
-
-.react-flow__handle-right {
-    right: -5px;
-}
-
-/* Edge styles */
-.react-flow__edge-path {
-    stroke: #b5b5b5;
-    stroke-width: 2;
-}
-
-.react-flow__edge.selected .react-flow__edge-path {
-    stroke: #3298dc;
-    stroke-width: 3;
-}
-
-.react-flow__edge-label {
-    background: white;
-    border: 1px solid #dbdbdb;
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 0.75rem;
-}
-
-/* Controls */
-.react-flow__controls {
-    bottom: 20px;
-    left: 20px;
-}
-
-.react-flow__controls-button {
-    background: white;
-    border: 1px solid #dbdbdb;
-    border-radius: 4px;
-    padding: 8px;
-    cursor: pointer;
-}
-
-.react-flow__controls-button:hover {
-    background: #f5f5f5;
-}
-
-/* Minimap */
-.react-flow__minimap {
-    bottom: 20px;
-    right: 20px;
-    border: 1px solid #dbdbdb;
-    border-radius: 4px;
-}
-
-/* Notification container */
-#notification-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    max-width: 400px;
-}
-
-#notification-container .notification {
+.work-item-card {
     margin-bottom: 0.5rem;
-    animation: slideIn 0.3s ease;
+    cursor: move;
+    transition: all 0.2s;
 }
 
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+.work-item-card .card {
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
 }
 
-/* Workflow metadata section */
-.workflow-metadata {
+.work-item-card .card:hover {
+    border-left-color: #3273dc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(2px);
+}
+
+.work-item-card .card[draggable="true"]:active {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.work-item-card .button.is-ghost {
+    background: transparent;
+    border: none;
+    color: #7a7a7a;
+}
+
+.work-item-card .button.is-ghost:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #3273dc;
+}
+
+/* Workflow Canvas */
+.workflow-canvas {
+    background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px), linear-gradient(#f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-color: #ffffff;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.canvas-content {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Workflow Markers (START/END) */
+.workflow-marker {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+}
+
+.marker-content {
     background: white;
-    padding: 1.5rem;
-    border-bottom: 1px solid #dbdbdb;
+    border: 2px solid #dbdbdb;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
-.workflow-metadata .field.is-horizontal .field-label {
-    flex-basis: 100px;
+.start-marker .marker-content {
+    border-color: #48c774;
+    color: #48c774;
 }
 
-/* Loading state */
-.workflow-designer.is-loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
+.end-marker .marker-content {
+    border-color: #f14668;
+    color: #f14668;
+}
+
+/* Empty State */
+.empty-state-drop-zone {
+    width: 100%;
+    min-height: 300px;
+    border: 3px dashed #dbdbdb;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+    margin: 1rem 0;
+    transition: all 0.3s;
+    background: rgba(255, 255, 255, 0.5);
 }
 
-/* Execution visualization */
-.node-executing {
-    animation: pulse 2s infinite;
+.empty-state-drop-zone.is-active {
+    border-color: #3273dc;
+    background: rgba(50, 115, 220, 0.05);
+    border-width: 4px;
 }
 
-@keyframes pulse {
+.empty-state-content {
+    text-align: center;
+    padding: 2rem;
+}
 
-    0%,
-    100% {
+/* Workflow Steps */
+.workflow-steps-container {
+    width: 100%;
+}
+
+.workflow-step-wrapper {
+    width: 100%;
+    position: relative;
+    animation: slideIn 0.4s ease-out;
+    transition: all 0.3s ease;
+}
+
+/* Slide in animation for new steps */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
         opacity: 1;
-    }
-
-    50% {
-        opacity: 0.6;
+        transform: translateY(0);
     }
 }
 
-.node-completed {
-    border-left-color: #48c774 !important;
+/* Slide out animation for removed steps */
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }
 
-.node-failed {
-    border-left-color: #f14668 !important;
+/* Flow Connector - Contains arrow and drop zone */
+.flow-connector {
+    position: relative;
+    width: 100%;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Flow Arrow - Stretches vertically */
+.flow-arrow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.flow-arrow .arrow-line {
+    width: 100%;
+    flex: 1;
+    background: linear-gradient(to bottom,
+            transparent 0%,
+            #3273dc 20%,
+            #3273dc 80%,
+            transparent 100%);
+    opacity: 0.6;
+}
+
+.flow-arrow .arrow-head {
+    color: #3273dc;
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-top: -8px;
+    opacity: 0.8;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Drop Zones - Unified class for all drop zones */
+.drop-zone {
+    width: 50px;
+    height: 50px;
+    border: 4px dashed #3273dc;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: rgba(50, 115, 220, 0.2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(50, 115, 220, 0.3);
+    z-index: 10;
+}
+
+.drop-zone::before {
+    content: "+";
+    font-size: 1.5rem;
+    color: #3273dc;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+/* Horizontal drop zones (between steps) - container is full width, but box is 50x50 */
+.horizontal-drop-zone {
+    width: 100%;
+    padding: 1rem 0;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+/* Override for the actual drop zone inside horizontal container */
+.flow-connector .drop-zone {
+    width: 50px;
+    height: 50px;
+    margin-left: 100px;
+    /* Offset to the right */
+}
+
+/* Side drop zones positioning */
+.left-drop-zone {
+    margin-right: 0.75rem;
+}
+
+.right-drop-zone {
+    margin-left: 0.75rem;
+}
+
+/* Hover and active states */
+.drop-zone:hover {
+    border-color: #2366d1;
+    border-width: 5px;
+    border-style: solid;
+    background: rgba(50, 115, 220, 0.35);
+    box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
+    transform: scale(1.05);
+}
+
+.drop-zone:hover::before {
+    color: #2366d1;
+    font-size: 2rem;
+}
+
+.drop-zone.is-active {
+    border-color: #2366d1;
+    border-width: 5px;
+    border-style: solid;
+    background: rgba(50, 115, 220, 0.35);
+    box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
+}
+
+.drop-zone.is-active::before {
+    color: #2366d1;
+    font-size: 2rem;
+}
+
+/* Workflow Step */
+.workflow-step {
+    width: 100%;
+    margin: 0.5rem 0;
+}
+
+/* Step Item Container (for side drop zones) */
+.step-item-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Step Item */
+.step-item {
+    cursor: move;
+    transition: all 0.3s ease;
+    position: relative;
+    min-width: 140px;
+    flex: 1;
+    max-width: 280px;
+}
+
+.step-item .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.step-item:hover .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: #3273dc;
+}
+
+.step-item[draggable="true"]:active {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.step-item .delete {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+/* Parallel Items */
+.workflow-step.is-parallel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.parallel-items-container {
+    width: 100%;
+    border: 2px dashed #3273dc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: rgba(50, 115, 220, 0.02);
+}
+
+.parallel-label {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.parallel-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    justify-content: center;
+}
+
+.parallel-item {
+    min-width: 126px;
+    max-width: 100%;
+}
+
+/* Parallel add zone - for adding new items to parallel execution */
+.parallel-add-zone {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+.parallel-add-zone .drop-zone {
+    width: 50px;
+    height: 50px;
+}
+
+/* Drag State */
+.is-dragging {
+    opacity: 0.4;
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-    .properties-panel {
-        width: 300px;
-    }
-}
-
-@media (max-width: 768px) {
-    .properties-panel {
-        position: fixed;
+@media screen and (max-width: 768px) {
+    .work-items-panel {
         width: 100%;
-        height: 50vh;
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        border-left: none;
-        border-top: 1px solid #dbdbdb;
+        max-width: 250px;
     }
 
-    .workflow-designer .toolbar {
-        flex-direction: column;
-        gap: 0.5rem;
+    .parallel-items {
+        grid-template-columns: 1fr;
     }
 
-    .workflow-designer .node-palette {
-        flex-wrap: wrap;
+    .step-item {
+        min-width: 150px;
     }
 }
-/* Edge highlighting for drag operations - 3x normal size */
-.jtk-connector.edge-highlight path {
-    stroke: #ff3860 !important;
-    stroke-width: 6px !important;
-    filter: drop-shadow(0 0 8px rgba(255, 56, 96, 0.6));
+
+/* Card Header Toggle Animation */
+.card-header-icon .icon.is-rotated {
+    transform: rotate(180deg);
 }
 
-.jtk-connector.edge-highlight .jtk-overlay {
-    fill: #ff3860 !important;
+.card-header-icon .icon {
+    transition: transform 0.2s ease;
+}
+
+/* Card Header Title Spacing */
+.card-header-title {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.card-header-title span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

@@ -169,16 +169,35 @@ func (s *AgencySpecification) SetRACIMatrix(matrix *RACIMatrix, updatedBy string
 
 // SetWorkflows replaces all workflows
 func (s *AgencySpecification) SetWorkflows(workflows []Workflow, updatedBy string) {
-	// Generate keys for workflows that don't have them
+	// Build a map of existing workflows by key for lookup
+	existingByKey := make(map[string]*Workflow)
+	for i := range s.Workflows {
+		if s.Workflows[i].Key != "" {
+			existingByKey[s.Workflows[i].Key] = &s.Workflows[i]
+		}
+	}
+
+	// Process incoming workflows
 	for i := range workflows {
-		if workflows[i].Key == "" {
+		// If workflow has a key and it exists in our current set, preserve timestamps
+		if workflows[i].Key != "" {
+			if existing, found := existingByKey[workflows[i].Key]; found {
+				// This is an UPDATE - preserve creation timestamp
+				workflows[i].CreatedAt = existing.CreatedAt
+				workflows[i].UpdatedAt = time.Now()
+			} else {
+				// New workflow with explicit key - set timestamps
+				if workflows[i].CreatedAt.IsZero() {
+					workflows[i].CreatedAt = time.Now()
+				}
+				workflows[i].UpdatedAt = time.Now()
+			}
+		} else {
+			// No key provided - generate new key and timestamps
 			workflows[i].Key = uuid.New().String()
-		}
-		// Set timestamps
-		if workflows[i].CreatedAt.IsZero() {
 			workflows[i].CreatedAt = time.Now()
+			workflows[i].UpdatedAt = time.Now()
 		}
-		workflows[i].UpdatedAt = time.Now()
 
 		// Ensure agency ID is set
 		workflows[i].AgencyID = s.AgencyID

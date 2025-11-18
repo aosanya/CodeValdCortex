@@ -145,6 +145,81 @@ window.deleteWorkflow = function (workflowKey) {
     window.deleteEntity('workflows', workflowKey, displayName, loadWorkflows);
 }
 
+// Delete selected workflows (bulk delete)
+window.deleteSelectedWorkflows = async function () {
+    const selectedCheckboxes = document.querySelectorAll('#workflows-table-body input[type="checkbox"]:checked');
+    const selectedKeys = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+    if (selectedKeys.length === 0) {
+        window.showNotification('No workflows selected', 'warning');
+        return;
+    }
+
+    const confirmMessage = selectedKeys.length === 1
+        ? 'Are you sure you want to delete this workflow?'
+        : `Are you sure you want to delete ${selectedKeys.length} workflows?`;
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    const agencyId = window.getCurrentAgencyId();
+    if (!agencyId) {
+        window.showNotification('Unable to determine current agency', 'error');
+        return;
+    }
+
+    try {
+        // Get current specification
+        const spec = await window.specificationAPI.getSpecification();
+        const allWorkflows = spec.workflows || [];
+
+        // Filter out the selected workflows - use _key field instead of key
+        const remainingWorkflows = allWorkflows.filter(wf => !selectedKeys.includes(wf._key));
+
+
+        // Update specification with remaining workflows
+        const payload = {
+            workflows: remainingWorkflows,
+            updated_by: 'system'
+        };
+
+        const response = await fetch(`/api/v1/agencies/${agencyId}/specification/workflows`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to delete workflows');
+        }
+
+        const deletedCount = selectedKeys.length;
+        window.showNotification(
+            deletedCount === 1
+                ? 'Workflow deleted successfully'
+                : `${deletedCount} workflows deleted successfully`,
+            'success'
+        );
+
+        // Reload the list
+        await loadWorkflows();
+
+        // Clear selection and update UI
+        const selectAll = document.getElementById('select-all-workflows');
+        if (selectAll) {
+            selectAll.checked = false;
+        }
+        updateWorkflowSelectionUI();
+
+    } catch (error) {
+        window.showNotification('Failed to delete workflows: ' + error.message, 'danger');
+    }
+}
+
 // Duplicate workflow
 window.duplicateWorkflow = function (workflowId) {
     const agencyId = window.getCurrentAgencyId();
@@ -205,12 +280,18 @@ function updateWorkflowSelectionUI() {
     const checkboxes = document.querySelectorAll('#workflows-table-body input[type="checkbox"]:checked');
     const count = checkboxes.length;
     const countSpan = document.getElementById('workflow-selection-count');
+    const deleteBtn = document.getElementById('delete-workflows-btn');
     const refineBtn = document.getElementById('ai-refine-workflows-btn');
     const suggestBtn = document.getElementById('ai-suggest-workflows-btn');
 
     if (count > 0) {
         countSpan.textContent = `${count} selected`;
         countSpan.style.display = 'inline-flex';
+
+        // Show delete button when items are selected
+        if (deleteBtn) {
+            deleteBtn.style.display = 'inline-flex';
+        }
 
         // Enable refine/suggest buttons when exactly 1 workflow selected
         if (count === 1) {
@@ -226,6 +307,12 @@ function updateWorkflowSelectionUI() {
         }
     } else {
         countSpan.style.display = 'none';
+
+        // Hide delete button when no items selected
+        if (deleteBtn) {
+            deleteBtn.style.display = 'none';
+        }
+
         refineBtn?.classList.add('is-static');
         refineBtn?.setAttribute('disabled', 'disabled');
         suggestBtn?.classList.add('is-static');
@@ -319,4 +406,5 @@ window.deleteWorkflow = deleteWorkflow;
 window.duplicateWorkflow = duplicateWorkflow;
 window.filterWorkflows = filterWorkflows;
 window.toggleAllWorkflows = toggleAllWorkflows;
+window.updateWorkflowSelectionUI = updateWorkflowSelectionUI;
 window.processAIWorkflowOperation = processAIWorkflowOperation;

@@ -72,7 +72,6 @@ func (ms *MessageService) SendMessage(ctx context.Context, fromAgentID, toAgentI
 		return "", fmt.Errorf("failed to store message: %w", err)
 	}
 
-
 	return msg.ID, nil
 }
 
@@ -92,7 +91,6 @@ func (ms *MessageService) GetPendingMessages(ctx context.Context, agentID string
 		log.WithError(err).WithField("agent_id", agentID).Error("Failed to get pending messages")
 		return nil, err
 	}
-
 
 	return messages, nil
 }
@@ -137,7 +135,6 @@ func (ms *MessageService) GetConversationHistory(ctx context.Context, correlatio
 		log.WithError(err).WithField("correlation_id", correlationID).Error("Failed to get conversation history")
 		return nil, err
 	}
-
 
 	return messages, nil
 }

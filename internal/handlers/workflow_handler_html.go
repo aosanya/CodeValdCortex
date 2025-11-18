@@ -15,31 +15,12 @@ import (
 func (h *WorkflowHandler) GetWorkflowsHTML(c *gin.Context) {
 	agencyID := c.Param("id")
 
-	h.logger.WithField("agency_id", agencyID).Info("🔍 GetWorkflowsHTML: Fetching specification")
-
 	// Fetch workflows from specification (standardized with goals/work-items/roles)
 	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to get specification")
 		c.String(http.StatusInternalServerError, "Error loading workflows")
 		return
-	}
-
-	h.logger.WithFields(logrus.Fields{
-		"total_workflows": len(spec.Workflows),
-	}).Info("🔍 GetWorkflowsHTML: Retrieved specification")
-
-	// Log each workflow for debugging
-	for i, wf := range spec.Workflows {
-		h.logger.WithFields(logrus.Fields{
-			"index":       i,
-			"key":         wf.Key,
-			"name":        wf.Name,
-			"agency_id":   wf.AgencyID,
-			"description": truncateForLog(wf.Description, 50),
-			"nodes_count": len(wf.Nodes),
-			"edges_count": len(wf.Edges),
-		}).Info("  🔹 Workflow retrieved")
 	}
 
 	// Convert []Workflow to []*Workflow for compatibility with template

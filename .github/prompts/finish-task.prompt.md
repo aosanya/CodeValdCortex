@@ -31,12 +31,29 @@ Follow the **mandatory completion process** for MVP tasks:
 5. **Update dependent task references**
    - Update all tasks that depended on this one to show ~~MVP-XXX~~
 
-6. **ALWAYS remove all debug logs before merge**
-   - Search for and remove all debug `fmt.Printf()`, `fmt.Println()` statements added during development
-   - Search for MVP-XXX prefixed debug logs: `fmt.Printf("MVP-XXX-DEBUG:`, `fmt.Printf("MVP-XXX-TRACE:`, etc.
-   - Search for `console.log()` statements in JavaScript files
+6. **ALWAYS remove all debug logs before merge (MANDATORY)**
+   
+   **Backend Go Logs**:
+   - Search for and remove all debug `fmt.Printf()`, `fmt.Println()` statements
+   - Remove MVP-XXX prefixed debug logs: `fmt.Printf("MVP-XXX-DEBUG:`, `fmt.Printf("MVP-XXX-TRACE:`, etc.
+   - Remove emoji-prefixed debug logs: `🔍 DEBUG [`, `📊 BEFORE UPDATE`, `💾 Saved workflow`, `🔹 Workflow[`, etc.
+   - Remove detailed trace logs with object dumps and state inspection
+   - Search patterns to check:
+     - `grep -r "fmt.Printf" internal/ cmd/` (should only show essential production logs)
+     - `grep -r "🔍\|📊\|💾\|🔹\|✅\|⚠️" internal/ cmd/` (emoji indicators often mean debug logs)
+     - `grep -r "DEBUG \[" internal/ cmd/`
+   
+   **Frontend JavaScript Logs**:
+   - Search for and remove all `console.log()`, `console.warn()` statements in JavaScript files
+   - Search patterns to check:
+     - `grep -r "console.log" static/js/`
+     - `grep -r "console.warn" static/js/`
+   - Keep only `console.error()` for actual error handling
+   
+   **General Rules**:
    - Remove TODO comments that reference debug logging
    - Keep only essential production logging (errors, critical warnings)
+   - **Test the application after removing logs to ensure nothing breaks**
    - This is MANDATORY - no debug logs should remain in merged code
 
 7. **Prepare next task (if applicable)**

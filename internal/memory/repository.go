@@ -282,7 +282,6 @@ func (r *Repository) StoreWorking(ctx context.Context, memory *WorkingMemory) er
 		return fmt.Errorf("failed to store working memory: %w", err)
 	}
 
-
 	return nil
 }
 
@@ -357,7 +356,6 @@ func (r *Repository) UpdateWorking(ctx context.Context, memory *WorkingMemory) e
 		return fmt.Errorf("working memory not found for update: %s/%s", memory.AgentID, memory.Key)
 	}
 
-
 	return nil
 }
 
@@ -379,7 +377,6 @@ func (r *Repository) DeleteWorking(ctx context.Context, agentID, key string) err
 	if err != nil {
 		return fmt.Errorf("failed to delete working memory: %w", err)
 	}
-
 
 	return nil
 }
@@ -511,7 +508,6 @@ func (r *Repository) StoreLongterm(ctx context.Context, memory *LongtermMemory) 
 		return fmt.Errorf("failed to store longterm memory: %w", err)
 	}
 
-
 	return nil
 }
 
@@ -586,7 +582,6 @@ func (r *Repository) UpdateLongterm(ctx context.Context, memory *LongtermMemory)
 		return fmt.Errorf("longterm memory not found for update: %s/%s", memory.AgentID, memory.Key)
 	}
 
-
 	return nil
 }
 
@@ -608,7 +603,6 @@ func (r *Repository) DeleteLongterm(ctx context.Context, agentID, key string) er
 	if err != nil {
 		return fmt.Errorf("failed to delete longterm memory: %w", err)
 	}
-
 
 	return nil
 }
@@ -848,7 +842,6 @@ func (r *Repository) DeleteSnapshot(ctx context.Context, snapshotID string) erro
 	if err != nil {
 		return fmt.Errorf("failed to delete snapshot: %w", err)
 	}
-
 
 	return nil
 }

@@ -70,17 +70,6 @@ func (s *SpecificationService) UpdateWorkflows(ctx context.Context, agencyID str
 		"updated_by":     updatedBy,
 	}).Info("📋 UpdateWorkflows called")
 
-	for i, wf := range workflows {
-		s.logger.WithFields(logrus.Fields{
-			"index":       i,
-			"key":         wf.Key,
-			"name":        wf.Name,
-			"description": wf.Description,
-			"nodes_count": len(wf.Nodes),
-			"edges_count": len(wf.Edges),
-		}).Info("  🔹 Workflow to save")
-	}
-
 	result, err := s.repo.PatchSpecificationSection(ctx, agencyID, "workflows", workflows, updatedBy)
 	if err != nil {
 		s.logger.WithError(err).Error("❌ PatchSpecificationSection failed for workflows")

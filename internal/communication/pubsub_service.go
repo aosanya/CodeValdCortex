@@ -69,7 +69,6 @@ func (ps *PubSubService) Publish(ctx context.Context, publisherAgentID, publishe
 		return "", fmt.Errorf("failed to store publication: %w", err)
 	}
 
-
 	return pub.ID, nil
 }
 
@@ -110,7 +109,6 @@ func (ps *PubSubService) Subscribe(ctx context.Context, subscriberAgentID, subsc
 		return "", fmt.Errorf("failed to store subscription: %w", err)
 	}
 
-
 	return sub.ID, nil
 }
 
@@ -141,7 +139,6 @@ func (ps *PubSubService) GetActiveSubscriptions(ctx context.Context, agentID str
 		log.WithError(err).WithField("agent_id", agentID).Error("Failed to get active subscriptions")
 		return nil, err
 	}
-
 
 	return subscriptions, nil
 }
@@ -184,7 +181,6 @@ func (ps *PubSubService) GetMatchingPublications(ctx context.Context, agentID st
 			}(sub.ID)
 		}
 	}
-
 
 	return matched, nil
 }

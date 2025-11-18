@@ -68,19 +68,6 @@
                     const nodeBoxX = x - nodeWidth / 2;
                     const nodeBoxY = y - nodeHeight / 2;
 
-                    // Debug: Show bounds during toolbar drag
-                    console.log('[MVP-052][TOOLBAR-DRAG-BOUNDS]', {
-                        x: nodeBoxX,
-                        y: nodeBoxY,
-                        width: nodeWidth,
-                        height: nodeHeight,
-                        bounds: {
-                            left: nodeBoxX,
-                            top: nodeBoxY,
-                            right: nodeBoxX + nodeWidth,
-                            bottom: nodeBoxY + nodeHeight
-                        }
-                    });
 
                     const nearEdge = context.findNearbyEdgeWithBox(nodeBoxX, nodeBoxY, nodeWidth, nodeHeight);
 

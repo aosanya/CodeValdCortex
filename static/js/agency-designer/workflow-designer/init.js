@@ -58,11 +58,6 @@
 
                     state.edges = uniqueEdges;
 
-                    if (edgesBefore > state.edges.length) {
-                        console.log(`[MVP-052][DEDUP] Removed ${edgesBefore - state.edges.length} duplicate edges`);
-                        console.log(`[MVP-052][DEDUP] Edges before: ${edgesBefore}, after: ${state.edges.length}`);
-                    }
-
                     // Initialize with Start and End nodes if empty
                     if (state.nodes.length === 0) {
                         state.nodes = [
@@ -112,13 +107,6 @@
                 context.renderNodes();
                 this.setupKeyboardShortcuts();
 
-                // Debug: Log all edges to check for duplicates
-                console.log('[MVP-052][INIT] Total edges in state:', state.edges.length);
-                console.log('[MVP-052][INIT] Edge details:', state.edges.map(e => ({
-                    id: e.id,
-                    source: e.source,
-                    target: e.target
-                })));
             },
 
             /**
@@ -177,12 +165,6 @@
                         const left = x;
                         const right = x + nodeWidth;
 
-                        console.log('[MVP-052][DRAG]', {
-                            nodeId: params.el.id,
-                            left: left,
-                            right: right
-                        });
-
                         // Check all edges to see if node overlaps horizontally
                         const edgesWithinXBounds = [];
                         state.edges.forEach(edge => {
@@ -203,15 +185,6 @@
                                 const edgeLeft = Math.min(x1, x2);
                                 const edgeRight = Math.max(x1, x2);
                                 const nodeIsBetweenEdge = left <= edgeRight && right >= edgeLeft;
-
-                                console.log('[MVP-052][EDGE-CHECK]', {
-                                    edgeId: edge.id,
-                                    edgeLeft: edgeLeft,
-                                    edgeRight: edgeRight,
-                                    nodeLeft: left,
-                                    nodeRight: right,
-                                    overlap: nodeIsBetweenEdge
-                                });
 
                                 if (nodeIsBetweenEdge) {
                                     edgesWithinXBounds.push(edge);
@@ -236,8 +209,6 @@
                         });
 
                         if (edgesWithinXBounds.length > 0) {
-                            console.log('[MVP-052][EDGES-IN-X-BOUNDS]', edgesWithinXBounds.length, 'edges');
-
                             // Highlight edges that overlap with dragged node
                             edgesWithinXBounds.forEach(edge => {
                                 const connection = state.jsPlumbInstance.getConnections({
@@ -246,7 +217,6 @@
                                 })[0];
 
                                 if (connection) {
-                                    console.log('[MVP-052][HIGHLIGHT-EDGE]', edge.id, 'RED 6px');
                                     connection.setPaintStyle({
                                         stroke: '#ff3860',
                                         strokeWidth: 6

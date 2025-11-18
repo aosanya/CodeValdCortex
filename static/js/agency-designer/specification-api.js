@@ -404,11 +404,16 @@ window.SpecificationAPI = class SpecificationAPI {
     async deleteWorkflow(workflowKey, updatedBy = 'user') {
         const spec = await this.getSpecification();
         const workflows = spec.workflows || [];
+
         const filteredWorkflows = workflows.filter(w => {
             const id = w.key || w._key || w.id;
-            return id !== workflowKey;
+            const keep = id !== workflowKey;
+            return keep;
         });
-        return await this.updateWorkflows(filteredWorkflows, updatedBy);
+
+        const result = await this.updateWorkflows(filteredWorkflows, updatedBy);
+
+        return result;
     }
 }
 
