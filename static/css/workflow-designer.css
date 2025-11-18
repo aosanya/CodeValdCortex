@@ -387,6 +387,19 @@
     max-width: 100%;
 }
 
+/* Parallel add zone - for adding new items to parallel execution */
+.parallel-add-zone {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+}
+
+.parallel-add-zone .drop-zone {
+    width: 50px;
+    height: 50px;
+}
+
 /* Drag State */
 .is-dragging {
     opacity: 0.4;

@@ -284,6 +284,11 @@ window.workflowDesigner = function () {
                     // Add as parallel item
                     this.addParallelItem(position, this.draggedItem, dropType);
                     break;
+
+                case 'parallel':
+                    // Add to existing parallel execution
+                    this.addParallelItem(position, this.draggedItem, 'add');
+                    break;
             }
 
             // Clear drag state
@@ -335,10 +340,11 @@ window.workflowDesigner = function () {
                 showDescription: false
             };
 
-            // Add to items array (left = prepend, right = append)
+            // Add to items array (left = prepend, right/add = append)
             if (side === 'left') {
                 step.items.unshift(newItem);
             } else {
+                // 'right' or 'add' both append to the end
                 step.items.push(newItem);
             }
         },

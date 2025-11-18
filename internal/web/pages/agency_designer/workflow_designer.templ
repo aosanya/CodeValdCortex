@@ -293,6 +293,16 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																	</div>
 																</div>
 															</template>
+															<!-- Add parallel item drop zone -->
+															<div
+																class="parallel-add-zone"
+																@dragover.prevent="handleDragOver($event, { type: 'parallel', stepIndex })"
+																@dragleave="handleDragLeave($event)"
+																@drop="handleDrop($event, stepIndex, 'parallel')"
+																:class="{ 'is-active': dragOverTarget?.type === 'parallel' && dragOverTarget?.stepIndex === stepIndex }"
+															>
+																<div class="drop-zone"></div>
+															</div>
 														</div>
 													</div>
 													<!-- Right Side Drop Zone for Parallel -->
