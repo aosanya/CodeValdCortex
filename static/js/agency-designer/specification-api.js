@@ -409,7 +409,7 @@ window.SpecificationAPI = class SpecificationAPI {
 
         const spec = await this.getSpecification();
         const workflows = spec.workflows || [];
-        
+
         console.log('📋 Current workflows BEFORE delete:', {
             totalCount: workflows.length,
             workflows: workflows.map(w => ({
@@ -438,7 +438,7 @@ window.SpecificationAPI = class SpecificationAPI {
         });
 
         const result = await this.updateWorkflows(filteredWorkflows, updatedBy);
-        
+
         console.log('✅ deleteWorkflow AFTER update:', {
             returnedWorkflowCount: result.workflows?.length || 0
         });

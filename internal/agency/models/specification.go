@@ -206,4 +206,3 @@ func (s *AgencySpecification) SetWorkflows(workflows []Workflow, updatedBy strin
 	s.Workflows = workflows
 	s.IncrementVersion(updatedBy)
 }
-

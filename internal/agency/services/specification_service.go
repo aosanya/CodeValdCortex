@@ -76,7 +76,7 @@ func (s *SpecificationService) UpdateWorkflows(ctx context.Context, agencyID str
 		s.logger.WithFields(logrus.Fields{
 			"current_workflow_count": len(currentSpec.Workflows),
 		}).Info("📊 BEFORE UPDATE - Current state")
-		
+
 		for i, wf := range currentSpec.Workflows {
 			s.logger.WithFields(logrus.Fields{
 				"index": i,

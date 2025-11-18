@@ -395,10 +395,10 @@ window.workflowDesigner = function () {
                 // Find and update the current workflow in the allWorkflows array
                 const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
 
-                console.log('🔍 Workflow search result:', { 
-                    workflowIndex, 
+                console.log('🔍 Workflow search result:', {
+                    workflowIndex,
                     found: workflowIndex >= 0,
-                    searchKey: this.workflowKey 
+                    searchKey: this.workflowKey
                 });
 
                 if (workflowIndex >= 0) {
@@ -426,10 +426,10 @@ window.workflowDesigner = function () {
                     });
                 }
 
-                console.log('📤 Sending workflows to server:', this.allWorkflows.map(wf => ({ 
-                    key: wf.key, 
+                console.log('📤 Sending workflows to server:', this.allWorkflows.map(wf => ({
+                    key: wf.key,
                     name: wf.name,
-                    hasKey: !!wf.key 
+                    hasKey: !!wf.key
                 })));
 
                 // Save all workflows via specification endpoint
@@ -451,9 +451,9 @@ window.workflowDesigner = function () {
 
                 const updatedSpec = await response.json();
                 console.log('✅ Workflow saved successfully to specification');
-                console.log('📥 Server returned workflows:', updatedSpec.workflows?.map(wf => ({ 
-                    key: wf.key, 
-                    name: wf.name 
+                console.log('📥 Server returned workflows:', updatedSpec.workflows?.map(wf => ({
+                    key: wf.key,
+                    name: wf.name
                 })));
 
                 // Update allWorkflows with the response to stay in sync
