@@ -2,327 +2,345 @@
 
 /* Alpine.js cloak */
 [x-cloak] {
-display: none !important;
+    display: none !important;
 }
 
 /* Main Container Layout */
 .designer-container {
-display: flex;
-flex-direction: column;
-height: 100vh;
-overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* Toolbar */
 .designer-toolbar {
-background: #f5f5f5;
-border-bottom: 1px solid #dbdbdb;
-padding: 0.75rem 1rem;
-flex-shrink: 0;
+    background: #f5f5f5;
+    border-bottom: 1px solid #dbdbdb;
+    padding: 0.75rem 1rem;
+    flex-shrink: 0;
 }
 
 /* Content Area */
 .designer-content {
-flex: 1;
-overflow: hidden;
+    flex: 1;
+    overflow: hidden;
 }
 
 /* Work Items Panel */
 .work-items-panel {
-background: #fafafa;
-border-right: 1px solid #dbdbdb;
-overflow-y: auto;
-display: flex;
-flex-direction: column;
+    background: #fafafa;
+    border-right: 1px solid #dbdbdb;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .work-items-list {
-	overflow-y: auto;
-	flex: 1;
-	padding: 0.5rem;
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem;
 }
 
 .work-item-card {
-	margin-bottom: 0.5rem;
-	cursor: move;
-	transition: all 0.2s;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    transition: all 0.2s;
 }
 
 .work-item-card .card {
-	border-left: 3px solid transparent;
-	transition: all 0.2s;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
 }
 
 .work-item-card .card:hover {
-	border-left-color: #3273dc;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	transform: translateX(2px);
+    border-left-color: #3273dc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(2px);
 }
 
 .work-item-card .card[draggable="true"]:active {
-	opacity: 0.5;
-	cursor: grabbing;
+    opacity: 0.5;
+    cursor: grabbing;
 }
 
 .work-item-card .button.is-ghost {
-	background: transparent;
-	border: none;
-	color: #7a7a7a;
+    background: transparent;
+    border: none;
+    color: #7a7a7a;
 }
 
 .work-item-card .button.is-ghost:hover {
-	background: rgba(0, 0, 0, 0.05);
-	color: #3273dc;
-}/* Workflow Canvas */
+    background: rgba(0, 0, 0, 0.05);
+    color: #3273dc;
+}
+
+/* Workflow Canvas */
 .workflow-canvas {
-background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px), linear-gradient(#f0f0f0 1px, transparent 1px);
-background-size: 20px 20px;
-background-color: #ffffff;
-overflow-y: auto;
-display: flex;
-justify-content: center;
-padding: 2rem 1rem;
+    background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px), linear-gradient(#f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-color: #ffffff;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
 }
 
 .canvas-content {
-width: 100%;
-max-width: 800px;
-display: flex;
-flex-direction: column;
-align-items: center;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Workflow Markers (START/END) */
 .workflow-marker {
-display: flex;
-justify-content: center;
-padding: 1rem 0;
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
 }
 
 .marker-content {
-background: white;
-border: 2px solid #dbdbdb;
-border-radius: 8px;
-padding: 1rem 2rem;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-display: flex;
-align-items: center;
-gap: 0.75rem;
+    background: white;
+    border: 2px solid #dbdbdb;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .start-marker .marker-content {
-border-color: #48c774;
-color: #48c774;
+    border-color: #48c774;
+    color: #48c774;
 }
 
 .end-marker .marker-content {
-border-color: #f14668;
-color: #f14668;
+    border-color: #f14668;
+    color: #f14668;
 }
 
 /* Empty State */
 .empty-state-drop-zone {
-width: 100%;
-min-height: 300px;
-border: 3px dashed #dbdbdb;
-border-radius: 12px;
-display: flex;
-align-items: center;
-justify-content: center;
-margin: 1rem 0;
-transition: all 0.3s;
-background: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    min-height: 300px;
+    border: 3px dashed #dbdbdb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+    transition: all 0.3s;
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .empty-state-drop-zone.is-active {
-border-color: #3273dc;
-background: rgba(50, 115, 220, 0.05);
-border-width: 4px;
+    border-color: #3273dc;
+    background: rgba(50, 115, 220, 0.05);
+    border-width: 4px;
 }
 
 .empty-state-content {
-text-align: center;
-padding: 2rem;
+    text-align: center;
+    padding: 2rem;
 }
 
 /* Workflow Steps */
 .workflow-steps-container {
-width: 100%;
+    width: 100%;
 }
 
 .workflow-step-wrapper {
-width: 100%;
-position: relative;
+    width: 100%;
+    position: relative;
 }
 
 /* Drop Zones */
 .drop-zone {
-width: 100%;
-min-height: 20px;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: all 0.2s;
+    width: 100%;
+    min-height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
 .horizontal-drop-zone {
-padding: 0.25rem 0;
+    padding: 0.25rem 0;
 }
 
 .drop-zone-indicator {
-width: 100%;
-height: 2px;
-background: transparent;
-border-radius: 2px;
-transition: all 0.2s;
+    width: 100%;
+    height: 2px;
+    background: transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
 }
 
 .drop-zone.is-active .drop-zone-indicator {
-height: 4px;
-background: #3273dc;
-box-shadow: 0 0 8px rgba(50, 115, 220, 0.5);
+    height: 4px;
+    background: #3273dc;
+    box-shadow: 0 0 8px rgba(50, 115, 220, 0.5);
 }
 
 /* Workflow Step */
 .workflow-step {
-width: 100%;
-margin: 0.5rem 0;
+    width: 100%;
+    margin: 0.5rem 0;
 }
 
 /* Step Item Container (for side drop zones) */
 .step-item-container {
-position: relative;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 0.5rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 /* Side Drop Zones */
 .side-drop-zone {
-width: 40px;
-height: 100%;
-min-height: 80px;
-border: 2px dashed transparent;
-border-radius: 8px;
-transition: all 0.2s;
-background: transparent;
+    width: 40px;
+    height: 100%;
+    min-height: 80px;
+    border: 2px dashed transparent;
+    border-radius: 8px;
+    transition: all 0.2s;
+    background: transparent;
 }
 
 .side-drop-zone:hover,
 .side-drop-zone.is-active {
-border-color: #3273dc;
-background: rgba(50, 115, 220, 0.05);
+    border-color: #3273dc;
+    background: rgba(50, 115, 220, 0.05);
 }
 
 .left-drop-zone {
-margin-right: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 .right-drop-zone {
-margin-left: 0.5rem;
+    margin-left: 0.5rem;
 }
 
 /* Step Item */
 .step-item {
-background: white;
-border: 2px solid #dbdbdb;
-border-radius: 8px;
-padding: 1rem;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-cursor: move;
-transition: all 0.2s;
-position: relative;
-min-width: 200px;
-flex: 1;
-max-width: 400px;
+    cursor: move;
+    transition: all 0.2s;
+    position: relative;
+    min-width: 200px;
+    flex: 1;
+    max-width: 400px;
 }
 
-.step-item:hover {
-border-color: #3273dc;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.step-item .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.step-item:hover .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    border-color: #3273dc;
 }
 
 .step-item[draggable="true"]:active {
-opacity: 0.5;
-cursor: grabbing;
-}
-
-.step-item-header {
-display: flex;
-align-items: center;
-gap: 0.5rem;
-margin-bottom: 0.5rem;
+    opacity: 0.5;
+    cursor: grabbing;
 }
 
 .step-item .delete {
-position: absolute;
-top: 0.5rem;
-right: 0.5rem;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
 }
 
 /* Parallel Items */
 .workflow-step.is-parallel {
-display: flex;
-flex-direction: column;
-align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .parallel-items-container {
-width: 100%;
-border: 2px dashed #3273dc;
-border-radius: 12px;
-padding: 1.5rem;
-background: rgba(50, 115, 220, 0.02);
+    width: 100%;
+    border: 2px dashed #3273dc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    background: rgba(50, 115, 220, 0.02);
 }
 
 .parallel-label {
-text-align: center;
-margin-bottom: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
 }
 
 .parallel-items {
-	display: flex;
-	gap: 1rem;
-	justify-content: center;
-	flex-wrap: wrap;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .parallel-item {
-flex: 1;
-min-width: 180px;
-max-width: 300px;
+    flex: 1;
+    min-width: 180px;
+    max-width: 300px;
 }
 
 /* Drag State */
 .is-dragging {
-opacity: 0.4;
+    opacity: 0.4;
 }
 
 /* Responsive */
 @media screen and (max-width: 768px) {
-.work-items-panel {
-width: 100%;
-max-width: 250px;
-}
-.parallel-items {
-flex-direction: column;
-}
-.step-item {
-min-width: 150px;
-}
+    .work-items-panel {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .parallel-items {
+        flex-direction: column;
+    }
+
+    .step-item {
+        min-width: 150px;
+    }
 }
 
 /* Flow Arrows (Visual Enhancement) */
 .workflow-step-wrapper::after {
-content: "";
-display: block;
-width: 2px;
-height: 20px;
-background: #dbdbdb;
-margin: 0 auto;
+    content: "";
+    display: block;
+    width: 2px;
+    height: 20px;
+    background: #dbdbdb;
+    margin: 0 auto;
 }
 
 .workflow-step-wrapper:last-child::after {
-display: none;
+    display: none;
+}
+
+/* Card Header Toggle Animation */
+.card-header-icon .icon.is-rotated {
+    transform: rotate(180deg);
+}
+
+.card-header-icon .icon {
+    transition: transform 0.2s ease;
+}
+
+/* Card Header Title Spacing */
+.card-header-title {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.card-header-title span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

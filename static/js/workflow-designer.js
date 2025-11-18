@@ -121,6 +121,29 @@ window.workflowDesigner = function () {
         },
 
         /**
+         * Toggle work item description visibility
+         */
+        toggleItemDescription(itemKey) {
+            const item = this.filteredWorkItems.find(i => i._key === itemKey);
+            if (item) {
+                item.showDescription = !item.showDescription;
+            }
+        },
+
+        /**
+         * Toggle step item description visibility
+         */
+        toggleStepItemDescription(stepId, workItemId) {
+            const step = this.workflowSteps.find(s => s.id === stepId);
+            if (step) {
+                const item = step.items.find(i => i.work_item_id === workItemId);
+                if (item) {
+                    item.showDescription = !item.showDescription;
+                }
+            }
+        },
+
+        /**
          * Filter work items based on search query
          */
         filterWorkItems() {
@@ -131,9 +154,9 @@ window.workflowDesigner = function () {
             }
 
             this.filteredWorkItems = this.availableWorkItems.filter(item => {
-                const name = (item.name || '').toLowerCase();
+                const title = (item.title || '').toLowerCase();
                 const description = (item.description || '').toLowerCase();
-                return name.includes(query) || description.includes(query);
+                return title.includes(query) || description.includes(query);
             });
         },
 
@@ -283,8 +306,10 @@ window.workflowDesigner = function () {
                 order: position,
                 items: items.map(item => ({
                     id: this.generateID(),
-                    work_item_id: item.key,
-                    work_item_name: item.name
+                    work_item_id: item.key || item._key,
+                    work_item_title: item.title,
+                    description: item.description || '',
+                    showDescription: false
                 }))
             };
 
@@ -304,8 +329,10 @@ window.workflowDesigner = function () {
 
             const newItem = {
                 id: this.generateID(),
-                work_item_id: item.key,
-                work_item_name: item.name
+                work_item_id: item.key || item._key,
+                work_item_title: item.title,
+                description: item.description || '',
+                showDescription: false
             };
 
             // Add to items array (left = prepend, right = append)

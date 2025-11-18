@@ -199,17 +199,32 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															@dragstart="handleStepDragStart($event, stepIndex, 0)"
 															@dragend="handleDragEnd($event)"
 														>
-															<div class="step-item-header">
-																<span class="icon is-small">
-																	<i class="fas fa-grip-vertical"></i>
-																</span>
-																<span class="has-text-weight-semibold" x-text="step.items[0].work_item_name"></span>
+															<div class="card">
+																<header class="card-header" style="position: relative;">
+																	<button
+																		class="card-header-icon"
+																		@click.stop="toggleStepItemDescription(step.id, step.items[0].work_item_id)"
+																		:title="step.items[0].showDescription ? 'Hide description' : 'Show description'"
+																		x-show="step.items[0].description"
+																	>
+																		<span class="icon is-small" :class="{ 'is-rotated': step.items[0].showDescription }">
+																			<i class="fas fa-chevron-down"></i>
+																		</span>
+																	</button>
+																	<div class="card-header-title py-3" style="padding-right: 3rem;">
+																		<span class="is-size-6" x-text="step.items[0].work_item_title"></span>
+																	</div>
+																	<button
+																		class="delete is-small"
+																		@click.stop="removeItemFromStep(stepIndex, 0)"
+																		title="Remove from workflow"
+																		style="position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;"
+																	></button>
+																</header>
+																<div class="card-content py-2 px-3" x-show="step.items[0].showDescription" x-cloak>
+																	<p class="is-size-7 has-text-grey" x-text="step.items[0].description"></p>
+																</div>
 															</div>
-															<button
-																class="delete is-small"
-																@click.stop="removeItemFromStep(stepIndex, 0)"
-																title="Remove from workflow"
-															></button>
 														</div>
 														<div
 															class="side-drop-zone right-drop-zone"
@@ -239,17 +254,32 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																	@dragstart="handleStepDragStart($event, stepIndex, itemIndex)"
 																	@dragend="handleDragEnd($event)"
 																>
-																	<div class="step-item-header">
-																		<span class="icon is-small">
-																			<i class="fas fa-grip-vertical"></i>
-																		</span>
-																		<span class="has-text-weight-semibold" x-text="item.work_item_name"></span>
+																	<div class="card">
+																		<header class="card-header" style="position: relative;">
+																			<button
+																				class="card-header-icon"
+																				@click.stop="toggleStepItemDescription(step.id, item.work_item_id)"
+																				:title="item.showDescription ? 'Hide description' : 'Show description'"
+																				x-show="item.description"
+																			>
+																				<span class="icon is-small" :class="{ 'is-rotated': item.showDescription }">
+																					<i class="fas fa-chevron-down"></i>
+																				</span>
+																			</button>
+																			<div class="card-header-title py-3" style="padding-right: 3rem;">
+																				<span class="is-size-6" x-text="item.work_item_title"></span>
+																			</div>
+																			<button
+																				class="delete is-small"
+																				@click.stop="removeItemFromStep(stepIndex, itemIndex)"
+																				title="Remove from workflow"
+																				style="position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;"
+																			></button>
+																		</header>
+																		<div class="card-content py-2 px-3" x-show="item.showDescription" x-cloak>
+																			<p class="is-size-7 has-text-grey" x-text="item.description"></p>
+																		</div>
 																	</div>
-																	<button
-																		class="delete is-small"
-																		@click.stop="removeItemFromStep(stepIndex, itemIndex)"
-																		title="Remove from workflow"
-																	></button>
 																</div>
 															</template>
 														</div>
