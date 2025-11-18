@@ -190,8 +190,6 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															class="side-drop-zone left-drop-zone"
 															@drop.stop="handleDrop($event, stepIndex, 'left')"
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }"
-															x-show="isDragging"
-															x-cloak
 														></div>
 														<div
 															class="step-item"
@@ -230,8 +228,6 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															class="side-drop-zone right-drop-zone"
 															@drop.stop="handleDrop($event, stepIndex, 'right')"
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }"
-															x-show="isDragging"
-															x-cloak
 														></div>
 													</div>
 												</template>
