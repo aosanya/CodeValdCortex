@@ -85,17 +85,13 @@ func (s *Service) DuplicateWorkflow(ctx context.Context, id string) (*models.Wor
 		Name:        original.Name + " (Copy)",
 		Version:     "1.0.0",
 		Description: original.Description,
-		Nodes:       make([]models.WorkflowNode, len(original.Nodes)),
-		Edges:       make([]models.WorkflowEdge, len(original.Edges)),
+		Steps:       make(models.Steps, len(original.Steps)),
 		AgencyID:    original.AgencyID,
 		CreatedBy:   original.CreatedBy,
 	}
 
-	// Deep copy nodes
-	copy(duplicate.Nodes, original.Nodes)
-
-	// Deep copy edges
-	copy(duplicate.Edges, original.Edges)
+	// Deep copy steps
+	copy(duplicate.Steps, original.Steps)
 
 	// Create the duplicate
 	if err := s.CreateWorkflow(ctx, duplicate); err != nil {
@@ -162,149 +158,80 @@ func (s *Service) ValidateWorkflowStructure(workflow *models.Workflow) *models.W
 		})
 	}
 
-	// Validate nodes
-	if len(workflow.Nodes) > 0 {
-		s.validateNodes(workflow, result)
-	}
-
-	// Validate edges
-	if len(workflow.Edges) > 0 {
-		s.validateEdges(workflow, result)
+	// Validate steps
+	if len(workflow.Steps) > 0 {
+		s.validateSteps(workflow, result)
 	}
 
 	return result
 }
 
-// validateNodes validates all nodes in the workflow
-func (s *Service) validateNodes(workflow *models.Workflow, result *models.WorkflowValidationResult) {
-	nodeIDs := make(map[string]bool)
-	hasStart := false
-	hasEnd := false
+// validateSteps validates all steps in the workflow
+func (s *Service) validateSteps(workflow *models.Workflow, result *models.WorkflowValidationResult) {
+	stepIDs := make(map[string]bool)
+	orders := make(map[int]bool)
 
-	for _, node := range workflow.Nodes {
-		// Check for duplicate node IDs
-		if nodeIDs[node.ID] {
+	for _, step := range workflow.Steps {
+		// Check for duplicate step IDs
+		if stepIDs[step.ID] {
 			result.Valid = false
 			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "nodes",
-				Message: fmt.Sprintf("Duplicate node ID: %s", node.ID),
-				NodeID:  node.ID,
+				Field:   "steps",
+				Message: fmt.Sprintf("Duplicate step ID: %s", step.ID),
+				StepID:  step.ID,
 			})
 			continue
 		}
-		nodeIDs[node.ID] = true
+		stepIDs[step.ID] = true
 
-		// Validate node type - only work_item nodes are supported
-		if node.Type != models.NodeTypeWorkItem {
+		// Check for duplicate order values
+		if orders[step.Order] {
 			result.Valid = false
 			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "nodes",
-				Message: fmt.Sprintf("Invalid node type: %s. Only 'work_item' nodes are supported", node.Type),
-				NodeID:  node.ID,
+				Field:   "steps",
+				Message: fmt.Sprintf("Duplicate order value: %d", step.Order),
+				StepID:  step.ID,
 			})
 		}
+		orders[step.Order] = true
 
-		// Validate node-specific data
-		if node.Type == models.NodeTypeWorkItem {
-			if node.Data.WorkItemKey == "" {
+		// Validate step has at least one item
+		if len(step.Items) == 0 {
+			result.Valid = false
+			result.Errors = append(result.Errors, models.ValidationError{
+				Field:   "steps",
+				Message: "Step must have at least one work item",
+				StepID:  step.ID,
+			})
+			continue
+		}
+
+		// Validate items within step
+		itemIDs := make(map[string]bool)
+		for _, item := range step.Items {
+			// Check for duplicate item IDs within step
+			if itemIDs[item.ID] {
 				result.Valid = false
 				result.Errors = append(result.Errors, models.ValidationError{
-					Field:   "nodes",
-					Message: "Work item node must have work_item_key",
-					NodeID:  node.ID,
+					Field:   "steps",
+					Message: fmt.Sprintf("Duplicate item ID in step: %s", item.ID),
+					StepID:  step.ID,
+					ItemID:  item.ID,
+				})
+				continue
+			}
+			itemIDs[item.ID] = true
+
+			// Validate work item reference
+			if strings.TrimSpace(item.WorkItemID) == "" {
+				result.Valid = false
+				result.Errors = append(result.Errors, models.ValidationError{
+					Field:   "steps",
+					Message: "Work item ID is required",
+					StepID:  step.ID,
+					ItemID:  item.ID,
 				})
 			}
-		}
-	}
-
-	// Check for required start and end nodes if there are multiple nodes
-	if len(workflow.Nodes) > 1 {
-		if !hasStart {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "nodes",
-				Message: "models.Workflow must have a start node",
-			})
-		}
-		if !hasEnd {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "nodes",
-				Message: "models.Workflow must have an end node",
-			})
-		}
-	}
-}
-
-// validateEdges validates all edges in the workflow
-func (s *Service) validateEdges(workflow *models.Workflow, result *models.WorkflowValidationResult) {
-	// Build node ID map for validation
-	nodeIDs := make(map[string]bool)
-	for _, node := range workflow.Nodes {
-		nodeIDs[node.ID] = true
-	}
-
-	edgeIDs := make(map[string]bool)
-
-	for _, edge := range workflow.Edges {
-		// Check for duplicate edge IDs
-		if edgeIDs[edge.ID] {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "edges",
-				Message: fmt.Sprintf("Duplicate edge ID: %s", edge.ID),
-				EdgeID:  edge.ID,
-			})
-			continue
-		}
-		edgeIDs[edge.ID] = true
-
-		// Validate source node exists
-		if !nodeIDs[edge.Source] {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "edges",
-				Message: fmt.Sprintf("models.WorkflowEdge source node not found: %s", edge.Source),
-				EdgeID:  edge.ID,
-			})
-		}
-
-		// Validate target node exists
-		if !nodeIDs[edge.Target] {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "edges",
-				Message: fmt.Sprintf("models.WorkflowEdge target node not found: %s", edge.Target),
-				EdgeID:  edge.ID,
-			})
-		}
-	}
-
-	// Validate edges
-	if len(workflow.Edges) > 0 {
-		s.checkOrphanedNodes(workflow, result)
-	}
-}
-
-// checkOrphanedNodes checks for nodes that are not connected
-func (s *Service) checkOrphanedNodes(workflow *models.Workflow, result *models.WorkflowValidationResult) {
-	hasIncoming := make(map[string]bool)
-	hasOutgoing := make(map[string]bool)
-
-	for _, edge := range workflow.Edges {
-		hasOutgoing[edge.Source] = true
-		hasIncoming[edge.Target] = true
-	}
-
-	for _, node := range workflow.Nodes {
-		// All work item nodes should have connections
-		if !hasIncoming[node.ID] && !hasOutgoing[node.ID] {
-			result.Valid = false
-			result.Errors = append(result.Errors, models.ValidationError{
-				Field:   "nodes",
-				Message: fmt.Sprintf("Orphaned node (no connections): %s", node.ID),
-				NodeID:  node.ID,
-			})
 		}
 	}
 }

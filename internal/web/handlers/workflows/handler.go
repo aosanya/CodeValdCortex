@@ -2,7 +2,6 @@ package workflows
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -221,92 +220,18 @@ func (h *Handler) validateWorkflowStructure(workflow *models.Workflow) models.Wo
 		Warnings: []string{},
 	}
 
-	// Check if workflow has nodes
-	if len(workflow.Nodes) == 0 {
+	// Check if workflow has steps
+	if len(workflow.Steps) == 0 {
 		result.Valid = false
 		result.Errors = append(result.Errors, models.ValidationError{
-			Field:   "nodes",
-			Message: "Workflow must have at least one node",
+			Field:   "steps",
+			Message: "Workflow must have at least one step",
 		})
 		return result
 	}
 
-	// Check for cycles
-	if h.hasCycle(workflow) {
-		result.Valid = false
-		result.Errors = append(result.Errors, models.ValidationError{
-			Field:   "edges",
-			Message: "Workflow contains circular dependencies",
-		})
-	}
-
-	// Check for orphaned nodes (except root nodes)
-	orphanedNodes := h.findOrphanedNodes(workflow)
-	if len(orphanedNodes) > 0 {
-		result.Warnings = append(result.Warnings, fmt.Sprintf("Found %d orphaned nodes that have no incoming or outgoing edges", len(orphanedNodes)))
-	}
+	// Note: Detailed validation is handled by workflow.Service.ValidateWorkflowStructure()
+	// This is a lightweight check for the handler layer
 
 	return result
-}
-
-func (h *Handler) hasCycle(workflow *models.Workflow) bool {
-	// Build adjacency list
-	graph := make(map[string][]string)
-	for _, edge := range workflow.Edges {
-		graph[edge.Source] = append(graph[edge.Source], edge.Target)
-	}
-
-	// Track visited nodes
-	visited := make(map[string]bool)
-	recStack := make(map[string]bool)
-
-	// DFS for cycle detection
-	var dfs func(string) bool
-	dfs = func(node string) bool {
-		visited[node] = true
-		recStack[node] = true
-
-		for _, neighbor := range graph[node] {
-			if !visited[neighbor] {
-				if dfs(neighbor) {
-					return true
-				}
-			} else if recStack[neighbor] {
-				return true
-			}
-		}
-
-		recStack[node] = false
-		return false
-	}
-
-	// Check all nodes
-	for _, node := range workflow.Nodes {
-		if !visited[node.ID] {
-			if dfs(node.ID) {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func (h *Handler) findOrphanedNodes(workflow *models.Workflow) []string {
-	// Build set of nodes with edges
-	hasEdge := make(map[string]bool)
-	for _, edge := range workflow.Edges {
-		hasEdge[edge.Source] = true
-		hasEdge[edge.Target] = true
-	}
-
-	// Find orphaned nodes
-	orphaned := []string{}
-	for _, node := range workflow.Nodes {
-		if !hasEdge[node.ID] && len(workflow.Edges) > 0 {
-			orphaned = append(orphaned, node.ID)
-		}
-	}
-
-	return orphaned
 }

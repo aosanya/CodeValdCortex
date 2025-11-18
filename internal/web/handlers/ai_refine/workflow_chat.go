@@ -276,11 +276,8 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 				updatedWorkflow := *workflow
 				updatedWorkflow.Name = refined.RefinedName
 				updatedWorkflow.Description = refined.RefinedDescription
-				if len(refined.RefinedNodes) > 0 {
-					updatedWorkflow.Nodes = refined.RefinedNodes
-				}
-				if len(refined.RefinedEdges) > 0 {
-					updatedWorkflow.Edges = refined.RefinedEdges
+				if len(refined.RefinedSteps) > 0 {
+					updatedWorkflow.Steps = refined.RefinedSteps
 				}
 
 				updatedWorkflows = append(updatedWorkflows, updatedWorkflow)
@@ -311,8 +308,7 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 				Name:        gwf.Name,
 				Description: gwf.Description,
 				Version:     gwf.Version,
-				Nodes:       gwf.Nodes,
-				Edges:       gwf.Edges,
+				Steps:       gwf.Steps,
 			}
 
 			updatedWorkflows = append(updatedWorkflows, newWorkflow)
@@ -358,8 +354,7 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 					Name:        cwf.Name,
 					Description: cwf.Description,
 					Version:     cwf.Version,
-					Nodes:       cwf.Nodes,
-					Edges:       cwf.Edges,
+					Steps:       cwf.Steps,
 				}
 
 				updatedWorkflows = append(updatedWorkflows, newWorkflow)

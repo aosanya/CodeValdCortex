@@ -493,7 +493,7 @@ func (b *WorkflowsBuilder) buildDynamicWorkflowsPrompt(req *builder.RefineWorkfl
 		builder.WriteString("### TARGET WORKFLOWS FOR OPERATION\n")
 		for _, workflow := range req.TargetWorkflows {
 			builder.WriteString(fmt.Sprintf("- **%s** (v%s): %s\n", workflow.Name, workflow.Version, workflow.Description))
-			builder.WriteString(fmt.Sprintf("  Nodes: %d, Edges: %d\n", len(workflow.Nodes), len(workflow.Edges)))
+			builder.WriteString(fmt.Sprintf("  Steps: %d\n", len(workflow.Steps)))
 		}
 		builder.WriteString("\n")
 	}

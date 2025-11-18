@@ -112,8 +112,8 @@ func (r *Repository) GetSpecification(ctx context.Context, agencyID string) (*mo
 		// Debug logging for workflows
 		fmt.Printf("🔍 DEBUG [GetSpecification]: Retrieved spec with %d workflows\n", len(spec.Workflows))
 		for i, wf := range spec.Workflows {
-			fmt.Printf("  🔹 Workflow[%d]: Key=%q Name=%q AgencyID=%q NodesCount=%d\n",
-				i, wf.Key, wf.Name, wf.AgencyID, len(wf.Nodes))
+			fmt.Printf("  🔹 Workflow[%d]: Key=%q Name=%q AgencyID=%q StepsCount=%d\n",
+				i, wf.Key, wf.Name, wf.AgencyID, len(wf.Steps))
 		}
 
 		return &spec, nil

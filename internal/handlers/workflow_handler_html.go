@@ -37,8 +37,7 @@ func (h *WorkflowHandler) GetWorkflowsHTML(c *gin.Context) {
 			"name":        wf.Name,
 			"agency_id":   wf.AgencyID,
 			"description": truncateForLog(wf.Description, 50),
-			"nodes_count": len(wf.Nodes),
-			"edges_count": len(wf.Edges),
+			"steps_count": len(wf.Steps),
 		}).Info("  🔹 Workflow retrieved")
 	}
 

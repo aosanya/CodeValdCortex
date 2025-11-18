@@ -267,8 +267,7 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			data-workflow-name={ wf.Name }
 			data-workflow-description={ wf.Description }
 			data-workflow-version={ wf.Version }
-			data-workflow-nodes={ templ.JSONString(wf.Nodes) }
-			data-workflow-edges={ templ.JSONString(wf.Edges) }>
+			data-workflow-steps={ templ.JSONString(wf.Steps) }>
 				<!-- Toolbar -->
 				<div class="designer-toolbar">
 					<div class="level is-mobile">
