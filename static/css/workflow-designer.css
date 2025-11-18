@@ -157,37 +157,69 @@
     position: relative;
 }
 
-/* Drop Zones */
-.drop-zone {
+/* Flow Connector - Contains arrow and drop zone */
+.flow-connector {
+    position: relative;
     width: 100%;
-    min-height: 60px;
+    min-height: 120px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 0;
 }
 
-.horizontal-drop-zone {
-    padding: 1rem 0;
+/* Flow Arrow - Stretches vertically */
+.flow-arrow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    pointer-events: none;
 }
 
-.drop-zone-indicator {
-    width: 80px;
-    height: 80px;
-    background: rgba(50, 115, 220, 0.2);
+.flow-arrow .arrow-line {
+    width: 100%;
+    flex: 1;
+    background: linear-gradient(to bottom,
+            transparent 0%,
+            #3273dc 20%,
+            #3273dc 80%,
+            transparent 100%);
+    opacity: 0.6;
+}
+
+.flow-arrow .arrow-head {
+    color: #3273dc;
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-top: -8px;
+    opacity: 0.8;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Drop Zones - Unified class for all drop zones */
+.drop-zone {
+    width: 50px;
+    height: 50px;
     border: 4px dashed #3273dc;
     border-radius: 12px;
     transition: all 0.3s ease;
+    background: rgba(50, 115, 220, 0.2);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(50, 115, 220, 0.3);
+    z-index: 10;
 }
 
-.drop-zone-indicator::before {
+.drop-zone::before {
     content: "+";
     font-size: 1.5rem;
     color: #3273dc;
@@ -195,7 +227,34 @@
     transition: all 0.3s ease;
 }
 
-.drop-zone:hover .drop-zone-indicator {
+/* Horizontal drop zones (between steps) - container is full width, but box is 50x50 */
+.horizontal-drop-zone {
+    width: 100%;
+    padding: 1rem 0;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+/* Override for the actual drop zone inside horizontal container */
+.flow-connector .drop-zone {
+    width: 50px;
+    height: 50px;
+    margin-left: 100px;
+    /* Offset to the right */
+}
+
+/* Side drop zones positioning */
+.left-drop-zone {
+    margin-right: 0.75rem;
+}
+
+.right-drop-zone {
+    margin-left: 0.75rem;
+}
+
+/* Hover and active states */
+.drop-zone:hover {
     border-color: #2366d1;
     border-width: 5px;
     border-style: solid;
@@ -204,23 +263,20 @@
     transform: scale(1.05);
 }
 
-.drop-zone:hover .drop-zone-indicator::before {
+.drop-zone:hover::before {
     color: #2366d1;
     font-size: 2rem;
 }
 
 .drop-zone.is-active {
-    min-height: 90px;
-}
-
-.drop-zone.is-active .drop-zone-indicator {
-    height: 80px;
+    border-color: #2366d1;
+    border-width: 5px;
+    border-style: solid;
     background: rgba(50, 115, 220, 0.35);
-    border: 5px solid #2366d1;
     box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
 }
 
-.drop-zone.is-active .drop-zone-indicator::before {
+.drop-zone.is-active::before {
     color: #2366d1;
     font-size: 2rem;
 }
@@ -238,55 +294,6 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-}
-
-/* Side Drop Zones */
-.side-drop-zone {
-    width: 80px;
-    height: 80px;
-    border: 4px dashed #3273dc;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    background: rgba(50, 115, 220, 0.2);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(50, 115, 220, 0.3);
-}
-
-.side-drop-zone::before {
-    content: "+";
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #3273dc;
-    transition: all 0.3s ease;
-}
-
-.side-drop-zone:hover,
-.side-drop-zone.is-active {
-    border-color: #2366d1;
-    border-width: 5px;
-    border-style: solid;
-    background: rgba(50, 115, 220, 0.35);
-    box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
-    width: 85px;
-    transform: scale(1.05);
-}
-
-.side-drop-zone.is-active::before,
-.side-drop-zone:hover::before {
-    color: #2366d1;
-    font-size: 2rem;
-}
-
-.left-drop-zone {
-    margin-right: 0.75rem;
-}
-
-.right-drop-zone {
-    margin-left: 0.75rem;
 }
 
 /* Step Item */
@@ -372,29 +379,6 @@
     .step-item {
         min-width: 150px;
     }
-}
-
-/* Flow Arrows (Visual Enhancement) */
-.workflow-step-wrapper::after {
-    /* position absolute so arrows sit above drop zones and are not clipped */
-    content: "↓";
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: -32px;
-    /* places arrow between this step and the next drop zone */
-    color: #3273dc;
-    font-size: 1.75rem;
-    font-weight: 700;
-    opacity: 0.95;
-    line-height: 1;
-    z-index: 40;
-    pointer-events: none;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.workflow-step-wrapper:last-child::after {
-    display: none;
 }
 
 /* Card Header Toggle Animation */
