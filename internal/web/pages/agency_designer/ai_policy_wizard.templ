@@ -108,25 +108,30 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 				<!-- Step Content -->
 				<div class="section">
 					<div class="container">
-						<!-- Step 1: Policy Stance -->
-						<div class="box" x-show="currentStep === 1" x-cloak>
-							<h2 class="title is-4">Organization AI Stance</h2>
-							<p class="subtitle is-6 has-text-grey">Define your organization's overall approach to AI adoption</p>
+					<!-- Step 1: Policy Stance -->
+					<div class="box" x-show="currentStep === 1" x-cloak>
+						<h2 class="title is-4">Organization AI Stance</h2>
+						<p class="subtitle is-6 has-text-grey">Define your organization's overall approach to AI adoption</p>
 
-							<div class="field">
-								<label class="label">Adoption Level</label>
-								<div class="control">
-									<div class="select is-fullwidth">
-										<select x-model="policy.stance.adoption_level">
-											<option value="conservative">Conservative - Cautious AI adoption with strict oversight</option>
-											<option value="controlled">Controlled - Measured AI adoption with clear governance</option>
-											<option value="progressive">Progressive - Active AI adoption with balanced controls</option>
-											<option value="innovative">Innovative - Aggressive AI adoption, high experimentation</option>
-										</select>
-									</div>
+						<!-- Inline validation message for this step -->
+						<div class="notification is-danger is-light" x-show="saveError && (errorMessage.toLowerCase().includes('stance') || errorMessage.toLowerCase().includes('adoption'))" x-cloak>
+							<button class="delete" @click="saveError = false"></button>
+							<strong>Validation Error:</strong> <span x-text="errorMessage"></span>
+						</div>
+
+						<div class="field">
+							<label class="label">Adoption Level</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select x-model="policy.stance.adoption_level">
+										<option value="conservative">Conservative - Cautious AI adoption with strict oversight</option>
+										<option value="controlled">Controlled - Measured AI adoption with clear governance</option>
+										<option value="progressive">Progressive - Active AI adoption with balanced controls</option>
+										<option value="innovative">Innovative - Aggressive AI adoption, high experimentation</option>
+									</select>
 								</div>
 							</div>
-
+						</div>
 							<div class="field">
 								<label class="label">Risk Tolerance</label>
 								<div class="control">
@@ -169,6 +174,12 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 						<div class="box" x-show="currentStep === 2" x-cloak>
 							<h2 class="title is-4">AI Models & Providers</h2>
 							<p class="subtitle is-6 has-text-grey">Configure which AI models and providers are allowed</p>
+
+							<!-- Inline validation message for this step -->
+							<div class="notification is-danger is-light" x-show="saveError && errorMessage.toLowerCase().includes('provider')" x-cloak>
+								<button class="delete" @click="saveError = false"></button>
+								<strong>Validation Error:</strong> <span x-text="errorMessage"></span>
+							</div>
 
 							<div class="field">
 								<label class="label">Fallback Behavior</label>
@@ -236,27 +247,32 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 							</div>
 						</div>
 
-						<!-- Step 3: Autonomy Policy -->
-						<div class="box" x-show="currentStep === 3" x-cloak>
-							<h2 class="title is-4">Autonomy Levels</h2>
-							<p class="subtitle is-6 has-text-grey">Define default autonomy and role-specific overrides</p>
+					<!-- Step 3: Autonomy Policy -->
+					<div class="box" x-show="currentStep === 3" x-cloak>
+						<h2 class="title is-4">Autonomy Levels</h2>
+						<p class="subtitle is-6 has-text-grey">Define default autonomy and role-specific overrides</p>
 
-							<div class="field">
-								<label class="label">Default Autonomy Level</label>
-								<div class="control">
-									<div class="select is-fullwidth">
-										<select x-model="policy.autonomy.default_level">
-											<option value="L0">L0 - Full Oversight (All decisions require approval)</option>
-											<option value="L1">L1 - Assisted (AI recommends, human approves)</option>
-											<option value="L2">L2 - Monitored (AI acts with oversight)</option>
-											<option value="L3">L3 - Delegated (AI operates independently, humans intervene on exceptions)</option>
-											<option value="L4">L4 - Autonomous (Fully autonomous AI operations)</option>
-										</select>
-									</div>
+						<!-- Inline validation message for this step -->
+						<div class="notification is-danger is-light" x-show="saveError && (errorMessage.toLowerCase().includes('autonomy') || errorMessage.toLowerCase().includes('role'))" x-cloak>
+							<button class="delete" @click="saveError = false"></button>
+							<strong>Validation Error:</strong> <span x-text="errorMessage"></span>
+						</div>
+
+						<div class="field">
+							<label class="label">Default Autonomy Level</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select x-model="policy.autonomy.default_level">
+										<option value="L0">L0 - Full Oversight (All decisions require approval)</option>
+										<option value="L1">L1 - Assisted (AI recommends, human approves)</option>
+										<option value="L2">L2 - Monitored (AI acts with oversight)</option>
+										<option value="L3">L3 - Delegated (AI operates independently, humans intervene on exceptions)</option>
+										<option value="L4">L4 - Autonomous (Fully autonomous AI operations)</option>
+									</select>
 								</div>
-								<p class="help">This applies to all roles unless overridden below</p>
 							</div>
-
+							<p class="help">This applies to all roles unless overridden below</p>
+						</div>
 							<div class="field mt-5">
 								<label class="label">Role-Specific Overrides</label>
 								<p class="help mb-3">Configure custom autonomy levels for specific roles</p>
@@ -308,18 +324,23 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 							</div>
 						</div>
 
-						<!-- Step 4: Data Access Policy -->
-						<div class="box" x-show="currentStep === 4" x-cloak>
-							<h2 class="title is-4">Data Access & Privacy</h2>
-							<p class="subtitle is-6 has-text-grey">Control data access by classification level</p>
+					<!-- Step 4: Data Access Policy -->
+					<div class="box" x-show="currentStep === 4" x-cloak>
+						<h2 class="title is-4">Data Access & Privacy</h2>
+						<p class="subtitle is-6 has-text-grey">Control data access by classification level</p>
 
-							<div class="field">
-								<label class="checkbox">
-									<input type="checkbox" x-model="policy.data_access.classification_required"/>
-									Require data classification before access
-								</label>
-							</div>
+						<!-- Inline validation message for this step -->
+						<div class="notification is-danger is-light" x-show="saveError && (errorMessage.toLowerCase().includes('data') || errorMessage.toLowerCase().includes('classification') || errorMessage.toLowerCase().includes('pii'))" x-cloak>
+							<button class="delete" @click="saveError = false"></button>
+							<strong>Validation Error:</strong> <span x-text="errorMessage"></span>
+						</div>
 
+						<div class="field">
+							<label class="checkbox">
+								<input type="checkbox" x-model="policy.data_access.classification_required"/>
+								Require data classification before access
+							</label>
+						</div>
 							<div class="field mt-4">
 								<label class="label">PII Handling</label>
 								<div class="field">
@@ -356,19 +377,24 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 							</div>
 						</div>
 
-						<!-- Step 5: Actions & Risk -->
-						<div class="box" x-show="currentStep === 5" x-cloak>
-							<h2 class="title is-4">Actions & Risk Management</h2>
-							<p class="subtitle is-6 has-text-grey">Configure action approvals and risk thresholds</p>
+					<!-- Step 5: Actions & Risk -->
+					<div class="box" x-show="currentStep === 5" x-cloak>
+						<h2 class="title is-4">Actions & Risk Management</h2>
+						<p class="subtitle is-6 has-text-grey">Configure action approvals and risk thresholds</p>
 
-							<div class="field">
-								<label class="label">Prohibited Actions (comma-separated patterns)</label>
-								<div class="control">
-									<input class="input" type="text" x-model="prohibitedActionsText" @input="updateProhibitedActions()" placeholder="delete_database, drop_table, execute_shell"/>
-								</div>
-								<p class="help">Use * for wildcards, e.g., delete_*</p>
+						<!-- Inline validation message for this step -->
+						<div class="notification is-danger is-light" x-show="saveError && (errorMessage.toLowerCase().includes('action') || errorMessage.toLowerCase().includes('risk') || errorMessage.toLowerCase().includes('threshold'))" x-cloak>
+							<button class="delete" @click="saveError = false"></button>
+							<strong>Validation Error:</strong> <span x-text="errorMessage"></span>
+						</div>
+
+						<div class="field">
+							<label class="label">Prohibited Actions (comma-separated patterns)</label>
+							<div class="control">
+								<input class="input" type="text" x-model="prohibitedActionsText" @input="updateProhibitedActions()" placeholder="delete_database, drop_table, execute_shell"/>
 							</div>
-
+							<p class="help">Use * for wildcards, e.g., delete_*</p>
+						</div>
 							<div class="field mt-4">
 								<label class="checkbox">
 									<input type="checkbox" x-model="policy.risk.scoring_enabled"/>
@@ -415,34 +441,39 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 							</div>
 						</div>
 
-						<!-- Step 6: Compliance & Monitoring -->
-						<div class="box" x-show="currentStep === 6" x-cloak>
-							<h2 class="title is-4">Compliance & Monitoring</h2>
-							<p class="subtitle is-6 has-text-grey">Configure audit requirements and monitoring</p>
+					<!-- Step 6: Compliance & Monitoring -->
+					<div class="box" x-show="currentStep === 6" x-cloak>
+						<h2 class="title is-4">Compliance & Monitoring</h2>
+						<p class="subtitle is-6 has-text-grey">Configure audit requirements and monitoring</p>
 
+						<!-- Inline validation message for this step -->
+						<div class="notification is-danger is-light" x-show="saveError && (errorMessage.toLowerCase().includes('compliance') || errorMessage.toLowerCase().includes('audit') || errorMessage.toLowerCase().includes('monitoring'))" x-cloak>
+							<button class="delete" @click="saveError = false"></button>
+							<strong>Validation Error:</strong> <span x-text="errorMessage"></span>
+						</div>
+
+						<div class="field">
+							<label class="label">Audit Requirements</label>
 							<div class="field">
-								<label class="label">Audit Requirements</label>
-								<div class="field">
-									<label class="checkbox">
-										<input type="checkbox" x-model="policy.compliance.audit_requirements.log_all_actions"/>
-										Log all AI actions
-									</label>
-								</div>
-								<div class="field">
-									<label class="checkbox">
-										<input type="checkbox" x-model="policy.compliance.audit_requirements.immutable_audit_log"/>
-										Use immutable audit log
-									</label>
-								</div>
+								<label class="checkbox">
+									<input type="checkbox" x-model="policy.compliance.audit_requirements.log_all_actions"/>
+									Log all AI actions
+								</label>
 							</div>
-
-							<div class="field mt-4">
-								<label class="label">Audit Retention (years)</label>
-								<div class="control">
-									<input class="input" type="number" x-model.number="policy.compliance.audit_requirements.retention_years" placeholder="7"/>
-								</div>
+							<div class="field">
+								<label class="checkbox">
+									<input type="checkbox" x-model="policy.compliance.audit_requirements.immutable_audit_log"/>
+									Use immutable audit log
+								</label>
 							</div>
+						</div>
 
+						<div class="field mt-4">
+							<label class="label">Audit Retention (years)</label>
+							<div class="control">
+								<input class="input" type="number" x-model.number="policy.compliance.audit_requirements.retention_years" placeholder="7"/>
+							</div>
+						</div>
 							<div class="field mt-4">
 								<label class="label">Reporting Requirements</label>
 								<div class="field">

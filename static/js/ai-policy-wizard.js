@@ -304,7 +304,12 @@ window.policyWizard = function () {
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.error || 'Failed to save policy');
+                    const errorMsg = error.error || 'Failed to save policy';
+
+                    // Navigate to relevant step based on error message
+                    this.handleValidationError(errorMsg);
+
+                    throw new Error(errorMsg);
                 }
 
                 const result = await response.json();
@@ -324,6 +329,26 @@ window.policyWizard = function () {
                 setTimeout(() => this.saveError = false, 5000);
             } finally {
                 this.saving = false;
+            }
+        },
+
+        // Handle validation errors by navigating to relevant step
+        handleValidationError(errorMsg) {
+            const lowerMsg = errorMsg.toLowerCase();
+
+            // Map error messages to steps
+            if (lowerMsg.includes('adoption') || lowerMsg.includes('risk tolerance') || lowerMsg.includes('stance')) {
+                this.currentStep = 1;
+            } else if (lowerMsg.includes('provider') || lowerMsg.includes('model')) {
+                this.currentStep = 2;
+            } else if (lowerMsg.includes('autonomy') || lowerMsg.includes('role override')) {
+                this.currentStep = 3;
+            } else if (lowerMsg.includes('data') || lowerMsg.includes('classification') || lowerMsg.includes('pii')) {
+                this.currentStep = 4;
+            } else if (lowerMsg.includes('action') || lowerMsg.includes('risk') || lowerMsg.includes('threshold')) {
+                this.currentStep = 5;
+            } else if (lowerMsg.includes('compliance') || lowerMsg.includes('audit') || lowerMsg.includes('monitoring')) {
+                this.currentStep = 6;
             }
         }
     };

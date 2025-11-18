@@ -121,11 +121,11 @@ func (s *Service) validatePolicy(policy *AIPolicy) error {
 			validProviders = append(validProviders, provider)
 		}
 	}
-	
+
 	if len(validProviders) == 0 {
 		return fmt.Errorf("at least one allowed provider is required")
 	}
-	
+
 	// Update policy with only valid providers
 	policy.Models.AllowedProviders = validProviders
 
