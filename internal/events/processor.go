@@ -187,7 +187,6 @@ func (p *Processor) eventLoop(workerID int) {
 	defer p.wg.Done()
 
 	logger := log.WithField("worker_id", workerID)
-	logger.Debug("Event worker started")
 
 	for event := range p.eventChan {
 		startTime := time.Now()
@@ -223,16 +222,8 @@ func (p *Processor) eventLoop(workerID int) {
 				"error":      err,
 				"duration":   duration,
 			}).Error("Event processing failed")
-		} else {
-			logger.WithFields(log.Fields{
-				"event_id":   event.ID,
-				"event_type": event.Type,
-				"duration":   duration,
-			}).Debug("Event processed successfully")
 		}
 	}
-
-	logger.Debug("Event worker stopped")
 }
 
 // processEventWithRetry processes an event with retry logic
@@ -279,10 +270,6 @@ func (p *Processor) processEvent(ctx context.Context, event *Event) error {
 	// Get handlers for this event type
 	handlers := p.registry.GetHandlers(event.Type)
 	if len(handlers) == 0 {
-		log.WithFields(log.Fields{
-			"event_id":   event.ID,
-			"event_type": event.Type,
-		}).Debug("No handlers registered for event type")
 		return nil
 	}
 

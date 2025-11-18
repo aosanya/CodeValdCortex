@@ -192,7 +192,7 @@ func (r *Repository) GetMessage(ctx context.Context, id string) (*Message, error
 	var msg Message
 	meta, err := r.messagesCol.ReadDocument(ctx, id, &msg)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("message not found: %s", id)
 		}
 		return nil, fmt.Errorf("failed to read message: %w", err)
@@ -355,7 +355,7 @@ func (r *Repository) GetPublication(ctx context.Context, id string) (*Publicatio
 	var pub Publication
 	meta, err := r.publicationsCol.ReadDocument(ctx, id, &pub)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("publication not found: %s", id)
 		}
 		return nil, fmt.Errorf("failed to read publication: %w", err)
@@ -375,7 +375,7 @@ func (r *Repository) GetMatchingPublications(ctx context.Context, subscriptions 
 	// Build filter for event patterns
 	patterns := make([]string, 0, len(subscriptions))
 	for _, sub := range subscriptions {
-		patterns = append(patterns, sub.EventPattern)
+		_ = append(patterns, sub.EventPattern)
 	}
 
 	query := `
@@ -465,7 +465,7 @@ func (r *Repository) GetSubscription(ctx context.Context, id string) (*Subscript
 	var sub Subscription
 	meta, err := r.subscriptionsCol.ReadDocument(ctx, id, &sub)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("subscription not found: %s", id)
 		}
 		return nil, fmt.Errorf("failed to read subscription: %w", err)

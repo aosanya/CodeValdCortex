@@ -1,9 +1,10 @@
 // Roles functionality
 // Handles roles management in Agency Designer
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
-import { scrollToBottom } from './chat.js';
-import { loadEntityList, showEntityEditor, cancelEntityEdit, deleteEntity, saveEntity, populateForm, clearForm } from './crud-helpers.js';
+// Functions available from global window namespace
+// getCurrentAgencyId, showNotification from utils.js
+// scrollToBottom from chat.js  
+// loadEntityList, showEntityEditor, etc. from crud-helpers.js
 
 // Role editor state management
 let roleEditorState = {
@@ -13,23 +14,23 @@ let roleEditorState = {
 };
 
 // Load roles list
-export function loadRoles() {
-    return loadEntityList('roles', 'roles-table-body', 5);
+window.loadRoles = function () {
+    return window.loadEntityList('roles', 'roles-table-body', 5);
 }
 
 // Show role editor
-export function showRoleEditor(mode, roleKey = null) {
+window.showRoleEditor = function (mode, roleKey = null) {
     roleEditorState.mode = mode;
     roleEditorState.roleKey = roleKey;
 
-    showEntityEditor(
+    window.showEntityEditor(
         mode,
         'role-editor-card',
         'roles-list-card',
         'role-editor-title',
         'Add New Role',
         'Edit Role',
-        'role-name-editor'
+        'role-code-editor'
     );
 
     if (mode === 'add') {
@@ -40,55 +41,53 @@ export function showRoleEditor(mode, roleKey = null) {
 }
 
 // Load role data for editing
-function loadRoleData(roleKey) {
-    const agencyId = getCurrentAgencyId();
-    if (!agencyId) {
-        return;
-    }
+async function loadRoleData(roleKey) {
 
-    const url = `/api/v1/agencies/${agencyId}/roles/${roleKey}`;
+    try {
+        const spec = await window.specificationAPI.getSpecification();
+        const roles = spec.roles || [];
 
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load role data');
-            }
-            return response.json();
-        })
-        .then(role => {
-            roleEditorState.originalData = role;
-            populateRoleForm(role);
-        })
-        .catch(error => {
-            console.error('[Roles] Error loading role data:', error);
-            showNotification('Error loading role data', 'danger');
+        // Find role by _key or other identifier
+        const role = roles.find(r => {
+            const id = r._key || r.key || r._id || r.code || r.id || r.name;
+            return id === roleKey;
         });
+
+        if (!role) {
+            throw new Error(`Role with key ${roleKey} not found`);
+        }
+
+        roleEditorState.originalData = role;
+        populateRoleForm(role);
+
+    } catch (error) {
+        window.showNotification('Error loading role data', 'danger');
+    }
 }
 
 // Populate form with role data
 function populateRoleForm(role) {
-    populateForm({
+    const formData = {
+        'role-code-editor': role.code || '',
         'role-name-editor': role.name || '',
         'role-tags-editor': (role.tags || []).join(', '),
         'role-description-editor': role.description || '',
         'role-autonomy-level-editor': role.autonomy_level || '',
-        'role-capabilities-editor': (role.capabilities || []).join('\n'),
-        'role-required-skills-editor': (role.required_skills || []).join(', '),
         'role-token-budget-editor': role.token_budget || 0,
         'role-icon-editor': role.icon || '',
         'role-color-editor': role.color || '#3298dc'
-    });
+    };
+    populateForm(formData);
 }
 
 // Clear role form
 function clearRoleForm() {
-    clearForm([
+    window.clearForm([
+        'role-code-editor',
         'role-name-editor',
         'role-tags-editor',
         'role-description-editor',
         'role-autonomy-level-editor',
-        'role-capabilities-editor',
-        'role-required-skills-editor',
         'role-token-budget-editor',
         'role-icon-editor',
         'role-color-editor'
@@ -99,75 +98,75 @@ function clearRoleForm() {
 }
 
 // Save role from editor
-export function saveRoleFromEditor() {
+window.saveRoleFromEditor = function () {
+
     // Gather form data
+    const code = document.getElementById('role-code-editor')?.value.trim();
     const name = document.getElementById('role-name-editor')?.value.trim();
     const tagsText = document.getElementById('role-tags-editor')?.value.trim();
     const description = document.getElementById('role-description-editor')?.value.trim();
     const autonomyLevel = document.getElementById('role-autonomy-level-editor')?.value;
-    const capabilitiesText = document.getElementById('role-capabilities-editor')?.value.trim();
-    const requiredSkillsText = document.getElementById('role-required-skills-editor')?.value.trim();
     const tokenBudget = parseInt(document.getElementById('role-token-budget-editor')?.value || '0');
     const icon = document.getElementById('role-icon-editor')?.value.trim();
     const color = document.getElementById('role-color-editor')?.value;
 
     // Validation
+    if (!code) {
+        window.showNotification('Please enter a role code', 'warning');
+        return;
+    }
+
     if (!name) {
-        showNotification('Please enter a role name', 'warning');
+        window.showNotification('Please enter a role name', 'warning');
         return;
     }
 
     if (!autonomyLevel) {
-        showNotification('Please select an autonomy level', 'warning');
+        window.showNotification('Please select an autonomy level', 'warning');
         return;
     }
 
-    // Parse tags, capabilities and skills
+    // Parse tags
     const tags = tagsText
         ? tagsText.split(',').map(t => t.trim()).filter(t => t)
         : [];
 
-    const capabilities = capabilitiesText
-        ? capabilitiesText.split('\n').map(c => c.trim().replace(/^-\s*/, '')).filter(c => c)
-        : [];
-
-    const requiredSkills = requiredSkillsText
-        ? requiredSkillsText.split(',').map(s => s.trim()).filter(s => s)
-        : [];
-
     // Construct payload
     const payload = {
+        code: code,  // Use code field for the role code
         name,
         tags,
         description,
         autonomy_level: autonomyLevel,
-        capabilities,
-        required_skills: requiredSkills,
         token_budget: tokenBudget,
         icon,
         color,
+        // Preserve _key and timestamps for edit mode
+        ...(roleEditorState.mode === 'edit' && roleEditorState.originalData?._key ? {
+            _key: roleEditorState.originalData._key,
+            created_at: roleEditorState.originalData.created_at,
+        } : {}),
         // Include version: preserve existing for edit, default for add
         version: roleEditorState.mode === 'edit' && roleEditorState.originalData?.version
             ? roleEditorState.originalData.version
             : '1.0.0'
     };
 
-    saveEntity('roles', roleEditorState.mode, roleEditorState.roleKey, payload, 'save-role-btn', () => {
+    window.saveEntity('roles', roleEditorState.mode, roleEditorState.roleKey, payload, 'save-role-btn', () => {
         cancelRoleEdit();
         loadRoles();
-        scrollToBottom();
+        window.scrollToBottom();
     });
 }
 
 // Cancel role edit
-export function cancelRoleEdit() {
-    cancelEntityEdit('role-editor-card', 'roles-list-card', [
+window.cancelRoleEdit = function () {
+    window.cancelEntityEdit('role-editor-card', 'roles-list-card', [
+        'role-code-editor',
         'role-name-editor',
         'role-tags-editor',
         'role-description-editor',
         'role-autonomy-level-editor',
-        'role-capabilities-editor',
-        'role-required-skills-editor',
         'role-token-budget-editor',
         'role-icon-editor',
         'role-color-editor'
@@ -181,12 +180,12 @@ export function cancelRoleEdit() {
 }
 
 // Delete role
-export function deleteRole(roleKey) {
-    deleteEntity('roles', roleKey, 'this role', loadRoles);
+window.deleteRole = function (roleKey) {
+    window.deleteEntity('roles', roleKey, 'this role', loadRoles);
 }
 
 // Filter roles
-export function filterRoles() {
+window.filterRoles = function () {
     const searchInput = document.getElementById('roles-search');
     if (!searchInput) return;
 
@@ -204,10 +203,10 @@ export function filterRoles() {
 }
 
 // AI Role Operations
-export async function processAIRoleOperation(operations) {
-    const agencyId = getCurrentAgencyId();
+window.processAIRoleOperation = async function (operations) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
@@ -218,7 +217,7 @@ export async function processAIRoleOperation(operations) {
 
     // Validate selection for operations that require it
     if ((operations.includes('enhance') || operations.includes('consolidate')) && selectedRoleKeys.length === 0) {
-        showNotification('Please select roles first', 'warning');
+        window.showNotification('Please select roles first', 'warning');
         return;
     }
 
@@ -282,11 +281,10 @@ export async function processAIRoleOperation(operations) {
                     const chatHtml = await chatResp.text();
                     chatContainer.innerHTML = chatHtml;
                     // Scroll to bottom to show latest assistant message
-                    try { scrollToBottom(); } catch (e) { /* ignore */ }
+                    try { window.scrollToBottom(); } catch (e) { /* ignore */ }
                 }
             }
         } catch (err) {
-            console.error('[Roles] Error refreshing chat messages:', err);
         }
 
         // Hide AI processing status after roles and chat are updated
@@ -294,17 +292,16 @@ export async function processAIRoleOperation(operations) {
             window.hideAIProcessStatus();
         }
 
-        showNotification('AI operation completed', 'success');
+        window.showNotification('AI operation completed', 'success');
 
     } catch (error) {
-        console.error('[Roles] Error processing AI operation:', error);
 
         // Hide processing status on error
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();
         }
 
-        showNotification('Error processing AI operation', 'danger');
+        window.showNotification('Error processing AI operation', 'danger');
     }
 }
 

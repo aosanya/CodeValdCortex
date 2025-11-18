@@ -18,7 +18,6 @@ function dashboard() {
             });
 
             document.body.addEventListener('htmx:responseError', (e) => {
-                console.error('HTMX error', e.detail);
                 this.showError('Failed to update. Please refresh the page.');
             });
         },
@@ -48,7 +47,6 @@ function metricsChart() {
             const canvas = this.$el.querySelector('canvas');
 
             if (!canvas) {
-                console.error('Canvas not found');
                 return;
             }
 

@@ -2,11 +2,11 @@ package pages
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
-templ Homepage(agencies []*agency.Agency) {
+templ Homepage(agencies []*models.Agency) {
 	@components.HomepageLayout("Select Agency") {
 		<!-- Agency-specific CSS -->
 		<link rel="stylesheet" href="/static/css/agencies.css"/>
@@ -109,7 +109,7 @@ templ Homepage(agencies []*agency.Agency) {
 	}
 }
 
-templ AgencyCard(ag agency.Agency) {
+templ AgencyCard(ag models.Agency) {
 	<div 
 		class="column is-one-third-desktop is-half-tablet agency-card-column" 
 		data-category={ ag.Category }
@@ -226,9 +226,9 @@ templ CategoryBadge(category string) {
 	}
 }
 
-templ StatusBadge(status agency.AgencyStatus) {
+templ StatusBadge(status models.AgencyStatus) {
 	switch status {
-		case agency.AgencyStatusActive:
+		case models.AgencyStatusActive:
 			<span class="tag is-success">
 				<span class="icon">
 					<svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
@@ -237,7 +237,7 @@ templ StatusBadge(status agency.AgencyStatus) {
 				</span>
 				<span>Active</span>
 			</span>
-		case agency.AgencyStatusInactive:
+		case models.AgencyStatusInactive:
 			<span class="tag is-light">
 				<span class="icon">
 					<svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
@@ -246,7 +246,7 @@ templ StatusBadge(status agency.AgencyStatus) {
 				</span>
 				<span>Inactive</span>
 			</span>
-		case agency.AgencyStatusPaused:
+		case models.AgencyStatusPaused:
 			<span class="tag is-warning">
 				<span class="icon">
 					<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +255,7 @@ templ StatusBadge(status agency.AgencyStatus) {
 				</span>
 				<span>Paused</span>
 			</span>
-		case agency.AgencyStatusArchived:
+		case models.AgencyStatusArchived:
 			<span class="tag is-dark">
 				<span class="icon">
 					<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">

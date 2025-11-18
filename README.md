@@ -483,6 +483,7 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 ### 🔄 In Progress (Current Sprint)
 - 🔄 Management Dashboard with real-time monitoring (MVP-015)
 - 🔄 Agency Designer UI/UX refinements and performance optimization
+- 🔄 **MVP-052**: Work Items Documentation - GitOps-based workflow system with ArangoDB graph storage
 
 ### 📋 Planned - Core Operations & Infrastructure (High Priority)
 - 📋 **MVP-046**: Agency Admin & Configuration Page - Token budgets, rate limits, monitoring dashboards
@@ -529,6 +530,7 @@ CodeValdCortex is licensed under the [MIT License](LICENSE). See the LICENSE fil
 - ✅ **Agency Operations Framework**: Complete Goals, Roles, and RACI matrix management
 - ✅ **AI Builder Architecture**: Major refactoring for maintainability and consistency
 - ✅ **Code Quality Enhancement**: Comprehensive dead code cleanup and tooling automation
+- ✅ **Work Items Architecture**: GitOps workflow system documented with Gitea + ArangoDB multi-graph design
 
 **Current Development Priorities**:
 1. A2A Protocol Integration - Multi-vendor agent interoperability (v1.2)

@@ -75,11 +75,6 @@ func NewRepository(db driver.Database, config RepositoryConfig, logger *log.Logg
 
 // CreateWorkflow stores a new workflow definition
 func (r *Repository) CreateWorkflow(ctx context.Context, workflow *Workflow) error {
-	r.logger.WithFields(log.Fields{
-		"workflow_id": workflow.ID,
-		"name":        workflow.Name,
-		"version":     workflow.Version,
-	}).Debug("Creating workflow")
 
 	// Set creation timestamp
 	workflow.CreatedAt = time.Now()
@@ -97,7 +92,6 @@ func (r *Repository) CreateWorkflow(ctx context.Context, workflow *Workflow) err
 
 // GetWorkflow retrieves a workflow by ID
 func (r *Repository) GetWorkflow(ctx context.Context, workflowID string) (*Workflow, error) {
-	r.logger.WithField("workflow_id", workflowID).Debug("Retrieving workflow")
 
 	var workflow Workflow
 	_, err := r.workflowsCollection.ReadDocument(ctx, workflowID, &workflow)
@@ -113,10 +107,6 @@ func (r *Repository) GetWorkflow(ctx context.Context, workflowID string) (*Workf
 
 // GetWorkflowByName retrieves a workflow by name and version
 func (r *Repository) GetWorkflowByName(ctx context.Context, name, version string) (*Workflow, error) {
-	r.logger.WithFields(log.Fields{
-		"name":    name,
-		"version": version,
-	}).Debug("Retrieving workflow by name")
 
 	query := `
 		FOR w IN @@collection
@@ -151,7 +141,6 @@ func (r *Repository) GetWorkflowByName(ctx context.Context, name, version string
 
 // UpdateWorkflow updates an existing workflow
 func (r *Repository) UpdateWorkflow(ctx context.Context, workflow *Workflow) error {
-	r.logger.WithField("workflow_id", workflow.ID).Debug("Updating workflow")
 
 	// Update timestamp
 	workflow.UpdatedAt = time.Now()
@@ -171,7 +160,6 @@ func (r *Repository) UpdateWorkflow(ctx context.Context, workflow *Workflow) err
 
 // DeleteWorkflow removes a workflow
 func (r *Repository) DeleteWorkflow(ctx context.Context, workflowID string) error {
-	r.logger.WithField("workflow_id", workflowID).Debug("Deleting workflow")
 
 	_, err := r.workflowsCollection.RemoveDocument(ctx, workflowID)
 	if err != nil {
@@ -187,10 +175,6 @@ func (r *Repository) DeleteWorkflow(ctx context.Context, workflowID string) erro
 
 // ListWorkflows retrieves workflows with pagination
 func (r *Repository) ListWorkflows(ctx context.Context, limit, offset int) ([]*Workflow, error) {
-	r.logger.WithFields(log.Fields{
-		"limit":  limit,
-		"offset": offset,
-	}).Debug("Listing workflows")
 
 	query := `
 		FOR w IN @@collection
@@ -227,10 +211,6 @@ func (r *Repository) ListWorkflows(ctx context.Context, limit, offset int) ([]*W
 
 // SearchWorkflows searches workflows by name, description, or tags
 func (r *Repository) SearchWorkflows(ctx context.Context, searchTerm string, limit int) ([]*Workflow, error) {
-	r.logger.WithFields(log.Fields{
-		"search_term": searchTerm,
-		"limit":       limit,
-	}).Debug("Searching workflows")
 
 	// Prepare search term for AQL
 	searchPattern := fmt.Sprintf("%%%s%%", strings.ToLower(searchTerm))
@@ -279,11 +259,6 @@ func (r *Repository) SearchWorkflows(ctx context.Context, searchTerm string, lim
 
 // CreateExecution stores a new workflow execution
 func (r *Repository) CreateExecution(ctx context.Context, execution *WorkflowExecution) error {
-	r.logger.WithFields(log.Fields{
-		"execution_id": execution.ID,
-		"workflow_id":  execution.WorkflowID,
-		"status":       execution.Status,
-	}).Debug("Creating execution")
 
 	// Insert into database
 	_, err := r.executionsCollection.CreateDocument(ctx, execution)
@@ -297,7 +272,6 @@ func (r *Repository) CreateExecution(ctx context.Context, execution *WorkflowExe
 
 // GetExecution retrieves an execution by ID
 func (r *Repository) GetExecution(ctx context.Context, executionID string) (*WorkflowExecution, error) {
-	r.logger.WithField("execution_id", executionID).Debug("Retrieving execution")
 
 	var execution WorkflowExecution
 	_, err := r.executionsCollection.ReadDocument(ctx, executionID, &execution)
@@ -313,7 +287,6 @@ func (r *Repository) GetExecution(ctx context.Context, executionID string) (*Wor
 
 // UpdateExecution updates an existing execution
 func (r *Repository) UpdateExecution(ctx context.Context, execution *WorkflowExecution) error {
-	r.logger.WithField("execution_id", execution.ID).Debug("Updating execution")
 
 	// Update document
 	_, err := r.executionsCollection.UpdateDocument(ctx, execution.ID, execution)
@@ -324,13 +297,11 @@ func (r *Repository) UpdateExecution(ctx context.Context, execution *WorkflowExe
 		return fmt.Errorf("failed to update execution: %w", err)
 	}
 
-	r.logger.WithField("execution_id", execution.ID).Debug("Execution updated successfully")
 	return nil
 }
 
 // DeleteExecution removes an execution
 func (r *Repository) DeleteExecution(ctx context.Context, executionID string) error {
-	r.logger.WithField("execution_id", executionID).Debug("Deleting execution")
 
 	_, err := r.executionsCollection.RemoveDocument(ctx, executionID)
 	if err != nil {
@@ -346,12 +317,6 @@ func (r *Repository) DeleteExecution(ctx context.Context, executionID string) er
 
 // ListExecutions retrieves executions with pagination and filtering
 func (r *Repository) ListExecutions(ctx context.Context, workflowID string, status WorkflowStatus, limit, offset int) ([]*WorkflowExecution, error) {
-	r.logger.WithFields(log.Fields{
-		"workflow_id": workflowID,
-		"status":      status,
-		"limit":       limit,
-		"offset":      offset,
-	}).Debug("Listing executions")
 
 	// Build query with optional filters
 	var filters []string
@@ -406,7 +371,6 @@ func (r *Repository) ListExecutions(ctx context.Context, workflowID string, stat
 
 // GetExecutionsByStatus retrieves executions by status
 func (r *Repository) GetExecutionsByStatus(ctx context.Context, status WorkflowStatus) ([]*WorkflowExecution, error) {
-	r.logger.WithField("status", status).Debug("Retrieving executions by status")
 
 	query := `
 		FOR e IN @@collection
@@ -449,7 +413,6 @@ func (r *Repository) GetActiveExecutions(ctx context.Context) ([]*WorkflowExecut
 
 // GetWorkflowStats returns statistics for a workflow
 func (r *Repository) GetWorkflowStats(ctx context.Context, workflowID string) (*WorkflowStats, error) {
-	r.logger.WithField("workflow_id", workflowID).Debug("Getting workflow statistics")
 
 	query := `
 		LET executions = (
@@ -543,13 +506,14 @@ type WorkflowStats struct {
 // Helper methods
 
 func (r *Repository) initializeCollections(config RepositoryConfig) error {
+	ctx := context.Background()
 	var err error
 
 	// Initialize workflows collection
-	r.workflowsCollection, err = r.db.Collection(nil, config.WorkflowsCollection)
+	r.workflowsCollection, err = r.db.Collection(ctx, config.WorkflowsCollection)
 	if err != nil {
 		// Collection doesn't exist, create it
-		r.workflowsCollection, err = r.db.CreateCollection(nil, config.WorkflowsCollection, nil)
+		r.workflowsCollection, err = r.db.CreateCollection(ctx, config.WorkflowsCollection, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create workflows collection: %w", err)
 		}
@@ -557,10 +521,10 @@ func (r *Repository) initializeCollections(config RepositoryConfig) error {
 	}
 
 	// Initialize executions collection
-	r.executionsCollection, err = r.db.Collection(nil, config.ExecutionsCollection)
+	r.executionsCollection, err = r.db.Collection(ctx, config.ExecutionsCollection)
 	if err != nil {
 		// Collection doesn't exist, create it
-		r.executionsCollection, err = r.db.CreateCollection(nil, config.ExecutionsCollection, nil)
+		r.executionsCollection, err = r.db.CreateCollection(ctx, config.ExecutionsCollection, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create executions collection: %w", err)
 		}

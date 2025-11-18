@@ -1,55 +1,94 @@
 // Introduction functionality
 // Handles introduction editor and saving
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
+// Uses global functions: getCurrentAgencyId, showNotification, specificationAPI
 
 // Store original introduction for undo
 let originalIntroduction = '';
 
+// Update original introduction (used after AI refinement)
+window.updateOriginalIntroduction = function (text) {
+    originalIntroduction = text || '';
+}
+
 // Load introduction editor and data
-export function loadIntroductionEditor() {
-    const agencyId = getCurrentAgencyId();
+window.loadIntroductionEditor = async function () {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        console.error('No agency ID found');
         return;
     }
 
-    // Fetch the current overview/introduction
-    fetch(`/api/v1/agencies/${agencyId}/overview`)
-        .then(response => {
-            if (!response.ok) {
-                // If 404 or error, just show empty editor
-                return { introduction: '' };
+    try {
+        const data = await window.specificationAPI.getIntroduction();
+        const editor = document.getElementById('introduction-editor');
+        if (editor) {
+            const introText = data.introduction || '';
+            editor.value = introText;
+            // Store original value for undo
+            originalIntroduction = introText;
+
+            // Attach input event listener to clear contexts on edit
+            attachContextClearListener(editor);
+        }
+    } catch (error) {
+    }
+}
+
+// Attach event listener to clear contexts when editor changes
+function attachContextClearListener(editor) {
+    // Remove any existing listener to avoid duplicates
+    if (editor._contextClearAttached) {
+        return;
+    }
+
+    let typingTimer;
+    const typingDelay = 500; // Wait 500ms after user stops typing
+
+    editor.addEventListener('input', function () {
+
+        // Clear any existing timer
+        clearTimeout(typingTimer);
+
+        // Set a new timer to clear contexts after user stops typing
+        typingTimer = setTimeout(function () {
+
+            if (!window.ContextManager) {
+                return;
             }
-            return response.json();
-        })
-        .then(data => {
-            const editor = document.getElementById('introduction-editor');
-            if (editor) {
-                const introText = data.introduction || '';
-                editor.value = introText;
-                // Store original value for undo
-                originalIntroduction = introText;
+
+            const contexts = window.ContextManager.getAllContexts();
+            const selections = window.ContextManager.getSelections();
+
+            const hasContextsOrSelections = (contexts && contexts.length > 0) || (selections && selections.length > 0);
+
+            if (hasContextsOrSelections) {
+
+                // Clear both contexts and selections
+                window.ContextManager.clearAllContexts();
+                window.ContextManager.clearSelections();
+
+                // Verify it was cleared
+                setTimeout(() => {
+                    const afterContexts = window.ContextManager.getAllContexts();
+                    const afterSelections = window.ContextManager.getSelections();
+                }, 100);
+            } else {
             }
-        })
-        .catch(error => {
-            console.error('Error loading introduction:', error);
-        });
+        }, typingDelay);
+    });    // Mark as attached
+    editor._contextClearAttached = true;
 }
 
 // Save overview introduction
-// Save overview introduction
-export function saveOverviewIntroduction() {
-    const agencyId = getCurrentAgencyId();
+window.saveOverviewIntroduction = async function () {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        console.error('No agency ID found');
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
     const editor = document.getElementById('introduction-editor');
     if (!editor) {
-        console.error('Introduction editor not found');
         return;
     }
 
@@ -62,49 +101,139 @@ export function saveOverviewIntroduction() {
         saveBtn.disabled = true;
     }
 
-    fetch(`/api/v1/agencies/${agencyId}/overview`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ introduction: introduction })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to save introduction');
-            }
-            return response.json();
-        })
-        .then(data => {
-            showNotification('Introduction saved successfully!', 'success');
-            // Update original value after successful save
-            originalIntroduction = editor.value;
-        })
-        .catch(error => {
-            console.error('Error saving introduction:', error);
-            showNotification('Error saving introduction', 'error');
-        })
-        .finally(() => {
-            // Re-enable button
-            if (saveBtn) {
-                saveBtn.classList.remove('is-loading');
-                saveBtn.disabled = false;
-            }
-        });
+    try {
+        await window.specificationAPI.updateIntroduction(introduction, 'user');
+
+        window.showNotification('Introduction saved successfully!', 'success');
+        // Update original value after successful save
+        originalIntroduction = editor.value;
+    } catch (error) {
+        window.showNotification('Error saving introduction', 'error');
+    } finally {
+        // Re-enable button
+        if (saveBtn) {
+            saveBtn.classList.remove('is-loading');
+            saveBtn.disabled = false;
+        }
+    }
 }
 
 // Update agency name display in various places
 // (name updates are not handled here; agency name is managed centrally)
 
-// Undo changes to overview introduction
-export function undoOverviewIntroduction() {
+// Handle AI refine button click
+window.handleAIRefineClick = async function () {
+
+    const agencyId = window.getCurrentAgencyId();
+    if (!agencyId) {
+        return;
+    }
+
     const editor = document.getElementById('introduction-editor');
     if (!editor) {
-        console.error('Introduction editor not found');
+        return;
+    }
+
+    const contentElement = document.getElementById('introduction-content');
+    if (!contentElement) {
+        return;
+    }
+
+    try {
+        // Show AI processing status
+        if (window.showAIProcessStatus) {
+            window.showAIProcessStatus('AI is refining your introduction...');
+        }
+
+        // Check if there's a pending user request from chat
+        const pendingRequest = window.sessionStorage.getItem('pendingIntroductionRequest');
+
+        const formData = new URLSearchParams({
+            'introduction-editor': editor.value
+        });
+
+        if (pendingRequest) {
+            formData.append('user-request', pendingRequest);
+            window.sessionStorage.removeItem('pendingIntroductionRequest');
+        }
+
+        // Use shared streaming utility with single endpoint
+        await window.executeAIRefine({
+            url: `/api/v1/agencies/${agencyId}/overview/refine`,
+            formData: formData,
+            displayElement: contentElement,
+            onComplete: (result) => {
+
+                // Update editor with new content if available
+                if (result.introduction) {
+                    editor.value = result.introduction;
+                } else {
+                }
+
+                // Handle post-refinement tasks
+                handlePostRefinement();
+            },
+            onError: (error) => {
+                window.showNotification('Failed to refine introduction. Please try again.', 'error');
+            }
+        });
+
+    } catch (error) {
+        window.showNotification('Failed to refine introduction. Please try again.', 'error');
+    } finally {
+        // Hide AI processing status
+        if (window.hideAIProcessStatus) {
+            window.hideAIProcessStatus();
+        }
+    }
+}
+
+// Handle post-refinement tasks (reload editor and chat)
+function handlePostRefinement() {
+    // Reload the introduction editor to sync with updated content
+    if (window.loadIntroductionEditor) {
+        window.loadIntroductionEditor();
+    }
+
+    // Reload chat messages to show AI response
+    const agencyId = window.getCurrentAgencyId();
+    if (!agencyId) return;
+
+    const triggerElement = document.getElementById('ai-refine-complete');
+    const agencyName = triggerElement?.dataset?.agencyName || '';
+
+    fetch(`/agencies/${agencyId}/chat-messages?agencyName=${encodeURIComponent(agencyName)}`)
+        .then(response => response.text())
+        .then(html => {
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages) {
+                chatMessages.innerHTML = html;
+                // Scroll to bottom
+                if (window.scrollToBottom) {
+                    window.scrollToBottom(chatMessages);
+                }
+            }
+        })
+        .catch(error => {
+        });
+}
+
+// Undo changes to overview introduction
+window.undoOverviewIntroduction = function () {
+    const editor = document.getElementById('introduction-editor');
+    if (!editor) {
         return;
     }
 
     // Restore original value
     editor.value = originalIntroduction;
-    showNotification('Changes reverted', 'info');
+    window.showNotification('Changes reverted', 'info');
 }
+
+// Initialize introduction editor event listeners
+document.addEventListener('DOMContentLoaded', function () {
+    const editor = document.getElementById('introduction-editor');
+    if (editor) {
+        attachContextClearListener(editor);
+    }
+});

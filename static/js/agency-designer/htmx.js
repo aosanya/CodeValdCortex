@@ -1,45 +1,24 @@
 // HTMX events and interactions
 // Handles HTMX-related functionality
 
-import { scrollToBottom } from './chat.js';
-import { initializeAgentSelection } from './agents.js';
+// Uses global functions: scrollToBottom, initializeAgentSelection, loadEntityList
 
 // Initialize HTMX event listeners
-export function initializeHTMXEvents() {
+window.initializeHTMXEvents = function () {
     // Log context being sent with chat messages
     document.body.addEventListener('htmx:configRequest', function (evt) {
         if (evt.detail.path && evt.detail.path.includes('/messages/web')) {
-            console.log('[HTMX] Chat message request config:', {
-                path: evt.detail.path,
-                verb: evt.detail.verb,
-                parameters: evt.detail.parameters,
-                headers: evt.detail.headers
-            });
         }
     });
 
     // Log what's actually being sent
     document.body.addEventListener('htmx:beforeRequest', function (evt) {
-        console.log('[HTMX] beforeRequest event:', {
-            path: evt.detail.path,
-            eltTag: evt.detail.elt.tagName,
-            eltClass: evt.detail.elt.className,
-            matchesConversations: evt.detail.elt.matches('form[hx-post*="conversations"]'),
-            matchesMessages: evt.detail.elt.matches('form[hx-post*="messages"]')
-        });
 
         if (evt.detail.path && (evt.detail.path.includes('/messages/web') || evt.detail.path.includes('/conversations/web'))) {
-            console.log('[HTMX] Chat request detected:', {
-                path: evt.detail.path,
-                parameters: evt.detail.parameters,
-                target: evt.detail.target
-            });
 
             // Try to log the actual form data
             const formData = new FormData(evt.detail.elt);
-            console.log('[HTMX] Form data entries:');
             for (let [key, value] of formData.entries()) {
-                console.log(`  ${key}: ${value}`);
             }
         }
 
@@ -47,11 +26,7 @@ export function initializeHTMXEvents() {
         const isChatForm = evt.detail.elt.matches('form[hx-post*="conversations"]') ||
             evt.detail.elt.matches('form[hx-post*="messages"]');
 
-        console.log('[HTMX] Indicator element:', indicator ? 'found' : 'NOT FOUND');
-        console.log('[HTMX] Is chat form?', isChatForm);
-
         if (isChatForm) {
-            console.log('[HTMX] ✅ Chat form detected');
 
             // Get the input field and message
             const input = evt.detail.elt.querySelector('input[name="message"]');
@@ -61,18 +36,17 @@ export function initializeHTMXEvents() {
             if (message && message.length > 0) {
                 const chatContainer = document.getElementById('chat-messages');
                 if (chatContainer) {
+                    // Add to global state
+                    if (window.addChatMessage) {
+                        window.addChatMessage('user', message);
+                    }
+
                     // Create user message element
                     const userMessageDiv = document.createElement('div');
-                    userMessageDiv.className = 'message is-user';
+                    userMessageDiv.className = 'message user-message';
                     userMessageDiv.innerHTML = `
-                        <div class="message-header">
-                            <span class="icon has-text-info">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <span>You</span>
-                        </div>
-                        <div class="message-body">
-                            <div class="content">
+                        <div class="message-content">
+                            <div class="message-bubble">
                                 <p>${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                             </div>
                         </div>
@@ -86,14 +60,12 @@ export function initializeHTMXEvents() {
                 // Clear the input immediately
                 if (input) {
                     input.value = '';
-                    console.log('[HTMX] ✅ Input cleared and message added to chat');
                 }
             }
 
             // Show typing indicator if it exists
             if (indicator) {
                 indicator.style.display = 'block';
-                console.log('[HTMX] ✅ Typing indicator shown');
             }
 
             // Show AI process status for chat requests with context-aware message
@@ -122,10 +94,8 @@ export function initializeHTMXEvents() {
                         statusMessage = 'AI is processing your message...';
                 }
 
-                console.log('[HTMX] ✅ Calling showAIProcessStatus:', statusMessage);
                 window.showAIProcessStatus(statusMessage);
             } else {
-                console.warn('[HTMX] ❌ window.showAIProcessStatus is not defined!');
             }
 
             // Scroll to show typing indicator
@@ -134,7 +104,6 @@ export function initializeHTMXEvents() {
                 setTimeout(() => scrollToBottom(chatContainer), 100);
             }
         } else {
-            console.log('[HTMX] ❌ Not a chat form, skipping status display');
         }
 
         // Handle other AI operations
@@ -157,6 +126,7 @@ export function initializeHTMXEvents() {
 
     // Hide typing indicator and scroll when new message arrives
     document.body.addEventListener('htmx:afterSwap', function (evt) {
+
         const indicator = document.getElementById('typing-indicator');
         if (indicator && evt.detail.target.id === 'chat-messages') {
             indicator.style.display = 'none';
@@ -170,20 +140,15 @@ export function initializeHTMXEvents() {
 
         // For introduction refine, refresh chat messages to show AI explanation
         if (isIntroductionRefine) {
-            const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
-            const chatContainer = document.getElementById('chat-messages');
 
-            if (agencyId && chatContainer) {
-                fetch(`/agencies/${agencyId}/chat-messages`)
-                    .then(response => response.text())
-                    .then(html => {
-                        chatContainer.innerHTML = html;
-                        scrollToBottom(chatContainer);
-                    })
-                    .catch(error => {
-                        console.error('Error refreshing chat after introduction refine:', error);
-                    });
+            const textarea = document.getElementById('introduction-editor');
+            if (textarea) {
+            } else {
             }
+
+            // NOTE: We don't refresh chat messages here anymore
+            // The AI message is already appended by HTMX via OOB swap or separate response
+            // Refreshing would remove the user message that was added by JavaScript
         }
 
         // Hide AI process status only for specific targets that indicate completion
@@ -204,7 +169,35 @@ export function initializeHTMXEvents() {
         // Scroll to bottom to show new message
         const chatContainer = document.getElementById('chat-messages');
         if (chatContainer && evt.detail.target.id === 'chat-messages') {
-            setTimeout(() => scrollToBottom(chatContainer), 100);
+            // Track AI message in global state if it was just added
+            if (window.addChatMessage) {
+                const newMessages = chatContainer.querySelectorAll('.message.ai-message');
+                if (newMessages.length > 0) {
+                    const lastMessage = newMessages[newMessages.length - 1];
+                    const bubble = lastMessage.querySelector('.message-bubble');
+                    if (bubble) {
+                        const content = bubble.textContent.trim();
+                        // Check if this message is already in our global state
+                        const existingMessages = window.getChatMessages ? window.getChatMessages() : [];
+                        const isDuplicate = existingMessages.some(msg =>
+                            msg.role === 'assistant' && msg.content === content
+                        );
+                        if (!isDuplicate) {
+                            window.addChatMessage('assistant', content);
+                        }
+                    }
+                }
+            }
+
+            // Check if messages were lost and restore from global state
+            if (window.restoreChatMessagesFromState) {
+                setTimeout(() => {
+                    window.restoreChatMessagesFromState();
+                    scrollToBottom(chatContainer);
+                }, 50);
+            } else {
+                setTimeout(() => scrollToBottom(chatContainer), 100);
+            }
 
             // Refresh goals list if we're in goal-definition context
             const context = window.currentAgencyContext || '';
@@ -213,15 +206,24 @@ export function initializeHTMXEvents() {
                 const goalsTableBody = document.getElementById('goals-table-body');
 
                 if (agencyId && goalsTableBody) {
-                    console.log('[HTMX] Refreshing goals list after chat response');
-                    fetch(`/api/v1/agencies/${agencyId}/goals/html`)
-                        .then(response => response.text())
-                        .then(html => {
-                            goalsTableBody.innerHTML = html;
-                            console.log('[HTMX] ✅ Goals list refreshed');
+                    window.loadEntityList('goals', 'goals-table-body', 3)
+                        .then(() => {
                         })
                         .catch(error => {
-                            console.error('[HTMX] ❌ Error refreshing goals list:', error);
+                        });
+                }
+            }
+
+            // Refresh work items list if we're in work-items context
+            if (context === 'work-items') {
+                const agencyId = window.location.pathname.match(/agencies\/([^\/]+)/)?.[1];
+                const workItemsTableBody = document.getElementById('work-items-table-body');
+
+                if (agencyId && workItemsTableBody) {
+                    window.loadEntityList('work-items', 'work-items-table-body', 3)
+                        .then(() => {
+                        })
+                        .catch(error => {
                         });
                 }
             }

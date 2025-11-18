@@ -292,7 +292,6 @@ func (hsb *HealthStatusBroadcaster) Subscribe(agentID string) <-chan *HealthEven
 	eventChan := make(chan *HealthEvent, 100) // Buffered channel
 	hsb.subscribers[agentID] = append(hsb.subscribers[agentID], eventChan)
 
-	hsb.logger.WithField("agent_id", agentID).Debug("Added health status subscriber")
 	return eventChan
 }
 

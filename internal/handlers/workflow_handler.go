@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -11,15 +13,17 @@ import (
 
 // WorkflowHandler handles HTTP requests for workflows
 type WorkflowHandler struct {
-	service *workflow.Service
-	logger  *logrus.Logger
+	service       *workflow.Service
+	agencyService agency.Service
+	logger        *logrus.Logger
 }
 
 // NewWorkflowHandler creates a new workflow handler
-func NewWorkflowHandler(service *workflow.Service, logger *logrus.Logger) *WorkflowHandler {
+func NewWorkflowHandler(service *workflow.Service, agencyService agency.Service, logger *logrus.Logger) *WorkflowHandler {
 	return &WorkflowHandler{
-		service: service,
-		logger:  logger,
+		service:       service,
+		agencyService: agencyService,
+		logger:        logger,
 	}
 }
 
@@ -27,7 +31,7 @@ func NewWorkflowHandler(service *workflow.Service, logger *logrus.Logger) *Workf
 func (h *WorkflowHandler) CreateWorkflow(c *gin.Context) {
 	agencyID := c.Param("id")
 
-	var req workflow.Workflow
+	var req models.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -80,7 +84,7 @@ func (h *WorkflowHandler) GetWorkflow(c *gin.Context) {
 func (h *WorkflowHandler) UpdateWorkflow(c *gin.Context) {
 	id := c.Param("id")
 
-	var req workflow.Workflow
+	var req models.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -126,7 +130,7 @@ func (h *WorkflowHandler) DuplicateWorkflow(c *gin.Context) {
 
 // ValidateWorkflow handles POST /api/v1/workflows/validate
 func (h *WorkflowHandler) ValidateWorkflow(c *gin.Context) {
-	var req workflow.Workflow
+	var req models.Workflow
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
@@ -149,29 +153,4 @@ func (h *WorkflowHandler) ListWorkflows(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, workflows)
-}
-
-// StartExecution handles POST /api/v1/workflows/:id/execute
-func (h *WorkflowHandler) StartExecution(c *gin.Context) {
-	id := c.Param("id")
-
-	var req struct {
-		Context map[string]interface{} `json:"context"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-
-	// TODO: Get user from context/session
-	startedBy := "system"
-
-	execution, err := h.service.StartExecution(c.Request.Context(), id, startedBy, req.Context)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to start execution")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start execution", "details": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, execution)
 }

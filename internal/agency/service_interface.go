@@ -1,47 +1,32 @@
 package agency
 
-import "context"
+import (
+	"context"
+
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
 
 // Service defines the interface for agency business logic operations
 type Service interface {
 	// Agency operations
-	CreateAgency(ctx context.Context, agency *Agency) error
-	GetAgency(ctx context.Context, id string) (*Agency, error)
-	ListAgencies(ctx context.Context, filters AgencyFilters) ([]*Agency, error)
-	UpdateAgency(ctx context.Context, id string, updates AgencyUpdates) error
+	CreateAgency(ctx context.Context, agency *models.Agency) error
+	GetAgency(ctx context.Context, id string) (*models.Agency, error)
+	ListAgencies(ctx context.Context, filters models.AgencyFilters) ([]*models.Agency, error)
+	UpdateAgency(ctx context.Context, id string, updates models.AgencyUpdates) error
 	DeleteAgency(ctx context.Context, id string) error
 	SetActiveAgency(ctx context.Context, id string) error
-	GetActiveAgency(ctx context.Context) (*Agency, error)
-	GetAgencyStatistics(ctx context.Context, id string) (*AgencyStatistics, error)
+	GetActiveAgency(ctx context.Context) (*models.Agency, error)
+	GetAgencyStatistics(ctx context.Context, id string) (*models.AgencyStatistics, error)
 
-	// Overview methods
-	GetAgencyOverview(ctx context.Context, agencyID string) (*Overview, error)
-	UpdateAgencyOverview(ctx context.Context, agencyID string, introduction string) error
-
-	// Goal methods
-	CreateGoal(ctx context.Context, agencyID string, code string, description string) (*Goal, error)
-	GetGoals(ctx context.Context, agencyID string) ([]*Goal, error)
-	GetGoal(ctx context.Context, agencyID string, key string) (*Goal, error)
-	UpdateGoal(ctx context.Context, agencyID string, key string, code string, description string) error
-	DeleteGoal(ctx context.Context, agencyID string, key string) error
-
-	// WorkItem methods
-	CreateWorkItem(ctx context.Context, agencyID string, req CreateWorkItemRequest) (*WorkItem, error)
-	GetWorkItems(ctx context.Context, agencyID string) ([]*WorkItem, error)
-	GetWorkItem(ctx context.Context, agencyID string, key string) (*WorkItem, error)
-	GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*WorkItem, error)
-	UpdateWorkItem(ctx context.Context, agencyID string, key string, req UpdateWorkItemRequest) error
-	DeleteWorkItem(ctx context.Context, agencyID string, key string) error
-	ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error
-
-	// RACI Assignment methods (graph-based)
-	CreateRACIAssignment(ctx context.Context, agencyID string, assignment *RACIAssignment) error
-	GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*RACIAssignment, error)
-	GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*RACIAssignment, error)
-	GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*RACIAssignment, error)
-	UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *RACIAssignment) error
-	DeleteRACIAssignment(ctx context.Context, agencyID string, key string) error
-	DeleteRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) error
+	// Specification methods (unified document approach)
+	GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error)
+	UpdateSpecification(ctx context.Context, agencyID string, req *models.SpecificationUpdateRequest) (*models.AgencySpecification, error)
+	UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error)
+	UpdateSpecificationGoals(ctx context.Context, agencyID string, goals []models.Goal, updatedBy string) (*models.AgencySpecification, error)
+	UpdateSpecificationWorkItems(ctx context.Context, agencyID string, workItems []models.WorkItem, updatedBy string) (*models.AgencySpecification, error)
+	UpdateSpecificationWorkflows(ctx context.Context, agencyID string, workflows []models.Workflow, updatedBy string) (*models.AgencySpecification, error)
+	UpdateSpecificationRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error)
+	UpdateSpecificationRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix, updatedBy string) (*models.AgencySpecification, error)
 }
 
 // Use services.New() or services.NewWithDBInit() to create a service instance.

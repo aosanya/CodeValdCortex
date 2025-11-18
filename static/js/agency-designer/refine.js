@@ -36,7 +36,6 @@ function sendChatMessage(message) {
     const chatForm = userInput.closest('form');
 
     if (!userInput || !chatForm) {
-        console.error('Chat form not found');
         return;
     }
 

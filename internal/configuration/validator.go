@@ -1,23 +1,18 @@
 package configuration
 
 import (
-	"context"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/agent"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // DefaultValidator implements the Validator interface
 type DefaultValidator struct {
 	// resourceChecker checks resource availability
 	resourceChecker ResourceChecker
-
-	// roleService validates against registered agent types
-	roleService registry.RoleService
 }
 
 // ResourceChecker defines the interface for checking resource availability
@@ -64,22 +59,22 @@ func (ve ValidationErrors) Error() string {
 // NewDefaultValidator creates a new default validator
 func NewDefaultValidator(resourceChecker ResourceChecker) *DefaultValidator {
 	return &DefaultValidator{
-		resourceChecker:  resourceChecker,
-		roleService: nil, // Set via SetRoleService
+		resourceChecker: resourceChecker,
 	}
 }
 
-// NewDefaultValidatorWithTypeService creates a validator with agent type service
-func NewDefaultValidatorWithTypeService(resourceChecker ResourceChecker, roleService registry.RoleService) *DefaultValidator {
+// NewDefaultValidatorWithTypeService creates a validator (kept for compatibility)
+// Deprecated: Use NewDefaultValidator instead
+func NewDefaultValidatorWithTypeService(resourceChecker ResourceChecker) *DefaultValidator {
 	return &DefaultValidator{
-		resourceChecker:  resourceChecker,
-		roleService: roleService,
+		resourceChecker: resourceChecker,
 	}
 }
 
-// SetRoleService sets the agent type service for validation
-func (v *DefaultValidator) SetRoleService(service registry.RoleService) {
-	v.roleService = service
+// SetRoleService is deprecated - no longer uses role service
+// Deprecated: Kept for compatibility only
+func (v *DefaultValidator) SetRoleService(service interface{}) {
+	// No-op - registry removed
 }
 
 // Validate validates an agent configuration
@@ -619,26 +614,9 @@ func (v *DefaultValidator) validateLabels(labels map[string]string) error {
 
 // Helper functions
 
-// validateAgentType validates an agent type using the registry or fallback to hardcoded list
+// validateAgentType validates an agent type using hardcoded list
 func (v *DefaultValidator) validateAgentType(agentType string) error {
-	// If agent type service is available, use it
-	if v.roleService != nil {
-		ctx := context.Background()
-		isValid, err := v.roleService.IsValidType(ctx, agentType)
-		if err != nil {
-			// On error, fall back to hardcoded validation
-			if !isValidAgentType(agentType) {
-				return fmt.Errorf("unsupported agent type")
-			}
-			return nil
-		}
-		if !isValid {
-			return fmt.Errorf("agent type not registered or disabled")
-		}
-		return nil
-	}
-
-	// Fallback to hardcoded list
+	// Use hardcoded list
 	if !isValidAgentType(agentType) {
 		return fmt.Errorf("unsupported agent type")
 	}

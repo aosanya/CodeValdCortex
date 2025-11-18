@@ -1,7 +1,7 @@
 // CRUD Helper Functions
 // Reusable functions for managing entities (goals, work items, roles)
 
-import { getCurrentAgencyId, showNotification } from './utils.js';
+// Uses global functions: getCurrentAgencyId, showNotification, specificationAPI
 
 /**
  * Generic function to load entity list HTML
@@ -9,16 +9,14 @@ import { getCurrentAgencyId, showNotification } from './utils.js';
  * @param {string} tableBodyId - ID of the table body element
  * @param {number} colspan - Number of columns for loading/error messages
  */
-export async function loadEntityList(entityType, tableBodyId, colspan = 3) {
-    const agencyId = getCurrentAgencyId();
+window.loadEntityList = async function (entityType, tableBodyId, colspan = 3) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        console.error('No agency ID found');
         return;
     }
 
     const tableBody = document.getElementById(tableBodyId);
     if (!tableBody) {
-        console.error(`Table body not found: ${tableBodyId}`);
         return;
     }
 
@@ -26,16 +24,252 @@ export async function loadEntityList(entityType, tableBodyId, colspan = 3) {
     tableBody.innerHTML = `<tr><td colspan="${colspan}" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading ${entityType}...</p></td></tr>`;
 
     try {
-        const response = await fetch(`/api/v1/agencies/${agencyId}/${entityType}/html`);
-        if (!response.ok) {
-            throw new Error(`Failed to load ${entityType}`);
+        // Use the specification API to get data and render HTML locally
+        const specification = await window.specificationAPI.getSpecification();
+
+        // Cache specification for use in rendering (especially for goal tags in work items)
+        window._cachedSpecification = specification;
+
+        let entities = [];
+
+        // Handle workflows separately since they have their own API
+        if (entityType === 'workflows') {
+            const response = await fetch(`/api/v1/agencies/${agencyId}/workflows/html`);
+            if (!response.ok) {
+                throw new Error(`Failed to load workflows: ${response.status}`);
+            }
+            const html = await response.text();
+            tableBody.innerHTML = html;
+            return;
         }
-        const html = await response.text();
+
+        switch (entityType) {
+            case 'goals':
+                entities = specification.goals || [];
+                break;
+            case 'work-items':
+                entities = specification.work_items || [];
+                break;
+            case 'roles':
+                entities = specification.roles || [];
+                break;
+            default:
+                throw new Error(`Unknown entity type: ${entityType}`);
+        }
+
+        // Generate HTML based on entity type
+        const html = generateEntityListHTML(entityType, entities);
         tableBody.innerHTML = html;
     } catch (error) {
-        console.error(`Error loading ${entityType}:`, error);
         tableBody.innerHTML = `<tr><td colspan="${colspan}" class="has-text-danger has-text-centered py-5"><p>Error loading ${entityType}</p></td></tr>`;
     }
+}
+
+/**
+ * Generate HTML for entity list based on type and data
+ * @param {string} entityType - Type of entity
+ * @param {Array} entities - Array of entity objects
+ */
+function generateEntityListHTML(entityType, entities) {
+    if (!entities || entities.length === 0) {
+        const entityDisplay = entityType.replace('-', ' ');
+        return `<tr><td colspan="4" class="has-text-grey has-text-centered py-5"><p>No ${entityDisplay} defined yet.</p></td></tr>`;
+    }
+
+    switch (entityType) {
+        case 'goals':
+            return entities.map(goal => {
+                // Use _key as the primary unique identifier for goals (guaranteed unique by ArangoDB)
+                const id = goal._key;
+
+                return `
+                <tr>
+                    <td>
+                        <label class="checkbox">
+                            <input type="checkbox" value="${id}" onchange="window.updateGoalSelectionButtons && window.updateGoalSelectionButtons()">
+                        </label>
+                    </td>
+                    <td>
+                        <strong>${escapeHtml(goal.code || '')}</strong>
+                    </td>
+                    <td>${escapeHtml(goal.description || '')}</td>
+                    <td>
+                        <div class="buttons">
+                            <button class="button is-small" onclick="window.showGoalEditor('edit', '${id}', '${escapeHtml(goal.code)}', '${escapeHtml(goal.description)}')">
+                                <span class="icon"><i class="fas fa-edit"></i></span>
+                            </button>
+                            <button class="button is-small is-danger" onclick="window.deleteGoal('${id}')">
+                                <span class="icon"><i class="fas fa-trash"></i></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+        case 'work-items':
+            return entities.map(item => {
+                // Use _key as the primary unique identifier for work items (guaranteed unique by UUID)
+                const id = item._key;
+
+                // Get goals data for displaying goal tags
+                const goalKeys = item.goal_keys || [];
+                let goalTagsHTML = '';
+
+                if (goalKeys.length > 0) {
+                    // We need to get the specification to map goal keys to goal codes
+                    // Since we're in a map function, we'll use the cached specification
+                    const goals = window._cachedSpecification?.goals || [];
+                    const goalMap = {};
+                    goals.forEach(g => {
+                        goalMap[g._key] = g.code || g._key;
+                    });
+
+                    goalTagsHTML = '<hr class="m-0"/><div class="mt-2">' +
+                        '<span class="has-text-grey is-size-6">Goals: </span>' +
+                        '<div class="tags is-inline">' +
+                        goalKeys.map(gk => {
+                            const goalCode = goalMap[gk] || gk.substring(0, 8);
+                            return `<span class="tag is-link is-light" title="Linked Goal: ${goalCode}">${goalCode}</span>`;
+                        }).join('') +
+                        '</div>' +
+                        '</div>';
+                }
+
+                return `
+                <tr>
+                    <td>
+                        <label class="checkbox">
+                            <input type="checkbox" value="${id}" onchange="window.updateWorkItemSelectionButtons && window.updateWorkItemSelectionButtons()">
+                        </label>
+                    </td>
+                    <td><strong>${escapeHtml(item.code || '')}</strong></td>
+                    <td>
+                        <div>
+                            <strong>${escapeHtml(item.title || '')}</strong>
+                            ${item.description ? `<br><small class="has-text-grey">${escapeHtml(item.description)}</small>` : ''}
+                            ${goalTagsHTML}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="buttons">
+                            <button class="button is-small" onclick="window.showWorkItemEditor('edit', '${id}')">
+                                <span class="icon"><i class="fas fa-edit"></i></span>
+                            </button>
+                            <button class="button is-small is-danger" onclick="window.deleteWorkItem('${id}')">
+                                <span class="icon"><i class="fas fa-trash"></i></span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+        case 'roles':
+            return entities.map(role => {
+                // Use _key as primary identifier for roles
+                const id = role._key || role.key || role._id || role.code || role.id || role.name;
+
+                // Build autonomy and tags HTML similar to work items' goal tags
+                let detailTagsHTML = '';
+                const hasAutonomy = role.autonomy_level && role.autonomy_level !== '';
+                const hasTokenBudget = role.token_budget && role.token_budget > 0;
+                const hasTags = role.tags && role.tags.length > 0;
+
+                if (hasAutonomy || hasTokenBudget || hasTags) {
+                    const tags = [];
+
+                    // Add autonomy level tag
+                    if (hasAutonomy) {
+                        tags.push(`<span class="tag is-primary is-light"><span class="icon is-small"><i class="fas fa-robot"></i></span><span>${escapeHtml(role.autonomy_level)}</span></span>`);
+                    }
+
+                    // Add token budget tag
+                    if (hasTokenBudget) {
+                        const budget = formatTokenBudget(role.token_budget);
+                        tags.push(`<span class="tag is-info is-light"><span class="icon is-small"><i class="fas fa-coins"></i></span><span>${budget}</span></span>`);
+                    }
+
+                    // Add custom tags
+                    if (hasTags) {
+                        role.tags.forEach(tag => {
+                            tags.push(`<span class="tag is-light">${escapeHtml(tag)}</span>`);
+                        });
+                    }
+
+                    detailTagsHTML = '<div class="mt-2"><div class="tags are-small">' + tags.join('') + '</div></div>';
+                }
+
+                return `
+                <tr class="table-item">
+                    <td>
+                        <label class="checkbox">
+                            <input type="checkbox" class="role-checkbox" value="${id}" data-role-key="${id}" onchange="window.updateRoleSelectionButtons && window.updateRoleSelectionButtons()">
+                        </label>
+                    </td>
+                    <td><strong>${escapeHtml(role.code || role.id || '')}</strong></td>
+                    <td>
+                        <div>
+                            ${role.icon ? `<span style="font-size: 1.2em;" class="mr-1">${escapeHtml(role.icon)}</span>` : ''}
+                            <strong>${escapeHtml(role.name || '')}</strong>
+                            ${role.description ? `<br><small class="has-text-grey">${escapeHtml(truncateText(role.description, 100))}</small>` : ''}
+                            ${detailTagsHTML}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="buttons">
+                            <button class="button is-small is-light is-fullwidth" onclick="window.ContextManager && window.ContextManager.addRoleContext('${escapeHtml(role.code || role.id || '')}', '${escapeHtml(role.description || role.name || '')}')">
+                                <span class="icon"><i class="fas fa-layer-group"></i></span>
+                                <span>Context</span>
+                            </button>
+                            <button class="button is-small is-info is-fullwidth" onclick="window.showRoleEditor('edit', '${id}')">
+                                <span class="icon"><i class="fas fa-edit"></i></span>
+                                <span>Edit</span>
+                            </button>
+                            <button class="button is-small is-danger is-fullwidth" onclick="window.deleteRole('${id}')">
+                                <span class="icon"><i class="fas fa-trash"></i></span>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+        default:
+            return '<tr><td colspan="3" class="has-text-danger">Unknown entity type</td></tr>';
+    }
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Format token budget for display (K/M format)
+ */
+function formatTokenBudget(budget) {
+    if (budget >= 1000000) {
+        return (budget / 1000000).toFixed(1) + 'M';
+    } else if (budget >= 1000) {
+        return (budget / 1000).toFixed(1) + 'K';
+    }
+    return budget.toString();
+}
+
+/**
+ * Truncate text to specified length
+ */
+function truncateText(text, maxLength) {
+    if (!text || text.length <= maxLength) {
+        return text;
+    }
+    return text.substring(0, maxLength) + '...';
 }
 
 /**
@@ -48,13 +282,12 @@ export async function loadEntityList(entityType, tableBodyId, colspan = 3) {
  * @param {string} editTitle - Title text for edit mode
  * @param {string} focusElementId - ID of element to focus after showing
  */
-export function showEntityEditor(mode, editorCardId, listCardId, titleElementId, addTitle, editTitle, focusElementId) {
+window.showEntityEditor = function (mode, editorCardId, listCardId, titleElementId, addTitle, editTitle, focusElementId) {
     const editorCard = document.getElementById(editorCardId);
     const listCard = document.getElementById(listCardId);
     const editorTitle = document.getElementById(titleElementId);
 
     if (!editorCard || !listCard) {
-        console.error('Editor or list card not found');
         return;
     }
 
@@ -66,6 +299,22 @@ export function showEntityEditor(mode, editorCardId, listCardId, titleElementId,
     // Show editor, hide list
     editorCard.classList.remove('is-hidden');
     listCard.classList.add('is-hidden');
+
+    // Hide AI operations toolbar based on editor type
+    const aiOperationsMap = {
+        'goal-editor-card': 'goal-ai-operations',
+        'work-item-editor-card': 'work-item-ai-operations',
+        'role-editor-card': 'role-ai-operations',
+        'workflow-editor-card': 'workflow-ai-operations'
+    };
+
+    const aiOperationsId = aiOperationsMap[editorCardId];
+    if (aiOperationsId) {
+        const aiOperations = document.getElementById(aiOperationsId);
+        if (aiOperations) {
+            aiOperations.classList.add('is-hidden');
+        }
+    }
 
     // Focus on specified element
     if (focusElementId) {
@@ -81,12 +330,28 @@ export function showEntityEditor(mode, editorCardId, listCardId, titleElementId,
  * @param {string} listCardId - ID of list card element
  * @param {string[]} fieldIds - Array of field IDs to clear
  */
-export function cancelEntityEdit(editorCardId, listCardId, fieldIds = []) {
+window.cancelEntityEdit = function (editorCardId, listCardId, fieldIds = []) {
     const editorCard = document.getElementById(editorCardId);
     const listCard = document.getElementById(listCardId);
 
     if (editorCard) editorCard.classList.add('is-hidden');
     if (listCard) listCard.classList.remove('is-hidden');
+
+    // Show AI operations toolbar based on editor type
+    const aiOperationsMap = {
+        'goal-editor-card': 'goal-ai-operations',
+        'work-item-editor-card': 'work-item-ai-operations',
+        'role-editor-card': 'role-ai-operations',
+        'workflow-editor-card': 'workflow-ai-operations'
+    };
+
+    const aiOperationsId = aiOperationsMap[editorCardId];
+    if (aiOperationsId) {
+        const aiOperations = document.getElementById(aiOperationsId);
+        if (aiOperations) {
+            aiOperations.classList.remove('is-hidden');
+        }
+    }
 
     // Clear form fields
     fieldIds.forEach(id => {
@@ -104,34 +369,48 @@ export function cancelEntityEdit(editorCardId, listCardId, fieldIds = []) {
  * @param {string} entityName - Display name for confirmation
  * @param {Function} reloadCallback - Function to call after successful deletion
  */
-export async function deleteEntity(entityType, entityKey, entityName, reloadCallback) {
+window.deleteEntity = async function (entityType, entityKey, entityName, reloadCallback) {
     if (!confirm(`Are you sure you want to delete ${entityName}?`)) {
         return;
     }
 
-    const agencyId = getCurrentAgencyId();
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
     try {
-        const response = await fetch(`/api/v1/agencies/${agencyId}/${entityType}/${entityKey}`, {
-            method: 'DELETE'
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to delete ${entityType.slice(0, -1)}`);
+        // Use specification API to delete entity
+        switch (entityType) {
+            case 'goals':
+                await window.specificationAPI.deleteGoal(entityKey);
+                break;
+            case 'work-items':
+                await window.specificationAPI.deleteWorkItem(entityKey);
+                break;
+            case 'roles':
+                // For roles, we need to get current roles and filter out the deleted one
+                const spec = await window.specificationAPI.getSpecification();
+                const updatedRoles = (spec.roles || []).filter(r => {
+                    const id = r._key || r.key || r._id || r.name;
+                    return id !== entityKey;
+                });
+                await window.specificationAPI.updateRoles(updatedRoles);
+                break;
+            case 'workflows':
+                await window.specificationAPI.deleteWorkflow(entityKey);
+                break;
+            default:
+                throw new Error(`Unknown entity type: ${entityType}`);
         }
 
-        await response.json();
-        showNotification(`${entityName} deleted successfully!`, 'success');
+        window.showNotification(`${entityName} deleted successfully!`, 'success');
         if (reloadCallback) {
             reloadCallback();
         }
     } catch (error) {
-        console.error(`Error deleting ${entityType}:`, error);
-        showNotification(`Error deleting ${entityType.slice(0, -1)}`, 'error');
+        window.showNotification(`Error deleting ${entityType.slice(0, -1)}`, 'error');
     }
 }
 
@@ -144,10 +423,10 @@ export async function deleteEntity(entityType, entityKey, entityName, reloadCall
  * @param {string} saveBtnId - ID of save button (to show loading state)
  * @param {Function} successCallback - Function to call after successful save
  */
-export async function saveEntity(entityType, mode, entityKey, data, saveBtnId, successCallback) {
-    const agencyId = getCurrentAgencyId();
+window.saveEntity = async function (entityType, mode, entityKey, data, saveBtnId, successCallback) {
+    const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
-        showNotification('Error: No agency selected', 'error');
+        window.showNotification('Error: No agency selected', 'error');
         return;
     }
 
@@ -157,33 +436,64 @@ export async function saveEntity(entityType, mode, entityKey, data, saveBtnId, s
     }
 
     const isAddMode = mode === 'add';
-    const url = isAddMode
-        ? `/api/v1/agencies/${agencyId}/${entityType}`
-        : `/api/v1/agencies/${agencyId}/${entityType}/${entityKey}`;
-    const method = isAddMode ? 'POST' : 'PUT';
 
     try {
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to ${isAddMode ? 'create' : 'update'} ${entityType.slice(0, -1)}`);
+        // Use specification API to save entity
+        if (isAddMode) {
+            switch (entityType) {
+                case 'goals':
+                    await window.specificationAPI.addGoal(data);
+                    break;
+                case 'work-items':
+                    await window.specificationAPI.addWorkItem(data);
+                    break;
+                case 'roles':
+                    const spec = await window.specificationAPI.getSpecification();
+                    const updatedRoles = [...(spec.roles || []), data];
+                    await window.specificationAPI.updateRoles(updatedRoles);
+                    break;
+                case 'workflows':
+                    await window.specificationAPI.addWorkflow(data);
+                    break;
+                default:
+                    throw new Error(`Unknown entity type: ${entityType}`);
+            }
+        } else {
+            switch (entityType) {
+                case 'goals':
+                    await window.specificationAPI.updateGoal(entityKey, data);
+                    break;
+                case 'work-items':
+                    await window.specificationAPI.updateWorkItem(entityKey, data);
+                    break;
+                case 'roles':
+                    const spec = await window.specificationAPI.getSpecification();
+                    const roles = spec.roles || [];
+                    const roleIndex = roles.findIndex(r => {
+                        const id = r._key || r.key || r._id || r.name;
+                        return id === entityKey;
+                    });
+                    if (roleIndex === -1) {
+                        throw new Error(`Role with key ${entityKey} not found`);
+                    }
+                    roles[roleIndex] = { ...roles[roleIndex], ...data };
+                    await window.specificationAPI.updateRoles(roles);
+                    break;
+                case 'workflows':
+                    await window.specificationAPI.updateWorkflow(entityKey, data);
+                    break;
+                default:
+                    throw new Error(`Unknown entity type: ${entityType}`);
+            }
         }
 
-        await response.json();
-        showNotification(`${entityType.slice(0, -1)} ${isAddMode ? 'added' : 'updated'} successfully!`, 'success');
+        window.showNotification(`${entityType.slice(0, -1)} ${isAddMode ? 'added' : 'updated'} successfully!`, 'success');
 
         if (successCallback) {
             successCallback();
         }
     } catch (error) {
-        console.error(`Error ${isAddMode ? 'creating' : 'updating'} ${entityType}:`, error);
-        showNotification(`Error ${isAddMode ? 'adding' : 'updating'} ${entityType.slice(0, -1)}`, 'error');
+        window.showNotification(`Error ${isAddMode ? 'adding' : 'updating'} ${entityType.slice(0, -1)}`, 'error');
     } finally {
         if (saveBtn) {
             saveBtn.classList.remove('is-loading');
@@ -195,7 +505,7 @@ export async function saveEntity(entityType, mode, entityKey, data, saveBtnId, s
  * Helper to populate form fields from data object
  * @param {Object} fieldMap - Map of field IDs to data values
  */
-export function populateForm(fieldMap) {
+window.populateForm = function (fieldMap) {
     for (const [id, value] of Object.entries(fieldMap)) {
         const element = document.getElementById(id);
         if (element) {
@@ -209,7 +519,7 @@ export function populateForm(fieldMap) {
  * @param {string[]} fieldIds - Array of field IDs to clear
  * @param {Object} defaults - Optional default values for specific fields
  */
-export function clearForm(fieldIds, defaults = {}) {
+window.clearForm = function (fieldIds, defaults = {}) {
     fieldIds.forEach(id => {
         const element = document.getElementById(id);
         if (element) {

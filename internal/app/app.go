@@ -2,19 +2,16 @@ package app
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
-	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
@@ -37,8 +34,6 @@ type App struct {
 	logger              *logrus.Logger
 	dbClient            *database.ArangoClient
 	registry            *registry.Repository
-	roleService         registry.RoleService
-	roleRepository      registry.RoleRepository
 	agencyService       agency.Service
 	agencyRepository    agency.Repository
 	runtimeManager      *runtime.Manager
@@ -75,34 +70,7 @@ func New(cfg *config.Config) *App {
 		logger.WithError(err).Fatal("Failed to initialize agent registry")
 	}
 
-	// Initialize role registry with ArangoDB persistence
-	logger.Info("Initializing role repository with ArangoDB")
-	roleRepo, err := registry.NewArangoRoleRepository(dbClient)
-	if err != nil {
-		logger.WithError(err).Fatal("Failed to initialize role repository")
-	}
-	roleService := registry.NewRoleService(roleRepo, logger)
-
-	// Register default roles
-	ctx := context.Background()
-	if err := registry.InitializeDefaultRoles(ctx, roleService, logger); err != nil {
-		logger.WithError(err).Warn("Failed to initialize default roles")
-	}
-
-	// Load use case-specific roles from config directory
-	useCaseConfigDir := os.Getenv("USECASE_CONFIG_DIR")
-	if useCaseConfigDir != "" {
-		rolesDir := filepath.Join(useCaseConfigDir, "config", "agents")
-		if err := loadRolesFromDirectory(ctx, rolesDir, roleService, logger); err != nil {
-			logger.WithError(err).Warn("Failed to load use case roles")
-		}
-
-		// Load use case-specific agent instances from data directory
-		agentDataDir := filepath.Join(useCaseConfigDir, "data")
-		if err := loadAgentInstancesFromDirectory(ctx, agentDataDir, reg, logger); err != nil {
-			logger.WithError(err).Warn("Failed to load use case agent instances")
-		}
-	}
+	// Note: Role registry removed - roles now managed via agency specifications
 
 	// Initialize communication repository and services
 	logger.Info("Initializing communication services")
@@ -136,7 +104,7 @@ func New(cfg *config.Config) *App {
 	}
 	agencyValidator := agency.NewValidator()
 	agencyDBInit := agency.NewDatabaseInitializer(dbClient.Client(), logger)
-	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit)
+	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit, logger)
 	logger.Info("Agency management service initialized successfully")
 
 	// Initialize AI services
@@ -189,8 +157,6 @@ func New(cfg *config.Config) *App {
 		logger:              logger,
 		dbClient:            dbClient,
 		registry:            reg,
-		roleRepository:      roleRepo,
-		roleService:         roleService,
 		agencyService:       agencyService,
 		agencyRepository:    agencyRepo,
 		runtimeManager:      runtimeManager,
@@ -296,7 +262,6 @@ func (a *App) setupServer() error {
 
 	// Register web dashboard handler
 	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
-	rolesWebHandler := webhandlers.NewRolesWebHandler(a.roleService, a.logger)
 	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
 	// Initialize homepage handler
 	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.runtimeManager, a.dbClient, a.registry, a.logger)
@@ -309,7 +274,6 @@ func (a *App) setupServer() error {
 		// Create AI refine handler (needed by chat handler and API routes)
 		aiRefineHandler = ai_refine.NewHandler(
 			a.agencyService,
-			a.roleService,
 			a.workflowService,
 			a.introductionRefiner,
 			a.goalRefiner,
@@ -321,18 +285,15 @@ func (a *App) setupServer() error {
 			a.logger,
 		)
 
-		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.roleService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
+		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.workflowService, a.logger)
+		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
 		a.logger.Info("AI Agency Designer web handler initialized")
 	} // Agency middleware
-	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger)
-
-	// Serve static files
+	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger) // Serve static files
 	router.Static("/static", "./static")
 
 	// Web dashboard routes
 	router.GET("/", homepageHandler.ShowHomepage)
-	router.GET("/roles", rolesWebHandler.ShowRoles)
 	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
 	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
 
@@ -367,10 +328,6 @@ func (a *App) setupServer() error {
 		webAPI.GET("/agents/json", dashboardHandler.GetAgentsJSON) // JSON API for large datasets
 		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
 
-		// Roles web endpoints
-		webAPI.GET("/roles", rolesWebHandler.GetRolesLive)
-		webAPI.POST("/roles/:id/:action", rolesWebHandler.HandleRoleAction)
-
 		// Topology visualizer endpoints
 		webAPI.GET("/topology/data", topologyVisualizerHandler.GetTopologyData)
 		webAPI.GET("/topology/updates", topologyVisualizerHandler.GetTopologyUpdates)
@@ -388,18 +345,8 @@ func (a *App) setupServer() error {
 	// API routes
 	v1 := router.Group("/api/v1")
 	{
-		// Roles endpoints
-		roleHandler := handlers.NewRoleHandler(a.roleService, a.logger)
-		v1.GET("/roles", roleHandler.ListRoles)
-		v1.GET("/roles/:id", roleHandler.GetRole)
-		v1.POST("/roles", roleHandler.CreateRole)
-		v1.PUT("/roles/:id", roleHandler.UpdateRole)
-		v1.DELETE("/roles/:id", roleHandler.DeleteRole)
-		v1.POST("/roles/:id/enable", roleHandler.EnableRole)
-		v1.POST("/roles/:id/disable", roleHandler.DisableRole)
-
 		// Agency endpoints
-		agencyHandler := handlers.NewAgencyHandler(a.agencyService, a.roleService, a.logger)
+		agencyHandler := handlers.NewAgencyHandler(a.agencyService, a.logger)
 		v1.GET("/agencies", agencyHandler.ListAgencies)
 		v1.GET("/agencies/:id", agencyHandler.GetAgency)
 		v1.POST("/agencies", agencyHandler.CreateAgency)
@@ -408,21 +355,20 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies/:id/activate", agencyHandler.ActivateAgency)
 		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
 		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
-		v1.GET("/agencies/:id/overview", agencyHandler.GetOverview)
-		v1.PUT("/agencies/:id/overview", agencyHandler.UpdateOverview)
-		v1.GET("/agencies/:id/goals", agencyHandler.GetGoals)
-		v1.GET("/agencies/:id/goals/html", agencyHandler.GetGoalsHTML)
-		v1.POST("/agencies/:id/goals", agencyHandler.CreateGoal)
-		v1.PUT("/agencies/:id/goals/:goalKey", agencyHandler.UpdateGoal)
-		v1.DELETE("/agencies/:id/goals/:goalKey", agencyHandler.DeleteGoal)
 
-		// Work Items endpoints
-		v1.GET("/agencies/:id/work-items", agencyHandler.GetWorkItems)
-		v1.GET("/agencies/:id/work-items/html", agencyHandler.GetWorkItemsHTML)
-		v1.POST("/agencies/:id/work-items", agencyHandler.CreateWorkItem)
-		v1.PUT("/agencies/:id/work-items/:key", agencyHandler.UpdateWorkItem)
-		v1.DELETE("/agencies/:id/work-items/:key", agencyHandler.DeleteWorkItem)
-		v1.POST("/agencies/:id/work-items/validate-deps", agencyHandler.ValidateWorkItemDependencies)
+		// Unified Specification endpoints (replaces separate overview/goals/work-items)
+		v1.GET("/agencies/:id/specification", agencyHandler.GetSpecification)
+		v1.PUT("/agencies/:id/specification", agencyHandler.UpdateSpecification)
+		v1.PUT("/agencies/:id/specification/introduction", agencyHandler.UpdateIntroduction)
+		v1.PUT("/agencies/:id/specification/goals", agencyHandler.UpdateGoals)
+		v1.PUT("/agencies/:id/specification/work-items", agencyHandler.UpdateWorkItems)
+		v1.PUT("/agencies/:id/specification/workflows", agencyHandler.UpdateWorkflows)
+		v1.PUT("/agencies/:id/specification/roles", agencyHandler.UpdateRoles)
+		v1.PUT("/agencies/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
+
+		// RACI Matrix CRUD endpoints
+		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetRACIMatrix)
+		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveRACIMatrix)
 
 		// Roles endpoints
 		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
@@ -432,13 +378,11 @@ func (a *App) setupServer() error {
 		v1.PUT("/agencies/:id/roles/:key", agencyHandler.UpdateAgencyRole)
 		v1.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
 
-		// RACI Matrix endpoints
-		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetAgencyRACIMatrix)
-		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveAgencyRACIMatrix)
+		// RACI Matrix is now part of unified specification endpoint
 
 		// Workflow endpoints
 		if a.workflowService != nil {
-			workflowHandler := handlers.NewWorkflowHandler(a.workflowService, a.logger)
+			workflowHandler := handlers.NewWorkflowHandler(a.workflowService, a.agencyService, a.logger)
 			v1.POST("/agencies/:id/workflows", workflowHandler.CreateWorkflow)
 			v1.GET("/agencies/:id/workflows", workflowHandler.GetWorkflows)
 			v1.GET("/agencies/:id/workflows/html", workflowHandler.GetWorkflowsHTML)
@@ -447,7 +391,6 @@ func (a *App) setupServer() error {
 			v1.DELETE("/workflows/:id", workflowHandler.DeleteWorkflow)
 			v1.POST("/workflows/:id/duplicate", workflowHandler.DuplicateWorkflow)
 			v1.POST("/workflows/validate", workflowHandler.ValidateWorkflow)
-			v1.POST("/workflows/:id/execute", workflowHandler.StartExecution)
 			a.logger.Info("Workflow endpoints registered")
 		}
 
@@ -463,13 +406,14 @@ func (a *App) setupServer() error {
 				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoalsWithPrompt)
 			}
 			if a.workItemBuilder != nil {
+				// DISABLED: Work item AI handlers need refactoring for unified specification model
 				// Main dynamic router - handles all work item operations through natural language prompts
-				v1.POST("/agencies/:id/work-items/refine-dynamic", aiRefineHandler.RefineWorkItems)
-				// Convenience routes that use RefineWorkItems with preset prompts
-				v1.POST("/agencies/:id/work-items/refine-specific", aiRefineHandler.RefineSpecificWorkItem)
-				v1.POST("/agencies/:id/work-items/generate", aiRefineHandler.GenerateWorkItemWithPrompt)
-				v1.POST("/agencies/:id/work-items/consolidate", aiRefineHandler.ConsolidateWorkItemsWithPrompt)
-				v1.POST("/agencies/:id/work-items/enhance-all", aiRefineHandler.EnhanceAllWorkItems)
+				// v1.POST("/agencies/:id/work-items/refine-dynamic", aiRefineHandler.RefineWorkItems)
+				// v1.POST("/agencies/:id/work-items/refine-specific", aiRefineHandler.RefineSpecificWorkItem)
+				// v1.POST("/agencies/:id/work-items/generate", aiRefineHandler.GenerateWorkItemWithPrompt)
+				// v1.POST("/agencies/:id/work-items/consolidate", aiRefineHandler.ConsolidateWorkItemsWithPrompt)
+				// v1.POST("/agencies/:id/work-items/enhance-all", aiRefineHandler.EnhanceAllWorkItems)
+				a.logger.Warn("Work item AI refine endpoints disabled - need refactoring for unified specification")
 			}
 			if a.roleBuilder != nil {
 				// Main dynamic router - handles all role operations through natural language prompts
@@ -490,8 +434,9 @@ func (a *App) setupServer() error {
 				v1.POST("/agencies/:id/raci-matrix/create-complete", aiRefineHandler.CreateCompleteRACIMatrixWithPrompt)
 			}
 			if a.workflowBuilder != nil {
-				// Main dynamic router - handles all workflow operations through natural language prompts
-				v1.POST("/agencies/:id/workflows/refine-dynamic", aiRefineHandler.RefineWorkflows)
+				// DISABLED: Workflow handler needs refactoring for unified specification model
+				// v1.POST("/agencies/:id/workflows/refine-dynamic", aiRefineHandler.RefineWorkflows)
+				a.logger.Warn("Workflow AI refine endpoint disabled - needs refactoring for unified specification")
 			}
 			a.logger.Info("AI Refine endpoints registered")
 		}
@@ -521,169 +466,4 @@ func (a *App) setupServer() error {
 	}
 
 	return nil
-}
-
-// loadRolesFromDirectory loads role definitions from JSON files in a directory
-func loadRolesFromDirectory(ctx context.Context, dir string, service registry.RoleService, logger *logrus.Logger) error {
-	// Check if directory exists
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		logger.WithField("dir", dir).Debug("Roles directory does not exist, skipping")
-		return nil
-	}
-
-	// Read all JSON files from directory
-	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
-	if err != nil {
-		return fmt.Errorf("failed to read roles directory: %w", err)
-	}
-
-	if len(files) == 0 {
-		logger.WithField("dir", dir).Debug("No role files found")
-		return nil
-	}
-
-	logger.WithFields(logrus.Fields{
-		"dir":   dir,
-		"count": len(files),
-	}).Info("Loading use case roles")
-
-	// Load each role file
-	for _, file := range files {
-		if err := loadRoleFromFile(ctx, file, service, logger); err != nil {
-			logger.WithError(err).WithField("file", file).Error("Failed to load role")
-			continue
-		}
-	}
-
-	return nil
-}
-
-// loadRoleFromFile loads a single role from a JSON file
-func loadRoleFromFile(ctx context.Context, filename string, service registry.RoleService, logger *logrus.Logger) error {
-	// Read file
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Parse JSON
-	var role registry.Role
-	if err := json.Unmarshal(data, &role); err != nil {
-		return fmt.Errorf("failed to parse JSON: %w", err)
-	}
-
-	// Register role
-	if err := service.RegisterType(ctx, &role); err != nil {
-		return fmt.Errorf("failed to register role: %w", err)
-	}
-
-	logger.WithFields(logrus.Fields{
-		"id":   role.ID,
-		"name": role.Name,
-		"tags": role.Tags,
-		"file": filepath.Base(filename),
-	}).Info("Loaded role")
-
-	return nil
-}
-
-// loadAgentInstancesFromDirectory loads agent instance definitions from JSON files in a directory
-func loadAgentInstancesFromDirectory(ctx context.Context, dir string, repo *registry.Repository, logger *logrus.Logger) error {
-	// Check if directory exists
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		logger.WithField("dir", dir).Debug("Agent instances directory does not exist, skipping")
-		return nil
-	}
-
-	// Read all JSON files from directory
-	files, err := filepath.Glob(filepath.Join(dir, "*.json"))
-	if err != nil {
-		return fmt.Errorf("failed to read agent instances directory: %w", err)
-	}
-
-	if len(files) == 0 {
-		logger.WithField("dir", dir).Debug("No agent instance files found")
-		return nil
-	}
-
-	logger.WithFields(logrus.Fields{
-		"dir":   dir,
-		"count": len(files),
-	}).Info("Loading use case agent instances")
-
-	loadedCount := 0
-	skippedCount := 0
-
-	// Load each agent instance file
-	for _, file := range files {
-		count, skipped, err := loadAgentInstancesFromFile(ctx, file, repo, logger)
-		if err != nil {
-			logger.WithError(err).WithField("file", file).Error("Failed to load agent instances")
-			continue
-		}
-		loadedCount += count
-		skippedCount += skipped
-	}
-
-	logger.WithFields(logrus.Fields{
-		"loaded":  loadedCount,
-		"skipped": skippedCount,
-	}).Info("Completed loading agent instances")
-
-	return nil
-}
-
-// loadAgentInstancesFromFile loads agent instances from a JSON file
-func loadAgentInstancesFromFile(ctx context.Context, filename string, repo *registry.Repository, logger *logrus.Logger) (int, int, error) {
-	// Read file
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return 0, 0, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Parse JSON as array of agents
-	var agents []agent.Agent
-	if err := json.Unmarshal(data, &agents); err != nil {
-		return 0, 0, fmt.Errorf("failed to parse JSON: %w", err)
-	}
-
-	loadedCount := 0
-	skippedCount := 0
-
-	// Create each agent instance
-	for i := range agents {
-		ag := &agents[i]
-		// Check if agent already exists
-		existing, err := repo.Get(ctx, ag.ID)
-		if err == nil && existing != nil {
-			logger.WithFields(logrus.Fields{
-				"id":   ag.ID,
-				"name": ag.Name,
-				"type": ag.Type,
-			}).Debug("Agent instance already exists, skipping")
-			skippedCount++
-			continue
-		}
-
-		// Create the agent
-		if err := repo.Create(ctx, ag); err != nil {
-			logger.WithError(err).WithFields(logrus.Fields{
-				"id":   ag.ID,
-				"name": ag.Name,
-				"type": ag.Type,
-			}).Error("Failed to create agent instance")
-			continue
-		}
-
-		logger.WithFields(logrus.Fields{
-			"id":   ag.ID,
-			"name": ag.Name,
-			"type": ag.Type,
-			"file": filepath.Base(filename),
-		}).Info("Loaded agent instance")
-
-		loadedCount++
-	}
-
-	return loadedCount, skippedCount, nil
 }

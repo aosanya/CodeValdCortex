@@ -1,10 +1,13 @@
 # A2A Protocol Integration - Technical Specification
 ## CodeValdCortex Enterprise Multi-Agent AI Orchestration Platform
 
-**Document Version**: 1.0  
+**Document Version**: 1.1  
 **Date**: November 11, 2025  
 **Status**: Draft - For Review  
-**Epic**: A2A Integration (v1.2)
+**Epic**: A2A Integration (v1.2)  
+**SDK**: Uses `a2a-go` (https://github.com/a2aproject/a2a-go)
+
+> **📘 Related Documentation**: See [a2a-go SDK Integration Strategy](./a2a-go-sdk-integration.md) for detailed SDK usage and implementation approach.
 
 ---
 
@@ -73,6 +76,17 @@ This specification defines the integration of the Agent2Agent (A2A) Protocol int
 - 📋 MVP-026: User Authentication
 - 📋 MVP-027: Security Implementation
 
+**External SDK Dependencies**:
+- 📦 **a2a-go SDK**: Official Go implementation of the A2A protocol
+  - Repository: https://github.com/a2aproject/a2a-go
+  - Purpose: Protocol-compliant client/server implementation
+  - Benefits:
+    - Accelerates development (reduces custom protocol implementation)
+    - Ensures A2A protocol compliance and compatibility
+    - Receives upstream updates and security patches
+    - Community-supported and maintained by A2A Project
+  - Integration: Add to `go.mod` as primary A2A protocol layer
+
 ---
 
 ## 2. Integration Architecture
@@ -129,9 +143,28 @@ This specification defines the integration of the Agent2Agent (A2A) Protocol int
 - Circuit breaker for external agent failures
 
 **Technology Stack**:
-- Go 1.21+ with `net/http` and `nhooyr.io/websocket` for SSE
-- JSON-RPC 2.0 implementation
+- **a2a-go SDK** (https://github.com/a2aproject/a2a-go): Official A2A protocol implementation
+  - Provides compliant client/server interfaces
+  - Handles protocol versioning and negotiation
+  - Built-in message serialization/deserialization
+- Go 1.23+ with `net/http` for HTTP transport
 - OpenTelemetry for distributed tracing
+
+**Implementation Approach**:
+```go
+// Use a2a-go SDK for protocol handling
+import (
+    "github.com/a2aproject/a2a-go/client"
+    "github.com/a2aproject/a2a-go/server"
+)
+
+// Gateway wraps a2a-go components with CodeValdCortex integration
+type A2AGateway struct {
+    a2aServer  *server.Server      // Expose internal agents
+    a2aClient  *client.Client      // Consume external agents
+    translator *ProtocolTranslator // Bridge to internal Go channels
+}
+```
 
 #### 2.2.2 Agent Card Manager
 
@@ -320,6 +353,230 @@ type A2AError struct {
 ---
 
 ## 3. Technical Requirements
+
+### 3.0 SDK Integration Requirements
+
+#### 3.0.1 a2a-go SDK Integration
+**Priority**: P0 (Must Have)  
+**Repository**: https://github.com/a2aproject/a2a-go
+
+**Purpose**: Use the official Go SDK for A2A protocol compliance instead of building custom protocol implementation.
+
+**Integration Benefits**:
+- ✅ **Faster Development**: Reduces implementation time by 40-60%
+- ✅ **Protocol Compliance**: Guarantees adherence to A2A specification
+- ✅ **Upstream Support**: Receives updates, security patches, and new features
+- ✅ **Community Validation**: Battle-tested by A2A ecosystem participants
+- ✅ **Reduced Maintenance**: No need to track protocol spec changes manually
+
+**Implementation Approach**:
+```go
+// go.mod
+require (
+    github.com/a2aproject/a2a-go v1.0.0  // Official A2A SDK
+)
+
+// internal/a2a/gateway/gateway.go
+package gateway
+
+import (
+    a2aclient "github.com/a2aproject/a2a-go/client"
+    a2aserver "github.com/a2aproject/a2a-go/server"
+    "github.com/a2aproject/a2a-go/protocol"
+)
+
+// Gateway wraps a2a-go SDK with CodeValdCortex integration
+type A2AGateway struct {
+    // Server-side: Expose internal agents via A2A protocol
+    a2aServer *a2aserver.Server
+    
+    // Client-side: Consume external A2A agents
+    a2aClient *a2aclient.Client
+    
+    // CodeValdCortex-specific components
+    translator    *ProtocolTranslator  // Bridge to internal Go channels
+    orchestrator  *orchestration.Engine
+    cardManager   *CardManager
+    authService   *auth.Service
+}
+
+// NewGateway initializes A2A Gateway with SDK integration
+func NewGateway(config *Config) (*A2AGateway, error) {
+    // Initialize a2a-go server to expose internal agents
+    a2aServer, err := a2aserver.NewServer(a2aserver.Config{
+        Address:     config.ServerAddress,
+        TLSConfig:   config.TLSConfig,
+        AuthHandler: adaptAuthHandler(config.AuthService),
+    })
+    if err != nil {
+        return nil, fmt.Errorf("failed to create a2a server: %w", err)
+    }
+    
+    // Initialize a2a-go client to consume external agents
+    a2aClient := a2aclient.NewClient(a2aclient.Config{
+        Timeout:       config.ClientTimeout,
+        RetryPolicy:   config.RetryPolicy,
+        TLSConfig:     config.TLSConfig,
+    })
+    
+    gateway := &A2AGateway{
+        a2aServer:    a2aServer,
+        a2aClient:    a2aClient,
+        translator:   NewProtocolTranslator(),
+        orchestrator: config.Orchestrator,
+        cardManager:  NewCardManager(config.Database),
+        authService:  config.AuthService,
+    }
+    
+    // Register internal agents with A2A server
+    gateway.registerInternalAgents()
+    
+    return gateway, nil
+}
+
+// RegisterInternalAgent exposes internal agent via A2A protocol
+func (g *A2AGateway) RegisterInternalAgent(agent *registry.Agent) error {
+    // Generate A2A-compliant agent card
+    card, err := g.cardManager.GenerateCard(agent)
+    if err != nil {
+        return fmt.Errorf("failed to generate agent card: %w", err)
+    }
+    
+    // Create A2A protocol handler using SDK
+    handler := &protocol.AgentHandler{
+        AgentID: agent.ID,
+        Card:    card,
+        ExecuteFunc: func(ctx context.Context, req *protocol.TaskRequest) (*protocol.TaskResponse, error) {
+            // Translate A2A request to internal format
+            internalTask := g.translator.ToInternalTask(req)
+            
+            // Execute via internal orchestrator
+            result := g.orchestrator.ExecuteTask(ctx, agent.ID, internalTask)
+            
+            // Translate internal result to A2A response
+            return g.translator.ToA2AResponse(result), nil
+        },
+    }
+    
+    // Register with a2a-go server
+    return g.a2aServer.RegisterAgent(handler)
+}
+
+// ExecuteExternalTask delegates task to external A2A agent
+func (g *A2AGateway) ExecuteExternalTask(ctx context.Context, externalAgentURL string, task *Task) (*TaskResult, error) {
+    // Translate internal task to A2A protocol request
+    a2aRequest := g.translator.ToA2ARequest(task)
+    
+    // Use a2a-go client to execute on external agent
+    a2aResponse, err := g.a2aClient.ExecuteTask(ctx, externalAgentURL, a2aRequest)
+    if err != nil {
+        return nil, fmt.Errorf("external agent execution failed: %w", err)
+    }
+    
+    // Translate A2A response back to internal format
+    return g.translator.ToInternalResult(a2aResponse), nil
+}
+```
+
+**SDK Components Used**:
+
+| SDK Component | Purpose | CodeValdCortex Usage |
+|--------------|---------|---------------------|
+| `a2a-go/server` | Expose agents via A2A protocol | Serve internal agents to external consumers |
+| `a2a-go/client` | Consume external A2A agents | Execute tasks on external agents |
+| `a2a-go/protocol` | A2A message types and schemas | Request/response translation |
+| `a2a-go/auth` | Authentication helpers | OAuth 2.0 and JWT validation |
+| `a2a-go/discovery` | Agent discovery mechanisms | External agent registration |
+
+**Configuration**:
+```yaml
+# config/a2a.yaml
+a2a:
+  enabled: true
+  
+  # SDK configuration
+  sdk:
+    version: "1.0.0"
+    log_level: "info"
+  
+  # Server configuration (expose internal agents)
+  server:
+    address: ":8083"
+    tls_enabled: true
+    tls_cert_file: "/etc/certs/a2a-server.crt"
+    tls_key_file: "/etc/certs/a2a-server.key"
+    
+  # Client configuration (consume external agents)
+  client:
+    timeout: "30s"
+    max_connections: 100
+    retry_attempts: 3
+    retry_backoff: "exponential"
+```
+
+**Testing SDK Integration**:
+```go
+// internal/a2a/gateway/gateway_test.go
+func TestA2AGatewayIntegration(t *testing.T) {
+    // Start mock external A2A agent using SDK
+    mockAgent := startMockA2AAgent(t)
+    defer mockAgent.Stop()
+    
+    // Initialize gateway with SDK
+    gateway := setupTestGateway(t)
+    
+    // Test task execution to external agent
+    task := &Task{
+        ID:    "test-task-001",
+        Input: map[string]interface{}{"query": "test"},
+    }
+    
+    result, err := gateway.ExecuteExternalTask(context.Background(), mockAgent.URL, task)
+    
+    assert.NoError(t, err)
+    assert.NotNil(t, result)
+    assert.Equal(t, "completed", result.Status)
+}
+
+// Helper: Create mock A2A agent using a2a-go SDK
+func startMockA2AAgent(t *testing.T) *MockA2AAgent {
+    server, err := a2aserver.NewServer(a2aserver.Config{
+        Address: ":0", // Random port
+    })
+    require.NoError(t, err)
+    
+    server.RegisterAgent(&protocol.AgentHandler{
+        AgentID: "mock-agent",
+        Card: &protocol.AgentCard{
+            Name:        "Mock Agent",
+            Version:     "1.0.0",
+            Capabilities: []string{"test"},
+        },
+        ExecuteFunc: func(ctx context.Context, req *protocol.TaskRequest) (*protocol.TaskResponse, error) {
+            return &protocol.TaskResponse{
+                TaskID: req.TaskID,
+                Status: "completed",
+                Output: map[string]interface{}{"result": "success"},
+            }, nil
+        },
+    })
+    
+    go server.Start()
+    
+    return &MockA2AAgent{
+        Server: server,
+        URL:    fmt.Sprintf("http://localhost:%d", server.Port()),
+    }
+}
+```
+
+**Migration Timeline**:
+1. **Week 1**: Add `a2a-go` to `go.mod`, study SDK documentation
+2. **Week 2**: Implement `A2AGateway` wrapper around SDK
+3. **Week 3**: Integrate with internal orchestration engine
+4. **Week 4**: Testing and validation with mock external agents
+
+---
 
 ### 3.1 Functional Requirements
 
@@ -1510,7 +1767,10 @@ groups:
 
 ### Appendix B: Related Specifications
 
-- [A2A Protocol Specification (Linux Foundation)](https://github.com/linuxfoundation/a2a-protocol)
+- **[a2a-go SDK Integration Strategy](./a2a-go-sdk-integration.md)** - Detailed SDK usage and implementation guide
+- **[A2A Protocol Specification (Linux Foundation)](https://github.com/linuxfoundation/a2a-protocol)** - Official protocol spec
+- **[a2a-go SDK Repository](https://github.com/a2aproject/a2a-go)** - Official Go SDK
+- **[a2a-go SDK Documentation](https://pkg.go.dev/github.com/a2aproject/a2a-go)** - Go package documentation
 - [CodeValdCortex Agent Registry](./backend-architecture.md#agent-registry)
 - [CodeValdCortex Orchestration Engine](./backend-architecture.md#orchestration)
 - [Security & Compliance Framework](../1-SoftwareRequirements/security-requirements.md)

@@ -2,19 +2,36 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 // AgencyDesignerPage renders the AI-powered agency designer interface with VS Code-like layout
-templ AgencyDesignerPage(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) {
+templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) {
 	@components.LayoutWithAgency("AI Agency Designer", currentAgency) {
 		<!-- Agency Designer Specific CSS -->
 		<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
 		<link rel="stylesheet" href="/static/css/agency-designer.css?v=20251031-context"/>
 		
 		<!-- Agency Designer JavaScript -->
-		<script src="/static/js/agency-designer.js?v=20251102-workitems" type="module" defer></script>
+		<script src="/static/js/agency-designer/utils.js" defer></script>
+		<script src="/static/js/agency-designer/specification-api.js" defer></script>
+		<script src="/static/js/agency-designer/crud-helpers.js" defer></script>
+		<script src="/static/js/agency-designer/ai-operations.js" defer></script>
+		<script src="/static/js/agency-designer/ai-streaming.js" defer></script>
+		<script src="/static/js/agency-designer/chat-streaming.js" defer></script>
+		<script src="/static/js/agency-designer/introduction.js" defer></script>
+		<script src="/static/js/agency-designer/overview.js" defer></script>
+		<script src="/static/js/agency-designer/goals.js" defer></script>
+		<script src="/static/js/agency-designer/work-items.js" defer></script>
+		<script src="/static/js/agency-designer/roles.js" defer></script>
+		<script src="/static/js/agency-designer/chat.js" defer></script>
+		<script src="/static/js/agency-designer/views.js" defer></script>
+		<script src="/static/js/agency-designer/workflows.js" defer></script>
+		<script src="/static/js/agency-designer/htmx.js" defer></script>
+		<script src="/static/js/agency-designer/context.js" defer></script>
+		<script src="/static/js/agency-designer.js?v=20251102-workitems" defer></script>
+		<script src="/static/js/agency-designer/main.js" defer></script>
 		<script src="/static/js/agency-designer/raci.js?v=20251103" defer></script>
 		
 		<div class="vscode-designer-container">

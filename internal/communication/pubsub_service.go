@@ -69,12 +69,6 @@ func (ps *PubSubService) Publish(ctx context.Context, publisherAgentID, publishe
 		return "", fmt.Errorf("failed to store publication: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"publication_id": pub.ID,
-		"publisher":      publisherAgentID,
-		"event":          eventName,
-		"type":           pub.PublicationType,
-	}).Debug("Event published successfully")
 
 	return pub.ID, nil
 }
@@ -116,11 +110,6 @@ func (ps *PubSubService) Subscribe(ctx context.Context, subscriberAgentID, subsc
 		return "", fmt.Errorf("failed to store subscription: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"subscription_id": sub.ID,
-		"subscriber":      subscriberAgentID,
-		"pattern":         eventPattern,
-	}).Debug("Subscription created successfully")
 
 	return sub.ID, nil
 }
@@ -132,7 +121,6 @@ func (ps *PubSubService) Unsubscribe(ctx context.Context, subscriptionID string)
 		return err
 	}
 
-	log.WithField("subscription_id", subscriptionID).Debug("Unsubscribed successfully")
 	return nil
 }
 
@@ -143,7 +131,6 @@ func (ps *PubSubService) DeleteSubscription(ctx context.Context, subscriptionID 
 		return err
 	}
 
-	log.WithField("subscription_id", subscriptionID).Debug("Subscription deleted successfully")
 	return nil
 }
 
@@ -155,10 +142,6 @@ func (ps *PubSubService) GetActiveSubscriptions(ctx context.Context, agentID str
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"count":    len(subscriptions),
-	}).Debug("Retrieved active subscriptions")
 
 	return subscriptions, nil
 }
@@ -202,13 +185,6 @@ func (ps *PubSubService) GetMatchingPublications(ctx context.Context, agentID st
 		}
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id":      agentID,
-		"subscriptions": len(subscriptions),
-		"publications":  len(publications),
-		"matched":       len(matched),
-		"since":         since,
-	}).Debug("Retrieved matching publications")
 
 	return matched, nil
 }

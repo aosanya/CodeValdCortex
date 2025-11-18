@@ -17,6 +17,20 @@ title="Cancel">
 </button>
 </header>
 <div class="card-content">
+<!-- Code Field -->
+<div class="field">
+<label class="label">Work Item Code</label>
+<div class="control">
+<input 
+class="input"
+type="text"
+id="work-item-code-editor"
+placeholder="e.g., WI001, UOW-1, etc."
+maxlength="50">
+</div>
+<p class="help">A unique code to identify this work item (e.g., WI001, UOW-1).</p>
+</div>
+
 <!-- Title Field -->
 <div class="field">
 <label class="label">Title</label>
@@ -59,17 +73,15 @@ style="font-family: monospace; font-size: 14px;"></textarea>
 <p class="help">List the expected deliverables or outputs (one per line).</p>
 </div>
 
-<!-- Dependencies Field -->
+<!-- Goals Field -->
 <div class="field">
-<label class="label">Dependencies</label>
+<label class="label">Linked Goals</label>
 <div class="control">
-<input 
-class="input"
-type="text"
-id="work-item-dependencies-editor"
-placeholder="e.g., WI-001, WI-003">
+<div id="work-item-goals-editor" class="box" style="max-height: 300px; overflow-y: auto;">
+<!-- Goals will be populated dynamically as checkboxes -->
 </div>
-<p class="help">Comma-separated list of work item keys this depends on (e.g., WI-001, WI-003).</p>
+</div>
+<p class="help">Select one or more goals this work item addresses.</p>
 </div>
 
 <!-- Tags Field -->
@@ -83,20 +95,6 @@ id="work-item-tags-editor"
 placeholder="e.g., backend, api, security">
 </div>
 <p class="help">Comma-separated tags for categorization.</p>
-</div>
-
-<!-- AI Refine Button -->
-<div class="field">
-<div class="buttons">
-<button 
-class="button is-small is-link"
-onclick="refineWorkItemDescription()"
-id="refine-work-item-btn"
-title="Use AI to enhance the description and deliverables">
-<span class="icon"><i class="fas fa-wand-magic-sparkles"></i></span>
-<span>AI Refine</span>
-</button>
-</div>
 </div>
 </div>
 <footer class="card-footer">

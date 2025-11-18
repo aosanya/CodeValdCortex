@@ -136,10 +136,6 @@ func (mp *MessagePoller) poll() {
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": mp.agentID,
-		"count":    len(messages),
-	}).Debug("Received messages")
 
 	for _, msg := range messages {
 		// Handle message
@@ -290,10 +286,6 @@ func (pp *PublicationPoller) poll() {
 		return
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": pp.agentID,
-		"count":    len(publications),
-	}).Debug("Received publications")
 
 	for _, pub := range publications {
 		// Handle publication

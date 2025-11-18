@@ -2,7 +2,7 @@
 // Handles navigation between different views (overview, agent-types, layout)
 
 // Initialize view switcher tabs
-export function initializeViewSwitcher() {
+window.initializeViewSwitcher = function() {
     const viewTabs = document.querySelectorAll('.view-tab');
 
     viewTabs.forEach(tab => {
@@ -23,7 +23,7 @@ export function initializeViewSwitcher() {
 }
 
 // Switch between different views
-export function switchView(view) {
+window.switchView = function(view) {
     // Remove is-active from all view content containers
     const allViewContents = document.querySelectorAll('.view-content');
     allViewContents.forEach(content => content.classList.remove('is-active'));

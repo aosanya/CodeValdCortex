@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 	"github.com/sirupsen/logrus"
 )
@@ -133,12 +134,12 @@ func (r *ArangoRepository) ensureIndexes(ctx context.Context) error {
 		return fmt.Errorf("failed to create execution status index: %w", err)
 	}
 
-	r.logger.Info("Workflow indexes created successfully")
+	r.logger.Info("models.Workflow indexes created successfully")
 	return nil
 }
 
 // Create creates a new workflow
-func (r *ArangoRepository) Create(ctx context.Context, workflow *Workflow) error {
+func (r *ArangoRepository) Create(ctx context.Context, workflow *models.Workflow) error {
 	col, err := r.db.Collection(ctx, workflowsCollection)
 	if err != nil {
 		return fmt.Errorf("failed to get collection: %w", err)
@@ -149,20 +150,12 @@ func (r *ArangoRepository) Create(ctx context.Context, workflow *Workflow) error
 	workflow.CreatedAt = now
 	workflow.UpdatedAt = now
 
-	// Set default status if not provided
-	if workflow.Status == "" {
-		workflow.Status = WorkflowStatusDraft
-	}
-
 	// Initialize empty arrays if nil
 	if workflow.Nodes == nil {
-		workflow.Nodes = []Node{}
+		workflow.Nodes = []models.WorkflowNode{}
 	}
 	if workflow.Edges == nil {
-		workflow.Edges = []Edge{}
-	}
-	if workflow.Variables == nil {
-		workflow.Variables = make(map[string]interface{})
+		workflow.Edges = []models.WorkflowEdge{}
 	}
 
 	meta, err := col.CreateDocument(ctx, workflow)
@@ -181,13 +174,13 @@ func (r *ArangoRepository) Create(ctx context.Context, workflow *Workflow) error
 }
 
 // GetByID retrieves a workflow by its ID
-func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*Workflow, error) {
+func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*models.Workflow, error) {
 	col, err := r.db.Collection(ctx, workflowsCollection)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collection: %w", err)
 	}
 
-	var workflow Workflow
+	var workflow models.Workflow
 	_, err = col.ReadDocument(ctx, id, &workflow)
 	if err != nil {
 		if driver.IsNotFound(err) {
@@ -201,7 +194,7 @@ func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*Workflow, e
 }
 
 // GetByAgencyID retrieves all workflows for a specific agency
-func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) ([]*Workflow, error) {
+func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) ([]*models.Workflow, error) {
 	query := `
 		FOR w IN @@collection
 		FILTER w.agency_id == @agency_id
@@ -220,9 +213,9 @@ func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) (
 	}
 	defer cursor.Close()
 
-	var workflows []*Workflow
+	var workflows []*models.Workflow
 	for {
-		var workflow Workflow
+		var workflow models.Workflow
 		meta, err := cursor.ReadDocument(ctx, &workflow)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -239,7 +232,7 @@ func (r *ArangoRepository) GetByAgencyID(ctx context.Context, agencyID string) (
 }
 
 // Update updates an existing workflow
-func (r *ArangoRepository) Update(ctx context.Context, workflow *Workflow) error {
+func (r *ArangoRepository) Update(ctx context.Context, workflow *models.Workflow) error {
 	col, err := r.db.Collection(ctx, workflowsCollection)
 	if err != nil {
 		return fmt.Errorf("failed to get collection: %w", err)
@@ -284,7 +277,7 @@ func (r *ArangoRepository) Delete(ctx context.Context, id string) error {
 }
 
 // List retrieves workflows with pagination
-func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*Workflow, error) {
+func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*models.Workflow, error) {
 	query := `
 		FOR w IN @@collection
 		SORT w.created_at DESC
@@ -304,9 +297,9 @@ func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*Work
 	}
 	defer cursor.Close()
 
-	var workflows []*Workflow
+	var workflows []*models.Workflow
 	for {
-		var workflow Workflow
+		var workflow models.Workflow
 		meta, err := cursor.ReadDocument(ctx, &workflow)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -320,142 +313,4 @@ func (r *ArangoRepository) List(ctx context.Context, limit, offset int) ([]*Work
 	}
 
 	return workflows, nil
-}
-
-// CreateExecution creates a new workflow execution
-func (r *ArangoRepository) CreateExecution(ctx context.Context, execution *WorkflowExecution) error {
-	col, err := r.db.Collection(ctx, workflowExecutionsCollection)
-	if err != nil {
-		return fmt.Errorf("failed to get collection: %w", err)
-	}
-
-	// Set start time
-	execution.StartedAt = time.Now()
-
-	// Initialize arrays if nil
-	if execution.NodeExecutions == nil {
-		execution.NodeExecutions = []NodeExecution{}
-	}
-	if execution.Errors == nil {
-		execution.Errors = []string{}
-	}
-	if execution.Context == nil {
-		execution.Context = make(map[string]interface{})
-	}
-
-	meta, err := col.CreateDocument(ctx, execution)
-	if err != nil {
-		return fmt.Errorf("failed to create execution: %w", err)
-	}
-
-	execution.ID = meta.Key
-	r.logger.WithFields(logrus.Fields{
-		"execution_id": execution.ID,
-		"workflow_id":  execution.WorkflowID,
-	}).Info("Created workflow execution")
-
-	return nil
-}
-
-// GetExecution retrieves an execution by its ID
-func (r *ArangoRepository) GetExecution(ctx context.Context, id string) (*WorkflowExecution, error) {
-	col, err := r.db.Collection(ctx, workflowExecutionsCollection)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get collection: %w", err)
-	}
-
-	var execution WorkflowExecution
-	_, err = col.ReadDocument(ctx, id, &execution)
-	if err != nil {
-		if driver.IsNotFound(err) {
-			return nil, fmt.Errorf("execution not found: %s", id)
-		}
-		return nil, fmt.Errorf("failed to read execution: %w", err)
-	}
-
-	execution.ID = id
-	return &execution, nil
-}
-
-// GetExecutionsByWorkflowID retrieves all executions for a specific workflow
-func (r *ArangoRepository) GetExecutionsByWorkflowID(ctx context.Context, workflowID string) ([]*WorkflowExecution, error) {
-	query := `
-		FOR e IN @@collection
-		FILTER e.workflow_id == @workflow_id
-		SORT e.started_at DESC
-		RETURN e
-	`
-
-	bindVars := map[string]interface{}{
-		"@collection": workflowExecutionsCollection,
-		"workflow_id": workflowID,
-	}
-
-	cursor, err := r.db.Query(ctx, query, bindVars)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query executions: %w", err)
-	}
-	defer cursor.Close()
-
-	var executions []*WorkflowExecution
-	for {
-		var execution WorkflowExecution
-		meta, err := cursor.ReadDocument(ctx, &execution)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("failed to read execution document: %w", err)
-		}
-
-		execution.ID = meta.Key
-		executions = append(executions, &execution)
-	}
-
-	return executions, nil
-}
-
-// UpdateExecution updates an existing execution
-func (r *ArangoRepository) UpdateExecution(ctx context.Context, execution *WorkflowExecution) error {
-	col, err := r.db.Collection(ctx, workflowExecutionsCollection)
-	if err != nil {
-		return fmt.Errorf("failed to get collection: %w", err)
-	}
-
-	_, err = col.UpdateDocument(ctx, execution.ID, execution)
-	if err != nil {
-		if driver.IsNotFound(err) {
-			return fmt.Errorf("execution not found: %s", execution.ID)
-		}
-		return fmt.Errorf("failed to update execution: %w", err)
-	}
-
-	return nil
-}
-
-// UpdateNodeExecution updates a specific node execution within a workflow execution
-func (r *ArangoRepository) UpdateNodeExecution(ctx context.Context, executionID string, nodeExecution *NodeExecution) error {
-	// Get the execution
-	execution, err := r.GetExecution(ctx, executionID)
-	if err != nil {
-		return err
-	}
-
-	// Find and update the node execution
-	found := false
-	for i, ne := range execution.NodeExecutions {
-		if ne.NodeID == nodeExecution.NodeID {
-			execution.NodeExecutions[i] = *nodeExecution
-			found = true
-			break
-		}
-	}
-
-	// If not found, append
-	if !found {
-		execution.NodeExecutions = append(execution.NodeExecutions, *nodeExecution)
-	}
-
-	// Update the execution
-	return r.UpdateExecution(ctx, execution)
 }

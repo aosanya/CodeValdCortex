@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"html"
 	"strings"
-
-	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 )
 
 // formatAIMessage formats AI message content with basic markdown-like formatting
@@ -106,16 +104,6 @@ func convertMarkdownLists(content string) string {
 	}
 
 	return result.String()
-}
-
-// getMessageEndpoint returns the appropriate API endpoint for sending messages
-func getMessageEndpoint(agencyID string, conversation *ai.ConversationContext) string {
-	if conversation == nil || conversation.ID == "" {
-		// Start new conversation (use web endpoint for HTML responses)
-		return fmt.Sprintf("/api/v1/agencies/%s/designer/conversations/web", agencyID)
-	}
-	// Continue existing conversation (use web endpoint for HTML responses)
-	return fmt.Sprintf("/api/v1/conversations/%s/messages/web", conversation.ID)
 }
 
 // formatValue formats a value for display

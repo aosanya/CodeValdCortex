@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/arangodb/go-driver"
 )
 
 // Create creates a new agency in the database
-func (r *Repository) Create(ctx context.Context, agencyDoc *agency.Agency) error {
+func (r *Repository) Create(ctx context.Context, agencyDoc *models.Agency) error {
 	// Use ID as the document key
 	agencyDoc.Key = agencyDoc.ID
 
@@ -23,8 +23,8 @@ func (r *Repository) Create(ctx context.Context, agencyDoc *agency.Agency) error
 }
 
 // GetByID retrieves an agency by its ID
-func (r *Repository) GetByID(ctx context.Context, id string) (*agency.Agency, error) {
-	var agencyDoc agency.Agency
+func (r *Repository) GetByID(ctx context.Context, id string) (*models.Agency, error) {
+	var agencyDoc models.Agency
 	_, err := r.collection.ReadDocument(ctx, id, &agencyDoc)
 	if err != nil {
 		if driver.IsNotFound(err) {
@@ -37,7 +37,7 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*agency.Agency, er
 }
 
 // List retrieves agencies with optional filtering
-func (r *Repository) List(ctx context.Context, filters agency.AgencyFilters) ([]*agency.Agency, error) {
+func (r *Repository) List(ctx context.Context, filters models.AgencyFilters) ([]*models.Agency, error) {
 	query, bindVars := buildListQuery(filters)
 
 	cursor, err := r.db.Query(ctx, query, bindVars)
@@ -46,9 +46,9 @@ func (r *Repository) List(ctx context.Context, filters agency.AgencyFilters) ([]
 	}
 	defer cursor.Close()
 
-	var agencies []*agency.Agency
+	var agencies []*models.Agency
 	for {
-		var agencyDoc agency.Agency
+		var agencyDoc models.Agency
 		_, err := cursor.ReadDocument(ctx, &agencyDoc)
 		if driver.IsNoMoreDocuments(err) {
 			break
@@ -63,7 +63,7 @@ func (r *Repository) List(ctx context.Context, filters agency.AgencyFilters) ([]
 }
 
 // Update updates an existing agency
-func (r *Repository) Update(ctx context.Context, agencyDoc *agency.Agency) error {
+func (r *Repository) Update(ctx context.Context, agencyDoc *models.Agency) error {
 	_, err := r.collection.UpdateDocument(ctx, agencyDoc.Key, agencyDoc)
 	if err != nil {
 		if driver.IsNotFound(err) {
@@ -89,7 +89,7 @@ func (r *Repository) Delete(ctx context.Context, id string) error {
 }
 
 // GetStatistics retrieves operational statistics for an agency
-func (r *Repository) GetStatistics(ctx context.Context, id string) (*agency.AgencyStatistics, error) {
+func (r *Repository) GetStatistics(ctx context.Context, id string) (*models.AgencyStatistics, error) {
 	// Query to get statistics from related collections
 	query := `
 		LET agency = DOCUMENT(CONCAT(@collection, '/', @id))
@@ -126,7 +126,7 @@ func (r *Repository) GetStatistics(ctx context.Context, id string) (*agency.Agen
 	}
 	defer cursor.Close()
 
-	var stats agency.AgencyStatistics
+	var stats models.AgencyStatistics
 	if cursor.HasMore() {
 		_, err := cursor.ReadDocument(ctx, &stats)
 		if err != nil {
@@ -149,7 +149,7 @@ func (r *Repository) Exists(ctx context.Context, id string) (bool, error) {
 }
 
 // buildListQuery constructs an AQL query for listing agencies with filters
-func buildListQuery(filters agency.AgencyFilters) (string, map[string]interface{}) {
+func buildListQuery(filters models.AgencyFilters) (string, map[string]interface{}) {
 	var conditions []string
 	bindVars := make(map[string]interface{})
 

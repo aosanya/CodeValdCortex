@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/web/middleware"
 	"github.com/gin-gonic/gin"
@@ -23,22 +24,22 @@ var (
 
 // mockAgencyService is a mock implementation of agency.Service for testing
 type mockAgencyService struct {
-	agencies map[string]*agency.Agency
+	agencies map[string]*models.Agency
 	active   string
 }
 
 func newMockAgencyService() *mockAgencyService {
 	return &mockAgencyService{
-		agencies: make(map[string]*agency.Agency),
+		agencies: make(map[string]*models.Agency),
 	}
 }
 
-func (m *mockAgencyService) CreateAgency(ctx context.Context, ag *agency.Agency) error {
+func (m *mockAgencyService) CreateAgency(ctx context.Context, ag *models.Agency) error {
 	m.agencies[ag.ID] = ag
 	return nil
 }
 
-func (m *mockAgencyService) GetAgency(ctx context.Context, id string) (*agency.Agency, error) {
+func (m *mockAgencyService) GetAgency(ctx context.Context, id string) (*models.Agency, error) {
 	ag, exists := m.agencies[id]
 	if !exists {
 		return nil, errAgencyNotFound
@@ -46,8 +47,8 @@ func (m *mockAgencyService) GetAgency(ctx context.Context, id string) (*agency.A
 	return ag, nil
 }
 
-func (m *mockAgencyService) ListAgencies(ctx context.Context, filters agency.AgencyFilters) ([]*agency.Agency, error) {
-	result := make([]*agency.Agency, 0, len(m.agencies))
+func (m *mockAgencyService) ListAgencies(ctx context.Context, filters models.AgencyFilters) ([]*models.Agency, error) {
+	result := make([]*models.Agency, 0, len(m.agencies))
 	for _, ag := range m.agencies {
 		// Apply filters
 		if filters.Status != "" && ag.Status != filters.Status {
@@ -58,7 +59,7 @@ func (m *mockAgencyService) ListAgencies(ctx context.Context, filters agency.Age
 	return result, nil
 }
 
-func (m *mockAgencyService) UpdateAgency(ctx context.Context, id string, updates agency.AgencyUpdates) error {
+func (m *mockAgencyService) UpdateAgency(ctx context.Context, id string, updates models.AgencyUpdates) error {
 	ag, exists := m.agencies[id]
 	if !exists {
 		return errAgencyNotFound
@@ -86,7 +87,7 @@ func (m *mockAgencyService) SetActiveAgency(ctx context.Context, id string) erro
 	return nil
 }
 
-func (m *mockAgencyService) GetActiveAgency(ctx context.Context) (*agency.Agency, error) {
+func (m *mockAgencyService) GetActiveAgency(ctx context.Context) (*models.Agency, error) {
 	if m.active == "" {
 		return nil, errNoActiveAgency
 	}
@@ -98,131 +99,132 @@ func (m *mockAgencyService) GetActiveAgency(ctx context.Context) (*agency.Agency
 	return ag, nil
 }
 
-func (m *mockAgencyService) GetAgencyStatistics(ctx context.Context, id string) (*agency.AgencyStatistics, error) {
+func (m *mockAgencyService) GetAgencyStatistics(ctx context.Context, id string) (*models.AgencyStatistics, error) {
 	ag, err := m.GetAgency(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &agency.AgencyStatistics{
+	return &models.AgencyStatistics{
 		ActiveAgents:   ag.Metadata.TotalAgents,
 		InactiveAgents: 0,
 	}, nil
 }
 
-func (m *mockAgencyService) GetAgencyOverview(ctx context.Context, id string) (*agency.Overview, error) {
-	return &agency.Overview{
-		AgencyID:     id,
+// Specification methods (unified document approach)
+func (m *mockAgencyService) GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
 		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      1,
+		UpdatedBy:    "mock",
 	}, nil
 }
 
-func (m *mockAgencyService) UpdateAgencyOverview(ctx context.Context, id string, introduction string) error {
-	return nil
+func (m *mockAgencyService) UpdateSpecification(ctx context.Context, agencyID string, req *models.SpecificationUpdateRequest) (*models.AgencySpecification, error) {
+	spec := &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    req.UpdatedBy,
+	}
+
+	if req.Introduction != nil {
+		spec.Introduction = *req.Introduction
+	}
+	if req.Goals != nil {
+		spec.Goals = *req.Goals
+	}
+	if req.WorkItems != nil {
+		spec.WorkItems = *req.WorkItems
+	}
+	if req.Roles != nil {
+		spec.Roles = *req.Roles
+	}
+	if req.RACIMatrix != nil {
+		spec.RACIMatrix = req.RACIMatrix
+	}
+
+	return spec, nil
 }
 
-func (m *mockAgencyService) CreateGoal(ctx context.Context, agencyID string, code string, description string) (*agency.Goal, error) {
-	return &agency.Goal{
-		Key:         "mock-goal-1",
-		AgencyID:    agencyID,
-		Number:      1,
-		Code:        code,
-		Description: description,
+func (m *mockAgencyService) UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: introduction,
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) GetGoals(ctx context.Context, agencyID string) ([]*agency.Goal, error) {
-	return []*agency.Goal{}, nil
-}
-
-func (m *mockAgencyService) GetGoal(ctx context.Context, agencyID string, key string) (*agency.Goal, error) {
-	return &agency.Goal{
-		Key:         key,
-		AgencyID:    agencyID,
-		Number:      1,
-		Code:        "GOAL-1",
-		Description: "Mock goal",
+func (m *mockAgencyService) UpdateSpecificationGoals(ctx context.Context, agencyID string, goals []models.Goal, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        goals,
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) UpdateGoal(ctx context.Context, agencyID string, goalKey string, code string, description string) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteGoal(ctx context.Context, agencyID string, goalKey string) error {
-	return nil
-}
-
-func (m *mockAgencyService) CreateWorkItem(ctx context.Context, agencyID string, req agency.CreateWorkItemRequest) (*agency.WorkItem, error) {
-	return &agency.WorkItem{
-		Key:      "WI-001",
-		AgencyID: agencyID,
-		Number:   1,
-		Title:    req.Title,
+func (m *mockAgencyService) UpdateSpecificationWorkItems(ctx context.Context, agencyID string, workItems []models.WorkItem, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    workItems,
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) GetWorkItems(ctx context.Context, agencyID string) ([]*agency.WorkItem, error) {
-	return []*agency.WorkItem{}, nil
-}
-
-func (m *mockAgencyService) GetWorkItem(ctx context.Context, agencyID string, key string) (*agency.WorkItem, error) {
-	return &agency.WorkItem{
-		Key:      key,
-		AgencyID: agencyID,
-		Number:   1,
-		Title:    "Mock Work Item",
+func (m *mockAgencyService) UpdateSpecificationWorkflows(ctx context.Context, agencyID string, workflows []models.Workflow, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Workflows:    workflows,
+		Roles:        []models.Role{},
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) GetWorkItemByCode(ctx context.Context, agencyID string, code string) (*agency.WorkItem, error) {
-	return &agency.WorkItem{
-		Key:      "WI-001",
-		AgencyID: agencyID,
-		Number:   1,
-		Code:     code,
-		Title:    "Mock Work Item",
+func (m *mockAgencyService) UpdateSpecificationRoles(ctx context.Context, agencyID string, roles []models.Role, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        roles,
+		RACIMatrix:   nil,
+		Version:      2,
+		UpdatedBy:    updatedBy,
 	}, nil
 }
 
-func (m *mockAgencyService) UpdateWorkItem(ctx context.Context, agencyID string, key string, req agency.UpdateWorkItemRequest) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteWorkItem(ctx context.Context, agencyID string, key string) error {
-	return nil
-}
-
-func (m *mockAgencyService) ValidateWorkItemDependencies(ctx context.Context, agencyID string, workItemCode string, dependencies []string) error {
-	return nil
-}
-
-func (m *mockAgencyService) CreateRACIAssignment(ctx context.Context, agencyID string, assignment *agency.RACIAssignment) error {
-	return nil
-}
-
-func (m *mockAgencyService) GetRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) ([]*agency.RACIAssignment, error) {
-	return []*agency.RACIAssignment{}, nil
-}
-
-func (m *mockAgencyService) GetRACIAssignmentsForRole(ctx context.Context, agencyID string, roleID string) ([]*agency.RACIAssignment, error) {
-	return []*agency.RACIAssignment{}, nil
-}
-
-func (m *mockAgencyService) GetAllRACIAssignments(ctx context.Context, agencyID string) ([]*agency.RACIAssignment, error) {
-	return []*agency.RACIAssignment{}, nil
-}
-
-func (m *mockAgencyService) UpdateRACIAssignment(ctx context.Context, agencyID string, key string, assignment *agency.RACIAssignment) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteRACIAssignment(ctx context.Context, agencyID string, key string) error {
-	return nil
-}
-
-func (m *mockAgencyService) DeleteRACIAssignmentsForWorkItem(ctx context.Context, agencyID string, workItemKey string) error {
-	return nil
+func (m *mockAgencyService) UpdateSpecificationRACIMatrix(ctx context.Context, agencyID string, matrix *models.RACIMatrix, updatedBy string) (*models.AgencySpecification, error) {
+	return &models.AgencySpecification{
+		Introduction: "Mock introduction",
+		Goals:        []models.Goal{},
+		WorkItems:    []models.WorkItem{},
+		Roles:        []models.Role{},
+		RACIMatrix:   matrix,
+		Version:      2,
+		UpdatedBy:    updatedBy,
+	}, nil
 }
 
 // setupTestRouter creates a test router with the homepage handlers and middleware
@@ -253,19 +255,19 @@ func TestHomepageIntegration(t *testing.T) {
 	// Setup test agencies
 	mockSvc := newMockAgencyService()
 
-	agency1 := &agency.Agency{
+	agency1 := &models.Agency{
 		ID:   "agency-1",
 		Name: "Test Agency 1",
-		Metadata: agency.AgencyMetadata{
+		Metadata: models.AgencyMetadata{
 			TotalAgents: 5,
 		},
 		Status: "active",
 	}
 
-	agency2 := &agency.Agency{
+	agency2 := &models.Agency{
 		ID:   "agency-2",
 		Name: "Test Agency 2",
-		Metadata: agency.AgencyMetadata{
+		Metadata: models.AgencyMetadata{
 			TotalAgents: 3,
 		},
 		Status: "active",
@@ -353,12 +355,12 @@ func TestHomepageIntegration(t *testing.T) {
 	t.Run("should filter agencies by status", func(t *testing.T) {
 		// Create a fresh service with mixed status agencies
 		freshMock := newMockAgencyService()
-		_ = freshMock.CreateAgency(context.Background(), &agency.Agency{
+		_ = freshMock.CreateAgency(context.Background(), &models.Agency{
 			ID:     "active-1",
 			Name:   "Active Agency 1",
 			Status: "active",
 		})
-		_ = freshMock.CreateAgency(context.Background(), &agency.Agency{
+		_ = freshMock.CreateAgency(context.Background(), &models.Agency{
 			ID:     "inactive-1",
 			Name:   "Inactive Agency 1",
 			Status: "inactive",
@@ -383,10 +385,10 @@ func TestHomepageIntegration(t *testing.T) {
 func TestAgencyMiddleware(t *testing.T) {
 	mockSvc := newMockAgencyService()
 
-	agency1 := &agency.Agency{
+	agency1 := &models.Agency{
 		ID:   "agency-1",
 		Name: "Test Agency 1",
-		Metadata: agency.AgencyMetadata{
+		Metadata: models.AgencyMetadata{
 			TotalAgents: 5,
 		},
 		Status: "active",
@@ -430,19 +432,19 @@ func TestAgencyMiddleware(t *testing.T) {
 func TestHomepageFilter(t *testing.T) {
 	mockSvc := newMockAgencyService()
 
-	activeAgency := &agency.Agency{
+	activeAgency := &models.Agency{
 		ID:   "agency-active",
 		Name: "Active Agency",
-		Metadata: agency.AgencyMetadata{
+		Metadata: models.AgencyMetadata{
 			TotalAgents: 5,
 		},
 		Status: "active",
 	}
 
-	inactiveAgency := &agency.Agency{
+	inactiveAgency := &models.Agency{
 		ID:   "agency-inactive",
 		Name: "Inactive Agency",
-		Metadata: agency.AgencyMetadata{
+		Metadata: models.AgencyMetadata{
 			TotalAgents: 2,
 		},
 		Status: "inactive",

@@ -3,8 +3,7 @@ package builder
 import (
 	"time"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // Message represents a chat message (shared type for AI interactions)
@@ -26,9 +25,10 @@ type BuilderContext struct {
 
 	// Agency working data
 	Introduction string                   `json:"introduction,omitempty"`
-	Goals        []*agency.Goal           `json:"goals,omitempty"`
-	WorkItems    []*agency.WorkItem       `json:"work_items,omitempty"`
-	Roles        []*registry.Role         `json:"roles,omitempty"`
-	Assignments  []*agency.RACIAssignment `json:"assignments,omitempty"`
+	Goals        []*models.Goal           `json:"goals,omitempty"`
+	WorkItems    []*models.WorkItem       `json:"work_items,omitempty"`
+	Workflows    []*models.Workflow       `json:"workflows,omitempty"`
+	Roles        []*models.Role           `json:"roles,omitempty"`
+	Assignments  []*models.RACIAssignment `json:"assignments,omitempty"`
 	UserInput    string                   `json:"user_input,omitempty"`
 }

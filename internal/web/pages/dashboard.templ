@@ -2,7 +2,7 @@ package pages
 
 import (
 	"fmt"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/agent"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
@@ -16,7 +16,7 @@ type DashboardStats struct {
 	Healthy   int
 }
 
-templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *agency.Agency) {
+templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *models.Agency) {
 	@components.LayoutWithAgency("Dashboard", currentAgency) {
 		<div x-data="dashboard()" x-init="init()">
 		<!-- Current Agency Indicator -->

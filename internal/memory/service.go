@@ -48,11 +48,6 @@ func (s *Service) StoreWorking(ctx context.Context, agentID, key string, value i
 		return fmt.Errorf("failed to store working memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"key":      key,
-		"ttl":      ttl,
-	}).Debug("Stored working memory")
 
 	return nil
 }
@@ -105,10 +100,6 @@ func (s *Service) UpdateWorking(ctx context.Context, agentID, key string, value 
 		return fmt.Errorf("failed to update working memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"key":      key,
-	}).Debug("Updated working memory")
 
 	return nil
 }
@@ -127,10 +118,6 @@ func (s *Service) DeleteWorking(ctx context.Context, agentID, key string) error 
 		return fmt.Errorf("failed to delete working memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"key":      key,
-	}).Debug("Deleted working memory")
 
 	return nil
 }
@@ -538,7 +525,6 @@ func (s *Service) DeleteSnapshot(ctx context.Context, snapshotID string) error {
 		return fmt.Errorf("failed to delete snapshot: %w", err)
 	}
 
-	log.WithField("snapshot_id", snapshotID).Debug("Deleted snapshot")
 
 	return nil
 }
@@ -588,10 +574,6 @@ func (s *Service) SyncMemory(ctx context.Context, agentID string) (*SyncResult, 
 	result.DurationMs = time.Since(startTime).Milliseconds()
 	result.Success = true
 
-	log.WithFields(log.Fields{
-		"agent_id":    agentID,
-		"duration_ms": result.DurationMs,
-	}).Debug("Basic sync completed")
 
 	return result, nil
 }
@@ -628,27 +610,21 @@ func (s *Service) ResolveConflict(ctx context.Context, conflict *MemoryConflict,
 	case ConflictStrategyLastWriteWins:
 		// Use the version with the latest timestamp
 		if conflict.RemoteTime.After(conflict.LocalTime) {
-			log.Debug("Remote version is newer, using remote")
 			// Would update local with remote value
 		} else {
-			log.Debug("Local version is newer, keeping local")
 			// Keep local value
 		}
 
 	case ConflictStrategyLocalWins:
-		log.Debug("Using local version (local wins strategy)")
 		// Keep local value, push to remote
 
 	case ConflictStrategyRemoteWins:
-		log.Debug("Using remote version (remote wins strategy)")
 		// Update local with remote value
 
 	case ConflictStrategyVersionBased:
 		// Compare version numbers
 		if conflict.RemoteVersion > conflict.LocalVersion {
-			log.Debug("Remote version number is higher, using remote")
 		} else {
-			log.Debug("Local version number is higher or equal, keeping local")
 		}
 
 	case ConflictStrategyManual:

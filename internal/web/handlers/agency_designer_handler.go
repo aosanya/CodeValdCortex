@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
+	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -14,6 +16,7 @@ import (
 type AgencyDesignerWebHandler struct {
 	designerService *ai.AgencyDesignerService
 	agencyRepo      agency.Repository
+	workflowService *workflow.Service
 	logger          *logrus.Logger
 }
 
@@ -21,11 +24,13 @@ type AgencyDesignerWebHandler struct {
 func NewAgencyDesignerWebHandler(
 	designerService *ai.AgencyDesignerService,
 	agencyRepo agency.Repository,
+	workflowService *workflow.Service,
 	logger *logrus.Logger,
 ) *AgencyDesignerWebHandler {
 	return &AgencyDesignerWebHandler{
 		designerService: designerService,
 		agencyRepo:      agencyRepo,
+		workflowService: workflowService,
 		logger:          logger,
 	}
 }
@@ -50,10 +55,13 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 		conversation = existingConv
 	}
 
-	// Try to load the overview so we can pre-fill the introduction editor server-side
-	var overview *agency.Overview
-	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
-		overview = ov
+	// Try to load the specification so we can pre-fill the introduction editor server-side
+	var overview *models.Overview
+	if spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID); err == nil {
+		overview = &models.Overview{
+			AgencyID:     agencyID,
+			Introduction: spec.Introduction,
+		}
 	}
 
 	// Render the designer page (pass overview so introduction is pre-filled)
@@ -93,10 +101,13 @@ func (h *AgencyDesignerWebHandler) ShowConversation(c *gin.Context) {
 		return
 	}
 
-	// Try to load the overview so we can pre-fill the introduction editor server-side
-	var overview *agency.Overview
-	if ov, err := h.agencyRepo.GetOverview(c.Request.Context(), agencyID); err == nil {
-		overview = ov
+	// Try to load the specification so we can pre-fill the introduction editor server-side
+	var overview *models.Overview
+	if spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID); err == nil {
+		overview = &models.Overview{
+			AgencyID:     agencyID,
+			Introduction: spec.Introduction,
+		}
 	}
 
 	// Render the designer page with the conversation (pass overview)
@@ -227,9 +238,70 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 	// RACI matrix editor
 	router.GET("/agencies/:id/raci", h.ShowRACIMatrix)
 
+	// Workflow visual designer
+	router.GET("/agencies/:id/designer/workflows/:workflowId", h.ShowWorkflowDesigner)
+
 	// Get agent type details (HTMX endpoint)
 	router.GET("/api/v1/conversations/:conversationId/agents/:agentId", h.GetRoleDetails)
 
 	// Get chat messages for an agency (HTMX endpoint)
 	router.GET("/agencies/:id/chat-messages", h.GetChatMessages)
+}
+
+// ShowWorkflowDesigner renders the visual workflow designer page
+func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
+	agencyID := c.Param("id")
+	workflowKey := c.Param("workflowId") // This is actually the workflow key, not ID
+
+	// Get agency specification to access workflows
+	spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency specification")
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Agency specification not found",
+		})
+		return
+	}
+
+	// Find workflow by key
+	var workflow *models.Workflow
+	for i := range spec.Workflows {
+		if spec.Workflows[i].Key == workflowKey {
+			workflow = &spec.Workflows[i]
+			break
+		}
+	}
+
+	if workflow == nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":    agencyID,
+			"workflow_key": workflowKey,
+		}).Error("Workflow not found in specification")
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Workflow not found",
+		})
+		return
+	}
+
+	// Log workflow details before rendering
+	h.logger.WithFields(logrus.Fields{
+		"workflow_id":   workflow.ID,
+		"workflow_key":  workflow.Key,
+		"workflow_name": workflow.Name,
+		"agency_id":     agencyID,
+		"nodes_count":   len(workflow.Nodes),
+		"edges_count":   len(workflow.Edges),
+	}).Info("🎨 Rendering workflow designer")
+
+	if len(workflow.Nodes) > 0 {
+		h.logger.WithFields(logrus.Fields{
+			"first_node_id":            workflow.Nodes[0].ID,
+			"first_node_type":          workflow.Nodes[0].Type,
+			"first_node_work_item_key": workflow.Nodes[0].Data.WorkItemKey,
+		}).Info("  📌 Sample node data")
+	}
+
+	// Render designer page
+	component := agency_designer.WorkflowDesigner(agencyID, workflow)
+	component.Render(c.Request.Context(), c.Writer)
 }

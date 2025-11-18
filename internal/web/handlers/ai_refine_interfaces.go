@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	"github.com/gin-gonic/gin"
@@ -20,7 +20,7 @@ import (
 //   - Methods handle: request parsing, validation, calling AI services, returning responses
 //
 // Standard Context Builder Signature Pattern:
-//   func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *agency.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error)
+//   func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *models.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error)
 //
 // Where:
 //   - ctx: Go context for cancellation and deadlines
@@ -67,6 +67,12 @@ type GoalBuilderInterface interface {
 	// ProcessAIGoalRequest handles POST /api/v1/agencies/:id/ai/goals/process
 	// Processes batch AI operations on goals (create, enhance, consolidate).
 	ProcessAIGoalRequest(c *gin.Context)
+
+	// ProcessGoalsChatRequest handles chat-based goal interactions (non-streaming)
+	ProcessGoalsChatRequest(c *gin.Context)
+
+	// ProcessGoalsChatRequestStreaming handles chat-based goal interactions with streaming
+	ProcessGoalsChatRequestStreaming(c *gin.Context)
 }
 
 // WorkItemBuilderInterface defines the contract for all work item-related AI HTTP handlers.
@@ -90,6 +96,19 @@ type WorkItemBuilderInterface interface {
 	// ProcessAIWorkItemRequest handles POST /api/v1/agencies/:id/ai/work-items/process
 	// Processes batch AI operations on work items (create, enhance, consolidate).
 	ProcessAIWorkItemRequest(c *gin.Context)
+
+	// ProcessWorkItemsChatRequestStreaming handles chat-based work item interactions with streaming
+	ProcessWorkItemsChatRequestStreaming(c *gin.Context)
+}
+
+// WorkflowBuilderInterface defines the contract for all workflow-related AI HTTP handlers.
+type WorkflowBuilderInterface interface {
+	// RefineWorkflows handles POST /api/v1/agencies/:id/workflows/refine-dynamic
+	// Dynamically determines and executes the appropriate workflow operation based on user message.
+	RefineWorkflows(c *gin.Context)
+
+	// ProcessWorkflowsChatRequestStreaming handles chat-based workflow interactions with streaming
+	ProcessWorkflowsChatRequestStreaming(c *gin.Context)
 }
 
 // RoleBuilderInterface defines the contract for all role-related AI HTTP handlers.
@@ -113,6 +132,9 @@ type RoleBuilderInterface interface {
 	// ProcessAIRoleRequest handles POST /api/v1/agencies/:id/ai/roles/process
 	// Processes batch AI operations on roles (create roles based on agency needs).
 	ProcessAIRoleRequest(c *gin.Context)
+
+	// ProcessRolesChatRequestStreaming handles chat-based role interactions with streaming
+	ProcessRolesChatRequestStreaming(c *gin.Context)
 }
 
 // RACIBuilderInterface defines the contract for all RACI-related AI HTTP handlers.
@@ -162,7 +184,7 @@ type ContextBuilderInterface interface {
 	//   - error: Any critical error encountered during data gathering (non-critical errors are logged and ignored)
 	BuildBuilderContext(
 		ctx context.Context,
-		agencyObj *agency.Agency,
+		agencyObj *models.Agency,
 		currentIntroduction string,
 		userRequest string,
 	) (builder.BuilderContext, error)

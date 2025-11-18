@@ -1,0 +1,33 @@
+package agency_designer
+
+// AIOperationsToolbar renders a reusable AI operations toolbar
+// entityType: "goal", "work-item", "role", "workflow"
+templ AIOperationsToolbar(entityType string) {
+	<div class="box mb-4 p-4" id={ entityType + "-ai-operations" }>
+		<div class="is-flex is-flex-direction-column">
+			<div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+				<p class="has-text-weight-semibold mb-0">AI { capitalizeEntityType(entityType) } Operations:</p>
+				<span id={ entityType + "-selection-count" } class="tag is-info is-light" style="display: none;"></span>
+			</div>
+			<div class="buttons" data-entity-type={ entityType } id={ entityType + "-ai-buttons" }>
+				<!-- Buttons will be rendered by JavaScript -->
+			</div>
+		</div>
+	</div>
+}
+
+// capitalizeEntityType converts entity type to display name
+func capitalizeEntityType(entityType string) string {
+	switch entityType {
+	case "goal":
+		return "Goal"
+	case "work-item":
+		return "Work Item"
+	case "role":
+		return "Role"
+	case "workflow":
+		return "Workflow"
+	default:
+		return entityType
+	}
+}

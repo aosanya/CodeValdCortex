@@ -7,6 +7,7 @@ html,
 body {
     overflow: hidden;
     height: 100%;
+    font-size: 0.9rem;
 }
 
 /* Override Bulma's default section and container padding/margin */
@@ -673,15 +674,6 @@ body {
     }
 }
 
-.message-avatar {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .message-content {
     flex: 1;
     display: flex;
@@ -724,16 +716,18 @@ body {
 /* User Message */
 .user-message {
     flex-direction: row-reverse;
+    background-color: transparent !important;
 }
 
 .user-message .message-content {
     align-items: flex-end;
+    background-color: transparent !important;
 }
 
 .user-message .message-bubble {
-    background: var(--vscode-accent);
-    border-color: var(--vscode-accent);
-    color: white;
+    background: #d1ecf1 !important;
+    border: 1px solid #bee5eb !important;
+    color: #0c5460 !important;
 }
 
 .user-message .message-time {
@@ -744,6 +738,15 @@ body {
 .ai-message .message-bubble {
     background: var(--vscode-sidebar-bg);
     border: 1px solid var(--vscode-border);
+}
+
+/* User Message (Bulma message component style) */
+.message.is-user .message-body {
+    background: var(--vscode-accent);
+    border-color: var(--vscode-accent);
+    color: white;
+    font-size: 0.85rem;
+    line-height: 1.5;
 }
 
 /* Welcome Message */
@@ -861,7 +864,7 @@ body {
     background: var(--vscode-panel-bg);
     border-color: var(--vscode-border);
     color: var(--vscode-text);
-    font-size: 0.85rem;
+    font-size: 1rem !important;
 }
 
 .chat-input-container input::placeholder {
@@ -1667,4 +1670,53 @@ a.overview-nav-link:hover {
 
 .button.is-pulsing {
     animation: pulse 2s infinite;
+}
+
+/* ===================================
+   GLOBAL FORM ELEMENT SIZING
+   =================================== */
+
+/* Make all labels smaller (0.75rem) */
+.label {
+    font-size: 0.75rem !important;
+}
+
+/* Make all help text smaller (0.65rem) */
+.help {
+    font-size: 0.65rem !important;
+}
+
+/* Make all inputs and textareas smaller */
+.input,
+.textarea,
+.select select {
+    font-size: 0.8rem !important;
+}
+
+/* Apply smaller size to input/textarea elements */
+.input.is-small,
+.textarea.is-small,
+.select.is-small select {
+    font-size: 0.75rem !important;
+}
+
+/* Make work item goals checkboxes smaller */
+#work-item-goals-editor .checkbox {
+    font-size: 0.75rem !important;
+}
+
+#work-item-goals-editor .checkbox input[type="checkbox"] {
+    transform: scale(0.9);
+}
+
+/* Small table styling - applies to all tables with is-small class */
+table.is-small td:not([align]),
+table.is-small th:not([align]) {
+    font-size: 0.875rem;
+    padding: 0.5em 0.75em;
+}
+
+table.is-small td,
+table.is-small th {
+    text-align: inherit;
 }

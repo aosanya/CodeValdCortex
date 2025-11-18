@@ -1,5 +1,6 @@
 // RACI Matrix Editor for Agency Designer
 // Loads work items and roles, allows assignment of R/A/C/I responsibilities
+// Uses global specificationAPI
 
 let raciState = {
     agencyId: null,
@@ -31,40 +32,25 @@ window.loadRACIMatrix = function () {
     if (!raciState.agencyId) {
         raciState.agencyId = getAgencyId();
         if (!raciState.agencyId) {
-            console.error('[RACI] Unable to determine agency ID');
             return;
         }
     }
 
     const tableBody = document.getElementById('raci-matrix-body');
     if (!tableBody) {
-        console.error('[RACI] Table body element not found');
         return;
     }
 
     // Show simple loading state in table
     tableBody.innerHTML = '<tr><td colspan="3" class="has-text-grey has-text-centered py-5"><p><i class="fas fa-spinner fa-spin"></i> Loading work items...</p></td></tr>';
 
-    // Fetch work items first
-    const workItemsUrl = `/api/v1/agencies/${raciState.agencyId}/work-items`;
-
-    fetch(workItemsUrl)
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch work items');
-            return response.json();
-        })
-        .then(workItems => {
+    // Fetch work items and roles using specification API
+    Promise.all([
+        window.specificationAPI.getWorkItems(),
+        window.specificationAPI.getRoles()
+    ])
+        .then(([workItems, roles]) => {
             raciState.workItems = workItems || [];
-
-            // Fetch roles
-            const rolesUrl = `/api/v1/agencies/${raciState.agencyId}/roles`;
-            return fetch(rolesUrl);
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch roles');
-            return response.json();
-        })
-        .then(roles => {
             raciState.roles = roles || [];
 
             // Render work items immediately
@@ -74,7 +60,6 @@ window.loadRACIMatrix = function () {
             loadExistingAssignments();
         })
         .catch(error => {
-            console.error('[RACI] Error loading RACI matrix:', error);
             tableBody.innerHTML = '<tr><td colspan="3" class="has-text-danger has-text-centered py-5"><p>Error loading work items</p></td></tr>';
         });
 }
@@ -94,7 +79,6 @@ function loadExistingAssignments() {
             renderRACITable();
         })
         .catch(error => {
-            console.error('[RACI] Error loading RACI assignments:', error);
             raciState.assignments = {};
         });
 }
@@ -105,7 +89,6 @@ function renderRACITable() {
     const tableContainer = document.getElementById('raci-matrix-table');
 
     if (!tableBody) {
-        console.error('[RACI] Table body not found in renderRACITable');
         return;
     }
 
@@ -272,7 +255,7 @@ function renderAssignmentsPanel(workItemKey, assignments) {
 
 window.addRoleToWorkItem = function (workItemKey) {
     if (!raciState.roles || raciState.roles.length === 0) {
-        showError('No roles available. Please create roles first.');
+        window.showNotification('No roles available. Please create roles first.', 'danger');
         return;
     }
 
@@ -359,7 +342,7 @@ window.confirmAddRole = function (workItemKey) {
 
     closeAddRoleModal();
     renderRACITable();
-    showSuccess('Role added successfully');
+    window.showNotification('Role added successfully', 'success');
 
     // Auto-save the new assignment
     saveRACIAssignment(workItemKey, roleKey);
@@ -419,7 +402,6 @@ window.saveRACIAssignment = async function (workItemKey, roleKey) {
         showNotification('Changes saved', 'success');
 
     } catch (error) {
-        console.error('[RACI] Error saving assignment:', error);
         showNotification('Failed to save changes. Click "Save Matrix" to retry.', 'warning');
     }
 }
@@ -599,10 +581,9 @@ window.saveRACIMatrix = async function () {
 
         if (!response.ok) throw new Error('Failed to save RACI matrix');
 
-        showSuccess('RACI matrix saved successfully');
+        window.showNotification('RACI matrix saved successfully', 'success');
     } catch (error) {
-        console.error('Error saving RACI matrix:', error);
-        showError('Failed to save RACI matrix');
+        window.showNotification('Failed to save RACI matrix', 'danger');
     }
 }
 
@@ -649,7 +630,7 @@ window.validateRACIMatrix = function () {
         return { valid: errors.length === 0, errors, warnings };
     }
 
-    showSuccess('RACI matrix validation passed');
+    window.showNotification('RACI matrix validation passed', 'success');
     return { valid: true, errors: [], warnings: [] };
 }
 
@@ -705,18 +686,18 @@ window.createRACIMappings = async function () {
     if (!raciState.agencyId) {
         raciState.agencyId = getAgencyId();
         if (!raciState.agencyId) {
-            showError('Error: No agency selected');
+            window.showNotification('Error: No agency selected', 'danger');
             return;
         }
     }
 
     if (!raciState.workItems || raciState.workItems.length === 0) {
-        showError('No work items available. Please create work items first.');
+        window.showNotification('No work items available. Please create work items first.', 'danger');
         return;
     }
 
     if (!raciState.roles || raciState.roles.length === 0) {
-        showError('No roles available. Please create roles first.');
+        window.showNotification('No roles available. Please create roles first.', 'danger');
         return;
     }
 
@@ -777,7 +758,6 @@ window.createRACIMappings = async function () {
                 }
             }
         } catch (err) {
-            console.error('[RACI] Error refreshing chat:', err);
         }
 
         // Hide AI processing status
@@ -788,9 +768,9 @@ window.createRACIMappings = async function () {
         // Show success message
         const mappingCount = Object.keys(raciState.assignments).length;
         if (mappingCount > 0) {
-            showSuccess(`Successfully created ${mappingCount} RACI mapping(s)! Review and adjust as needed.`);
+            window.showNotification(`Successfully created ${mappingCount} RACI mapping(s)! Review and adjust as needed.`, 'success');
         } else {
-            showSuccess('RACI mappings created successfully!');
+            window.showNotification('RACI mappings created successfully!', 'success');
         }
 
         // Restore button
@@ -798,14 +778,13 @@ window.createRACIMappings = async function () {
         btn.innerHTML = originalHTML;
 
     } catch (error) {
-        console.error('[RACI] Error creating mappings:', error);
 
         // Hide AI processing status
         if (window.hideAIProcessStatus) {
             window.hideAIProcessStatus();
         }
 
-        showError(`AI processing failed: ${error.message}`);
+        window.showNotification(`AI processing failed: ${error.message}`, 'danger');
 
         // Restore button
         const btn = document.getElementById('ai-create-mappings-btn');
@@ -821,8 +800,7 @@ window.exportRACIMatrix = async function (format) {
         const url = `/api/v1/agencies/${raciState.agencyId}/raci-matrix/export/${format}`;
         window.open(url, '_blank');
     } catch (error) {
-        console.error(`Error exporting RACI matrix as ${format}:`, error);
-        showError(`Failed to export as ${format}`);
+        window.showNotification(`Failed to export as ${format}`, 'danger');
     }
 }
 
@@ -858,8 +836,7 @@ async function loadTemplates() {
         `).join('<br>');
 
     } catch (error) {
-        console.error('Error loading templates:', error);
-        showError('Failed to load templates');
+        window.showNotification('Failed to load templates', 'danger');
     }
 }
 
@@ -875,29 +852,6 @@ function showLoading(show) {
         loading.style.display = 'none';
         table.style.display = 'table';
     }
-}
-
-function showSuccess(message) {
-    showNotification(message, 'success');
-}
-
-function showError(message) {
-    showNotification(message, 'danger');
-}
-
-function showNotification(message, type = 'info') {
-    // Create a notification toast
-    const notification = document.createElement('div');
-    notification.className = `notification is-${type} is-light`;
-    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; min-width: 300px;';
-    notification.innerHTML = `
-        <button class="delete" onclick="this.parentElement.remove()"></button>
-        ${escapeHtml(message)}
-    `;
-    document.body.appendChild(notification);
-
-    // Auto-remove after 5 seconds
-    setTimeout(() => notification.remove(), 5000);
 }
 
 function escapeHtml(text) {

@@ -1,39 +1,33 @@
 package templates
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
-
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 )
 
 // DefaultValidator implements the Validator interface
 type DefaultValidator struct {
-	roleService registry.RoleService
 }
 
 // NewDefaultValidator creates a new default template validator
 func NewDefaultValidator() *DefaultValidator {
-	return &DefaultValidator{
-		roleService: nil,
-	}
+	return &DefaultValidator{}
 }
 
-// NewDefaultValidatorWithTypeService creates a validator with agent type service
-func NewDefaultValidatorWithTypeService(roleService registry.RoleService) *DefaultValidator {
-	return &DefaultValidator{
-		roleService: roleService,
-	}
+// NewDefaultValidatorWithTypeService creates a validator (kept for compatibility, no longer uses type service)
+// Deprecated: Use NewDefaultValidator instead
+func NewDefaultValidatorWithTypeService() *DefaultValidator {
+	return &DefaultValidator{}
 }
 
-// SetRoleService sets the agent type service for validation
-func (v *DefaultValidator) SetRoleService(service registry.RoleService) {
-	v.roleService = service
+// SetRoleService is deprecated - no longer uses role service
+// Deprecated: Kept for compatibility only
+func (v *DefaultValidator) SetRoleService(service interface{}) {
+	// No-op - registry removed
 }
 
 // ValidateTemplate validates a template
@@ -327,17 +321,7 @@ func (v *DefaultValidator) validateVariableConstraints(tv TemplateVariable) erro
 // Helper methods
 
 func (v *DefaultValidator) isValidAgentType(agentType string) bool {
-	// If agent type service is available, use it
-	if v.roleService != nil {
-		ctx := context.Background()
-		isValid, err := v.roleService.IsValidType(ctx, agentType)
-		if err == nil && isValid {
-			return true
-		}
-		// Fall back to hardcoded list on error
-	}
-
-	// Fallback to hardcoded list
+	// Use hardcoded list of valid types
 	validTypes := []string{"worker", "coordinator", "monitor", "proxy", "gateway"}
 	for _, valid := range validTypes {
 		if agentType == valid {

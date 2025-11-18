@@ -2,11 +2,19 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
+// Helper function to convert bool to string for JavaScript
+func getBoolString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
 // ChatPanel renders the AI chat panel for the agency designer
-templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationContext) {
+templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContext) {
 	<aside class="chat-panel">
 		<header class="chat-header">
 			<div class="chat-header-content">
@@ -33,24 +41,6 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 		@ContextPanel()
 	</div>		<!-- Chat Input (Independent) -->
 		<div class="chat-input-container">
-			<!-- AI Process Status Bar (inside input panel) -->
-			<div class="ai-process-status htmx-indicator" id="ai-process-status" style="display: none;">
-				<div class="process-content">
-					<div class="process-info">
-						<span class="icon has-text-info">
-							<i class="fas fa-spinner fa-spin"></i>
-						</span>
-						<span class="process-text" id="ai-status-message">AI is working on your request...</span>
-					</div>
-					<button class="button is-small is-danger is-outlined" id="stop-ai-process" title="Stop AI processing">
-						<span class="icon is-small">
-							<i class="fas fa-stop"></i>
-						</span>
-						<span>Stop</span>
-					</button>
-				</div>
-			</div>
-			
 			@ChatInput(currentAgency.ID, conversation)
 		</div>
 	</aside>
@@ -59,22 +49,10 @@ templ ChatPanel(currentAgency *agency.Agency, conversation *ai.ConversationConte
 // WelcomeMessage displays the initial greeting
 templ WelcomeMessage(agencyName string) {
 	<div class="message ai-message welcome-message">
-		<div class="message-avatar">
-			<span class="icon is-large has-text-primary">
-				<i class="fas fa-robot fa-2x"></i>
-			</span>
-		</div>
 		<div class="message-content">
 			<div class="message-bubble">
 				<p><strong>Hi! I'm your AI Agency Designer.</strong> 🤖</p>
-				<p>I'll help you create a complete multi-agent architecture for <strong>{ agencyName }</strong>.</p>
-				<p>Let's start by understanding your use case:</p>
-				<ul>
-					<li>What problem are you trying to solve?</li>
-					<li>What are the main processes or workflows?</li>
-					<li>Who are the key actors or stakeholders?</li>
-				</ul>
-				<p class="mt-4"><em>💡 Tip: Be as detailed as you can - I'll help you refine the details as we go!</em></p>
+				<p>How can I help?</p>
 			</div>
 		</div>
 	</div>
@@ -103,22 +81,12 @@ templ UserMessage(msg ai.Message) {
 				{ msg.Timestamp.Format("3:04 PM") }
 			</div>
 		</div>
-		<div class="message-avatar">
-			<span class="icon is-medium has-text-info">
-				<i class="fas fa-user"></i>
-			</span>
-		</div>
 	</div>
 }
 
 // AIMessage renders an AI assistant message bubble
 templ AIMessage(msg ai.Message) {
 	<div class="message ai-message">
-		<div class="message-avatar">
-			<span class="icon is-medium has-text-primary">
-				<i class="fas fa-robot"></i>
-			</span>
-		</div>
 		<div class="message-content">
 			<div class="message-bubble">
 				@templ.Raw(formatAIMessage(msg.Content))
@@ -133,34 +101,10 @@ templ AIMessage(msg ai.Message) {
 // ChatInput renders the message input form
 templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 	<form 
-		hx-post={ getMessageEndpoint(agencyID, conversation) }
-		hx-target="#chat-messages"
-		if conversation == nil || len(conversation.Messages) == 0 {
-			hx-swap="innerHTML"
-		} else {
-			hx-swap="beforeend"
-		}
-		hx-vals='js:{"context": window.currentAgencyContext || "introduction"}'
-		hx-on::before-request="
-			console.log('[Chat Form] Submitting with context:', window.currentAgencyContext, 'Message:', document.getElementById('user-input').value);
-			// Append formatted contexts to message if available
-			const messageInput = document.getElementById('user-input');
-			const originalMessage = messageInput.value;
-			if (window.ContextManager) {
-				const formattedContexts = window.ContextManager.getFormattedContexts();
-				if (formattedContexts) {
-					messageInput.value = originalMessage + formattedContexts;
-				}
-			}
-		"
-		hx-on::after-request="
-			document.getElementById('user-input').value = ''; 
-			document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-			// Clear selections after message is sent
-			if (window.ContextManager) {
-				window.ContextManager.clearSelections();
-			}
-		">
+		id="chat-form"
+		data-agency-id={ agencyID }
+		data-has-conversation={ getBoolString(conversation != nil) }
+		onsubmit="return handleChatSubmit(event)">
 		
 		<div class="field has-addons">
 			<div class="control is-expanded">
@@ -174,8 +118,8 @@ templ ChatInput(agencyID string, conversation *ai.ConversationContext) {
 					autocomplete="off"/>
 			</div>
 			<div class="control">
-				<button class="button is-primary" type="submit">
-					<span class="icon">
+				<button class="button is-primary" type="submit" id="chat-submit-btn">
+					<span class="icon" id="chat-submit-icon">
 						<i class="fas fa-paper-plane"></i>
 					</span>
 				</button>

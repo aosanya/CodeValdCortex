@@ -1,268 +1,340 @@
 package ai_refine
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 // RefineIntroduction handles POST /api/v1/agencies/:id/overview/refine
-// Refines the agency introduction using AI with full context
+// Supports both streaming (via ?stream=true) and standard modes
 func (h *Handler) RefineIntroduction(c *gin.Context) {
 	agencyID := c.Param("id")
+	streamMode := c.Query("stream") == "true"
 
-	h.logger.WithField("agency_id", agencyID).Info("Processing AI introduction refinement request")
+	if streamMode {
+		h.refineIntroductionStreaming(c, agencyID)
+	} else {
+		h.refineIntroductionStandard(c, agencyID)
+	}
+}
 
-	// Get agency context
-	ag, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
+// refineIntroductionStandard handles non-streaming introduction refinement
+func (h *Handler) refineIntroductionStandard(c *gin.Context, agencyID string) {
+	h.logger.WithField("agency_id", agencyID).Info("Processing AI introduction refinement")
+
+	// Fetch agency and specification
+	ag, spec, err := h.fetchAgencyAndSpec(c, agencyID)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to fetch agency")
-		c.Header("Content-Type", "text/html")
-		c.String(http.StatusNotFound, `
-			<div class="notification is-warning">
-				<div class="is-flex is-align-items-center">
-					<span class="icon has-text-warning mr-2">
-						<i class="fas fa-exclamation-triangle"></i>
-					</span>
-					<div>
-						<strong>Agency Not Found</strong>
-						<p class="mb-0">The requested agency could not be found.</p>
-					</div>
-				</div>
-			</div>
-		`)
+		return // Error already handled
+	}
+
+	// Get current introduction and user request
+	currentIntroduction := h.getCurrentIntroduction(c, spec)
+	userRequest := h.getUserRequest(c)
+
+	// Build AI context
+	builderContextData, err := h.buildAIContext(c, ag, currentIntroduction, userRequest)
+	if err != nil {
+		return // Error already handled
+	}
+
+	// Get conversation history
+	conversationHistory := h.getConversationHistory(agencyID)
+
+	// Perform AI refinement
+	refinedResult, err := h.introductionRefiner.RefineIntroduction(
+		c.Request.Context(),
+		&builder.RefineIntroductionRequest{
+			AgencyID:            agencyID,
+			ConversationHistory: conversationHistory,
+		},
+		builderContextData,
+	)
+	if err != nil {
+		h.sendError(c, false, "AI Refinement Failed", "Please check your AI configuration and try again.")
 		return
 	}
 
-	// Get current overview/introduction
-	overview, err := h.agencyService.GetAgencyOverview(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to fetch overview")
-		// Create empty overview if not found
-		overview = &agency.Overview{
-			AgencyID:     agencyID,
-			Introduction: "",
+	// Save refined introduction
+	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
+		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, refinedResult.Data.Introduction, "ai-refine")
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to save refined introduction")
 		}
 	}
 
-	// Get current introduction text from form (user might have edited it)
-	currentIntroduction := c.PostForm("introduction-editor")
-	if currentIntroduction == "" {
-		// Fallback to stored introduction if form is empty
-		currentIntroduction = overview.Introduction
-	}
+	// Add to conversation
+	h.addToConversation(agencyID, refinedResult)
 
-	// Check if there's a specific user request from the form
-	userRequest := c.PostForm("user-request")
-	if userRequest == "" {
-		// Check if there's a pending request from chat (passed via header or session)
-		userRequest = c.GetHeader("X-User-Request")
-	}
+	// Render response
+	h.renderStandardResponse(c, agencyID, refinedResult, ag, userRequest)
+}
 
-	if userRequest != "" {
-		h.logger.WithFields(logrus.Fields{
-			"agency_id":    agencyID,
-			"user_request": userRequest,
-		}).Info("User provided specific refinement request")
-	}
+// refineIntroductionStreaming handles streaming introduction refinement via SSE
+func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
+	h.logger.WithField("agency_id", agencyID).Info("🌊 Processing streaming AI introduction refinement")
 
-	// Build AI context data using shared context builder (pass the full agency object)
-	builderContextData, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, currentIntroduction, userRequest)
+	// Fetch agency and specification
+	ag, spec, err := h.fetchAgencyAndSpec(c, agencyID)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to build AI context data")
-		c.Header("Content-Type", "text/html")
-		c.String(http.StatusInternalServerError, `
-			<div class="notification is-danger">
-				<div class="is-flex is-align-items-center">
-					<span class="icon has-text-danger mr-2">
-						<i class="fas fa-exclamation-triangle"></i>
-					</span>
-					<div>
-						<strong>Context Build Failed</strong>
-						<p class="mb-0">Failed to gather necessary context data.</p>
-					</div>
-				</div>
-			</div>
-		`)
+		c.SSEvent("error", `{"error": "Agency not found"}`)
 		return
 	}
 
-	// Get conversation context for recent chat messages
-	var conversationHistory []ai.Message
+	// Get current introduction and user request
+	currentIntroduction := h.getCurrentIntroduction(c, spec)
+	userRequest := h.getUserRequest(c)
+
+	// Build AI context
+	builderContextData, err := h.buildAIContext(c, ag, currentIntroduction, userRequest)
+	if err != nil {
+		c.SSEvent("error", `{"error": "Failed to build context"}`)
+		return
+	}
+
+	// Get or create conversation
+	conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
+	if err != nil {
+		h.logger.Warn("No conversation exists, creating new one", "agencyID", agencyID)
+		conversation, err = h.designerService.StartConversation(c.Request.Context(), agencyID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to create conversation")
+			c.SSEvent("error", `{"error": "Failed to initialize conversation"}`)
+			return
+		}
+	}
+
+	// Setup SSE
+	h.setupSSE(c)
+
+	// Stream refinement (real AI streaming from backend)
+	chunkCount := 0
+	result, err := h.introductionRefiner.RefineIntroductionStream(
+		c.Request.Context(),
+		&builder.RefineIntroductionRequest{AgencyID: agencyID},
+		builderContextData,
+		func(chunk string) error {
+			chunkCount++
+			c.SSEvent("chunk", chunk)
+			c.Writer.Flush()
+			return nil
+		},
+	)
+
+	if err != nil {
+		h.logger.WithError(err).Error("❌ Streaming refinement failed")
+		c.SSEvent("error", fmt.Sprintf(`{"error": "%s"}`, err.Error()))
+		return
+	}
+
+	h.logger.WithField("total_chunks", chunkCount).Info("✅ Streaming completed")
+
+	// Save if changed
+	if result.Data != nil && result.Data.Introduction != "" && result.Data.Introduction != spec.Introduction {
+		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, result.Data.Introduction, "ai-refine-stream")
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to save")
+			c.SSEvent("error", `{"error": "Failed to save changes"}`)
+			return
+		}
+	}
+
+	// Format message for conversation history
+	chatMessage := result.Explanation
+	if result.WasChanged {
+		chatMessage = "✨ **Introduction Refined & Saved**\n\n" + chatMessage
+	} else {
+		chatMessage = "✅ **Introduction Review Complete**\n\n" + chatMessage
+	}
+
+	// Add to conversation
+	if err := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); err != nil {
+		h.logger.WithError(err).Error("Failed to add message to conversation")
+	}
+
+	// Send completion
+	completionData := map[string]interface{}{
+		"was_changed":      result.WasChanged,
+		"explanation":      result.Explanation,
+		"changed_sections": result.ChangedSections,
+		"conversation_id":  conversation.ID,
+	}
+	if result.Data != nil {
+		completionData["introduction"] = result.Data.Introduction
+	}
+
+	c.SSEvent("complete", completionData)
+	c.Writer.Flush()
+}
+
+// Helper functions
+
+func (h *Handler) fetchAgencyAndSpec(c *gin.Context, agencyID string) (*models.Agency, *models.AgencySpecification, error) {
+	ag, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to fetch agency")
+		h.sendError(c, false, "Agency Not Found", "The requested agency could not be found.")
+		return nil, nil, err
+	}
+
+	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to fetch specification")
+		spec = &models.AgencySpecification{Introduction: ""}
+	}
+
+	return ag, spec, nil
+}
+
+func (h *Handler) getCurrentIntroduction(c *gin.Context, spec *models.AgencySpecification) string {
+	currentIntroduction := c.PostForm("introduction-editor")
+	if currentIntroduction == "" {
+		h.logger.Warn("⚠️ Form empty, using database value")
+		currentIntroduction = spec.Introduction
+	}
+	return currentIntroduction
+}
+
+func (h *Handler) getUserRequest(c *gin.Context) string {
+	userRequest := c.PostForm("user-request")
+	if userRequest == "" {
+		userRequest = c.GetHeader("X-User-Request")
+	}
+	return userRequest
+}
+
+func (h *Handler) buildAIContext(c *gin.Context, ag *models.Agency, currentIntro, userRequest string) (builder.BuilderContext, error) {
+	builderContextData, err := h.contextBuilder.BuildBuilderContext(c.Request.Context(), ag, currentIntro, userRequest)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to build AI context")
+		h.sendError(c, false, "Context Build Failed", "Failed to gather necessary context data.")
+		return builder.BuilderContext{}, err
+	}
+	return builderContextData, nil
+}
+
+func (h *Handler) getConversationHistory(agencyID string) []ai.Message {
 	conv, err := h.designerService.GetConversationByAgencyID(agencyID)
 	if err == nil && conv != nil {
-		// Include recent conversation messages (last 5) for context
 		messageCount := len(conv.Messages)
 		startIdx := 0
 		if messageCount > 5 {
 			startIdx = messageCount - 5
 		}
-		conversationHistory = conv.Messages[startIdx:]
-
-		h.logger.WithFields(logrus.Fields{
-			"agency_id":     agencyID,
-			"message_count": len(conversationHistory),
-		}).Info("Including conversation context in introduction refinement")
+		return conv.Messages[startIdx:]
 	}
+	return nil
+}
 
-	// Build refinement request using the structured AI context data
-	refineReq := &builder.RefineIntroductionRequest{
-		AgencyID:            agencyID,
-		ConversationHistory: conversationHistory,
-	}
-
-	// Call AI refiner service with builderContextData passed separately
-	refinedResult, err := h.introductionRefiner.RefineIntroduction(c.Request.Context(), refineReq, builderContextData)
-	if err != nil {
-		h.logger.WithError(err).Error("AI refinement failed")
-		c.Header("Content-Type", "text/html")
-		c.String(http.StatusInternalServerError, `
-			<div class="notification is-danger">
-				<div class="is-flex is-align-items-center">
-					<span class="icon has-text-danger mr-2">
-						<i class="fas fa-exclamation-triangle"></i>
-					</span>
-					<div>
-						<strong>AI Refinement Failed</strong>
-						<p class="mb-0">Please check your AI configuration and try again.</p>
-					</div>
-				</div>
-			</div>
-		`)
-		return
-	}
-
-	h.logger.WithFields(logrus.Fields{
-		"agency_id":        agencyID,
-		"was_changed":      refinedResult.WasChanged,
-		"explanation":      refinedResult.Explanation,
-		"changed_sections": refinedResult.ChangedSections,
-	}).Info("AI refinement completed")
-
-	// Extract introduction from the refined data
-	var introToSave string
-	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
-		introToSave = refinedResult.Data.Introduction
-	} else {
-		// Fallback to current introduction if data is missing
-		introToSave = currentIntroduction
-	}
-
-	// Check if the introduction is different from what's in the database
-	needsSave := (introToSave != overview.Introduction)
-
-	if needsSave {
-		h.logger.WithFields(logrus.Fields{
-			"agency_id":           agencyID,
-			"ai_changed":          refinedResult.WasChanged,
-			"intro_length":        len(introToSave),
-			"stored_intro_length": len(overview.Introduction),
-		}).Info("Introduction differs from database, saving")
-
-		err = h.agencyService.UpdateAgencyOverview(c.Request.Context(), agencyID, introToSave)
-		if err != nil {
-			h.logger.WithError(err).Error("Failed to save introduction")
-			// Show error notification
-			c.Header("Content-Type", "text/html")
-			c.String(http.StatusInternalServerError, `
-				<div class="notification is-danger">
-					<div class="is-flex is-align-items-center">
-						<span class="icon has-text-danger mr-2">
-							<i class="fas fa-exclamation-triangle"></i>
-						</span>
-						<div>
-							<strong>Save Failed</strong>
-							<p class="mb-0">The introduction could not be saved. Please try again.</p>
-						</div>
-					</div>
-				</div>
-			`)
-			return
-		}
-
-		h.logger.WithFields(logrus.Fields{
-			"agency_id": agencyID,
-		}).Info("Successfully saved introduction to database")
-	} else {
-		h.logger.WithFields(logrus.Fields{
-			"agency_id": agencyID,
-		}).Info("Introduction matches database, no save needed")
-	}
-
-	// Add the AI refinement explanation to the chat conversation
-	h.logger.Info("Attempting to add introduction refinement to chat",
-		"agencyID", agencyID,
-		"wasChanged", refinedResult.WasChanged,
-		"explanationLength", len(refinedResult.Explanation))
-
+func (h *Handler) addToConversation(agencyID string, result *builder.RefineIntroductionResponse) {
 	conversation, err := h.designerService.GetConversationByAgencyID(agencyID)
 	if err != nil {
-		h.logger.Warn("No conversation exists for introduction refine, creating new one",
-			"agencyID", agencyID,
-			"error", err)
-		// No conversation exists, create one
-		conversation, err = h.designerService.StartConversation(c.Request.Context(), agencyID)
+		ctx := context.Background()
+		conversation, err = h.designerService.StartConversation(ctx, agencyID)
 		if err != nil {
-			h.logger.WithError(err).Error("Failed to create conversation for AI refinement message")
+			h.logger.WithError(err).Error("Failed to create conversation")
+			return
 		}
 	}
 
 	if conversation != nil {
-		chatMessage := refinedResult.Explanation
-		if refinedResult.WasChanged {
+		chatMessage := result.Explanation
+		if result.WasChanged {
 			chatMessage = "✨ **Introduction Refined & Saved**\n\n" + chatMessage
 		} else {
 			chatMessage = "✅ **Introduction Review Complete**\n\n" + chatMessage
 		}
-
-		h.logger.Info("Adding introduction refinement message to chat",
-			"agencyID", agencyID,
-			"conversationID", conversation.ID,
-			"messageLength", len(chatMessage),
-			"wasChanged", refinedResult.WasChanged)
-
-		if addErr := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); addErr != nil {
-			h.logger.WithError(addErr).Error("Failed to add refinement explanation to chat")
-		} else {
-			h.logger.Info("Successfully added introduction refinement to chat",
-				"agencyID", agencyID,
-				"conversationID", conversation.ID)
+		if err := h.designerService.AddMessage(conversation.ID, "assistant", chatMessage); err != nil {
+			h.logger.WithError(err).Error("Failed to add message to conversation")
 		}
+	}
+}
+
+func (h *Handler) renderStandardResponse(c *gin.Context, agencyID string, result *builder.RefineIntroductionResponse, ag *models.Agency, userRequest string) {
+	conversationID := c.Param("conversationId")
+	isFromChat := conversationID != "" || userRequest != ""
+
+	if isFromChat {
+		h.renderChatResponse(c, agencyID, result, ag)
 	} else {
-		h.logger.Error("Conversation is nil after creation attempt for introduction refine",
-			"agencyID", agencyID)
+		h.renderDirectResponse(c, result, ag)
+	}
+}
+
+func (h *Handler) renderChatResponse(c *gin.Context, agencyID string, result *builder.RefineIntroductionResponse, ag *models.Agency) {
+	conversation, _ := h.designerService.GetConversationByAgencyID(agencyID)
+	var chatHTML string
+
+	if conversation != nil && len(conversation.Messages) > 0 {
+		lastMessage := conversation.Messages[len(conversation.Messages)-1]
+		if lastMessage.Role == "assistant" {
+			var chatBuf strings.Builder
+			component := agency_designer.AIMessage(lastMessage)
+			if err := component.Render(c.Request.Context(), &chatBuf); err == nil {
+				chatHTML = chatBuf.String()
+			}
+		}
 	}
 
-	// Update overview object for template rendering
-	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
-		overview.Introduction = refinedResult.Data.Introduction
-	}
-
-	// Render the refined introduction response
-	component := agency_designer.AIRefineResponse(refinedResult, ag, overview)
-	c.Header("Content-Type", "text/html")
-	err = component.Render(c.Request.Context(), c.Writer)
-	if err != nil {
-		h.logger.WithError(err).Error("Failed to render AI refine response")
-		c.Header("Content-Type", "text/html")
-		c.String(http.StatusInternalServerError, `
-			<div class="notification is-danger">
-				<div class="is-flex is-align-items-center">
-					<span class="icon has-text-danger mr-2">
-						<i class="fas fa-exclamation-triangle"></i>
-					</span>
-					<div>
-						<strong>Render Error</strong>
-						<p class="mb-0">Failed to render the response. Please try again.</p>
-					</div>
-				</div>
-			</div>
-		`)
+	// Render introduction editor for OOB swap
+	var introBuf strings.Builder
+	introComponent := agency_designer.AIRefineResponse(result, ag)
+	if err := introComponent.Render(c.Request.Context(), &introBuf); err != nil {
+		h.logger.WithError(err).Error("Failed to render introduction editor")
+		c.String(http.StatusInternalServerError, "Failed to render introduction")
 		return
 	}
+
+	introOOB := fmt.Sprintf(`<div id="introduction-content" hx-swap-oob="true">%s</div>`, introBuf.String())
+	c.Header("Content-Type", "text/html")
+	c.String(http.StatusOK, chatHTML+introOOB)
+}
+
+func (h *Handler) renderDirectResponse(c *gin.Context, result *builder.RefineIntroductionResponse, ag *models.Agency) {
+	component := agency_designer.AIRefineResponse(result, ag)
+	c.Header("Content-Type", "text/html")
+	if err := component.Render(c.Request.Context(), c.Writer); err != nil {
+		h.logger.WithError(err).Error("Failed to render AI refine response")
+		c.String(http.StatusInternalServerError, "Render error")
+	}
+}
+
+func (h *Handler) setupSSE(c *gin.Context) {
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	c.Writer.Flush()
+	c.SSEvent("start", `{"status": "streaming"}`)
+	c.Writer.Flush()
+}
+
+func (h *Handler) sendError(c *gin.Context, isStreaming bool, title, message string) {
+	if isStreaming {
+		c.SSEvent("error", fmt.Sprintf(`{"error": "%s"}`, message))
+		return
+	}
+
+	c.Header("Content-Type", "text/html")
+	c.String(http.StatusInternalServerError, fmt.Sprintf(`
+		<div class="notification is-danger">
+			<div class="is-flex is-align-items-center">
+				<span class="icon has-text-danger mr-2">
+					<i class="fas fa-exclamation-triangle"></i>
+				</span>
+				<div>
+					<strong>%s</strong>
+					<p class="mb-0">%s</p>
+				</div>
+			</div>
+		</div>
+	`, title, message))
 }

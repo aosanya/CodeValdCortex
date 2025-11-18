@@ -9,12 +9,12 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 )
 
 // OverviewContent renders the overview section with three navigation nodes
-func OverviewContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
+func OverviewContent(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -100,7 +100,7 @@ func OverviewContent(currentAgency *agency.Agency, conversation *ai.Conversation
 }
 
 // OverviewNavigationList shows the three navigation nodes
-func OverviewNavigationList(currentAgency *agency.Agency) templ.Component {
+func OverviewNavigationList(currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -130,7 +130,7 @@ func OverviewNavigationList(currentAgency *agency.Agency) templ.Component {
 }
 
 // IntroductionContent shows the introduction section
-func IntroductionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext, overview *agency.Overview) templ.Component {
+func IntroductionContent(currentAgency *models.Agency, conversation *ai.ConversationContext, overview *models.Overview) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -168,7 +168,7 @@ func IntroductionContent(currentAgency *agency.Agency, conversation *ai.Conversa
 }
 
 // GoalDefinitionContent shows the goal definition section
-func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func GoalDefinitionContent(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -189,7 +189,11 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"overview-section\"><!-- AI Goal Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Goal Operations:</p><span id=\"goal-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIGoalOperation(['create'])\" id=\"ai-create-goals-btn\" title=\"Generate new goals from introduction\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIGoalOperation(['enhance'])\" id=\"ai-enhance-goals-btn\" title=\"Select goals to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIGoalOperation(['consolidate'])\" id=\"ai-consolidate-goals-btn\" title=\"Select goals to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"overview-section\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AIOperationsToolbar("goal").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -210,7 +214,7 @@ func GoalDefinitionContent(currentAgency *agency.Agency, conversation *ai.Conver
 }
 
 // WorkItemsContent shows the work items section
-func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func WorkItemsContent(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -231,7 +235,11 @@ func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"overview-section\"><!-- AI Work Item Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Work Item Operations:</p><span id=\"work-item-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkItemOperation(['create'])\" id=\"ai-create-work-items-btn\" title=\"Generate work items from goals\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkItemOperation(['enhance'])\" id=\"ai-enhance-work-items-btn\" title=\"Select work items to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIWorkItemOperation(['consolidate'])\" id=\"ai-consolidate-work-items-btn\" title=\"Select work items to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"overview-section\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AIOperationsToolbar("work-item").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -252,7 +260,7 @@ func WorkItemsContent(currentAgency *agency.Agency, conversation *ai.Conversatio
 }
 
 // OverviewRolesContent shows the roles section in the overview
-func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.ConversationContext) templ.Component {
+func OverviewRolesContent(currentAgency *models.Agency, conversation *ai.ConversationContext) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -273,7 +281,11 @@ func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Convers
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"overview-section\"><!-- AI Role Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Role Operations:</p><span id=\"role-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIRoleOperation(['create'])\" id=\"ai-create-roles-btn\" title=\"Generate roles from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIRoleOperation(['enhance'])\" id=\"ai-enhance-roles-btn\" title=\"Select roles to enhance\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Enhance</span></button> <button class=\"button is-small is-warning is-static\" onclick=\"processAIRoleOperation(['consolidate'])\" id=\"ai-consolidate-roles-btn\" title=\"Select roles to consolidate\" disabled><span class=\"icon\"><i class=\"fas fa-compress\"></i></span> <span>Consolidate</span></button></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"overview-section\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AIOperationsToolbar("role").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -294,7 +306,7 @@ func OverviewRolesContent(currentAgency *agency.Agency, conversation *ai.Convers
 }
 
 // RACIMatrixContent shows the RACI matrix section in the overview
-func RACIMatrixContent(currentAgency *agency.Agency) templ.Component {
+func RACIMatrixContent(currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -324,7 +336,7 @@ func RACIMatrixContent(currentAgency *agency.Agency) templ.Component {
 }
 
 // WorkflowsContent renders the workflows section with AI operations and workflow management
-func WorkflowsContent(currentAgency *agency.Agency) templ.Component {
+func WorkflowsContent(currentAgency *models.Agency) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -345,7 +357,11 @@ func WorkflowsContent(currentAgency *agency.Agency) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\"><!-- AI Workflow Operations Toolbar --><div class=\"box mb-4 p-4\"><div class=\"is-flex is-flex-direction-column\"><div class=\"is-flex is-justify-content-space-between is-align-items-center mb-2\"><p class=\"has-text-weight-semibold mb-0\">AI Workflow Operations:</p><span id=\"workflow-selection-count\" class=\"tag is-info is-light\" style=\"display: none;\"></span></div><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"processAIWorkflowOperation('create')\" id=\"ai-create-workflows-btn\" title=\"Generate workflows from work items\"><span class=\"icon\"><i class=\"fas fa-sparkles\"></i></span> <span>Create</span></button> <button class=\"button is-small is-link is-static\" onclick=\"processAIWorkflowOperation('refine')\" id=\"ai-refine-workflows-btn\" title=\"Select a workflow to refine\" disabled><span class=\"icon\"><i class=\"fas fa-wand-magic-sparkles\"></i></span> <span>Refine</span></button> <button class=\"button is-small is-success is-static\" onclick=\"processAIWorkflowOperation('suggest')\" id=\"ai-suggest-workflows-btn\" title=\"Select a workflow to get improvement suggestions\" disabled><span class=\"icon\"><i class=\"fas fa-lightbulb\"></i></span> <span>Suggest Improvements</span></button></div></div><!-- AI Response Container --><div id=\"workflow-ai-response\" class=\"mt-3\" style=\"display: none;\"></div></div><!-- Workflows List Card --><div class=\"columns\"><div class=\"column\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AIOperationsToolbar("workflow").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -353,15 +369,11 @@ func WorkflowsContent(currentAgency *agency.Agency) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><!-- Workflow Editor Card (Initially Hidden) --><div class=\"columns\"><div class=\"column\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = WorkflowEditorCard().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

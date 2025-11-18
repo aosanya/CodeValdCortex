@@ -1,11 +1,11 @@
 package agency_designer
 
 import (
-    "github.com/aosanya/CodeValdCortex/internal/agency"
+    "github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // RACIMatrixModal renders the RACI matrix modal and placeholder UI
-templ RACIMatrixModal(currentAgency *agency.Agency) {
+templ RACIMatrixModal(currentAgency *models.Agency) {
     <link rel="stylesheet" href="/static/css/raci-matrix.css?v=20251103"/>
 
     <div id="raci-matrix-modal" class="modal">

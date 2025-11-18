@@ -29,10 +29,15 @@ func NewAIIntroductionBuilder(llmClient LLMClient, logger *logrus.Logger) *Intro
 
 // aiRefinementResponse represents the JSON structure returned by the AI
 type aiRefinementResponse struct {
-	Data            *builder.AgencyDataResponse `json:"data"`
-	Explanation     string                      `json:"explanation"`
-	Changed         bool                        `json:"changed"`
-	ChangedSections []string                    `json:"changed_sections"`
+	Data            *aiIntroductionData `json:"data"`
+	Explanation     string              `json:"explanation"`
+	Changed         bool                `json:"changed"`
+	ChangedSections []string            `json:"changed_sections"`
+}
+
+// aiIntroductionData contains only the introduction field (lighter response)
+type aiIntroductionData struct {
+	Introduction string `json:"introduction"`
 }
 
 // RefineIntroduction uses AI to refine the agency introduction based on all available context
@@ -67,8 +72,8 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 				Content: prompt,
 			},
 		},
-		Temperature: 0.0, // Completely deterministic - no creativity
-		MaxTokens:   2048,
+		Temperature: 0.0,  // Completely deterministic - no creativity
+		MaxTokens:   4096, // Increased to handle detailed responses without truncation
 	})
 	if err != nil {
 		return nil, fmt.Errorf("AI refinement request failed: %w", err)
@@ -119,9 +124,93 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 	}, nil
 }
 
+// RefineIntroductionStream uses AI streaming to refine the agency introduction
+// It calls the streamCallback with each chunk of the response as it arrives
+func (r *IntroductionBuilder) RefineIntroductionStream(ctx context.Context, req *builder.RefineIntroductionRequest, builderContext builder.BuilderContext, streamCallback func(chunk string) error) (*builder.RefineIntroductionResponse, error) {
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":           req.AgencyID,
+		"current_intro_chars": len(builderContext.Introduction),
+		"goals_count":         len(builderContext.Goals),
+		"work_items_count":    len(builderContext.WorkItems),
+	}).Info("Starting streaming introduction refinement")
+
+	// Build comprehensive prompt with all context
+	prompt := r.buildRefinementPrompt(builderContext)
+
+	r.logger.WithFields(logrus.Fields{
+		"prompt_length": len(prompt),
+		"user_request":  builderContext.UserInput,
+	}).Info("Built refinement prompt for streaming")
+
+	// Accumulate the full response
+	var fullResponse strings.Builder
+
+	// Request AI refinement with streaming
+	err := r.llmClient.ChatStream(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: r.getSystemPrompt(),
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		Temperature: 0.0,  // Completely deterministic - no creativity
+		MaxTokens:   4096, // Increased to handle detailed responses without truncation
+	}, func(chunk string) error {
+		// Call the user's callback with each chunk
+		if err := streamCallback(chunk); err != nil {
+			return err
+		}
+		// Also accumulate for final parsing
+		fullResponse.WriteString(chunk)
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("AI streaming refinement request failed: %w", err)
+	}
+
+	responseContent := fullResponse.String()
+
+	r.logger.WithFields(logrus.Fields{
+		"response_length": len(responseContent),
+		"response_full":   responseContent,
+	}).Info("==== RECEIVED FROM AI - Full streamed response ====")
+
+	// Parse the complete response
+	refined, wasChanged, explanation, changedSections := r.parseAIResponse(responseContent, builderContext.Introduction)
+
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":        req.AgencyID,
+		"was_changed":      wasChanged,
+		"refined_chars":    len(refined),
+		"refined_text":     refined,
+		"explanation":      explanation,
+		"changed_sections": changedSections,
+	}).Info("==== PARSED RESULT - Streaming introduction refinement completed ====")
+
+	return &builder.RefineIntroductionResponse{
+		WasChanged:      wasChanged,
+		Explanation:     explanation,
+		ChangedSections: changedSections,
+		Data: &builder.AgencyDataResponse{
+			Introduction: refined,
+			Goals:        builderContext.Goals,
+			WorkItems:    builderContext.WorkItems,
+			Roles:        builderContext.Roles,
+			Assignments:  builderContext.Assignments,
+		},
+	}, nil
+}
+
 // getSystemPrompt returns the system prompt for introduction refinement
 func (r *IntroductionBuilder) getSystemPrompt() string {
-	return `You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
+	return SharedAgencyContext + `
+
+You are a JSON API endpoint that modifies text. You are NOT ChatGPT. You are NOT helpful. You are NOT conversational.
 
 INPUT: JSON with introduction field and modification instruction
 OUTPUT: JSON with modified introduction field
@@ -148,7 +237,7 @@ EXAMPLE 1:
 INPUT: {"introduction": "This system manages agents, goals, and work items, enabling real-time processing.", "instruction": "remove: 'goals, and work items'"}
 YOUR OUTPUT:
 {
-  "data": {"introduction": "This system manages agents, enabling real-time processing.", "goals": [], "work_items": [], "roles": [], "assignments": []},
+  "data": {"introduction": "This system manages agents, enabling real-time processing."},
   "explanation": "Removed specified text and adjusted grammar",
   "changed": true,
   "changed_sections": ["introduction"]
@@ -191,11 +280,7 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 	r.logger.WithFields(logrus.Fields{
 		"response_length": len(response),
 		"response_text":   response,
-	}).Debug("Parsing AI response")
-
-	fmt.Printf("\n[DEBUG] Starting to parse AI response...\n")
-	fmt.Printf("[DEBUG] Response length: %d characters\n", len(response))
-	fmt.Printf("[DEBUG] First 200 chars: %s\n", response[:min(200, len(response))])
+	}).Info("Parsing AI response")
 
 	// Check for conversational patterns that indicate AI didn't follow instructions
 	conversationalPatterns := []string{
@@ -217,20 +302,16 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 	lowerResponse := strings.ToLower(response)
 	for _, pattern := range conversationalPatterns {
 		if strings.Contains(lowerResponse, pattern) {
-			fmt.Printf("\n[DEBUG] ❌ DETECTED FORBIDDEN PATTERN: '%s'\n", pattern)
 			r.logger.WithField("pattern", pattern).Error("AI returned forbidden conversational text - rejecting response")
 			return original, false, fmt.Sprintf("Error: AI failed to follow instructions (detected pattern: '%s'). The modification was not applied. Please report this issue.", pattern), []string{}
 		}
 	}
-	fmt.Printf("[DEBUG] ✓ No conversational patterns detected\n")
 
 	// Try to parse as JSON
-	fmt.Printf("[DEBUG] Attempting to parse as JSON...\n")
 	var aiResponse aiRefinementResponse
 	err := json.Unmarshal([]byte(strings.TrimSpace(response)), &aiResponse)
 
 	if err != nil {
-		fmt.Printf("[DEBUG] ❌ Initial JSON parse failed: %v\n", err)
 		r.logger.WithError(err).Warn("Failed to parse AI response as JSON, trying to extract JSON from response")
 
 		// Try to find JSON within the response (sometimes AI adds extra text)
@@ -239,19 +320,13 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 
 		if startIdx != -1 && endIdx != -1 && endIdx > startIdx {
 			jsonStr := response[startIdx : endIdx+1]
-			fmt.Printf("[DEBUG] Found JSON boundaries at %d to %d\n", startIdx, endIdx)
-			fmt.Printf("[DEBUG] Extracted JSON: %s\n", jsonStr[:min(200, len(jsonStr))])
 			err = json.Unmarshal([]byte(jsonStr), &aiResponse)
 		}
 
 		if err != nil {
-			fmt.Printf("[DEBUG] ❌ JSON extraction also failed: %v\n", err)
 			r.logger.WithError(err).Error("Could not parse AI response as JSON")
 			return original, false, "Could not parse AI response, keeping original introduction.", []string{}
 		}
-		fmt.Printf("[DEBUG] ✓ Successfully extracted and parsed JSON\n")
-	} else {
-		fmt.Printf("[DEBUG] ✓ Successfully parsed JSON on first attempt\n")
 	}
 
 	// Extract refined introduction from data

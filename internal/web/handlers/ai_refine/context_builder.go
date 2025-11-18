@@ -4,58 +4,61 @@ import (
 	"context"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
-	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/sirupsen/logrus"
 )
 
 // BuilderContextBuilder provides methods to build AI context from agency data
 type BuilderContextBuilder struct {
 	agencyService agency.Service
-	roleService   registry.RoleService
 	logger        *logrus.Logger
 }
 
 // NewBuilderContextBuilder creates a new AI context builder
-func NewBuilderContextBuilder(agencyService agency.Service, roleService registry.RoleService, logger *logrus.Logger) *BuilderContextBuilder {
+func NewBuilderContextBuilder(agencyService agency.Service, logger *logrus.Logger) *BuilderContextBuilder {
 	return &BuilderContextBuilder{
 		agencyService: agencyService,
-		roleService:   roleService,
 		logger:        logger,
 	}
 }
 
 // BuildBuilderContext gathers all agency context data and returns it as a structured BuilderContext
 // This is the centralized function used by all AI operations to ensure consistent context
-func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *agency.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
-	b.logger.WithField("agency_id", agencyObj.ID).Debug("Building AI context data")
+func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyObj *models.Agency, currentIntroduction string, userRequest string) (builder.BuilderContext, error) {
 
-	// Get all goals for context
-	goals, err := b.agencyService.GetGoals(ctx, agencyObj.ID)
+	// Get unified specification (replaces separate GetGoals, GetWorkItems, GetOverview calls)
+	spec, err := b.agencyService.GetSpecification(ctx, agencyObj.ID)
 	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch goals, continuing without them")
-		goals = []*agency.Goal{}
+		b.logger.WithError(err).Warn("Failed to fetch specification, using empty context")
+		spec = &models.AgencySpecification{
+			Goals:     []models.Goal{},
+			WorkItems: []models.WorkItem{},
+		}
 	}
 
-	// Get all units of work for context
-	workItems, err := b.agencyService.GetWorkItems(ctx, agencyObj.ID)
-	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch units of work, continuing without them")
-		workItems = []*agency.WorkItem{}
+	// Convert goals from []Goal to []*Goal for compatibility
+	goals := make([]*models.Goal, len(spec.Goals))
+	for i := range spec.Goals {
+		goals[i] = &spec.Goals[i]
 	}
 
-	// Get all roles for context
-	roles, err := b.roleService.ListTypes(ctx)
-	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch roles, continuing without them")
-		roles = []*registry.Role{}
+	// Convert work items from []WorkItem to []*WorkItem for compatibility
+	workItems := make([]*models.WorkItem, len(spec.WorkItems))
+	for i := range spec.WorkItems {
+		workItems[i] = &spec.WorkItems[i]
 	}
 
-	// Get RACI assignments for context
-	assignments, err := b.agencyService.GetAllRACIAssignments(ctx, agencyObj.ID)
-	if err != nil {
-		b.logger.WithError(err).Warn("Failed to fetch RACI assignments, continuing without them")
-		assignments = []*agency.RACIAssignment{}
+	// Convert roles from []Role to []*Role for compatibility
+	roles := make([]*models.Role, len(spec.Roles))
+	for i := range spec.Roles {
+		roles[i] = &spec.Roles[i]
+	}
+
+	// Convert workflows from []Workflow to []*Workflow for compatibility
+	workflows := make([]*models.Workflow, len(spec.Workflows))
+	for i := range spec.Workflows {
+		workflows[i] = &spec.Workflows[i]
 	}
 
 	builderContext := builder.BuilderContext{
@@ -68,20 +71,21 @@ func (b *BuilderContextBuilder) BuildBuilderContext(ctx context.Context, agencyO
 		Introduction: currentIntroduction,
 		Goals:        goals,
 		WorkItems:    workItems,
+		Workflows:    workflows,
 		Roles:        roles,
-		Assignments:  assignments,
+		Assignments:  []*models.RACIAssignment{}, // RACI now in specification.RACIMatrix
 		UserInput:    userRequest,
 	}
 
 	b.logger.WithFields(logrus.Fields{
-		"agency_id":         agencyObj.ID,
-		"agency_name":       agencyObj.DisplayName,
-		"goals_count":       len(goals),
-		"work_items_count":  len(workItems),
-		"roles_count":       len(roles),
-		"assignments_count": len(assignments),
-		"has_user_input":    userRequest != "",
-	}).Debug("AI context data built successfully")
+		"agency_id":        agencyObj.ID,
+		"agency_name":      agencyObj.DisplayName,
+		"goals_count":      len(goals),
+		"work_items_count": len(workItems),
+		"workflows_count":  len(workflows),
+		"roles_count":      len(roles),
+		"has_user_input":   userRequest != "",
+	}).Info("Built refine context")
 
 	return builderContext, nil
 }

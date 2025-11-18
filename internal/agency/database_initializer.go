@@ -32,11 +32,6 @@ func (d *databaseInitializer) InitializeAgencyDatabase(ctx context.Context, agen
 	// Use agency ID directly as database name (already has "agency_" prefix)
 	dbName := agencyID
 
-	d.logger.WithFields(logrus.Fields{
-		"agencyID": agencyID,
-		"dbName":   dbName,
-	}).Debug("Initializing agency database")
-
 	// Check if database already exists
 	exists, err := d.client.DatabaseExists(ctx, dbName)
 	if err != nil {
@@ -54,7 +49,9 @@ func (d *databaseInitializer) InitializeAgencyDatabase(ctx context.Context, agen
 		return fmt.Errorf("failed to create database: %w", err)
 	}
 
-	d.logger.WithField("database", dbName).Info("Created agency database") // Define collections needed for agency operation
+	d.logger.WithField("database", dbName).Info("Created agency database")
+
+	// Define collections needed for agency operation
 	collections := []string{
 		"agents",
 		"tasks",
@@ -84,11 +81,6 @@ func (d *databaseInitializer) InitializeAgencyDatabase(ctx context.Context, agen
 		if err != nil {
 			return fmt.Errorf("failed to create collection %s: %w", collName, err)
 		}
-
-		d.logger.WithFields(logrus.Fields{
-			"database":   agencyID,
-			"collection": collName,
-		}).Debug("Created collection")
 	}
 
 	d.logger.WithField("database", agencyID).Info("Initialized agency collections")

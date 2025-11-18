@@ -83,7 +83,7 @@ while IFS= read -r file; do
         done
         echo ""
     fi
-done < <(find static/js -type f -name "*.js" ! -name "*.min.js" 2>/dev/null)
+done < <(find static/js -type f -name "*.js" ! -name "*.min.js" ! -path "*/vendor/*" 2>/dev/null)
 
 # Also check templ files
 while IFS= read -r file; do

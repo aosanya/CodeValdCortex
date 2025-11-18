@@ -3,6 +3,8 @@ package agency
 import (
 	"context"
 	"fmt"
+
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // ContextKey is the type for context keys
@@ -41,8 +43,8 @@ func (cm *ContextManager) WithAgency(ctx context.Context, agencyID string) (cont
 }
 
 // GetAgencyFromContext retrieves the agency from context
-func GetAgencyFromContext(ctx context.Context) (*Agency, error) {
-	agency, ok := ctx.Value(AgencyContextKey).(*Agency)
+func GetAgencyFromContext(ctx context.Context) (*models.Agency, error) {
+	agency, ok := ctx.Value(AgencyContextKey).(*models.Agency)
 	if !ok || agency == nil {
 		return nil, fmt.Errorf("no agency in context")
 	}

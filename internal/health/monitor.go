@@ -287,9 +287,8 @@ func (m *Monitor) Shutdown() error {
 
 	// Stop all monitoring
 	m.mu.Lock()
-	for agentID, cancel := range m.monitoring {
+	for _, cancel := range m.monitoring {
 		cancel()
-		m.logger.WithField("agent_id", agentID).Debug("Stopped monitoring during shutdown")
 	}
 	m.monitoring = make(map[string]context.CancelFunc)
 	m.mu.Unlock()
@@ -308,11 +307,8 @@ func (m *Monitor) Shutdown() error {
 func (m *Monitor) monitorAgent(ctx context.Context, agentInstance *agent.Agent) {
 	defer m.wg.Done()
 
-	agentID := agentInstance.ID
 	ticker := time.NewTicker(m.config.CheckInterval)
 	defer ticker.Stop()
-
-	m.logger.WithField("agent_id", agentID).Debug("Started agent monitoring loop")
 
 	// Grace period before starting health checks
 	select {
@@ -325,7 +321,6 @@ func (m *Monitor) monitorAgent(ctx context.Context, agentInstance *agent.Agent) 
 	for {
 		select {
 		case <-ctx.Done():
-			m.logger.WithField("agent_id", agentID).Debug("Agent monitoring stopped")
 			return
 		case <-ticker.C:
 			m.performHealthChecks(ctx, agentInstance)

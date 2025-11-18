@@ -132,7 +132,7 @@ func (m *Manager) loadAgentsFromRegistry() error {
 			"agent_id":   a.ID,
 			"agent_name": a.Name,
 			"state":      a.State,
-		}).Debug("Loaded agent from registry")
+		}).Info("Loaded agent from registry")
 	}
 
 	// Update metrics
@@ -142,9 +142,7 @@ func (m *Manager) loadAgentsFromRegistry() error {
 
 	m.logger.WithField("count", len(agents)).Info("Loaded agents from registry")
 	return nil
-}
-
-// CreateAgent creates and registers a new agent
+} // CreateAgent creates and registers a new agent
 func (m *Manager) CreateAgent(name, agentType string, config agent.Config) (*agent.Agent, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -269,7 +267,7 @@ func (m *Manager) agentWorker(a *agent.Agent, workerID int, results chan<- *agen
 	m.logger.WithFields(logrus.Fields{
 		"agent_id":  a.ID,
 		"worker_id": workerID,
-	}).Debug("Agent worker started")
+	}).Info("Agent worker started")
 
 	for {
 		select {
@@ -368,7 +366,7 @@ func (m *Manager) handleTaskResult(a *agent.Agent, result *agent.TaskResult) {
 			"agent_id": a.ID,
 			"task_id":  result.TaskID,
 			"duration": result.Duration,
-		}).Debug("Task completed successfully")
+		}).Info("Task completed successfully")
 	} else {
 		m.logger.WithFields(logrus.Fields{
 			"agent_id": a.ID,

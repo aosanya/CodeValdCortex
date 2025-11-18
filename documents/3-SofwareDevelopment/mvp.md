@@ -86,7 +86,7 @@ git branch -d feature/MVP-XXX_description
 | MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment                   | Not Started | P1       | High   | DevOps, Kubernetes      | MVP-010      |         |
 | MVP-015 | Management Dashboard  | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | In Progress | P1       | Medium | Go, Frontend Dev, Templ | MVP-013      |         |
 | MVP-023 | AI Agent Creator      | Implement AI-powered conversational interface for creating agents. AI asks questions, resolves details, and generates complete agent configurations through natural language dialogue | Not Started | P1       | Medium | Go, Templ, AI/LLM, Frontend Dev | MVP-025      | [MVP-023.md](mvp-details/MVP-023.md) |
-| MVP-030 | Work Items Core Schema & Registry | Implement work item types registry, JSON schemas, and extend roles with taxonomy fields (autonomy, budget, safety, identity) | Not Started | P1       | Medium | Go, ArangoDB, JSON Schema | MVP-029      | [MVP-030.md](mvp-details/MVP-030.md) |
+| MVP-030 | Work Items Core Schema & Registry | Implement work item types registry, JSON schemas, and extend roles with taxonomy fields (autonomy, budget, safety, identity). **Architecture**: See [Work Items Documentation](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/) for complete GitOps + ArangoDB multi-graph design | Not Started | P1       | Medium | Go, ArangoDB, JSON Schema | MVP-029      | [MVP-030.md](mvp-details/MVP-030.md) |
 | MVP-031 | Work Items Lifecycle & SLA | Implement state machine, timers, breach handlers, and SLA/SLO enforcement for work items | Not Started | P1       | Medium | Go, ArangoDB, Backend Dev | MVP-030      | [MVP-031.md](mvp-details/MVP-031.md) |
 | MVP-032 | Work Items Assignment & Routing | Build declarative routing rules engine, skill matching, and agent selection algorithms | Not Started | P1       | Medium | Go, ArangoDB, Backend Dev | MVP-031      | [MVP-032.md](mvp-details/MVP-032.md) |
 | MVP-033 | Agent Lifecycle FSM | Implement agent lifecycle states (Registered, Scheduled, Starting, Healthy, Degraded, Backoff, Draining, Quarantined, Stopped, Retired) with transitions, guards, and health probes | Not Started | P1       | High   | Go, Backend Dev, Health Checks | MVP-032      | [MVP-033.md](mvp-details/MVP-033.md) |
@@ -116,7 +116,7 @@ git branch -d feature/MVP-XXX_description
 | MVP-048 | AI Policy Layer - Foundation | Implement organizational AI governance: first-run policy wizard (stance, model approval, autonomy levels, data classification), policy schema, basic enforcement engine, and UI indicators. Addresses DORA requirement for clear AI stance and runtime guardrails | Not Started | P0       | High   | Go, Security, Backend Dev, Templ | MVP-044      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-049 | AI Policy Layer - Runtime Enforcement | Build action authorization, approval workflows, risk scoring, budget tracking, and policy violation handling with real-time feedback and audit logging | Not Started | P1       | High   | Go, Security, Backend Dev | MVP-048      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-050 | AI Policy Layer - Advanced Features | Implement data classification engine, PII detection/masking, compliance reporting, policy versioning, and multi-policy inheritance | Not Started | P1       | Medium | Go, Security, ML, Backend Dev | MVP-049      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
-| MVP-052 | Workflow Visual Designer | Build drag-and-drop workflow designer using xyflow (vanilla JS) to visually connect and orchestrate work items. Features: node editor, connections/dependencies, conditional routing, parallel paths, validation, save/load workflows as JSON, execution visualization | Not Started | P1       | High   | Go, Templ, Frontend Dev (xyflow/Alpine.js) | MVP-051 (Complete)      | [MVP-052.md](mvp-details/MVP-052.md) |
+| MVP-052 | Workflow Visual Designer | **DESIGN COMPLETE**: Comprehensive design spec created for simplified vertical column-based designer (replaces jsPlumb). Ready for implementation on new branch. See: [MVP-052-New-Design.md](mvp-details/MVP-052-New-Design.md) | Design Complete | P1       | High   | Go, Templ, Frontend Dev (Alpine.js) | MVP-051 (Complete)      | [MVP-052.md](mvp-details/MVP-052.md) |
 | MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (introduction, goals, work items, roles, RACI), and batch AI generation | Not Started | P1       | High   | Go, Templ, AI/LLM, Frontend Dev | MVP-047      | [MVP-042.md](mvp-details/MVP-042.md) |
 
 ## Agent Property Broadcasting Feature (P1 - Critical)
@@ -137,23 +137,27 @@ git branch -d feature/MVP-XXX_description
 
 *Transform CodeValdCortex into the "Kubernetes of Multi-Vendor AI Agents" - enabling seamless interoperability with external A2A-compatible agents*
 
+**SDK Integration**: Uses official `a2a-go` SDK (https://github.com/a2aproject/a2a-go) for protocol compliance and faster implementation.
+
 | Task ID | Title                                    | Description                                                                                                      | Status      | Priority | Effort | Skills Required            | Dependencies |
 | ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | -------------------------- | ------------ |
-| MVP-A2A-001 | A2A Agent Card Generator | Implement A2A-compliant Agent Card generation, validation, and HTTP endpoint to serve cards for all internal agents | Not Started | P0       | Medium | Go, Backend Dev, REST API  | MVP-028, MVP-026, MVP-027 |
-| MVP-A2A-002 | External Agent Registry | Build external agent registration API, health check system (60s intervals), discovery UI, and ArangoDB storage | Not Started | P0       | Medium | Go, Backend Dev, Frontend Dev | MVP-A2A-001 |
-| MVP-A2A-003 | A2A Gateway Service | Implement bidirectional HTTP/SSE gateway for protocol translation between internal Go channels and external A2A protocol | Not Started | P0       | Medium | Go, HTTP/SSE, Backend Dev | MVP-A2A-002 |
-| MVP-A2A-004 | Task Delegation System | Build sync/async task execution, retry logic (exponential backoff), timeout enforcement, audit logging, and fallback chains | Not Started | P0       | High   | Go, Backend Dev, Orchestration | MVP-A2A-003 |
+| MVP-A2A-000 | a2a-go SDK Integration | Add `github.com/a2aproject/a2a-go` to project, create wrapper interfaces, implement protocol translation layer | Not Started | P0       | Low    | Go, SDK Integration        | None |
+| MVP-A2A-001 | A2A Agent Card Generator | Implement A2A-compliant Agent Card generation using a2a-go types, validation, and HTTP endpoint to serve cards | Not Started | P0       | Medium | Go, Backend Dev, REST API  | MVP-A2A-000, MVP-028, MVP-026, MVP-027 |
+| MVP-A2A-002 | External Agent Registry | Build external agent registration API using a2a-go client, health check system (60s intervals), discovery UI | Not Started | P0       | Medium | Go, Backend Dev, Frontend Dev | MVP-A2A-001 |
+| MVP-A2A-003 | A2A Gateway Service | Implement bidirectional gateway using a2a-go server/client for protocol translation between internal and external agents | Not Started | P0       | Medium | Go, a2a-go SDK, Backend Dev | MVP-A2A-002 |
+| MVP-A2A-004 | Task Delegation System | Build sync/async task execution with a2a-go client, retry logic (exponential backoff), timeout enforcement, audit logging | Not Started | P0       | High   | Go, Backend Dev, Orchestration | MVP-A2A-003 |
 | MVP-A2A-005 | Enhanced Orchestration | Implement intelligent agent selection algorithm (capability, trust, cost, latency), configurable weights, A/B testing support | Not Started | P1       | High   | Go, Backend Dev, Algorithms | MVP-A2A-004 |
-| MVP-A2A-006 | Security & Compliance | Implement OAuth 2.0 server, JWT validation, API key management, RBAC integration, compliance audit reports | Not Started | P0       | Medium | Go, Security, OAuth 2.0 | MVP-A2A-005 |
+| MVP-A2A-006 | Security & Compliance | Implement OAuth 2.0 using a2a-go auth helpers, JWT validation, API key management, RBAC integration, compliance audit reports | Not Started | P0       | Medium | Go, Security, OAuth 2.0 | MVP-A2A-005 |
 | MVP-A2A-007 | Monitoring & Observability | Add Prometheus metrics, Grafana dashboards, distributed tracing (OpenTelemetry), structured logging, and alerting rules | Not Started | P1       | Medium | Go, Prometheus, Grafana, DevOps | MVP-A2A-006 |
 | MVP-A2A-008 | Performance Optimization | Implement connection pooling, Redis caching for agent cards, serialization optimization, load testing, and tuning | Not Started | P1       | Medium | Go, Performance, Redis | MVP-A2A-007 |
 | MVP-A2A-009 | Documentation & Developer Experience | Create OpenAPI/Swagger specs, integration guide, sample implementations (Python, Node.js), troubleshooting playbook, video tutorials | Not Started | P1       | Medium | Technical Writing, Developer Relations | MVP-A2A-008 |
 
 **Strategic Value**: 
-- 40% reduction in custom integration costs
+- 40% reduction in custom integration costs (60% with SDK)
 - 60% faster time-to-value for new capabilities
 - 3x expansion of addressable agent ecosystem
 - Aligns with Linux Foundation open standards
+- **SDK Benefits**: Protocol compliance guaranteed, upstream security updates, reduced maintenance burden
 
 **Complete Technical Specification**: See [`/documents/2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md`](../../2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md)
 

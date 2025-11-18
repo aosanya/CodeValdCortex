@@ -177,7 +177,7 @@ func (h *HealthHandler) GetAllAgentHealth(w http.ResponseWriter, r *http.Request
 }
 
 // getAgentHealthByID returns the health status of a specific agent
-func (h *HealthHandler) getAgentHealthByID(w http.ResponseWriter, r *http.Request, agentID string) {
+func (h *HealthHandler) getAgentHealthByID(w http.ResponseWriter, _ *http.Request, agentID string) {
 	h.monitor.mu.RLock()
 	defer h.monitor.mu.RUnlock()
 
@@ -219,7 +219,7 @@ func (h *HealthHandler) StartMonitoring(w http.ResponseWriter, r *http.Request) 
 }
 
 // stopMonitoringForAgent stops health monitoring for a specific agent
-func (h *HealthHandler) stopMonitoringForAgent(w http.ResponseWriter, r *http.Request, agentID string) {
+func (h *HealthHandler) stopMonitoringForAgent(w http.ResponseWriter, _ *http.Request, agentID string) {
 	if agentID == "" {
 		http.Error(w, "Agent ID is required", http.StatusBadRequest)
 		return
@@ -349,7 +349,7 @@ func (h *HealthHandler) GetHealthChecks(w http.ResponseWriter, r *http.Request) 
 }
 
 // enableHealthCheckByName enables a specific health check
-func (h *HealthHandler) enableHealthCheckByName(w http.ResponseWriter, r *http.Request, checkName string) {
+func (h *HealthHandler) enableHealthCheckByName(w http.ResponseWriter, _ *http.Request, checkName string) {
 	if checkName == "" {
 		http.Error(w, "Check name is required", http.StatusBadRequest)
 		return
@@ -375,7 +375,7 @@ func (h *HealthHandler) EnableHealthCheck(w http.ResponseWriter, r *http.Request
 }
 
 // disableHealthCheckByName disables a specific health check
-func (h *HealthHandler) disableHealthCheckByName(w http.ResponseWriter, r *http.Request, checkName string) {
+func (h *HealthHandler) disableHealthCheckByName(w http.ResponseWriter, _ *http.Request, checkName string) {
 	if checkName == "" {
 		http.Error(w, "Check name is required", http.StatusBadRequest)
 		return

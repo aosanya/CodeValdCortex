@@ -59,7 +59,6 @@ class TopologyVisualizer {
     init() {
         const container = document.getElementById(this.containerId);
         if (!container) {
-            console.error(`Container #${this.containerId} not found`);
             return;
         }
 

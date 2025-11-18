@@ -155,11 +155,6 @@ func (m *Monitor) Stop() error {
 
 // StartTracking begins tracking a workflow execution
 func (m *Monitor) StartTracking(ctx context.Context, execution *WorkflowExecution) error {
-	m.logger.WithFields(log.Fields{
-		"execution_id": execution.ID,
-		"workflow_id":  execution.WorkflowID,
-	}).Debug("Starting execution tracking")
-
 	m.execMutex.Lock()
 	m.executions[execution.ID] = execution
 	m.execMutex.Unlock()
@@ -190,8 +185,6 @@ func (m *Monitor) StartTracking(ctx context.Context, execution *WorkflowExecutio
 
 // StopTracking stops tracking a workflow execution
 func (m *Monitor) StopTracking(ctx context.Context, executionID string) error {
-	m.logger.WithField("execution_id", executionID).Debug("Stopping execution tracking")
-
 	m.execMutex.Lock()
 	execution, exists := m.executions[executionID]
 	if exists {
@@ -212,10 +205,11 @@ func (m *Monitor) StopTracking(ctx context.Context, executionID string) error {
 	eventType := EventExecutionCompleted
 	message := "Workflow execution completed"
 
-	if execution.Status == WorkflowStatusFailed {
+	switch execution.Status {
+	case WorkflowStatusFailed:
 		eventType = EventExecutionFailed
 		message = "Workflow execution failed"
-	} else if execution.Status == WorkflowStatusCancelled {
+	case WorkflowStatusCancelled:
 		eventType = EventExecutionCancelled
 		message = "Workflow execution cancelled"
 	}
@@ -276,22 +270,11 @@ func (m *Monitor) UpdateProgress(ctx context.Context, executionID string, progre
 		m.logger.WithError(err).Warn("Failed to emit progress update event")
 	}
 
-	m.logger.WithFields(log.Fields{
-		"execution_id": executionID,
-		"progress":     progress,
-	}).Debug("Execution progress updated")
-
 	return nil
 }
 
 // RecordTaskStart records the start of a task execution
 func (m *Monitor) RecordTaskStart(ctx context.Context, executionID, taskID, agentID string) error {
-	m.logger.WithFields(log.Fields{
-		"execution_id": executionID,
-		"task_id":      taskID,
-		"agent_id":     agentID,
-	}).Debug("Recording task start")
-
 	// Create task metrics
 	metrics := &TaskMetrics{
 		TaskID:      taskID,
@@ -324,11 +307,6 @@ func (m *Monitor) RecordTaskStart(ctx context.Context, executionID, taskID, agen
 
 // RecordTaskCompletion records the completion of a task execution
 func (m *Monitor) RecordTaskCompletion(ctx context.Context, taskID string, status TaskStatus, error string) error {
-	m.logger.WithFields(log.Fields{
-		"task_id": taskID,
-		"status":  status,
-	}).Debug("Recording task completion")
-
 	m.metricsMutex.Lock()
 	metrics, exists := m.taskMetrics[taskID]
 	if exists {
@@ -379,12 +357,6 @@ func (m *Monitor) RecordTaskCompletion(ctx context.Context, taskID string, statu
 
 // RecordTaskRetry records a task retry
 func (m *Monitor) RecordTaskRetry(ctx context.Context, taskID string, retryCount int, reason string) error {
-	m.logger.WithFields(log.Fields{
-		"task_id":     taskID,
-		"retry_count": retryCount,
-		"reason":      reason,
-	}).Debug("Recording task retry")
-
 	m.metricsMutex.Lock()
 	metrics, exists := m.taskMetrics[taskID]
 	if exists {
@@ -467,9 +439,10 @@ func (m *Monitor) GetExecutionMetrics(ctx context.Context, executionID string) (
 			avgMemoryUsage += metrics.MemoryUsage
 			avgCPUUsage += metrics.CPUUsage
 
-			if metrics.Status == TaskStatusCompleted {
+			switch metrics.Status {
+			case TaskStatusCompleted:
 				completedTasks++
-			} else if metrics.Status == TaskStatusFailed {
+			case TaskStatusFailed:
 				failedTasks++
 			}
 
@@ -518,7 +491,6 @@ func (m *Monitor) AddEventHandler(handler ExecutionEventHandler) error {
 	}
 
 	m.eventHandlers = append(m.eventHandlers, handler)
-	m.logger.WithField("handler_count", len(m.eventHandlers)).Debug("Event handler added")
 
 	return nil
 }
@@ -559,8 +531,6 @@ func (m *Monitor) countCompletedTasks(execution *WorkflowExecution) int {
 
 func (m *Monitor) progressMonitorWorker() {
 	defer m.wg.Done()
-
-	m.logger.Debug("Progress monitor worker started")
 
 	ticker := time.NewTicker(m.config.ProgressUpdateInterval)
 	defer ticker.Stop()
@@ -605,8 +575,6 @@ func (m *Monitor) calculateProgress(execution *WorkflowExecution) float64 {
 func (m *Monitor) metricsCleanupWorker() {
 	defer m.wg.Done()
 
-	m.logger.Debug("Metrics cleanup worker started")
-
 	ticker := time.NewTicker(m.config.MetricsCleanupInterval)
 	defer ticker.Stop()
 
@@ -635,8 +603,4 @@ func (m *Monitor) cleanupOldMetrics() {
 		delete(m.taskMetrics, taskID)
 	}
 	m.metricsMutex.Unlock()
-
-	if len(toDelete) > 0 {
-		m.logger.WithField("cleaned_metrics", len(toDelete)).Debug("Cleaned up old task metrics")
-	}
 }

@@ -22,10 +22,10 @@ type Repository struct {
 
 // New creates a new ArangoDB repository for agencies
 func New(client driver.Client, db driver.Database) (agency.Repository, error) {
-	// Ensure collection exists
-	collection, err := ensureCollection(db)
+	// Ensure agencies collection exists
+	collection, err := ensureCollection(db, CollectionName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to ensure collection: %w", err)
+		return nil, fmt.Errorf("failed to ensure agencies collection: %w", err)
 	}
 
 	return &Repository{
@@ -35,12 +35,12 @@ func New(client driver.Client, db driver.Database) (agency.Repository, error) {
 	}, nil
 }
 
-// ensureCollection ensures the agencies collection exists with proper indexes
-func ensureCollection(db driver.Database) (driver.Collection, error) {
+// ensureCollection ensures a collection exists with proper indexes
+func ensureCollection(db driver.Database, collectionName string) (driver.Collection, error) {
 	ctx := context.Background()
 
 	// Check if collection exists
-	exists, err := db.CollectionExists(ctx, CollectionName)
+	exists, err := db.CollectionExists(ctx, collectionName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check collection existence: %w", err)
 	}
@@ -48,27 +48,29 @@ func ensureCollection(db driver.Database) (driver.Collection, error) {
 	var collection driver.Collection
 	if !exists {
 		// Create collection
-		collection, err = db.CreateCollection(ctx, CollectionName, nil)
+		collection, err = db.CreateCollection(ctx, collectionName, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create collection: %w", err)
 		}
 	} else {
-		collection, err = db.Collection(ctx, CollectionName)
+		collection, err = db.Collection(ctx, collectionName)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get collection: %w", err)
 		}
 	}
 
-	// Ensure indexes
-	if err := ensureIndexes(ctx, collection); err != nil {
-		return nil, fmt.Errorf("failed to ensure indexes: %w", err)
+	// Ensure indexes for agencies collection
+	if collectionName == CollectionName {
+		if err := ensureAgencyIndexes(ctx, collection); err != nil {
+			return nil, fmt.Errorf("failed to ensure agency indexes: %w", err)
+		}
 	}
 
 	return collection, nil
 }
 
-// ensureIndexes creates necessary indexes on the collection
-func ensureIndexes(ctx context.Context, collection driver.Collection) error {
+// ensureAgencyIndexes creates necessary indexes on the agencies collection
+func ensureAgencyIndexes(ctx context.Context, collection driver.Collection) error {
 	// Index on ID field (for unique constraint)
 	_, _, err := collection.EnsurePersistentIndex(ctx, []string{"id"}, &driver.EnsurePersistentIndexOptions{
 		Unique: true,
@@ -97,3 +99,6 @@ func ensureIndexes(ctx context.Context, collection driver.Collection) error {
 
 	return nil
 }
+
+// Basic Agency CRUD methods are implemented in agencies.go
+// Specification methods are implemented in specifications.go

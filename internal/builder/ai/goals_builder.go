@@ -29,7 +29,7 @@ func NewGoalRefiner(llmClient LLMClient, logger *logrus.Logger) *GoalsBuilder {
 
 // stripMarkdownFences removes markdown code fences from JSON responses
 // Some LLMs wrap JSON in ```json ... ``` blocks which need to be removed
-// Also handles cases where explanatory text appears before the JSON
+// Also handles cases where explanatory text appears before OR after the JSON
 func stripMarkdownFences(content string) string {
 	// Remove leading/trailing whitespace
 	content = strings.TrimSpace(content)
@@ -66,6 +66,12 @@ func stripMarkdownFences(content string) string {
 		if jsonStart := strings.Index(content, "{"); jsonStart != -1 {
 			content = content[jsonStart:]
 		}
+	}
+
+	// Remove any text AFTER the JSON ends
+	// Find the last closing brace and truncate everything after it
+	if lastBrace := strings.LastIndex(content, "}"); lastBrace != -1 {
+		content = content[:lastBrace+1]
 	}
 
 	return content
@@ -120,6 +126,69 @@ func (r *GoalsBuilder) RefineGoals(ctx context.Context, req *builder.RefineGoals
 	return &result, nil
 }
 
+// RefineGoalsStream performs dynamic goal refinement with streaming support
+// Similar to RefineGoals but streams chunks to the callback as they arrive from the LLM
+func (r *GoalsBuilder) RefineGoalsStream(ctx context.Context, req *builder.RefineGoalsRequest, builderContext builder.BuilderContext, streamCallback StreamCallback) (*builder.RefineGoalsResponse, error) {
+	r.logger.WithFields(logrus.Fields{
+		"agency_id":      req.AgencyID,
+		"user_message":   req.UserMessage,
+		"target_goals":   len(req.TargetGoals),
+		"existing_goals": len(req.ExistingGoals),
+	}).Info("Starting streaming dynamic goal refinement")
+
+	// Build the prompt
+	prompt := r.buildDynamicGoalsPrompt(req, builderContext)
+
+	// Stream the LLM response
+	var contentBuilder strings.Builder
+	err := r.llmClient.ChatStream(ctx, &ChatRequest{
+		Messages: []Message{
+			{
+				Role:    "system",
+				Content: dynamicGoalsSystemPrompt,
+			},
+			{
+				Role:    "user",
+				Content: prompt,
+			},
+		},
+		Stream: true,
+	}, func(chunk string) error {
+		// Accumulate content for final parsing
+		contentBuilder.WriteString(chunk)
+
+		// Forward chunk to the callback (for SSE streaming)
+		if streamCallback != nil {
+			return streamCallback(chunk)
+		}
+		return nil
+	})
+
+	if err != nil {
+		r.logger.WithError(err).Error("Failed to stream AI response for dynamic goal refinement")
+		return nil, fmt.Errorf("AI streaming refinement failed: %w", err)
+	}
+
+	// Parse the accumulated response
+	fullContent := contentBuilder.String()
+	cleanedContent := stripMarkdownFences(fullContent)
+
+	var result builder.RefineGoalsResponse
+	if err := json.Unmarshal([]byte(cleanedContent), &result); err != nil {
+		r.logger.WithError(err).WithField("response", cleanedContent).Error("Failed to parse streamed goals response")
+		return nil, fmt.Errorf("failed to parse streamed response: %w", err)
+	}
+
+	r.logger.WithFields(logrus.Fields{
+		"action":           result.Action,
+		"refined_count":    len(result.RefinedGoals),
+		"generated_count":  len(result.GeneratedGoals),
+		"no_action_needed": result.NoActionNeeded,
+	}).Info("Streaming dynamic goal refinement completed")
+
+	return &result, nil
+}
+
 // buildDynamicGoalsPrompt creates the prompt for dynamic goal processing
 func (r *GoalsBuilder) buildDynamicGoalsPrompt(req *builder.RefineGoalsRequest, contextData builder.BuilderContext) string {
 	var builder strings.Builder
@@ -154,114 +223,39 @@ func (r *GoalsBuilder) buildDynamicGoalsPrompt(req *builder.RefineGoalsRequest, 
 }
 
 // System prompts for AI goal handling
-const dynamicGoalsSystemPrompt = `Act as a strategic goal management AI with full authority to modify the goal dataset based on user requests.
+const dynamicGoalsSystemPrompt = SharedAgencyContext + `
 
-Your role is to:
-1. ANALYZE the user's request to understand their intent
-2. DETERMINE what action is needed (refine, generate, consolidate, remove, enhance_all, or no action)
-3. EXECUTE the action by manipulating the goal data structures
-4. RETURN the updated goal list and explanation
+Act as strategic goal management AI. Modify goals based on user requests.
 
-## You Can Handle ANY Goal Operation:
+AGENT-ORIENTED goals (✅): Actions agents perform
+- "Collect user requests and refine for development"
+- "Monitor metrics and trigger alerts"
+- "Process support tickets and assign priorities"
 
-**remove/delete** - Remove specific goals from the list
-- Use when: "remove G013", "delete goal X", "get rid of goal Y"
-- Return: consolidated_data.removed_goals with the keys to delete
-- Example: User says "remove G013" → Mark G013 for removal in removed_goals array
+IMPLEMENTATION goals (❌): System building
+- "Implement request management system"
+- "Build monitoring dashboard"
 
-**refine** - Improve existing goals (better clarity, metrics, scope)
-- Use when: "improve goals", "refine goals", "make goals clearer", "enhance goal X"
-- Return: refined_goals array with improvements for specific goals
+## Actions:
+**remove** - Delete goals (return in consolidated_data.removed_goals)
+**refine** - Improve existing goals  
+**generate** - Create new goals (agent actions only)
+**consolidate** - Merge duplicates
+**enhance_all** - Refine all goals
+**no_action** - Already optimal
 
-**generate** - Create new goals
-- Use when: "add goals", "create goals for X", "we need goals about Y", "generate goals"
-- Return: generated_goals array with new goals to add
-
-**consolidate** - Merge duplicate or overlapping goals
-- Use when: "consolidate goals", "merge duplicate goals", "reduce goal count", "simplify goals"
-- Return: consolidated_data with merged goals and removed keys
-
-**enhance_all** - Refine all existing goals
-- Use when: "improve all goals", "refine everything", "make all goals better"
-- Return: refined_goals array for all goals
-
-**no_action** - Goals are already optimal
-- Use when: Goals meet strategic standards and no changes are needed
-- Return: no_action_needed = true with explanation
-
-## Response Format:
-
-Respond with JSON in this exact format:
-
+## Response JSON:
 {
   "action": "remove|refine|generate|consolidate|enhance_all|no_action",
-  "refined_goals": [
-    {
-      "original_key": "goal_key",
-      "refined_description": "Improved description",
-      "refined_scope": "Improved scope",
-      "refined_metrics": ["metric1", "metric2", "metric3"],
-      "suggested_code": "G009",
-      "suggested_priority": "High/Medium/Low",
-      "suggested_category": "Category",
-      "suggested_tags": ["tag1", "tag2"],
-      "was_changed": true,
-      "explanation": "What was improved and why"
-    }
-  ],
-  "generated_goals": [
-    {
-      "description": "New goal description",
-      "scope": "Goal scope",
-      "success_metrics": ["metric1", "metric2", "metric3"],
-      "suggested_code": "G001",
-      "suggested_priority": "High/Medium/Low",
-      "suggested_category": "Category",
-      "suggested_tags": ["tag1", "tag2"],
-      "explanation": "Why this goal is needed"
-    }
-  ],
-  "consolidated_data": {
-    "consolidated_goals": [...],
-    "removed_goals": ["goal_key1", "goal_key2"],
-    "summary": "What was consolidated or removed",
-    "explanation": "Why consolidation/removal was performed"
-  },
-  "explanation": "Overall explanation of what was done and why",
+  "refined_goals": [{"original_key": "key", "refined_description": "...", "explanation": "Brief"}],
+  "generated_goals": [{"description": "...", "scope": "...", "success_metrics": [...], "explanation": "Brief"}],
+  "consolidated_data": {"removed_goals": ["key1"], "summary": "Brief", "explanation": "Brief"},
+  "explanation": "Brief overall summary",
   "no_action_needed": false
 }
 
-## Critical Instructions for Goal Removal:
-
-When user requests to remove/delete goals:
-1. Set action to "remove" (or use "consolidate" if also merging)
-2. Add the goal keys (e.g., "goal_123") to consolidated_data.removed_goals array
-3. Do NOT include removed goals in any other arrays
-4. Provide clear explanation of what was removed and why
-
-Example for "remove G013":
-{
-  "action": "remove",
-  "refined_goals": [],
-  "generated_goals": [],
-  "consolidated_data": {
-    "consolidated_goals": [],
-    "removed_goals": ["<actual_goal_key_for_G013>"],
-    "summary": "Removed goal G013 as requested",
-    "explanation": "Removed 'Establish data-driven decision making culture' (G013) per user request"
-  },
-  "explanation": "Successfully removed goal G013 from the goal list",
-  "no_action_needed": false
-}
-
-## Important Guidelines:
-
-1. **Be empowered** - You have full authority to modify, add, or remove goals
-2. **Be decisive** - Choose the action that best matches user intent
-3. **Be strategic** - Consider alignment with agency mission
-4. **Be clear** - Provide explanations that justify your decisions
-5. **Be practical** - Execute the requested changes
-6. **Be comprehensive** - If refining multiple goals, include all in the response
-7. **Be responsive** - Handle remove/delete requests by marking goals for removal
-
-Present results in a structured, professional format suitable for strategic planning.`
+Guidelines:
+- Be decisive and execute requested changes
+- Goals = what agents DO (not system implementation)
+- Keep explanations concise (1-2 sentences)
+- Use action verbs: Monitor, Process, Track, Validate, Coordinate`

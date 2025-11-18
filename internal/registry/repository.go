@@ -99,7 +99,6 @@ func ensureCollection(ctx context.Context, db driver.Database) (driver.Collectio
 		if err != nil {
 			return nil, fmt.Errorf("failed to open collection: %w", err)
 		}
-		log.WithField("collection", CollectionAgents).Debug("Using existing collection")
 		return col, nil
 	}
 
@@ -151,7 +150,6 @@ func ensureIndexes(ctx context.Context, col driver.Collection) error {
 		return fmt.Errorf("failed to create type_state index: %w", err)
 	}
 
-	log.Debug("Indexes created successfully")
 	return nil
 }
 
@@ -160,15 +158,12 @@ func (r *Repository) Create(ctx context.Context, ag *agent.Agent) error {
 	doc := toDocument(ag)
 	doc.UpdatedAt = time.Now()
 
-	meta, err := r.collection.CreateDocument(ctx, doc)
+	_, err := r.collection.CreateDocument(ctx, doc)
 	if err != nil {
 		return fmt.Errorf("failed to create agent document: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": ag.ID,
-		"key":      meta.Key,
-	}).Debug("Agent created in registry")
+	log.WithField("agent_id", ag.ID).Info("Agent created in registry")
 
 	return nil
 }
@@ -202,7 +197,6 @@ func (r *Repository) Update(ctx context.Context, ag *agent.Agent) error {
 		return fmt.Errorf("failed to update agent document: %w", err)
 	}
 
-	log.WithField("agent_id", ag.ID).Debug("Agent updated in registry")
 	return nil
 }
 
@@ -216,7 +210,6 @@ func (r *Repository) Delete(ctx context.Context, id string) error {
 		return fmt.Errorf("failed to delete agent document: %w", err)
 	}
 
-	log.WithField("agent_id", id).Debug("Agent deleted from registry")
 	return nil
 }
 

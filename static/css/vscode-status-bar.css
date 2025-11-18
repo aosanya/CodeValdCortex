@@ -44,6 +44,32 @@
     max-width: 300px;
 }
 
+/* Notification in status bar */
+.status-notification {
+    color: white !important;
+}
+
+.status-notification .status-text {
+    color: white !important;
+}
+
+/* Icon colors for different notification types */
+.status-notification.has-text-success i {
+    color: #48c774 !important;
+}
+
+.status-notification.has-text-danger i {
+    color: #f14668 !important;
+}
+
+.status-notification.has-text-warning i {
+    color: #ffdd57 !important;
+}
+
+.status-notification.has-text-info i {
+    color: #3e8ed0 !important;
+}
+
 .status-separator {
     opacity: 0.5;
     padding: 0 0.25rem;

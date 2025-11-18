@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -71,7 +72,6 @@ func (m *AgencyMiddleware) RequireAgency() gin.HandlerFunc {
 		_, exists := c.Get(contextKeyAgency)
 		if !exists {
 			// No agency selected - redirect to homepage
-			m.logger.Debug("No agency selected, redirecting to homepage")
 
 			// Check if it's an API request
 			if isAPIRequest(c) {
@@ -100,13 +100,13 @@ func (m *AgencyMiddleware) OptionalAgency() gin.HandlerFunc {
 }
 
 // GetCurrentAgency retrieves the current agency from the Gin context
-func GetCurrentAgency(c *gin.Context) (*agency.Agency, bool) {
+func GetCurrentAgency(c *gin.Context) (*models.Agency, bool) {
 	ag, exists := c.Get(contextKeyAgency)
 	if !exists {
 		return nil, false
 	}
 
-	currentAgency, ok := ag.(*agency.Agency)
+	currentAgency, ok := ag.(*models.Agency)
 	return currentAgency, ok
 }
 

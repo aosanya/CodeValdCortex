@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -77,15 +77,25 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 		return
 	}
 
-	// Get all existing goals for context
-	existingGoals, err := h.agencyService.GetGoals(c.Request.Context(), agencyID)
+	// Get unified specification (replaces separate GetGoals, GetWorkItems, GetOverview calls)
+	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch existing goals")
-		existingGoals = []*agency.Goal{}
+		h.logger.WithError(err).Warn("Failed to fetch specification")
+		spec = &models.AgencySpecification{
+			Introduction: "",
+			Goals:        []models.Goal{},
+			WorkItems:    []models.WorkItem{},
+		}
+	}
+
+	// Convert goals from []Goal to []*Goal for compatibility
+	existingGoals := make([]*models.Goal, len(spec.Goals))
+	for i := range spec.Goals {
+		existingGoals[i] = &spec.Goals[i]
 	}
 
 	// Filter target goals if specific keys were provided
-	var targetGoals []*agency.Goal
+	var targetGoals []*models.Goal
 	if len(req.GoalKeys) > 0 {
 		goalKeyMap := make(map[string]bool)
 		for _, key := range req.GoalKeys {
@@ -102,25 +112,17 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 		}).Info("Filtered target goals")
 	}
 
-	// Get work items for context
-	workItems, err := h.agencyService.GetWorkItems(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch work items")
-		workItems = []*agency.WorkItem{}
-	}
-
-	// Get overview for introduction context
-	overview, err := h.agencyService.GetAgencyOverview(c.Request.Context(), agencyID)
-	if err != nil {
-		h.logger.WithError(err).Warn("Failed to fetch overview")
-		overview = &agency.Overview{AgencyID: agencyID}
+	// Convert work items from []WorkItem to []*WorkItem for compatibility
+	workItems := make([]*models.WorkItem, len(spec.WorkItems))
+	for i := range spec.WorkItems {
+		workItems[i] = &spec.WorkItems[i]
 	}
 
 	// Build the AI builder context
 	builderContext, err := h.contextBuilder.BuildBuilderContext(
 		c.Request.Context(),
 		ag,
-		overview.Introduction,
+		spec.Introduction,
 		req.UserMessage,
 	)
 	if err != nil {
@@ -179,7 +181,153 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 		"generated_count":  len(result.GeneratedGoals),
 		"no_action_needed": result.NoActionNeeded,
 		"has_consolidated": result.ConsolidatedData != nil,
-	}).Info("Dynamic goal refinement completed")
+	}).Info("🔵 Dynamic goal refinement completed - AI analysis received")
+
+	// 🔍 DEBUG: Log what the AI wants to do
+	h.logger.Info("🔍 DEBUG: AI Result Analysis",
+		"action", result.Action,
+		"explanation", result.Explanation)
+
+	if result.ConsolidatedData != nil {
+		h.logger.WithFields(logrus.Fields{
+			"consolidated_goals_count": len(result.ConsolidatedData.ConsolidatedGoals),
+			"removed_goals_count":      len(result.ConsolidatedData.RemovedGoals),
+		}).Info("🔍 DEBUG: Consolidation data present")
+
+		// Log removed goals details (RemovedGoals is []string of keys/codes)
+		for i, removedKey := range result.ConsolidatedData.RemovedGoals {
+			h.logger.WithFields(logrus.Fields{
+				"index": i,
+				"key":   removedKey,
+			}).Info("🔍 DEBUG: Goal marked for removal by AI")
+		}
+	}
+
+	// ⚠️ CRITICAL: Apply the changes to the database
+	// The AI returns what should be done, but we need to execute those operations
+	ctx := c.Request.Context()
+
+	// Build the updated goals list based on the AI's recommendations
+	updatedGoals := make([]models.Goal, 0)
+	goalsModified := false
+
+	switch result.Action {
+	case "refine", "enhance_all":
+		// Start with existing goals and apply refinements
+		goalMap := make(map[string]*models.Goal)
+		for _, g := range existingGoals {
+			goalMap[g.Key] = g
+		}
+
+		// Apply refinements
+		for _, rg := range result.RefinedGoals {
+			if goal, exists := goalMap[rg.OriginalKey]; exists && rg.WasChanged {
+				h.logger.WithFields(logrus.Fields{
+					"original_key":  rg.OriginalKey,
+					"original_desc": goal.Description,
+					"new_desc":      rg.RefinedDescription,
+				}).Info("🔄 Applying refined goal")
+
+				// Update the goal
+				goal.Description = rg.RefinedDescription
+				if rg.SuggestedCode != "" && rg.SuggestedCode != goal.Code {
+					goal.Code = rg.SuggestedCode
+				}
+				goalsModified = true
+			}
+		}
+
+		// Build final goals list from map
+		for _, goal := range goalMap {
+			updatedGoals = append(updatedGoals, *goal)
+		}
+
+	case "generate":
+		// Keep existing goals and add new ones
+		for _, g := range existingGoals {
+			updatedGoals = append(updatedGoals, *g)
+		}
+
+		// Add generated goals
+		for _, gg := range result.GeneratedGoals {
+			h.logger.WithFields(logrus.Fields{
+				"code":        gg.SuggestedCode,
+				"description": gg.Description,
+			}).Info("🆕 Adding generated goal")
+
+			newGoal := models.Goal{
+				Code:        gg.SuggestedCode,
+				Description: gg.Description,
+			}
+			updatedGoals = append(updatedGoals, newGoal)
+			goalsModified = true
+		}
+
+	case "consolidate", "remove":
+		if result.ConsolidatedData != nil {
+			// Create a set of removed goal keys for quick lookup
+			removedKeys := make(map[string]bool)
+			for _, removedKey := range result.ConsolidatedData.RemovedGoals {
+				removedKeys[removedKey] = true
+				h.logger.Info("🔍 DEBUG: Marking goal for removal", "key", removedKey)
+			}
+
+			h.logger.WithFields(logrus.Fields{
+				"total_existing_goals": len(existingGoals),
+				"goals_to_remove":      len(removedKeys),
+			}).Info("🔍 DEBUG: Processing goal removal/consolidation")
+
+			// Keep goals that are NOT in the removed list
+			for _, g := range existingGoals {
+				if !removedKeys[g.Key] {
+					updatedGoals = append(updatedGoals, *g)
+					h.logger.Info("🔍 DEBUG: Keeping goal", "key", g.Key, "code", g.Code)
+				} else {
+					h.logger.Info("🗑️ Removing goal", "key", g.Key, "code", g.Code)
+					goalsModified = true
+				}
+			}
+
+			// Add consolidated goals (these are new or updated goals)
+			for _, cg := range result.ConsolidatedData.ConsolidatedGoals {
+				h.logger.WithFields(logrus.Fields{
+					"code":        cg.SuggestedCode,
+					"description": cg.Description,
+				}).Info("🔄 Adding consolidated goal")
+
+				newGoal := models.Goal{
+					Code:        cg.SuggestedCode,
+					Description: cg.Description,
+				}
+				updatedGoals = append(updatedGoals, newGoal)
+				goalsModified = true
+			}
+
+			h.logger.WithFields(logrus.Fields{
+				"goals_modified":   goalsModified,
+				"final_goal_count": len(updatedGoals),
+			}).Info("🔍 DEBUG: Consolidation/removal complete")
+		}
+	}
+
+	// Save the updated goals list if modified
+	if goalsModified {
+		h.logger.WithFields(logrus.Fields{
+			"previous_count": len(existingGoals),
+			"updated_count":  len(updatedGoals),
+		}).Info("💾 Saving updated goals to database")
+
+		_, err = h.agencyService.UpdateSpecificationGoals(ctx, agencyID, updatedGoals, "ai-refine")
+		if err != nil {
+			h.logger.WithError(err).Error("❌ Failed to save goals to database")
+		} else {
+			h.logger.Info("✅ Successfully saved goals to database")
+		}
+	} else {
+		h.logger.Info("ℹ️ No goals modifications needed")
+	}
+
+	h.logger.Info("🎯 Goal refinement processing completed")
 
 	// Return the result as JSON
 	c.JSON(http.StatusOK, gin.H{
@@ -229,6 +377,14 @@ func (h *Handler) buildSummaryMessage(result *builder.RefineGoalsResponse) strin
 			}
 			if removed > 0 {
 				parts = append(parts, "✓ Removed "+pluralize(removed, "duplicate", "duplicates"))
+			}
+		}
+
+	case "remove":
+		if result.ConsolidatedData != nil {
+			removed := len(result.ConsolidatedData.RemovedGoals)
+			if removed > 0 {
+				parts = append(parts, "✓ Removed "+pluralize(removed, "goal", "goals"))
 			}
 		}
 

@@ -282,11 +282,6 @@ func (r *Repository) StoreWorking(ctx context.Context, memory *WorkingMemory) er
 		return fmt.Errorf("failed to store working memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": memory.AgentID,
-		"key":      memory.Key,
-		"id":       memory.ID,
-	}).Debug("Stored working memory")
 
 	return nil
 }
@@ -362,11 +357,6 @@ func (r *Repository) UpdateWorking(ctx context.Context, memory *WorkingMemory) e
 		return fmt.Errorf("working memory not found for update: %s/%s", memory.AgentID, memory.Key)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": memory.AgentID,
-		"key":      memory.Key,
-		"version":  memory.Version,
-	}).Debug("Updated working memory")
 
 	return nil
 }
@@ -390,10 +380,6 @@ func (r *Repository) DeleteWorking(ctx context.Context, agentID, key string) err
 		return fmt.Errorf("failed to delete working memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"key":      key,
-	}).Debug("Deleted working memory")
 
 	return nil
 }
@@ -525,12 +511,6 @@ func (r *Repository) StoreLongterm(ctx context.Context, memory *LongtermMemory) 
 		return fmt.Errorf("failed to store longterm memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": memory.AgentID,
-		"category": memory.Category,
-		"key":      memory.Key,
-		"id":       memory.ID,
-	}).Debug("Stored longterm memory")
 
 	return nil
 }
@@ -606,11 +586,6 @@ func (r *Repository) UpdateLongterm(ctx context.Context, memory *LongtermMemory)
 		return fmt.Errorf("longterm memory not found for update: %s/%s", memory.AgentID, memory.Key)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": memory.AgentID,
-		"key":      memory.Key,
-		"version":  memory.Version,
-	}).Debug("Updated longterm memory")
 
 	return nil
 }
@@ -634,10 +609,6 @@ func (r *Repository) DeleteLongterm(ctx context.Context, agentID, key string) er
 		return fmt.Errorf("failed to delete longterm memory: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"key":      key,
-	}).Debug("Deleted longterm memory")
 
 	return nil
 }
@@ -878,7 +849,6 @@ func (r *Repository) DeleteSnapshot(ctx context.Context, snapshotID string) erro
 		return fmt.Errorf("failed to delete snapshot: %w", err)
 	}
 
-	log.WithField("snapshot_id", snapshotID).Debug("Deleted snapshot")
 
 	return nil
 }
