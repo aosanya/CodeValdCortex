@@ -323,7 +323,7 @@ func (a *App) setupServer() error {
 
 	// AI Policy web routes (if available)
 	if a.policyService != nil {
-		aiPolicyHandler := webhandlers.NewAIPolicyWebHandler(a.policyService, a.logger)
+		aiPolicyHandler := webhandlers.NewAIPolicyWebHandler(a.policyService, a.agencyService, a.logger)
 		aiPolicyHandler.RegisterRoutes(router.Group(""))
 		a.logger.Info("AI Policy web routes registered")
 	}

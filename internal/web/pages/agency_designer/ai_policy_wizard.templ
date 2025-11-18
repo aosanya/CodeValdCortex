@@ -2,65 +2,65 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/policy"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 // AIPolicyWizard renders the AI Policy Configuration Wizard
-templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
+templ AIPolicyWizard(currentAgency *models.Agency, existingPolicy *policy.AIPolicy) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>AI Policy Configuration - Agency { agencyID }</title>
-			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"/>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+			<title>AI Policy Configuration - { currentAgency.Name }</title>
+			
+			<!-- Bulma CSS (self-hosted) -->
+			<link rel="stylesheet" href="/static/css/bulma.min.css"/>
+			
+			<!-- FontAwesome CSS (self-hosted) -->
+			<link rel="stylesheet" href="/static/fontawesome/css/all.min.css"/>
+			
+			<!-- Custom styles -->
+			<link rel="stylesheet" href="/static/css/common-layout.css"/>
+			<link rel="stylesheet" href="/static/css/styles.css"/>
+			<link rel="stylesheet" href="/static/css/agencies.css"/>
+			<link rel="stylesheet" href="/static/css/themes.css"/>
 			<link rel="stylesheet" href="/static/css/ai-policy-wizard.css"/>
-			<!-- Alpine.js -->
-			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			
+			<!-- HTMX (self-hosted) -->
+			<script src="/static/js/htmx.min.js"></script>
+			
+			<!-- Alpine.js (self-hosted) -->
+			<script defer src="/static/js/alpine.min.js"></script>
+			
+			<!-- Chart.js (self-hosted) -->
+			<script src="/static/js/chart.umd.min.js"></script>
+			
+			<!-- Custom Alpine components -->
+			<script src="/static/js/alpine-components.js"></script>
+			
+			<!-- Theme manager -->
+			<script src="/static/js/theme-manager.js"></script>
+			
 			<!-- AI Policy Wizard Script -->
 			<script src="/static/js/ai-policy-wizard.js"></script>
+			
+			<!-- Progress bar for HTMX requests -->
+			<div id="htmx-progress"></div>
 		</head>
 		<body>
+			<!-- Navbar -->
+			@components.NavbarWithAgency(currentAgency)
+			
 			<div
 				class="policy-wizard-container"
 				x-data="policyWizard()"
-				data-agency-id={ agencyID }
+				data-agency-id={ currentAgency.ID }
 				if existingPolicy != nil {
 					data-existing-policy={ templ.JSONString(existingPolicy) }
 				}
 			>
-				<!-- Header -->
-				<nav class="navbar is-light" role="navigation">
-					<div class="navbar-brand">
-						<div class="navbar-item">
-							<a href={ templ.SafeURL("/agencies/" + agencyID + "/designer") } class="button is-small is-ghost">
-								<span class="icon"><i class="fas fa-arrow-left"></i></span>
-								<span>Back to Agency Designer</span>
-							</a>
-						</div>
-					</div>
-					<div class="navbar-menu">
-						<div class="navbar-start">
-							<div class="navbar-item">
-								<h1 class="title is-4 mb-0">
-									<span class="icon-text">
-										<span class="icon has-text-primary"><i class="fas fa-shield-halved"></i></span>
-										<span>AI Policy Configuration</span>
-									</span>
-								</h1>
-							</div>
-						</div>
-						<div class="navbar-end">
-							<div class="navbar-item">
-								<button @click="savePolicy()" class="button is-primary" :disabled="saving || !isValid()">
-									<span class="icon"><i class="fas fa-save"></i></span>
-									<span x-text="saving ? 'Saving...' : 'Save Policy'">Save Policy</span>
-								</button>
-							</div>
-						</div>
-					</div>
-				</nav>
-
 				<!-- Progress Indicator -->
 				<div class="section py-4">
 					<div class="container">
@@ -531,18 +531,42 @@ templ AIPolicyWizard(agencyID string, existingPolicy *policy.AIPolicy) {
 					</div>
 				</div>
 
-				<!-- Save Success Notification -->
-				<div class="notification is-success is-light" x-show="saveSuccess" x-cloak style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-					<button class="delete" @click="saveSuccess = false"></button>
-					Policy saved successfully!
-				</div>
-
-				<!-- Save Error Notification -->
-				<div class="notification is-danger is-light" x-show="saveError" x-cloak style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
-					<button class="delete" @click="saveError = false"></button>
-					<span x-text="errorMessage">Failed to save policy</span>
-				</div>
+			<!-- Save Success Notification -->
+			<div class="notification is-success is-light" x-show="saveSuccess" x-cloak style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+				<button class="delete" @click="saveSuccess = false"></button>
+				Policy saved successfully!
 			</div>
-		</body>
-	</html>
+
+			<!-- Save Error Notification -->
+			<div class="notification is-danger is-light" x-show="saveError" x-cloak style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+				<button class="delete" @click="saveError = false"></button>
+				<span x-text="errorMessage">Failed to save policy</span>
+			</div>
+		</div>
+		
+		<!-- Status Bar at Bottom (VS Code style) -->
+		@components.StatusBar(currentAgency, nil)
+		
+		<!-- Bulma navbar burger toggle -->
+		<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			// Get all "navbar-burger" elements
+			const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+
+			// Add a click event on each of them
+			$navbarBurgers.forEach(el => {
+				el.addEventListener('click', () => {
+					// Get the target from the "data-target" attribute
+					const target = el.dataset.target;
+					const $target = document.getElementById(target);
+
+					// Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+					el.classList.toggle('is-active');
+					$target.classList.toggle('is-active');
+				});
+			});
+		});
+		</script>
+	</body>
+</html>
 }

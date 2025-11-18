@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/policy"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/gin-gonic/gin"
@@ -12,13 +13,15 @@ import (
 // AIPolicyWebHandler handles web requests for AI policy management
 type AIPolicyWebHandler struct {
 	policyService *policy.Service
+	agencyService agency.Service
 	logger        *logrus.Logger
 }
 
 // NewAIPolicyWebHandler creates a new AI policy web handler
-func NewAIPolicyWebHandler(policyService *policy.Service, logger *logrus.Logger) *AIPolicyWebHandler {
+func NewAIPolicyWebHandler(policyService *policy.Service, agencyService agency.Service, logger *logrus.Logger) *AIPolicyWebHandler {
 	return &AIPolicyWebHandler{
 		policyService: policyService,
+		agencyService: agencyService,
 		logger:        logger,
 	}
 }
@@ -27,6 +30,14 @@ func NewAIPolicyWebHandler(policyService *policy.Service, logger *logrus.Logger)
 func (h *AIPolicyWebHandler) ShowPolicyWizard(c *gin.Context) {
 	agencyID := c.Param("id")
 
+	// Fetch the agency
+	currentAgency, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency")
+		c.JSON(http.StatusNotFound, gin.H{"error": "Agency not found"})
+		return
+	}
+
 	// Try to load existing policy
 	existingPolicy, err := h.policyService.GetPolicy(c.Request.Context(), agencyID)
 	if err != nil {
@@ -34,7 +45,7 @@ func (h *AIPolicyWebHandler) ShowPolicyWizard(c *gin.Context) {
 	}
 
 	// Render wizard template
-	component := agency_designer.AIPolicyWizard(agencyID, existingPolicy)
+	component := agency_designer.AIPolicyWizard(currentAgency, existingPolicy)
 	if err := component.Render(c.Request.Context(), c.Writer); err != nil {
 		h.logger.WithError(err).Error("Failed to render policy wizard")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to render policy wizard"})
