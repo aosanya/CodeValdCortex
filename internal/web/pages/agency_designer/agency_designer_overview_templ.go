@@ -91,7 +91,15 @@ func OverviewContent(currentAgency *models.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div></main></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><div id=\"content-ai-policy\" class=\"overview-content-section\" style=\"display: none;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = AIPolicyContent(currentAgency).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></main></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -121,7 +129,7 @@ func OverviewNavigationList(currentAgency *models.Agency) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"work-items\" onclick=\"selectOverviewSection(this, 'work-items')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Work Items</div><div class=\"nav-description\">Define work items</div></div></div><div class=\"overview-nav-item\" data-section=\"roles\" onclick=\"selectOverviewSection(this, 'roles')\"><div class=\"nav-icon\"><i class=\"fas fa-user-tag\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Roles</div><div class=\"nav-description\">Define agent roles</div></div></div><div class=\"overview-nav-item\" data-section=\"raci-matrix\" onclick=\"selectOverviewSection(this, 'raci-matrix')\"><div class=\"nav-icon\"><i class=\"fas fa-table-cells\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">RACI Matrix</div><div class=\"nav-description\">Role assignments</div></div></div><div class=\"overview-nav-item\" data-section=\"workflows\" onclick=\"selectOverviewSection(this, 'workflows')\"><div class=\"nav-icon\"><i class=\"fas fa-sitemap\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Workflows</div><div class=\"nav-description\">Work item orchestration</div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"overview-nav-list\"><div class=\"overview-nav-item is-active\" data-section=\"introduction\" onclick=\"selectOverviewSection(this, 'introduction')\"><div class=\"nav-icon\"><i class=\"fas fa-info-circle\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Introduction</div><div class=\"nav-description\">Get started</div></div></div><div class=\"overview-nav-item\" data-section=\"goal-definition\" onclick=\"selectOverviewSection(this, 'goal-definition')\"><div class=\"nav-icon\"><i class=\"fas fa-bullseye\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Goal Definition</div><div class=\"nav-description\">Define objectives</div></div></div><div class=\"overview-nav-item\" data-section=\"work-items\" onclick=\"selectOverviewSection(this, 'work-items')\"><div class=\"nav-icon\"><i class=\"fas fa-clipboard-list\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Work Items</div><div class=\"nav-description\">Define work items</div></div></div><div class=\"overview-nav-item\" data-section=\"roles\" onclick=\"selectOverviewSection(this, 'roles')\"><div class=\"nav-icon\"><i class=\"fas fa-user-tag\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Roles</div><div class=\"nav-description\">Define agent roles</div></div></div><div class=\"overview-nav-item\" data-section=\"raci-matrix\" onclick=\"selectOverviewSection(this, 'raci-matrix')\"><div class=\"nav-icon\"><i class=\"fas fa-table-cells\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">RACI Matrix</div><div class=\"nav-description\">Role assignments</div></div></div><div class=\"overview-nav-item\" data-section=\"workflows\" onclick=\"selectOverviewSection(this, 'workflows')\"><div class=\"nav-icon\"><i class=\"fas fa-sitemap\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">Workflows</div><div class=\"nav-description\">Work item orchestration</div></div></div><div class=\"overview-nav-item\" data-section=\"ai-policy\" onclick=\"selectOverviewSection(this, 'ai-policy')\"><div class=\"nav-icon\"><i class=\"fas fa-shield-halved\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">AI Policy</div><div class=\"nav-description\">Configure AI governance</div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -151,7 +159,7 @@ func IntroductionContent(currentAgency *models.Agency, conversation *ai.Conversa
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -159,7 +167,7 @@ func IntroductionContent(currentAgency *models.Agency, conversation *ai.Conversa
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -189,7 +197,7 @@ func GoalDefinitionContent(currentAgency *models.Agency, conversation *ai.Conver
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -205,7 +213,7 @@ func GoalDefinitionContent(currentAgency *models.Agency, conversation *ai.Conver
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -235,7 +243,7 @@ func WorkItemsContent(currentAgency *models.Agency, conversation *ai.Conversatio
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -251,7 +259,7 @@ func WorkItemsContent(currentAgency *models.Agency, conversation *ai.Conversatio
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -281,7 +289,7 @@ func OverviewRolesContent(currentAgency *models.Agency, conversation *ai.Convers
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -297,7 +305,7 @@ func OverviewRolesContent(currentAgency *models.Agency, conversation *ai.Convers
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -327,7 +335,7 @@ func RACIMatrixContent(currentAgency *models.Agency) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div class=\"overview-section\"><!-- Validation Messages --><div id=\"raci-validation-messages\"></div><!-- RACI Matrix Editor --><div class=\"box p-4\"><div class=\"level mb-4\"><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"createRACIMappings()\" id=\"ai-create-mappings-btn\" title=\"Generate RACI mappings from work items and roles using AI\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <span>Create Mappings</span></button></div></div></div></div><div class=\"raci-matrix-container\"><!-- Loading State (small, non-blocking) --><div id=\"raci-loading\" class=\"notification is-info is-light\" style=\"display: none;\"><span class=\"icon\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>Loading role assignments...</span></div><!-- Work Items List --><div id=\"raci-matrix-table\" style=\"display: block;\"><div class=\"table-container\"><table class=\"table is-fullwidth is-borderless raci-table\"><tbody id=\"raci-matrix-body\"><!-- Work item rows with collapsible assignments will be dynamically inserted --></tbody></table></div><!-- Empty State --><div id=\"raci-empty-state\" class=\"has-text-centered py-6\" style=\"display: none;\"><i class=\"fas fa-clipboard-list fa-3x mb-3 has-text-grey-light\"></i><p class=\"has-text-grey\">No work items defined yet.</p><p class=\"help\">Create work items first, then return here to assign roles and define objectives.</p></div></div></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\"><!-- Validation Messages --><div id=\"raci-validation-messages\"></div><!-- RACI Matrix Editor --><div class=\"box p-4\"><div class=\"level mb-4\"><div class=\"level-right\"><div class=\"level-item\"><div class=\"buttons\"><button class=\"button is-small is-info\" onclick=\"createRACIMappings()\" id=\"ai-create-mappings-btn\" title=\"Generate RACI mappings from work items and roles using AI\"><span class=\"icon\"><i class=\"fas fa-robot\"></i></span> <span>Create Mappings</span></button></div></div></div></div><div class=\"raci-matrix-container\"><!-- Loading State (small, non-blocking) --><div id=\"raci-loading\" class=\"notification is-info is-light\" style=\"display: none;\"><span class=\"icon\"><i class=\"fas fa-spinner fa-spin\"></i></span> <span>Loading role assignments...</span></div><!-- Work Items List --><div id=\"raci-matrix-table\" style=\"display: block;\"><div class=\"table-container\"><table class=\"table is-fullwidth is-borderless raci-table\"><tbody id=\"raci-matrix-body\"><!-- Work item rows with collapsible assignments will be dynamically inserted --></tbody></table></div><!-- Empty State --><div id=\"raci-empty-state\" class=\"has-text-centered py-6\" style=\"display: none;\"><i class=\"fas fa-clipboard-list fa-3x mb-3 has-text-grey-light\"></i><p class=\"has-text-grey\">No work items defined yet.</p><p class=\"help\">Create work items first, then return here to assign roles and define objectives.</p></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -357,7 +365,7 @@ func WorkflowsContent(currentAgency *models.Agency) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div class=\"overview-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"overview-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -373,7 +381,50 @@ func WorkflowsContent(currentAgency *models.Agency) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+// AIPolicyContent renders the AI Policy section with a card linking to the wizard
+func AIPolicyContent(currentAgency *models.Agency) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"overview-section\"><div class=\"box\"><div class=\"level mb-4\"><div class=\"level-left\"><div class=\"level-item\"><h2 class=\"title is-4 mb-0\"><span class=\"icon-text\"><span class=\"icon has-text-primary\"><i class=\"fas fa-shield-halved\"></i></span> <span>AI Policy Configuration</span></span></h2></div></div><div class=\"level-right\"><div class=\"level-item\"><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 templ.SafeURL
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/agencies/" + currentAgency.ID + "/policy/wizard"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/agency_designer_overview.templ`, Line: 271, Col: 81}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"button is-primary\"><span class=\"icon\"><i class=\"fas fa-magic\"></i></span> <span>Configure Policy</span></a></div></div></div><div class=\"content\"><p>Configure AI governance policies for this agency, including:</p><ul><li><strong>Policy Stance:</strong> Define your organization's AI adoption level and risk tolerance</li><li><strong>Model Policy:</strong> Control which AI models and providers are allowed</li><li><strong>Autonomy Levels:</strong> Set default and role-specific autonomy levels (L0-L4)</li><li><strong>Data Access:</strong> Configure data classification and PII handling rules</li><li><strong>Actions & Risk:</strong> Define prohibited actions and risk thresholds</li><li><strong>Compliance:</strong> Enable audit logging and compliance framework controls</li></ul><!-- Policy Summary (loaded dynamically) --><div id=\"policy-summary-container\" class=\"box mt-4\" style=\"background-color: #f9f9f9; display: none;\"><h3 class=\"subtitle is-5\">Current Policy Summary</h3><div id=\"policy-summary-content\" class=\"content\"><!-- Populated by JavaScript --></div></div><div id=\"policy-no-config\" class=\"notification is-info is-light\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <span>No AI policy configured yet. Click \"Configure Policy\" to get started.</span></div></div></div></div><script>\n\t\t// Load policy summary on section view\n\t\t(function() {\n\t\t\tasync function loadPolicySummary() {\n\t\t\t\ttry {\n\t\t\t\t\tconst response = await fetch(`/api/agencies/${ currentAgency.ID }/policy/summary`);\n\t\t\t\t\tif (response.ok) {\n\t\t\t\t\t\tconst summary = await response.json();\n\t\t\t\t\t\tdocument.getElementById('policy-summary-container').style.display = 'block';\n\t\t\t\t\t\tdocument.getElementById('policy-no-config').style.display = 'none';\n\t\t\t\t\t\t\n\t\t\t\t\t\tconst content = document.getElementById('policy-summary-content');\n\t\t\t\t\t\tcontent.innerHTML = `\n\t\t\t\t\t\t\t<div class=\"columns\">\n\t\t\t\t\t\t\t\t<div class=\"column\">\n\t\t\t\t\t\t\t\t\t<p><strong>Adoption Level:</strong> ${ summary.adoption_level }</p>\n\t\t\t\t\t\t\t\t\t<p><strong>Risk Tolerance:</strong> ${ summary.risk_tolerance }</p>\n\t\t\t\t\t\t\t\t\t<p><strong>Default Autonomy:</strong> ${ summary.default_autonomy_level }</p>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t<div class=\"column\">\n\t\t\t\t\t\t\t\t\t<p><strong>Allowed Providers:</strong> ${ summary.allowed_providers.join(', ') }</p>\n\t\t\t\t\t\t\t\t\t<p><strong>Total Budget:</strong> $${ summary.total_budget_usd }</p>\n\t\t\t\t\t\t\t\t\t<p><strong>Compliance Frameworks:</strong> ${ summary.compliance_frameworks.join(', ') || 'None' }</p>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t<p class=\"help\">Last updated: ${ new Date(summary.last_updated).toLocaleString() }</p>\n\t\t\t\t\t\t`;\n\t\t\t\t\t}\n\t\t\t\t} catch (error) {\n\t\t\t\t\tconsole.debug('No policy configured yet');\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// Load summary when AI Policy section is shown\n\t\t\tconst observer = new MutationObserver((mutations) => {\n\t\t\t\tmutations.forEach((mutation) => {\n\t\t\t\t\tconst aiPolicySection = document.getElementById('content-ai-policy');\n\t\t\t\t\tif (aiPolicySection && aiPolicySection.style.display !== 'none') {\n\t\t\t\t\t\tloadPolicySummary();\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t});\n\n\t\t\tconst aiPolicySection = document.getElementById('content-ai-policy');\n\t\t\tif (aiPolicySection) {\n\t\t\t\tobserver.observe(aiPolicySection, { attributes: true, attributeFilter: ['style'] });\n\t\t\t}\n\t\t})();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
