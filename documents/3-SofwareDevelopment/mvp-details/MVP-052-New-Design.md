@@ -133,7 +133,6 @@ Empty State:
     {
       "id": "step_1",
       "order": 0,
-      "type": "sequential",
       "items": [
         {
           "id": "item_1",
@@ -145,7 +144,6 @@ Empty State:
     {
       "id": "step_2",
       "order": 1,
-      "type": "sequential",
       "items": [
         {
           "id": "item_2",
@@ -157,8 +155,7 @@ Empty State:
     {
       "id": "step_3",
       "order": 2,
-      "type": "parallel",  // Multiple items execute in parallel
-      "items": [
+      "items": [  // Multiple items = parallel execution
         {
           "id": "item_3a",
           "work_item_id": "wi_check_credit",
@@ -174,7 +171,6 @@ Empty State:
     {
       "id": "step_4",
       "order": 3,
-      "type": "sequential",
       "items": [
         {
           "id": "item_4",
@@ -186,7 +182,6 @@ Empty State:
     {
       "id": "step_5",
       "order": 4,
-      "type": "sequential",
       "items": [
         {
           "id": "item_5",
@@ -201,9 +196,9 @@ Empty State:
 
 ### Execution Flow Derivation
 
-**Sequential Steps**: Items execute one after another (top to bottom)
+**Sequential Steps**: Steps with 1 item execute that item
 
-**Parallel Steps**: All items in the step execute simultaneously, workflow waits for all to complete before continuing
+**Parallel Steps**: Steps with 2+ items execute all items simultaneously, workflow waits for all to complete before continuing
 
 ```
 Execution Order:
@@ -320,7 +315,7 @@ Execution Order:
 - Side drop zones appear when dragging over a work item
 
 **System Behavior**:
-1. Convert step type from "sequential" to "parallel"
+1. Convert step to parallel by adding item to Items array
 2. Create visual column split with items side-by-side
 3. Both items now execute simultaneously
 4. Add sync point after parallel section
@@ -461,7 +456,7 @@ Execution Order:
         <!-- Workflow Steps -->
         <template x-for="(step, stepIndex) in steps" :key="step.id">
           <div class="workflow-step" 
-               :class="{ 'is-parallel': step.type === 'parallel' }">
+               :class="{ 'is-parallel': step.items.length > 1 }">
             
             <!-- Drop Target (Visible between items) -->
             <div class="drop-target" 
@@ -474,7 +469,7 @@ Execution Order:
             </div>
 
             <!-- Sequential Step (single item) -->
-            <template x-if="step.type === 'sequential'">
+            <template x-if="step.items.length === 1">
               <div class="workflow-item-wrapper"
                    @dragover="onDragOverItem($event, stepIndex)"
                    @dragleave="onDragLeaveItem($event)">
@@ -521,7 +516,7 @@ Execution Order:
             </template>
 
             <!-- Parallel Step (multiple items side-by-side) -->
-            <template x-if="step.type === 'parallel'">
+            <template x-if="step.items.length > 1">
               <div class="parallel-container">
                 <div class="parallel-header">
                   <span class="tag is-info is-light">
@@ -729,7 +724,6 @@ function workflowDesigner() {
       const newStep = {
         id: `step_${Date.now()}`,
         order: stepIndex,
-        type: 'sequential',
         items: [{
           id: `item_${Date.now()}`,
           work_item_id: item.id || item.work_item_id,
@@ -753,19 +747,11 @@ function workflowDesigner() {
         work_item_name: item.name || item.work_item_name
       };
 
-      if (step.type === 'sequential') {
-        // Convert sequential to parallel
-        step.type = 'parallel';
-        
-        // Add new item on left or right side
-        if (side === 'left') {
-          step.items.unshift(newItem); // Add to beginning
-        } else {
-          step.items.push(newItem); // Add to end
-        }
+      // Add new item on left or right side
+      if (side === 'left') {
+        step.items.unshift(newItem); // Add to beginning
       } else {
-        // Add to existing parallel (always at end for now)
-        step.items.push(newItem);
+        step.items.push(newItem); // Add to end
       }
     },
 
@@ -779,11 +765,6 @@ function workflowDesigner() {
       const step = this.steps[stepIndex];
       step.items.splice(itemIndex, 1);
       
-      // If only 1 item left, convert back to sequential
-      if (step.items.length === 1) {
-        step.type = 'sequential';
-      }
-      
       // If no items left, remove step
       if (step.items.length === 0) {
         this.steps.splice(stepIndex, 1);
@@ -796,17 +777,12 @@ function workflowDesigner() {
     removeItemFromWorkflow(stepIndex, itemIndex) {
       const step = this.steps[stepIndex];
       
-      if (step.type === 'sequential') {
-        // Remove entire step for sequential
+      if (step.items.length === 1) {
+        // Remove entire step if only one item
         this.steps.splice(stepIndex, 1);
       } else {
-        // Remove specific item from parallel
+        // Remove specific item from parallel step
         step.items.splice(itemIndex, 1);
-        
-        // Convert to sequential if only 1 item left
-        if (step.items.length === 1) {
-          step.type = 'sequential';
-        }
         
         // Remove step if empty
         if (step.items.length === 0) {
@@ -1132,20 +1108,75 @@ function workflowDesigner() {
 
 ## Backend Updates Required
 
-### 1. Update Workflow Model
+### Current Model Complexity (Problem Statement)
+
+**Current State**: `internal/agency/models/workflow.go` (96 lines)
+```go
+type Workflow struct {
+    // ArangoDB fields
+    Key, ID, Rev string
+    
+    // Metadata
+    Name, Description, AgencyID, Version string
+    CreatedAt, UpdatedAt time.Time
+    CreatedBy, UpdatedBy string
+    
+    // jsPlumb-based structure (COMPLEX)
+    Nodes []WorkflowNode  // Free-form positioned nodes
+    Edges []WorkflowEdge  // Manual connections between nodes
+}
+
+type WorkflowNode struct {
+    ID       string
+    Type     NodeType
+    Position NodePosition  // X,Y coordinates (free-form canvas)
+    Data     WorkflowNodeData
+    Width, Height int
+}
+
+type WorkflowEdge struct {
+    ID       string
+    Source   string  // Node ID
+    Target   string  // Node ID
+    Type     EdgeType
+    Animated bool
+    Label    string
+    Data     EdgeData
+}
+```
+
+**Problems**:
+1. ❌ **Nodes/Edges complexity**: Requires manual edge management, connection validation
+2. ❌ **Free-form positioning**: X/Y coordinates make execution order ambiguous
+3. ❌ **Visual-to-execution gap**: Must parse node positions and edges to determine flow
+4. ❌ **Data duplication**: Multiple edges can represent same connection
+5. ❌ **Validation burden**: Must verify no cycles, orphaned nodes, multiple entry points
+6. ❌ **Frontend coupling**: Backend model tied to jsPlumb visual representation
+
+### New Simplified Model (Solution)
+
+**Target State**: Replace `Nodes/Edges` with `Steps` array
 
 ```go
-// internal/workflow/models/workflow.go
+// internal/agency/models/workflow.go (UPDATED)
 type Workflow struct {
-    ID          string    `json:"id" gorm:"primaryKey"`
-    Key         string    `json:"key"`
-    Name        string    `json:"name"`
+    // ArangoDB fields
+    Key         string    `json:"_key,omitempty" db:"_key"`
+    ID          string    `json:"_id,omitempty" db:"_id"`
+    Rev         string    `json:"_rev,omitempty" db:"_rev"`
+    
+    // Metadata
+    Name        string    `json:"name" binding:"required"`
     Description string    `json:"description"`
+    AgencyID    string    `json:"agency_id" binding:"required"`
     Version     string    `json:"version"`
-    AgencyID    string    `json:"agency_id"`
-    Steps       Steps     `json:"steps" gorm:"type:jsonb"`
     CreatedAt   time.Time `json:"created_at"`
     UpdatedAt   time.Time `json:"updated_at"`
+    CreatedBy   string    `json:"created_by"`
+    UpdatedBy   string    `json:"updated_by"`
+    
+    // Simple step-based structure (replaces old Nodes/Edges approach)
+    Steps       Steps     `json:"steps"`
 }
 
 type Steps []Step
@@ -1153,23 +1184,33 @@ type Steps []Step
 type Step struct {
     ID    string     `json:"id"`
     Order int        `json:"order"`
-    Type  string     `json:"type"` // "sequential" or "parallel"
-    Items []StepItem `json:"items"`
+    Items []StepItem `json:"items"` // 1 item = sequential, 2+ items = parallel
 }
 
 type StepItem struct {
     ID           string `json:"id"`
     WorkItemID   string `json:"work_item_id"`
-    WorkItemName string `json:"work_item_name"`
+    WorkItemKey  string `json:"work_item_key"`  // ArangoDB _key reference
+    WorkItemName string `json:"work_item_name"` // Denormalized for display
 }
 ```
 
+**Benefits**:
+1. ✅ **Self-describing execution order**: Steps array IS the execution sequence
+2. ✅ **No position coordinates**: Eliminated X/Y complexity
+3. ✅ **Built-in validation**: Invalid structures are impossible to create
+4. ✅ **Clear parallel semantics**: `type: "parallel"` is explicit
+5. ✅ **Frontend agnostic**: Backend doesn't care about visual representation
+
 ### 2. Execution Flow Generator
 
+Create a service function that generates `from → to` connections for execution engine:
+
 ```go
-// internal/workflow/service/execution_flow.go
+// internal/agency/services/workflow_execution.go
 
 // GenerateExecutionFlow creates from→to connections from step structure
+// This converts the simple Steps array into execution graph for orchestration
 func GenerateExecutionFlow(steps []Step) []Connection {
     connections := []Connection{}
     
@@ -1183,8 +1224,8 @@ func GenerateExecutionFlow(steps []Step) []Connection {
             currentItems[i] = item.ID
         }
         
-        if step.Type == "sequential" {
-            // Sequential: one item, connects from all previous
+        if len(step.Items) == 1 {
+            // Sequential: single item, connects from all previous
             itemID := currentItems[0]
             for _, prevID := range previousItems {
                 connections = append(connections, Connection{
@@ -1194,8 +1235,8 @@ func GenerateExecutionFlow(steps []Step) []Connection {
             }
             previousItems = []string{itemID}
             
-        } else if step.Type == "parallel" {
-            // Parallel: multiple items, each connects from all previous
+        } else {
+            // Parallel: multiple items, each connects from all previous (fork)
             for _, itemID := range currentItems {
                 for _, prevID := range previousItems {
                     connections = append(connections, Connection{
@@ -1204,7 +1245,7 @@ func GenerateExecutionFlow(steps []Step) []Connection {
                     })
                 }
             }
-            // All parallel items become previous for next step
+            // All parallel items become previous for next step (join)
             previousItems = currentItems
         }
     }
@@ -1226,29 +1267,144 @@ type Connection struct {
 }
 ```
 
+**Example Usage**:
+```go
+// Workflow with steps
+workflow := &Workflow{
+    Steps: Steps{
+        {ID: "step_1", Order: 1, Items: []StepItem{{ID: "item_1"}}},
+        {ID: "step_2", Order: 2, Items: []StepItem{{ID: "item_2"}}},
+        {ID: "step_3", Order: 3, Items: []StepItem{{ID: "item_3a"}, {ID: "item_3b"}}}, // Parallel (2 items)
+        {ID: "step_4", Order: 4, Items: []StepItem{{ID: "item_4"}}},
+    },
+}
+
+// Generate execution connections
+connections := GenerateExecutionFlow(workflow.Steps)
+
+// Result:
+// [
+//   {from: "start", to: "item_1"},
+//   {from: "item_1", to: "item_2"},
+//   {from: "item_2", to: "item_3a"},  // Parallel fork
+//   {from: "item_2", to: "item_3b"},  // Parallel fork
+//   {from: "item_3a", to: "item_4"},  // Parallel join
+//   {from: "item_3b", to: "item_4"},  // Parallel join
+//   {from: "item_4", to: "end"},
+// ]
+```
+
+### 3. API Implementation
+
+Create handlers for the new workflow designer:
+
+```go
+// internal/web/handlers/workflow_handler.go
+
+// GetWorkflow returns workflow with steps structure
+func (h *WorkflowHandler) GetWorkflow(c *gin.Context) {
+    workflowID := c.Param("id")
+    
+    workflow, err := h.service.GetByID(workflowID)
+    if err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "workflow not found"})
+        return
+    }
+    
+    c.JSON(http.StatusOK, workflow)
+}
+
+// SaveWorkflow creates or updates workflow with steps validation
+func (h *WorkflowHandler) SaveWorkflow(c *gin.Context) {
+    var workflow models.Workflow
+    if err := c.ShouldBindJSON(&workflow); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    
+    // Validate steps structure
+    if err := h.validateSteps(workflow.Steps); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+    
+    if err := h.service.Update(&workflow); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    c.JSON(http.StatusOK, workflow)
+}
+
+func (h *WorkflowHandler) validateSteps(steps Steps) error {
+    if len(steps) == 0 {
+        return nil // Empty workflow is valid
+    }
+    
+    for i, step := range steps {
+        // Check order
+        if step.Order != i+1 {
+            return fmt.Errorf("step %d has invalid order %d", i+1, step.Order)
+        }
+        
+        // Check items
+        if len(step.Items) == 0 {
+            return fmt.Errorf("step %d has no items", i+1)
+        }
+    }
+    
+    return nil
+}
+```
+
 ---
 
-## Migration Strategy
+## Implementation Plan
 
-### Phase 1: Create New Designer (Parallel)
-- Build new column-based designer alongside existing jsPlumb designer
-- Add feature flag to toggle between old/new designer
-- Test with subset of users
+### Phase 1: Update Backend Models (Week 1)
 
-### Phase 2: Data Migration
-- Create migration script to convert existing workflows:
-  - Extract nodes from jsPlumb structure
-  - Sort nodes by y-coordinate (vertical position)
-  - Group consecutive parallel nodes (similar y-coordinates)
-  - Create sequential steps for single items
-  - Create parallel steps for grouped items
-  - Preserve work item assignments
+**Tasks**:
+1. Update `internal/agency/models/workflow.go` to use Steps structure
+2. Create `internal/agency/services/workflow_execution.go` with GenerateExecutionFlow
+3. Update workflow repository to handle Steps JSONB field
+4. Add validation functions for steps structure
+5. Update API handlers to accept/return steps-based workflows
+6. Write unit tests for execution flow generation
 
-### Phase 3: Deprecate Old Designer
-- Mark old designer as deprecated
-- Migrate all workflows to new format
-- Remove jsPlumb dependencies
-- Clean up old code
+**Files to modify**:
+- `internal/agency/models/workflow.go`
+- `internal/agency/services/workflow_execution.go` (new)
+- `internal/agency/repository/workflow_repository.go`
+- `internal/web/handlers/workflow_handler.go`
+
+### Phase 2: Build Frontend Designer (Week 2-3)
+
+**Tasks**:
+1. Create Templ template: `internal/templates/workflow_designer.templ`
+2. Create Alpine.js component: `static/js/workflow-designer.js`
+3. Create CSS: `static/css/workflow-designer.css`
+4. Implement drag-and-drop functionality
+5. Add search/filter for work items
+6. Add side drop zones for parallel execution
+7. Test all user interactions
+
+**Files to create**:
+- `internal/templates/workflow_designer.templ`
+- `static/js/workflow-designer.js`
+- `static/css/workflow-designer.css`
+
+### Phase 3: Integration & Testing (Week 4)
+
+**Tasks**:
+1. Integrate frontend with backend API
+2. Test workflow creation and execution
+3. Test parallel execution flows
+4. Performance testing (load time < 500ms)
+5. Cross-browser testing
+6. Mobile/tablet testing
+7. Update documentation
+
+### Total Timeline: 4 weeks
 
 ---
 
