@@ -15,7 +15,8 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"/>
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 			<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
-			<!-- Alpine.js -->
+			<!-- Alpine.js with Collapse plugin -->
+			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 			<!-- Specification API for work items -->
 			<script src="/static/js/agency-designer/specification-api.js"></script>

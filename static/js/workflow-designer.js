@@ -31,6 +31,7 @@ window.workflowDesigner = function () {
 
         // UI state
         saving: false,
+        saveTimeout: null,
 
         /**
          * Initialize the designer
@@ -39,9 +40,6 @@ window.workflowDesigner = function () {
             // Get workflow data from data attributes
             const container = this.$el;
 
-            console.log('Container element:', container);
-            console.log('All data attributes:', container.dataset);
-
             this.agencyID = container.dataset.agencyId;
             this.workflowID = container.dataset.workflowId;
             this.workflowKey = container.dataset.workflowKey;
@@ -49,14 +47,7 @@ window.workflowDesigner = function () {
             this.workflowDescription = container.dataset.workflowDescription;
             this.workflowVersion = container.dataset.workflowVersion;
 
-            console.log('Parsed workflow data:', {
-                agencyID: this.agencyID,
-                workflowID: this.workflowID,
-                workflowKey: this.workflowKey,
-                workflowName: this.workflowName
-            });
-
-            // Parse existing workflow steps
+            // Parse workflow steps if available
             try {
                 const stepsData = container.dataset.workflowSteps;
                 if (stepsData && stepsData !== 'null') {
@@ -69,43 +60,32 @@ window.workflowDesigner = function () {
 
             // Load available work items from specification API
             await this.loadWorkItems();
-
-            console.log('Workflow Designer initialized:', {
-                workflowID: this.workflowID,
-                steps: this.workflowSteps.length,
-                workItems: this.availableWorkItems.length
-            });
         },
 
         /**
          * Load available work items from specification
          */
         async loadWorkItems() {
-            console.log('loadWorkItems called with agencyID:', this.agencyID);
-
             try {
                 // Use existing specification API
                 if (typeof window.specificationAPI !== 'undefined') {
                     // Set the agency ID on the API instance
                     window.specificationAPI.agencyId = this.agencyID;
 
-                    console.log('Fetching specification from:', window.specificationAPI.baseUrl);
-
                     const spec = await window.specificationAPI.getSpecification();
-
-                    console.log('Raw specification response:', spec);
 
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
 
                     // Load all workflows for specification updates
-                    this.allWorkflows = spec.workflows || [];
+                    // Normalize workflows to ensure they have a 'key' property
+                    this.allWorkflows = (spec.workflows || []).map(wf => ({
+                        ...wf,
+                        key: wf._key
+                    }));
 
-                    console.log('Loaded specification:', {
-                        workItems: this.availableWorkItems.length,
-                        workflows: this.allWorkflows.length,
-                        firstWorkItem: this.availableWorkItems[0]
-                    });
+                    // Enrich existing workflow steps with work item details
+                    this.enrichWorkflowSteps();
                 } else {
                     console.error('Specification API not available!');
                     this.availableWorkItems = [];
@@ -118,6 +98,41 @@ window.workflowDesigner = function () {
                 this.filteredWorkItems = [];
                 this.allWorkflows = [];
             }
+        },
+
+        /**
+         * Enrich workflow steps with work item details
+         */
+        enrichWorkflowSteps() {
+            if (!this.availableWorkItems || this.availableWorkItems.length === 0) {
+                return;
+            }
+
+            this.workflowSteps.forEach(step => {
+                if (step.items) {
+                    step.items.forEach(item => {
+                        // Find the work item in availableWorkItems
+                        const workItem = this.availableWorkItems.find(wi =>
+                            wi._key === item.work_item_id ||
+                            wi.key === item.work_item_id ||
+                            wi._key === item.work_item_key ||
+                            wi.key === item.work_item_key
+                        );
+
+                        if (workItem) {
+                            // Enrich with work item details
+                            item.work_item_title = workItem.title || workItem.name || item.work_item_name || 'Unnamed Work Item';
+                            item.description = workItem.description || '';
+                            item.showDescription = item.showDescription || false;
+                        } else {
+                            // Fallback to existing name or default
+                            item.work_item_title = item.work_item_name || 'Unknown Work Item';
+                            item.description = item.description || '';
+                            item.showDescription = item.showDescription || false;
+                        }
+                    });
+                }
+            });
         },
 
         /**
@@ -383,23 +398,46 @@ window.workflowDesigner = function () {
          * Save workflow to backend (via specification workflows endpoint)
          */
         async saveWorkflow() {
+            // Debounce: Cancel previous save timer and set a new one
+            if (this.saveTimeout) {
+                clearTimeout(this.saveTimeout);
+            }
+
+            this.saveTimeout = setTimeout(async () => {
+                await this._performSave();
+            }, 300); // 300ms debounce
+        },
+
+        /**
+         * Perform the actual save operation
+         */
+        async _performSave() {
+            // Prevent multiple simultaneous saves
+            if (this.saving) {
+                console.log('⚠️ Save already in progress, skipping...');
+                return;
+            }
+
             this.saving = true;
 
             try {
-                console.log('🔍 saveWorkflow DEBUG:', {
-                    workflowKey: this.workflowKey,
-                    allWorkflowsCount: this.allWorkflows.length,
-                    allWorkflowKeys: this.allWorkflows.map(wf => ({ key: wf.key, name: wf.name }))
-                });
+                // Validate required data
+                if (!this.workflowKey || !this.agencyID) {
+                    throw new Error('Missing required workflow key or agency ID');
+                }
+
+                // Debug current state
+                console.log('🔍 Current allWorkflows:', this.allWorkflows.map(w => ({
+                    key: w.key || 'NO_KEY',
+                    name: w.name,
+                    hasKey: !!w.key
+                })));
+                console.log('🔍 Looking for workflow key:', this.workflowKey);
 
                 // Find and update the current workflow in the allWorkflows array
                 const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
 
-                console.log('🔍 Workflow search result:', {
-                    workflowIndex,
-                    found: workflowIndex >= 0,
-                    searchKey: this.workflowKey
-                });
+                console.log('🔍 Workflow lookup result:', { workflowIndex, found: workflowIndex >= 0 });
 
                 if (workflowIndex >= 0) {
                     // Update existing workflow - preserve the key explicitly!
@@ -412,9 +450,7 @@ window.workflowDesigner = function () {
                         version: this.workflowVersion,
                         steps: this.workflowSteps
                     };
-                    console.log('✅ Updated existing workflow at index', workflowIndex, 'with key:', existingKey);
                 } else {
-                    console.warn('⚠️ Workflow NOT found in allWorkflows, adding new entry');
                     // Workflow not found in allWorkflows, add it
                     this.allWorkflows.push({
                         key: this.workflowKey,
@@ -426,10 +462,28 @@ window.workflowDesigner = function () {
                     });
                 }
 
-                console.log('📤 Sending workflows to server:', this.allWorkflows.map(wf => ({
-                    key: wf.key,
-                    name: wf.name,
-                    hasKey: !!wf.key
+                // Filter out workflows with empty keys and remove duplicates
+                const workflowsToSave = this.allWorkflows.filter((workflow, index, arr) => {
+                    // Remove workflows with no key
+                    if (!workflow.key || workflow.key.trim() === '') {
+                        console.warn('⚠️ Removing workflow with empty key:', workflow.name);
+                        return false;
+                    }
+
+                    // Remove duplicates by key (keep first occurrence)
+                    const firstIndex = arr.findIndex(w => w.key === workflow.key);
+                    if (firstIndex !== index) {
+                        console.warn('⚠️ Removing duplicate workflow:', workflow.key, workflow.name);
+                        return false;
+                    }
+
+                    return true;
+                });
+
+                console.log('🔍 Workflows to save:', workflowsToSave.map(w => ({
+                    key: w.key,
+                    name: w.name,
+                    hasKey: !!w.key
                 })));
 
                 // Save all workflows via specification endpoint
@@ -439,7 +493,7 @@ window.workflowDesigner = function () {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        workflows: this.allWorkflows,
+                        workflows: workflowsToSave,
                         updated_by: 'system' // TODO: Get from auth context
                     })
                 });
@@ -450,14 +504,13 @@ window.workflowDesigner = function () {
                 }
 
                 const updatedSpec = await response.json();
-                console.log('✅ Workflow saved successfully to specification');
-                console.log('📥 Server returned workflows:', updatedSpec.workflows?.map(wf => ({
-                    key: wf.key,
-                    name: wf.name
-                })));
 
                 // Update allWorkflows with the response to stay in sync
-                this.allWorkflows = updatedSpec.workflows || [];
+                // Normalize workflows to ensure they have a 'key' property
+                this.allWorkflows = (updatedSpec.workflows || []).map(wf => ({
+                    ...wf,
+                    key: wf._key
+                }));
 
             } catch (error) {
                 console.error('❌ Failed to save workflow:', error);
