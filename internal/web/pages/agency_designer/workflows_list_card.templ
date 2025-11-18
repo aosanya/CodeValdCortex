@@ -26,7 +26,26 @@ templ WorkflowsListCard() {
 			</div>
 			<div class="level-right">
 				<div class="level-item">
+					<span 
+						id="workflow-selection-count" 
+						class="tag is-info mr-2"
+						style="display: none;">
+						0 selected
+					</span>
+				</div>
+				<div class="level-item">
 					<div class="field is-grouped">
+						<div class="control">
+							<button 
+								class="button is-small is-danger"
+								onclick="deleteSelectedWorkflows()"
+								id="delete-workflows-btn"
+								title="Delete Selected Workflows"
+								style="display: none;">
+								<span class="icon"><i class="fas fa-trash"></i></span>
+								<span>Delete Selected</span>
+							</button>
+						</div>
 						<div class="control">
 							<button 
 								class="button is-small is-success"
