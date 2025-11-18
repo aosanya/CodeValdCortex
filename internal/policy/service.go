@@ -182,12 +182,8 @@ func (s *Service) buildPolicySummary(policy *AIPolicy) *PolicySummary {
 	summary.DefaultAutonomyLevel = policy.Autonomy.DefaultLevel
 	summary.RoleOverridesCount = len(policy.Autonomy.RoleOverrides)
 
-	// Compliance frameworks
-	for _, framework := range policy.Compliance.Frameworks {
-		if framework.Enabled {
-			summary.ComplianceFrameworks = append(summary.ComplianceFrameworks, framework.Name)
-		}
-	}
+	// Note: Compliance frameworks removed - will be implemented as agents in MVP-051-053
+	// summary.ComplianceFrameworks field deprecated
 
 	// Monitoring status
 	summary.MonitoringEnabled = policy.Monitoring.RealTimePolicyViolations
@@ -232,18 +228,18 @@ func isValidDataClassification(classification string) bool {
 
 // PolicySummary represents a summary of the policy for UI display
 type PolicySummary struct {
-	AgencyID             string    `json:"agency_id"`
-	Version              string    `json:"version"`
-	AdoptionLevel        string    `json:"adoption_level"`
-	RiskTolerance        string    `json:"risk_tolerance"`
-	DefaultAutonomyLevel string    `json:"default_autonomy_level"`
-	RoleOverridesCount   int       `json:"role_overrides_count"`
-	AllowedProviders     []string  `json:"allowed_providers"`
-	TotalModels          int       `json:"total_models"`
-	TotalBudgetUSD       float64   `json:"total_budget_usd"`
-	CurrentSpendUSD      float64   `json:"current_spend_usd"`
-	ComplianceFrameworks []string  `json:"compliance_frameworks"`
-	MonitoringEnabled    bool      `json:"monitoring_enabled"`
-	AuditingEnabled      bool      `json:"auditing_enabled"`
-	LastUpdated          time.Time `json:"last_updated"`
+	AgencyID             string   `json:"agency_id"`
+	Version              string   `json:"version"`
+	AdoptionLevel        string   `json:"adoption_level"`
+	RiskTolerance        string   `json:"risk_tolerance"`
+	DefaultAutonomyLevel string   `json:"default_autonomy_level"`
+	RoleOverridesCount   int      `json:"role_overrides_count"`
+	AllowedProviders     []string `json:"allowed_providers"`
+	TotalModels          int      `json:"total_models"`
+	TotalBudgetUSD       float64  `json:"total_budget_usd"`
+	CurrentSpendUSD      float64  `json:"current_spend_usd"`
+	// ComplianceFrameworks field removed - see MVP-051-053 for agent-based compliance
+	MonitoringEnabled bool      `json:"monitoring_enabled"`
+	AuditingEnabled   bool      `json:"auditing_enabled"`
+	LastUpdated       time.Time `json:"last_updated"`
 }

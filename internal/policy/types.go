@@ -26,9 +26,11 @@ type AIPolicy struct {
 
 // PolicyStance defines the organization's overall AI adoption approach
 type PolicyStance struct {
-	AdoptionLevel        string   `json:"adoption_level" db:"adoption_level"`               // conservative|controlled|progressive|innovative
-	RiskTolerance        string   `json:"risk_tolerance" db:"risk_tolerance"`               // low|medium|high
-	ComplianceFrameworks []string `json:"compliance_frameworks" db:"compliance_frameworks"` // SOC2, GDPR, HIPAA, etc.
+	AdoptionLevel string `json:"adoption_level" db:"adoption_level"` // conservative|controlled|progressive|innovative
+	RiskTolerance string `json:"risk_tolerance" db:"risk_tolerance"` // low|medium|high
+	// Note: Compliance frameworks (SOC2, GDPR, HIPAA, ISO27001) will be implemented
+	// as intelligent agents in future MVP tasks (see MVP-051-053). This allows for
+	// context-aware, dynamic compliance enforcement vs static configuration.
 }
 
 // ModelPolicy defines which AI models and providers are allowed
@@ -147,25 +149,16 @@ type RiskThresholds struct {
 }
 
 // CompliancePolicy defines compliance framework requirements
+// Note: Static compliance frameworks removed. Future implementation (MVP-051-053)
+// will use intelligent compliance agents (SOC2Agent, GDPRAgent, HIPAAAgent, ISO27001Agent)
+// that provide context-aware, dynamic compliance enforcement with reasoning capabilities.
 type CompliancePolicy struct {
-	Frameworks        []ComplianceFramework `json:"frameworks" db:"frameworks"`
 	AuditRequirements AuditRequirements     `json:"audit_requirements" db:"audit_requirements"`
 	Reporting         ReportingRequirements `json:"reporting" db:"reporting"`
 }
 
-// ComplianceFramework represents a specific compliance standard
-type ComplianceFramework struct {
-	Name     string              `json:"name" db:"name"` // SOC2, GDPR, HIPAA, etc.
-	Controls []ComplianceControl `json:"controls" db:"controls"`
-	Enabled  bool                `json:"enabled" db:"enabled"`
-}
-
-// ComplianceControl represents a specific control within a framework
-type ComplianceControl struct {
-	ID          string `json:"id" db:"id"`
-	Description string `json:"description" db:"description"`
-	Enforcement string `json:"enforcement" db:"enforcement"` // strict|moderate|advisory
-}
+// ComplianceFramework, ComplianceControl types removed - will be replaced by
+// agent-based compliance system in future MVPs
 
 // AuditRequirements defines audit logging requirements
 type AuditRequirements struct {

@@ -160,6 +160,25 @@ git branch -d feature/MVP-XXX_description
 
 **Complete Technical Specification**: See [`/documents/2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md`](../../2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md)
 
+## Agent-Based Compliance Frameworks (P2 - Future Enhancement)
+
+*Intelligent compliance agents that provide context-aware, dynamic enforcement vs static configuration*
+
+| Task ID | Title                                    | Description                                                                                                      | Status      | Priority | Effort | Skills Required            | Dependencies |
+| ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | -------------------------- | ------------ |
+| MVP-051 | Compliance Agent Architecture | Design and implement base ComplianceAgent interface, knowledge base system, context analyzer, reasoning engine, and agent-to-workflow bridge service | Not Started | P2       | High   | Go, AI/LLM, Security, Architecture | MVP-050 |
+| MVP-052 | GDPR Compliance Agent | Implement GDPR-specific agent with article knowledge base, lawful basis engine, jurisdiction analyzer, cross-border transfer rules, and explainable compliance plan generation | Not Started | P2       | High   | Go, AI/LLM, GDPR Expertise, Security | MVP-051 |
+| MVP-053 | Multi-Framework Compliance System | Implement SOC2Agent (trust service criteria), HIPAAAgent (PHI classification, safeguards), ISO27001Agent (risk assessment, controls), and unified compliance dashboard | Not Started | P2       | High   | Go, AI/LLM, Compliance Expertise | MVP-052 |
+
+**Key Benefits**:
+- ✅ **Context-aware**: Different compliance steps based on data type, jurisdiction, use case
+- ✅ **Explainable**: AI provides reasoning for each requirement (e.g., "satisfies GDPR Article 6(1)(a)")
+- ✅ **Adaptive**: Automatically updates when regulations change
+- ✅ **Intelligent**: Understands lawful basis, data sensitivity, risk levels
+- ✅ **Auditable**: Complete reasoning trail for compliance officers
+
+**Architecture**: Compliance agents analyze context → generate compliance plans → bridge converts plans to executable workflows → workflow designer executes and monitors
+
 ---
 
 **Note**: This document contains only active and pending tasks. All completed tasks are moved to `mvp_done.md` to maintain a clean, actionable backlog.
