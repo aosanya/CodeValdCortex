@@ -294,8 +294,8 @@ func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 
 	if len(workflow.Steps) > 0 && len(workflow.Steps[0].Items) > 0 {
 		h.logger.WithFields(logrus.Fields{
-			"first_step_id":     workflow.Steps[0].ID,
-			"first_step_order":  workflow.Steps[0].Order,
+			"first_step_id":      workflow.Steps[0].ID,
+			"first_step_order":   workflow.Steps[0].Order,
 			"first_item_work_id": workflow.Steps[0].Items[0].WorkItemID,
 		}).Info("  📌 Sample step data")
 	}
