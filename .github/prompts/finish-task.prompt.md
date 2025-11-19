@@ -35,7 +35,18 @@ Follow the **mandatory completion process** for MVP tasks:
      - `gitea/models.go` - Gitea-specific transformations
      
      **Status**: ✅ Completed 2025-11-19
+     
+     **Coding Session**: [MVP-WI-001_gitea_webhook_integration](../coding_sessions/MVP-WI-001_gitea_webhook_integration.md)
+     
      <!-- /MVP-WI-001 -->
+     ```
+   - **Add coding session reference table** at end of task section:
+     ```markdown
+     ### Implementation History
+     
+     | Date | Session | Summary |
+     |------|---------|---------|
+     | 2025-11-19 | [MVP-WI-001_gitea_webhook_integration](../coding_sessions/MVP-WI-001_gitea_webhook_integration.md) | Implemented pluggable webhook architecture with work abstraction layer and Gitea provider |
      ```
    - **Domain coherence**: Ensure your updates fit the narrative flow of the entire domain
    - **Cross-references**: Link to related tasks in the same domain if dependencies resolved
