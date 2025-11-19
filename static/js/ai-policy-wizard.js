@@ -154,6 +154,14 @@ window.policyWizard = function () {
         loadExistingPolicy(existingPolicy) {
             this.policy = existingPolicy;
 
+            // Ensure critical fields are set (in case they're missing from loaded policy)
+            if (!this.policy.agency_id) {
+                this.policy.agency_id = this.agencyID;
+            }
+            if (!this.policy.owner) {
+                this.policy.owner = 'admin';
+            }
+
             // Sync UI helpers
             if (existingPolicy.stance && existingPolicy.stance.compliance_frameworks) {
                 existingPolicy.stance.compliance_frameworks.forEach(fw => {
@@ -198,11 +206,63 @@ window.policyWizard = function () {
 
         // Validation
         isValid() {
-            // Basic validation
-            if (!this.policy.agency_id) return false;
-            if (!this.policy.owner) return false;
-            if (this.policy.models.allowed_providers.length === 0) return false;
+            // Check all required fields
+            if (!this.policy.agency_id) {
+                console.log('Validation failed: Missing agency_id');
+                return false;
+            }
+            if (!this.policy.owner) {
+                console.log('Validation failed: Missing owner');
+                return false;
+            }
+
+            // Check models - must have at least one valid provider
+            if (this.policy.models.allowed_providers.length === 0) {
+                console.log('Validation failed: No providers');
+                return false;
+            }
+
+            // Each provider must have provider name and at least one model
+            const hasInvalidProvider = this.policy.models.allowed_providers.some(p =>
+                !p.provider || !p.models || p.models.length === 0
+            );
+
+            if (hasInvalidProvider) {
+                console.log('Validation failed: Invalid provider configuration');
+                return false;
+            }
+
+            console.log('Validation passed!');
             return true;
+        },
+
+        // Step-specific validation
+        isStepValid(step) {
+            switch (step) {
+                case 1: // Stance
+                    return this.policy.stance.adoption_level && this.policy.stance.risk_tolerance;
+                case 2: // Models
+                    return this.policy.models.allowed_providers.length > 0 &&
+                        this.policy.models.allowed_providers.every(p =>
+                            p.provider && p.models && p.models.length > 0
+                        );
+                case 3: // Autonomy
+                    return this.policy.autonomy.default_level;
+                case 4: // Data Access
+                    return true; // Optional section
+                case 5: // Actions & Risk
+                    return true; // Optional section
+                case 6: // Compliance
+                    return true; // Optional section
+                default:
+                    return false;
+            }
+        },
+
+        getStepClass(step) {
+            if (this.currentStep === step) return 'is-active';
+            if (this.currentStep > step) return 'is-completed';
+            return '';
         },
 
         // Provider Management

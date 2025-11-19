@@ -20,39 +20,6 @@ func NewService(repo Repository) *Service {
 	}
 }
 
-// CreatePolicy creates a new AI policy for an agency
-func (s *Service) CreatePolicy(ctx context.Context, policy *AIPolicy) error {
-	if err := s.validatePolicy(policy); err != nil {
-		return fmt.Errorf("invalid policy: %w", err)
-	}
-
-	return s.repo.Create(ctx, policy)
-}
-
-// GetPolicy retrieves an AI policy by agency ID
-func (s *Service) GetPolicy(ctx context.Context, agencyID string) (*AIPolicy, error) {
-	return s.repo.Get(ctx, agencyID)
-}
-
-// UpdatePolicy updates an existing AI policy
-func (s *Service) UpdatePolicy(ctx context.Context, policy *AIPolicy) error {
-	if err := s.validatePolicy(policy); err != nil {
-		return fmt.Errorf("invalid policy: %w", err)
-	}
-
-	return s.repo.Update(ctx, policy)
-}
-
-// DeletePolicy deletes an AI policy
-func (s *Service) DeletePolicy(ctx context.Context, agencyID string) error {
-	return s.repo.Delete(ctx, agencyID)
-}
-
-// ListPolicies lists all AI policies
-func (s *Service) ListPolicies(ctx context.Context) ([]*AIPolicy, error) {
-	return s.repo.ListAll(ctx)
-}
-
 // EvaluatePolicy evaluates a request against the agency's policy
 func (s *Service) EvaluatePolicy(ctx context.Context, req *EvaluateRequest) (*PolicyResult, error) {
 	return s.engine.Evaluate(ctx, req)
@@ -68,18 +35,8 @@ func (s *Service) GetEvaluations(ctx context.Context, agencyID string, limit int
 	return s.repo.GetEvaluations(ctx, agencyID, limit)
 }
 
-// GetPolicySummary returns a summary of the policy for display
-func (s *Service) GetPolicySummary(ctx context.Context, agencyID string) (*PolicySummary, error) {
-	policy, err := s.repo.Get(ctx, agencyID)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.buildPolicySummary(policy), nil
-}
-
-// validatePolicy validates policy configuration
-func (s *Service) validatePolicy(policy *AIPolicy) error {
+// validatePolicy validates policy configuration (used by web handlers)
+func (s *Service) ValidatePolicy(policy *AIPolicy) error {
 	if policy.AgencyID == "" {
 		return fmt.Errorf("agency_id is required")
 	}
@@ -158,38 +115,6 @@ func (s *Service) validatePolicy(policy *AIPolicy) error {
 	}
 
 	return nil
-}
-
-// buildPolicySummary creates a summary of the policy for UI display
-func (s *Service) buildPolicySummary(policy *AIPolicy) *PolicySummary {
-	summary := &PolicySummary{
-		AgencyID:      policy.AgencyID,
-		Version:       policy.Version,
-		AdoptionLevel: policy.Stance.AdoptionLevel,
-		RiskTolerance: policy.Stance.RiskTolerance,
-		LastUpdated:   policy.UpdatedAt,
-	}
-
-	// Count allowed providers and models
-	for _, provider := range policy.Models.AllowedProviders {
-		summary.AllowedProviders = append(summary.AllowedProviders, provider.Provider)
-		summary.TotalModels += len(provider.Models)
-		summary.TotalBudgetUSD += provider.MonthlyBudgetUSD
-		summary.CurrentSpendUSD += provider.CurrentSpendUSD
-	}
-
-	// Autonomy info
-	summary.DefaultAutonomyLevel = policy.Autonomy.DefaultLevel
-	summary.RoleOverridesCount = len(policy.Autonomy.RoleOverrides)
-
-	// Note: Compliance frameworks removed - will be implemented as agents in MVP-051-053
-	// summary.ComplianceFrameworks field deprecated
-
-	// Monitoring status
-	summary.MonitoringEnabled = policy.Monitoring.RealTimePolicyViolations
-	summary.AuditingEnabled = policy.Compliance.AuditRequirements.LogAllActions
-
-	return summary
 }
 
 // Helper validation functions

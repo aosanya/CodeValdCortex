@@ -65,37 +65,37 @@ templ AIPolicyWizard(currentAgency *models.Agency, existingPolicy *policy.AIPoli
 				<div class="section py-4">
 					<div class="container">
 						<div class="steps" id="wizard-steps">
-							<div class="step-item" :class="{'is-active': currentStep === 1, 'is-completed': currentStep > 1}" @click="goToStep(1)">
-								<div class="step-marker">1</div>
+							<div class="step-item" :class="getStepClass(1) + (!isStepValid(1) && currentStep > 1 ? ' has-text-danger' : '')" @click="goToStep(1)">
+								<div class="step-marker" :class="{'has-background-danger has-text-white': !isStepValid(1) && currentStep > 1}">1</div>
 								<div class="step-details">
 									<p class="step-title">Stance</p>
 								</div>
 							</div>
-							<div class="step-item" :class="{'is-active': currentStep === 2, 'is-completed': currentStep > 2}" @click="goToStep(2)">
-								<div class="step-marker">2</div>
+							<div class="step-item" :class="getStepClass(2) + (!isStepValid(2) && currentStep > 2 ? ' has-text-danger' : '')" @click="goToStep(2)">
+								<div class="step-marker" :class="{'has-background-danger has-text-white': !isStepValid(2) && currentStep > 2}">2</div>
 								<div class="step-details">
 									<p class="step-title">Models</p>
 								</div>
 							</div>
-							<div class="step-item" :class="{'is-active': currentStep === 3, 'is-completed': currentStep > 3}" @click="goToStep(3)">
-								<div class="step-marker">3</div>
+							<div class="step-item" :class="getStepClass(3) + (!isStepValid(3) && currentStep > 3 ? ' has-text-danger' : '')" @click="goToStep(3)">
+								<div class="step-marker" :class="{'has-background-danger has-text-white': !isStepValid(3) && currentStep > 3}">3</div>
 								<div class="step-details">
 									<p class="step-title">Autonomy</p>
 								</div>
 							</div>
-							<div class="step-item" :class="{'is-active': currentStep === 4, 'is-completed': currentStep > 4}" @click="goToStep(4)">
+							<div class="step-item" :class="getStepClass(4)" @click="goToStep(4)">
 								<div class="step-marker">4</div>
 								<div class="step-details">
 									<p class="step-title">Data Access</p>
 								</div>
 							</div>
-							<div class="step-item" :class="{'is-active': currentStep === 5, 'is-completed': currentStep > 5}" @click="goToStep(5)">
+							<div class="step-item" :class="getStepClass(5)" @click="goToStep(5)">
 								<div class="step-marker">5</div>
 								<div class="step-details">
 									<p class="step-title">Actions & Risk</p>
 								</div>
 							</div>
-							<div class="step-item" :class="{'is-active': currentStep === 6}" @click="goToStep(6)">
+							<div class="step-item" :class="getStepClass(6)" @click="goToStep(6)">
 								<div class="step-marker">6</div>
 								<div class="step-details">
 									<p class="step-title">Compliance</p>

@@ -427,29 +427,17 @@ func (e *Engine) evaluateRiskPolicy(policy *AIPolicy, req *EvaluateRequest, resu
 
 // evaluateCompliancePolicy checks compliance requirements
 func (e *Engine) evaluateCompliancePolicy(policy *AIPolicy, req *EvaluateRequest, result *PolicyResult) {
-	for _, framework := range policy.Compliance.Frameworks {
-		if !framework.Enabled {
-			continue
-		}
-
-		for _, control := range framework.Controls {
-			// Add control to compliance tracking
-			result.ComplianceControls = append(result.ComplianceControls, fmt.Sprintf("%s:%s", framework.Name, control.ID))
-
-			// Apply enforcement
-			switch control.Enforcement {
-			case "strict":
-				result.AuditRequired = true
-				result.RiskScore += 5
-			case "moderate":
-				result.EnhancedMonitoring = true
-			}
-		}
-	}
+	// Note: Compliance frameworks (SOC2, GDPR, HIPAA, ISO27001) will be implemented
+	// as intelligent agents in MVP-051-053. For now, we only enforce audit requirements.
 
 	// Check audit requirements
 	if policy.Compliance.AuditRequirements.LogAllActions {
 		result.AuditRequired = true
+	}
+
+	// If immutable audit log is required, increase monitoring
+	if policy.Compliance.AuditRequirements.ImmutableAuditLog {
+		result.EnhancedMonitoring = true
 	}
 }
 

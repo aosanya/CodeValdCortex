@@ -308,32 +308,34 @@ templ AIPolicyContent(currentAgency *models.Agency) {
 		(function() {
 			async function loadPolicySummary() {
 				try {
-					const response = await fetch(`/api/agencies/${ currentAgency.ID }/policy/summary`);
+					const response = await fetch(`/api/agencies/{ currentAgency.ID }/policy/summary`);
+					console.log('Policy summary response:', response.status);
 					if (response.ok) {
 						const summary = await response.json();
+						console.log('Policy summary loaded:', summary);
 						document.getElementById('policy-summary-container').style.display = 'block';
 						document.getElementById('policy-no-config').style.display = 'none';
 						
 						const content = document.getElementById('policy-summary-content');
-						content.innerHTML = `
-							<div class="columns">
-							<div class="column">
-								<p><strong>Adoption Level:</strong> ${ summary.adoption_level }</p>
-								<p><strong>Risk Tolerance:</strong> ${ summary.risk_tolerance }</p>
-								<p><strong>Default Autonomy:</strong> ${ summary.default_autonomy_level }</p>
-							</div>
-							<div class="column">
-								<p><strong>Allowed Providers:</strong> ${ summary.allowed_providers.join(', ') }</p>
-								<p><strong>Total Budget:</strong> $${ summary.total_budget_usd }</p>
-								<p><strong>Monitoring:</strong> ${ summary.monitoring_enabled ? 'Enabled' : 'Disabled' }</p>
-							</div>
-						</div>
-						<p class="help">Last updated: ${ new Date(summary.last_updated).toLocaleString() }</p>
-						<p class="help is-info">Note: Compliance frameworks (SOC2, GDPR, HIPAA, ISO27001) will be implemented as intelligent agents (see MVP-051-053)</p>
-					`;
+						content.innerHTML = 
+							'<div class="columns">' +
+							'<div class="column">' +
+								'<p><strong>Adoption Level:</strong> ' + (summary.adoption_level || 'Not set') + '</p>' +
+								'<p><strong>Risk Tolerance:</strong> ' + (summary.risk_tolerance || 'Not set') + '</p>' +
+								'<p><strong>Default Autonomy:</strong> ' + (summary.default_autonomy_level || 'Not set') + '</p>' +
+							'</div>' +
+							'<div class="column">' +
+								'<p><strong>Allowed Providers:</strong> ' + (summary.allowed_providers ? summary.allowed_providers.join(', ') : 'None') + '</p>' +
+								'<p><strong>Total Budget:</strong> $' + (summary.total_budget_usd || 0) + '</p>' +
+								'<p><strong>Monitoring:</strong> ' + (summary.monitoring_enabled ? 'Enabled' : 'Disabled') + '</p>' +
+							'</div>' +
+						'</div>' +
+						'<p class="help is-info">Note: Compliance frameworks (SOC2, GDPR, HIPAA, ISO27001) will be implemented as intelligent agents (see MVP-051-053)</p>';
+					} else {
+						console.log('Policy summary not found');
 					}
 				} catch (error) {
-					console.debug('No policy configured yet');
+					console.debug('Error loading policy summary:', error);
 				}
 			}
 
@@ -350,6 +352,11 @@ templ AIPolicyContent(currentAgency *models.Agency) {
 			const aiPolicySection = document.getElementById('content-ai-policy');
 			if (aiPolicySection) {
 				observer.observe(aiPolicySection, { attributes: true, attributeFilter: ['style'] });
+				
+				// Also load immediately if the section is already visible
+				if (aiPolicySection.style.display !== 'none') {
+					loadPolicySummary();
+				}
 			}
 		})();
 	</script>
