@@ -276,10 +276,10 @@ func (r *ArangoSyncAuditRepository) GetStats(ctx context.Context, since int64) (
 	}
 
 	var result struct {
-		TotalEvents      int64 `json:"total_events"`
-		SuccessfulSyncs  int64 `json:"successful_syncs"`
-		FailedSyncs      int64 `json:"failed_syncs"`
-		RetryCount       int64 `json:"retry_count"`
+		TotalEvents     int64 `json:"total_events"`
+		SuccessfulSyncs int64 `json:"successful_syncs"`
+		FailedSyncs     int64 `json:"failed_syncs"`
+		RetryCount      int64 `json:"retry_count"`
 	}
 
 	_, err = cursor.ReadDocument(ctx, &result)
@@ -294,9 +294,9 @@ func (r *ArangoSyncAuditRepository) GetStats(ctx context.Context, since int64) (
 		RetryCount:      result.RetryCount,
 		// Note: Latency metrics would require additional tracking
 		// For now, set to 0 and implement via metrics service later
-		AverageLatencyMs: 0,
-		P95LatencyMs:     0,
-		P99LatencyMs:     0,
+		AverageLatencyMs:  0,
+		P95LatencyMs:      0,
+		P99LatencyMs:      0,
 		CurrentQueueDepth: 0,
 	}
 
