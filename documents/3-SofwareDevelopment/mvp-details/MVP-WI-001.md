@@ -1,4 +1,4 @@
-# MVP-WI-001: Gitea Webhook Integration
+# MVP-WI-001: Work Tracking System Webhook Integration (Gitea Implementation)
 
 ## Overview
 **Priority**: P0  
@@ -8,7 +8,89 @@
 **Status**: In Progress
 
 ## Description
-Implement webhook handlers for Gitea events (issues, pull requests, milestones) that act as a **persistence layer** to save Gitea artifacts into ArangoDB. The Orchestrator (MVP-032) will monitor ArangoDB change streams to detect new/updated issues and create agents accordingly.
+Implement a **pluggable webhook integration system** with Gitea as the first implementation. The system uses an abstraction layer (`work` package) that defines interfaces for work tracking systems (issues, PRs, milestones), allowing easy integration with GitHub, GitLab, Jira, or other platforms in the future.
+
+### Pluggable Architecture
+
+**Interface Layer** (`internal/infrastructure/webhooks/work/`):
+- Defines common interfaces for work tracking concepts
+- Provider-agnostic data models
+- Webhook handler interface
+
+**Implementation Layer** (`internal/infrastructure/webhooks/gitea/`):
+- Gitea-specific webhook handlers
+- Implements `work` interfaces
+- Transforms Gitea payloads to common models
+
+**Future Implementations**:
+- `internal/infrastructure/webhooks/github/` - GitHub webhooks
+- `internal/infrastructure/webhooks/gitlab/` - GitLab webhooks
+- `internal/infrastructure/webhooks/jira/` - Jira webhooks
+- `internal/infrastructure/webhooks/linear/` - Linear webhooks
+
+### Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    External Work Tracking Systems                │
+│  ┌───────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐ │
+│  │  Gitea    │  │  GitHub    │  │  GitLab    │  │   Jira     │ │
+│  │ (MVP-WI-001)│  │  (Future)  │  │  (Future)  │  │  (Future)  │ │
+│  └─────┬─────┘  └──────┬─────┘  └──────┬─────┘  └──────┬─────┘ │
+│        │ Webhooks      │ Webhooks      │ Webhooks      │ API    │
+└────────┼───────────────┼───────────────┼───────────────┼────────┘
+         │               │               │               │
+         ▼               ▼               ▼               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│          Work Tracking Integration Layer (Abstraction)           │
+│                                                                   │
+│  internal/infrastructure/webhooks/work/                           │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │  Interfaces:                                                 ││
+│  │  - WorkTrackingProvider                                      ││
+│  │  - IssueHandler                                              ││
+│  │  - PullRequestHandler                                        ││
+│  │  - WebhookValidator                                          ││
+│  │                                                               ││
+│  │  Common Models:                                               ││
+│  │  - WorkIssue (provider-agnostic)                             ││
+│  │  - WorkPullRequest                                           ││
+│  │  - WorkMilestone                                             ││
+│  └─────────────────────────────────────────────────────────────┘│
+└────────────────────────────┬────────────────────────────────────┘
+                             │ Implements
+         ┌───────────────────┼───────────────────┐
+         ▼                   ▼                   ▼
+┌──────────────────┐  ┌──────────────┐  ┌──────────────┐
+│ Gitea Provider   │  │GitHub Provider│  │GitLab Provider│
+│ (MVP-WI-001)     │  │   (Future)   │  │   (Future)   │
+│                  │  │              │  │              │
+│ - GiteaHandler   │  │- GitHubHandler│  │- GitLabHandler│
+│ - Signature Val  │  │- Signature Val│  │- Signature Val│
+│ - Payload Parser │  │- Payload Parser│ │- Payload Parser│
+└────────┬─────────┘  └──────┬───────┘  └──────┬───────┘
+         │                   │                  │
+         └───────────────────┼──────────────────┘
+                             │ Persist to
+                             ▼
+                    ┌─────────────────┐
+                    │    ArangoDB     │
+                    │  ┌────────────┐ │
+                    │  │work-issues │ │
+                    │  │work-prs    │ │
+                    │  │work-milestones││
+                    │  └────────────┘ │
+                    └─────────────────┘
+```
+
+### Why Pluggable Architecture?
+
+**Benefits**:
+- ✅ **Flexibility**: Switch from Gitea to GitHub/GitLab without changing orchestrator
+- ✅ **Multi-Platform**: Support multiple work tracking systems simultaneously
+- ✅ **Migration**: Easy migration path from one platform to another
+- ✅ **Testability**: Mock providers for testing without external dependencies
+- ✅ **Vendor Independence**: Not locked into any single platform
 
 ### ArangoDB-Centric Architecture
 
@@ -136,6 +218,128 @@ MVP-032: Orchestrator (Change Stream Monitoring)
 - [ ] Documentation: Kanban setup guide, repository-workflow linking, milestone configuration
 
 ## Technical Specifications
+
+### Package Structure
+
+**Work Package (Abstraction Layer)**:
+```
+internal/infrastructure/webhooks/work/
+├── interfaces.go        # WorkTrackingProvider, IssueHandler, Repository
+├── models.go           # WorkIssue, WorkPullRequest, WorkMilestone (provider-agnostic)
+└── README.md           # Provider implementation guide
+```
+
+**Gitea Package (Implementation)**:
+```
+internal/infrastructure/webhooks/gitea/
+├── handler.go          # HTTP endpoint handlers implementing work.WorkTrackingProvider
+├── validator.go        # HMAC SHA-256 signature validation
+├── models.go           # Gitea-specific payload types and transformation to work models
+├── repository.go       # ArangoDB persistence for work items
+└── handler_test.go     # Unit tests
+```
+
+### Core Interfaces
+
+**work.WorkTrackingProvider** - Main contract for all work tracking integrations:
+```go
+type WorkTrackingProvider interface {
+    GetProviderName() string
+    ValidateWebhookSignature(payload []byte, signature string, secret string) error
+    HandleWebhook(ctx context.Context, r *http.Request) (*WebhookResult, error)
+}
+```
+
+**work.Repository** - Persistence abstraction:
+```go
+type Repository interface {
+    SaveIssue(ctx context.Context, issue *WorkIssue) error
+    SavePullRequest(ctx context.Context, pr *WorkPullRequest) error
+    SaveMilestone(ctx context.Context, milestone *WorkMilestone) error
+}
+```
+
+### Data Flow
+
+```
+Gitea Webhook Event (issue.milestoned)
+    ↓
+POST /api/v1/webhooks/gitea → handler.HandleWebhook()
+    ↓
+validator.ValidateSignature(X-Gitea-Signature)
+    ↓
+Parse JSON → GiteaIssuePayload
+    ↓
+GiteaIssuePayload.ToWorkIssue() → work.WorkIssue (normalized)
+    ↓
+repository.SaveIssue(workIssue) → ArangoDB work-issues collection
+    ↓
+Return 200 OK
+    ↓
+[Later] Orchestrator monitors ArangoDB change streams
+    ↓
+Detects new milestoned issue → Creates agent from work item definition
+```
+
+### Key Data Transformations
+
+**Gitea → Common Model**:
+```go
+// Gitea-specific payload
+type GiteaIssuePayload struct {
+    Action     string            `json:"action"`
+    Issue      *gitea.Issue      `json:"issue"`
+    Repository *gitea.Repository `json:"repository"`
+}
+
+// Transform to provider-agnostic model
+func (p *GiteaIssuePayload) ToWorkIssue() *work.WorkIssue {
+    return &work.WorkIssue{
+        Provider:       "gitea",
+        IssueID:        p.Issue.HTMLURL,
+        IssueNumber:    p.Issue.Index,
+        Title:          p.Issue.Title,
+        Body:           p.Issue.Body,
+        State:          string(p.Issue.State),
+        Milestone:      p.Issue.Milestone.Title,
+        RepoURL:        p.Repository.HTMLURL,
+        Labels:         extractLabels(p.Issue.Labels),
+        Assignees:      extractAssignees(p.Issue.Assignees),
+        ProviderMetadata: map[string]interface{}{
+            "html_url":      p.Issue.HTMLURL,
+            "webhook_event": p.Action,
+        },
+    }
+}
+```
+
+### ArangoDB Collections
+
+**work-issues** (Common issue format):
+```json
+{
+    "provider": "gitea",
+    "issue_id": "https://gitea.example.com/org/repo/issues/45",
+    "issue_number": 45,
+    "title": "Implement authentication",
+    "body": "Need OAuth2 support...",
+    "state": "open",
+    "milestone": "Requirements",
+    "milestone_id": "Requirements",
+    "repo_url": "https://gitea.example.com/org/repo",
+    "labels": ["feature", "security"],
+    "assignees": ["user1", "user2"],
+    "author_username": "developer1",
+    "author_email": "dev@example.com",
+    "created_at": "2025-11-19T10:00:00Z",
+    "updated_at": "2025-11-19T11:30:00Z",
+    "provider_metadata": {
+        "html_url": "https://gitea.example.com/org/repo/issues/45",
+        "webhook_event": "milestoned",
+        "issue_id": 12345
+    }
+}
+```
 
 ### Architecture
 
