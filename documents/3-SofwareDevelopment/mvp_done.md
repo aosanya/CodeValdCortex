@@ -33,6 +33,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-051 | Workflow Manager - List & CRUD | Built complete workflow management system with list/create/edit/delete operations, AI-powered workflow generation from agency context, dynamic workflow refinement, error handling improvements for truncated LLM responses, and custom CRUD implementations for workflow-specific URL patterns. Foundation for visual workflow designer (MVP-052) | 2025-11-06     | `feature/MVP-051_work_item_workflow_designer`   | ~6 hours   | ✅ Complete |
 | MVP-052-DESIGN | Workflow Visual Designer - Design Phase | Created comprehensive design specification (1,300+ lines) for simplified vertical column-based workflow designer. Eliminates jsPlumb complexity (70% code reduction), implements single-column layout with side drop zones for parallel execution, search/filter functionality, and migration strategy from current implementation. Ready for implementation phase | 2025-11-18     | `feature/MVP-052_workflow_visual_designer`   | ~4 hours   | ✅ Design Complete |
 | MVP-052 | Workflow Visual Designer | Implemented simplified drag-and-drop workflow designer with HTML5 Drag API + Alpine.js. Features include work item enrichment, parallel/sequential step support, debounced saves (300ms), duplicate workflow prevention through key normalization (_key→key), and comprehensive error handling. Replaced complex jsPlumb with maintainable vertical column layout | 2025-11-18     | `feature/MVP-052_workflow_visual_designer`   | ~6 hours   | ✅ Complete |
+| MVP-048 | AI Policy Layer - Foundation Debug Fix | Fixed critical template interpolation bug preventing AI policy save/retrieve in Agency Designer. Root cause: agency ID passed as literal string `"{ currentAgency.ID }"` instead of actual value. Solution: added `data-agency-id` attribute to template container, updated JavaScript to read from DOM. Removed compliance frameworks checkboxes. Unblocks MVP-049 (Runtime Enforcement) | 2025-11-19     | `feature/MVP-048_ai_policy_foundation`   | ~2 hours   | ✅ Complete |
 
 ---
 
@@ -2203,6 +2204,71 @@ Implemented simplified drag-and-drop workflow designer to replace complex jsPlum
 #### Documentation
 - Session: `documents/3-SofwareDevelopment/coding_sessions/MVP-052_workflow_visual_designer.md`
 - Complete implementation with architecture decisions and lessons learned
+
+---
+
+### MVP-048: AI Policy Layer - Foundation Debug Fix
+**Completed**: November 19, 2025  
+**Branch**: `feature/MVP-048_ai_policy_foundation`  
+**Status**: ✅ Complete
+
+#### Summary
+Fixed critical bug preventing AI policies from being saved and retrieved in the Agency Designer. Root cause was template interpolation error where agency ID was passed as literal string instead of actual value.
+
+#### Key Deliverables
+- ✅ Fixed template interpolation for agency ID in policy section
+- ✅ Added data-agency-id attribute pattern for JavaScript access
+- ✅ Removed compliance frameworks checkboxes from wizard UI
+- ✅ Policy save/retrieve now functional
+- ✅ No 404 errors when accessing policy endpoints
+
+#### Technical Highlights
+**Root Cause**: In `agency_designer_overview.templ`, JavaScript code had:
+```javascript
+fetch(`/api/agencies/{ currentAgency.ID }/policy/summary`)
+```
+This sent literal string `"{ currentAgency.ID }"` instead of actual agency ID.
+
+**Solution Implemented**:
+1. Added `data-agency-id={ currentAgency.ID }` to container div
+2. Updated JavaScript to read from `dataset.agencyId`
+3. Follows established pattern used in `ai_policy_wizard.templ`, `workflow_designer.templ`
+
+**Pattern Established**: Always use data attributes for passing server values to JavaScript:
+```go
+// In templ file
+<div data-agency-id={ currentAgency.ID }>
+
+// In JavaScript  
+const agencyId = element.dataset.agencyId;
+```
+
+#### Files Modified
+- `/internal/web/pages/agency_designer/agency_designer_overview.templ`
+  - Added `data-agency-id` attribute to `.overview-section`
+  - Updated JavaScript to read from data attribute
+- `/internal/web/pages/agency_designer/ai_policy_wizard.templ`
+  - Removed compliance frameworks checkboxes section
+
+#### Validation Results
+✅ Policy wizard loads without errors  
+✅ Policy summary API returns correct data  
+✅ No 404 errors in console  
+✅ Template variables properly interpolated  
+✅ `go fmt ./...` completed  
+✅ `go vet ./...` shows 0 issues  
+✅ `templ generate` successful  
+✅ All debug logs removed  
+✅ Build successful
+
+#### Dependencies Unblocked
+- ~~MVP-048~~ → MVP-049: AI Policy Runtime Enforcement
+- Policy configuration now functional for all agencies
+- Foundation solid for compliance framework agents (MVP-051-053)
+
+#### Documentation
+- Session: `documents/3-SofwareDevelopment/coding_sessions/MVP-048_ai_policy_save_retrieve_debug.md`
+- Detailed debugging process following `.github/prompts/debug.prompt.md`
 
 ---
 
