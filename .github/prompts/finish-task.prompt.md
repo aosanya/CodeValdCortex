@@ -8,11 +8,44 @@ Follow the **mandatory completion process** for MVP tasks:
 
 ## Completion Process (MANDATORY)
 
-1. **Create detailed coding session document** in `coding_sessions/` format: `{TaskID}_{description}.md`
+1. **Update domain documentation file** with implementation details
+   - **Locate your task** in the domain file (e.g., `work-items-integration.md`, `agency-designer.md`)
+   - **Find task annotation**: Look for `<!-- MVP-XXX -->` markers
+   - **Update task section** with:
+     - Implementation decisions made
+     - Code examples and patterns used
+     - Any deviations from original plan (with rationale)
+     - Links to created files and modules
+     - Known limitations or future improvements
+   - **Maintain narrative flow**: Updates should read naturally within the document
+   - **Example update**:
+     ```markdown
+     <!-- MVP-WI-001 -->
+     ## Gitea Webhook Integration (MVP-WI-001)
+     
+     The webhook integration was implemented using a pluggable architecture...
+     
+     **Implementation**: Created abstraction layer in `internal/infrastructure/webhooks/work/`
+     with provider-agnostic interfaces. Gitea provider at `webhooks/gitea/` implements
+     these interfaces, enabling easy addition of GitHub, GitLab, etc.
+     
+     **Key Files**:
+     - `work/interfaces.go` - Core provider interfaces
+     - `work/models.go` - Common data models
+     - `gitea/models.go` - Gitea-specific transformations
+     
+     **Status**: ✅ Completed 2025-11-19
+     <!-- /MVP-WI-001 -->
+     ```
+   - **Domain coherence**: Ensure your updates fit the narrative flow of the entire domain
+   - **Cross-references**: Link to related tasks in the same domain if dependencies resolved
+   - **Next steps**: If task unlocks follow-up work, mention it in narrative
+
+2. **Create detailed coding session document** in `coding_sessions/` format: `{TaskID}_{description}.md`
    - Document all implementation details, decisions, and validation results
    - Include technical highlights, files created/modified, and dependencies unblocked
 
-2. **Update architecture documentation if necessary**
+3. **Update architecture documentation if necessary**
    - If task introduced new architectural patterns, update `documents/2-SoftwareDesignAndArchitecture/`
    - Update relevant sections:
      - `general-architecture.md` for overall architecture changes
@@ -21,17 +54,17 @@ Follow the **mandatory completion process** for MVP tasks:
    - Add new architecture decision records if significant design choices were made
    - Document new services, handlers, or repositories added
 
-3. **Add completed task to `mvp_done.md`** with completion date
+4. **Add completed task to `mvp_done.md`** with completion date
    - Include summary, key deliverables, technical highlights, validation results
    - List dependencies unblocked by this completion
 
-4. **Remove completed task from active `mvp.md` file**
+5. **Remove completed task from active `mvp.md` file**
    - Strike through the completed MVP-XXX in dependency lists (~~MVP-XXX~~)
 
-5. **Update dependent task references**
+6. **Update dependent task references**
    - Update all tasks that depended on this one to show ~~MVP-XXX~~
 
-6. **ALWAYS remove all debug logs before merge (MANDATORY)**
+7. **ALWAYS remove all debug logs before merge (MANDATORY)**
    
    **Backend Go Logs**:
    - Search for and remove all debug `fmt.Printf()`, `fmt.Println()` statements
