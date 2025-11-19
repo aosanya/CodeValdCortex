@@ -17,6 +17,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
+	giteaWork "github.com/aosanya/CodeValdCortex/internal/infrastructure/gitea"
 	"github.com/aosanya/CodeValdCortex/internal/policy"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
@@ -49,6 +50,7 @@ type App struct {
 	workflowBuilder     *ai.WorkflowsBuilder
 	workflowService     *workflow.Service
 	policyService       *policy.Service
+	webhookHandler      *giteaWork.Handler
 }
 
 // New creates a new application instance
@@ -162,6 +164,21 @@ func New(cfg *config.Config) *App {
 	policyService := policy.NewService(policyRepo)
 	logger.Info("Policy service initialized successfully")
 
+	// Initialize work tracking integration handler (Gitea)
+	var webhookHandler *giteaWork.Handler
+	if cfg.WorkTracking.Secret != "" && cfg.WorkTracking.Provider == "gitea" {
+		validator := giteaWork.NewValidator(cfg.WorkTracking.Secret)
+		webhookRepo, err := giteaWork.NewRepository(dbClient.Database())
+		if err != nil {
+			logger.WithError(err).Warn("Failed to initialize work tracking repository")
+		} else {
+			webhookHandler = giteaWork.NewHandler(validator, webhookRepo)
+			logger.WithField("provider", "gitea").Info("Work tracking integration handler initialized successfully")
+		}
+	} else {
+		logger.Info("Work tracking integration not configured (set work_tracking.secret and work_tracking.provider)")
+	}
+
 	return &App{
 		config:              cfg,
 		logger:              logger,
@@ -181,6 +198,7 @@ func New(cfg *config.Config) *App {
 		workflowBuilder:     workflowBuilder,
 		workflowService:     workflowService,
 		policyService:       policyService,
+		webhookHandler:      webhookHandler,
 	}
 }
 
@@ -464,6 +482,16 @@ func (a *App) setupServer() error {
 			aiDesignerHandler := ai.NewAgencyDesignerHandler(a.aiDesignerService, a.logger)
 			aiDesignerHandler.RegisterRoutes(v1)
 			a.logger.Info("AI Agency Designer endpoints registered")
+		}
+
+		// Webhook endpoints for work item integration (if available)
+		if a.webhookHandler != nil {
+			work := v1.Group("/work")
+			{
+				work.POST("/issues", a.webhookHandler.HandleIssueWebhook)
+				work.POST("/pull-requests", a.webhookHandler.HandlePullRequestWebhook)
+			}
+			a.logger.Info("Work item webhook endpoints registered")
 		}
 
 		v1.GET("/status", func(c *gin.Context) {

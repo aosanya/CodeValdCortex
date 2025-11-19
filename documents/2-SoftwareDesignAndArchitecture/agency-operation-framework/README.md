@@ -2,6 +2,22 @@
 
 This directory contains the comprehensive specifications for CodeValdCortex's Agency Operation Framework, which defines how agencies, agents, and work items operate within the system.
 
+## Core Architecture
+
+### [Orchestration Architecture](../orchestration-architecture.md) ⭐ **NEW**
+**Purpose**: High-level orchestrator-agent interaction model
+
+**Contains**:
+- **Orchestrator Responsibilities**: Workflow monitoring, agent lifecycle management, WIP limit enforcement
+- **Agent Behavior**: Autonomous issue pickup, work execution, issue progression decisions
+- **Event Flow**: Complete example of issue flowing through Kanban workflow stages
+- **System Architecture**: How orchestrator spawns/terminates agents based on workflow state
+- **Key Principle**: Agents autonomously pick up Gitea issues and move them forward/backward through workflow
+
+**Critical Concept**: The orchestrator manages agent lifecycles, but **agents independently pick up and execute work** by pulling issues from Gitea milestones (Kanban columns).
+
+---
+
 ## Documents
 
 ### 1. [Agency Operations Framework](./agency-operations-framework.md)

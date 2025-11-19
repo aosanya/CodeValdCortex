@@ -34,6 +34,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-052-DESIGN | Workflow Visual Designer - Design Phase | Created comprehensive design specification (1,300+ lines) for simplified vertical column-based workflow designer. Eliminates jsPlumb complexity (70% code reduction), implements single-column layout with side drop zones for parallel execution, search/filter functionality, and migration strategy from current implementation. Ready for implementation phase | 2025-11-18     | `feature/MVP-052_workflow_visual_designer`   | ~4 hours   | ✅ Design Complete |
 | MVP-052 | Workflow Visual Designer | Implemented simplified drag-and-drop workflow designer with HTML5 Drag API + Alpine.js. Features include work item enrichment, parallel/sequential step support, debounced saves (300ms), duplicate workflow prevention through key normalization (_key→key), and comprehensive error handling. Replaced complex jsPlumb with maintainable vertical column layout | 2025-11-18     | `feature/MVP-052_workflow_visual_designer`   | ~6 hours   | ✅ Complete |
 | MVP-048 | AI Policy Layer - Foundation Debug Fix | Fixed critical template interpolation bug preventing AI policy save/retrieve in Agency Designer. Root cause: agency ID passed as literal string `"{ currentAgency.ID }"` instead of actual value. Solution: added `data-agency-id` attribute to template container, updated JavaScript to read from DOM. Removed compliance frameworks checkboxes. Unblocks MVP-049 (Runtime Enforcement) | 2025-11-19     | `feature/MVP-048_ai_policy_foundation`   | ~2 hours   | ✅ Complete |
+| MVP-WI-001 | Gitea Webhook Integration | Implemented pluggable work tracking integration with abstraction layer supporting multiple providers. Created 9 new files (~1,570 LOC) including HTTP webhook handlers, HMAC SHA-256 signature validation, ArangoDB repository with idempotent upserts, provider-agnostic data models, and unit tests. Endpoints: POST /api/v1/work/issues, POST /api/v1/work/pull-requests. Async webhook processing (<200ms response), ArangoDB-centric design with change streams for orchestrator integration | 2025-11-19     | `feature/MVP-WI-001_gitea_webhook_integration`   | ~3 hours   | ✅ Complete |
 
 ---
 
@@ -2269,6 +2270,198 @@ const agencyId = element.dataset.agencyId;
 #### Documentation
 - Session: `documents/3-SofwareDevelopment/coding_sessions/MVP-048_ai_policy_save_retrieve_debug.md`
 - Detailed debugging process following `.github/prompts/debug.prompt.md`
+
+---
+
+### MVP-WI-001: Gitea Webhook Integration
+**Completed**: November 19, 2025  
+**Branch**: `feature/MVP-WI-001_gitea_webhook_integration`  
+**Status**: ✅ Complete
+
+#### Objectives Achieved
+- ✅ Implemented pluggable work tracking abstraction layer
+- ✅ Created Gitea provider with full webhook support
+- ✅ Built HMAC SHA-256 signature validation system
+- ✅ Implemented ArangoDB persistence with idempotent upserts
+- ✅ Established provider-agnostic data models
+- ✅ Created async webhook processing (<200ms response)
+- ✅ Added comprehensive unit tests for security validation
+- ✅ Documented provider implementation guide
+
+#### Key Deliverables
+
+1. **Abstraction Layer** (`internal/infrastructure/work/`)
+   - `WorkTrackingProvider` interface - contract for all providers
+   - Provider-agnostic models: `WorkIssue`, `WorkPullRequest`, `WorkMilestone`
+   - `Repository` interface for ArangoDB persistence
+   - `README.md` - comprehensive provider implementation guide
+
+2. **Gitea Provider Implementation** (`internal/infrastructure/gitea/`)
+   - `handler.go` (272 lines) - HTTP webhook handlers with async processing
+   - `validator.go` (56 lines) - HMAC SHA-256 signature validation with constant-time comparison
+   - `repository.go` (287 lines) - ArangoDB persistence with idempotent upsert logic
+   - `models.go` (203 lines) - Gitea payload types and transformation to work models
+   - `validator_test.go` (68 lines) - Unit tests covering valid/invalid/tampered signatures
+
+3. **API Endpoints**
+   - `POST /api/v1/work/issues` - Issue webhook events (opened, milestoned, closed, etc.)
+   - `POST /api/v1/work/pull-requests` - PR webhook events (opened, synchronized, merged)
+   - Resource-oriented design (not implementation-centric)
+
+4. **Configuration System**
+   - Added `WorkTrackingConfig` struct to `internal/config/config.go`
+   - Environment variables: `CVXC_WORK_TRACKING_*`
+   - Config section in `config.yaml` with provider, secret, allowed_ips
+
+5. **ArangoDB Collections**
+   - `work-issues` - All issues across all providers
+   - `work-prs` - All pull requests/merge requests
+   - `work-milestones` - All milestones/sprints
+
+#### Architecture Highlights
+
+**Pluggable Provider Pattern**:
+```
+External Systems (Gitea/GitHub/GitLab/Jira)
+    ↓ Webhooks
+Work Abstraction Layer (internal/infrastructure/work/)
+    ↓ Provider-specific transformations
+ArangoDB (work-issues, work-prs, work-milestones)
+    ↓ Change Streams
+Orchestrator (MVP-032) monitors changes
+    ↓ Creates agents from work items
+```
+
+**Why Pluggable**:
+- ✅ Platform independence - not locked into Gitea
+- ✅ Easy migration path (Gitea → GitHub → GitLab)
+- ✅ Multi-platform support (use multiple systems simultaneously)
+- ✅ Testability (mock providers)
+- ✅ Future-proof for organizational changes
+
+**ArangoDB-Centric Design**:
+- Webhooks persist data even if orchestrator is down (resilience)
+- Complete audit history of external events
+- Agents query ArangoDB, not external APIs (performance)
+- Change streams provide reactive processing (no polling)
+- Decoupling: webhook handler independent of orchestrator
+
+**Security Implementation**:
+- HMAC SHA-256 signature validation (X-Gitea-Signature header)
+- Constant-time comparison prevents timing attacks
+- Configurable secret via environment variables
+- Invalid signatures return 401 Unauthorized
+- Malformed payloads return 400 Bad Request
+
+**Async Processing Pattern**:
+```go
+// Non-blocking webhook responses (<200ms)
+go h.processIssueAsync(ctx, workIssue, action)
+c.JSON(http.StatusOK, gin.H{"status": "accepted"})
+```
+
+#### Technical Decisions
+
+1. **Naming Convention**: `work_tracking` not `webhooks`
+   - Reflects domain purpose (work tracking integration)
+   - Not implementation detail (webhooks)
+   - Configuration aligns with business concepts
+
+2. **API Design**: `/api/v1/work/issues` not `/api/v1/webhooks/gitea/issues`
+   - Resource-centric (work items) not implementation-centric
+   - Provider-agnostic URL structure
+   - No `?provider=gitea` query param (single provider configuration)
+
+3. **Package Structure**: `internal/infrastructure/{work,gitea}` not `webhooks/gitea/`
+   - Flatter structure, easier navigation
+   - "Webhooks" is implementation detail
+   - Aligns with Go conventions
+
+4. **Idempotency**: Upsert logic using `provider + issue_id` as deterministic key
+   - Webhooks can be delivered multiple times (retries, network issues)
+   - Same webhook updates same document (no duplicates)
+
+#### Files Created (9 new files, ~1,570 LOC)
+
+**Abstraction Layer**:
+- `internal/infrastructure/work/interfaces.go` (125 lines)
+- `internal/infrastructure/work/models.go` (189 lines)
+- `internal/infrastructure/work/README.md` (447 lines)
+
+**Gitea Provider**:
+- `internal/infrastructure/gitea/handler.go` (272 lines)
+- `internal/infrastructure/gitea/validator.go` (56 lines)
+- `internal/infrastructure/gitea/repository.go` (287 lines)
+- `internal/infrastructure/gitea/models.go` (203 lines)
+- `internal/infrastructure/gitea/validator_test.go` (68 lines)
+
+**Integration**:
+- Updated `internal/app/app.go` - handler initialization, route registration
+- Updated `internal/config/config.go` - WorkTrackingConfig struct
+- Updated `config.yaml` - work_tracking section
+
+#### Testing & Validation
+
+**Unit Tests** (`validator_test.go`):
+- ✅ Valid signature passes validation
+- ✅ Invalid signature fails (401 Unauthorized)
+- ✅ Missing signature fails
+- ✅ Wrong format (not sha256=...) fails
+- ✅ Tampered payload fails
+- ✅ Header name returned correctly
+
+**Build Validation**:
+- ✅ Code compiles successfully (`go build ./cmd/main.go`)
+- ✅ All unit tests passing
+- ✅ No lint errors (`golangci-lint`)
+- ✅ Configuration loads without errors
+- ✅ All debug logs removed
+
+#### Dependencies Unblocked
+
+This task unblocks:
+- ✅ **MVP-WI-002**: Gitea API Client (can reuse validator, models)
+- ✅ **MVP-030**: Work Item Definitions (work_issues collection exists)
+- ✅ **MVP-032**: Orchestrator (can monitor work_issues collection via change streams)
+- ✅ **MVP-WI-003**: Agent-to-Issue Sync (foundation for bidirectional communication)
+- ✅ **MVP-WI-004**: Pull Request Automation (work_prs collection ready)
+
+#### Known Limitations & Future Work
+
+**Current Limitations**:
+1. IP allowlist configuration exists but not enforced (future middleware)
+2. No Prometheus metrics for webhook processing (future enhancement)
+3. No webhook retry mechanism if ArangoDB save fails (future: message queue)
+4. Integration tests deferred (manual testing plan documented)
+
+**Future Enhancements**:
+1. Add GitHub, GitLab, Jira providers (implement same interfaces)
+2. Provider auto-detection from signature headers
+3. Webhook replay admin UI for failed webhooks
+4. Rate limiting to prevent webhook flooding
+5. Batch processing for multiple webhooks
+
+#### Configuration Example
+
+**Environment Variables**:
+```bash
+export CVXC_WORK_TRACKING_PROVIDER="gitea"
+export CVXC_WORK_TRACKING_SECRET="your-webhook-secret"
+export CVXC_WORK_TRACKING_ALLOWED_IPS="192.168.1.100,10.0.0.5"
+```
+
+**Gitea Webhook Setup**:
+1. Repository → Settings → Webhooks
+2. URL: `http://codevaldcortex:8080/api/v1/work/issues`
+3. Content type: `application/json`
+4. Secret: (same as CVXC_WORK_TRACKING_SECRET)
+5. Events: Issues, Pull Requests
+6. Active: ✅
+
+#### Documentation
+- Session: `documents/3-SofwareDevelopment/coding_sessions/MVP-WI-001_gitea_webhook_integration.md`
+- Domain doc: `documents/3-SofwareDevelopment/mvp-details/work-items-integration.md`
+- Provider guide: `internal/infrastructure/work/README.md`
 
 ---
 

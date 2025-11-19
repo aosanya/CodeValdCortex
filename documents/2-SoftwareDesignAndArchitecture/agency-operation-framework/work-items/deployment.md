@@ -390,7 +390,7 @@ go run scripts/setup-webhooks.go
 
 # Or manually via Gitea UI:
 # Repository → Settings → Webhooks → Add Webhook
-# URL: http://codevaldcortex:8080/api/v1/webhooks/gitea/issues
+# URL: http://codevaldcortex:8080/api/v1/work/issues
 # Events: Issues, Pull Requests
 # Secret: (from .env)
 ```
@@ -402,7 +402,7 @@ go run scripts/setup-webhooks.go
 docker-compose ps
 
 # Test webhook
-curl -X POST http://localhost:8080/api/v1/webhooks/gitea/issues \
+curl -X POST "http://localhost:8080/api/v1/work/issues" \
   -H "Content-Type: application/json" \
   -d @test/webhook-payload.json
 
