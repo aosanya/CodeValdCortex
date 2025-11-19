@@ -86,6 +86,12 @@ type WorkTrackingConfig struct {
 	Secret     string   `mapstructure:"secret"`      // HMAC secret for webhook signature validation
 	AllowedIPs []string `mapstructure:"allowed_ips"` // Optional IP allowlist for webhook sources
 	Provider   string   `mapstructure:"provider"`    // Work tracking provider: gitea, github, gitlab, jira
+
+	// Gitea API client configuration
+	GiteaBaseURL   string `mapstructure:"gitea_base_url"`   // Gitea instance URL (e.g., https://gitea.example.com)
+	GiteaAPIToken  string `mapstructure:"gitea_api_token"`  // Gitea API token for authentication
+	GiteaTimeout   int    `mapstructure:"gitea_timeout"`    // HTTP client timeout in seconds (default: 30)
+	GiteaRateLimit int    `mapstructure:"gitea_rate_limit"` // Max requests per second (default: 10)
 }
 
 // Load loads configuration from file and environment variables
@@ -178,6 +184,10 @@ func Load(configPath string) (*Config, error) {
 	viper.BindEnv("work_tracking.secret", "CVXC_WORK_TRACKING_SECRET")
 	viper.BindEnv("work_tracking.allowed_ips", "CVXC_WORK_TRACKING_ALLOWED_IPS")
 	viper.BindEnv("work_tracking.provider", "CVXC_WORK_TRACKING_PROVIDER")
+	viper.BindEnv("work_tracking.gitea_base_url", "CVXC_WORK_TRACKING_GITEA_BASE_URL")
+	viper.BindEnv("work_tracking.gitea_api_token", "CVXC_WORK_TRACKING_GITEA_API_TOKEN")
+	viper.BindEnv("work_tracking.gitea_timeout", "CVXC_WORK_TRACKING_GITEA_TIMEOUT")
+	viper.BindEnv("work_tracking.gitea_rate_limit", "CVXC_WORK_TRACKING_GITEA_RATE_LIMIT")
 
 	// Read config file if it exists
 	if err := viper.ReadInConfig(); err != nil {

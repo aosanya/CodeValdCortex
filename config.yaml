@@ -32,8 +32,14 @@ ai:
   max_tokens: 4096       # Maximum tokens in response
   timeout: 60            # Request timeout in seconds
 
-# Work Tracking Integration (MVP-WI-001)
+# Work Tracking Integration (MVP-WI-001, MVP-WI-002)
 work_tracking:
-  provider: "gitea"      # Work tracking provider: gitea, github, gitlab, jira (empty = disabled)
-  secret: ""             # HMAC secret for webhook signature validation (use environment variable)
-  allowed_ips: []        # Optional: IP allowlist for webhook sources (e.g., ["192.168.1.100"])
+  provider: "gitea"          # Work tracking provider: gitea, github, gitlab, jira (empty = disabled)
+  secret: ""                 # HMAC secret for webhook signature validation (use environment variable)
+  allowed_ips: []            # Optional: IP allowlist for webhook sources (e.g., ["192.168.1.100"])
+  
+  # Gitea API Client (MVP-WI-002)
+  gitea_base_url: ""         # Gitea instance URL (e.g., https://gitea.example.com)
+  gitea_api_token: ""        # Gitea API token for authentication (use environment variable)
+  gitea_timeout: 30          # HTTP client timeout in seconds
+  gitea_rate_limit: 10       # Max requests per second (0 = no limit)
