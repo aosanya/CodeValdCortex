@@ -250,18 +250,16 @@ func (c *GiteaClient) CreateWebhook(repoOwner, repoName string) error {
 }
 ```
 
-## Webhook Processing
+## Webhook Processing (MVP-WI-001)
 
-### Issue Event Handler
+### Issue Event Handler - ArangoDB Persistence Layer
+
+**Core Responsibility**: Receive Gitea webhooks, validate signatures, persist artifacts to ArangoDB
 
 ```go
 type IssueWebhookHandler struct {
-    agentFactory    *AgentFactory        // Creates agents from work item definitions
-    agentRegistry   *AgentRegistry       // Tracks running agents
-    workItemRepo    *WorkItemRepository  // Access to work item definitions
-    db              *arangodb.Database
-    gitea           *GiteaClient
-    secretToken     string
+    db              *arangodb.Database   // ArangoDB client
+    secretToken     string               // Webhook signature validation
 }
 
 func (h *IssueWebhookHandler) HandleIssueEvent(c *gin.Context) {
@@ -279,38 +277,166 @@ func (h *IssueWebhookHandler) HandleIssueEvent(c *gin.Context) {
         return
     }
     
-    // 3. Process event
+    // 3. Persist to ArangoDB (orchestrator will detect via change streams)
     switch payload.Action {
-    case "opened":
-        h.handleIssueOpened(&payload)
-    case "labeled":
-        h.handleIssueLabeled(&payload)
+    case "opened", "milestoned":
+        h.saveIssueToArangoDB(&payload)
     case "closed":
-        h.handleIssueClosed(&payload)
+        h.updateIssueState(&payload, "closed")
     case "edited":
-        h.handleIssueEdited(&payload)
+        h.updateIssueToArangoDB(&payload)
     }
     
-    c.JSON(200, gin.H{"status": "processed"})
+    c.JSON(200, gin.H{"status": "persisted"})
 }
 
-func (h *IssueWebhookHandler) handleIssueMilestoned(payload *gitea.IssuePayload) {
-    // 1. Find repository-workflow mapping
-    repoURL := payload.Repository.HTMLURL
-    mapping, err := h.findRepositoryWorkflowMapping(repoURL)
+func (h *IssueWebhookHandler) saveIssueToArangoDB(payload *gitea.IssuePayload) error {
+    issueDoc := &GiteaIssue{
+        Key:          fmt.Sprintf("gitea-issue-%d", payload.Issue.ID),
+        IssueID:      payload.Issue.ID,
+        IssueNumber:  payload.Issue.Number,
+        Title:        payload.Issue.Title,
+        Body:         payload.Issue.Body,
+        State:        payload.Issue.State,
+        Milestone:    payload.Issue.Milestone.Title,
+        MilestoneID:  payload.Issue.Milestone.ID,
+        RepoURL:      payload.Repository.HTMLURL,
+        RepoOwner:    payload.Repository.Owner.Login,
+        RepoName:     payload.Repository.Name,
+        Labels:       extractLabels(payload.Issue.Labels),
+        Assignees:    extractAssignees(payload.Issue.Assignees),
+        CreatedAt:    payload.Issue.CreatedAt,
+        UpdatedAt:    payload.Issue.UpdatedAt,
+        SyncedAt:     time.Now(),
+    }
+    
+    // Save to ArangoDB - orchestrator will detect via change stream
+    collection := h.db.Collection("work-issues")
+    _, err := collection.CreateDocument(context.Background(), issueDoc)
     if err != nil {
-        log.Info("No workflow mapping for repository", "repo", repoURL)
+        log.Error("Failed to save issue to ArangoDB", "error", err)
+        return err
+    }
+    
+    log.Info("Issue persisted to ArangoDB",
+        "issue_number", issueDoc.IssueNumber,
+        "milestone", issueDoc.Milestone,
+        "repo", issueDoc.RepoURL)
+    
+    return nil
+}
+```
+
+**Key Points**:
+- Webhook handler is a **persistence layer only**
+- No orchestrator interaction
+- No agent creation
+- Just validates and saves to ArangoDB
+- Orchestrator monitors ArangoDB change streams independently
+
+### Orchestrator Monitors Change Streams (MVP-032)
+
+**Orchestrator detects changes in ArangoDB and creates agents**:
+
+```go
+type Orchestrator struct {
+    db              *arangodb.Database
+    agentFactory    *AgentFactory
+    workItemRepo    *WorkItemRepository
+}
+
+func (o *Orchestrator) MonitorGiteaIssues() {
+    // Subscribe to ArangoDB change streams for work-issues collection
+    collection := o.db.Collection("work-issues")
+    stream, err := collection.WatchChanges(context.Background(), &WatchOptions{
+        FullDocument: "updateLookup",
+    })
+    
+    if err != nil {
+        log.Fatal("Failed to watch work-issues collection", "error", err)
+    }
+    
+    log.Info("Orchestrator monitoring work-issues collection")
+    
+    for change := range stream {
+        switch change.OperationType {
+        case "insert", "update":
+            // New issue or milestone changed
+            issueDoc := change.FullDocument.(*GiteaIssue)
+            o.handleIssueChange(issueDoc)
+        }
+    }
+}
+
+func (o *Orchestrator) handleIssueChange(issueDoc *GiteaIssue) {
+    // Skip if no milestone
+    if issueDoc.Milestone == "" {
         return
     }
     
-    // 2. Get milestone name from issue
-    if payload.Issue.Milestone == nil {
-        log.Info("Issue has no milestone", "issue", payload.Issue.Index)
+    // 1. Query: What workflow does this repo map to?
+    workflow, err := o.getWorkflowForRepo(issueDoc.RepoURL)
+    if err != nil {
+        log.Warn("No workflow found for repo", "repo", issueDoc.RepoURL)
         return
     }
-    milestoneName := payload.Issue.Milestone.Title
     
-    // 3. Find workflow column for this milestone
+    // 2. Query: What column does this milestone map to?
+    column, err := o.getColumnForMilestone(workflow.ID, issueDoc.Milestone)
+    if err != nil {
+        log.Warn("No column mapping for milestone", 
+            "milestone", issueDoc.Milestone,
+            "workflow", workflow.Name)
+        return
+    }
+    
+    // 3. Check WIP limit
+    activeAgents := o.countActiveAgentsInColumn(column.ID)
+    if activeAgents >= column.MaxConcurrent {
+        log.Info("WIP limit reached, queueing issue",
+            "column", column.Name,
+            "limit", column.MaxConcurrent)
+        o.queueIssue(issueDoc, column)
+        return
+    }
+    
+    // 4. Get work item definition (agent blueprint) for this column
+    workItemDef, err := o.workItemRepo.GetByID(column.WorkItemDefID)
+    if err != nil {
+        log.Error("Failed to get work item definition", "error", err)
+        return
+    }
+    
+    // 5. Create agent from work item definition
+    agent, err := o.agentFactory.CreateFromWorkItemDefinition(AgentCreateRequest{
+        WorkItemDefinition: workItemDef,
+        IssueID:            issueDoc.Key,
+        IssueNumber:        issueDoc.IssueNumber,
+        Column:             column,
+        Workflow:           workflow,
+    })
+    
+    if err != nil {
+        log.Error("Failed to create agent", "error", err)
+        return
+    }
+    
+    log.Info("Agent spawned from ArangoDB change stream",
+        "agent_id", agent.ID,
+        "type", agent.Type,
+        "issue", issueDoc.IssueNumber,
+        "milestone", issueDoc.Milestone,
+        "column", column.Name)
+    
+    // Agent will query ArangoDB for issue details and start work
+    agent.Start()
+}
+```
+
+**Architecture Flow**:
+```
+Gitea Webhook → MVP-WI-001 → ArangoDB → Change Stream → MVP-032 Orchestrator → Creates Agent
+```
     columnID, exists := mapping.MilestoneColumnMapping[milestoneName]
     if !exists {
         log.Info("Milestone not mapped to workflow column", "milestone", milestoneName)

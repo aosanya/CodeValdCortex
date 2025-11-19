@@ -3,100 +3,97 @@
 ## Overview
 **Priority**: P0  
 **Effort**: Medium  
-**Skills Required**: Go, Webhooks, REST API, Security  
-**Dependencies**: MVP-032 (Work Items Assignment & Routing)  
+**Skills Required**: Go, Webhooks, ArangoDB, REST API, Security  
+**Dependencies**: None (Persistence layer only - Orchestrator in MVP-032 consumes persisted data)  
 **Status**: In Progress
 
 ## Description
-Implement webhook handlers for Gitea issue milestone events that enable **automatic agent instantiation** based on Kanban workflow columns. When issues are assigned to milestones (representing Kanban columns), agents are automatically created from the work item definitions linked to those columns.
+Implement webhook handlers for Gitea events (issues, pull requests, milestones) that act as a **persistence layer** to save Gitea artifacts into ArangoDB. The Orchestrator (MVP-032) will monitor ArangoDB change streams to detect new/updated issues and create agents accordingly.
 
-### Kanban-Based Conceptual Model
+### ArangoDB-Centric Architecture
 
-**Workflow = Kanban Board**:
-- **Workflow**: A published agency contains workflows that define Kanban boards
-- **Columns**: Each workflow has columns (e.g., "Requirements", "Design", "Implementation")
-- **Work Item Definitions**: Each column links to a work item definition (agent blueprint)
-- **Gitea Milestones**: Map to workflow columns (e.g., Milestone "Requirements Gathering" → Column "requirements")
+**Separation of Concerns**:
+- **MVP-WI-001 (This Task)**: Receive webhooks → Validate signatures → Persist to ArangoDB
+- **MVP-032 (Orchestrator)**: Monitor ArangoDB change streams → Create agents from work item definitions
 
-**Integration Flow**:
+**Data Flow**:
 ```
-Published Agency Workflow (Kanban Board)
-  ├─ Column: Requirements → WorkItemDef: Requirements Agent
-  ├─ Column: Design       → WorkItemDef: Design Agent
-  ├─ Column: Implementation → WorkItemDef: Coding Agent
-  └─ Column: Review       → WorkItemDef: Review Agent
-
-Gitea Repository
-  ├─ Milestone: "Requirements Gathering"
-  ├─ Milestone: "System Design"
-  ├─ Milestone: "Implementation"
-  └─ Milestone: "Code Review"
-
-Issue Flow:
-1. Issue created: "Gather auth requirements"
-2. Assigned to Milestone: "Requirements Gathering"
-3. Webhook fires: issues.milestoned
-4. CodeValdCortex:
-   - Finds repository→workflow mapping
-   - Maps milestone to workflow column
-   - Gets work item definition for that column
-   - Creates Requirements Agent instance
-   - Agent starts work on the issue
-5. Agent completes, moves issue to next milestone
-6. Process repeats with next agent type
+Gitea Instance
+  └─ Webhooks (issues, PRs, milestones)
+      ↓
+MVP-WI-001: Webhook Handler
+  ├─ Validate X-Gitea-Signature (HMAC SHA-256)
+  ├─ Parse JSON payload
+  ├─ Transform to ArangoDB document
+  └─ Save to work-issues / work-prs collections
+      ↓
+ArangoDB Collections:
+  ├─ work-issues (issue_number, title, body, milestone, state, repo_url, etc.)
+  ├─ work-prs (pr_number, title, head_branch, base_branch, state, etc.)
+  └─ work-milestones (milestone_id, title, description, due_date, etc.)
+      ↓
+MVP-032: Orchestrator (Change Stream Monitoring)
+  ├─ Watches work-issues collection for inserts/updates
+  ├─ Detects milestoned issues
+  ├─ Queries workflow/column mappings
+  ├─ Checks WIP limits
+  └─ Creates agents from work item definitions
 ```
 
-**Example**:
-1. Agency publishes workflow with 4 columns (Requirements → Design → Code → Review)
-2. Each column has an agent blueprint (work item definition)
-3. Repository linked to workflow, milestones created matching columns
-4. Issue: "Build auth system" assigned to "Requirements" milestone
-5. Requirements Agent auto-created, gathers requirements, posts to issue
-6. Agent moves issue to "Design" milestone when done
-7. Design Agent auto-created, creates architecture, posts diagrams
-8. Cycle continues through Implementation and Review
+**Why ArangoDB-Centric?**:
+- ✅ **Decoupling**: Webhook handler doesn't need orchestrator, workflows, or agent factory
+- ✅ **Resilience**: Webhooks persist data even if orchestrator is down
+- ✅ **Auditability**: Complete history of all Gitea events in database
+- ✅ **Queryability**: Agents query ArangoDB for issue details, not Gitea API
+- ✅ **Change Streams**: Orchestrator reactively processes new issues via ArangoDB native feature
 
 ## Objectives
-- Enable **Kanban-based workflow automation** where issues flow through workflow stages
-- Map Gitea milestones to workflow columns for visual Kanban board management
-- Automatically create agents when issues enter workflow columns (WIP-limited)
-- Link repository → workflow → work item definitions for seamless integration
-- Support agent handoff as issues progress through workflow stages
-- Provide secure webhook signature validation to prevent unauthorized access
-- Handle milestone events (assigned, changed, cleared) to manage agent lifecycle
+- Implement **ArangoDB persistence layer** for Gitea webhook events
+- Validate webhook signatures to ensure authenticity (X-Gitea-Signature)
+- Parse and transform Gitea payloads into ArangoDB documents
+- Store issues, PRs, milestones, and comments in respective collections
+- Provide data foundation for Orchestrator to monitor and create agents
+- Handle webhook delivery failures with proper HTTP status codes
 
 ## Requirements
 
 ### Functional Requirements
-1. **Webhook Endpoint**: POST /api/v1/webhooks/gitea/issues
+1. **Webhook Endpoints**:
+   - POST /api/v1/webhooks/gitea/issues - Issue events
+   - POST /api/v1/webhooks/gitea/pull-requests - PR events
 2. **Supported Events**:
-   - `issues.milestoned` - Issue assigned to milestone (enters Kanban column)
-   - `issues.demilestoned` - Issue removed from milestone (exits column)
-   - `issues.closed` - Stop associated agent
-3. **Repository-Workflow Mapping**:
-   - Query repository → workflow mapping by repository URL
-   - Validate workflow exists and is enabled
-   - Retrieve milestone → column mappings
-4. **Milestone-Column Mapping**:
-   - Extract milestone name from webhook payload
-   - Map to workflow column using stored configuration
-   - Get work item definition ID from column config
-5. **WIP Limit Enforcement**:
-   - Count active agents in target column
-   - Check against column's `max_concurrent` setting
-   - Queue issue if WIP limit exceeded
-6. **Agent Instantiation**:
-   - Create agent instance from column's work item definition
-   - Inject issue context (title, description, milestone, repository)
-   - Start agent execution asynchronously
-   - Link agent to issue and workflow column
-7. **Agent Lifecycle Management**:
-   - Track agent status per column
-   - Stop agents when issues leave columns or close
-   - Handle agent failures and retries
-   - Move issues to next column when agent completes
-8. **Signature Validation**: HMAC SHA-256 verification using X-Gitea-Signature header
-9. **Error Handling**: Post comments to issues on errors, queue for retry
+   - **Issues**: `opened`, `milestoned`, `demilestoned`, `closed`, `edited`, `labeled`, `assigned`
+   - **Pull Requests**: `opened`, `synchronized`, `closed`, `merged`, `edited`
+   - **Comments**: `issue_comment.created`, `pull_request_comment.created`
+3. **ArangoDB Persistence**:
+   - Save issue data to `work-issues` collection
+   - Save PR data to `work-prs` collection
+   - Save milestone data to `work-milestones` collection
+   - Update existing documents on webhook updates (upsert logic)
+4. **Document Schema**:
+   ```json
+   // work-issues collection
+   {
+     "_key": "gitea-issue-<issue_id>",
+     "issue_id": 123,
+     "issue_number": 45,
+     "title": "Implement authentication",
+     "body": "Need OAuth2 support...",
+     "state": "open",
+     "milestone": "Requirements Gathering",
+     "milestone_id": 5,
+     "repo_url": "https://gitea.example.com/org/repo",
+     "repo_owner": "org",
+     "repo_name": "repo",
+     "labels": ["feature", "security"],
+     "assignees": ["user1", "user2"],
+     "created_at": "2025-11-19T10:00:00Z",
+     "updated_at": "2025-11-19T11:30:00Z",
+     "synced_at": "2025-11-19T11:30:05Z"
+   }
+   ```
+5. **Signature Validation**: HMAC SHA-256 verification using X-Gitea-Signature header
+6. **Error Handling**: Return appropriate HTTP status codes (401, 400, 500)
 
 ### Non-Functional Requirements
 1. **Security**: 

@@ -12,25 +12,51 @@ CodeValdCortex implements an **orchestrator-driven agent system** where a centra
 
 ### Core Principles
 
-1. **Orchestrator as Coordinator**: Central orchestrator monitors workflows and spawns/terminates agents
-2. **Agents as Autonomous Workers**: Agents independently pick up, execute, and complete work
-3. **Gitea Issues as Work Units**: Issues represent concrete work items flowing through Kanban columns
-4. **Workflow-Driven Progression**: Agents move issues forward (or backward) through workflow stages
+1. **ArangoDB as Central State Store**: All Gitea artifacts (issues, PRs, milestones) persisted in ArangoDB
+2. **Orchestrator Monitors Change Streams**: Orchestrator watches ArangoDB for new/updated issues
+3. **Webhook Handlers as Persistence Layer**: MVP-WI-001 validates and saves Gitea webhooks to ArangoDB
+4. **Agents Query ArangoDB**: Agents read issue details from ArangoDB, not directly from Gitea
+5. **Workflow-Driven Progression**: Agents move issues forward (or backward) through workflow stages
 
 ---
 
 ## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Orchestrator                              │
-│  - Monitors workflow state (Kanban columns)                      │
-│  - Enforces WIP limits per column                                │
-│  - Spawns agents when issues enter columns                       │
-│  - Terminates agents when work is complete                       │
-│  - Manages agent pool and resource allocation                    │
-└──────────────────────┬──────────────────────────────────────────┘
-                       │
+                    ┌─────────────────────────────┐
+                    │      Gitea Instance         │
+                    │  Issues, PRs, Milestones    │
+                    └──────────┬──────────────────┘
+                               │ Webhooks
+                               ▼
+                    ┌─────────────────────────────┐
+                    │   MVP-WI-001: Webhook       │
+                    │   Handler (Persistence)     │
+                    │  - Validate signatures      │
+                    │  - Parse payloads           │
+                    │  - Save to ArangoDB         │
+                    └──────────┬──────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                          ArangoDB                                 │
+│  ┌──────────────────┐  ┌──────────────┐  ┌────────────────────┐ │
+│  │  work-issues     │  │  workflows   │  │  work_item_defs    │ │
+│  │  - issue_number  │  │  - columns   │  │  - agent blueprints│ │
+│  │  - milestone     │  │  - repo map  │  │  - tools           │ │
+│  │  - state         │  │  - WIP limits│  │  - instructions    │ │
+│  └──────────────────┘  └──────────────┘  └────────────────────┘ │
+└──────────────────┬───────────────────────────────────────────────┘
+                   │ Change Streams
+                   ▼
+        ┌─────────────────────────────────────────┐
+        │         Orchestrator (MVP-032)          │
+        │  - Monitors ArangoDB change streams     │
+        │  - Detects milestoned issues            │
+        │  - Queries workflow/column mappings     │
+        │  - Enforces WIP limits                  │
+        │  - Spawns/terminates agents             │
+        └──────────────┬──────────────────────────┘
                        │ spawns/terminates
                        │
           ┌────────────┼────────────┬────────────────┐
@@ -40,75 +66,78 @@ CodeValdCortex implements an **orchestrator-driven agent system** where a centra
     │ (Type A)│  │ (Type B)│  │ (Type A)│     │ (Type C)│
     └────┬────┘  └────┬────┘  └────┬────┘     └────┬────┘
          │            │            │                │
-         │ pick up    │ pick up    │ pick up        │ pick up
-         │ issues     │ issues     │ issues         │ issues
+         │ Query      │ Query      │ Query          │ Query
+         │ ArangoDB   │ ArangoDB   │ ArangoDB       │ ArangoDB
+         │ for issue  │ for issue  │ for issue      │ for issue
          │            │            │                │
          └────────────┴────────────┴────────────────┘
                        │
                        ▼
-         ┌─────────────────────────────────┐
-         │     Gitea Repository            │
-         │  ┌──────────────────────────┐   │
-         │  │  Kanban Workflow         │   │
-         │  │                          │   │
-         │  │  [Backlog]               │   │
-         │  │     Issue #1             │   │
-         │  │     Issue #5             │   │
-         │  │                          │   │
-         │  │  [In Progress] ← Agent 1 │   │
-         │  │     Issue #2             │   │
-         │  │                          │   │
-         │  │  [Review] ← Agent 2      │   │
-         │  │     Issue #3             │   │
-         │  │                          │   │
-         │  │  [Done]                  │   │
-         │  │     Issue #4             │   │
-         │  └──────────────────────────┘   │
-         └─────────────────────────────────┘
+         Agents execute work, update issue state in ArangoDB,
+         move issues to next milestone via Gitea API
 ```
 
 ---
 
 ## Orchestrator Responsibilities
 
-### 1. Workflow Monitoring
+### 1. ArangoDB Change Stream Monitoring
+
+The orchestrator monitors ArangoDB change streams for the `gitea_issues` collection to detect when Gitea webhooks have persisted new or updated issues.
 
 ```go
 type Orchestrator struct {
-    workflowMonitor  *WorkflowMonitor
+    dbClient         *arangodb.Client
     agentPool        *AgentPool
     wipLimitEnforcer *WIPLimitEnforcer
-    eventBus         *EventBus
+    changeStreams    *ChangeStreamMonitor
 }
 
-func (o *Orchestrator) MonitorWorkflows() {
-    for {
-        // Watch for workflow state changes
-        events := o.workflowMonitor.PollEvents()
-        
-        for _, event := range events {
-            switch event.Type {
-            case "issue_entered_column":
-                o.handleIssueEnteredColumn(event)
-            case "issue_left_column":
-                o.handleIssueLeftColumn(event)
-            case "agent_completed_work":
-                o.handleAgentCompletion(event)
-            }
+func (o *Orchestrator) MonitorGiteaIssues() {
+    // Subscribe to ArangoDB change streams for work-issues collection
+    stream, err := o.dbClient.Collection("work-issues").WatchChanges(ctx, &WatchOptions{
+        FullDocument: "updateLookup",
+    })
+    
+    if err != nil {
+        log.Fatal("Failed to watch work-issues collection", "error", err)
+    }
+    
+    for change := range stream {
+        switch change.OperationType {
+        case "insert", "update":
+            // New issue or milestone changed
+            o.handleIssueChange(change.FullDocument)
         }
-        
-        time.Sleep(5 * time.Second)
     }
 }
 ```
 
 ### 2. Agent Lifecycle Management
 
-**Agent Spawning**:
+**Agent Spawning** (triggered by ArangoDB change stream):
 ```go
-func (o *Orchestrator) handleIssueEnteredColumn(event WorkflowEvent) {
-    column := event.Column
-    issue := event.Issue
+func (o *Orchestrator) handleIssueChange(issueDoc *GiteaIssue) {
+    // Skip if no milestone
+    if issueDoc.Milestone == "" {
+        return
+    }
+    
+    // Query: What workflow does this repo map to?
+    workflow, err := o.getWorkflowForRepo(issueDoc.RepoURL)
+    if err != nil {
+        log.Warn("No workflow found for repo", "repo", issueDoc.RepoURL)
+        return
+    }
+    
+    // Query: What column does this milestone map to?
+    column, err := o.getColumnForMilestone(workflow.ID, issueDoc.Milestone)
+    if err != nil {
+        log.Warn("No column mapping for milestone", 
+            "milestone", issueDoc.Milestone,
+            "workflow", workflow.Name)
+        return
+    }
     
     // Check WIP limit
     activeAgents := o.agentPool.CountActiveInColumn(column.ID)
@@ -116,26 +145,32 @@ func (o *Orchestrator) handleIssueEnteredColumn(event WorkflowEvent) {
         log.Info("WIP limit reached, queueing issue", 
             "column", column.Name, 
             "limit", column.WIPLimit)
-        o.queueIssue(issue, column)
+        o.queueIssue(issueDoc, column)
         return
     }
     
     // Get work item definition for this column
-    workItemDef := o.getWorkItemDefinition(column.WorkItemDefID)
+    workItemDef, err := o.getWorkItemDefinition(column.WorkItemDefID)
+    if err != nil {
+        log.Error("Failed to get work item definition", "error", err)
+        return
+    }
     
     // Spawn agent
     agent := o.agentPool.SpawnAgent(AgentSpawnRequest{
         Type:               workItemDef.Type,
         WorkItemDefinition: workItemDef,
-        AssignedIssue:      issue,
+        IssueID:            issueDoc.ID,
+        IssueNumber:        issueDoc.IssueNumber,
         Column:             column,
-        Workflow:           event.Workflow,
+        Workflow:           workflow,
     })
     
-    log.Info("Agent spawned", 
+    log.Info("Agent spawned from ArangoDB change stream", 
         "agent_id", agent.ID, 
         "type", agent.Type, 
-        "issue", issue.Number)
+        "issue", issueDoc.IssueNumber,
+        "milestone", issueDoc.Milestone)
 }
 ```
 
