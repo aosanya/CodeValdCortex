@@ -20,6 +20,11 @@ Follow the **mandatory task startup process** for project tasks:
      - **Large domains** (5+ tasks, >500 lines): Folder like `platform-infrastructure/` with README.md + individual task files
    - **Locate your task**: Search for `<!-- MVP-XXX -->` annotation
    - **Domain files are narrative documents**: Easy to read, straightforward, consumable
+   - **🔄 REFACTOR AS YOU GO**: If you find individual `MVP-XXX.md` files instead of domain-based documentation:
+     - **Stop and refactor first**: Consolidate related tasks into domain file/folder before starting work
+     - Group tasks by problem domain (e.g., all webhook tasks → `work-items-integration.md`)
+     - Follow the structure guidelines below for creating domain documentation
+     - This keeps documentation organized and prevents fragmentation
    - **If domain file doesn't exist:**
      - **Small domain** (<500 lines): Create single file `{domain-name}.md`
      - **Large domain** (>500 lines): Create folder structure:

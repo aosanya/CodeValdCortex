@@ -12,6 +12,10 @@ Follow the **mandatory completion process** for MVP tasks:
    - **Locate your task** in `documents/3-SofwareDevelopment/mvp-details/`:
      - **Small domains** (2-4 tasks, <500 lines): Single file like `work-items-integration.md`
      - **Large domains** (5+ tasks, >500 lines): Folder with `README.md` + task files
+   - **🔄 REFACTOR IF NEEDED**: If you encounter individual `MVP-XXX.md` files instead of domain documentation:
+     - **Consolidate before completing**: Group related tasks into domain file/folder
+     - This prevents documentation fragmentation and improves discoverability
+     - Follow the folder structure guidelines below if domain is large
    - **Find task annotation**: Look for `<!-- MVP-XXX -->` markers
    - **Update task section** with:
      - Implementation decisions made
