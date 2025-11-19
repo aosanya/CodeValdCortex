@@ -1,6 +1,51 @@
 # Gitea Integration
 
-This document describes how Gitea (lightweight Git server) integrates with the work item system through webhooks, API operations, and merge automation.
+This document describes how Gitea (lightweight Git server) integrates with the work item system to enable **automatic agent instantiation** from published agency work item definitions.
+
+## Conceptual Model
+
+### Work Item Definition vs Agent Instance
+
+**Key Distinction**:
+- **Work Item Definition**: A blueprint/template defined in an agency specification that describes a type of work (e.g., "Requirements Gathering", "Code Review", "Security Audit")
+- **Agent Instance**: An autonomous agent created from a work item definition to execute specific work triggered by a Gitea issue
+
+### Lifecycle Flow
+
+```
+1. Agency Design Phase
+   └─> Define Work Item Definitions (blueprints)
+       Example: "Conduct stakeholder requirements gathering session"
+       - Execute structured interviews and workshops
+       - Collect functional and non-functional requirements
+       - Document findings in standardized format
+
+2. Agency Published
+   └─> Work Item Definitions stored in ArangoDB
+       - Available as templates/blueprints
+       - Ready for agent instantiation
+
+3. Gitea Issue Created
+   └─> "Gather requirements for authentication module"
+       - Label: "requirements-gathering"
+       - Webhook fires to CodeValdCortex
+
+4. Agent Instantiation (THIS IS THE KEY STEP)
+   └─> Match issue → Work Item Definition
+   └─> Create Agent Instance from definition
+       - Agent Type: Requirements Gathering Agent
+       - Agent Task: Authentication module requirements
+       - Agent Config: Inherited from work item definition
+
+5. Agent Execution
+   └─> Agent autonomously executes work
+       - Conducts interviews/workshops
+       - Collects requirements
+       - Posts progress updates to Gitea issue
+       - Marks issue complete when done
+```
+
+**Critical Understanding**: The Gitea webhook does NOT create a "work item" (task ticket). It creates an **AGENT** based on a work item definition. The agent is the autonomous entity that performs the work.
 
 ## Gitea Overview
 
@@ -11,6 +56,158 @@ This document describes how Gitea (lightweight Git server) integrates with the w
 - **API**: Full REST API compatible with GitHub/GitLab
 - **Webhooks**: Extensive webhook support
 - **UI**: Clean web interface for code review
+
+## Kanban-Based Work Management
+
+### Workflow as Kanban Board
+
+**Conceptual Model**:
+- **Workflow** (in published agency) = **Kanban Board** with columns
+- **Gitea Issues** = **Cards** placed in columns
+- **Agents** = **Workers** that pick up cards from specific columns
+- **Work Item Definitions** = **Agent blueprints** assigned to columns
+
+### Kanban Workflow Structure
+
+```yaml
+# Agency Workflow Definition (stored in ArangoDB)
+workflow:
+  id: "software-dev-workflow-001"
+  name: "Software Development Kanban"
+  agency_id: "software-dev-agency-001"
+  
+  columns:
+    - id: "requirements"
+      name: "Requirements Gathering"
+      position: 1
+      work_item_definition_id: "wid-requirements-001"  # Links to agent blueprint
+      agent_config:
+        auto_assign: true          # Auto-create agent when issue enters column
+        max_concurrent: 3          # Max 3 agents working this column simultaneously
+        
+    - id: "design"
+      name: "System Design"
+      position: 2
+      work_item_definition_id: "wid-design-001"
+      agent_config:
+        auto_assign: true
+        max_concurrent: 2
+        
+    - id: "implementation"
+      name: "Implementation"
+      position: 3
+      work_item_definition_id: "wid-coding-001"
+      agent_config:
+        auto_assign: true
+        max_concurrent: 5
+        
+    - id: "review"
+      name: "Code Review"
+      position: 4
+      work_item_definition_id: "wid-review-001"
+      agent_config:
+        auto_assign: true
+        max_concurrent: 2
+        
+    - id: "done"
+      name: "Done"
+      position: 5
+      work_item_definition_id: null  # No agent needed for done column
+      agent_config:
+        auto_assign: false
+```
+
+### Gitea Milestones as Kanban Columns
+
+**Mapping Strategy**: Use Gitea **Milestones** to represent Kanban columns
+
+```
+Gitea Repository Setup:
+├─ Milestone: "Requirements Gathering"  → Maps to workflow column "requirements"
+├─ Milestone: "System Design"           → Maps to workflow column "design"
+├─ Milestone: "Implementation"          → Maps to workflow column "implementation"
+├─ Milestone: "Code Review"             → Maps to workflow column "review"
+└─ Milestone: "Done"                    → Maps to workflow column "done"
+```
+
+**Why Milestones?**
+- ✅ Built-in Gitea feature (no custom labels needed)
+- ✅ Visual board in Gitea UI (Projects view)
+- ✅ Issues can only be in ONE milestone (enforces single column)
+- ✅ Webhook events fire when milestone changes
+- ✅ Easy to track progress and WIP limits
+
+### Integration Flow
+
+```
+1. Agency Published
+   └─> Workflow defined with Kanban columns
+       └─> Each column links to Work Item Definition (agent blueprint)
+
+2. Gitea Repository Configured
+   └─> Milestones created matching workflow columns
+   └─> Repository webhook configured: http://codevaldcortex:8080/api/v1/webhooks/gitea
+
+3. Issue Created & Assigned to Milestone
+   └─> Issue: "Gather auth requirements"
+   └─> Milestone: "Requirements Gathering"
+   └─> Webhook fires: issues.milestoned
+
+4. Webhook Processing
+   └─> Extract: Repository, Issue, Milestone
+   └─> Find workflow: BY repository_url
+   └─> Find column: WHERE milestone_name = "Requirements Gathering"
+   └─> Get work_item_definition_id from column config
+
+5. Agent Creation (if auto_assign = true)
+   └─> Check: Current agents in column < max_concurrent?
+   └─> Create agent from work_item_definition
+   └─> Assign agent to issue
+   └─> Agent starts work
+
+6. Agent Execution
+   └─> Agent performs work (requirements gathering)
+   └─> Posts updates to issue comments
+   └─> When done: Moves issue to next milestone (Design)
+   └─> Webhook fires again → Next agent picks it up
+
+7. Issue Moves Through Workflow
+   Requirements → Design → Implementation → Review → Done
+   (Each stage triggers a new agent specialized for that work)
+```
+
+### Repository-Workflow Mapping
+
+**Configuration in ArangoDB**:
+```json
+{
+  "_key": "repo-workflow-map-001",
+  "repository_url": "https://gitea.example.com/myorg/myproject",
+  "workflow_id": "software-dev-workflow-001",
+  "agency_id": "software-dev-agency-001",
+  "milestone_column_mapping": {
+    "Requirements Gathering": "requirements",
+    "System Design": "design",
+    "Implementation": "implementation",
+    "Code Review": "review",
+    "Done": "done"
+  },
+  "enabled": true,
+  "created_at": "2025-11-19T10:00:00Z"
+}
+```
+
+**Setup UI in Agency Designer**:
+```
+Agency Designer → Workflows Tab
+  ├─ Create Kanban Workflow
+  ├─ Define Columns (drag & drop)
+  ├─ Assign Work Item Definition to each column
+  ├─ Configure agent settings (auto_assign, max_concurrent)
+  └─ Link to Gitea Repository
+      └─ Auto-create milestones in Gitea
+      └─ Configure webhook
+```
 
 ## Webhook Configuration
 
@@ -59,9 +256,12 @@ func (c *GiteaClient) CreateWebhook(repoOwner, repoName string) error {
 
 ```go
 type IssueWebhookHandler struct {
-    executor    *WorkItemExecutor
-    db          *arangodb.Database
-    secretToken string
+    agentFactory    *AgentFactory        // Creates agents from work item definitions
+    agentRegistry   *AgentRegistry       // Tracks running agents
+    workItemRepo    *WorkItemRepository  // Access to work item definitions
+    db              *arangodb.Database
+    gitea           *GiteaClient
+    secretToken     string
 }
 
 func (h *IssueWebhookHandler) HandleIssueEvent(c *gin.Context) {
@@ -94,48 +294,221 @@ func (h *IssueWebhookHandler) HandleIssueEvent(c *gin.Context) {
     c.JSON(200, gin.H{"status": "processed"})
 }
 
-func (h *IssueWebhookHandler) handleIssueOpened(payload *gitea.IssuePayload) {
-    // Check if issue has work-item label
-    if !hasLabel(payload.Issue, "work-item") {
+func (h *IssueWebhookHandler) handleIssueMilestoned(payload *gitea.IssuePayload) {
+    // 1. Find repository-workflow mapping
+    repoURL := payload.Repository.HTMLURL
+    mapping, err := h.findRepositoryWorkflowMapping(repoURL)
+    if err != nil {
+        log.Info("No workflow mapping for repository", "repo", repoURL)
         return
     }
     
-    // Trigger work item execution in goroutine
-    go func() {
-        ctx := context.Background()
-        if err := h.executor.Execute(ctx, payload.Issue); err != nil {
-            log.Printf("Work item execution failed: %v", err)
-            
-            // Add error comment to issue
-            h.executor.gitea.CreateIssueComment(
-                payload.Repository.Owner.UserName,
-                payload.Repository.Name,
-                payload.Issue.Index,
-                fmt.Sprintf("❌ Work item execution failed: %v", err),
-            )
-        }
-    }()
+    // 2. Get milestone name from issue
+    if payload.Issue.Milestone == nil {
+        log.Info("Issue has no milestone", "issue", payload.Issue.Index)
+        return
+    }
+    milestoneName := payload.Issue.Milestone.Title
+    
+    // 3. Find workflow column for this milestone
+    columnID, exists := mapping.MilestoneColumnMapping[milestoneName]
+    if !exists {
+        log.Info("Milestone not mapped to workflow column", "milestone", milestoneName)
+        return
+    }
+    
+    // 4. Get workflow and column configuration
+    workflow, err := h.getWorkflow(mapping.WorkflowID)
+    if err != nil {
+        log.Error("Workflow not found", "workflow_id", mapping.WorkflowID, "error", err)
+        return
+    }
+    
+    column := workflow.GetColumn(columnID)
+    if column == nil {
+        log.Error("Column not found in workflow", "column_id", columnID)
+        return
+    }
+    
+    // 5. Check if auto-assign is enabled for this column
+    if !column.AgentConfig.AutoAssign {
+        log.Info("Auto-assign disabled for column", "column", column.Name)
+        return
+    }
+    
+    // 6. Check WIP (work-in-progress) limit
+    currentAgents, err := h.countActiveAgentsInColumn(workflow.ID, columnID)
+    if err != nil {
+        log.Error("Failed to count active agents", "error", err)
+        return
+    }
+    
+    if currentAgents >= column.AgentConfig.MaxConcurrent {
+        log.Warn("WIP limit reached", "column", column.Name, "current", currentAgents, "max", column.AgentConfig.MaxConcurrent)
+        h.gitea.CreateIssueComment(
+            payload.Repository.Owner.UserName,
+            payload.Repository.Name,
+            payload.Issue.Index,
+            fmt.Sprintf("⏸️ WIP limit reached for '%s' (%d/%d). Issue queued.", column.Name, currentAgents, column.AgentConfig.MaxConcurrent),
+        )
+        // Add to queue for later processing
+        h.queueIssue(workflow.ID, columnID, payload.Issue)
+        return
+    }
+    
+    // 7. Get work item definition for this column
+    if column.WorkItemDefinitionID == "" {
+        log.Info("No work item definition for column", "column", column.Name)
+        return
+    }
+    
+    workItemDef, err := h.getWorkItemDefinition(column.WorkItemDefinitionID)
+    if err != nil {
+        log.Error("Work item definition not found", "id", column.WorkItemDefinitionID, "error", err)
+        return
+    }
+    
+    // 8. Create agent instance from work item definition
+    go h.createAndStartAgent(payload, workflow, column, workItemDef)
+}
+
+func (h *IssueWebhookHandler) createAndStartAgent(
+    payload *gitea.IssuePayload,
+    workflow *Workflow,
+    column *WorkflowColumn,
+    workItemDef *WorkItemDefinition,
+) {
+    ctx := context.Background()
+    
+    agent, err := h.agentFactory.CreateFromWorkItemDefinition(ctx, &AgentCreationRequest{
+        WorkflowID:         workflow.ID,
+        ColumnID:           column.ID,
+        WorkItemDefinition: workItemDef,
+        AgencyID:           workflow.AgencyID,
+        TriggerSource:      "gitea_kanban",
+        RepositoryURL:      payload.Repository.HTMLURL,
+        IssueID:            payload.Issue.Index,
+        IssueTitle:         payload.Issue.Title,
+        IssueBody:          payload.Issue.Body,
+        IssueURL:           payload.Issue.HTMLURL,
+        Milestone:          payload.Issue.Milestone.Title,
+    })
+    
+    if err != nil {
+        log.Error("Agent creation failed", "error", err)
+        h.gitea.CreateIssueComment(
+            payload.Repository.Owner.UserName,
+            payload.Repository.Name,
+            payload.Issue.Index,
+            fmt.Sprintf("❌ Failed to create agent: %v", err),
+        )
+        return
+    }
+    
+    // Start agent execution
+    if err := agent.Start(ctx); err != nil {
+        log.Error("Agent start failed", "agent_id", agent.ID, "error", err)
+        h.gitea.CreateIssueComment(
+            payload.Repository.Owner.UserName,
+            payload.Repository.Name,
+            payload.Issue.Index,
+            fmt.Sprintf("❌ Agent failed to start: %v", err),
+        )
+        return
+    }
+    
+    // Link agent to issue
+    h.linkAgentToIssue(agent.ID, payload.Issue.Index, payload.Repository.HTMLURL, workflow.ID, column.ID)
+    
+    // Post success comment
+    h.gitea.CreateIssueComment(
+        payload.Repository.Owner.UserName,
+        payload.Repository.Name,
+        payload.Issue.Index,
+        fmt.Sprintf("🤖 **Agent Assigned**\n\n"+
+            "- **Stage**: %s\n"+
+            "- **Agent**: %s\n"+
+            "- **Type**: %s\n"+
+            "- **ID**: `%s`\n\n"+
+            "The agent will now work on this issue. Updates will be posted here.",
+            column.Name, workItemDef.Name, workItemDef.Type, agent.ID),
+    )
+}
+
+// Find repository-workflow mapping
+func (h *IssueWebhookHandler) findRepositoryWorkflowMapping(repoURL string) (*RepositoryWorkflowMapping, error) {
+    query := `
+        FOR mapping IN repository_workflow_mappings
+            FILTER mapping.repository_url == @repoURL
+            AND mapping.enabled == true
+            LIMIT 1
+            RETURN mapping
+    `
+    
+    cursor, err := h.db.Query(context.Background(), query, map[string]interface{}{
+        "repoURL": repoURL,
+    })
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close()
+    
+    var mapping RepositoryWorkflowMapping
+    if !cursor.HasMore() {
+        return nil, fmt.Errorf("no workflow mapping for repository: %s", repoURL)
+    }
+    
+    cursor.ReadDocument(context.Background(), &mapping)
+    return &mapping, nil
 }
 
 func (h *IssueWebhookHandler) handleIssueLabeled(payload *gitea.IssuePayload) {
-    // If work-item label was just added, trigger execution
-    if payload.Label.Name == "work-item" {
-        go h.executor.Execute(context.Background(), payload.Issue)
+    // Extract work item type from the newly added label
+    workItemType := extractWorkItemType([]gitea.Label{*payload.Label})
+    if workItemType == "" {
+        return // Not a work item type label
     }
+    
+    // Create agent from work item definition (same as handleIssueOpened)
+    h.handleIssueOpened(payload)
 }
 
 func (h *IssueWebhookHandler) handleIssueClosed(payload *gitea.IssuePayload) {
-    // Update work item status in ArangoDB
+    // Find agent instance linked to this issue
     query := `
-        FOR wi IN work_items
-            FILTER wi.gitea_issue_id == @issueID
-            UPDATE wi WITH {status: "completed", completed_at: @now} IN work_items
+        FOR agent IN agents
+            FILTER agent.trigger_source == "gitea" 
+            AND agent.gitea_issue_id == @issueID
+            RETURN agent
     `
     
-    h.db.Query(context.Background(), query, map[string]interface{}{
+    cursor, err := h.db.Query(context.Background(), query, map[string]interface{}{
         "issueID": payload.Issue.Index,
-        "now":     time.Now(),
     })
+    if err != nil {
+        log.Error("Failed to find agent for issue", "issue", payload.Issue.Index, "error", err)
+        return
+    }
+    defer cursor.Close()
+    
+    var agent Agent
+    if cursor.ReadDocument(context.Background(), &agent) {
+        // Stop the agent gracefully
+        if err := h.agentRegistry.StopAgent(context.Background(), agent.ID); err != nil {
+            log.Error("Failed to stop agent", "agent_id", agent.ID, "error", err)
+        }
+        
+        // Update agent status to completed
+        h.db.Collection("agents").UpdateDocument(
+            context.Background(),
+            agent.ID,
+            map[string]interface{}{
+                "status":       "completed",
+                "completed_at": time.Now(),
+                "exit_reason":  "gitea_issue_closed",
+            },
+        )
+    }
 }
 ```
 

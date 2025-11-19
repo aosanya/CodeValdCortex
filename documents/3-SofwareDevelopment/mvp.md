@@ -62,26 +62,26 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P0: Work Items System (FOUNDATIONAL)
+## P0: Work Items & Workflows System (FOUNDATIONAL)
 
-*Complete work item lifecycle with Gitea integration*
+*Kanban-based workflow automation with agent instantiation*
 
-### Core Work Items Architecture
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-030 | Work Items Core Schema & Registry | Implement work item types registry, JSON schemas, and extend roles with taxonomy fields (autonomy, budget, safety, identity). **Architecture**: See [Work Items Documentation](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/) for complete GitOps + ArangoDB multi-graph design | 📋 Not Started | P0 | Medium | Go, ArangoDB, JSON Schema | MVP-029 ✅ | [MVP-030.md](mvp-details/MVP-030.md) |
-| MVP-031 | Work Items Lifecycle & SLA | Implement state machine, timers, breach handlers, and SLA/SLO enforcement for work items | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-030 | [MVP-031.md](mvp-details/MVP-031.md) |
-| MVP-032 | Work Items Assignment & Routing | Build declarative routing rules engine, skill matching, and agent selection algorithms | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-031 | [MVP-032.md](mvp-details/MVP-032.md) |
-
-### Gitea Integration for Work Items
+### Core Workflow Architecture
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-WI-001 | Gitea Webhook Integration | Implement webhook handlers for Gitea issue events (opened, labeled, closed, assigned). Parse payloads, verify signatures (X-Gitea-Signature), create/update work items in ArangoDB | 📋 Not Started | P0 | Medium | Go, Webhooks, REST API | MVP-032 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
-| MVP-WI-002 | Gitea API Client | Build Gitea client for bidirectional sync: create/update issues, post comments, manage labels, update status. Support authentication (API tokens), rate limiting, and error handling | 📋 Not Started | P0 | Medium | Go, REST API, Gitea SDK | MVP-WI-001 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
-| MVP-WI-003 | Work Item to Issue Sync | Implement bidirectional sync: work item state changes → Gitea issue updates, issue comments → work item audit trail, label mapping, and conflict resolution | 📋 Not Started | P0 | High | Go, Sync Logic, Event-Driven | MVP-WI-002 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
-| MVP-WI-004 | Pull Request Automation | Implement PR creation from work items, auto-merge on approval (when tests pass), link PRs to work items, update work item status on merge/close | 📋 Not Started | P0 | High | Go, Git, CI/CD Integration | MVP-WI-003 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
+| MVP-030 | Work Item Definitions & Workflows | Implement work item definition schema (agent blueprints), workflow/Kanban board definitions with columns, column→definition mappings, and workflow CRUD in Agency Designer | 📋 Not Started | P0 | Medium | Go, ArangoDB, JSON Schema | MVP-029 ✅ | [MVP-030.md](mvp-details/MVP-030.md) |
+| MVP-031 | Repository-Workflow Linking | Build repository→workflow mapping system, milestone→column configuration, WIP limit settings per column, and UI in Agency Designer to link Gitea repos to workflows | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-030 | [MVP-031.md](mvp-details/MVP-031.md) |
+| MVP-032 | Agent Factory & Lifecycle | Implement AgentFactory.CreateFromWorkItemDefinition(), agent lifecycle FSM (created→running→completed), agent→issue linking, and WIP limit enforcement | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-031 | [MVP-032.md](mvp-details/MVP-032.md) |
+
+### Gitea Integration for Kanban Workflows
+
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-WI-001 | Gitea Webhook Integration | Implement webhook handlers for Gitea milestone events (issues.milestoned). Parse payloads, verify signatures (X-Gitea-Signature), match milestone→workflow column, check WIP limits, create agents from work item definitions | � In Progress | P0 | Medium | Go, Webhooks, REST API | MVP-032 | [MVP-WI-001.md](mvp-details/MVP-WI-001.md) |
+| MVP-WI-002 | Gitea API Client | Build Gitea client for bidirectional sync: create/update issues, post agent progress comments, manage milestones, create PRs. Support authentication (API tokens), rate limiting, and error handling | 📋 Not Started | P0 | Medium | Go, REST API, Gitea SDK | MVP-WI-001 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
+| MVP-WI-003 | Agent-to-Issue Sync | Implement bidirectional sync: agent state changes → Gitea issue comments/labels, agent completion → milestone progression, agent errors → issue alerts, audit trail of agent actions | 📋 Not Started | P0 | High | Go, Sync Logic, Event-Driven | MVP-WI-002 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
+| MVP-WI-004 | Pull Request Automation | Implement PR creation from agents, auto-merge on approval (when tests pass), link PRs to issues and agents, update issue milestone on merge/close | 📋 Not Started | P0 | High | Go, Git, CI/CD Integration | MVP-WI-003 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
 
 **Architecture Reference**: `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md`
 
