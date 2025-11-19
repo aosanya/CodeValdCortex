@@ -141,8 +141,8 @@ MVP-032: Orchestrator (Change Stream Monitoring)
 
 ### Functional Requirements
 1. **Webhook Endpoints**:
-   - POST /api/v1/webhooks/gitea/issues - Issue events
-   - POST /api/v1/webhooks/gitea/pull-requests - PR events
+   - POST /api/v1/work/issues - Issue events
+   - POST /api/v1/work/pull-requests - PR events
 2. **Supported Events**:
    - **Issues**: `opened`, `milestoned`, `demilestoned`, `closed`, `edited`, `labeled`, `assigned`
    - **Pull Requests**: `opened`, `synchronized`, `closed`, `merged`, `edited`
@@ -196,7 +196,7 @@ MVP-032: Orchestrator (Change Stream Monitoring)
    - Error rate monitoring
 
 ## Acceptance Criteria
-- [ ] POST /api/v1/webhooks/gitea/issues endpoint created and registered in Gin router
+- [ ] POST /api/v1/work/issues endpoint created and registered in Gin router
 - [ ] X-Gitea-Signature HMAC SHA-256 validation working (rejects invalid signatures)
 - [ ] Repository→Workflow mapping stored in ArangoDB and queryable by repository URL
 - [ ] Milestone→Column mapping extracted from webhook payload
@@ -264,7 +264,7 @@ type Repository interface {
 ```
 Gitea Webhook Event (issue.milestoned)
     ↓
-POST /api/v1/webhooks/gitea → handler.HandleWebhook()
+POST /api/v1/work/issues → handler.HandleWebhook()
     ↓
 validator.ValidateSignature(X-Gitea-Signature)
     ↓

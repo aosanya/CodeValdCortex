@@ -28,6 +28,9 @@ type Config struct {
 
 	// AI configuration
 	AI AIConfig `mapstructure:"ai"`
+
+	// Work tracking integration configuration
+	WorkTracking WorkTrackingConfig `mapstructure:"work_tracking"`
 }
 
 // ServerConfig holds server-related configuration
@@ -76,6 +79,13 @@ type AIConfig struct {
 	Temperature float32 `mapstructure:"temperature"` // Default temperature
 	MaxTokens   int     `mapstructure:"max_tokens"`  // Default max tokens
 	Timeout     int     `mapstructure:"timeout"`     // Request timeout in seconds
+}
+
+// WorkTrackingConfig holds work tracking integration configuration (Gitea, GitHub, etc.)
+type WorkTrackingConfig struct {
+	Secret     string   `mapstructure:"secret"`      // HMAC secret for webhook signature validation
+	AllowedIPs []string `mapstructure:"allowed_ips"` // Optional IP allowlist for webhook sources
+	Provider   string   `mapstructure:"provider"`    // Work tracking provider: gitea, github, gitlab, jira
 }
 
 // Load loads configuration from file and environment variables
@@ -163,6 +173,11 @@ func Load(configPath string) (*Config, error) {
 	viper.BindEnv("ai.temperature", "CVXC_AI_TEMPERATURE")
 	viper.BindEnv("ai.max_tokens", "CVXC_AI_MAX_TOKENS")
 	viper.BindEnv("ai.timeout", "CVXC_AI_TIMEOUT")
+
+	// Work tracking integration configuration bindings
+	viper.BindEnv("work_tracking.secret", "CVXC_WORK_TRACKING_SECRET")
+	viper.BindEnv("work_tracking.allowed_ips", "CVXC_WORK_TRACKING_ALLOWED_IPS")
+	viper.BindEnv("work_tracking.provider", "CVXC_WORK_TRACKING_PROVIDER")
 
 	// Read config file if it exists
 	if err := viper.ReadInConfig(); err != nil {

@@ -2,7 +2,7 @@ package giteawebhook
 
 import (
 	gitea "code.gitea.io/sdk/gitea"
-	"github.com/aosanya/CodeValdCortex/internal/infrastructure/webhooks/work"
+	"github.com/aosanya/CodeValdCortex/internal/infrastructure/work"
 )
 
 // GiteaIssuePayload represents the Gitea-specific webhook payload for issues

@@ -18,6 +18,139 @@ This directory contains **domain-based task documentation** where related tasks 
 - ✅ Shared context: architecture explained once for entire domain
 - ✅ Clear relationships: dependencies and flow visible within document
 
+**Keep it simple and consumable**:
+- ✅ **Max 500 lines per file**: If domain file exceeds 500 lines, create a folder
+- ✅ **Easy to read**: Straightforward language, clear structure, no unnecessary complexity
+- ✅ **Separate verbosity**: Move detailed code examples to separate files in folder
+- ✅ **Well-organized folders**: Use subfolders for architecture, examples, schemas
+
+## File Size Guidelines
+
+### Single File (Preferred for small domains)
+**Use when**: Domain has 2-4 related tasks, total content < 500 lines
+
+```
+mvp-details/
+├── work-items-integration.md  (350 lines - good!)
+├── agency-designer.md         (280 lines - good!)
+└── authentication.md          (150 lines - good!)
+```
+
+### Folder Structure (Required for large domains)
+**Use when**: Domain has 5+ tasks OR single file would exceed 500 lines
+
+```
+mvp-details/
+├── platform-infrastructure/
+│   ├── README.md              (Overview, architecture, task list - MAX 300 lines)
+│   ├── deployment.md          (MVP-037 Deployment Rollouts - concise)
+│   ├── namespace-isolation.md (MVP-038 Namespace Isolation - concise)
+│   ├── rbac.md               (MVP-039 Organization & RBAC - concise)
+│   ├── billing.md            (MVP-040 Billing & Metering - concise)
+│   ├── architecture/
+│   │   ├── deployment-strategies.md  (Detailed diagrams, flows)
+│   │   └── rbac-model.md            (Detailed permission matrix)
+│   └── examples/
+│       ├── deployment-yaml.md       (Sample Kubernetes manifests)
+│       ├── rbac-policies.md         (Example RBAC configurations)
+│       └── billing-queries.md       (Example metering queries)
+```
+
+### Folder Organization Rules
+
+**README.md** (Entry point - MAX 300 lines):
+- Domain overview and goals
+- High-level architecture diagram
+- Task list with links to individual task files
+- Quick navigation to detailed docs
+
+**Individual Task Files** (MAX 200 lines each):
+- One task per file
+- Concise description, objectives, acceptance criteria
+- Link to detailed architecture/examples as needed
+- Use annotations: `<!-- MVP-XXX -->`
+
+**architecture/** subfolder:
+- Detailed architecture documents
+- Complex diagrams and data flows
+- Design decisions and rationale
+- System integration patterns
+
+**examples/** subfolder:
+- Code snippets and templates
+- Configuration examples
+- API request/response samples
+- Step-by-step tutorials
+
+**schemas/** subfolder (if needed):
+- JSON schemas
+- Database schemas
+- API specifications
+- Data models
+
+### Example: Platform Infrastructure Folder
+
+```markdown
+# platform-infrastructure/README.md (280 lines)
+
+# Platform Infrastructure
+
+## Overview
+[Brief domain introduction - 50 lines]
+
+## Architecture
+[High-level diagram and concepts - 100 lines]
+
+## Tasks in This Domain
+
+1. [MVP-037: Deployment Rollouts](deployment.md)
+2. [MVP-038: Namespace Isolation](namespace-isolation.md)
+3. [MVP-039: Organization & RBAC](rbac.md)
+4. [MVP-040: Billing & Metering](billing.md)
+5. [MVP-041: Multi-tenancy Hardening](multi-tenancy.md)
+
+## Detailed Documentation
+
+- [Deployment Strategies](architecture/deployment-strategies.md)
+- [RBAC Model](architecture/rbac-model.md)
+- [Example Configurations](examples/)
+```
+
+```markdown
+# platform-infrastructure/deployment.md (180 lines)
+
+<!-- MVP-037 -->
+# Deployment Rollouts (MVP-037)
+
+[Concise task description]
+
+**Priority**: P1  
+**Effort**: High  
+**Dependencies**: MVP-036  
+**Status**: Not Started
+
+## Objectives
+[Brief list]
+
+## Requirements
+[Concise requirements]
+
+## Acceptance Criteria
+- [ ] [Criteria]
+
+## Architecture Overview
+See [Deployment Strategies](architecture/deployment-strategies.md) for detailed diagrams.
+
+## Key Implementation Points
+[High-level implementation notes]
+
+**Key Files**: [List]
+
+**Examples**: See [examples/deployment-yaml.md](examples/deployment-yaml.md)
+
+<!-- /MVP-037 -->
+```
+
 ## Document Structure
 
 Domain files follow this narrative template:

@@ -1087,8 +1087,8 @@ GET    /api/v1/search/commits?q=term
 GET    /api/v1/search/work-items?q=term
 
 # Webhooks
-POST   /api/v1/webhooks/gitea/issues
-POST   /api/v1/webhooks/gitea/pull-requests
+POST   /api/v1/work/issues
+POST   /api/v1/work/pull-requests
 ```
 
 ## 10. Observability & Metrics

@@ -146,7 +146,7 @@ Gitea Repository Setup:
 
 2. Gitea Repository Configured
    └─> Milestones created matching workflow columns
-   └─> Repository webhook configured: http://codevaldcortex:8080/api/v1/webhooks/gitea
+   └─> Repository webhook configured: http://codevaldcortex:8080/api/v1/work/issues
 
 3. Issue Created & Assigned to Milestone
    └─> Issue: "Gather auth requirements"
@@ -226,7 +226,7 @@ Gitea supports multiple webhook events:
 
 **Via Gitea UI**:
 1. Navigate to repository → Settings → Webhooks
-2. Add webhook URL: `http://codevaldcortex:8080/api/v1/webhooks/gitea/issues`
+2. Add webhook URL: `http://codevaldcortex:8080/api/v1/work/issues`
 3. Select events: `Issues`, `Pull Requests`
 4. Add secret token for validation
 5. Set content type: `application/json`
@@ -237,7 +237,7 @@ func (c *GiteaClient) CreateWebhook(repoOwner, repoName string) error {
     webhook := &gitea.CreateHookOption{
         Type: "gitea",
         Config: map[string]string{
-            "url":          "http://codevaldcortex:8080/api/v1/webhooks/gitea/issues",
+            "url":          "http://codevaldcortex:8080/api/v1/work/issues",
             "content_type": "json",
             "secret":       c.webhookSecret,
         },
