@@ -50,6 +50,9 @@ templ OverviewContent(currentAgency *models.Agency, conversation *ai.Conversatio
 			<div id="content-workflows" class="overview-content-section" style="display: none;">
 				@WorkflowsContent(currentAgency)
 			</div>
+			<div id="content-ai-policy" class="overview-content-section" style="display: none;">
+				@AIPolicyContent(currentAgency)
+			</div>
 		</div>
 	</main>
 	</div>
@@ -133,6 +136,19 @@ templ OverviewNavigationList(currentAgency *models.Agency) {
 			<div class="nav-info">
 				<div class="nav-name">Workflows</div>
 				<div class="nav-description">Work item orchestration</div>
+			</div>
+		</div>
+		
+		<div 
+			class="overview-nav-item"
+			data-section="ai-policy"
+			onclick="selectOverviewSection(this, 'ai-policy')">
+			<div class="nav-icon">
+				<i class="fas fa-shield-halved"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">AI Policy</div>
+				<div class="nav-description">Configure AI governance</div>
 			</div>
 		</div>
 	</div>
@@ -233,4 +249,117 @@ templ WorkflowsContent(currentAgency *models.Agency) {
 		@WorkflowsListCard()
 		@WorkflowEditorCard()
 	</div>
+}
+
+// AIPolicyContent renders the AI Policy section with a card linking to the wizard
+templ AIPolicyContent(currentAgency *models.Agency) {
+	<div class="overview-section" data-agency-id={ currentAgency.ID }>
+		<div class="box">
+			<div class="level mb-4">
+				<div class="level-left">
+					<div class="level-item">
+						<h2 class="title is-4 mb-0">
+							<span class="icon-text">
+								<span class="icon has-text-primary"><i class="fas fa-shield-halved"></i></span>
+								<span>AI Policy Configuration</span>
+							</span>
+						</h2>
+					</div>
+				</div>
+				<div class="level-right">
+					<div class="level-item">
+						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/policy/wizard") } class="button is-primary">
+							<span class="icon"><i class="fas fa-magic"></i></span>
+							<span>Configure Policy</span>
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="content">
+				<p>Configure AI governance policies for this agency, including:</p>
+				<ul>
+					<li><strong>Policy Stance:</strong> Define your organization's AI adoption level and risk tolerance</li>
+					<li><strong>Model Policy:</strong> Control which AI models and providers are allowed</li>
+					<li><strong>Autonomy Levels:</strong> Set default and role-specific autonomy levels (L0-L4)</li>
+					<li><strong>Data Access:</strong> Configure data classification and PII handling rules</li>
+					<li><strong>Actions & Risk:</strong> Define prohibited actions and risk thresholds</li>
+					<li><strong>Compliance:</strong> Enable audit logging and compliance framework controls</li>
+				</ul>
+
+				<!-- Policy Summary (loaded dynamically) -->
+				<div id="policy-summary-container" class="box mt-4" style="background-color: #f9f9f9; display: none;">
+					<h3 class="subtitle is-5">Current Policy Summary</h3>
+					<div id="policy-summary-content" class="content">
+						<!-- Populated by JavaScript -->
+					</div>
+				</div>
+
+				<div id="policy-no-config" class="notification is-info is-light">
+					<span class="icon"><i class="fas fa-info-circle"></i></span>
+					<span>No AI policy configured yet. Click "Configure Policy" to get started.</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Load policy summary on section view
+		(function() {
+			async function loadPolicySummary() {
+				try {
+					const aiPolicySection = document.getElementById('content-ai-policy');
+					const agencyId = aiPolicySection.querySelector('.overview-section').dataset.agencyId;
+					const response = await fetch(`/api/agencies/${agencyId}/policy/summary`);
+					console.log('Policy summary response:', response.status);
+					if (response.ok) {
+						const summary = await response.json();
+						console.log('Policy summary loaded:', summary);
+						document.getElementById('policy-summary-container').style.display = 'block';
+						document.getElementById('policy-no-config').style.display = 'none';
+						
+						const content = document.getElementById('policy-summary-content');
+						content.innerHTML = 
+							'<div class="columns">' +
+							'<div class="column">' +
+								'<p><strong>Adoption Level:</strong> ' + (summary.adoption_level || 'Not set') + '</p>' +
+								'<p><strong>Risk Tolerance:</strong> ' + (summary.risk_tolerance || 'Not set') + '</p>' +
+								'<p><strong>Default Autonomy:</strong> ' + (summary.default_autonomy_level || 'Not set') + '</p>' +
+							'</div>' +
+							'<div class="column">' +
+								'<p><strong>Allowed Providers:</strong> ' + (summary.allowed_providers ? summary.allowed_providers.join(', ') : 'None') + '</p>' +
+								'<p><strong>Total Budget:</strong> $' + (summary.total_budget_usd || 0) + '</p>' +
+								'<p><strong>Monitoring:</strong> ' + (summary.monitoring_enabled ? 'Enabled' : 'Disabled') + '</p>' +
+							'</div>' +
+						'</div>' +
+						'<p class="help is-info">Note: Compliance frameworks (SOC2, GDPR, HIPAA, ISO27001) will be implemented as intelligent agents (see MVP-051-053)</p>';
+					} else {
+						console.log('Policy summary not found');
+					}
+				} catch (error) {
+					console.debug('Error loading policy summary:', error);
+				}
+			}
+
+			// Load summary when AI Policy section is shown
+			const observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					const aiPolicySection = document.getElementById('content-ai-policy');
+					if (aiPolicySection && aiPolicySection.style.display !== 'none') {
+						loadPolicySummary();
+					}
+				});
+			});
+
+			const aiPolicySection = document.getElementById('content-ai-policy');
+			if (aiPolicySection) {
+				observer.observe(aiPolicySection, { attributes: true, attributeFilter: ['style'] });
+				
+				// Also load immediately if the section is already visible
+				if (aiPolicySection.style.display !== 'none') {
+					loadPolicySummary();
+				}
+			}
+		})();
+	</script>
 }

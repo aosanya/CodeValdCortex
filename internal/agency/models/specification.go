@@ -41,6 +41,7 @@ type AgencySpecification struct {
 	Roles        []Role      `json:"roles"`        // Team roles and structure (uses Role model from role.go)
 	RACIMatrix   *RACIMatrix `json:"raci_matrix"`  // Responsibility assignments (reuses existing RACIMatrix model)
 	Workflows    []Workflow  `json:"workflows"`    // Process orchestration and work item flow
+	AIPolicy     *Policy     `json:"ai_policy"`    // AI Policy configuration (embedded policy document)
 }
 
 // SpecificationUpdateRequest represents a request to update the entire specification
@@ -51,6 +52,7 @@ type SpecificationUpdateRequest struct {
 	Roles        *[]Role     `json:"roles,omitempty"`
 	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
 	Workflows    *[]Workflow `json:"workflows,omitempty"`
+	AIPolicy     *Policy     `json:"ai_policy,omitempty"`
 	UpdatedBy    string      `json:"updated_by,omitempty"`
 }
 
@@ -75,6 +77,7 @@ type CreateSpecificationRequest struct {
 	Roles        []Role      `json:"roles,omitempty"`
 	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
 	Workflows    []Workflow  `json:"workflows,omitempty"`
+	AIPolicy     *Policy     `json:"ai_policy,omitempty"`
 }
 
 // NewAgencySpecification creates a new specification with default values
@@ -205,4 +208,20 @@ func (s *AgencySpecification) SetWorkflows(workflows []Workflow, updatedBy strin
 
 	s.Workflows = workflows
 	s.IncrementVersion(updatedBy)
+}
+
+// Policy represents the AI governance policy embedded in the specification
+// This is a simplified version for storage - the full policy.AIPolicy type
+// from internal/policy package is converted to/from this for evaluation
+type Policy struct {
+	Version    string                 `json:"version"`
+	Owner      string                 `json:"owner"`
+	Stance     map[string]interface{} `json:"stance"`
+	Models     map[string]interface{} `json:"models"`
+	Autonomy   map[string]interface{} `json:"autonomy"`
+	DataAccess map[string]interface{} `json:"data_access,omitempty"`
+	Actions    map[string]interface{} `json:"actions,omitempty"`
+	Risk       map[string]interface{} `json:"risk,omitempty"`
+	Compliance map[string]interface{} `json:"compliance,omitempty"`
+	Monitoring map[string]interface{} `json:"monitoring,omitempty"`
 }

@@ -230,6 +230,10 @@ func (r *Repository) UpdateSpecification(ctx context.Context, agencyID string, r
 	if req.RACIMatrix != nil {
 		existing.SetRACIMatrix(req.RACIMatrix, req.UpdatedBy)
 	}
+	if req.AIPolicy != nil {
+		existing.AIPolicy = req.AIPolicy
+		existing.IncrementVersion(req.UpdatedBy)
+	}
 
 	// Update in database
 	meta, err := collection.UpdateDocument(ctx, existing.Key, existing)

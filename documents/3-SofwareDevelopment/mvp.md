@@ -113,8 +113,7 @@ git branch -d feature/MVP-XXX_description
 | ------- | ------------------------- | ---------------------------------------------------------- | ----------- | -------- | ------ | --------------------- | ------------ | ------- |
 | MVP-046 | Agency Admin & Configuration Page | Build comprehensive admin interface for agency-wide settings: token budgets (role & individual agent levels), rate limits, resource quotas, AI model selection, cost controls, monitoring dashboards, and operational parameters | Not Started | P1       | Medium | Go, Templ, Frontend Dev, Analytics | MVP-044      | [MVP-046.md](mvp-details/MVP-046.md) |
 | MVP-047 | Agency Designer Export System | Implement comprehensive export functionality for entire agency design (all sections) to PDF, Markdown, and JSON formats with customizable templates and branding | Not Started | P1       | Medium | Go, PDF Generation, File Export | MVP-044      | [MVP-047.md](mvp-details/MVP-047.md) |
-| MVP-048 | AI Policy Layer - Foundation | Implement organizational AI governance: first-run policy wizard (stance, model approval, autonomy levels, data classification), policy schema, basic enforcement engine, and UI indicators. Addresses DORA requirement for clear AI stance and runtime guardrails | Not Started | P0       | High   | Go, Security, Backend Dev, Templ | MVP-044      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
-| MVP-049 | AI Policy Layer - Runtime Enforcement | Build action authorization, approval workflows, risk scoring, budget tracking, and policy violation handling with real-time feedback and audit logging | Not Started | P1       | High   | Go, Security, Backend Dev | MVP-048      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
+| MVP-049 | AI Policy Layer - Runtime Enforcement | Build action authorization, approval workflows, risk scoring, budget tracking, and policy violation handling with real-time feedback and audit logging | Not Started | P1       | High   | Go, Security, Backend Dev | ~~MVP-048~~      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-050 | AI Policy Layer - Advanced Features | Implement data classification engine, PII detection/masking, compliance reporting, policy versioning, and multi-policy inheritance | Not Started | P1       | Medium | Go, Security, ML, Backend Dev | MVP-049      | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (introduction, goals, work items, roles, RACI), and batch AI generation | Not Started | P1       | High   | Go, Templ, AI/LLM, Frontend Dev | MVP-047      | [MVP-042.md](mvp-details/MVP-042.md) |
 
@@ -159,6 +158,25 @@ git branch -d feature/MVP-XXX_description
 - **SDK Benefits**: Protocol compliance guaranteed, upstream security updates, reduced maintenance burden
 
 **Complete Technical Specification**: See [`/documents/2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md`](../../2-SoftwareDesignAndArchitecture/a2a-protocol-integration.md)
+
+## Agent-Based Compliance Frameworks (P2 - Future Enhancement)
+
+*Intelligent compliance agents that provide context-aware, dynamic enforcement vs static configuration*
+
+| Task ID | Title                                    | Description                                                                                                      | Status      | Priority | Effort | Skills Required            | Dependencies |
+| ------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------- | -------- | ------ | -------------------------- | ------------ |
+| MVP-051 | Compliance Agent Architecture | Design and implement base ComplianceAgent interface, knowledge base system, context analyzer, reasoning engine, and agent-to-workflow bridge service | Not Started | P2       | High   | Go, AI/LLM, Security, Architecture | MVP-050 |
+| MVP-052 | GDPR Compliance Agent | Implement GDPR-specific agent with article knowledge base, lawful basis engine, jurisdiction analyzer, cross-border transfer rules, and explainable compliance plan generation | Not Started | P2       | High   | Go, AI/LLM, GDPR Expertise, Security | MVP-051 |
+| MVP-053 | Multi-Framework Compliance System | Implement SOC2Agent (trust service criteria), HIPAAAgent (PHI classification, safeguards), ISO27001Agent (risk assessment, controls), and unified compliance dashboard | Not Started | P2       | High   | Go, AI/LLM, Compliance Expertise | MVP-052 |
+
+**Key Benefits**:
+- ✅ **Context-aware**: Different compliance steps based on data type, jurisdiction, use case
+- ✅ **Explainable**: AI provides reasoning for each requirement (e.g., "satisfies GDPR Article 6(1)(a)")
+- ✅ **Adaptive**: Automatically updates when regulations change
+- ✅ **Intelligent**: Understands lawful basis, data sensitivity, risk levels
+- ✅ **Auditable**: Complete reasoning trail for compliance officers
+
+**Architecture**: Compliance agents analyze context → generate compliance plans → bridge converts plans to executable workflows → workflow designer executes and monitors
 
 ---
 

@@ -70,3 +70,17 @@ templ StatusBarSimple(currentAgency *models.Agency, leftItems ...string) {
 		</div>
 	</div>
 }
+
+// StatusBarWithID renders a status bar showing agency ID or name
+// Useful for wizard pages and standalone tools
+templ StatusBarWithID(agencyIdentifier string) {
+	<div class="vscode-status-bar">
+		<div class="status-bar-left">
+			<span class="status-item">
+				<i class="fas fa-network-wired"></i>
+				<span class="status-text">Current Agency: { agencyIdentifier }</span>
+			</span>
+		</div>
+		<div class="status-bar-right"></div>
+	</div>
+}

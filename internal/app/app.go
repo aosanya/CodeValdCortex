@@ -17,6 +17,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
+	"github.com/aosanya/CodeValdCortex/internal/policy"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
@@ -47,6 +48,7 @@ type App struct {
 	raciBuilder         *ai.RACIBuilder
 	workflowBuilder     *ai.WorkflowsBuilder
 	workflowService     *workflow.Service
+	policyService       *policy.Service
 }
 
 // New creates a new application instance
@@ -152,6 +154,14 @@ func New(cfg *config.Config) *App {
 	workflowService := workflow.NewService(workflowRepo, logger)
 	logger.Info("Workflow service initialized successfully")
 
+	// Initialize policy service
+	policyRepo, err := policy.NewArangoRepository(dbClient.Database())
+	if err != nil {
+		logger.WithError(err).Warn("Failed to initialize policy repository")
+	}
+	policyService := policy.NewService(policyRepo)
+	logger.Info("Policy service initialized successfully")
+
 	return &App{
 		config:              cfg,
 		logger:              logger,
@@ -170,6 +180,7 @@ func New(cfg *config.Config) *App {
 		raciBuilder:         raciBuilder,
 		workflowBuilder:     workflowBuilder,
 		workflowService:     workflowService,
+		policyService:       policyService,
 	}
 }
 
@@ -308,6 +319,13 @@ func (a *App) setupServer() error {
 	if aiDesignerWebHandler != nil {
 		aiDesignerWebHandler.RegisterRoutes(router.Group(""))
 		a.logger.Info("AI Agency Designer web routes registered")
+	}
+
+	// AI Policy web routes (if available)
+	if a.policyService != nil {
+		aiPolicyHandler := webhandlers.NewAIPolicyWebHandler(a.policyService, a.agencyService, a.logger)
+		aiPolicyHandler.RegisterRoutes(router.Group(""))
+		a.logger.Info("AI Policy web routes registered")
 	}
 
 	// Chat routes for web interface (if available)

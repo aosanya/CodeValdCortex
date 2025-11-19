@@ -1,0 +1,15 @@
+package components
+
+// VSCodeStatusBar renders a standalone VS Code-style status bar
+// This is a lightweight component for pages that need a status bar without dependencies
+templ VSCodeStatusBar(agencyIdentifier string) {
+	<div class="vscode-status-bar">
+		<div class="status-bar-left">
+			<span class="status-item">
+				<i class="fas fa-network-wired"></i>
+				<span class="status-text">Current Agency: { agencyIdentifier }</span>
+			</span>
+		</div>
+		<div class="status-bar-right"></div>
+	</div>
+}
