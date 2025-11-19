@@ -78,8 +78,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-WI-003 | Agent-to-Issue Sync | Implement bidirectional sync: agent state changes → Gitea issue comments/labels, agent completion → milestone progression, agent errors → issue alerts, audit trail of agent actions | 📋 Not Started | P0 | High | Go, Sync Logic, Event-Driven | ~~MVP-WI-002~~ | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
-| MVP-WI-004 | Pull Request Automation | Implement PR creation from agents, auto-merge on approval (when tests pass), link PRs to issues and agents, update issue milestone on merge/close | 📋 Not Started | P0 | High | Go, Git, CI/CD Integration | MVP-WI-003 | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
+| MVP-WI-004 | Pull Request Automation | Implement PR creation from agents, auto-merge on approval (when tests pass), link PRs to issues and agents, update issue milestone on merge/close | 📋 Not Started | P0 | High | Go, Git, CI/CD Integration | ~~MVP-WI-003~~ ✅ | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
 
 **Architecture Reference**: `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md`
 
