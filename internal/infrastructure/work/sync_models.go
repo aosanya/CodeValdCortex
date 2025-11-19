@@ -11,10 +11,10 @@ type AgentIssueLink struct {
 	AgentID string `json:"agent_id"`
 
 	// Work item identification
-	IssueID       string `json:"issue_id"`        // Work tracking system issue ID (string for multi-provider)
-	IssueNumber   int64  `json:"issue_number"`    // Numeric issue number (Gitea, GitHub)
-	RepositoryURL string `json:"repository_url"`  // Full URL to repository
-	ProviderType  string `json:"provider_type"`   // "gitea", "github", "gitlab", "jira"
+	IssueID       string `json:"issue_id"`       // Work tracking system issue ID (string for multi-provider)
+	IssueNumber   int64  `json:"issue_number"`   // Numeric issue number (Gitea, GitHub)
+	RepositoryURL string `json:"repository_url"` // Full URL to repository
+	ProviderType  string `json:"provider_type"`  // "gitea", "github", "gitlab", "jira"
 
 	// Workflow context
 	WorkflowID    string `json:"workflow_id"`
@@ -27,11 +27,11 @@ type AgentIssueLink struct {
 	Status      string     `json:"status"` // "active", "completed", "failed", "cancelled"
 
 	// Sync metadata
-	LastSyncAt      time.Time `json:"last_sync_at"`
-	SyncCount       int       `json:"sync_count"`        // Number of sync operations performed
-	LastEventType   string    `json:"last_event_type"`   // Last agent event type synced
-	LastCommentID   string    `json:"last_comment_id"`   // ID of last comment posted
-	CurrentMilestone string   `json:"current_milestone"` // Current milestone/column name
+	LastSyncAt       time.Time `json:"last_sync_at"`
+	SyncCount        int       `json:"sync_count"`        // Number of sync operations performed
+	LastEventType    string    `json:"last_event_type"`   // Last agent event type synced
+	LastCommentID    string    `json:"last_comment_id"`   // ID of last comment posted
+	CurrentMilestone string    `json:"current_milestone"` // Current milestone/column name
 }
 
 // SyncAuditRecord logs all sync operations for compliance and debugging
@@ -61,7 +61,7 @@ type SyncAuditRecord struct {
 	RetryCount   int    `json:"retry_count"` // Number of retry attempts
 
 	// Provider context
-	ProviderType string `json:"provider_type"` // "gitea", "github", etc.
+	ProviderType  string `json:"provider_type"` // "gitea", "github", etc.
 	RepositoryURL string `json:"repository_url"`
 }
 
@@ -111,22 +111,22 @@ type CommentTemplateData struct {
 	FormattedTime string    `json:"formatted_time"`
 
 	// Workflow context
-	ColumnName     string `json:"column_name,omitempty"`
-	WorkflowName   string `json:"workflow_name,omitempty"`
-	CurrentColumn  string `json:"current_column,omitempty"`
-	NextColumn     string `json:"next_column,omitempty"`
+	ColumnName    string `json:"column_name,omitempty"`
+	WorkflowName  string `json:"workflow_name,omitempty"`
+	CurrentColumn string `json:"current_column,omitempty"`
+	NextColumn    string `json:"next_column,omitempty"`
 
 	// Status and progress
-	Status             string `json:"status,omitempty"`
-	StatusMessage      string `json:"status_message,omitempty"`
-	ProgressPercentage int    `json:"progress_percentage,omitempty"`
+	Status              string `json:"status,omitempty"`
+	StatusMessage       string `json:"status_message,omitempty"`
+	ProgressPercentage  int    `json:"progress_percentage,omitempty"`
 	DetailedDescription string `json:"detailed_description,omitempty"`
 
 	// Task details
-	TaskName      string `json:"task_name,omitempty"`
-	TaskDuration  string `json:"task_duration,omitempty"`
-	TaskSummary   string `json:"task_summary,omitempty"`
-	Deliverables  string `json:"deliverables,omitempty"`
+	TaskName     string `json:"task_name,omitempty"`
+	TaskDuration string `json:"task_duration,omitempty"`
+	TaskSummary  string `json:"task_summary,omitempty"`
+	Deliverables string `json:"deliverables,omitempty"`
 
 	// Error details
 	ErrorType        string `json:"error_type,omitempty"`

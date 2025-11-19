@@ -106,12 +106,12 @@ type Workflow struct {
 
 // WorkflowColumn represents a column/stage in a workflow
 type WorkflowColumn struct {
-	ID                string `json:"id"`
-	Name              string `json:"name"`
-	Position          int    `json:"position"`
-	WorkItemDefID     string `json:"work_item_def_id"`
-	MilestoneName     string `json:"milestone_name"` // Mapped milestone name in work tracking system
-	AutoAssign        bool   `json:"auto_assign"`
-	MaxConcurrent     int    `json:"max_concurrent"`
-	NextColumnID      string `json:"next_column_id,omitempty"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Position      int    `json:"position"`
+	WorkItemDefID string `json:"work_item_def_id"`
+	MilestoneName string `json:"milestone_name"` // Mapped milestone name in work tracking system
+	AutoAssign    bool   `json:"auto_assign"`
+	MaxConcurrent int    `json:"max_concurrent"`
+	NextColumnID  string `json:"next_column_id,omitempty"`
 }
