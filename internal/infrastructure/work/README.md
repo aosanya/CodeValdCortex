@@ -10,6 +10,11 @@ The `work` package provides a **provider-agnostic abstraction layer** for integr
 ✅ Test with mock providers without external dependencies  
 ✅ Avoid vendor lock-in
 
+This package provides **two types of interfaces**:
+
+1. **Webhook Interfaces** (Inbound) - Handle incoming events from work tracking systems
+2. **API Client Interfaces** (Outbound) - Make API calls to work tracking systems for bidirectional sync
+
 ## Architecture
 
 ```
@@ -17,11 +22,12 @@ The `work` package provides a **provider-agnostic abstraction layer** for integr
 │         External Work Tracking Systems              │
 │  Gitea | GitHub | GitLab | Jira | Linear            │
 └───────────────────┬─────────────────────────────────┘
-                    │ Webhooks / API
+                    │ Webhooks (Inbound)
                     ▼
 ┌─────────────────────────────────────────────────────┐
 │     Work Abstraction Layer (this package)           │
-│  - WorkTrackingProvider interface                   │
+│  - WorkTrackingProvider interface (webhooks)        │
+│  - APIClient interface (outbound API calls)         │
 │  - WorkIssue, WorkPullRequest, WorkMilestone        │
 │  - Common webhook handling patterns                 │
 └───────────────────┬─────────────────────────────────┘
@@ -33,21 +39,31 @@ The `work` package provides a **provider-agnostic abstraction layer** for integr
    │Provider│  │Provider│  │Provider│
    └───┬────┘  └───┬────┘  └───┬────┘
        │           │           │
+       │ Persist   │ API Calls │
        └───────────┼───────────┘
-                   │ Persist
                    ▼
             ┌────────────┐
             │  ArangoDB  │
             │work-issues │
             │ work-prs   │
             └────────────┘
+                   │
+                   ▼
+            ┌────────────┐
+            │Orchestrator│
+            │  Agents    │
+            └────────────┘
+                   │ API Client
+                   └──► Updates issues/PRs
 ```
 
 ## Core Interfaces
 
-### WorkTrackingProvider
+### 1. Webhook Interfaces (Inbound Communication)
 
-Main contract for all work tracking system integrations:
+#### WorkTrackingProvider
+
+Main contract for all work tracking system webhook integrations:
 
 ```go
 type WorkTrackingProvider interface {
@@ -61,6 +77,84 @@ type WorkTrackingProvider interface {
     HandleWebhook(ctx context.Context, r *http.Request) (*WebhookResult, error)
 }
 ```
+
+**Implementation**: `internal/infrastructure/gitea/handler.go` (Gitea provider)
+
+### 2. API Client Interfaces (Outbound Communication)
+
+#### APIClient
+
+Main contract for bidirectional sync with work tracking systems:
+
+```go
+type APIClient interface {
+    IssueClient
+    PullRequestClient
+    MilestoneClient
+    CommentClient
+    LabelClient
+    RepositoryClient
+}
+```
+
+#### IssueClient
+
+```go
+type IssueClient interface {
+    CreateIssue(ctx context.Context, owner, repo string, opts CreateIssueOptions) (*WorkIssue, error)
+    UpdateIssue(ctx context.Context, owner, repo string, issueID string, opts UpdateIssueOptions) (*WorkIssue, error)
+    GetIssue(ctx context.Context, owner, repo string, issueID string) (*WorkIssue, error)
+    ListIssues(ctx context.Context, owner, repo string, opts ListIssueOptions) ([]*WorkIssue, error)
+    CloseIssue(ctx context.Context, owner, repo string, issueID string) error
+    ReopenIssue(ctx context.Context, owner, repo string, issueID string) error
+}
+```
+
+#### PullRequestClient
+
+```go
+type PullRequestClient interface {
+    CreatePullRequest(ctx context.Context, owner, repo string, opts CreatePullRequestOptions) (*WorkPullRequest, error)
+    UpdatePullRequest(ctx context.Context, owner, repo string, prID string, opts UpdatePullRequestOptions) (*WorkPullRequest, error)
+    GetPullRequest(ctx context.Context, owner, repo string, prID string) (*WorkPullRequest, error)
+    ListPullRequests(ctx context.Context, owner, repo string, opts ListPullRequestOptions) ([]*WorkPullRequest, error)
+    MergePullRequest(ctx context.Context, owner, repo string, prID string, opts MergePullRequestOptions) error
+}
+```
+
+#### MilestoneClient
+
+```go
+type MilestoneClient interface {
+    CreateMilestone(ctx context.Context, owner, repo string, opts CreateMilestoneOptions) (*WorkMilestone, error)
+    UpdateMilestone(ctx context.Context, owner, repo string, milestoneID string, opts UpdateMilestoneOptions) (*WorkMilestone, error)
+    GetMilestone(ctx context.Context, owner, repo string, milestoneID string) (*WorkMilestone, error)
+    ListMilestones(ctx context.Context, owner, repo string, opts ListMilestoneOptions) ([]*WorkMilestone, error)
+}
+```
+
+#### CommentClient
+
+```go
+type CommentClient interface {
+    PostComment(ctx context.Context, owner, repo string, issueID string, body string) (*WorkComment, error)
+    ListComments(ctx context.Context, owner, repo string, issueID string) ([]*WorkComment, error)
+    UpdateComment(ctx context.Context, owner, repo string, commentID string, body string) (*WorkComment, error)
+    DeleteComment(ctx context.Context, owner, repo string, commentID string) error
+}
+```
+
+#### LabelClient
+
+```go
+type LabelClient interface {
+    AddLabel(ctx context.Context, owner, repo string, issueID string, labels []string) error
+    RemoveLabel(ctx context.Context, owner, repo string, issueID string, labelID string) error
+    ListLabels(ctx context.Context, owner, repo string, issueID string) ([]*WorkLabel, error)
+}
+```
+
+**Implementation Note**: The Gitea API client (`internal/infrastructure/gitea/client.go`) implements these interfaces but returns Gitea-specific types. An adapter layer will be needed to convert between Gitea types and `work` package types.
 
 ### Repository
 

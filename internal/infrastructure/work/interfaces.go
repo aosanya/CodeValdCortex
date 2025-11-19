@@ -122,3 +122,229 @@ type WebhookConfig struct {
 	// ProviderSpecificConfig holds provider-specific settings
 	ProviderSpecificConfig map[string]interface{}
 }
+
+// ============================================================================
+// API Client Interfaces (Outbound Communication)
+// ============================================================================
+
+// APIClient provides methods for bidirectional sync with work tracking systems
+// This is the provider-agnostic interface that abstracts Gitea, GitHub, GitLab, etc.
+type APIClient interface {
+	IssueClient
+	PullRequestClient
+	MilestoneClient
+	CommentClient
+	LabelClient
+	RepositoryClient
+}
+
+// IssueClient handles issue operations
+type IssueClient interface {
+	// CreateIssue creates a new issue
+	CreateIssue(ctx context.Context, owner, repo string, opts CreateIssueOptions) (*WorkIssue, error)
+
+	// UpdateIssue updates an existing issue
+	UpdateIssue(ctx context.Context, owner, repo string, issueID string, opts UpdateIssueOptions) (*WorkIssue, error)
+
+	// GetIssue retrieves an issue by ID
+	GetIssue(ctx context.Context, owner, repo string, issueID string) (*WorkIssue, error)
+
+	// ListIssues lists issues with filtering
+	ListIssues(ctx context.Context, owner, repo string, opts ListIssueOptions) ([]*WorkIssue, error)
+
+	// CloseIssue closes an issue
+	CloseIssue(ctx context.Context, owner, repo string, issueID string) error
+
+	// ReopenIssue reopens a closed issue
+	ReopenIssue(ctx context.Context, owner, repo string, issueID string) error
+}
+
+// PullRequestClient handles pull request operations
+type PullRequestClient interface {
+	// CreatePullRequest creates a new pull request
+	CreatePullRequest(ctx context.Context, owner, repo string, opts CreatePullRequestOptions) (*WorkPullRequest, error)
+
+	// UpdatePullRequest updates an existing pull request
+	UpdatePullRequest(ctx context.Context, owner, repo string, prID string, opts UpdatePullRequestOptions) (*WorkPullRequest, error)
+
+	// GetPullRequest retrieves a pull request by ID
+	GetPullRequest(ctx context.Context, owner, repo string, prID string) (*WorkPullRequest, error)
+
+	// ListPullRequests lists pull requests with filtering
+	ListPullRequests(ctx context.Context, owner, repo string, opts ListPullRequestOptions) ([]*WorkPullRequest, error)
+
+	// MergePullRequest merges a pull request
+	MergePullRequest(ctx context.Context, owner, repo string, prID string, opts MergePullRequestOptions) error
+}
+
+// MilestoneClient handles milestone operations
+type MilestoneClient interface {
+	// CreateMilestone creates a new milestone
+	CreateMilestone(ctx context.Context, owner, repo string, opts CreateMilestoneOptions) (*WorkMilestone, error)
+
+	// UpdateMilestone updates an existing milestone
+	UpdateMilestone(ctx context.Context, owner, repo string, milestoneID string, opts UpdateMilestoneOptions) (*WorkMilestone, error)
+
+	// GetMilestone retrieves a milestone by ID
+	GetMilestone(ctx context.Context, owner, repo string, milestoneID string) (*WorkMilestone, error)
+
+	// ListMilestones lists milestones with filtering
+	ListMilestones(ctx context.Context, owner, repo string, opts ListMilestoneOptions) ([]*WorkMilestone, error)
+}
+
+// CommentClient handles comment operations
+type CommentClient interface {
+	// PostComment posts a comment on an issue or PR
+	PostComment(ctx context.Context, owner, repo string, issueID string, body string) (*WorkComment, error)
+
+	// ListComments lists comments on an issue or PR
+	ListComments(ctx context.Context, owner, repo string, issueID string) ([]*WorkComment, error)
+
+	// UpdateComment updates a comment
+	UpdateComment(ctx context.Context, owner, repo string, commentID string, body string) (*WorkComment, error)
+
+	// DeleteComment deletes a comment
+	DeleteComment(ctx context.Context, owner, repo string, commentID string) error
+}
+
+// LabelClient handles label operations
+type LabelClient interface {
+	// AddLabel adds labels to an issue or PR
+	AddLabel(ctx context.Context, owner, repo string, issueID string, labels []string) error
+
+	// RemoveLabel removes a label from an issue or PR
+	RemoveLabel(ctx context.Context, owner, repo string, issueID string, labelID string) error
+
+	// ListLabels lists labels on an issue or PR
+	ListLabels(ctx context.Context, owner, repo string, issueID string) ([]*WorkLabel, error)
+}
+
+// RepositoryClient handles repository operations
+type RepositoryClient interface {
+	// GetRepository retrieves repository information
+	GetRepository(ctx context.Context, owner, repo string) (*WorkRepository, error)
+
+	// ListRepositories lists repositories for a user or organization
+	ListRepositories(ctx context.Context, opts ListRepoOptions) ([]*WorkRepository, error)
+}
+
+// ============================================================================
+// API Options Structs
+// ============================================================================
+
+// CreateIssueOptions contains options for creating an issue
+type CreateIssueOptions struct {
+	Title        string
+	Body         string
+	Assignees    []string
+	Milestone    string
+	Labels       []string
+	Closed       bool
+	DueDate      *time.Time
+	CustomFields map[string]interface{} // Provider-specific fields
+}
+
+// UpdateIssueOptions contains options for updating an issue
+type UpdateIssueOptions struct {
+	Title        *string
+	Body         *string
+	Assignees    []string
+	Milestone    *string
+	State        *string
+	Labels       []string
+	CustomFields map[string]interface{}
+}
+
+// ListIssueOptions contains options for listing issues
+type ListIssueOptions struct {
+	State     string
+	Labels    []string
+	Milestone string
+	Assignee  string
+	Creator   string
+	Since     *time.Time
+	Page      int
+	Limit     int
+	SortBy    string
+	SortOrder string
+}
+
+// CreatePullRequestOptions contains options for creating a PR
+type CreatePullRequestOptions struct {
+	Title        string
+	Body         string
+	Base         string
+	Head         string
+	Assignees    []string
+	Labels       []string
+	Milestone    string
+	Draft        bool
+	CustomFields map[string]interface{}
+}
+
+// UpdatePullRequestOptions contains options for updating a PR
+type UpdatePullRequestOptions struct {
+	Title        *string
+	Body         *string
+	Base         *string
+	State        *string
+	Assignees    []string
+	Labels       []string
+	Milestone    *string
+	CustomFields map[string]interface{}
+}
+
+// ListPullRequestOptions contains options for listing PRs
+type ListPullRequestOptions struct {
+	State     string
+	Base      string
+	Head      string
+	Labels    []string
+	SortBy    string
+	SortOrder string
+	Page      int
+	Limit     int
+}
+
+// MergePullRequestOptions contains options for merging a PR
+type MergePullRequestOptions struct {
+	Style        string // "merge", "rebase", "squash"
+	Message      string
+	DeleteBranch bool
+	CustomFields map[string]interface{}
+}
+
+// CreateMilestoneOptions contains options for creating a milestone
+type CreateMilestoneOptions struct {
+	Title       string
+	Description string
+	DueDate     *time.Time
+	State       string
+}
+
+// UpdateMilestoneOptions contains options for updating a milestone
+type UpdateMilestoneOptions struct {
+	Title       *string
+	Description *string
+	DueDate     *time.Time
+	State       *string
+}
+
+// ListMilestoneOptions contains options for listing milestones
+type ListMilestoneOptions struct {
+	State     string
+	SortBy    string
+	SortOrder string
+	Page      int
+	Limit     int
+}
+
+// ListRepoOptions contains options for listing repositories
+type ListRepoOptions struct {
+	Owner     string
+	Type      string // "all", "owner", "member", "public", "private"
+	SortBy    string
+	SortOrder string
+	Page      int
+	Limit     int
+}

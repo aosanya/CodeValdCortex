@@ -172,6 +172,64 @@ type WorkComment struct {
 	ProviderMetadata map[string]interface{} `json:"provider_metadata,omitempty"`
 }
 
+// WorkLabel represents a label/tag in a work tracking system
+type WorkLabel struct {
+	// Provider identifies the source system
+	Provider string `json:"provider"`
+
+	// LabelID is the provider-specific unique identifier
+	LabelID string `json:"label_id"`
+
+	// Name is the label name
+	Name string `json:"name"`
+
+	// Description is the label description
+	Description string `json:"description,omitempty"`
+
+	// Color is the label color (hex format)
+	Color string `json:"color,omitempty"`
+
+	// Provider-specific metadata
+	ProviderMetadata map[string]interface{} `json:"provider_metadata,omitempty"`
+}
+
+// WorkRepository represents a repository/project in a work tracking system
+type WorkRepository struct {
+	// Provider identifies the source system
+	Provider string `json:"provider"`
+
+	// RepoID is the provider-specific unique identifier
+	RepoID string `json:"repo_id"`
+
+	// Name is the repository name
+	Name string `json:"name"`
+
+	// FullName is the full repository path (e.g., "owner/repo")
+	FullName string `json:"full_name"`
+
+	// Description is the repository description
+	Description string `json:"description,omitempty"`
+
+	// Owner is the repository owner username
+	Owner string `json:"owner"`
+
+	// URL is the repository web URL
+	URL string `json:"url"`
+
+	// DefaultBranch is the default branch name
+	DefaultBranch string `json:"default_branch,omitempty"`
+
+	// IsPrivate indicates if the repository is private
+	IsPrivate bool `json:"is_private"`
+
+	// Timestamps
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// Provider-specific metadata
+	ProviderMetadata map[string]interface{} `json:"provider_metadata,omitempty"`
+}
+
 // GetCollectionName returns the ArangoDB collection name for work items
 func GetCollectionName(eventType WorkEventType) string {
 	switch eventType {
