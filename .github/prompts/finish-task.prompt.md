@@ -9,7 +9,9 @@ Follow the **mandatory completion process** for MVP tasks:
 ## Completion Process (MANDATORY)
 
 1. **Update domain documentation file** with implementation details
-   - **Locate your task** in the domain file (e.g., `work-items-integration.md`, `agency-designer.md`)
+   - **Locate your task** in `documents/3-SofwareDevelopment/mvp-details/`:
+     - **Small domains** (2-4 tasks, <500 lines): Single file like `work-items-integration.md`
+     - **Large domains** (5+ tasks, >500 lines): Folder with `README.md` + task files
    - **Find task annotation**: Look for `<!-- MVP-XXX -->` markers
    - **Update task section** with:
      - Implementation decisions made
@@ -48,6 +50,18 @@ Follow the **mandatory completion process** for MVP tasks:
      |------|---------|---------|
      | 2025-11-19 | [MVP-WI-001_gitea_webhook_integration](../coding_sessions/MVP-WI-001_gitea_webhook_integration.md) | Implemented pluggable webhook architecture with work abstraction layer and Gitea provider |
      ```
+   - **Keep documentation consumable**: Easy to read, straightforward, well-organized
+   - **Respect file size limits**:
+     - **MAX 500 lines per file**: If domain file exceeds, refactor into folder structure
+     - **Folder structure** for large domains:
+       ```
+       {domain-name}/
+       ├── README.md              # Overview, architecture, navigation (MAX 300 lines)
+       ├── task-1.md              # Individual task details (MAX 200 lines)
+       ├── architecture/          # Detailed diagrams, flows
+       └── examples/              # Code samples, configurations
+       ```
+     - If creating folder, move verbose content to subfolders, keep README.md concise
    - **Domain coherence**: Ensure your updates fit the narrative flow of the entire domain
    - **Cross-references**: Link to related tasks in the same domain if dependencies resolved
    - **Next steps**: If task unlocks follow-up work, mention it in narrative

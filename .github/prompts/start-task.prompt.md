@@ -15,49 +15,34 @@ Follow the **mandatory task startup process** for project tasks:
 
 2. **Read detailed specification**
    - **Domain-based documentation**: Tasks are organized by problem domain in `documents/3-SofwareDevelopment/mvp-details/`
-   - **Find your task's domain file** (e.g., `work-items-integration.md`, `agency-designer.md`, `authentication.md`)
-   - **Within the domain file**, locate your task using annotations like `<!-- MVP-XXX -->` or `## MVP-XXX: Task Title`
-   - **Domain files are narrative documents** that read as cohesive guides, with tasks as annotated sections
+   - **Find your task's domain**:
+     - **Small domains** (2-4 tasks, <500 lines): Single file like `work-items-integration.md`
+     - **Large domains** (5+ tasks, >500 lines): Folder like `platform-infrastructure/` with README.md + individual task files
+   - **Locate your task**: Search for `<!-- MVP-XXX -->` annotation
+   - **Domain files are narrative documents**: Easy to read, straightforward, consumable
    - **If domain file doesn't exist:**
-     - Create new domain-based file: `{domain-name}.md` (e.g., `compliance-framework.md`)
-     - Write as a **continuous narrative document** covering the entire domain
-     - Annotate task sections with `<!-- MVP-XXX -->` comments for reference
-     - Use this template structure:
-       ```markdown
-       # [Domain Name] (e.g., Work Items Integration)
-       
-       ## Overview
-       [Narrative introduction to the entire domain]
-       
-       ## Architecture
-       [Overall architecture for this domain]
-       
-       <!-- MVP-XXX -->
-       ## [Task Title] (MVP-XXX)
-       
-       [Task description integrated into the narrative flow]
-       
-       **Priority**: [P0/P1/P2]  
-       **Effort**: [Low/Medium/High]  
-       **Dependencies**: [MVP-XXX, MVP-YYY]
-       
-       ### Objectives
-       - [Objective 1]
-       
-       ### Requirements
-       [Requirements in narrative form]
-       
-       ### Acceptance Criteria
-       - [ ] [Criterion 1]
-       
-       ### Technical Details
-       [Implementation details that flow with the document]
-       
-       <!-- /MVP-XXX -->
-       
-       [Continue narrative to next task or section...]
+     - **Small domain** (<500 lines): Create single file `{domain-name}.md`
+     - **Large domain** (>500 lines): Create folder structure:
        ```
-   - **Key principle**: Domain files should be readable as standalone documents, not just task lists
+       {domain-name}/
+       ├── README.md              # Overview, architecture, task list (MAX 300 lines)
+       ├── task-1.md              # Individual task (MAX 200 lines)
+       ├── task-2.md              # Individual task (MAX 200 lines)
+       ├── architecture/          # Detailed diagrams, flows
+       │   └── detailed-design.md
+       └── examples/              # Code snippets, configs
+           └── sample-config.md
+       ```
+     - **Keep it simple**: Straightforward language, clear structure
+     - **Separate verbosity**: Move detailed examples to `examples/` subfolder
+     - **Well-organized**: Use `architecture/`, `examples/`, `schemas/` subfolders
+     - Write as **continuous narrative document** covering the entire domain
+     - Annotate task sections with `<!-- MVP-XXX -->` comments for reference
+   - **Key principles**:
+     - **MAX 500 lines per file**: Split into folder if exceeding
+     - **MAX 300 lines for README.md**: Keep entry point concise
+     - **MAX 200 lines per task file**: One task per file in folders
+     - Domain files should be readable as standalone documents, not just task lists
    - Review all requirements, acceptance criteria, and technical specifications within the domain context
    - Understand how this task fits into the broader domain strategy
 
