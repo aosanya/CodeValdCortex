@@ -153,7 +153,7 @@ The agent has been quarantined and requires manual review before it can resume w
 	r.RegisterTemplate("task_running", `▶️ **Executing Task**
 
 **Agent**: `+"`{{.AgentID}}`"+`  
-**Task**: {{.TaskDescription}}  
+**Task**: {{.TaskName}}  
 **Started**: {{.FormattedTime}}
 
 The agent is now executing this task.`)
