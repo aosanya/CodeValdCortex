@@ -102,11 +102,11 @@ func (h *AIPolicyWebHandler) GetPolicySummary(c *gin.Context) {
 
 	// Build summary directly from models.Policy
 	summary := buildPolicySummaryFromModelPolicy(spec.AIPolicy)
-	
+
 	// Add specification metadata
 	summary["last_updated"] = spec.UpdatedAt
 	summary["agency_id"] = spec.AgencyID
-	
+
 	c.JSON(http.StatusOK, summary)
 }
 

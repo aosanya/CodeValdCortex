@@ -253,7 +253,7 @@ templ WorkflowsContent(currentAgency *models.Agency) {
 
 // AIPolicyContent renders the AI Policy section with a card linking to the wizard
 templ AIPolicyContent(currentAgency *models.Agency) {
-	<div class="overview-section">
+	<div class="overview-section" data-agency-id={ currentAgency.ID }>
 		<div class="box">
 			<div class="level mb-4">
 				<div class="level-left">
@@ -308,7 +308,9 @@ templ AIPolicyContent(currentAgency *models.Agency) {
 		(function() {
 			async function loadPolicySummary() {
 				try {
-					const response = await fetch(`/api/agencies/{ currentAgency.ID }/policy/summary`);
+					const aiPolicySection = document.getElementById('content-ai-policy');
+					const agencyId = aiPolicySection.querySelector('.overview-section').dataset.agencyId;
+					const response = await fetch(`/api/agencies/${agencyId}/policy/summary`);
 					console.log('Policy summary response:', response.status);
 					if (response.ok) {
 						const summary = await response.json();
