@@ -261,7 +261,7 @@ func TestHomepageIntegration(t *testing.T) {
 		Metadata: models.AgencyMetadata{
 			TotalAgents: 5,
 		},
-		Status: "active",
+		State: models.AgencyStateActive,
 	}
 
 	agency2 := &models.Agency{
@@ -270,7 +270,7 @@ func TestHomepageIntegration(t *testing.T) {
 		Metadata: models.AgencyMetadata{
 			TotalAgents: 3,
 		},
-		Status: "active",
+		State: models.AgencyStateActive,
 	}
 
 	_ = mockSvc.CreateAgency(context.Background(), agency1)
@@ -356,14 +356,14 @@ func TestHomepageIntegration(t *testing.T) {
 		// Create a fresh service with mixed status agencies
 		freshMock := newMockAgencyService()
 		_ = freshMock.CreateAgency(context.Background(), &models.Agency{
-			ID:     "active-1",
-			Name:   "Active Agency 1",
-			Status: "active",
+			ID:    "active-1",
+			Name:  "Active Agency 1",
+			State: models.AgencyStateActive,
 		})
 		_ = freshMock.CreateAgency(context.Background(), &models.Agency{
-			ID:     "inactive-1",
-			Name:   "Inactive Agency 1",
-			Status: "inactive",
+			ID:    "inactive-1",
+			Name:  "Inactive Agency 1",
+			State: models.AgencyStateStopped,
 		})
 
 		freshRouter := setupTestRouter(freshMock)
@@ -391,7 +391,7 @@ func TestAgencyMiddleware(t *testing.T) {
 		Metadata: models.AgencyMetadata{
 			TotalAgents: 5,
 		},
-		Status: "active",
+		State: models.AgencyStateActive,
 	}
 
 	_ = mockSvc.CreateAgency(context.Background(), agency1)
@@ -438,7 +438,7 @@ func TestHomepageFilter(t *testing.T) {
 		Metadata: models.AgencyMetadata{
 			TotalAgents: 5,
 		},
-		Status: "active",
+		State: models.AgencyStateActive,
 	}
 
 	inactiveAgency := &models.Agency{
@@ -447,7 +447,7 @@ func TestHomepageFilter(t *testing.T) {
 		Metadata: models.AgencyMetadata{
 			TotalAgents: 2,
 		},
-		Status: "inactive",
+		State: models.AgencyStateStopped,
 	}
 
 	_ = mockSvc.CreateAgency(context.Background(), activeAgency)
