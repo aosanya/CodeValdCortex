@@ -38,7 +38,7 @@ func (h *PublicationHandler) ValidateForPublish(c *gin.Context) {
 	if err != nil {
 		h.logger.WithError(err).Error("validation service error")
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to validate agency",
+			"error":   "failed to validate agency",
 			"details": err.Error(),
 		})
 		return
@@ -51,10 +51,10 @@ func (h *PublicationHandler) ValidateForPublish(c *gin.Context) {
 	}
 
 	c.JSON(statusCode, gin.H{
-		"valid":            result.Valid,
-		"errors":           result.Errors,
-		"warnings":         result.Warnings,
-		"recommendations":  result.Recommendations,
+		"valid":           result.Valid,
+		"errors":          result.Errors,
+		"warnings":        result.Warnings,
+		"recommendations": result.Recommendations,
 	})
 }
 
@@ -73,7 +73,7 @@ func (h *PublicationHandler) Publish(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.WithError(err).Warn("invalid request body")
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request body",
+			"error":   "invalid request body",
 			"details": err.Error(),
 		})
 		return
@@ -83,27 +83,27 @@ func (h *PublicationHandler) Publish(c *gin.Context) {
 	publication, err := h.pubService.Publish(c.Request.Context(), agencyID, &req)
 	if err != nil {
 		h.logger.WithError(err).Error("publish service error")
-		
+
 		// Check for validation errors
 		if err.Error() == "validation failed: 0 errors found" {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
-				"error": "agency validation failed",
+				"error":   "agency validation failed",
 				"details": err.Error(),
 			})
 			return
 		}
-		
+
 		// Check for duplicate version
-		if err.Error() == "publication with version " + req.Version + " already exists" {
+		if err.Error() == "publication with version "+req.Version+" already exists" {
 			c.JSON(http.StatusConflict, gin.H{
-				"error": "version conflict",
+				"error":   "version conflict",
 				"details": err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to publish agency",
+			"error":   "failed to publish agency",
 			"details": err.Error(),
 		})
 		return
@@ -151,18 +151,18 @@ func (h *PublicationHandler) Activate(c *gin.Context) {
 	result, err := h.pubService.Activate(c.Request.Context(), publicationID)
 	if err != nil {
 		h.logger.WithError(err).Error("activation service error")
-		
+
 		// Check for state errors
 		if err.Error() == "agency must be in published state to activate" {
 			c.JSON(http.StatusConflict, gin.H{
-				"error": "invalid state",
+				"error":   "invalid state",
 				"details": err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to activate agency",
+			"error":   "failed to activate agency",
 			"details": err.Error(),
 		})
 		return
@@ -201,18 +201,18 @@ func (h *PublicationHandler) Deactivate(c *gin.Context) {
 	err := h.pubService.Deactivate(c.Request.Context(), agencyID, req.Graceful)
 	if err != nil {
 		h.logger.WithError(err).Error("deactivation service error")
-		
+
 		// Check for state errors
 		if err.Error() == "agency must be in active or paused state to deactivate" {
 			c.JSON(http.StatusConflict, gin.H{
-				"error": "invalid state",
+				"error":   "invalid state",
 				"details": err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to deactivate agency",
+			"error":   "failed to deactivate agency",
 			"details": err.Error(),
 		})
 		return
@@ -221,7 +221,7 @@ func (h *PublicationHandler) Deactivate(c *gin.Context) {
 	h.logger.WithField("agency_id", agencyID).Info("agency deactivated successfully")
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "agency deactivated successfully",
+		"message":  "agency deactivated successfully",
 		"graceful": req.Graceful,
 	})
 }
@@ -241,7 +241,7 @@ func (h *PublicationHandler) GetPublicationHistory(c *gin.Context) {
 	if err != nil {
 		h.logger.WithError(err).Error("failed to retrieve publication history")
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to retrieve publication history",
+			"error":   "failed to retrieve publication history",
 			"details": err.Error(),
 		})
 		return
@@ -272,18 +272,18 @@ func (h *PublicationHandler) ActivatePublication(c *gin.Context) {
 	result, err := h.pubService.Activate(c.Request.Context(), publicationID)
 	if err != nil {
 		h.logger.WithError(err).Error("activation service error")
-		
+
 		// Check for state errors
 		if err.Error() == "agency must be in published state to activate" {
 			c.JSON(http.StatusConflict, gin.H{
-				"error": "invalid state",
+				"error":   "invalid state",
 				"details": err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to activate publication",
+			"error":   "failed to activate publication",
 			"details": err.Error(),
 		})
 		return

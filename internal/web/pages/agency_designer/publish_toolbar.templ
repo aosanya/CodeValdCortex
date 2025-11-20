@@ -1,0 +1,224 @@
+package agency_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
+
+// PublishToolbar renders the publish/validate/tag action buttons
+// Positioned in top toolbar area for easy access during design
+templ PublishToolbar(currentAgency *models.Agency) {
+	<div class="publish-toolbar">
+		<div class="buttons has-addons">
+			if string(currentAgency.State) == "draft" {
+				<!-- Validate button (Draft → Validated) -->
+				<button 
+					class="button is-small is-info"
+					onclick="handleValidateAgency()"
+					id="validate-btn"
+					title="Validate agency specification">
+					<span class="icon is-small">
+						<i class="fas fa-check-circle"></i>
+					</span>
+					<span>Validate</span>
+				</button>
+			}
+			
+			if string(currentAgency.State) == "validated" || string(currentAgency.State) == "published" || string(currentAgency.State) == "active" {
+				<!-- Publish button (Validated → Published) -->
+				<button 
+					class="button is-small is-primary"
+					onclick="openPublishDialog()"
+					id="publish-btn"
+					title="Publish agency as new version">
+					<span class="icon is-small">
+						<i class="fas fa-upload"></i>
+					</span>
+					<span>Publish</span>
+				</button>
+			}
+			
+			<!-- Create Tag button (available in all states except draft) -->
+			if string(currentAgency.State) != "draft" {
+				<button 
+					class="button is-small is-link"
+					onclick="openTagDialog()"
+					id="tag-btn"
+					title="Create tag for current state">
+					<span class="icon is-small">
+						<i class="fas fa-tag"></i>
+					</span>
+					<span>Create Tag</span>
+				</button>
+			}
+			
+			<!-- Lifecycle action buttons (context-sensitive) -->
+			if string(currentAgency.State) == "published" {
+				<button 
+					class="button is-small is-success"
+					onclick="handleActivateAgency()"
+					id="activate-btn"
+					title="Activate agency (spawn agents and start workflows)">
+					<span class="icon is-small">
+						<i class="fas fa-play"></i>
+					</span>
+					<span>Activate</span>
+				</button>
+			}
+			
+			if string(currentAgency.State) == "active" {
+				<button 
+					class="button is-small is-warning"
+					onclick="handlePauseAgency()"
+					id="pause-btn"
+					title="Pause agency (temporarily suspend agents)">
+					<span class="icon is-small">
+						<i class="fas fa-pause"></i>
+					</span>
+					<span>Pause</span>
+				</button>
+				<button 
+					class="button is-small is-warning"
+					onclick="handleDrainAgency()"
+					id="drain-btn"
+					title="Drain agency (complete existing work, no new work)">
+					<span class="icon is-small">
+						<i class="fas fa-hourglass-half"></i>
+					</span>
+					<span>Drain</span>
+				</button>
+				<button 
+					class="button is-small is-danger"
+					onclick="handleStopAgency()"
+					id="stop-btn"
+					title="Stop agency immediately">
+					<span class="icon is-small">
+						<i class="fas fa-stop"></i>
+					</span>
+					<span>Stop</span>
+				</button>
+			}
+			
+			if string(currentAgency.State) == "paused" {
+				<button 
+					class="button is-small is-success"
+					onclick="handleResumeAgency()"
+					id="resume-btn"
+					title="Resume agency from paused state">
+					<span class="icon is-small">
+						<i class="fas fa-play"></i>
+					</span>
+					<span>Resume</span>
+				</button>
+				<button 
+					class="button is-small is-danger"
+					onclick="handleStopAgency()"
+					id="stop-btn"
+					title="Stop agency">
+					<span class="icon is-small">
+						<i class="fas fa-stop"></i>
+					</span>
+					<span>Stop</span>
+				</button>
+			}
+			
+			if string(currentAgency.State) == "draining" {
+				<!-- In draining state, only show force stop -->
+				<button 
+					class="button is-small is-danger"
+					onclick="handleForceStopAgency()"
+					id="force-stop-btn"
+					title="Force stop draining agency">
+					<span class="icon is-small">
+						<i class="fas fa-times-circle"></i>
+					</span>
+					<span>Force Stop</span>
+				</button>
+			}
+		</div>
+		
+		<!-- State badge showing current agency state -->
+		<div class="state-badge ml-3">
+			@StateBadge(string(currentAgency.State))
+		</div>
+	</div>
+}
+
+// StateBadge renders a colored badge showing the current agency state
+templ StateBadge(state string) {
+	<span class={ "tag", "is-medium", stateToClass(state) }>
+		<span class="icon is-small">
+			<i class={ stateToIcon(state) }></i>
+		</span>
+		<span>{ stateToLabel(state) }</span>
+	</span>
+}
+
+// Helper functions for state display
+func stateToClass(state string) string {
+	switch state {
+	case "draft":
+		return "is-light"
+	case "validated":
+		return "is-info"
+	case "published":
+		return "is-link"
+	case "active":
+		return "is-success"
+	case "paused":
+		return "is-warning"
+	case "draining":
+		return "is-warning is-light"
+	case "stopped":
+		return "is-dark"
+	case "archived":
+		return "is-grey"
+	default:
+		return "is-light"
+	}
+}
+
+func stateToIcon(state string) string {
+	switch state {
+	case "draft":
+		return "fas fa-pencil-alt"
+	case "validated":
+		return "fas fa-check-circle"
+	case "published":
+		return "fas fa-upload"
+	case "active":
+		return "fas fa-running"
+	case "paused":
+		return "fas fa-pause-circle"
+	case "draining":
+		return "fas fa-hourglass-half"
+	case "stopped":
+		return "fas fa-stop-circle"
+	case "archived":
+		return "fas fa-archive"
+	default:
+		return "fas fa-question-circle"
+	}
+}
+
+func stateToLabel(state string) string {
+	switch state {
+	case "draft":
+		return "Draft"
+	case "validated":
+		return "Validated"
+	case "published":
+		return "Published"
+	case "active":
+		return "Active"
+	case "paused":
+		return "Paused"
+	case "draining":
+		return "Draining"
+	case "stopped":
+		return "Stopped"
+	case "archived":
+		return "Archived"
+	default:
+		return state
+	}
+}

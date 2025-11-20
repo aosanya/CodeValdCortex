@@ -30,6 +30,8 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 		<script src="/static/js/agency-designer/workflows.js" defer></script>
 		<script src="/static/js/agency-designer/htmx.js" defer></script>
 		<script src="/static/js/agency-designer/context.js" defer></script>
+		<script src="/static/js/agency-designer/publish.js" defer></script>
+		<script src="/static/js/agency-designer/tags.js" defer></script>
 		<script src="/static/js/agency-designer.js?v=20251102-workitems" defer></script>
 		<script src="/static/js/agency-designer/main.js" defer></script>
 		<script src="/static/js/agency-designer/raci.js?v=20251103" defer></script>
@@ -39,9 +41,16 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 			<div class="columns is-gapless vscode-main-content">
 				<!-- Left Column: Designer Panels -->
 				<div class="column is-two-thirds">
-					<!-- View Switcher at Top -->
+					<!-- View Switcher and Publish Toolbar at Top -->
 					<div class="top-toolbar">
-						@ViewSwitcher()
+						<div class="is-flex is-justify-content-space-between is-align-items-center">
+							<div>
+								@ViewSwitcher()
+							</div>
+							<div>
+								@PublishToolbar(currentAgency)
+							</div>
+						</div>
 					</div>
 					<div class="designer-panels">
 						<!-- Overview View -->
@@ -66,6 +75,10 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 		
 		<!-- Status Bar at Bottom (VS Code style) -->
 		@components.StatusBar(currentAgency, conversation)
+		
+		<!-- Modals/Dialogs -->
+		@PublishDialog()
+		@TagDialog()
 	</div>
 }
 }// ViewSwitcher shows the different view options
