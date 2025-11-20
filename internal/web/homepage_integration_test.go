@@ -51,7 +51,7 @@ func (m *mockAgencyService) ListAgencies(ctx context.Context, filters models.Age
 	result := make([]*models.Agency, 0, len(m.agencies))
 	for _, ag := range m.agencies {
 		// Apply filters
-		if filters.Status != "" && ag.Status != filters.Status {
+		if filters.State != "" && ag.State != filters.State {
 			continue
 		}
 		result = append(result, ag)
