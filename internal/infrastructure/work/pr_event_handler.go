@@ -283,7 +283,7 @@ func (h *PREventHandler) handlePRApproved(ctx context.Context, event *PRWebhookE
 }
 
 // handleChangesRequested processes a request for changes
-func (h *PREventHandler) handleChangesRequested(ctx context.Context, event *PRWebhookEvent) error {
+func (h *PREventHandler) handleChangesRequested(_ context.Context, event *PRWebhookEvent) error {
 	log.WithFields(log.Fields{
 		"pr_id":    event.PullRequest.PRID,
 		"reviewer": event.Review.SubmittedBy,
@@ -383,7 +383,7 @@ func (h *PREventHandler) evaluateAndAutoMerge(ctx context.Context, prID string) 
 }
 
 // findAgentFromPR attempts to find the agent ID from PR metadata
-func (h *PREventHandler) findAgentFromPR(ctx context.Context, pr *WorkPullRequest) (string, error) {
+func (h *PREventHandler) findAgentFromPR(_ context.Context, _ *WorkPullRequest) (string, error) {
 	// Strategy 1: Check if PR branch follows agent/{agentID}/... pattern
 	// Strategy 2: Check if PR is linked to an issue, then check agent-issue links
 	// Strategy 3: Check PR creator metadata

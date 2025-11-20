@@ -131,7 +131,7 @@ func (r *ArangoAgentIssueLinkRepository) GetByAgentID(ctx context.Context, agent
 	var link AgentIssueLink
 	_, err := r.col.ReadDocument(ctx, agentID, &link)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("agent-issue link not found for agent: %s", agentID)
 		}
 		return nil, fmt.Errorf("failed to read agent-issue link: %w", err)
@@ -273,7 +273,7 @@ func (r *ArangoAgentIssueLinkRepository) ListActive(ctx context.Context) ([]*Age
 func (r *ArangoAgentIssueLinkRepository) Delete(ctx context.Context, agentID string) error {
 	_, err := r.col.RemoveDocument(ctx, agentID)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("agent-issue link not found: %s", agentID)
 		}
 		return fmt.Errorf("failed to delete agent-issue link: %w", err)

@@ -64,7 +64,7 @@ func (r *prRepositoryImpl) GetByID(ctx context.Context, prID string) (*PRInfo, e
 	var pr PRInfo
 	_, err = col.ReadDocument(ctx, prID, &pr)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("PR not found: %s", prID)
 		}
 		return nil, fmt.Errorf("failed to read PR %s: %w", prID, err)

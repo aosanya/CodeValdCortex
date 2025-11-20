@@ -389,7 +389,7 @@ func (s *publicationService) generateDeploymentManifest(spec *models.AgencySpeci
 	workflowPlan := s.generateWorkflowExecution(spec)
 
 	// Calculate resource allocation
-	resources := s.calculateResourceAllocation(spec, agentPlan)
+	resources := s.calculateResourceAllocation(agentPlan)
 
 	// Generate monitoring configuration
 	monitoring := s.generateMonitoringConfig(agencyDoc)
@@ -470,22 +470,24 @@ func (s *publicationService) generateWorkflowExecution(spec *models.AgencySpecif
 }
 
 // calculateResourceAllocation computes resource quotas
-func (s *publicationService) calculateResourceAllocation(spec *models.AgencySpecification, agentPlan models.AgentSpawnPlan) models.ResourceAllocation {
+func (s *publicationService) calculateResourceAllocation(agentPlan models.AgentSpawnPlan) models.ResourceAllocation {
 	totalCPU := 0
 	totalMemory := 0
 
 	for _, agent := range agentPlan.Agents {
 		// Parse CPU (assume "500m" format)
-		if agent.ResourceLimits.CPULimit == "500m" {
+		switch agent.ResourceLimits.CPULimit {
+		case "500m":
 			totalCPU += 500
-		} else if agent.ResourceLimits.CPULimit == "1000m" {
+		case "1000m":
 			totalCPU += 1000
 		}
 
 		// Parse memory (assume "512Mi" or "1Gi" format)
-		if agent.ResourceLimits.MemoryLimit == "512Mi" {
+		switch agent.ResourceLimits.MemoryLimit {
+		case "512Mi":
 			totalMemory += 512
-		} else if agent.ResourceLimits.MemoryLimit == "1Gi" {
+		case "1Gi":
 			totalMemory += 1024
 		}
 	}
