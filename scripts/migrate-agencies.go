@@ -127,7 +127,7 @@ func discoverUseCases(rootDir string) ([]*models.Agency, error) {
 			Description: fmt.Sprintf("Use case: %s", formatName(namePart)),
 			Category:    category,
 			Icon:        getIconForCategory(category),
-			Status:      models.AgencyStatusActive,
+			State:       models.AgencyStateDraft,
 			Metadata: models.AgencyMetadata{
 				Roles:       []string{},
 				TotalAgents: 0,

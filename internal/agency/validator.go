@@ -71,24 +71,14 @@ func (v *validator) ValidateAgency(agency *models.Agency) error {
 		return fmt.Errorf("invalid category: %s", agency.Category)
 	}
 
-	// Validate status
-	if agency.Status != "" {
-		if !isValidStatus(agency.Status) {
-			return fmt.Errorf("invalid agency status: %s", agency.Status)
+	// Validate state
+	if agency.State != "" {
+		if !models.IsValidAgencyState(agency.State) {
+			return fmt.Errorf("invalid agency state: %s", agency.State)
 		}
 	}
 
 	return nil
-}
-
-// isValidStatus checks if the status is valid
-func isValidStatus(status models.AgencyStatus) bool {
-	switch status {
-	case models.AgencyStatusActive, models.AgencyStatusInactive, models.AgencyStatusPaused, models.AgencyStatusArchived:
-		return true
-	default:
-		return false
-	}
 }
 
 // isValidCategory checks if the category is valid

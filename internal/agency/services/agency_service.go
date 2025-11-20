@@ -38,9 +38,9 @@ func (s *AgencyService) CreateAgency(ctx context.Context, agencyDoc *models.Agen
 	agencyDoc.CreatedAt = now
 	agencyDoc.UpdatedAt = now
 
-	// Set default status if not provided
-	if agencyDoc.Status == "" {
-		agencyDoc.Status = models.AgencyStatusActive
+	// Set default state if not provided
+	if agencyDoc.State == "" {
+		agencyDoc.State = models.AgencyStateDraft
 	}
 
 	// Set database field if not provided
@@ -175,8 +175,8 @@ func (s *AgencyService) applyUpdates(agencyDoc *models.Agency, updates models.Ag
 	if updates.Icon != nil {
 		agencyDoc.Icon = *updates.Icon
 	}
-	if updates.Status != nil {
-		agencyDoc.Status = *updates.Status
+	if updates.State != nil {
+		agencyDoc.State = *updates.State
 	}
 	if updates.Metadata != nil {
 		agencyDoc.Metadata = *updates.Metadata
