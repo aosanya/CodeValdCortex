@@ -64,11 +64,12 @@ type PublicationService interface {
 
 // publicationService is the concrete implementation of PublicationService
 type publicationService struct {
-	pubRepo      PublicationRepository
-	agencyRepo   agency.Repository
-	stateMachine *agency.AgencyStateMachine
-	validator    *validation.PublisherValidator
-	logger       *slog.Logger
+	pubRepo       PublicationRepository
+	agencyRepo    agency.Repository
+	stateMachine  *agency.AgencyStateMachine
+	validator     *validation.PublisherValidator
+	activationSvc ActivationService
+	logger        *slog.Logger
 }
 
 // NewPublicationService creates a new publication service instance
@@ -77,14 +78,16 @@ func NewPublicationService(
 	agencyRepo agency.Repository,
 	stateMachine *agency.AgencyStateMachine,
 	validator *validation.PublisherValidator,
+	activationSvc ActivationService,
 	logger *slog.Logger,
 ) PublicationService {
 	return &publicationService{
-		pubRepo:      pubRepo,
-		agencyRepo:   agencyRepo,
-		stateMachine: stateMachine,
-		validator:    validator,
-		logger:       logger,
+		pubRepo:       pubRepo,
+		agencyRepo:    agencyRepo,
+		stateMachine:  stateMachine,
+		validator:     validator,
+		activationSvc: activationSvc,
+		logger:        logger,
 	}
 }
 
@@ -255,6 +258,35 @@ func (s *publicationService) Activate(ctx context.Context, publicationID string)
 		return nil, fmt.Errorf("failed to transition to active: %w", err)
 	}
 
+	// Spawn agents using activation service
+	spawnResult, err := s.activationSvc.SpawnAgents(ctx, publicationID)
+	if err != nil {
+		s.logger.Error("failed to spawn agents", "error", err)
+		// Revert state transition
+		_ = s.stateMachine.Transition(agencyDoc, "deactivate")
+		return nil, fmt.Errorf("failed to spawn agents: %w", err)
+	}
+
+	s.logger.Info("agents spawned",
+		"total_spawned", len(spawnResult.SpawnedAgents),
+		"failures", len(spawnResult.Failures))
+
+	// Initialize workflows
+	workflowResult, err := s.activationSvc.InitializeWorkflows(ctx, publicationID)
+	if err != nil {
+		s.logger.Error("failed to initialize workflows", "error", err)
+		// Continue - agents are already spawned
+	} else {
+		s.logger.Info("workflows initialized",
+			"total_initialized", len(workflowResult.InitializedWorkflows))
+	}
+
+	// Start monitoring
+	if err := s.activationSvc.StartMonitoring(ctx, publication.AgencyID); err != nil {
+		s.logger.Warn("failed to start monitoring", "error", err)
+		// Non-critical - continue
+	}
+
 	// Update agency
 	now := time.Now()
 	agencyDoc.ActivatedAt = &now
@@ -271,12 +303,14 @@ func (s *publicationService) Activate(ctx context.Context, publicationID string)
 
 	s.logger.Info("publication activated",
 		"publication_id", publicationID,
-		"agency_id", publication.AgencyID)
+		"agency_id", publication.AgencyID,
+		"agents_spawned", len(spawnResult.SpawnedAgents),
+		"workflows_initialized", len(workflowResult.InitializedWorkflows))
 
-	// Return stub result (actual agent spawning in MVP-PUB-004)
+	// Return activation result
 	result := &ActivationResult{
-		AgentsSpawned:        0, // Stub: agents not spawned yet
-		WorkflowsInitialized: 0, // Stub: workflows not initialized yet
+		AgentsSpawned:        len(spawnResult.SpawnedAgents),
+		WorkflowsInitialized: len(workflowResult.InitializedWorkflows),
 		MonitoringEnabled:    agencyDoc.Settings.MonitoringEnabled,
 		ActivatedAt:          now,
 	}
@@ -299,15 +333,34 @@ func (s *publicationService) Deactivate(ctx context.Context, agencyID string, gr
 		return fmt.Errorf("agency must be in active or paused state to deactivate (current: %s)", agencyDoc.State)
 	}
 
-	// Choose transition event
-	event := "force_stop"
+	// Stop agents using activation service
 	if graceful {
-		event = "drain"
-	}
+		s.logger.Info("draining agency gracefully", "agency_id", agencyID)
+		if err := s.activationSvc.DrainAgency(ctx, agencyID); err != nil {
+			s.logger.Error("failed to drain agency", "error", err)
+			return fmt.Errorf("failed to drain agency: %w", err)
+		}
 
-	// Transition state
-	if err := s.stateMachine.Transition(agencyDoc, event); err != nil {
-		return fmt.Errorf("failed to transition: %w", err)
+		// Transition to draining state
+		if err := s.stateMachine.Transition(agencyDoc, "drain"); err != nil {
+			s.logger.Warn("failed to transition to draining", "error", err)
+		}
+
+		// Transition to stopped after drain completes
+		if err := s.stateMachine.Transition(agencyDoc, "drain_complete"); err != nil {
+			s.logger.Warn("failed to complete drain transition", "error", err)
+		}
+	} else {
+		s.logger.Info("force stopping agency", "agency_id", agencyID)
+		if err := s.activationSvc.StopAgency(ctx, agencyID, true); err != nil {
+			s.logger.Error("failed to stop agency", "error", err)
+			return fmt.Errorf("failed to stop agency: %w", err)
+		}
+
+		// Transition to stopped
+		if err := s.stateMachine.Transition(agencyDoc, "force_stop"); err != nil {
+			s.logger.Warn("failed to transition to stopped", "error", err)
+		}
 	}
 
 	// Update agency
@@ -315,22 +368,10 @@ func (s *publicationService) Deactivate(ctx context.Context, agencyID string, gr
 		return fmt.Errorf("failed to update agency: %w", err)
 	}
 
-	// If graceful, wait for drain completion (stub for MVP-PUB-004)
-	if graceful {
-		s.logger.Info("draining agency", "agency_id", agencyID)
-		// TODO (MVP-PUB-004): Wait for work to complete
-		// For now, immediately transition to stopped
-		if err := s.stateMachine.Transition(agencyDoc, "drain_complete"); err != nil {
-			return fmt.Errorf("failed to complete drain: %w", err)
-		}
-		if err := s.agencyRepo.Update(ctx, agencyDoc); err != nil {
-			return fmt.Errorf("failed to update agency after drain: %w", err)
-		}
-	}
-
 	s.logger.Info("agency deactivated",
 		"agency_id", agencyID,
-		"final_state", agencyDoc.State)
+		"final_state", agencyDoc.State,
+		"graceful", graceful)
 
 	return nil
 }
