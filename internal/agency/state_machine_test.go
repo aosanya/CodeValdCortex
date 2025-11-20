@@ -20,11 +20,11 @@ func TestValidTransitions(t *testing.T) {
 	sm := NewAgencyStateMachine()
 
 	tests := []struct {
-		name        string
-		initialState models.AgencyState
-		event       string
+		name          string
+		initialState  models.AgencyState
+		event         string
 		expectedState models.AgencyState
-		shouldFail  bool
+		shouldFail    bool
 	}{
 		{
 			name:          "Draft to Validated",
