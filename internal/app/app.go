@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -38,6 +39,7 @@ type App struct {
 	registry            *registry.Repository
 	agencyService       agency.Service
 	agencyRepository    agency.Repository
+	tagService          *services.TagService
 	runtimeManager      *runtime.Manager
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
@@ -110,6 +112,20 @@ func New(cfg *config.Config) *App {
 	agencyDBInit := agency.NewDatabaseInitializer(dbClient.Client(), logger)
 	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit, logger)
 	logger.Info("Agency management service initialized successfully")
+
+	// Initialize tag service
+	logger.Info("Initializing tag service")
+	tagRepo, err := arangodb.NewTagRepository(dbClient.Database())
+	if err != nil {
+		logger.WithError(err).Warn("Failed to initialize tag repository")
+	}
+	var tagService services.TagService
+	if tagRepo != nil {
+		// Create slog logger from logrus logger
+		slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
+		tagService = services.NewTagService(tagRepo, agencyRepo, slogger)
+		logger.Info("Tag service initialized successfully")
+	}
 
 	// Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
@@ -186,6 +202,7 @@ func New(cfg *config.Config) *App {
 		registry:            reg,
 		agencyService:       agencyService,
 		agencyRepository:    agencyRepo,
+		tagService:          &tagService,
 		runtimeManager:      runtimeManager,
 		messageService:      messageService,
 		pubSubService:       pubSubService,
@@ -415,6 +432,18 @@ func (a *App) setupServer() error {
 		v1.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
 
 		// RACI Matrix is now part of unified specification endpoint
+
+		// Tag endpoints (if tag service is available)
+		if a.tagService != nil {
+			tagHandler := handlers.NewTagHandler(*a.tagService, a.logger)
+			v1.POST("/agencies/:id/tags", tagHandler.CreateTag)
+			v1.GET("/agencies/:id/tags", tagHandler.ListTags)
+			v1.GET("/agencies/:id/tags/:name", tagHandler.GetTag)
+			v1.DELETE("/agencies/:id/tags/:name", tagHandler.DeleteTag)
+			v1.POST("/agencies/:id/tags/:name/restore", tagHandler.RestoreFromTag)
+			v1.GET("/tags/:tag1/compare/:tag2", tagHandler.CompareTags)
+			a.logger.Info("Tag endpoints registered")
+		}
 
 		// Workflow endpoints
 		if a.workflowService != nil {
