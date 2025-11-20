@@ -13,6 +13,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
+	"github.com/aosanya/CodeValdCortex/internal/agency/validation"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
@@ -40,6 +41,7 @@ type App struct {
 	agencyService       agency.Service
 	agencyRepository    agency.Repository
 	tagService          *services.TagService
+	publicationService  services.PublicationService
 	runtimeManager      *runtime.Manager
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
@@ -127,6 +129,18 @@ func New(cfg *config.Config) *App {
 		logger.Info("Tag service initialized successfully")
 	}
 
+	// Initialize publication service (MVP-PUB-003)
+	logger.Info("Initializing publication service")
+	slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
+	pubRepo := arangodb.NewPublicationRepository(dbClient.Database(), slogger)
+	var publicationService services.PublicationService
+	if pubRepo != nil {
+		publisherValidator := validation.NewPublisherValidator(slogger)
+		stateMachine := agency.NewAgencyStateMachine()
+		publicationService = services.NewPublicationService(pubRepo, agencyRepo, stateMachine, publisherValidator, slogger)
+		logger.Info("Publication service initialized successfully")
+	}
+
 	// Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
 	var introductionRefiner *ai.IntroductionBuilder
@@ -203,6 +217,7 @@ func New(cfg *config.Config) *App {
 		agencyService:       agencyService,
 		agencyRepository:    agencyRepo,
 		tagService:          &tagService,
+		publicationService:  publicationService,
 		runtimeManager:      runtimeManager,
 		messageService:      messageService,
 		pubSubService:       pubSubService,
@@ -443,6 +458,18 @@ func (a *App) setupServer() error {
 			v1.POST("/agencies/:id/tags/:name/restore", tagHandler.RestoreFromTag)
 			v1.GET("/tags/:tag1/compare/:tag2", tagHandler.CompareTags)
 			a.logger.Info("Tag endpoints registered")
+		}
+
+		// Publication endpoints (MVP-PUB-003)
+		if a.publicationService != nil {
+			pubHandler := handlers.NewPublicationHandler(a.publicationService, a.logger)
+			v1.POST("/agencies/:id/validate", pubHandler.ValidateForPublish)
+			v1.POST("/agencies/:id/publish", pubHandler.Publish)
+			v1.POST("/agencies/:id/activate", pubHandler.Activate)
+			v1.POST("/agencies/:id/deactivate", pubHandler.Deactivate)
+			v1.GET("/agencies/:id/publications", pubHandler.GetPublicationHistory)
+			v1.POST("/publications/:id/activate", pubHandler.ActivatePublication)
+			a.logger.Info("Publication endpoints registered")
 		}
 
 		// Workflow endpoints
