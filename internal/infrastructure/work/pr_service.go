@@ -11,13 +11,13 @@ import (
 
 // prServiceImpl implements PRService interface
 type prServiceImpl struct {
-	prRepo         PRRepository
-	gitOps         GitOperations
-	checkService   QualityCheckService
-	autoMerge      AutoMergeEngine
-	apiClient      APIClient
-	syncService    SyncService
-	linkRepo       AgentIssueLinkRepository
+	prRepo          PRRepository
+	gitOps          GitOperations
+	checkService    QualityCheckService
+	autoMerge       AutoMergeEngine
+	apiClient       APIClient
+	syncService     SyncService
+	linkRepo        AgentIssueLinkRepository
 	autoMergeConfig *AutoMergeConfig
 }
 
@@ -101,11 +101,11 @@ func (s *prServiceImpl) CreatePR(ctx context.Context, req *CreatePRRequest) (*PR
 	owner, repo := parts[0], parts[1]
 
 	pr, err := s.apiClient.CreatePullRequest(ctx, owner, repo, CreatePullRequestOptions{
-		Title:       req.Title,
-		Body:        req.Description,
-		Head:        branchName,
-		Base:        targetBranch,
-		Labels:      req.Labels,
+		Title:  req.Title,
+		Body:   req.Description,
+		Head:   branchName,
+		Base:   targetBranch,
+		Labels: req.Labels,
 	})
 	if err != nil {
 		return nil, &PRCreationError{
@@ -183,9 +183,9 @@ func (s *prServiceImpl) UpdatePR(ctx context.Context, prID string, updates *PRUp
 
 	// Update via API
 	_, err = s.apiClient.UpdatePullRequest(ctx, owner, repo, pr.ID, UpdatePullRequestOptions{
-		Title:       updates.Title,
-		Body:        updates.Description,
-		State:       updates.State,
+		Title: updates.Title,
+		Body:  updates.Description,
+		State: updates.State,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update PR via API: %w", err)

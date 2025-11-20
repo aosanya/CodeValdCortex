@@ -81,14 +81,14 @@ type MergeOptions struct {
 
 // QualityCheckResults represents the results of all quality checks
 type QualityCheckResults struct {
-	PRID           string              `json:"pr_id"`
-	CheckTimestamp time.Time           `json:"check_timestamp"`
-	TestResults    *TestResults        `json:"test_results,omitempty"`
-	LintResults    *LintResults        `json:"lint_results,omitempty"`
-	SecurityScan   *SecurityResults    `json:"security_scan,omitempty"`
-	Coverage       *CoverageReport     `json:"coverage,omitempty"`
-	PolicyCheck    *PolicyCheckResult  `json:"policy_check,omitempty"`
-	OverallStatus  string              `json:"overall_status"` // pass, fail, pending
+	PRID           string             `json:"pr_id"`
+	CheckTimestamp time.Time          `json:"check_timestamp"`
+	TestResults    *TestResults       `json:"test_results,omitempty"`
+	LintResults    *LintResults       `json:"lint_results,omitempty"`
+	SecurityScan   *SecurityResults   `json:"security_scan,omitempty"`
+	Coverage       *CoverageReport    `json:"coverage,omitempty"`
+	PolicyCheck    *PolicyCheckResult `json:"policy_check,omitempty"`
+	OverallStatus  string             `json:"overall_status"` // pass, fail, pending
 }
 
 // TestResults represents test execution results
@@ -143,9 +143,9 @@ type CoverageReport struct {
 
 // PolicyCheckResult represents policy compliance check result
 type PolicyCheckResult struct {
-	Compliant    bool     `json:"compliant"`
-	Violations   []string `json:"violations,omitempty"`
-	CheckedAt    time.Time `json:"checked_at"`
+	Compliant  bool      `json:"compliant"`
+	Violations []string  `json:"violations,omitempty"`
+	CheckedAt  time.Time `json:"checked_at"`
 }
 
 // AutoMergeDecision represents the decision whether to auto-merge
@@ -159,16 +159,16 @@ type AutoMergeDecision struct {
 
 // AutoMergeConfig represents auto-merge configuration
 type AutoMergeConfig struct {
-	Enabled              bool    `json:"enabled"`
-	RequireApproval      bool    `json:"require_approval"`
-	MinApprovals         int     `json:"min_approvals"`
-	RequireTestsPass     bool    `json:"require_tests_pass"`
-	RequireLintPass      bool    `json:"require_lint_pass"`
-	RequireSecurityScan  bool    `json:"require_security_scan"`
-	MinCoveragePercent   float64 `json:"min_coverage_percent"`
-	BlockOnHighVulns     bool    `json:"block_on_high_vulns"`
-	MergeStrategy        string  `json:"merge_strategy"` // merge, squash, rebase
-	DeleteBranchAfter    bool    `json:"delete_branch_after"`
+	Enabled             bool    `json:"enabled"`
+	RequireApproval     bool    `json:"require_approval"`
+	MinApprovals        int     `json:"min_approvals"`
+	RequireTestsPass    bool    `json:"require_tests_pass"`
+	RequireLintPass     bool    `json:"require_lint_pass"`
+	RequireSecurityScan bool    `json:"require_security_scan"`
+	MinCoveragePercent  float64 `json:"min_coverage_percent"`
+	BlockOnHighVulns    bool    `json:"block_on_high_vulns"`
+	MergeStrategy       string  `json:"merge_strategy"` // merge, squash, rebase
+	DeleteBranchAfter   bool    `json:"delete_branch_after"`
 }
 
 // CheckStatus represents the current status of quality checks
