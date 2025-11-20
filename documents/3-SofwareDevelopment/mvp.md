@@ -70,8 +70,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-PUB-004 | Activation Service Implementation | Implement ActivationService interface, agent spawn orchestration, workflow initialization, monitoring setup, pause/resume logic, and graceful drain/stop operations | 📋 Not Started | P0 | High | Go, Orchestration, Backend Dev | ~~MVP-PUB-003~~ ✅, MVP-032 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-4-activation-service-week-4) |
-| MVP-PUB-005 | Publishing UI Implementation | Add publish button to Agency Designer, create publish dialog (validation, version, auto-activate), tag creation dialog (name, type, version, description), tag management page, agency state badges on homepage, publication history view, and tag comparison UI | 📋 Not Started | P0 | Medium | Templ, Alpine.js, Frontend Dev | MVP-PUB-004 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-5-ui-implementation-week-5) |
+| MVP-PUB-005 | Publishing UI Implementation | Add publish button to Agency Designer, create publish dialog (validation, version, auto-activate), tag creation dialog (name, type, version, description), tag management page, agency state badges on homepage, publication history view, and tag comparison UI | 📋 Not Started | P0 | Medium | Templ, Alpine.js, Frontend Dev | ~~MVP-PUB-004~~ ✅ | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-5-ui-implementation-week-5) |
 | MVP-PUB-006 | Publishing Integration & Testing | End-to-end testing of publish workflow, tag creation/restoration, activation/deactivation, load testing with multiple agencies, documentation updates, and training materials | 📋 Not Started | P0 | Medium | Testing, DevOps, Documentation | MVP-PUB-005 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-6-integration-and-testing-week-6) |
 
 ---
@@ -225,12 +224,12 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Agency Publishing & Tagging**: 5 tasks (MVP-PUB-002 through MVP-PUB-006)
+- **Agency Publishing & Tagging**: 2 tasks (MVP-PUB-005, MVP-PUB-006)
 - **Work Items Core**: 3 tasks (MVP-030, MVP-031, MVP-032)
 - **Gitea Integration**: 4 tasks (MVP-WI-001 through MVP-WI-004)
 - **A2A Protocol**: 3 foundational tasks (MVP-A2A-000, MVP-A2A-001, MVP-A2A-002, MVP-A2A-003, MVP-A2A-004, MVP-A2A-006)
 
-**Total P0**: 20 tasks
+**Total P0**: 19 tasks
 
 ### P1 (Critical - Core Features)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)
@@ -246,7 +245,7 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 **Total P2**: 7 tasks
 
-**Grand Total Active Tasks**: 47 tasks
+**Grand Total Active Tasks**: 46 tasks
 
 ---
 

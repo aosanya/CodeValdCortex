@@ -134,12 +134,12 @@ func New(cfg *config.Config) *App {
 	logger.Info("Initializing publication service")
 	slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
 	pubRepo := arangodb.NewPublicationRepository(dbClient.Database(), slogger)
-	
+
 	// Initialize lifecycle manager (needed for activation service)
 	lifecycleRepo := lifecycle.NewInMemoryRepository()
 	lifecycleManager := lifecycle.NewManager(lifecycleRepo)
 	logger.Info("Lifecycle manager initialized successfully")
-	
+
 	// Initialize activation service (MVP-PUB-004)
 	// Note: workflow engine is nil for MVP, will be added when workflow integration is complete
 	var activationService services.ActivationService
@@ -147,14 +147,14 @@ func New(cfg *config.Config) *App {
 		activationService = services.NewActivationService(pubRepo, agencyRepo, lifecycleManager, nil, slogger)
 		logger.Info("Activation service initialized successfully")
 	}
-	
+
 	var publicationService services.PublicationService
 	if pubRepo != nil && activationService != nil {
 		publisherValidator := validation.NewPublisherValidator(slogger)
 		stateMachine := agency.NewAgencyStateMachine()
 		publicationService = services.NewPublicationService(pubRepo, agencyRepo, stateMachine, publisherValidator, activationService, slogger)
 		logger.Info("Publication service initialized successfully")
-	}	// Initialize AI services
+	} // Initialize AI services
 	var aiDesignerService *ai.AgencyDesignerService
 	var introductionRefiner *ai.IntroductionBuilder
 	var goalRefiner *ai.GoalsBuilder
