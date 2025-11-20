@@ -78,9 +78,10 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-WI-004 | Pull Request Automation | Implement PR creation from agents, auto-merge on approval (when tests pass), link PRs to issues and agents, update issue milestone on merge/close | 📋 Not Started | P0 | High | Go, Git, CI/CD Integration | ~~MVP-WI-003~~ ✅ | [Gitea Integration](../../2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md) |
 
 **Architecture Reference**: `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md`
+
+**Note**: All Gitea integration tasks (MVP-WI-001 through MVP-WI-004) have been completed. See `mvp_done.md` for details.
 
 ---
 
