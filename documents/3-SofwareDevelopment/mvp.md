@@ -70,8 +70,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-PUB-001 | Agency State Machine & Data Models | Update AgencyState enum (draft/validated/published/active/paused/draining/stopped/archived), create AgencyPublication and AgencyTag models, add ArangoDB collections (agency_publications, agency_tags), implement state transition validation logic, add database migrations | 📋 Not Started | P0 | Medium | Go, ArangoDB, State Machine | MVP-044 ✅ | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-1-state-machine-and-data-models-week-1) |
-| MVP-PUB-002 | Tag Service Implementation | Implement TagService interface and TagRepository (ArangoDB), add tag creation/listing/comparison endpoints, implement snapshot generation (deep copy of specification), SHA generation for content hashing, and tag diff logic | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-PUB-001 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-2-tag-service-week-2) |
+| MVP-PUB-002 | Tag Service Implementation | Implement TagService interface and TagRepository (ArangoDB), add tag creation/listing/comparison endpoints, implement snapshot generation (deep copy of specification), SHA generation for content hashing, and tag diff logic | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | ~~MVP-PUB-001~~ ✅ | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-2-tag-service-week-2) |
 | MVP-PUB-003 | Publication Service Implementation | Implement PublicationService interface, validation logic (pre-publish checks), publication workflow, deployment manifest generation, publication snapshot storage, and publication history tracking | 📋 Not Started | P0 | High | Go, ArangoDB, Backend Dev | MVP-PUB-002 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-3-publication-service-week-3) |
 | MVP-PUB-004 | Activation Service Implementation | Implement ActivationService interface, agent spawn orchestration, workflow initialization, monitoring setup, pause/resume logic, and graceful drain/stop operations | 📋 Not Started | P0 | High | Go, Orchestration, Backend Dev | MVP-PUB-003, MVP-032 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-4-activation-service-week-4) |
 | MVP-PUB-005 | Publishing UI Implementation | Add publish button to Agency Designer, create publish dialog (validation, version, auto-activate), tag creation dialog (name, type, version, description), tag management page, agency state badges on homepage, publication history view, and tag comparison UI | 📋 Not Started | P0 | Medium | Templ, Alpine.js, Frontend Dev | MVP-PUB-004 | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-5-ui-implementation-week-5) |
@@ -228,12 +227,12 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Agency Publishing & Tagging**: 6 tasks (MVP-PUB-001 through MVP-PUB-006)
+- **Agency Publishing & Tagging**: 5 tasks (MVP-PUB-002 through MVP-PUB-006)
 - **Work Items Core**: 3 tasks (MVP-030, MVP-031, MVP-032)
 - **Gitea Integration**: 4 tasks (MVP-WI-001 through MVP-WI-004)
 - **A2A Protocol**: 3 foundational tasks (MVP-A2A-000, MVP-A2A-001, MVP-A2A-002, MVP-A2A-003, MVP-A2A-004, MVP-A2A-006)
 
-**Total P0**: 21 tasks
+**Total P0**: 20 tasks
 
 ### P1 (Critical - Core Features)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)

@@ -132,7 +132,7 @@ type AgencyTag struct {
 
 | Task | Title | Status | Effort | Description |
 |------|-------|--------|--------|-------------|
-| [MVP-PUB-001](state-machine.md) | State Machine & Data Models | 📋 Not Started | Medium | Update AgencyState enum, create Publication/Tag models, ArangoDB collections, migrations |
+| [MVP-PUB-001](state-machine.md) | State Machine & Data Models | ✅ Complete | Medium | Update AgencyState enum, create Publication/Tag models, ArangoDB collections, migrations |
 | [MVP-PUB-002](tag-service.md) | Tag Service Implementation | 📋 Not Started | Medium | Tag CRUD, snapshot generation, SHA hashing, diff logic |
 | [MVP-PUB-003](publication-service.md) | Publication Service | 📋 Not Started | High | Validation, publication workflow, manifest generation |
 | [MVP-PUB-004](activation-service.md) | Activation Service | 📋 Not Started | High | Agent spawning, workflow init, pause/resume/drain |
