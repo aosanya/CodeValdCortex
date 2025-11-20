@@ -29,13 +29,13 @@ Follow the **mandatory task startup process** for project tasks:
        ```
        work-items-integration/
        ├── README.md              # Overview, architecture (MAX 300 lines)
-       ├── MVP-WI-001.md          # Gitea webhooks (MAX 200 lines)
-       ├── MVP-WI-002.md          # API client (MAX 200 lines)
-       ├── MVP-WI-003.md          # Agent-to-issue sync (MAX 200 lines)
-       ├── MVP-WI-004.md          # PR automation (MAX 200 lines)
+       ├── webhooks.md            # Webhook integration (MAX 500 lines)
+       ├── api-client.md          # API client implementation (MAX 500 lines)
+       ├── synchronization.md     # Agent-to-issue sync (MAX 500 lines)
+       ├── pull-requests.md       # PR automation (MAX 500 lines)
        ├── architecture/          # Optional: detailed designs
-       │   ├── webhook-flow.md
-       │   └── sync-architecture.md
+       │   ├── event-flow.md
+       │   └── data-models.md
        └── examples/              # Optional: code samples
            ├── webhook-payload.json
            └── pr-template.md
@@ -43,20 +43,37 @@ Follow the **mandatory task startup process** for project tasks:
    - **Locate your task**: Search for `<!-- MVP-XXX -->` annotation
    - **Domain files are narrative documents**: Easy to read, straightforward, consumable
    - **🔄 REFACTOR WORKFLOW**:
-     - If domain file >500 lines: Create folder, split into README + task files
-     - If individual `MVP-XXX.md` files exist: Consolidate into domain folder
+     - If domain file >500 lines: Create folder, split by TOPIC (not task ID)
+     - If individual `MVP-XXX.md` files exist: Consolidate into topic-based files
      - **Always refactor BEFORE adding new content**
    - **Folder structure template**:
      ```
      {domain-name}/
      ├── README.md              # Domain overview, architecture, task index
-     ├── MVP-XXX.md             # Individual task specification
-     ├── MVP-YYY.md             # Individual task specification
+     ├── {topic-1}.md           # Topic-based file (group related tasks)
+     ├── {topic-2}.md           # Topic-based file (group related tasks)
      ├── architecture/          # Optional: detailed technical designs
-     │   └── *.md
-     └── examples/              # Optional: code samples, configs
-         └── *.{json,yaml,md}
+     │   ├── flow-diagrams.md
+     │   └── data-models.md
+     └── examples/              # Optional: code samples
+         ├── sample-configs.yaml
+         └── example-payloads.json
      ```
+   - **FILE NAMING PRINCIPLES**:
+     - ✅ **Use topic names**: `authentication.md`, `webhooks.md`, `state-machines.md`
+     - ❌ **Never use task IDs**: NOT `MVP-001.md`, NOT `task-1.md`
+     - **Group related tasks**: If 2+ tasks cover same topic, put in ONE file
+     - **Example grouping**:
+       - `webhooks.md` - All webhook-related tasks
+       - `api-client.md` - All API client tasks
+       - `state-machines.md` - Agent FSM + Run FSM (related state machines)
+       - `authentication.md` - Login + OAuth + RBAC (all auth topics)
+   - **Key principles**:
+     - **MAX 500 lines per topic file**: Split into multiple topics if exceeding
+     - **MAX 300 lines for README.md**: Keep entry point concise
+     - Domain files should be readable as standalone documents, not just task lists
+   - Review all requirements, acceptance criteria, and technical specifications within the domain context
+   - Understand how this task fits into the broader domain strategy
    - **Key principles**:
      - **HARD LIMIT: 500 lines per file** - No exceptions
      - **README.md: MAX 300 lines** - Overview only, link to task files
@@ -157,17 +174,18 @@ README.md contains domain overview and task index:
 [System design...]
 
 ## Task Index
-- [MVP-WI-001: Gitea Webhooks](MVP-WI-001.md) - ✅ Complete
-- [MVP-WI-002: API Client](MVP-WI-002.md) - ✅ Complete
-- [MVP-WI-003: Agent Sync](MVP-WI-003.md) - ✅ Complete
-- [MVP-WI-004: PR Automation](MVP-WI-004.md) - 📋 Not Started
+- [Webhooks](webhooks.md) - MVP-WI-001 ✅ Complete
+- [API Client](api-client.md) - MVP-WI-002 ✅ Complete  
+- [Synchronization](synchronization.md) - MVP-WI-003 ✅ Complete
+- [Pull Requests](pull-requests.md) - MVP-WI-004 📋 Not Started
 ```
 
 **Finding Tasks**:
 1. Check `mvp.md` for task's domain
 2. Navigate to domain folder in `mvp-details/`
-3. Open task file directly: `MVP-XXX.md`
-4. Or read README.md for domain context first
+3. Open topic file (e.g., `webhooks.md`, `authentication.md`)
+4. Search for `<!-- MVP-XXX -->` annotation within the topic file
+5. Or read README.md for domain overview first
 
 ## Development Standards
 
