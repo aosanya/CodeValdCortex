@@ -43,6 +43,7 @@ type App struct {
 	agencyRepository    agency.Repository
 	tagService          *services.TagService
 	publicationService  services.PublicationService
+	activationService   services.ActivationService
 	runtimeManager      *runtime.Manager
 	messageService      *communication.MessageService
 	pubSubService       *communication.PubSubService
@@ -231,6 +232,7 @@ func New(cfg *config.Config) *App {
 		agencyRepository:    agencyRepo,
 		tagService:          &tagService,
 		publicationService:  publicationService,
+		activationService:   activationService,
 		runtimeManager:      runtimeManager,
 		messageService:      messageService,
 		pubSubService:       pubSubService,
@@ -483,6 +485,16 @@ func (a *App) setupServer() error {
 			v1.GET("/agencies/:id/publications", pubHandler.GetPublicationHistory)
 			v1.POST("/publications/:id/activate", pubHandler.ActivatePublication)
 			a.logger.Info("Publication endpoints registered")
+		}
+
+		// Activation/Lifecycle endpoints (MVP-PUB-004)
+		if a.activationService != nil {
+			activationHandler := handlers.NewActivationHandler(a.activationService, a.logger)
+			v1.POST("/agencies/:id/lifecycle/pause", activationHandler.PauseAgency)
+			v1.POST("/agencies/:id/lifecycle/resume", activationHandler.ResumeAgency)
+			v1.POST("/agencies/:id/lifecycle/drain", activationHandler.DrainAgency)
+			v1.POST("/agencies/:id/lifecycle/stop", activationHandler.StopAgency)
+			a.logger.Info("Activation lifecycle endpoints registered")
 		}
 
 		// Workflow endpoints
