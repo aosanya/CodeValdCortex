@@ -38,6 +38,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-WI-002 | Gitea API Client | Implemented comprehensive Gitea API client with 30+ methods for issues, PRs, milestones, comments, labels, and repositories. Created 3 new files (~740 LOC implementation + 135 LOC tests). Features: interface-based design, token authentication, configurable rate limiting (10 req/s default), context support, comprehensive error handling. Configuration via environment variables. All 13 unit tests passing. Enables bidirectional agent-to-issue communication | 2025-11-19     | `feature/MVP-WI-002_gitea_api_client`   | ~3 hours   | ✅ Complete |
 | MVP-WI-003 | Agent-to-Issue Sync | Implemented event-driven bidirectional synchronization between agent lifecycle/execution events and work item issues. Created 9 files (2,287 LOC total) including event handler, sync service, template renderer with 13 Markdown templates, ArangoDB repositories for agent-issue links and audit trail. Features: provider-agnostic design (Gitea/GitHub/GitLab), automated comment posting, label management (9 labels), milestone progression, compliance audit trail, URL parsing (HTTPS+SSH). 18 unit tests passing. Core sync latency <300ms (p95) | 2024-12-29     | `feature/MVP-WI-003_agent_to_issue_sync`   | ~6 hours   | ✅ Complete |
 | MVP-WI-004 | Pull Request Automation | Implemented complete PR automation infrastructure with 8 new files (~2,400 LOC). Components: PR service (create/update/merge/close), Git operations (Gitea SDK), quality check service (tests/lint/security/coverage - stub for CI/CD), auto-merge engine with configurable criteria, webhook event handler (9 event types), template renderer for PR descriptions/comments. Features: async quality checks, auto-merge on approval, agent attribution, ArangoDB persistence (agent_prs collection), retry logic. Ready for CI/CD integration and testing | 2025-11-20     | `feature/MVP-WI-004_pr_automation`   | ~4 hours   | ✅ Complete |
+| MVP-PUB-001 | Agency State Machine & Data Models | Implemented foundational infrastructure for agency publishing/tagging system. Created 7 new files (~1,135 LOC): 8-state lifecycle model (draft→validated→published→active→paused→draining→stopped→archived), AgencyPublication model with deployment manifests, AgencyTag model with 4 tag types (release/snapshot/experimental/checkpoint), state machine with guards/actions, ArangoDB collections with indexes, migration scripts. Updated 6 files to remove deprecated Status field. Comprehensive unit tests (285 LOC). Unblocks MVP-PUB-002 (Tag Service), MVP-PUB-003 (Publication Service), MVP-PUB-004 (Activation Service) | 2025-11-20     | `feature/MVP-PUB-001_state_machine`   | ~3.5 hours   | ✅ Complete |
 
 ---
 
@@ -2666,3 +2667,126 @@ func (s *AgentSyncService) OnAgentProgress(agent *Agent, progress int) {
 
 ---
 
+
+### MVP-PUB-001: Agency State Machine & Data Models
+**Completed**: November 20, 2025  
+**Branch**: `feature/MVP-PUB-001_state_machine`  
+**Status**: ✅ Complete
+
+**Summary**:
+Implemented the foundational infrastructure for agency publishing and tagging system. This task establishes the core lifecycle management capabilities that enable agencies to progress from design through validation, publication, activation, and eventual archival.
+
+**Key Deliverables**:
+1. **8-State Lifecycle Model** - Comprehensive state machine replacing simple 4-state Status enum:
+   - `draft` → `validated` → `published` → `active` → `paused` / `draining` → `stopped` → `archived`
+   
+2. **AgencyPublication Model** - Version tracking with deployment manifests:
+   - Complete agency snapshot at publication time
+   - Deployment manifest (agent spawn plan, workflow config, resource allocation)
+   - Publication metadata (version, publisher, timestamps)
+
+3. **AgencyTag Model** - Immutable snapshots for versioning:
+   - 4 tag types: release, snapshot, experimental, checkpoint
+   - Semantic versioning support (v1.0.0, v1.1.0, etc.)
+   - Git-style SHA for content hashing
+   - Custom metadata (git commit, build number, environment)
+
+4. **State Machine** - Transition validation with guards and actions:
+   - 7 defined transitions with guard conditions
+   - Action stubs for future implementation (MVP-PUB-003, MVP-PUB-004)
+   - Testable architecture
+
+5. **Database Schema** - ArangoDB collections with proper indexes:
+   - `agency_publications` - Published versions
+   - `agency_tags` - Snapshots and tags
+   - Indexes: hash on agency_id, skiplist on timestamps/versions, unique constraints
+
+6. **Migration Scripts**:
+   - Database migration (006_agency_publishing.go)
+   - Data migration template (migrate-agency-status-to-state.go)
+
+**Technical Highlights**:
+- **Complete Status Removal**: Clean break from deprecated 4-state model, all references updated throughout codebase
+- **Stub Pattern**: Guards and actions stubbed for implementation in subsequent tasks, enabling immediate testability
+- **Immutability**: Publications and tags are immutable once created (audit trail integrity)
+- **Provider-Agnostic**: State machine design supports future integration with external deployment systems
+
+**Files Created** (7 files, ~1,135 LOC):
+- `internal/agency/models/publication.go` (150 lines)
+- `internal/agency/models/tag.go` (80 lines)
+- `internal/agency/state_machine.go` (300 lines)
+- `internal/database/migrations/006_agency_publishing.go` (120 lines)
+- `scripts/migrate-agency-status-to-state.go` (100 lines)
+- `internal/agency/state_machine_test.go` (285 lines)
+- `internal/agency/models/tag_test.go` (100 lines)
+
+**Files Modified** (6 files):
+- `internal/agency/models/agency.go` - Added State field, publishing/activation metadata
+- `internal/agency/arangodb/agencies.go` - Updated filters (Status → State)
+- `internal/agency/services/agency_service.go` - Default state logic
+- `internal/handlers/agency_handler.go` - Updated to use State
+- `internal/web/pages/homepage.templ` - State-based rendering
+- `scripts/migrate-agencies.go` - Updated for State
+
+**Documentation** (3 files, ~2,500 lines):
+- `documents/2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md` - Complete system spec
+- `documents/3-SofwareDevelopment/mvp-details/agency-publishing/README.md` - Domain overview
+- `documents/3-SofwareDevelopment/mvp-details/agency-publishing/state-machine.md` - Task details
+
+**Validation Results**:
+- ✅ All unit tests passing (`go test ./internal/agency/...`)
+- ✅ Build clean (`go build ./cmd/... ./internal/...`)
+- ✅ Linting clean (`go vet ./cmd/... ./internal/...`)
+- ✅ Code formatted (`go fmt ./...`)
+- ✅ No debug logs remaining
+
+**Dependencies Unblocked**:
+- **MVP-PUB-002**: Tag Service Implementation
+- **MVP-PUB-003**: Publication Service
+- **MVP-PUB-004**: Activation Service
+
+**State Transition Example**:
+```go
+sm := NewAgencyStateMachine()
+
+// Validate agency design
+if err := sm.Transition(agency, "validate"); err != nil {
+    // Guards failed: missing introduction, goals, etc.
+}
+// agency.State = "validated"
+
+// Publish
+if err := sm.Transition(agency, "publish"); err != nil {
+    // Guards failed: not validated, duplicate publication
+}
+// agency.State = "published"
+
+// Activate (spawn agents, start workflows)
+if err := sm.Transition(agency, "activate"); err != nil {
+    // Guards failed: not published, resources unavailable
+}
+// agency.State = "active"
+```
+
+**Tag Usage Example**:
+```go
+// Create checkpoint tag before making changes
+tag := &models.AgencyTag{
+    AgencyID:    "UC-INFRA-001",
+    Name:        "v1.0.0-stable",
+    Type:        models.TagTypeRelease,
+    Description: "Production release",
+    Snapshot:    captureSnapshot(agency),
+}
+
+// Later: restore from tag for rollback
+restoreFromTag(agency, "v1.0.0-stable")
+```
+
+#### Documentation
+- Coding session: `documents/3-SofwareDevelopment/coding_sessions/MVP-PUB-001_state_machine_data_models.md`
+- Architecture spec: `documents/2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md`
+- Domain docs: `documents/3-SofwareDevelopment/mvp-details/agency-publishing/` (folder structure)
+- Task details: `documents/3-SofwareDevelopment/mvp-details/agency-publishing/state-machine.md`
+
+---

@@ -4,31 +4,77 @@ import "time"
 
 // Agency represents a use case operating as an independent entity with its own configuration
 type Agency struct {
-	Key         string         `json:"_key,omitempty"`
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	DisplayName string         `json:"display_name"`
-	Description string         `json:"description"`
-	Category    string         `json:"category"`
-	Icon        string         `json:"icon"`
-	Status      AgencyStatus   `json:"status"`
-	Database    string         `json:"database"` // Database name for this agency
-	Metadata    AgencyMetadata `json:"metadata"`
-	Settings    AgencySettings `json:"settings"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	CreatedBy   string         `json:"created_by"`
+	Key         string `json:"_key,omitempty"`
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Description string `json:"description"`
+	Category    string `json:"category"`
+	Icon        string `json:"icon"`
+
+	// Lifecycle state
+	State AgencyState `json:"state"`
+
+	// Publishing metadata
+	PublishedAt   *time.Time `json:"published_at,omitempty"`
+	PublishedBy   string     `json:"published_by,omitempty"`
+	PublicationID string     `json:"publication_id,omitempty"`
+	CurrentTagID  string     `json:"current_tag_id,omitempty"`
+
+	// Activation metadata
+	ActivatedAt      *time.Time `json:"activated_at,omitempty"`
+	ActivatedBy      string     `json:"activated_by,omitempty"`
+	ActiveAgentCount int        `json:"active_agent_count"`
+
+	// Infrastructure
+	Database string         `json:"database"` // Database name for this agency
+	Metadata AgencyMetadata `json:"metadata"`
+	Settings AgencySettings `json:"settings"`
+
+	// Audit trail
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedBy string    `json:"created_by"`
+	UpdatedBy string    `json:"updated_by,omitempty"`
 }
 
-// AgencyStatus represents the current state of an agency
-type AgencyStatus string
+// AgencyState represents the lifecycle state of an agency
+type AgencyState string
 
 const (
-	AgencyStatusActive   AgencyStatus = "active"
-	AgencyStatusInactive AgencyStatus = "inactive"
-	AgencyStatusPaused   AgencyStatus = "paused"
-	AgencyStatusArchived AgencyStatus = "archived"
+	AgencyStateDraft     AgencyState = "draft"     // Design in progress
+	AgencyStateValidated AgencyState = "validated" // Ready for publishing
+	AgencyStatePublished AgencyState = "published" // Published but not active
+	AgencyStateActive    AgencyState = "active"    // Agents running
+	AgencyStatePaused    AgencyState = "paused"    // Temporarily suspended
+	AgencyStateDraining  AgencyState = "draining"  // Completing existing work
+	AgencyStateStopped   AgencyState = "stopped"   // Shut down gracefully
+	AgencyStateArchived  AgencyState = "archived"  // Historical record
 )
+
+// ValidAgencyStates returns all valid agency states
+func ValidAgencyStates() []AgencyState {
+	return []AgencyState{
+		AgencyStateDraft,
+		AgencyStateValidated,
+		AgencyStatePublished,
+		AgencyStateActive,
+		AgencyStatePaused,
+		AgencyStateDraining,
+		AgencyStateStopped,
+		AgencyStateArchived,
+	}
+}
+
+// IsValidAgencyState checks if the given state is valid
+func IsValidAgencyState(state AgencyState) bool {
+	for _, validState := range ValidAgencyStates() {
+		if state == validState {
+			return true
+		}
+	}
+	return false
+}
 
 // AgencyMetadata contains additional information about the agency
 type AgencyMetadata struct {
@@ -51,7 +97,7 @@ type AgencySettings struct {
 // AgencyFilters defines criteria for filtering agencies in queries
 type AgencyFilters struct {
 	Category string
-	Status   AgencyStatus
+	State    AgencyState
 	Search   string // Search in name/description
 	Tags     []string
 	Limit    int
@@ -65,7 +111,7 @@ type AgencyUpdates struct {
 	Description *string         `json:"description,omitempty"`
 	Category    *string         `json:"category,omitempty"`
 	Icon        *string         `json:"icon,omitempty"`
-	Status      *AgencyStatus   `json:"status,omitempty"`
+	State       *AgencyState    `json:"state,omitempty"`
 	Metadata    *AgencyMetadata `json:"metadata,omitempty"`
 	Settings    *AgencySettings `json:"settings,omitempty"`
 }
@@ -101,7 +147,7 @@ type UpdateAgencyRequest struct {
 	Description *string         `json:"description,omitempty"`
 	Category    *string         `json:"category,omitempty"`
 	Icon        *string         `json:"icon,omitempty"`
-	Status      *AgencyStatus   `json:"status,omitempty"`
+	State       *AgencyState    `json:"state,omitempty"`
 	Metadata    *AgencyMetadata `json:"metadata,omitempty"`
 	Settings    *AgencySettings `json:"settings,omitempty"`
 }

@@ -107,7 +107,7 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		Description: req.Description,
 		Category:    req.Category,
 		Icon:        icon,
-		Status:      models.AgencyStatusActive,
+		State:       models.AgencyStateDraft,
 		// Database field will be set by service with proper prefix
 		Metadata:  metadata,
 		Settings:  settings,
@@ -167,7 +167,7 @@ func (h *AgencyHandler) ListAgencies(c *gin.Context) {
 	// Parse query parameters
 	filters := models.AgencyFilters{
 		Category: c.Query("category"),
-		Status:   models.AgencyStatus(c.Query("status")),
+		State:    models.AgencyState(c.Query("state")),
 		Search:   c.Query("search"),
 	}
 

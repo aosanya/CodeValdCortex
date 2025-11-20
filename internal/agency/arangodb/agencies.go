@@ -162,9 +162,9 @@ func buildListQuery(filters models.AgencyFilters) (string, map[string]interface{
 		bindVars["category"] = filters.Category
 	}
 
-	if filters.Status != "" {
-		conditions = append(conditions, "agency.status == @status")
-		bindVars["status"] = filters.Status
+	if filters.State != "" {
+		conditions = append(conditions, "agency.state == @state")
+		bindVars["state"] = filters.State
 	}
 
 	if filters.Search != "" {
