@@ -9,7 +9,7 @@ import (
 templ PublishToolbar(currentAgency *models.Agency) {
 	<div class="publish-toolbar">
 		<div class="buttons has-addons">
-			if string(currentAgency.State) == "draft" {
+			if string(currentAgency.State) == "draft" || string(currentAgency.State) == "" {
 				<!-- Validate button (Draft → Validated) -->
 				<button 
 					class="button is-small is-info"
@@ -37,8 +37,8 @@ templ PublishToolbar(currentAgency *models.Agency) {
 				</button>
 			}
 			
-			<!-- Create Tag button (available in all states except draft) -->
-			if string(currentAgency.State) != "draft" {
+			<!-- Create Tag button (available in all states except draft/empty) -->
+			if string(currentAgency.State) != "draft" && string(currentAgency.State) != "" {
 				<button 
 					class="button is-small is-link"
 					onclick="openTagDialog()"

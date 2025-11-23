@@ -39,7 +39,7 @@ func PublishToolbar(currentAgency *models.Agency) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if string(currentAgency.State) == "draft" {
+		if string(currentAgency.State) == "draft" || string(currentAgency.State) == "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Validate button (Draft → Validated) --> <button class=\"button is-small is-info\" onclick=\"handleValidateAgency()\" id=\"validate-btn\" title=\"Validate agency specification\"><span class=\"icon is-small\"><i class=\"fas fa-check-circle\"></i></span> <span>Validate</span></button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -51,11 +51,11 @@ func PublishToolbar(currentAgency *models.Agency) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Create Tag button (available in all states except draft) -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Create Tag button (available in all states except draft/empty) -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if string(currentAgency.State) != "draft" {
+		if string(currentAgency.State) != "draft" && string(currentAgency.State) != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<button class=\"button is-small is-link\" onclick=\"openTagDialog()\" id=\"tag-btn\" title=\"Create tag for current state\"><span class=\"icon is-small\"><i class=\"fas fa-tag\"></i></span> <span>Create Tag</span></button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

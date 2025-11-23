@@ -435,7 +435,6 @@ func (a *App) setupServer() error {
 		v1.POST("/agencies", agencyHandler.CreateAgency)
 		v1.PUT("/agencies/:id", agencyHandler.UpdateAgency)
 		v1.DELETE("/agencies/:id", agencyHandler.DeleteAgency)
-		v1.POST("/agencies/:id/activate", agencyHandler.ActivateAgency)
 		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
 		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
 
