@@ -3,20 +3,18 @@
  * 
  * Handles agency validation, publishing, and tag creation workflows
  * Interacts with /api/v1/agencies/:id/validate and /api/v1/agencies/:id/publish endpoints
+ * 
+ * Depends on: shared.js (for currentAgencyId)
  */
 
-// State management
-let currentAgencyId = null;
+// State management (currentAgencyId is in shared.js)
 let validationResult = null;
 
 /**
  * Initialize publish functionality
  */
 function initializePublishFeatures() {
-    // Get agency ID from URL or data attribute
-    const urlParts = window.location.pathname.split('/');
-    currentAgencyId = urlParts[urlParts.indexOf('agencies') + 1];
-
+    // currentAgencyId is already initialized in shared.js
     // Set up form listeners for live preview
     setupPublishFormListeners();
 }
@@ -314,6 +312,12 @@ async function handleValidateAgency() {
 
         const result = await response.json();
 
+        // Navigate to validation section to show results
+        navigateToValidationSection();
+
+        // Display validation results
+        displayValidationResults(result, response.ok);
+
         if (response.ok && result.is_valid) {
             showNotification('Success', 'Agency validated successfully', 'success');
 
@@ -323,16 +327,85 @@ async function handleValidateAgency() {
             // Reload to show new buttons
             setTimeout(() => window.location.reload(), 1000);
         } else {
-            // Show validation errors
-            const errors = result.errors.map(e => `${e.field}: ${e.message}`).join('\n');
-            alert(`Validation failed:\n\n${errors}`);
+            showNotification('Validation Failed', `Found ${result.errors?.length || 0} errors and ${result.warnings?.length || 0} warnings`, 'warning');
         }
     } catch (error) {
         console.error('Validation failed:', error);
-        alert(`Validation error: ${error.message}`);
+        showNotification('Error', `Validation error: ${error.message}`, 'danger');
     } finally {
         btn.classList.remove('is-loading');
     }
+}
+
+/**
+ * Navigate to the validation section in overview
+ */
+function navigateToValidationSection() {
+    // Switch to overview view if not already there
+    const overviewView = document.querySelector('[data-view-content="overview"]');
+    if (overviewView && !overviewView.classList.contains('is-active')) {
+        const overviewTab = document.querySelector('[data-view="overview"]');
+        if (overviewTab) overviewTab.click();
+    }
+
+    // Select validation section
+    const validationNavItem = document.querySelector('[data-section="validation"]');
+    if (validationNavItem) {
+        validationNavItem.click();
+    }
+}
+
+/**
+ * Display validation results in the validation section
+ */
+function displayValidationResults(result, isSuccess) {
+    const container = document.getElementById('validation-results');
+    if (!container) return;
+
+    const isValid = result.is_valid || false;
+    const errors = result.errors || [];
+    const warnings = result.warnings || [];
+
+    let html = '';
+
+    if (isValid) {
+        html = `
+            <div class="notification is-success is-light">
+                <p class="mb-2"><strong><i class="fas fa-check-circle mr-2"></i>Validation Passed!</strong></p>
+                <p class="is-size-7">Your agency specification is complete and ready for publishing.</p>
+            </div>
+        `;
+    } else {
+        // Show errors
+        if (errors.length > 0) {
+            html += `
+                <div class="notification is-danger is-light mb-4">
+                    <p class="mb-3"><strong><i class="fas fa-exclamation-circle mr-2"></i>Validation Errors (${errors.length})</strong></p>
+                    <div class="content is-small">
+                        <ul class="mb-0">
+                            ${errors.map(e => `<li><strong>${e.field}:</strong> ${e.message}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show warnings
+        if (warnings.length > 0) {
+            html += `
+                <div class="notification is-warning is-light">
+                    <p class="mb-3"><strong><i class="fas fa-exclamation-triangle mr-2"></i>Warnings (${warnings.length})</strong></p>
+                    <div class="content is-small">
+                        <ul class="mb-0">
+                            ${warnings.map(w => `<li><strong>${w.field}:</strong> ${w.message}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    container.innerHTML = html;
 }
 
 /**

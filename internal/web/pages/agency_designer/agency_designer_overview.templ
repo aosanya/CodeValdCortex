@@ -53,6 +53,9 @@ templ OverviewContent(currentAgency *models.Agency, conversation *ai.Conversatio
 			<div id="content-ai-policy" class="overview-content-section" style="display: none;">
 				@AIPolicyContent(currentAgency)
 			</div>
+			<div id="content-validation" class="overview-content-section" style="display: none;">
+				@ValidationContent(currentAgency)
+			</div>
 		</div>
 	</main>
 	</div>
@@ -149,6 +152,19 @@ templ OverviewNavigationList(currentAgency *models.Agency) {
 			<div class="nav-info">
 				<div class="nav-name">AI Policy</div>
 				<div class="nav-description">Configure AI governance</div>
+			</div>
+		</div>
+		
+		<div 
+			class="overview-nav-item"
+			data-section="validation"
+			onclick="selectOverviewSection(this, 'validation')">
+			<div class="nav-icon">
+				<i class="fas fa-check-circle"></i>
+			</div>
+			<div class="nav-info">
+				<div class="nav-name">Validation</div>
+				<div class="nav-description">Review validation results</div>
 			</div>
 		</div>
 	</div>

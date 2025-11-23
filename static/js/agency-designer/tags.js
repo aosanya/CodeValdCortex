@@ -2,19 +2,18 @@
  * Tag Dialog and Management
  * 
  * Handles tag creation, listing, comparison, and restoration
+ * 
+ * Depends on: shared.js (for currentAgencyId)
  */
 
-// State
-let currentAgencyId = null;
+// State (currentAgencyId is in shared.js)
 let metadataFieldCount = 0;
 
 /**
  * Initialize tag features
  */
 function initializeTagFeatures() {
-    const urlParts = window.location.pathname.split('/');
-    currentAgencyId = urlParts[urlParts.indexOf('agencies') + 1];
-
+    // currentAgencyId is already initialized in shared.js
     setupTagFormListeners();
 }
 
