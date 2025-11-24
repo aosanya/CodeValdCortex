@@ -40,8 +40,8 @@ func (sm *AgencyStateMachine) defineTransitions() {
 	transitions := []StateTransition{
 		{
 			From:  models.AgencyStateDraft,
-			To:    models.AgencyStateValidated,
-			Event: "validate",
+			To:    models.AgencyStatePublished,
+			Event: "publish",
 			Guards: []Guard{
 				guardHasIntroduction,
 				guardHasGoals,
@@ -49,17 +49,6 @@ func (sm *AgencyStateMachine) defineTransitions() {
 				guardHasWorkItems,
 				guardHasWorkflows,
 				guardHasRACIMatrix,
-			},
-			Actions: []Action{
-				actionMarkAsValidated,
-			},
-		},
-		{
-			From:  models.AgencyStateValidated,
-			To:    models.AgencyStatePublished,
-			Event: "publish",
-			Guards: []Guard{
-				guardIsValidated,
 				guardNoDuplicatePublication,
 			},
 			Actions: []Action{
@@ -231,13 +220,6 @@ func guardHasRACIMatrix(a *models.Agency) error {
 	return nil
 }
 
-func guardIsValidated(a *models.Agency) error {
-	if a.State != models.AgencyStateValidated {
-		return fmt.Errorf("agency must be validated")
-	}
-	return nil
-}
-
 func guardNoDuplicatePublication(a *models.Agency) error {
 	// TODO: Check no active publication exists (MVP-PUB-003)
 	return nil
@@ -256,11 +238,6 @@ func guardResourcesAvailable(a *models.Agency) error {
 }
 
 // Action implementations (stubs for now)
-
-func actionMarkAsValidated(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-003
-	return nil
-}
 
 func actionCreatePublication(a *models.Agency) error {
 	// Will be implemented in MVP-PUB-003

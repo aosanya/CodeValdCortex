@@ -120,9 +120,12 @@ func (v *PublisherValidator) ValidateForPublish(
 		v.validateWorkflows(spec.Workflows, result)
 	}
 
-	// Check 6: Agency state must be draft or validated
-	if agencyDoc.State != models.AgencyStateDraft &&
-		agencyDoc.State != models.AgencyStateValidated {
+	// Check 6: Agency state validation (allow draft, published, active for republishing)
+	// Empty state is treated as draft
+	if agencyDoc.State != "" &&
+		agencyDoc.State != models.AgencyStateDraft &&
+		agencyDoc.State != models.AgencyStatePublished &&
+		agencyDoc.State != models.AgencyStateActive {
 		result.Errors = append(result.Errors, ValidationError{
 			Field:   "state",
 			Message: fmt.Sprintf("Cannot publish agency in state: %s", agencyDoc.State),
@@ -161,13 +164,6 @@ func (v *PublisherValidator) validateGoals(goals []models.Goal, result *Validati
 				Code:    "GOAL_DESC_MISSING",
 			})
 			result.Valid = false
-		}
-
-		if goal.Priority == "" {
-			result.Warnings = append(result.Warnings, ValidationWarning{
-				Field:   fmt.Sprintf("specification.goals[%d].priority", i),
-				Message: "Goal has no priority set",
-			})
 		}
 
 		if len(goal.SuccessMetrics) == 0 {

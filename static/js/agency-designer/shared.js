@@ -14,7 +14,7 @@ let currentAgencyId = null;
 function initializeSharedState() {
     const urlParts = window.location.pathname.split('/');
     const agencyIndex = urlParts.indexOf('agencies');
-    
+
     if (agencyIndex !== -1 && urlParts.length > agencyIndex + 1) {
         currentAgencyId = urlParts[agencyIndex + 1];
     }

@@ -156,19 +156,7 @@ func (s *publicationService) Publish(ctx context.Context, agencyID string, req *
 		return nil, fmt.Errorf("publication with version %s already exists", req.Version)
 	}
 
-	// Step 4: Transition to validated if in draft
-	if agencyDoc.State == models.AgencyStateDraft {
-		if err := s.stateMachine.Transition(agencyDoc, "validate"); err != nil {
-			s.logger.Warn("failed to transition to validated", "error", err)
-			// Continue anyway - validation checks passed
-		}
-		// Update agency state in database
-		if err := s.agencyRepo.Update(ctx, agencyDoc); err != nil {
-			return nil, fmt.Errorf("failed to update agency state: %w", err)
-		}
-	}
-
-	// Step 5: Generate snapshot
+	// Step 4: Generate snapshot
 	snapshot := s.generateSnapshot(agencyDoc, spec)
 
 	// Step 6: Generate deployment manifest
