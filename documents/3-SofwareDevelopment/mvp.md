@@ -62,18 +62,6 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P0: Agency Publishing & Tagging System (CRITICAL)
-
-*Lifecycle management for agency deployment and versioning*
-
-**Architecture Reference**: [`/documents/2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md`](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md)
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-PUB-006 | Publishing Integration & Testing | End-to-end testing of publish workflow, tag creation/restoration, activation/deactivation, load testing with multiple agencies, documentation updates, and training materials | 📋 Not Started | P0 | Medium | Testing, DevOps, Documentation | ~~MVP-PUB-005~~ ✅ | [Architecture](../../2-SoftwareDesignAndArchitecture/agency-publishing-tagging-architecture.md#phase-6-integration-and-testing-week-6) |
-
----
-
 ## P0: Work Items & Workflows System (FOUNDATIONAL)
 
 *Kanban-based workflow automation with agent instantiation*
@@ -223,13 +211,12 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Agency Publishing & Tagging**: 1 task (MVP-PUB-006)
 - **Work Items Core**: 3 tasks (MVP-030, MVP-031, MVP-032)
 - **Gitea Integration**: 4 tasks (MVP-WI-001 through MVP-WI-004)
 - **A2A Protocol**: 3 foundational tasks (MVP-A2A-000, MVP-A2A-001, MVP-A2A-002, MVP-A2A-003, MVP-A2A-004, MVP-A2A-006)
 
 
-**Total P0**: 19 tasks
+**Total P0**: 18 tasks
 
 ### P1 (Critical - Core Features)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)
@@ -245,7 +232,7 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 **Total P2**: 7 tasks
 
-**Grand Total Active Tasks**: 46 tasks
+**Grand Total Active Tasks**: 45 tasks
 
 ---
 
