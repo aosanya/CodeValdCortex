@@ -188,10 +188,10 @@ async function createTagBeforePublish(tagName, version, description) {
     const tagData = {
         name: tagName,
         type: 'snapshot',
-        version: version,
         description: `Pre-publish snapshot: ${description}`,
         metadata: {
-            created_before_publish: true
+            created_before_publish: 'true',
+            version: version
         }
     };
 
@@ -205,7 +205,7 @@ async function createTagBeforePublish(tagName, version, description) {
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(`Failed to create tag: ${error.error}`);
+        throw new Error(`Failed to create tag: ${error.error || error.details || 'Unknown error'}`);
     }
 }
 
