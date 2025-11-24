@@ -19,16 +19,26 @@ func main() {
 	log.Println("Starting agency status to state migration...")
 	log.Println("Note: This is a template script. Update with your database connection details.")
 
+	// Suppress unused warning - this is a template script
+	_ = migrateAgencies
+
 	// TODO: Initialize database connection (example below)
 	// db, err := connectToDatabase()
 	// if err != nil {
 	//     log.Fatalf("Failed to connect to database: %v", err)
+	// }
+	//
+	// ctx := context.Background()
+	// if err := migrateAgencies(ctx, db); err != nil {
+	//     log.Fatalf("Migration failed: %v", err)
 	// }
 
 	log.Println("Migration script template created. Please configure database connection.")
 }
 
 // migrateAgencies performs the actual migration
+//
+//nolint:all // Template function for manual migration usage
 func migrateAgencies(ctx context.Context, db driver.Database) error {
 	// Get agencies collection
 	col, err := db.Collection(ctx, "agencies")
@@ -87,6 +97,8 @@ func migrateAgencies(ctx context.Context, db driver.Database) error {
 }
 
 // determineState maps old Status to new State based on agency condition
+//
+//nolint:all // Template function called by migrateAgencies
 func determineState(agency models.Agency) models.AgencyState {
 	// If State is already set and valid, keep it
 	if models.IsValidAgencyState(agency.State) {
@@ -95,11 +107,6 @@ func determineState(agency models.Agency) models.AgencyState {
 
 	// For agencies with no explicit state, infer from context
 	// Note: Since we removed Status, we need to handle agencies that may not have State set yet
-
-	// Check if agency has active agents
-	if agency.ActiveAgentCount > 0 {
-		return models.AgencyStateActive
-	}
 
 	// Check if agency has publication metadata
 	if agency.PublishedAt != nil {

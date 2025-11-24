@@ -43,12 +43,7 @@ type AgencyState string
 
 const (
 	AgencyStateDraft     AgencyState = "draft"     // Design in progress
-	AgencyStateValidated AgencyState = "validated" // Ready for publishing
 	AgencyStatePublished AgencyState = "published" // Published but not active
-	AgencyStateActive    AgencyState = "active"    // Agents running
-	AgencyStatePaused    AgencyState = "paused"    // Temporarily suspended
-	AgencyStateDraining  AgencyState = "draining"  // Completing existing work
-	AgencyStateStopped   AgencyState = "stopped"   // Shut down gracefully
 	AgencyStateArchived  AgencyState = "archived"  // Historical record
 )
 
@@ -56,12 +51,7 @@ const (
 func ValidAgencyStates() []AgencyState {
 	return []AgencyState{
 		AgencyStateDraft,
-		AgencyStateValidated,
 		AgencyStatePublished,
-		AgencyStateActive,
-		AgencyStatePaused,
-		AgencyStateDraining,
-		AgencyStateStopped,
 		AgencyStateArchived,
 	}
 }

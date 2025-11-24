@@ -51,11 +51,3 @@ func (h *WorkflowHandler) GetWorkflowsHTML(c *gin.Context) {
 	c.Header("Content-Type", "text/html")
 	component.Render(c.Request.Context(), c.Writer)
 }
-
-// truncateForLog returns a truncated version of a string for logging
-func truncateForLog(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	return s[:maxLen] + "..."
-}

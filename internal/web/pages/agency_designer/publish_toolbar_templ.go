@@ -35,61 +35,45 @@ func PublishToolbar(currentAgency *models.Agency) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"publish-toolbar\"><div class=\"buttons has-addons\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"publish-toolbar\"><div class=\"buttons has-addons\"><!-- Validate button - always available to check current state --><button class=\"button is-small is-info\" onclick=\"handleValidateAgency()\" id=\"validate-btn\" title=\"Validate agency specification\"><span class=\"icon is-small\"><i class=\"fas fa-check-circle\"></i></span> <span>Validate</span></button><!-- Publish button - validates before publishing --><button class=\"button is-small is-primary\" onclick=\"openPublishDialog()\" id=\"publish-btn\" title=\"Publish agency as new version (validates first)\"><span class=\"icon is-small\"><i class=\"fas fa-upload\"></i></span> <span>Publish</span></button><!-- Create Tag button (available in all states except draft/empty) -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if string(currentAgency.State) == "draft" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Validate button (Draft → Validated) --> <button class=\"button is-small is-info\" onclick=\"handleValidateAgency()\" id=\"validate-btn\" title=\"Validate agency specification\"><span class=\"icon is-small\"><i class=\"fas fa-check-circle\"></i></span> <span>Validate</span></button> ")
+		if string(currentAgency.State) != "draft" && string(currentAgency.State) != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<button class=\"button is-small is-link\" onclick=\"openTagDialog()\" id=\"tag-btn\" title=\"Create tag for current state\"><span class=\"icon is-small\"><i class=\"fas fa-tag\"></i></span> <span>Create Tag</span></button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if string(currentAgency.State) == "validated" || string(currentAgency.State) == "published" || string(currentAgency.State) == "active" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Publish button (Validated → Published) --> <button class=\"button is-small is-primary\" onclick=\"openPublishDialog()\" id=\"publish-btn\" title=\"Publish agency as new version\"><span class=\"icon is-small\"><i class=\"fas fa-upload\"></i></span> <span>Publish</span></button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Create Tag button (available in all states except draft) -->")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if string(currentAgency.State) != "draft" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<button class=\"button is-small is-link\" onclick=\"openTagDialog()\" id=\"tag-btn\" title=\"Create tag for current state\"><span class=\"icon is-small\"><i class=\"fas fa-tag\"></i></span> <span>Create Tag</span></button>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Lifecycle action buttons (context-sensitive) -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Lifecycle action buttons (context-sensitive) -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if string(currentAgency.State) == "published" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<button class=\"button is-small is-success\" onclick=\"handleActivateAgency()\" id=\"activate-btn\" title=\"Activate agency (spawn agents and start workflows)\"><span class=\"icon is-small\"><i class=\"fas fa-play\"></i></span> <span>Activate</span></button> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button class=\"button is-small is-success\" onclick=\"handleActivateAgency()\" id=\"activate-btn\" title=\"Activate agency (spawn agents and start workflows)\"><span class=\"icon is-small\"><i class=\"fas fa-play\"></i></span> <span>Activate</span></button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if string(currentAgency.State) == "active" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<button class=\"button is-small is-warning\" onclick=\"handlePauseAgency()\" id=\"pause-btn\" title=\"Pause agency (temporarily suspend agents)\"><span class=\"icon is-small\"><i class=\"fas fa-pause\"></i></span> <span>Pause</span></button> <button class=\"button is-small is-warning\" onclick=\"handleDrainAgency()\" id=\"drain-btn\" title=\"Drain agency (complete existing work, no new work)\"><span class=\"icon is-small\"><i class=\"fas fa-hourglass-half\"></i></span> <span>Drain</span></button> <button class=\"button is-small is-danger\" onclick=\"handleStopAgency()\" id=\"stop-btn\" title=\"Stop agency immediately\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<button class=\"button is-small is-warning\" onclick=\"handlePauseAgency()\" id=\"pause-btn\" title=\"Pause agency (temporarily suspend agents)\"><span class=\"icon is-small\"><i class=\"fas fa-pause\"></i></span> <span>Pause</span></button> <button class=\"button is-small is-warning\" onclick=\"handleDrainAgency()\" id=\"drain-btn\" title=\"Drain agency (complete existing work, no new work)\"><span class=\"icon is-small\"><i class=\"fas fa-hourglass-half\"></i></span> <span>Drain</span></button> <button class=\"button is-small is-danger\" onclick=\"handleStopAgency()\" id=\"stop-btn\" title=\"Stop agency immediately\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if string(currentAgency.State) == "paused" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<button class=\"button is-small is-success\" onclick=\"handleResumeAgency()\" id=\"resume-btn\" title=\"Resume agency from paused state\"><span class=\"icon is-small\"><i class=\"fas fa-play\"></i></span> <span>Resume</span></button> <button class=\"button is-small is-danger\" onclick=\"handleStopAgency()\" id=\"stop-btn\" title=\"Stop agency\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<button class=\"button is-small is-success\" onclick=\"handleResumeAgency()\" id=\"resume-btn\" title=\"Resume agency from paused state\"><span class=\"icon is-small\"><i class=\"fas fa-play\"></i></span> <span>Resume</span></button> <button class=\"button is-small is-danger\" onclick=\"handleStopAgency()\" id=\"stop-btn\" title=\"Stop agency\"><span class=\"icon is-small\"><i class=\"fas fa-stop\"></i></span> <span>Stop</span></button> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if string(currentAgency.State) == "draining" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<!-- In draining state, only show force stop --> <button class=\"button is-small is-danger\" onclick=\"handleForceStopAgency()\" id=\"force-stop-btn\" title=\"Force stop draining agency\"><span class=\"icon is-small\"><i class=\"fas fa-times-circle\"></i></span> <span>Force Stop</span></button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<!-- In draining state, only show force stop --> <button class=\"button is-small is-danger\" onclick=\"handleForceStopAgency()\" id=\"force-stop-btn\" title=\"Force stop draining agency\"><span class=\"icon is-small\"><i class=\"fas fa-times-circle\"></i></span> <span>Force Stop</span></button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><!-- State badge showing current agency state --><div class=\"state-badge ml-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><!-- State badge showing current agency state --><div class=\"state-badge ml-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -97,7 +81,7 @@ func PublishToolbar(currentAgency *models.Agency) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -132,7 +116,7 @@ func StateBadge(state string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<span class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<span class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -145,7 +129,7 @@ func StateBadge(state string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\"><span class=\"icon is-small\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><span class=\"icon is-small\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -154,7 +138,7 @@ func StateBadge(state string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<i class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<i class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -167,20 +151,20 @@ func StateBadge(state string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"></i></span> <span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"></i></span> <span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(stateToLabel(state))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/publish_toolbar.templ`, Line: 152, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/publish_toolbar.templ`, Line: 148, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -193,8 +177,6 @@ func stateToClass(state string) string {
 	switch state {
 	case "draft":
 		return "is-light"
-	case "validated":
-		return "is-info"
 	case "published":
 		return "is-link"
 	case "active":
@@ -216,8 +198,6 @@ func stateToIcon(state string) string {
 	switch state {
 	case "draft":
 		return "fas fa-pencil-alt"
-	case "validated":
-		return "fas fa-check-circle"
 	case "published":
 		return "fas fa-upload"
 	case "active":
@@ -239,8 +219,6 @@ func stateToLabel(state string) string {
 	switch state {
 	case "draft":
 		return "Draft"
-	case "validated":
-		return "Validated"
 	case "published":
 		return "Published"
 	case "active":

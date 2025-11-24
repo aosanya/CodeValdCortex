@@ -156,19 +156,7 @@ func (s *publicationService) Publish(ctx context.Context, agencyID string, req *
 		return nil, fmt.Errorf("publication with version %s already exists", req.Version)
 	}
 
-	// Step 4: Transition to validated if in draft
-	if agencyDoc.State == models.AgencyStateDraft {
-		if err := s.stateMachine.Transition(agencyDoc, "validate"); err != nil {
-			s.logger.Warn("failed to transition to validated", "error", err)
-			// Continue anyway - validation checks passed
-		}
-		// Update agency state in database
-		if err := s.agencyRepo.Update(ctx, agencyDoc); err != nil {
-			return nil, fmt.Errorf("failed to update agency state: %w", err)
-		}
-	}
-
-	// Step 5: Generate snapshot
+	// Step 4: Generate snapshot
 	snapshot := s.generateSnapshot(agencyDoc, spec)
 
 	// Step 6: Generate deployment manifest
@@ -328,9 +316,9 @@ func (s *publicationService) Deactivate(ctx context.Context, agencyID string, gr
 		return fmt.Errorf("failed to get agency: %w", err)
 	}
 
-	// Check state (must be active or paused)
-	if agencyDoc.State != models.AgencyStateActive && agencyDoc.State != models.AgencyStatePaused {
-		return fmt.Errorf("agency must be in active or paused state to deactivate (current: %s)", agencyDoc.State)
+	// Check state (must be published)
+	if agencyDoc.State != models.AgencyStatePublished {
+		return fmt.Errorf("agency must be in published state to deactivate (current: %s)", agencyDoc.State)
 	}
 
 	// Stop agents using activation service

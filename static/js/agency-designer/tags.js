@@ -2,19 +2,18 @@
  * Tag Dialog and Management
  * 
  * Handles tag creation, listing, comparison, and restoration
+ * 
+ * Depends on: shared.js (for currentAgencyId)
  */
 
-// State
-let currentAgencyId = null;
+// State (currentAgencyId is in shared.js)
 let metadataFieldCount = 0;
 
 /**
  * Initialize tag features
  */
 function initializeTagFeatures() {
-    const urlParts = window.location.pathname.split('/');
-    currentAgencyId = urlParts[urlParts.indexOf('agencies') + 1];
-
+    // currentAgencyId is already initialized in shared.js
     setupTagFormListeners();
 }
 
@@ -276,15 +275,12 @@ async function handleTagSubmit() {
             throw new Error(result.error || 'Failed to create tag');
         }
     } catch (error) {
-        console.error('Tag creation failed:', error);
         alert(`Failed to create tag: ${error.message}`);
     } finally {
         tagBtn.disabled = false;
         progress.style.display = 'none';
     }
-}
-
-/**
+}/**
  * Pause agency
  */
 async function handlePauseAgency() {
@@ -368,16 +364,13 @@ async function performLifecycleAction(action, successMessage, force = false) {
             throw new Error(error.error || `${action} failed`);
         }
     } catch (error) {
-        console.error(`${action} failed:`, error);
         alert(`Failed to ${action}: ${error.message}`);
     } finally {
         if (btn) {
             btn.classList.remove('is-loading');
         }
     }
-}
-
-/**
+}/**
  * Show notification
  */
 function showNotification(title, message, type = 'info') {

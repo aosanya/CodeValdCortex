@@ -74,8 +74,8 @@ window.showGoalEditor = function (mode, goalKey = null, code = '', description =
     goalEditorState.originalCode = code;
     goalEditorState.originalDescription = description;
 
-    const addTitle = '<span class="icon"><i class="fas fa-plus"></i></span><span>Add New Goal</span>';
-    const editTitle = '<span class="icon"><i class="fas fa-edit"></i></span><span>Edit Goal</span>';
+    const addTitle = 'Add New Goal';
+    const editTitle = 'Edit Goal';
 
     window.showEntityEditor(mode, 'goal-editor-card', 'goals-list-card', 'goal-editor-title', addTitle, editTitle, 'goal-description-editor');
 

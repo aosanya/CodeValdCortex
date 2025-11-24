@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
@@ -11,94 +12,95 @@ import (
 )
 
 const (
-	TagCollectionName = "agency_tags"
+	tagCollectionName = "agency_tags"
 )
 
-// TagRepository implements the tag repository using ArangoDB
+// TagRepository implements the tag repository using agency-specific databases
 type TagRepository struct {
-	db         driver.Database
-	collection driver.Collection
+	client driver.Client // ArangoDB client to access different databases
 }
 
 // NewTagRepository creates a new tag repository
-func NewTagRepository(db driver.Database) (*TagRepository, error) {
-	// Get or create tags collection
-	var collection driver.Collection
-	exists, err := db.CollectionExists(context.Background(), TagCollectionName)
+func NewTagRepository(client driver.Client) (*TagRepository, error) {
+	return &TagRepository{
+		client: client,
+	}, nil
+}
+
+// getTagCollection gets or creates the tags collection in the agency's database
+func (r *TagRepository) getTagCollection(ctx context.Context, agencyDB string) (driver.Collection, error) {
+	// Get the agency's database
+	db, err := r.client.Database(ctx, agencyDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to access agency database %s: %w", agencyDB, err)
+	}
+
+	// Check if collection exists
+	exists, err := db.CollectionExists(ctx, tagCollectionName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check collection existence: %w", err)
 	}
 
+	var collection driver.Collection
 	if exists {
-		collection, err = db.Collection(context.Background(), TagCollectionName)
+		collection, err = db.Collection(ctx, tagCollectionName)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get collection: %w", err)
 		}
 	} else {
-		collection, err = db.CreateCollection(context.Background(), TagCollectionName, nil)
+		// Create the collection
+		collection, err = db.CreateCollection(ctx, tagCollectionName, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create collection: %w", err)
 		}
 	}
 
-	return &TagRepository{
-		db:         db,
-		collection: collection,
-	}, nil
+	return collection, nil
 }
 
-// Create creates a new tag
-func (r *TagRepository) Create(ctx context.Context, tag *models.AgencyTag) error {
-	// Generate document key from agency_id and name
-	tag.Key = generateTagKey(tag.AgencyID, tag.Name)
+// Create creates a new tag in the agency's database
+func (r *TagRepository) Create(ctx context.Context, tag *models.AgencyTag, agencyID string, agencyDB string) error {
+	collection, err := r.getTagCollection(ctx, agencyDB)
+	if err != nil {
+		return err
+	}
 
-	meta, err := r.collection.CreateDocument(ctx, tag)
+	// Generate document key from agency_id and name
+	tag.Key = generateTagKey(agencyID, tag.Name)
+	tag.AgencyID = agencyID
+
+	if tag.CreatedAt.IsZero() {
+		tag.CreatedAt = time.Now()
+	}
+
+	meta, err := collection.CreateDocument(ctx, tag)
 	if err != nil {
 		if driver.IsConflict(err) {
-			return fmt.Errorf("tag with name '%s' already exists for agency", tag.Name)
+			return fmt.Errorf("tag with name '%s' already exists", tag.Name)
 		}
 		return fmt.Errorf("failed to create tag: %w", err)
 	}
 
-	// Set the full ID
 	tag.ID = meta.ID.String()
 	tag.Rev = meta.Rev
 
 	return nil
 }
 
-// GetByID retrieves a tag by its document ID
-func (r *TagRepository) GetByID(ctx context.Context, tagID string) (*models.AgencyTag, error) {
-	// Extract key from full ID if needed
-	key := tagID
-	if strings.Contains(tagID, "/") {
-		parts := strings.Split(tagID, "/")
-		if len(parts) == 2 {
-			key = parts[1]
-		}
-	}
-
-	var tag models.AgencyTag
-	_, err := r.collection.ReadDocument(ctx, key, &tag)
-	if err != nil {
-		if driver.IsNotFound(err) {
-			return nil, nil // Return nil instead of error for not found
-		}
-		return nil, fmt.Errorf("failed to read tag: %w", err)
-	}
-
-	return &tag, nil
-}
-
 // GetByAgencyAndName retrieves a tag by agency ID and tag name
-func (r *TagRepository) GetByAgencyAndName(ctx context.Context, agencyID, name string) (*models.AgencyTag, error) {
+func (r *TagRepository) GetByAgencyAndName(ctx context.Context, agencyID, name string, agencyDB string) (*models.AgencyTag, error) {
+	collection, err := r.getTagCollection(ctx, agencyDB)
+	if err != nil {
+		return nil, err
+	}
+
 	key := generateTagKey(agencyID, name)
 
 	var tag models.AgencyTag
-	_, err := r.collection.ReadDocument(ctx, key, &tag)
+	_, err = collection.ReadDocument(ctx, key, &tag)
 	if err != nil {
 		if driver.IsNotFound(err) {
-			return nil, nil // Return nil instead of error for not found
+			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to read tag: %w", err)
 	}
@@ -107,10 +109,15 @@ func (r *TagRepository) GetByAgencyAndName(ctx context.Context, agencyID, name s
 }
 
 // List retrieves tags for an agency with optional filtering
-func (r *TagRepository) List(ctx context.Context, agencyID string, filters *services.TagFilters) ([]*models.AgencyTag, error) {
+func (r *TagRepository) List(ctx context.Context, agencyID string, agencyDB string, filters *services.TagFilters) ([]*models.AgencyTag, error) {
+	db, err := r.client.Database(ctx, agencyDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to access agency database: %w", err)
+	}
+
 	query, bindVars := r.buildListQuery(agencyID, filters)
 
-	cursor, err := r.db.Query(ctx, query, bindVars)
+	cursor, err := db.Query(ctx, query, bindVars)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -132,11 +139,16 @@ func (r *TagRepository) List(ctx context.Context, agencyID string, filters *serv
 	return tags, nil
 }
 
-// Delete removes a tag
-func (r *TagRepository) Delete(ctx context.Context, agencyID, name string) error {
+// Delete removes a tag from the agency's database
+func (r *TagRepository) Delete(ctx context.Context, agencyID, name string, agencyDB string) error {
+	collection, err := r.getTagCollection(ctx, agencyDB)
+	if err != nil {
+		return err
+	}
+
 	key := generateTagKey(agencyID, name)
 
-	_, err := r.collection.RemoveDocument(ctx, key)
+	_, err = collection.RemoveDocument(ctx, key)
 	if err != nil {
 		if driver.IsNotFound(err) {
 			return fmt.Errorf("tag not found: %s", name)
@@ -150,47 +162,43 @@ func (r *TagRepository) Delete(ctx context.Context, agencyID, name string) error
 // buildListQuery constructs the AQL query for listing tags with filters
 func (r *TagRepository) buildListQuery(agencyID string, filters *services.TagFilters) (string, map[string]interface{}) {
 	bindVars := map[string]interface{}{
-		"collection": TagCollectionName,
+		"collection": tagCollectionName,
 		"agency_id":  agencyID,
 	}
 
-	// Start building the query
 	var queryParts []string
-	queryParts = append(queryParts, fmt.Sprintf("FOR tag IN %s", TagCollectionName))
+	queryParts = append(queryParts, fmt.Sprintf("FOR tag IN %s", tagCollectionName))
 	queryParts = append(queryParts, "FILTER tag.agency_id == @agency_id")
 
-	// Add type filter
-	if filters != nil && filters.Type != "" {
-		queryParts = append(queryParts, "FILTER tag.type == @type")
-		bindVars["type"] = filters.Type
+	if filters != nil {
+		if filters.Type != "" {
+			queryParts = append(queryParts, "FILTER tag.type == @type")
+			bindVars["type"] = filters.Type
+		}
+
+		if filters.NameLike != "" {
+			queryParts = append(queryParts, "FILTER LIKE(tag.name, @name_pattern, true)")
+			bindVars["name_pattern"] = fmt.Sprintf("%%%s%%", filters.NameLike)
+		}
+
+		if filters.FromDate != nil {
+			queryParts = append(queryParts, "FILTER tag.created_at >= @from_date")
+			bindVars["from_date"] = filters.FromDate
+		}
+
+		if filters.ToDate != nil {
+			queryParts = append(queryParts, "FILTER tag.created_at <= @to_date")
+			bindVars["to_date"] = filters.ToDate
+		}
 	}
 
-	// Add name filter (LIKE)
-	if filters != nil && filters.NameLike != "" {
-		queryParts = append(queryParts, "FILTER LIKE(tag.name, @name_pattern, true)")
-		bindVars["name_pattern"] = fmt.Sprintf("%%%s%%", filters.NameLike)
-	}
-
-	// Add date range filters
-	if filters != nil && filters.FromDate != nil {
-		queryParts = append(queryParts, "FILTER tag.created_at >= @from_date")
-		bindVars["from_date"] = filters.FromDate
-	}
-
-	if filters != nil && filters.ToDate != nil {
-		queryParts = append(queryParts, "FILTER tag.created_at <= @to_date")
-		bindVars["to_date"] = filters.ToDate
-	}
-
-	// Sort by created_at descending (newest first)
 	queryParts = append(queryParts, "SORT tag.created_at DESC")
 
-	// Add pagination
 	if filters != nil {
 		if filters.Limit > 0 {
 			queryParts = append(queryParts, "LIMIT @offset, @limit")
-			bindVars["limit"] = filters.Limit
 			bindVars["offset"] = filters.Offset
+			bindVars["limit"] = filters.Limit
 		}
 	}
 
@@ -200,30 +208,17 @@ func (r *TagRepository) buildListQuery(agencyID string, filters *services.TagFil
 	return query, bindVars
 }
 
-// generateTagKey creates a unique key for a tag (agency_id + name)
-func generateTagKey(agencyID, name string) string {
-	// Remove "agency_" prefix if present
+// generateTagKey creates a unique key for a tag
+func generateTagKey(agencyID, tagName string) string {
 	cleanID := strings.TrimPrefix(agencyID, "agency_")
-	// Create key: agencyid_tagname (sanitize to be URL-safe)
-	key := fmt.Sprintf("%s_%s", cleanID, sanitizeName(name))
-	return key
-}
+	cleanID = strings.TrimPrefix(cleanID, "agencies/")
 
-// sanitizeName removes special characters from tag name for key generation
-func sanitizeName(name string) string {
-	// Replace spaces and special characters with underscores
 	replacer := strings.NewReplacer(
-		" ", "_",
 		"/", "_",
-		"\\", "_",
-		":", "_",
-		"*", "_",
-		"?", "_",
-		"\"", "_",
-		"<", "_",
-		">", "_",
-		"|", "_",
-		".", "_",
+		" ", "_",
+		"-", "_",
 	)
-	return replacer.Replace(name)
+	cleanName := replacer.Replace(tagName)
+
+	return fmt.Sprintf("%s_%s", cleanID, cleanName)
 }

@@ -27,59 +27,10 @@ func TestValidTransitions(t *testing.T) {
 		shouldFail    bool
 	}{
 		{
-			name:          "Draft to Validated",
+			name:          "Draft to Published",
 			initialState:  models.AgencyStateDraft,
-			event:         "validate",
-			expectedState: models.AgencyStateValidated,
-			shouldFail:    false,
-		},
-		{
-			name:          "Validated to Published",
-			initialState:  models.AgencyStateValidated,
 			event:         "publish",
 			expectedState: models.AgencyStatePublished,
-			shouldFail:    false,
-		},
-		{
-			name:          "Published to Active",
-			initialState:  models.AgencyStatePublished,
-			event:         "activate",
-			expectedState: models.AgencyStateActive,
-			shouldFail:    false,
-		},
-		{
-			name:          "Active to Paused",
-			initialState:  models.AgencyStateActive,
-			event:         "pause",
-			expectedState: models.AgencyStatePaused,
-			shouldFail:    false,
-		},
-		{
-			name:          "Paused to Active",
-			initialState:  models.AgencyStatePaused,
-			event:         "resume",
-			expectedState: models.AgencyStateActive,
-			shouldFail:    false,
-		},
-		{
-			name:          "Active to Draining",
-			initialState:  models.AgencyStateActive,
-			event:         "drain",
-			expectedState: models.AgencyStateDraining,
-			shouldFail:    false,
-		},
-		{
-			name:          "Draining to Stopped",
-			initialState:  models.AgencyStateDraining,
-			event:         "drain_complete",
-			expectedState: models.AgencyStateStopped,
-			shouldFail:    false,
-		},
-		{
-			name:          "Active to Stopped (force)",
-			initialState:  models.AgencyStateActive,
-			event:         "force_stop",
-			expectedState: models.AgencyStateStopped,
 			shouldFail:    false,
 		},
 	}
@@ -117,29 +68,19 @@ func TestInvalidTransitions(t *testing.T) {
 		event string
 	}{
 		{
-			name:  "Draft to Active (invalid)",
+			name:  "Draft to Activate (invalid)",
 			state: models.AgencyStateDraft,
 			event: "activate",
 		},
 		{
-			name:  "Draft to Published (invalid)",
-			state: models.AgencyStateDraft,
-			event: "publish",
-		},
-		{
-			name:  "Validated to Active (invalid)",
-			state: models.AgencyStateValidated,
-			event: "activate",
-		},
-		{
-			name:  "Published to Paused (invalid)",
+			name:  "Published to Pause (invalid)",
 			state: models.AgencyStatePublished,
 			event: "pause",
 		},
 		{
-			name:  "Stopped to Active (invalid)",
-			state: models.AgencyStateStopped,
-			event: "activate",
+			name:  "Archived to Publish (invalid)",
+			state: models.AgencyStateArchived,
+			event: "publish",
 		},
 	}
 
@@ -168,9 +109,9 @@ func TestCanTransition(t *testing.T) {
 		shouldPass bool
 	}{
 		{
-			name:       "Valid: Draft to Validated",
+			name:       "Valid: Draft to Publish",
 			state:      models.AgencyStateDraft,
-			event:      "validate",
+			event:      "publish",
 			shouldPass: true,
 		},
 		{
@@ -180,16 +121,10 @@ func TestCanTransition(t *testing.T) {
 			shouldPass: false,
 		},
 		{
-			name:       "Valid: Published to Active",
+			name:       "Invalid: Published to Pause",
 			state:      models.AgencyStatePublished,
-			event:      "activate",
-			shouldPass: true,
-		},
-		{
-			name:       "Valid: Active to Paused",
-			state:      models.AgencyStateActive,
 			event:      "pause",
-			shouldPass: true,
+			shouldPass: false,
 		},
 	}
 
@@ -216,14 +151,14 @@ func TestCanTransition(t *testing.T) {
 func TestGuardEvaluation(t *testing.T) {
 	sm := NewAgencyStateMachine()
 
-	// Test that guards are evaluated for Draft -> Validated transition
+	// Test that guards are evaluated for Draft -> Published transition
 	agency := &models.Agency{
 		ID:    "test-agency",
 		State: models.AgencyStateDraft,
 	}
 
 	// This should pass because guard stubs return nil
-	err := sm.CanTransition(agency, "validate")
+	err := sm.CanTransition(agency, "publish")
 	if err != nil {
 		t.Errorf("Guard evaluation failed: %v", err)
 	}
@@ -256,18 +191,12 @@ func TestMultipleTransitions(t *testing.T) {
 		State: models.AgencyStateDraft,
 	}
 
-	// Simulate full lifecycle
+	// Simulate simplified lifecycle (only draft -> published now)
 	transitions := []struct {
 		event         string
 		expectedState models.AgencyState
 	}{
-		{"validate", models.AgencyStateValidated},
 		{"publish", models.AgencyStatePublished},
-		{"activate", models.AgencyStateActive},
-		{"pause", models.AgencyStatePaused},
-		{"resume", models.AgencyStateActive},
-		{"drain", models.AgencyStateDraining},
-		{"drain_complete", models.AgencyStateStopped},
 	}
 
 	for i, trans := range transitions {

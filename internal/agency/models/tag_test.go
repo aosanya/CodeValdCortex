@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 func TestIsValidTagType(t *testing.T) {
@@ -53,9 +54,10 @@ func TestValidTagTypes(t *testing.T) {
 
 func TestAgencyTagJSONMarshaling(t *testing.T) {
 	tag := AgencyTag{
-		Key:         "tag-123",
-		ID:          "agency_tags/tag-123",
-		AgencyID:    "UC-TEST-001",
+		Key:         "test_agency_v1_0_0",
+		ID:          "agency_tags/test_agency_v1_0_0",
+		Rev:         "_abc123",
+		AgencyID:    "agency_123",
 		Name:        "v1.0.0",
 		Version:     "1.0.0",
 		Description: "Initial release",
@@ -66,6 +68,8 @@ func TestAgencyTagJSONMarshaling(t *testing.T) {
 			BuildNumber: "42",
 			Environment: "production",
 		},
+		CreatedAt: time.Now(),
+		CreatedBy: "test-user",
 	}
 
 	// Marshal to JSON

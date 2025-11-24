@@ -9,36 +9,32 @@ import (
 templ PublishToolbar(currentAgency *models.Agency) {
 	<div class="publish-toolbar">
 		<div class="buttons has-addons">
-			if string(currentAgency.State) == "draft" {
-				<!-- Validate button (Draft → Validated) -->
-				<button 
-					class="button is-small is-info"
-					onclick="handleValidateAgency()"
-					id="validate-btn"
-					title="Validate agency specification">
-					<span class="icon is-small">
-						<i class="fas fa-check-circle"></i>
-					</span>
-					<span>Validate</span>
-				</button>
-			}
+			<!-- Validate button - always available to check current state -->
+			<button 
+				class="button is-small is-info"
+				onclick="handleValidateAgency()"
+				id="validate-btn"
+				title="Validate agency specification">
+				<span class="icon is-small">
+					<i class="fas fa-check-circle"></i>
+				</span>
+				<span>Validate</span>
+			</button>
 			
-			if string(currentAgency.State) == "validated" || string(currentAgency.State) == "published" || string(currentAgency.State) == "active" {
-				<!-- Publish button (Validated → Published) -->
-				<button 
-					class="button is-small is-primary"
-					onclick="openPublishDialog()"
-					id="publish-btn"
-					title="Publish agency as new version">
-					<span class="icon is-small">
-						<i class="fas fa-upload"></i>
-					</span>
-					<span>Publish</span>
-				</button>
-			}
+			<!-- Publish button - validates before publishing -->
+			<button 
+				class="button is-small is-primary"
+				onclick="openPublishDialog()"
+				id="publish-btn"
+				title="Publish agency as new version (validates first)">
+				<span class="icon is-small">
+					<i class="fas fa-upload"></i>
+				</span>
+				<span>Publish</span>
+			</button>
 			
-			<!-- Create Tag button (available in all states except draft) -->
-			if string(currentAgency.State) != "draft" {
+			<!-- Create Tag button (available in all states except draft/empty) -->
+			if string(currentAgency.State) != "draft" && string(currentAgency.State) != "" {
 				<button 
 					class="button is-small is-link"
 					onclick="openTagDialog()"
@@ -158,8 +154,6 @@ func stateToClass(state string) string {
 	switch state {
 	case "draft":
 		return "is-light"
-	case "validated":
-		return "is-info"
 	case "published":
 		return "is-link"
 	case "active":
@@ -181,8 +175,6 @@ func stateToIcon(state string) string {
 	switch state {
 	case "draft":
 		return "fas fa-pencil-alt"
-	case "validated":
-		return "fas fa-check-circle"
 	case "published":
 		return "fas fa-upload"
 	case "active":
@@ -204,8 +196,6 @@ func stateToLabel(state string) string {
 	switch state {
 	case "draft":
 		return "Draft"
-	case "validated":
-		return "Validated"
 	case "published":
 		return "Published"
 	case "active":

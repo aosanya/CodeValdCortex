@@ -3,22 +3,18 @@
  * 
  * Handles agency validation, publishing, and tag creation workflows
  * Interacts with /api/v1/agencies/:id/validate and /api/v1/agencies/:id/publish endpoints
+ * 
+ * Depends on: shared.js (for currentAgencyId)
  */
 
-// State management
-let currentAgencyId = null;
+// State management (currentAgencyId is in shared.js)
 let validationResult = null;
 
 /**
  * Initialize publish functionality
  */
 function initializePublishFeatures() {
-    // Get agency ID from URL or data attribute
-    const urlParts = window.location.pathname.split('/');
-    currentAgencyId = urlParts[urlParts.indexOf('agencies') + 1];
-
-    // Set up form listeners for live preview
-    setupPublishFormListeners();
+    // currentAgencyId is already initialized in shared.js
 }
 
 /**
@@ -51,9 +47,7 @@ function resetPublishForm() {
     document.getElementById('publish-version').value = '';
     document.getElementById('publish-description').value = '';
     document.getElementById('publish-auto-activate').checked = false;
-    document.getElementById('publish-create-tag').checked = false;
     document.getElementById('publish-tag-name').value = '';
-    document.getElementById('tag-name-field').style.display = 'none';
     document.getElementById('publish-form').style.display = 'none';
     document.getElementById('validation-status-info').style.display = 'block';
     document.getElementById('validation-errors').style.display = 'none';
@@ -80,7 +74,7 @@ async function checkValidation() {
         const result = await response.json();
         validationResult = result;
 
-        if (response.ok && result.is_valid) {
+        if (response.ok && result.valid) {
             // Valid - show publish form
             statusDiv.style.display = 'none';
             errorsDiv.style.display = 'none';
@@ -92,114 +86,31 @@ async function checkValidation() {
             errorsDiv.style.display = 'block';
 
             // Render error list
-            errorList.innerHTML = '<ul class="is-size-7">' +
-                result.errors.map(err => `<li><strong>${err.field}:</strong> ${err.message}</li>`).join('') +
-                '</ul>';
+            if (result.errors && result.errors.length > 0) {
+                errorList.innerHTML = '<ul class="is-size-7">' +
+                    result.errors.map(err => `<li><strong>${err.field}:</strong> ${err.message}</li>`).join('') +
+                    '</ul>';
+            } else {
+                errorList.innerHTML = '<p class="is-size-7">No specific errors provided.</p>';
+            }
 
             publishForm.style.display = 'none';
         }
     } catch (error) {
-        console.error('Validation check failed:', error);
         statusDiv.innerHTML = `
-            <p class="has-text-danger">
-                <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
-                Failed to check validation: ${error.message}
-            </p>
-        `;
+        <p class="has-text-danger">
+            <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
+            Failed to check validation: ${error.message}
+        </p>
+    `;
     }
-}
-
-/**
- * Set up form field listeners for live preview
- */
-function setupPublishFormListeners() {
-    // Version input
-    const versionInput = document.getElementById('publish-version');
-    if (versionInput) {
-        versionInput.addEventListener('input', updatePublishPreview);
-    }
-
-    // Description input
-    const descInput = document.getElementById('publish-description');
-    if (descInput) {
-        descInput.addEventListener('input', updatePublishPreview);
-    }
-
-    // Auto-activate checkbox
-    const activateCheck = document.getElementById('publish-auto-activate');
-    if (activateCheck) {
-        activateCheck.addEventListener('change', updatePublishPreview);
-    }
-
-    // Create tag checkbox
-    const tagCheck = document.getElementById('publish-create-tag');
-    if (tagCheck) {
-        tagCheck.addEventListener('change', updatePublishPreview);
-    }
-
-    // Tag name input
-    const tagNameInput = document.getElementById('publish-tag-name');
-    if (tagNameInput) {
-        tagNameInput.addEventListener('input', updatePublishPreview);
-    }
-}
-
-/**
- * Update live preview of publication
- */
-function updatePublishPreview() {
-    const version = document.getElementById('publish-version').value || '-';
-    const description = document.getElementById('publish-description').value || '-';
-    const autoActivate = document.getElementById('publish-auto-activate').checked;
-    const createTag = document.getElementById('publish-create-tag').checked;
-    const tagName = document.getElementById('publish-tag-name').value || version;
-
-    // Update preview fields
-    document.getElementById('preview-version').textContent = version;
-    document.getElementById('preview-description').textContent = description;
-
-    // Update action list
-    const tagAction = document.getElementById('preview-tag-action');
-    const activateAction = document.getElementById('preview-activate-action');
-
-    if (createTag) {
-        tagAction.style.display = 'list-item';
-        document.getElementById('preview-tag-name').textContent = tagName;
-    } else {
-        tagAction.style.display = 'none';
-    }
-
-    if (autoActivate) {
-        activateAction.style.display = 'list-item';
-    } else {
-        activateAction.style.display = 'none';
-    }
-}
-
-/**
- * Toggle tag name input visibility
- */
-function toggleTagNameInput() {
-    const createTag = document.getElementById('publish-create-tag').checked;
-    const tagField = document.getElementById('tag-name-field');
-
-    if (createTag) {
-        tagField.style.display = 'block';
-    } else {
-        tagField.style.display = 'none';
-    }
-
-    updatePublishPreview();
-}
-
-/**
+}/**
  * Handle publish form submission
  */
 async function handlePublishSubmit() {
     const version = document.getElementById('publish-version').value.trim();
     const description = document.getElementById('publish-description').value.trim();
     const autoActivate = document.getElementById('publish-auto-activate').checked;
-    const createTag = document.getElementById('publish-create-tag').checked;
     const tagName = document.getElementById('publish-tag-name').value.trim() || version;
 
     // Validate required fields
@@ -229,10 +140,8 @@ async function handlePublishSubmit() {
             auto_activate: autoActivate
         };
 
-        // Optionally create tag first
-        if (createTag) {
-            await createTagBeforePublish(tagName, version, description);
-        }
+        // Always create tag before publishing
+        await createTagBeforePublish(tagName, version, description);
 
         // Publish agency
         const response = await fetch(`/api/v1/agencies/${currentAgencyId}/publish`, {
@@ -261,25 +170,31 @@ async function handlePublishSubmit() {
             throw new Error(result.error || 'Failed to publish agency');
         }
     } catch (error) {
-        console.error('Publish failed:', error);
         alert(`Failed to publish agency: ${error.message}`);
     } finally {
         publishBtn.disabled = false;
         progress.style.display = 'none';
     }
-}
-
-/**
- * Create tag before publishing
+}/**
+ * Create tag before publishing (or use existing if it already exists)
  */
 async function createTagBeforePublish(tagName, version, description) {
+    // Check if tag already exists
+    const checkResponse = await fetch(`/api/v1/agencies/${currentAgencyId}/tags/${tagName}`);
+
+    if (checkResponse.ok) {
+        const existingTag = await checkResponse.json();
+        return existingTag;
+    }
+
+    // Tag doesn't exist, create it
     const tagData = {
         name: tagName,
         type: 'snapshot',
-        version: version,
         description: `Pre-publish snapshot: ${description}`,
         metadata: {
-            created_before_publish: true
+            created_before_publish: 'true',
+            version: version
         }
     };
 
@@ -293,8 +208,11 @@ async function createTagBeforePublish(tagName, version, description) {
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(`Failed to create tag: ${error.error}`);
+        throw new Error(`Failed to create tag: ${error.error || error.details || 'Unknown error'}`);
     }
+
+    const result = await response.json();
+    return result;
 }
 
 /**
@@ -314,6 +232,12 @@ async function handleValidateAgency() {
 
         const result = await response.json();
 
+        // Navigate to validation section to show results
+        navigateToValidationSection();
+
+        // Display validation results
+        displayValidationResults(result, response.ok);
+
         if (response.ok && result.is_valid) {
             showNotification('Success', 'Agency validated successfully', 'success');
 
@@ -323,16 +247,82 @@ async function handleValidateAgency() {
             // Reload to show new buttons
             setTimeout(() => window.location.reload(), 1000);
         } else {
-            // Show validation errors
-            const errors = result.errors.map(e => `${e.field}: ${e.message}`).join('\n');
-            alert(`Validation failed:\n\n${errors}`);
+            showNotification('Validation Failed', `Found ${result.errors?.length || 0} errors and ${result.warnings?.length || 0} warnings`, 'warning');
         }
     } catch (error) {
-        console.error('Validation failed:', error);
-        alert(`Validation error: ${error.message}`);
+        showNotification('Error', `Validation error: ${error.message}`, 'danger');
     } finally {
         btn.classList.remove('is-loading');
     }
+}/**
+ * Navigate to the validation section in overview
+ */
+function navigateToValidationSection() {
+    // Switch to overview view if not already there
+    const overviewView = document.querySelector('[data-view-content="overview"]');
+    if (overviewView && !overviewView.classList.contains('is-active')) {
+        const overviewTab = document.querySelector('[data-view="overview"]');
+        if (overviewTab) overviewTab.click();
+    }
+
+    // Select validation section
+    const validationNavItem = document.querySelector('[data-section="validation"]');
+    if (validationNavItem) {
+        validationNavItem.click();
+    }
+}
+
+/**
+ * Display validation results in the validation section
+ */
+function displayValidationResults(result, isSuccess) {
+    const container = document.getElementById('validation-results');
+    if (!container) return;
+
+    const isValid = result.is_valid || false;
+    const errors = result.errors || [];
+    const warnings = result.warnings || [];
+
+    let html = '';
+
+    if (isValid) {
+        html = `
+            <div class="notification is-success is-light">
+                <p class="mb-2"><strong><i class="fas fa-check-circle mr-2"></i>Validation Passed!</strong></p>
+                <p class="is-size-7">Your agency specification is complete and ready for publishing.</p>
+            </div>
+        `;
+    } else {
+        // Show errors
+        if (errors.length > 0) {
+            html += `
+                <div class="notification is-danger is-light mb-4">
+                    <p class="mb-3"><strong><i class="fas fa-exclamation-circle mr-2"></i>Validation Errors (${errors.length})</strong></p>
+                    <div class="content is-small">
+                        <ul class="mb-0">
+                            ${errors.map(e => `<li><strong>${e.field}:</strong> ${e.message}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show warnings
+        if (warnings.length > 0) {
+            html += `
+                <div class="notification is-warning is-light">
+                    <p class="mb-3"><strong><i class="fas fa-exclamation-triangle mr-2"></i>Warnings (${warnings.length})</strong></p>
+                    <div class="content is-small">
+                        <ul class="mb-0">
+                            ${warnings.map(w => `<li><strong>${w.field}:</strong> ${w.message}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    container.innerHTML = html;
 }
 
 /**
@@ -359,14 +349,11 @@ async function handleActivateAgency() {
             throw new Error(error.error || 'Activation failed');
         }
     } catch (error) {
-        console.error('Activation failed:', error);
         alert(`Failed to activate: ${error.message}`);
     } finally {
         btn.classList.remove('is-loading');
     }
-}
-
-/**
+}/**
  * Update agency state via API
  */
 async function updateAgencyState(newState) {
