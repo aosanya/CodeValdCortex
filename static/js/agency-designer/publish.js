@@ -15,8 +15,6 @@ let validationResult = null;
  */
 function initializePublishFeatures() {
     // currentAgencyId is already initialized in shared.js
-    // Set up form listeners for live preview
-    setupPublishFormListeners();
 }
 
 /**
@@ -106,61 +104,6 @@ async function checkValidation() {
                 Failed to check validation: ${error.message}
             </p>
         `;
-    }
-}
-
-/**
- * Set up form field listeners for live preview
- */
-function setupPublishFormListeners() {
-    // Version input
-    const versionInput = document.getElementById('publish-version');
-    if (versionInput) {
-        versionInput.addEventListener('input', updatePublishPreview);
-    }
-
-    // Description input
-    const descInput = document.getElementById('publish-description');
-    if (descInput) {
-        descInput.addEventListener('input', updatePublishPreview);
-    }
-
-    // Auto-activate checkbox
-    const activateCheck = document.getElementById('publish-auto-activate');
-    if (activateCheck) {
-        activateCheck.addEventListener('change', updatePublishPreview);
-    }
-
-    // Tag name input
-    const tagNameInput = document.getElementById('publish-tag-name');
-    if (tagNameInput) {
-        tagNameInput.addEventListener('input', updatePublishPreview);
-    }
-}
-
-/**
- * Update live preview of publication
- */
-function updatePublishPreview() {
-    const version = document.getElementById('publish-version').value || '-';
-    const description = document.getElementById('publish-description').value || '-';
-    const autoActivate = document.getElementById('publish-auto-activate').checked;
-    const tagName = document.getElementById('publish-tag-name').value || 'auto-generated';
-
-    // Update preview fields
-    document.getElementById('preview-version').textContent = version;
-    document.getElementById('preview-description').textContent = description;
-
-    // Update tag name in preview (always shown)
-    document.getElementById('preview-tag-name').textContent = tagName;
-
-    // Update action list
-    const activateAction = document.getElementById('preview-activate-action');
-
-    if (autoActivate) {
-        activateAction.style.display = 'list-item';
-    } else {
-        activateAction.style.display = 'none';
     }
 }
 
