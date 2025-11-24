@@ -42,6 +42,7 @@ type App struct {
 	agencyService       agency.Service
 	agencyRepository    agency.Repository
 	tagService          *services.TagService
+	instanceService     services.InstanceService
 	publicationService  services.PublicationService
 	activationService   services.ActivationService
 	runtimeManager      *runtime.Manager
@@ -129,6 +130,20 @@ func New(cfg *config.Config) *App {
 		slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
 		tagService = services.NewTagService(tagRepo, agencyRepo, slogger)
 		logger.Info("Tag service initialized successfully")
+	}
+
+	// Initialize instance service (MVP-PUB-007)
+	logger.Info("Initializing instance service")
+	instanceRepo, err := arangodb.NewInstanceRepository(dbClient.Client())
+	if err != nil {
+		logger.WithError(err).Warn("Failed to initialize instance repository")
+	}
+	var instanceService services.InstanceService
+	if instanceRepo != nil && tagService != nil {
+		// Create slog logger from logrus logger
+		slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
+		instanceService = services.NewInstanceService(instanceRepo, tagService, agencyRepo, slogger)
+		logger.Info("Instance service initialized successfully")
 	}
 
 	// Initialize publication service (MVP-PUB-003)
@@ -231,6 +246,7 @@ func New(cfg *config.Config) *App {
 		agencyService:       agencyService,
 		agencyRepository:    agencyRepo,
 		tagService:          &tagService,
+		instanceService:     instanceService,
 		publicationService:  publicationService,
 		activationService:   activationService,
 		runtimeManager:      runtimeManager,
@@ -472,6 +488,20 @@ func (a *App) setupServer() error {
 			v1.POST("/agencies/:id/tags/:name/restore", tagHandler.RestoreFromTag)
 			v1.GET("/tags/:tag1/compare/:tag2", tagHandler.CompareTags)
 			a.logger.Info("Tag endpoints registered")
+		}
+
+		// Instance endpoints (MVP-PUB-007)
+		if a.instanceService != nil {
+			instanceHandler := handlers.NewInstanceHandler(a.instanceService, a.logger)
+			v1.POST("/agencies/:id/tags/:name/instances", instanceHandler.StartInstance)
+			v1.GET("/agencies/:id/instances", instanceHandler.ListInstances)
+			v1.GET("/agencies/:id/instances/:instanceId", instanceHandler.GetInstance)
+			v1.DELETE("/agencies/:id/instances/:instanceId", instanceHandler.StopInstance)
+			v1.POST("/agencies/:id/instances/:instanceId/restart", instanceHandler.RestartInstance)
+			v1.GET("/agencies/:id/instances/:instanceId/health", instanceHandler.GetInstanceHealth)
+			v1.GET("/agencies/:id/instances/:instanceId/agents", instanceHandler.GetInstanceAgents)
+			v1.GET("/agencies/:id/tags/:name/instances", instanceHandler.ListInstancesByTag)
+			a.logger.Info("Instance endpoints registered")
 		}
 
 		// Publication endpoints (MVP-PUB-003)

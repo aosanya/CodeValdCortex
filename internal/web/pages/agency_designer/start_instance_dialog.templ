@@ -1,0 +1,209 @@
+package agency_designer
+
+// StartInstanceDialog renders the modal dialog for starting an instance from a tag
+templ StartInstanceDialog() {
+	<div class="modal" id="start-instance-dialog">
+		<div class="modal-background" onclick="closeStartInstanceDialog()"></div>
+		<div class="modal-card">
+			<header class="modal-card-head">
+				<p class="modal-card-title">
+					<span class="icon-text">
+						<span class="icon">
+							<i class="fas fa-play-circle"></i>
+						</span>
+						<span>Start Instance</span>
+					</span>
+				</p>
+				<button class="delete" aria-label="close" onclick="closeStartInstanceDialog()"></button>
+			</header>
+			
+			<section class="modal-card-body">
+				<div class="notification is-info is-light">
+					<p class="is-size-7">
+						<span class="icon"><i class="fas fa-info-circle"></i></span>
+						Create a running instance from tag <strong id="instance-source-tag">-</strong>.
+						Multiple instances can run from the same tag with isolated state.
+					</p>
+				</div>
+				
+				<!-- Instance Name -->
+				<div class="field">
+					<label class="label">Instance Name *</label>
+					<div class="control has-icons-left">
+						<input 
+							class="input" 
+							type="text" 
+							id="instance-name"
+							placeholder="production-instance-1"
+							pattern="^[a-zA-Z0-9._-]+$"
+							required>
+						<span class="icon is-small is-left">
+							<i class="fas fa-server"></i>
+						</span>
+					</div>
+					<p class="help">Unique name for this instance (alphanumeric with dots, dashes, underscores)</p>
+				</div>
+				
+				<!-- Environment -->
+				<div class="field">
+					<label class="label">Environment *</label>
+					<div class="control has-icons-left">
+						<div class="select is-fullwidth">
+							<select id="instance-environment">
+								<option value="development">Development</option>
+								<option value="staging">Staging</option>
+								<option value="test">Test</option>
+								<option value="production">Production</option>
+							</select>
+						</div>
+						<span class="icon is-small is-left">
+							<i class="fas fa-globe"></i>
+						</span>
+					</div>
+				</div>
+				
+				<!-- Resource Configuration -->
+				<div class="field">
+					<label class="label">Resource Configuration</label>
+					
+					<div class="field is-horizontal">
+						<div class="field-label is-small">
+							<label class="label">CPU Limit</label>
+						</div>
+						<div class="field-body">
+							<div class="field">
+								<div class="control has-icons-left">
+									<input 
+										class="input is-small" 
+										type="text" 
+										id="instance-cpu-limit"
+										placeholder="2000m"
+										value="2000m">
+									<span class="icon is-small is-left">
+										<i class="fas fa-microchip"></i>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="field is-horizontal">
+						<div class="field-label is-small">
+							<label class="label">Memory Limit</label>
+						</div>
+						<div class="field-body">
+							<div class="field">
+								<div class="control has-icons-left">
+									<input 
+										class="input is-small" 
+										type="text" 
+										id="instance-memory-limit"
+										placeholder="1Gi"
+										value="1Gi">
+									<span class="icon is-small is-left">
+										<i class="fas fa-memory"></i>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="field is-horizontal">
+						<div class="field-label is-small">
+							<label class="label">Max Agents</label>
+						</div>
+						<div class="field-body">
+							<div class="field">
+								<div class="control has-icons-left">
+									<input 
+										class="input is-small" 
+										type="number" 
+										id="instance-max-agents"
+										placeholder="10"
+										value="10"
+										min="1"
+										max="100">
+									<span class="icon is-small is-left">
+										<i class="fas fa-users"></i>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Auto-Scaling -->
+				<div class="field">
+					<label class="checkbox">
+						<input type="checkbox" id="instance-autoscale" onchange="toggleAutoScaleSettings()">
+						Enable Auto-Scaling
+					</label>
+				</div>
+				
+				<div id="autoscale-settings" style="display: none;" class="box is-light">
+					<div class="field is-horizontal">
+						<div class="field-label is-small">
+							<label class="label">Min Agents</label>
+						</div>
+						<div class="field-body">
+							<div class="field">
+								<div class="control is-expanded">
+									<input 
+										class="input is-small" 
+										type="number" 
+										id="instance-min-agents"
+										placeholder="1"
+										value="1"
+										min="1">
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="field is-horizontal">
+						<div class="field-label is-small">
+							<label class="label">Max Scale Agents</label>
+						</div>
+						<div class="field-body">
+							<div class="field">
+								<div class="control is-expanded">
+									<input 
+										class="input is-small" 
+										type="number" 
+										id="instance-max-scale-agents"
+										placeholder="20"
+										value="20"
+										min="1">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Labels (optional) -->
+				<div class="field">
+					<label class="label">Labels (optional)</label>
+					<div class="control">
+						<textarea 
+							class="textarea is-small" 
+							id="instance-labels"
+							placeholder='{"team": "backend", "version": "v1"}'
+							rows="2"></textarea>
+					</div>
+					<p class="help">JSON object with key-value pairs</p>
+				</div>
+				
+				<!-- Validation Messages -->
+				<div id="instance-validation-messages"></div>
+			</section>
+			
+			<footer class="modal-card-foot">
+				<button class="button" onclick="closeStartInstanceDialog()">Cancel</button>
+				<button class="button is-success" onclick="startInstanceFromTag()" id="start-instance-btn">
+					<span class="icon"><i class="fas fa-play"></i></span>
+					<span>Start Instance</span>
+				</button>
+			</footer>
+		</div>
+	</div>
+}

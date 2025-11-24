@@ -1,0 +1,63 @@
+package agency_designer
+
+// TagsListCard renders the tags list with instance management
+templ TagsListCard() {
+	<div class="box m-0 p-0" id="tags-list-card">
+		<div class="level is-mobile mb-4">
+			<div class="level-left">
+				<div class="level-item">
+					<div class="field has-addons">
+						<div class="control">
+							<input 
+								class="input is-small" 
+								type="text" 
+								id="tags-search" 
+								placeholder="Search tags..."
+								onkeyup="filterTags()"/>
+						</div>
+						<div class="control">
+							<button class="button is-small is-light">
+								<span class="icon"><i class="fas fa-search"></i></span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="level-right">
+				<div class="level-item">
+					<button 
+						class="button is-small is-success"
+						onclick="openTagDialog()"
+						title="Create New Tag">
+						<span class="icon"><i class="fas fa-tag"></i></span>
+						<span>Create Tag</span>
+					</button>
+				</div>
+			</div>
+		</div>
+		
+		<div id="tags-list" class="tags-list">
+			<table class="table is-fullwidth is-striped is-hoverable">
+				<thead>
+					<tr>
+						<th style="width: 40px;"><i class="fas fa-tag"></i></th>
+						<th>Tag Name</th>
+						<th style="width: 120px;">Type</th>
+						<th style="width: 100px;">Version</th>
+						<th style="width: 150px;">Created</th>
+						<th style="width: 100px;">Instances</th>
+						<th style="width: 180px;">Actions</th>
+					</tr>
+				</thead>
+				<tbody id="tags-table-body">
+					<!-- Tags will be loaded here dynamically -->
+					<tr>
+						<td colspan="7" class="has-text-grey has-text-centered py-5">
+							<p><i class="fas fa-spinner fa-spin"></i> Loading tags...</p>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
