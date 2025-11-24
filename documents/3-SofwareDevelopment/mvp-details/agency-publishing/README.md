@@ -1,8 +1,8 @@
 # Agency Publishing & Tagging Domain
 
 **Priority**: P0 (Critical)  
-**Total Tasks**: 6 (MVP-PUB-001 through MVP-PUB-006)  
-**Estimated Timeline**: 6 weeks  
+**Total Tasks**: 7 (MVP-PUB-001 through MVP-PUB-007)  
+**Estimated Timeline**: 7 weeks  
 
 ## Overview
 
@@ -12,10 +12,11 @@ The Agency Publishing & Tagging system transforms agencies from design artifacts
 2. **Tagging**: Immutable snapshots for version control, rollback, and experimentation
 3. **Lifecycle Management**: State machine controlling agency progression through 8 states
 4. **Activation**: Orchestrated agent spawning and workflow initialization
+5. **Instance Management**: Multi-instance deployment from tags with isolated runtime state
 
 ## Conceptual Model
 
-### Publishing vs. Tagging
+### Publishing vs. Tagging vs. Instances
 
 **Publishing** is the go-live process:
 - Validates agency completeness (introduction, goals, roles, workflows, RACI)
@@ -29,7 +30,16 @@ The Agency Publishing & Tagging system transforms agencies from design artifacts
 - Supports semantic versioning (v1.0.0, v1.1.0)
 - Enables rollback and experimentation
 
-**Key Distinction**: Tags are static copies; published agencies can be activated/deactivated and transition through lifecycle states.
+**Instances** are runtime deployments:
+- Multiple instances can be started from a single tag
+- Each instance has isolated runtime state (separate agent pools, workflows)
+- Independent lifecycle (start/stop/restart) per instance
+- Enables testing, demos, production, blue/green deployments from same tag
+
+**Key Distinctions**: 
+- Tags are static snapshots (version control)
+- Publications are validated deployment plans (one-time activation)
+- Instances are running agencies (multi-instance execution from tags)
 
 ## Architecture
 
@@ -73,6 +83,14 @@ Draft → Validated → Published → Active → Paused/Draining → Stopped →
 │  - InitializeWorkflows()           │
 │  - PauseAgency()                   │
 │  - DrainAgency()                   │
+├────────────────────────────────────┤
+│  InstanceService                   │
+│  - StartInstance()                 │
+│  - StopInstance()                  │
+│  - ListInstances()                 │
+│  - RestartInstance()               │
+│  - GetInstanceHealth()             │
+└────────────────────────────────────┘
 │  - StopAgency()                    │
 └────────────────────────────────────┘
 ```
@@ -133,11 +151,12 @@ type AgencyTag struct {
 | Task | Title | Status | Effort | Description |
 |------|-------|--------|--------|-------------|
 | [MVP-PUB-001](state-machine.md) | State Machine & Data Models | ✅ Complete | Medium | Update AgencyState enum, create Publication/Tag models, ArangoDB collections, migrations |
-| [MVP-PUB-002](tag-service.md) | Tag Service Implementation | 📋 Not Started | Medium | Tag CRUD, snapshot generation, SHA hashing, diff logic |
-| [MVP-PUB-003](publication-service.md) | Publication Service | 📋 Not Started | High | Validation, publication workflow, manifest generation |
-| [MVP-PUB-004](activation-service.md) | Activation Service | 📋 Not Started | High | Agent spawning, workflow init, pause/resume/drain |
-| [MVP-PUB-005](ui-implementation.md) | Publishing UI | 📋 Not Started | Medium | Publish/tag dialogs, tag management page, state badges |
-| [MVP-PUB-006](integration-testing.md) | Integration & Testing | 📋 Not Started | Medium | E2E testing, load testing, documentation |
+| [MVP-PUB-002](tag-service.md) | Tag Service Implementation | ✅ Complete | Medium | Tag CRUD, snapshot generation, SHA hashing, diff logic |
+| [MVP-PUB-003](publication-service.md) | Publication Service | ✅ Complete | High | Validation, publication workflow, manifest generation |
+| [MVP-PUB-004](activation-service.md) | Activation Service | ✅ Complete | High | Agent spawning, workflow init, pause/resume/drain |
+| [MVP-PUB-005](ui-implementation.md) | Publishing UI | ✅ Complete | Medium | Publish/tag dialogs, tag management page, state badges |
+| [MVP-PUB-006](integration-testing.md) | Integration & Testing | ✅ Complete | Medium | E2E testing, load testing, documentation |
+| [MVP-PUB-007](instance-management.md) | Instance Management | 📋 Not Started | High | Multi-instance deployment from tags with isolated runtime state |
 
 ## Dependencies
 
@@ -146,43 +165,51 @@ type AgencyTag struct {
 - MVP-032 (Agent Factory - required for agent spawning in MVP-PUB-004)
 
 **Internal Dependencies** (within domain):
-- MVP-PUB-002 depends on MVP-PUB-001
-- MVP-PUB-003 depends on MVP-PUB-002
-- MVP-PUB-004 depends on MVP-PUB-003 and MVP-032
-- MVP-PUB-005 depends on MVP-PUB-004
-- MVP-PUB-006 depends on MVP-PUB-005
+- MVP-PUB-002 depends on MVP-PUB-001 ✅
+- MVP-PUB-003 depends on MVP-PUB-002 ✅
+- MVP-PUB-004 depends on MVP-PUB-003 and MVP-032 ✅
+- MVP-PUB-005 depends on MVP-PUB-004 ✅
+- MVP-PUB-006 depends on MVP-PUB-005 ✅
+- MVP-PUB-007 depends on MVP-PUB-006 ✅
 
 ## Implementation Strategy
 
-### Phase 1: Foundation (Weeks 1-2)
+### Phase 1: Foundation (Weeks 1-2) ✅
 Tasks MVP-PUB-001 and MVP-PUB-002
 - Establish data models and state machine
 - Build tag service (snapshots, versioning)
 - No UI changes yet
 
-### Phase 2: Publishing (Week 3)
+### Phase 2: Publishing (Week 3) ✅
 Task MVP-PUB-003
 - Implement publication validation and workflow
 - Generate deployment manifests
 - Publication history tracking
 
-### Phase 3: Activation (Week 4)
+### Phase 3: Activation (Week 4) ✅
 Task MVP-PUB-004
 - Orchestrate agent spawning from publication manifest
 - Initialize workflows based on agency design
 - Implement lifecycle controls (pause/resume/drain/stop)
 
-### Phase 4: User Experience (Week 5)
+### Phase 4: User Experience (Week 5) ✅
 Task MVP-PUB-005
 - Agency Designer publishing controls
 - Tag management interface
 - Publication history viewer
 
-### Phase 5: Validation (Week 6)
+### Phase 5: Validation (Week 6) ✅
 Task MVP-PUB-006
 - End-to-end workflow testing
 - Performance and load testing
 - Documentation and training materials
+
+### Phase 6: Instance Management (Week 7) 🔄
+Task MVP-PUB-007
+- Multi-instance deployment from tags
+- Instance lifecycle management (start/stop/restart)
+- Instance health monitoring and resource tracking
+- Tag list UI with instance controls
 
 ## API Endpoints
 
@@ -204,6 +231,18 @@ DELETE /api/v1/agencies/:id/tags/:name        # Delete tag
 POST   /api/v1/agencies/:id/tags/:name/restore    # Restore from tag
 POST   /api/v1/agencies/:id/tags/:name/publish    # Publish from tag
 GET    /api/v1/tags/:tag1/compare/:tag2       # Compare tags
+```
+
+### Instance Management Endpoints
+```
+POST   /api/v1/agencies/:id/tags/:name/instances     # Start instance from tag
+GET    /api/v1/agencies/:id/instances                # List all instances
+GET    /api/v1/agencies/:id/instances/:instanceId    # Get instance details
+DELETE /api/v1/agencies/:id/instances/:instanceId    # Stop and delete instance
+POST   /api/v1/agencies/:id/instances/:instanceId/restart  # Restart instance
+GET    /api/v1/agencies/:id/instances/:instanceId/health   # Instance health
+GET    /api/v1/agencies/:id/instances/:instanceId/agents   # Instance agents
+GET    /api/v1/agencies/:id/tags/:name/instances     # Instances for specific tag
 ```
 
 ### Lifecycle Control

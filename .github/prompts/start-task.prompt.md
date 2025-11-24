@@ -23,63 +23,70 @@ Follow the **mandatory task startup process** for project tasks:
        2. **Create folder structure** first
        3. **Split existing content** into README + task files
        4. **Then proceed** with new task
+   
+   - **🔄 MANDATORY REFACTOR WORKFLOW** (ENFORCE BEFORE ADDING ANY NEW CONTENT):
+     ```
+     BEFORE writing new task documentation:
+     1. CHECK file size: wc -l {domain-file}.md
+     2. IF >500 lines OR individual MVP-XXX.md files exist:
+        a. CREATE folder: mvp-details/{domain-name}/
+        b. CREATE README.md (overview, architecture, task index)
+        c. SPLIT content by TOPIC (NOT by task ID):
+           - Group related tasks into topic files
+           - Examples: webhooks.md, authentication.md, state-machines.md
+        d. MOVE architecture diagrams → architecture/ subfolder
+        e. MOVE examples → examples/ subfolder
+     3. ONLY THEN add new task content to appropriate topic file
+     ```
+   
+   - **🛑 STOP CONDITIONS** (Do NOT proceed until these are fixed):
+     - ❌ Domain file exceeds 500 lines → **MUST refactor first**
+     - ❌ README.md exceeds 300 lines → **MUST split content**
+     - ❌ Individual `MVP-XXX.md` files exist → **MUST consolidate by topic**
+     - ❌ Task file exceeds 200 lines → **MUST split into subtopics**
+   
    - **Find your task's domain**:
      - **Small domains** (2-4 tasks, <500 lines): Single file like `authentication.md`
-     - **Large domains** (5+ tasks OR >500 lines): MUST use folder structure:
-       ```
-       work-items-integration/
-       ├── README.md              # Overview, architecture (MAX 300 lines)
-       ├── webhooks.md            # Webhook integration (MAX 500 lines)
-       ├── api-client.md          # API client implementation (MAX 500 lines)
-       ├── synchronization.md     # Agent-to-issue sync (MAX 500 lines)
-       ├── pull-requests.md       # PR automation (MAX 500 lines)
-       ├── architecture/          # Optional: detailed designs
-       │   ├── event-flow.md
-       │   └── data-models.md
-       └── examples/              # Optional: code samples
-           ├── webhook-payload.json
-           └── pr-template.md
-       ```
-   - **Locate your task**: Search for `<!-- MVP-XXX -->` annotation
-   - **Domain files are narrative documents**: Easy to read, straightforward, consumable
-   - **🔄 REFACTOR WORKFLOW**:
-     - If domain file >500 lines: Create folder, split by TOPIC (not task ID)
-     - If individual `MVP-XXX.md` files exist: Consolidate into topic-based files
-     - **Always refactor BEFORE adding new content**
-   - **Folder structure template**:
+     - **Large domains** (5+ tasks OR >500 lines): MUST use folder structure
+   
+   - **📁 FOLDER STRUCTURE TEMPLATE** (Use when domain >500 lines):
      ```
      {domain-name}/
-     ├── README.md              # Domain overview, architecture, task index
-     ├── {topic-1}.md           # Topic-based file (group related tasks)
-     ├── {topic-2}.md           # Topic-based file (group related tasks)
+     ├── README.md              # Domain overview, architecture, task index (MAX 300 lines)
+     ├── {topic-1}.md           # Topic-based file grouping related tasks (MAX 500 lines)
+     ├── {topic-2}.md           # Topic-based file grouping related tasks (MAX 500 lines)
+     ├── {topic-3}.md           # Topic-based file grouping related tasks (MAX 500 lines)
      ├── architecture/          # Optional: detailed technical designs
      │   ├── flow-diagrams.md
-     │   └── data-models.md
-     └── examples/              # Optional: code samples
+     │   ├── data-models.md
+     │   └── state-machines.md
+     └── examples/              # Optional: code samples, configs
          ├── sample-configs.yaml
-         └── example-payloads.json
+         ├── example-payloads.json
+         └── api-examples.md
      ```
-   - **FILE NAMING PRINCIPLES**:
-     - ✅ **Use topic names**: `authentication.md`, `webhooks.md`, `state-machines.md`
-     - ❌ **Never use task IDs**: NOT `MVP-001.md`, NOT `task-1.md`
-     - **Group related tasks**: If 2+ tasks cover same topic, put in ONE file
-     - **Example grouping**:
-       - `webhooks.md` - All webhook-related tasks
-       - `api-client.md` - All API client tasks
-       - `state-machines.md` - Agent FSM + Run FSM (related state machines)
-       - `authentication.md` - Login + OAuth + RBAC (all auth topics)
-   - **Key principles**:
-     - **MAX 500 lines per topic file**: Split into multiple topics if exceeding
-     - **MAX 300 lines for README.md**: Keep entry point concise
-     - Domain files should be readable as standalone documents, not just task lists
-   - Review all requirements, acceptance criteria, and technical specifications within the domain context
-   - Understand how this task fits into the broader domain strategy
-   - **Key principles**:
-     - **HARD LIMIT: 500 lines per file** - No exceptions
-     - **README.md: MAX 300 lines** - Overview only, link to task files
-     - **Task files: MAX 200 lines** - One task per file
-     - Use subfolders (`architecture/`, `examples/`) to separate verbosity
-     - Domain documentation must be narrative, not just task lists
+   
+   - **🏷️ FILE NAMING PRINCIPLES** (CRITICAL):
+     ```
+     ✅ CORRECT (topic-based):
+        - webhooks.md            (all webhook tasks together)
+        - authentication.md      (login + OAuth + RBAC)
+        - state-machines.md      (agent FSM + run FSM)
+        - api-client.md          (all API client tasks)
+     
+     ❌ WRONG (task ID-based):
+        - MVP-001.md             (DON'T use task IDs as filenames)
+        - task-123.md            (DON'T use generic task numbers)
+        - feature-auth.md        (DON'T use vague names)
+     
+     📋 GROUPING RULES:
+        - If 2+ tasks cover same TOPIC → ONE file
+        - If tasks share same COMPONENT → ONE file
+        - If tasks are sequential PHASES → ONE file
+        - Group by CONCEPT, not by task ID
+     ```
+   - **Locate your task**: Search for `<!-- MVP-XXX -->` annotation or check task index in README.md
+   - **Domain files are narrative documents**: Easy to read, straightforward, consumable - NOT just task lists
    - Review all requirements, acceptance criteria, and technical specifications within the domain context
    - Understand how this task fits into the broader domain strategy
 
@@ -106,7 +113,13 @@ Follow the **mandatory task startup process** for project tasks:
 Before starting implementation:
 - [ ] Task selected from mvp.md based on priority and dependencies
 - [ ] All dependency tasks are completed (~~MVP-XXX~~)
-- [ ] Read domain documentation file (e.g., `work-items-integration.md`) and located task section
+- [ ] **🔄 REFACTOR CHECK COMPLETED** (MANDATORY):
+  - [ ] Checked domain file size: `wc -l mvp-details/{domain}.md`
+  - [ ] If >500 lines: Created folder structure and split by topic
+  - [ ] If individual MVP-XXX.md files exist: Consolidated into topic-based files
+  - [ ] All files comply with limits (README <300, topic files <500)
+  - [ ] File names use topics (webhooks.md) NOT task IDs (MVP-001.md)
+- [ ] Read domain documentation file (e.g., `work-items-integration/`) and located task section
 - [ ] Feature branch created: `feature/MVP-XXX_description`
 - [ ] Reviewed code quality standards in rules.instructions.md
 - [ ] Todo list created with implementation steps
