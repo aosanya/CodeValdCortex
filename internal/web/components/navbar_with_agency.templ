@@ -41,6 +41,12 @@ templ NavbarWithAgency(currentAgency *models.Agency) {
 							</span>
 							<span>Versions</span>
 						</a>
+						<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/instances") } class="navbar-item">
+							<span class="icon">
+								<i class="fas fa-server"></i>
+							</span>
+							<span>Instances</span>
+						</a>
 					} else {
 						<a href="/dashboard" class="navbar-item">
 							Dashboard
