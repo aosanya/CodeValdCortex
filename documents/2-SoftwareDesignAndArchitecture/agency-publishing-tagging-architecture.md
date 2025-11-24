@@ -18,6 +18,7 @@ This document defines the architecture for **publishing** and **tagging** agenci
 6. [Service Architecture](#service-architecture)
 7. [UI/UX Design](#uiux-design)
 8. [Implementation Plan](#implementation-plan)
+9. [Instance Management](#instance-management)
 
 ---
 
@@ -1274,4 +1275,85 @@ func MigrateAgencyStatuses(ctx context.Context, db driver.Database) error {
 
 ---
 
+## 9. Instance Management
+
+### 9.1 Concept
+
+**Instances** are independent runtime deployments created from immutable tag snapshots. Each instance operates with isolated state while referencing the same source tag configuration.
+
+### 9.2 Key Design Decisions
+
+| Aspect | Decision | Rationale |
+|--------|----------|-----------|
+| **Storage** | All instances in `agency_instances` collection (agency DB) | Simplifies querying and maintains agency isolation |
+| **Agent Model** | References to tag configurations, not physical entities | Agents created on-demand when workflows trigger them |
+| **Initial State** | Instance marked "running" immediately on creation | Agent loading is asynchronous, instance is ready to accept work |
+| **Health Monitoring** | Calculated on-demand based on current agent states | Reduces overhead, ensures real-time accuracy |
+| **Shutdown** | Graceful with 30s timeout (rejects new jobs, completes current) | Prevents data loss while ensuring bounded completion |
+| **Naming** | Unique per agency (enforced at creation) | Clear identification, prevents confusion |
+| **Deletion** | Soft delete only (preserves audit trail) | Compliance and debugging requirements |
+| **Uptime** | Real-time calculation: `current_time - started_at` | No storage overhead, always accurate |
+| **Tagging** | Uses existing tag system (like goals, workitems, roles) | Consistency across platform |
+
+### 9.3 Instance States
+
+```
+┌─────────────┐
+│   Running   │ ◄──── Created immediately, accepts jobs
+└──────┬──────┘
+       │ stop()
+       ▼
+┌─────────────┐
+│  Stopping   │ ◄──── Rejects new jobs, completes current (30s timeout)
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Stopped   │ ◄──── All work completed/force stopped
+└──────┬──────┘
+       │ soft_delete()
+       ▼
+┌─────────────┐
+│   Deleted   │ ◄──── Marked deleted, preserved for audit
+└─────────────┘
+```
+
+### 9.4 Use Cases
+
+**Multi-environment Deployment**
+```
+Tag: v1.2.0-stable
+  ├─> Instance: Production (running)
+  ├─> Instance: Staging (running)
+  └─> Instance: Load Test (stopped)
+```
+
+**A/B Testing**
+```
+Tag: experiment-new-algorithm
+  ├─> Instance: Control Group (running)
+  └─> Instance: Treatment Group (running)
+```
+
+**Rollback Scenario**
+```
+1. Tag v1.1.0 running in production instance
+2. Deploy Tag v1.2.0 to new production instance
+3. Issue detected → Stop v1.2.0 instance
+4. Start new instance from Tag v1.1.0
+5. Delete failed v1.2.0 instance (soft delete preserves logs)
+```
+
+### 9.5 Instance Dashboard
+
+Each instance provides comprehensive monitoring:
+- **Overview**: State, health, uptime, job acceptance status
+- **Agent References**: List of agent configurations from tag
+- **Active Workflows**: Real-time workflow execution status
+- **Activity Feed**: Recent events and state changes
+- **Controls**: Stop, restart, delete actions
+
+---
+
 **End of Document**
+
