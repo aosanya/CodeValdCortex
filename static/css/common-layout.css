@@ -2,6 +2,16 @@
 /* This file contains shared styling for navbar and status bar components */
 
 /* ===========================
+   GLOBAL FONT SIZE
+   =========================== */
+
+/* Apply consistent smaller font size across all agency pages */
+html,
+body {
+    font-size: 0.9rem;
+}
+
+/* ===========================
    NAVBAR COMMON STYLES
    =========================== */
 

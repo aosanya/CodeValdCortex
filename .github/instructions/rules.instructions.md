@@ -20,6 +20,64 @@ applyTo: '**'
 - **Note**: These are styling references only - do not copy JavaScript functionality
 - Follow the template-first architecture when converting designs to `.templ` files
 
+## Component Reuse and DRY Principles
+
+**🚨 CRITICAL: Maximize code reuse to prevent repository bloat.**
+
+- **ALWAYS check for existing components before creating new ones**
+- **NEVER duplicate layouts, navbars, or page structures** - use shared components
+- **Repository size is a concern** - reuse aggressively to keep codebase maintainable
+- Before creating ANY new template file, search for similar existing components
+- Use `@components.LayoutWithAgency()` for all agency-scoped pages
+- Use shared components from `internal/web/components/` whenever possible
+- Extract repeated markup patterns into reusable components
+- Benefits:
+  - Smaller repository size
+  - Consistent UI/UX across all pages
+  - Single source of truth for layouts
+  - Easier maintenance and bug fixes
+  - Faster development
+
+**Example of WRONG approach:**
+```templ
+// ❌ NEVER DO THIS - Duplicating entire page structure
+templ MyPage(agency *models.Agency) {
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="UTF-8"/>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"/>
+            <!-- ... duplicate all CSS/JS includes ... -->
+        </head>
+        <body>
+            @components.NavbarWithAgency(agency)  // Even if using shared navbar, structure is duplicated!
+            <section class="section">
+                <!-- page content -->
+            </section>
+        </body>
+    </html>
+}
+```
+
+**Example of CORRECT approach:**
+```templ
+// ✅ CORRECT - Use shared layout component
+templ MyPage(agency *models.Agency) {
+    @components.LayoutWithAgency("My Page Title", agency) {
+        <section class="section">
+            <!-- page content only -->
+        </section>
+    }
+}
+```
+
+**Checklist before creating new templates:**
+1. ✅ Does a similar component already exist in `internal/web/components/`?
+2. ✅ Can I use `@components.LayoutWithAgency()` instead of building full HTML?
+3. ✅ Is there a page template I can reference in `internal/web/pages/`?
+4. ✅ Can I extract repeated markup into a new shared component?
+5. ✅ Am I about to duplicate any HTML structure that exists elsewhere?
+
 ## Template-First Architecture
 
 **Always prefer `.templ` files over Go/JavaScript for HTML generation.**
@@ -28,6 +86,7 @@ applyTo: '**'
 - **NEVER generate HTML strings in Go handler files** - use `.templ` files instead
 - **NEVER generate HTML strings in JavaScript files** - use `.templ` files or server-side rendering
 - **NEVER put JavaScript logic in `.templ` files** - keep `.templ` files for HTML structure only
+- **NEVER duplicate page layouts** - always use shared layout components
 - JavaScript should only handle:
   - Event handling
   - Data fetching

@@ -13,13 +13,13 @@ let instanceRefreshInterval = null;
  */
 function openStartInstanceDialog(tagName) {
     currentTagForInstance = tagName;
-    
+
     // Update dialog to show the tag name
     const sourceTagEl = document.getElementById('instance-source-tag');
     if (sourceTagEl) {
         sourceTagEl.textContent = tagName;
     }
-    
+
     // Reset form
     document.getElementById('instance-name').value = `${tagName}-instance-${Date.now()}`;
     document.getElementById('instance-environment').value = 'development';
@@ -28,19 +28,19 @@ function openStartInstanceDialog(tagName) {
     document.getElementById('instance-max-agents').value = '10';
     document.getElementById('instance-autoscale').checked = false;
     document.getElementById('instance-labels').value = '';
-    
+
     // Hide autoscale settings
     const autoscaleSettings = document.getElementById('autoscale-settings');
     if (autoscaleSettings) {
         autoscaleSettings.style.display = 'none';
     }
-    
+
     // Clear validation messages
     const validationEl = document.getElementById('instance-validation-messages');
     if (validationEl) {
         validationEl.innerHTML = '';
     }
-    
+
     // Show dialog
     const dialog = document.getElementById('start-instance-dialog');
     if (dialog) {
@@ -65,7 +65,7 @@ function closeStartInstanceDialog() {
 function toggleAutoScaleSettings() {
     const autoscaleCheckbox = document.getElementById('instance-autoscale');
     const autoscaleSettings = document.getElementById('autoscale-settings');
-    
+
     if (autoscaleSettings && autoscaleCheckbox) {
         autoscaleSettings.style.display = autoscaleCheckbox.checked ? 'block' : 'none';
     }
@@ -81,13 +81,13 @@ async function startInstanceFromTag() {
         showNotification('No tag selected', 'warning');
         return;
     }
-    
+
     const agencyID = getAgencyID();
     if (!agencyID) {
         showNotification('Agency ID not found', 'danger');
         return;
     }
-    
+
     // Gather form data
     const instanceName = document.getElementById('instance-name').value.trim();
     const environment = document.getElementById('instance-environment').value;
@@ -95,13 +95,13 @@ async function startInstanceFromTag() {
     const memoryLimit = document.getElementById('instance-memory-limit').value.trim();
     const maxAgents = parseInt(document.getElementById('instance-max-agents').value);
     const autoScaleEnabled = document.getElementById('instance-autoscale').checked;
-    
+
     // Validation
     if (!instanceName) {
         showValidationError('Instance name is required');
         return;
     }
-    
+
     // Build configuration
     const config = {
         cpu_limit: cpuLimit,
@@ -111,12 +111,12 @@ async function startInstanceFromTag() {
         metrics_enabled: true,
         log_level: 'info'
     };
-    
+
     if (autoScaleEnabled) {
         config.min_agents = parseInt(document.getElementById('instance-min-agents').value);
         config.max_scale_agents = parseInt(document.getElementById('instance-max-scale-agents').value);
     }
-    
+
     // Parse labels (optional)
     const labelsText = document.getElementById('instance-labels').value.trim();
     let labels = {};
@@ -128,7 +128,7 @@ async function startInstanceFromTag() {
             return;
         }
     }
-    
+
     // Build request
     const request = {
         instance_name: instanceName,
@@ -137,13 +137,13 @@ async function startInstanceFromTag() {
         labels: labels,
         metadata: {}
     };
-    
+
     // Disable button
     const btn = document.getElementById('start-instance-btn');
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Starting...</span>';
-    
+
     try {
         const response = await fetch(`/api/v1/agencies/${agencyID}/tags/${currentTagForInstance}/instances`, {
             method: 'POST',
@@ -152,13 +152,13 @@ async function startInstanceFromTag() {
             },
             body: JSON.stringify(request)
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             showNotification(`Instance "${instanceName}" started successfully`, 'success');
             closeStartInstanceDialog();
-            
+
             // Refresh instances list
             await loadInstancesForTag(currentTagForInstance);
         } else {
@@ -181,20 +181,20 @@ async function stopInstance(instanceID) {
     if (!confirm('Are you sure you want to stop this instance? All running agents will be terminated.')) {
         return;
     }
-    
+
     const agencyID = getAgencyID();
     if (!agencyID) {
         showNotification('Agency ID not found', 'danger');
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}`, {
             method: 'DELETE'
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             showNotification('Instance stopped successfully', 'success');
             await loadAllInstances();
@@ -217,14 +217,14 @@ async function restartInstance(instanceID) {
         showNotification('Agency ID not found', 'danger');
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/restart`, {
             method: 'POST'
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
             showNotification('Instance restarted successfully', 'success');
             await loadAllInstances();
@@ -247,11 +247,11 @@ async function viewInstanceDetails(instanceID) {
         showNotification('Agency ID not found', 'danger');
         return;
     }
-    
+
     try {
         const response = await fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}`);
         const data = await response.json();
-        
+
         if (response.ok) {
             // TODO: Display instance details in a modal or panel
             console.log('Instance details:', data.instance);
@@ -273,12 +273,12 @@ async function viewInstanceDetails(instanceID) {
 async function loadAllInstances() {
     const agencyID = getAgencyID();
     if (!agencyID) return;
-    
+
     try {
         const response = await fetch(`/api/v1/agencies/${agencyID}/instances`);
         const data = await response.json();
-        
-        if (response.ok) {
+
+        if (response.ok && data.instances) {
             // Group instances by tag
             const instancesByTag = {};
             data.instances.forEach(instance => {
@@ -287,7 +287,7 @@ async function loadAllInstances() {
                 }
                 instancesByTag[instance.tag_name].push(instance);
             });
-            
+
             // Update UI with instance counts
             updateInstanceCounts(instancesByTag);
         }
@@ -303,11 +303,11 @@ async function loadAllInstances() {
 async function loadInstancesForTag(tagName) {
     const agencyID = getAgencyID();
     if (!agencyID) return;
-    
+
     try {
         const response = await fetch(`/api/v1/agencies/${agencyID}/tags/${tagName}/instances`);
         const data = await response.json();
-        
+
         if (response.ok) {
             console.log(`Instances for tag ${tagName}:`, data.instances);
             // Update the instance count badge for this tag
@@ -380,10 +380,10 @@ function getAgencyID() {
  */
 function initializeInstanceManagement() {
     console.log('Instance management initialized');
-    
+
     // Load instances on page load
     loadAllInstances();
-    
+
     // Auto-refresh instances every 30 seconds
     if (instanceRefreshInterval) {
         clearInterval(instanceRefreshInterval);

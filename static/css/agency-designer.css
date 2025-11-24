@@ -7,7 +7,6 @@ html,
 body {
     overflow: hidden;
     height: 100%;
-    font-size: 0.9rem;
 }
 
 /* Override Bulma's default section and container padding/margin */
@@ -1720,6 +1719,7 @@ table.is-small td,
 table.is-small th {
     text-align: inherit;
 }
+
 /* Publish Toolbar Styles */
 .publish-toolbar {
     display: flex;
@@ -1786,7 +1786,7 @@ table.is-small th {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .publish-toolbar .buttons {
         flex-wrap: wrap;
     }

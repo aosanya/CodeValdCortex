@@ -99,6 +99,11 @@ func (h *InstanceHandler) ListInstances(c *gin.Context) {
 		return
 	}
 
+	// Ensure instances is never nil for JSON marshaling
+	if instances == nil {
+		instances = []*models.AgencyInstance{}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"instances": instances,
 		"count":     len(instances),
@@ -236,6 +241,11 @@ func (h *InstanceHandler) GetInstanceAgents(c *gin.Context) {
 		return
 	}
 
+	// Ensure agents is never nil for JSON marshaling
+	if agents == nil {
+		agents = []*models.InstanceAgent{}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"agents": agents,
 		"count":  len(agents),
@@ -260,6 +270,11 @@ func (h *InstanceHandler) ListInstancesByTag(c *gin.Context) {
 			"details": err.Error(),
 		})
 		return
+	}
+
+	// Ensure instances is never nil for JSON marshaling
+	if instances == nil {
+		instances = []*models.AgencyInstance{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
