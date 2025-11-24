@@ -1,0 +1,105 @@
+package pages
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
+)
+
+templ VersionsPage(agency *models.Agency) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Versions - { agency.Name } - CodeValdCortex</title>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"/>
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+			<link rel="stylesheet" href="/static/css/themes.css"/>
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+			<script src="/static/js/theme-switcher.js"></script>
+		</head>
+		<body>
+			@components.NavbarWithAgency(agency)
+			
+			<section class="section">
+				<div class="container">
+					<div class="columns">
+						<div class="column is-12">
+							<!-- Page Header -->
+							<div class="level mb-5">
+								<div class="level-left">
+									<div class="level-item">
+										<div>
+											<h1 class="title is-3">
+												<span class="icon-text">
+													<span class="icon has-text-info">
+														<i class="fas fa-tags"></i>
+													</span>
+													<span>Agency Versions</span>
+												</span>
+											</h1>
+											<p class="subtitle is-6 has-text-grey">
+												Manage tags and instances for <strong>{ agency.Name }</strong>
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Info Box -->
+							<div class="notification is-info is-light mb-5">
+								<div class="columns is-vcentered">
+									<div class="column">
+										<p class="is-size-6">
+											<span class="icon"><i class="fas fa-info-circle"></i></span>
+											<strong>Tags</strong> are immutable snapshots of your agency configuration. 
+											Create multiple <strong>instances</strong> from any tag for testing, staging, or production.
+										</p>
+									</div>
+								</div>
+							</div>
+							
+							<!-- Tags List Card -->
+							<div class="box">
+								@agency_designer.TagsListCard()
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			
+			<!-- Tag Dialog -->
+			@agency_designer.TagDialog()
+			
+			<!-- Start Instance Dialog -->
+			@agency_designer.StartInstanceDialog()
+			
+			<!-- JavaScript -->
+			<script src="/static/js/agency-designer/tags.js"></script>
+			<script src="/static/js/agency-designer/instances.js"></script>
+			<script>
+				// Initialize on page load
+				document.addEventListener('DOMContentLoaded', function() {
+					// Load tags when page loads
+					if (typeof loadTags === 'function') {
+						loadTags();
+					}
+					
+					// Initialize burger menu
+					const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+					if ($navbarBurgers.length > 0) {
+						$navbarBurgers.forEach(el => {
+							el.addEventListener('click', () => {
+								const target = el.dataset.target;
+								const $target = document.getElementById(target);
+								el.classList.toggle('is-active');
+								$target.classList.toggle('is-active');
+							});
+						});
+					}
+				});
+			</script>
+		</body>
+	</html>
+}

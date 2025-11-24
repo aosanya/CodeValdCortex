@@ -6,6 +6,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
@@ -69,6 +70,32 @@ func (h *AgencyDesignerWebHandler) ShowDesigner(c *gin.Context) {
 	err = component.Render(c.Request.Context(), c.Writer)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to render agency designer page")
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": "Failed to render page",
+		})
+		return
+	}
+}
+
+// ShowVersions renders the agency versions (tags and instances) page
+func (h *AgencyDesignerWebHandler) ShowVersions(c *gin.Context) {
+	agencyID := c.Param("id")
+
+	// Get the agency
+	ag, err := h.agencyRepo.GetByID(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to fetch agency")
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"error": "Agency not found",
+		})
+		return
+	}
+
+	// Render the versions page
+	component := pages.VersionsPage(ag)
+	err = component.Render(c.Request.Context(), c.Writer)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to render versions page")
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": "Failed to render page",
 		})
@@ -234,6 +261,9 @@ func (h *AgencyDesignerWebHandler) RegisterRoutes(router *gin.RouterGroup) {
 
 	// View specific conversation
 	router.GET("/agencies/:id/designer/conversations/:conversationId", h.ShowConversation)
+
+	// Versions/tags page (tag management and instance launching)
+	router.GET("/agencies/:id/versions", h.ShowVersions)
 
 	// RACI matrix editor
 	router.GET("/agencies/:id/raci", h.ShowRACIMatrix)
