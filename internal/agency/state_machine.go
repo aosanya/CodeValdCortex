@@ -56,83 +56,6 @@ func (sm *AgencyStateMachine) defineTransitions() {
 				actionUpdatePublishMetadata,
 			},
 		},
-		{
-			From:  models.AgencyStatePublished,
-			To:    models.AgencyStateActive,
-			Event: "activate",
-			Guards: []Guard{
-				guardIsPublished,
-				guardResourcesAvailable,
-			},
-			Actions: []Action{
-				actionSpawnAgents,
-				actionInitializeWorkflows,
-				actionStartMonitoring,
-				actionUpdateActivationMetadata,
-			},
-		},
-		{
-			From:  models.AgencyStateActive,
-			To:    models.AgencyStatePaused,
-			Event: "pause",
-			Actions: []Action{
-				actionStopAcceptingWork,
-				actionPauseAgents,
-			},
-		},
-		{
-			From:  models.AgencyStatePaused,
-			To:    models.AgencyStateActive,
-			Event: "resume",
-			Actions: []Action{
-				actionResumeAgents,
-				actionResumeAcceptingWork,
-			},
-		},
-		{
-			From:  models.AgencyStateActive,
-			To:    models.AgencyStateDraining,
-			Event: "drain",
-			Actions: []Action{
-				actionStopAcceptingNewWork,
-			},
-		},
-		{
-			From:  models.AgencyStateDraining,
-			To:    models.AgencyStateStopped,
-			Event: "drain_complete",
-			Actions: []Action{
-				actionStopAllAgents,
-				actionCleanupResources,
-			},
-		},
-		{
-			From:  models.AgencyStateActive,
-			To:    models.AgencyStateStopped,
-			Event: "force_stop",
-			Actions: []Action{
-				actionStopAllAgents,
-				actionCleanupResources,
-			},
-		},
-		{
-			From:  models.AgencyStatePaused,
-			To:    models.AgencyStateStopped,
-			Event: "force_stop",
-			Actions: []Action{
-				actionStopAllAgents,
-				actionCleanupResources,
-			},
-		},
-		{
-			From:  models.AgencyStateDraining,
-			To:    models.AgencyStateStopped,
-			Event: "force_stop",
-			Actions: []Action{
-				actionStopAllAgents,
-				actionCleanupResources,
-			},
-		},
 	}
 
 	for _, t := range transitions {
@@ -225,18 +148,6 @@ func guardNoDuplicatePublication(a *models.Agency) error {
 	return nil
 }
 
-func guardIsPublished(a *models.Agency) error {
-	if a.State != models.AgencyStatePublished {
-		return fmt.Errorf("agency must be published")
-	}
-	return nil
-}
-
-func guardResourcesAvailable(a *models.Agency) error {
-	// TODO: Check resource quotas available (MVP-PUB-004)
-	return nil
-}
-
 // Action implementations (stubs for now)
 
 func actionCreatePublication(a *models.Agency) error {
@@ -246,60 +157,5 @@ func actionCreatePublication(a *models.Agency) error {
 
 func actionUpdatePublishMetadata(a *models.Agency) error {
 	// Will be implemented in MVP-PUB-003
-	return nil
-}
-
-func actionSpawnAgents(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionInitializeWorkflows(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionStartMonitoring(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionUpdateActivationMetadata(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionStopAcceptingWork(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionPauseAgents(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionResumeAgents(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionResumeAcceptingWork(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionStopAcceptingNewWork(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionStopAllAgents(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
-	return nil
-}
-
-func actionCleanupResources(a *models.Agency) error {
-	// Will be implemented in MVP-PUB-004
 	return nil
 }

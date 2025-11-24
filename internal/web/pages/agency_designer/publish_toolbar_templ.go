@@ -177,8 +177,6 @@ func stateToClass(state string) string {
 	switch state {
 	case "draft":
 		return "is-light"
-	case "validated":
-		return "is-info"
 	case "published":
 		return "is-link"
 	case "active":
@@ -200,8 +198,6 @@ func stateToIcon(state string) string {
 	switch state {
 	case "draft":
 		return "fas fa-pencil-alt"
-	case "validated":
-		return "fas fa-check-circle"
 	case "published":
 		return "fas fa-upload"
 	case "active":
@@ -223,8 +219,6 @@ func stateToLabel(state string) string {
 	switch state {
 	case "draft":
 		return "Draft"
-	case "validated":
-		return "Validated"
 	case "published":
 		return "Published"
 	case "active":

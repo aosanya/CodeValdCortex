@@ -316,9 +316,9 @@ func (s *publicationService) Deactivate(ctx context.Context, agencyID string, gr
 		return fmt.Errorf("failed to get agency: %w", err)
 	}
 
-	// Check state (must be active or paused)
-	if agencyDoc.State != models.AgencyStateActive && agencyDoc.State != models.AgencyStatePaused {
-		return fmt.Errorf("agency must be in active or paused state to deactivate (current: %s)", agencyDoc.State)
+	// Check state (must be published)
+	if agencyDoc.State != models.AgencyStatePublished {
+		return fmt.Errorf("agency must be in published state to deactivate (current: %s)", agencyDoc.State)
 	}
 
 	// Stop agents using activation service

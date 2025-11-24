@@ -435,61 +435,36 @@ func StatusBadge(state models.AgencyState) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		switch state {
-		case models.AgencyStateActive:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<span class=\"tag is-success\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Active</span></span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 		case models.AgencyStatePublished:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<span class=\"tag is-info\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Published</span></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<span class=\"tag is-info\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Published</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case models.AgencyStateDraft:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<span class=\"tag is-light\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Draft</span></span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case models.AgencyStatePaused:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<span class=\"tag is-warning\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg></span> <span>Paused</span></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<span class=\"tag is-light\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><circle cx=\"10\" cy=\"10\" r=\"3\"></circle></svg></span> <span>Draft</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case models.AgencyStateArchived:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<span class=\"tag is-dark\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4\"></path></svg></span> <span>Archived</span></span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case models.AgencyStateValidated:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "<span class=\"tag is-primary\"><span>Validated</span></span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case models.AgencyStateDraining:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<span class=\"tag is-warning\"><span>Draining</span></span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		case models.AgencyStateStopped:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<span class=\"tag is-danger\"><span>Stopped</span></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<span class=\"tag is-dark\"><span class=\"icon\"><svg style=\"width: 1rem; height: 1rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4\"></path></svg></span> <span>Archived</span></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		default:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<span class=\"tag\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<span class=\"tag\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(string(state))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/homepage.templ`, Line: 289, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/homepage.templ`, Line: 259, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "</span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

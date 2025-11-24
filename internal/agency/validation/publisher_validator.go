@@ -120,12 +120,11 @@ func (v *PublisherValidator) ValidateForPublish(
 		v.validateWorkflows(spec.Workflows, result)
 	}
 
-	// Check 6: Agency state validation (allow draft, published, active for republishing)
+	// Check 6: Agency state validation (allow draft, published for republishing)
 	// Empty state is treated as draft
 	if agencyDoc.State != "" &&
 		agencyDoc.State != models.AgencyStateDraft &&
-		agencyDoc.State != models.AgencyStatePublished &&
-		agencyDoc.State != models.AgencyStateActive {
+		agencyDoc.State != models.AgencyStatePublished {
 		result.Errors = append(result.Errors, ValidationError{
 			Field:   "state",
 			Message: fmt.Sprintf("Cannot publish agency in state: %s", agencyDoc.State),

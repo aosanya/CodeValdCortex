@@ -228,15 +228,6 @@ templ CategoryBadge(category string) {
 
 templ StatusBadge(state models.AgencyState) {
 	switch state {
-		case models.AgencyStateActive:
-			<span class="tag is-success">
-				<span class="icon">
-					<svg style="width: 1rem; height: 1rem;" fill="currentColor" viewBox="0 0 20 20">
-						<circle cx="10" cy="10" r="3"></circle>
-					</svg>
-				</span>
-				<span>Active</span>
-			</span>
 		case models.AgencyStatePublished:
 			<span class="tag is-info">
 				<span class="icon">
@@ -255,15 +246,6 @@ templ StatusBadge(state models.AgencyState) {
 				</span>
 				<span>Draft</span>
 			</span>
-		case models.AgencyStatePaused:
-			<span class="tag is-warning">
-				<span class="icon">
-					<svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-					</svg>
-				</span>
-				<span>Paused</span>
-			</span>
 		case models.AgencyStateArchived:
 			<span class="tag is-dark">
 				<span class="icon">
@@ -272,14 +254,6 @@ templ StatusBadge(state models.AgencyState) {
 					</svg>
 				</span>
 				<span>Archived</span>
-			</span>
-		case models.AgencyStateDraining:
-			<span class="tag is-warning">
-				<span>Draining</span>
-			</span>
-		case models.AgencyStateStopped:
-			<span class="tag is-danger">
-				<span>Stopped</span>
 			</span>
 		default:
 			<span class="tag">{ string(state) }</span>
