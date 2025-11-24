@@ -49,9 +49,7 @@ function resetPublishForm() {
     document.getElementById('publish-version').value = '';
     document.getElementById('publish-description').value = '';
     document.getElementById('publish-auto-activate').checked = false;
-    document.getElementById('publish-create-tag').checked = false;
     document.getElementById('publish-tag-name').value = '';
-    document.getElementById('tag-name-field').style.display = 'none';
     document.getElementById('publish-form').style.display = 'none';
     document.getElementById('validation-status-info').style.display = 'block';
     document.getElementById('validation-errors').style.display = 'none';
@@ -78,7 +76,7 @@ async function checkValidation() {
         const result = await response.json();
         validationResult = result;
 
-        if (response.ok && result.is_valid) {
+        if (response.ok && result.valid) {
             // Valid - show publish form
             statusDiv.style.display = 'none';
             errorsDiv.style.display = 'none';
@@ -90,9 +88,13 @@ async function checkValidation() {
             errorsDiv.style.display = 'block';
 
             // Render error list
-            errorList.innerHTML = '<ul class="is-size-7">' +
-                result.errors.map(err => `<li><strong>${err.field}:</strong> ${err.message}</li>`).join('') +
-                '</ul>';
+            if (result.errors && result.errors.length > 0) {
+                errorList.innerHTML = '<ul class="is-size-7">' +
+                    result.errors.map(err => `<li><strong>${err.field}:</strong> ${err.message}</li>`).join('') +
+                    '</ul>';
+            } else {
+                errorList.innerHTML = '<p class="is-size-7">No specific errors provided.</p>';
+            }
 
             publishForm.style.display = 'none';
         }
@@ -149,23 +151,17 @@ function updatePublishPreview() {
     const version = document.getElementById('publish-version').value || '-';
     const description = document.getElementById('publish-description').value || '-';
     const autoActivate = document.getElementById('publish-auto-activate').checked;
-    const createTag = document.getElementById('publish-create-tag').checked;
-    const tagName = document.getElementById('publish-tag-name').value || version;
+    const tagName = document.getElementById('publish-tag-name').value || 'auto-generated';
 
     // Update preview fields
     document.getElementById('preview-version').textContent = version;
     document.getElementById('preview-description').textContent = description;
 
-    // Update action list
-    const tagAction = document.getElementById('preview-tag-action');
-    const activateAction = document.getElementById('preview-activate-action');
+    // Update tag name in preview (always shown)
+    document.getElementById('preview-tag-name').textContent = tagName;
 
-    if (createTag) {
-        tagAction.style.display = 'list-item';
-        document.getElementById('preview-tag-name').textContent = tagName;
-    } else {
-        tagAction.style.display = 'none';
-    }
+    // Update action list
+    const activateAction = document.getElementById('preview-activate-action');
 
     if (autoActivate) {
         activateAction.style.display = 'list-item';
@@ -175,29 +171,12 @@ function updatePublishPreview() {
 }
 
 /**
- * Toggle tag name input visibility
- */
-function toggleTagNameInput() {
-    const createTag = document.getElementById('publish-create-tag').checked;
-    const tagField = document.getElementById('tag-name-field');
-
-    if (createTag) {
-        tagField.style.display = 'block';
-    } else {
-        tagField.style.display = 'none';
-    }
-
-    updatePublishPreview();
-}
-
-/**
  * Handle publish form submission
  */
 async function handlePublishSubmit() {
     const version = document.getElementById('publish-version').value.trim();
     const description = document.getElementById('publish-description').value.trim();
     const autoActivate = document.getElementById('publish-auto-activate').checked;
-    const createTag = document.getElementById('publish-create-tag').checked;
     const tagName = document.getElementById('publish-tag-name').value.trim() || version;
 
     // Validate required fields
@@ -227,10 +206,8 @@ async function handlePublishSubmit() {
             auto_activate: autoActivate
         };
 
-        // Optionally create tag first
-        if (createTag) {
-            await createTagBeforePublish(tagName, version, description);
-        }
+        // Always create tag before publishing
+        await createTagBeforePublish(tagName, version, description);
 
         // Publish agency
         const response = await fetch(`/api/v1/agencies/${currentAgencyId}/publish`, {

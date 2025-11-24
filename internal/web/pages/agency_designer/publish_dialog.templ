@@ -86,39 +86,25 @@ templ PublishDialog() {
 						</p>
 					</div>
 					
-					<!-- Create tag checkbox -->
+					<!-- Tag name input (always shown, tags always created) -->
 					<div class="field">
-						<div class="control">
-							<label class="checkbox">
-								<input 
-									type="checkbox" 
-									id="publish-create-tag"
-									onchange="toggleTagNameInput()">
-								<span class="icon-text ml-2">
-									<span class="icon"><i class="fas fa-tag"></i></span>
-									<span>Create tag before publishing</span>
-								</span>
-							</label>
-						</div>
-						<p class="help">
-							Create an immutable snapshot tag of the current state before publishing
-						</p>
-					</div>
-					
-					<!-- Tag name input (conditional) -->
-					<div class="field ml-5" id="tag-name-field" style="display: none;">
-						<label class="label">Tag Name</label>
+						<label class="label">
+							<span class="icon-text">
+								<span class="icon"><i class="fas fa-tag"></i></span>
+								<span>Tag Name (Optional)</span>
+							</span>
+						</label>
 						<div class="control has-icons-left">
 							<input 
 								class="input" 
 								type="text" 
 								id="publish-tag-name"
-								placeholder="pre-publish-snapshot">
+								placeholder="Leave empty to auto-generate from version">
 							<span class="icon is-small is-left">
 								<i class="fas fa-tag"></i>
 							</span>
 						</div>
-						<p class="help">Leave empty to auto-generate from version</p>
+						<p class="help">A snapshot tag will always be created before publishing</p>
 					</div>
 					
 					<!-- Publication Preview -->
@@ -129,9 +115,9 @@ templ PublishDialog() {
 							<p><strong>Description:</strong> <span id="preview-description">-</span></p>
 							<p><strong>Actions:</strong></p>
 							<ul id="preview-actions">
+								<li>Create snapshot tag: <span id="preview-tag-name">auto-generated</span></li>
 								<li>Create publication snapshot</li>
 								<li>Generate deployment manifest</li>
-								<li id="preview-tag-action" style="display: none;">Create tag: <span id="preview-tag-name"></span></li>
 								<li id="preview-activate-action" style="display: none;">Auto-activate agency</li>
 							</ul>
 						</div>
