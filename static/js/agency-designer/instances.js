@@ -272,13 +272,28 @@ async function viewInstanceDetails(instanceID) {
  */
 async function loadAllInstances() {
     const agencyID = getAgencyID();
-    if (!agencyID) return;
+    if (!agencyID) {
+        console.warn('No agency ID found, skipping instance load');
+        return;
+    }
 
     try {
-        const response = await fetch(`/api/v1/agencies/${agencyID}/instances`);
-        const data = await response.json();
+        const url = `/api/v1/agencies/${agencyID}/instances`;
+        console.log('Loading instances from:', url);
 
-        if (response.ok && data.instances) {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.error(`Failed to load instances: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            return;
+        }
+
+        const data = await response.json();
+        console.log('Instances loaded:', data);
+
+        if (data.instances) {
             // Group instances by tag
             const instancesByTag = {};
             data.instances.forEach(instance => {
@@ -293,6 +308,10 @@ async function loadAllInstances() {
         }
     } catch (error) {
         console.error('Error loading instances:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack
+        });
     }
 }
 
