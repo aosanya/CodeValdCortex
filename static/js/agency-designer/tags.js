@@ -267,19 +267,19 @@ async function handleTagSubmit() {
             closeTagDialog();
             showNotification('Success', `Tag "${name}" created successfully`, 'success');
 
-        // Refresh tag list if on tag management page
-        if (typeof refreshTagList === 'function') {
-            refreshTagList();
+            // Refresh tag list if on tag management page
+            if (typeof refreshTagList === 'function') {
+                refreshTagList();
+            }
+        } else {
+            throw new Error(result.error || 'Failed to create tag');
         }
-    } else {
-        throw new Error(result.error || 'Failed to create tag');
+    } catch (error) {
+        alert(`Failed to create tag: ${error.message}`);
+    } finally {
+        tagBtn.disabled = false;
+        progress.style.display = 'none';
     }
-} catch (error) {
-    alert(`Failed to create tag: ${error.message}`);
-} finally {
-    tagBtn.disabled = false;
-    progress.style.display = 'none';
-}
 }/**
  * Pause agency
  */
@@ -359,17 +359,17 @@ async function performLifecycleAction(action, successMessage, force = false) {
         if (response.ok) {
             showNotification('Success', successMessage, 'success');
             setTimeout(() => window.location.reload(), 1500);
-    } else {
-        const error = await response.json();
-        throw new Error(error.error || `${action} failed`);
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || `${action} failed`);
+        }
+    } catch (error) {
+        alert(`Failed to ${action}: ${error.message}`);
+    } finally {
+        if (btn) {
+            btn.classList.remove('is-loading');
+        }
     }
-} catch (error) {
-    alert(`Failed to ${action}: ${error.message}`);
-} finally {
-    if (btn) {
-        btn.classList.remove('is-loading');
-    }
-}
 }/**
  * Show notification
  */

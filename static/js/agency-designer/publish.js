@@ -92,18 +92,18 @@ async function checkValidation() {
                     '</ul>';
             } else {
                 errorList.innerHTML = '<p class="is-size-7">No specific errors provided.</p>';
-        }
+            }
 
-        publishForm.style.display = 'none';
-    }
-} catch (error) {
-    statusDiv.innerHTML = `
+            publishForm.style.display = 'none';
+        }
+    } catch (error) {
+        statusDiv.innerHTML = `
         <p class="has-text-danger">
             <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
             Failed to check validation: ${error.message}
         </p>
     `;
-}
+    }
 }/**
  * Handle publish form submission
  */
@@ -162,19 +162,19 @@ async function handlePublishSubmit() {
             showNotification('Success', `Agency published as ${version}`, 'success');
 
             // Reload page to reflect new state
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
-    } else {
-        // Error
-        throw new Error(result.error || 'Failed to publish agency');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            // Error
+            throw new Error(result.error || 'Failed to publish agency');
+        }
+    } catch (error) {
+        alert(`Failed to publish agency: ${error.message}`);
+    } finally {
+        publishBtn.disabled = false;
+        progress.style.display = 'none';
     }
-} catch (error) {
-    alert(`Failed to publish agency: ${error.message}`);
-} finally {
-    publishBtn.disabled = false;
-    progress.style.display = 'none';
-}
 }/**
  * Create tag before publishing (or use existing if it already exists)
  */
@@ -242,18 +242,18 @@ async function handleValidateAgency() {
             showNotification('Success', 'Agency validated successfully', 'success');
 
             // Transition state to validated
-        await updateAgencyState('validated');
+            await updateAgencyState('validated');
 
-        // Reload to show new buttons
-        setTimeout(() => window.location.reload(), 1000);
-    } else {
-        showNotification('Validation Failed', `Found ${result.errors?.length || 0} errors and ${result.warnings?.length || 0} warnings`, 'warning');
+            // Reload to show new buttons
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification('Validation Failed', `Found ${result.errors?.length || 0} errors and ${result.warnings?.length || 0} warnings`, 'warning');
+        }
+    } catch (error) {
+        showNotification('Error', `Validation error: ${error.message}`, 'danger');
+    } finally {
+        btn.classList.remove('is-loading');
     }
-} catch (error) {
-    showNotification('Error', `Validation error: ${error.message}`, 'danger');
-} finally {
-    btn.classList.remove('is-loading');
-}
 }/**
  * Navigate to the validation section in overview
  */
@@ -342,17 +342,17 @@ async function handleActivateAgency() {
         });
 
         if (response.ok) {
-        showNotification('Success', 'Agency activated successfully', 'success');
-        setTimeout(() => window.location.reload(), 1500);
-    } else {
-        const error = await response.json();
-        throw new Error(error.error || 'Activation failed');
+            showNotification('Success', 'Agency activated successfully', 'success');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Activation failed');
+        }
+    } catch (error) {
+        alert(`Failed to activate: ${error.message}`);
+    } finally {
+        btn.classList.remove('is-loading');
     }
-} catch (error) {
-    alert(`Failed to activate: ${error.message}`);
-} finally {
-    btn.classList.remove('is-loading');
-}
 }/**
  * Update agency state via API
  */
