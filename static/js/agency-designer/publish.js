@@ -131,12 +131,6 @@ function setupPublishFormListeners() {
         activateCheck.addEventListener('change', updatePublishPreview);
     }
 
-    // Create tag checkbox
-    const tagCheck = document.getElementById('publish-create-tag');
-    if (tagCheck) {
-        tagCheck.addEventListener('change', updatePublishPreview);
-    }
-
     // Tag name input
     const tagNameInput = document.getElementById('publish-tag-name');
     if (tagNameInput) {
