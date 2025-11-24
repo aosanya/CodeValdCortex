@@ -123,7 +123,8 @@ func (r *TagRepository) List(ctx context.Context, agencyID string, agencyDB stri
 	}
 	defer cursor.Close()
 
-	var tags []*models.AgencyTag
+	// Initialize with empty slice instead of nil to ensure JSON marshals to [] not null
+	tags := make([]*models.AgencyTag, 0)
 	for {
 		var tag models.AgencyTag
 		_, err := cursor.ReadDocument(ctx, &tag)
@@ -162,8 +163,7 @@ func (r *TagRepository) Delete(ctx context.Context, agencyID, name string, agenc
 // buildListQuery constructs the AQL query for listing tags with filters
 func (r *TagRepository) buildListQuery(agencyID string, filters *services.TagFilters) (string, map[string]interface{}) {
 	bindVars := map[string]interface{}{
-		"collection": tagCollectionName,
-		"agency_id":  agencyID,
+		"agency_id": agencyID,
 	}
 
 	var queryParts []string

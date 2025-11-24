@@ -23,17 +23,7 @@ function openStartInstanceDialog(tagName) {
     // Reset form
     document.getElementById('instance-name').value = `${tagName}-instance-${Date.now()}`;
     document.getElementById('instance-environment').value = 'development';
-    document.getElementById('instance-cpu-limit').value = '2000m';
-    document.getElementById('instance-memory-limit').value = '1Gi';
-    document.getElementById('instance-max-agents').value = '10';
-    document.getElementById('instance-autoscale').checked = false;
-    document.getElementById('instance-labels').value = '';
-
-    // Hide autoscale settings
-    const autoscaleSettings = document.getElementById('autoscale-settings');
-    if (autoscaleSettings) {
-        autoscaleSettings.style.display = 'none';
-    }
+    document.getElementById('instance-tags').value = '';
 
     // Clear validation messages
     const validationEl = document.getElementById('instance-validation-messages');
@@ -59,18 +49,6 @@ function closeStartInstanceDialog() {
     currentTagForInstance = null;
 }
 
-/**
- * Toggles auto-scale settings visibility
- */
-function toggleAutoScaleSettings() {
-    const autoscaleCheckbox = document.getElementById('instance-autoscale');
-    const autoscaleSettings = document.getElementById('autoscale-settings');
-
-    if (autoscaleSettings && autoscaleCheckbox) {
-        autoscaleSettings.style.display = autoscaleCheckbox.checked ? 'block' : 'none';
-    }
-}
-
 // ==================== Instance Operations ====================
 
 /**
@@ -91,10 +69,6 @@ async function startInstanceFromTag() {
     // Gather form data
     const instanceName = document.getElementById('instance-name').value.trim();
     const environment = document.getElementById('instance-environment').value;
-    const cpuLimit = document.getElementById('instance-cpu-limit').value.trim();
-    const memoryLimit = document.getElementById('instance-memory-limit').value.trim();
-    const maxAgents = parseInt(document.getElementById('instance-max-agents').value);
-    const autoScaleEnabled = document.getElementById('instance-autoscale').checked;
 
     // Validation
     if (!instanceName) {
@@ -104,37 +78,22 @@ async function startInstanceFromTag() {
 
     // Build configuration
     const config = {
-        cpu_limit: cpuLimit,
-        memory_limit: memoryLimit,
-        max_agents: maxAgents,
-        auto_scale_enabled: autoScaleEnabled,
         metrics_enabled: true,
         log_level: 'info'
     };
 
-    if (autoScaleEnabled) {
-        config.min_agents = parseInt(document.getElementById('instance-min-agents').value);
-        config.max_scale_agents = parseInt(document.getElementById('instance-max-scale-agents').value);
-    }
-
-    // Parse labels (optional)
-    const labelsText = document.getElementById('instance-labels').value.trim();
-    let labels = {};
-    if (labelsText) {
-        try {
-            labels = JSON.parse(labelsText);
-        } catch (e) {
-            showValidationError('Invalid JSON format for labels');
-            return;
-        }
-    }
+    // Parse tags (optional)
+    const tagsText = document.getElementById('instance-tags').value.trim();
+    const tags = tagsText
+        ? tagsText.split(',').map(t => t.trim()).filter(t => t)
+        : [];
 
     // Build request
     const request = {
         instance_name: instanceName,
         environment: environment,
         config: config,
-        labels: labels,
+        tags: tags,
         metadata: {}
     };
 

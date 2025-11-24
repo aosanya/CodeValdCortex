@@ -31,9 +31,9 @@ type AgencyInstance struct {
 	StateMessage string        `json:"state_message,omitempty"` // Human-readable state info
 
 	// Runtime configuration
-	Snapshot AgencySnapshot         `json:"snapshot"`          // Config snapshot from tag
-	Config   InstanceConfiguration  `json:"config"`            // Runtime-specific config
-	Resources InstanceResourceStatus `json:"resources"`         // Resource allocation and usage
+	Snapshot  AgencySnapshot         `json:"snapshot"`  // Config snapshot from tag
+	Config    InstanceConfiguration  `json:"config"`    // Runtime-specific config
+	Resources InstanceResourceStatus `json:"resources"` // Resource allocation and usage
 
 	// Lifecycle tracking
 	StartedAt  time.Time  `json:"started_at"`
@@ -43,7 +43,7 @@ type AgencyInstance struct {
 	// Metadata
 	CreatedBy   string                 `json:"created_by"`
 	Environment string                 `json:"environment"` // e.g., "production", "staging", "test"
-	Labels      map[string]string      `json:"labels,omitempty"`
+	Tags        []string               `json:"tags,omitempty"`
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
@@ -75,14 +75,14 @@ type InstanceResourceStatus struct {
 	MemoryUsage string `json:"memory_usage"` // e.g., "512Mi"
 
 	// Agent counts
-	ActiveAgents   int `json:"active_agents"`
-	SpawnedAgents  int `json:"spawned_agents"`
+	ActiveAgents     int `json:"active_agents"`
+	SpawnedAgents    int `json:"spawned_agents"`
 	TerminatedAgents int `json:"terminated_agents"`
 
 	// Health indicators
-	HealthScore      float64 `json:"health_score"` // 0.0 to 1.0
-	LastHealthCheck  time.Time `json:"last_health_check"`
-	ConsecutiveFailures int    `json:"consecutive_failures"`
+	HealthScore         float64   `json:"health_score"` // 0.0 to 1.0
+	LastHealthCheck     time.Time `json:"last_health_check"`
+	ConsecutiveFailures int       `json:"consecutive_failures"`
 }
 
 // InstanceHealth represents the health status of an instance
@@ -125,7 +125,7 @@ type StartInstanceRequest struct {
 	InstanceName string                 `json:"instance_name"` // User-friendly name
 	Environment  string                 `json:"environment"`   // e.g., "production", "staging"
 	Config       InstanceConfiguration  `json:"config"`        // Runtime configuration
-	Labels       map[string]string      `json:"labels,omitempty"`
+	Tags         []string               `json:"tags,omitempty"`
 	Metadata     map[string]interface{} `json:"metadata,omitempty"`
 }
 
@@ -148,8 +148,8 @@ type InstanceAgent struct {
 	AutonomyLevel string `json:"autonomy_level"`
 
 	// State
-	State     string    `json:"state"`
-	SpawnedAt time.Time `json:"spawned_at"`
+	State     string     `json:"state"`
+	SpawnedAt time.Time  `json:"spawned_at"`
 	StoppedAt *time.Time `json:"stopped_at,omitempty"`
 
 	// Resource tracking

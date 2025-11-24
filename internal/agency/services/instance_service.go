@@ -131,7 +131,7 @@ func (s *instanceService) StartInstance(ctx context.Context, agencyID string, ta
 		LastSeenAt:  time.Now(),
 		CreatedBy:   createdBy,
 		Environment: req.Environment,
-		Labels:      req.Labels,
+		Tags:        req.Tags,
 		Metadata:    req.Metadata,
 	}
 
