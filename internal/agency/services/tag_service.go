@@ -26,8 +26,8 @@ type TagService interface {
 	// GetTag retrieves a specific tag
 	GetTag(ctx context.Context, agencyID string, tagName string) (*models.AgencyTag, error)
 
-	// CompareTags generates a diff between two tags
-	CompareTags(ctx context.Context, tagID1, tagID2 string) (*TagComparison, error)
+	// CompareTags generates a diff between two tags (now requires agency ID and tag names)
+	CompareTags(ctx context.Context, agencyID string, tagName1, tagName2 string) (*TagComparison, error)
 
 	// RestoreFromTag overwrites agency draft with tag snapshot
 	RestoreFromTag(ctx context.Context, agencyID string, tagName string) error
@@ -74,11 +74,10 @@ type TagDifference struct {
 
 // TagRepository defines the interface for tag data persistence
 type TagRepository interface {
-	Create(ctx context.Context, tag *models.AgencyTag) error
-	GetByID(ctx context.Context, tagID string) (*models.AgencyTag, error)
-	GetByAgencyAndName(ctx context.Context, agencyID, name string) (*models.AgencyTag, error)
-	List(ctx context.Context, agencyID string, filters *TagFilters) ([]*models.AgencyTag, error)
-	Delete(ctx context.Context, agencyID, name string) error
+	Create(ctx context.Context, tag *models.AgencyTag, agencyID string, agencyDB string) error
+	GetByAgencyAndName(ctx context.Context, agencyID, name string, agencyDB string) (*models.AgencyTag, error)
+	List(ctx context.Context, agencyID string, agencyDB string, filters *TagFilters) ([]*models.AgencyTag, error)
+	Delete(ctx context.Context, agencyID, name string, agencyDB string) error
 }
 
 // tagService implements the TagService interface
@@ -104,16 +103,16 @@ func (s *tagService) CreateTag(ctx context.Context, agencyID string, req *Create
 		return nil, fmt.Errorf("invalid tag type: %s", req.Type)
 	}
 
-	// Check if tag name already exists
-	existing, _ := s.tagRepo.GetByAgencyAndName(ctx, agencyID, req.Name)
-	if existing != nil {
-		return nil, fmt.Errorf("tag with name '%s' already exists", req.Name)
-	}
-
 	// Retrieve current agency state
 	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve agency: %w", err)
+	}
+
+	// Check if tag name already exists
+	existing, _ := s.tagRepo.GetByAgencyAndName(ctx, agencyID, req.Name, agencyDoc.Database)
+	if existing != nil {
+		return nil, fmt.Errorf("tag with name '%s' already exists", req.Name)
 	}
 
 	// Retrieve agency specification
@@ -141,7 +140,6 @@ func (s *tagService) CreateTag(ctx context.Context, agencyID string, req *Create
 	}
 
 	tag := &models.AgencyTag{
-		AgencyID:    agencyID,
 		Name:        req.Name,
 		Type:        req.Type,
 		Version:     req.Version,
@@ -155,13 +153,14 @@ func (s *tagService) CreateTag(ctx context.Context, agencyID string, req *Create
 		CreatedBy: req.CreatedBy,
 	}
 
-	// Save tag to repository
-	if err := s.tagRepo.Create(ctx, tag); err != nil {
+	// Save tag to repository (in agency-specific database)
+	if err := s.tagRepo.Create(ctx, tag, agencyID, agencyDoc.Database); err != nil {
 		return nil, fmt.Errorf("failed to create tag: %w", err)
 	}
 
 	s.logger.Info("created tag",
 		"agency_id", agencyID,
+		"agency_db", agencyDoc.Database,
 		"tag_name", req.Name,
 		"tag_type", req.Type,
 		"content_hash", contentHash,
@@ -172,7 +171,13 @@ func (s *tagService) CreateTag(ctx context.Context, agencyID string, req *Create
 
 // ListTags retrieves tags for an agency with optional filtering
 func (s *tagService) ListTags(ctx context.Context, agencyID string, filters *TagFilters) ([]*models.AgencyTag, error) {
-	tags, err := s.tagRepo.List(ctx, agencyID, filters)
+	// Get agency to retrieve database name
+	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve agency: %w", err)
+	}
+
+	tags, err := s.tagRepo.List(ctx, agencyID, agencyDoc.Database, filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tags: %w", err)
 	}
@@ -181,7 +186,13 @@ func (s *tagService) ListTags(ctx context.Context, agencyID string, filters *Tag
 
 // GetTag retrieves a specific tag by name
 func (s *tagService) GetTag(ctx context.Context, agencyID string, tagName string) (*models.AgencyTag, error) {
-	tag, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName)
+	// Get agency to retrieve database name
+	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve agency: %w", err)
+	}
+
+	tag, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName, agencyDoc.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tag: %w", err)
 	}
@@ -192,22 +203,28 @@ func (s *tagService) GetTag(ctx context.Context, agencyID string, tagName string
 }
 
 // CompareTags generates a diff between two tags
-func (s *tagService) CompareTags(ctx context.Context, tagID1, tagID2 string) (*TagComparison, error) {
-	// Retrieve both tags
-	tag1, err := s.tagRepo.GetByID(ctx, tagID1)
+func (s *tagService) CompareTags(ctx context.Context, agencyID string, tagName1, tagName2 string) (*TagComparison, error) {
+	// Get agency to retrieve database name
+	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve agency: %w", err)
+	}
+
+	// Retrieve both tags by name
+	tag1, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName1, agencyDoc.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve tag1: %w", err)
 	}
 	if tag1 == nil {
-		return nil, fmt.Errorf("tag1 not found: %s", tagID1)
+		return nil, fmt.Errorf("tag1 not found: %s", tagName1)
 	}
 
-	tag2, err := s.tagRepo.GetByID(ctx, tagID2)
+	tag2, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName2, agencyDoc.Database)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve tag2: %w", err)
 	}
 	if tag2 == nil {
-		return nil, fmt.Errorf("tag2 not found: %s", tagID2)
+		return nil, fmt.Errorf("tag2 not found: %s", tagName2)
 	}
 
 	// Generate differences
@@ -241,19 +258,19 @@ func (s *tagService) CompareTags(ctx context.Context, tagID1, tagID2 string) (*T
 
 // RestoreFromTag overwrites the agency draft with a tag's snapshot
 func (s *tagService) RestoreFromTag(ctx context.Context, agencyID string, tagName string) error {
+	// Retrieve current agency
+	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve agency: %w", err)
+	}
+
 	// Retrieve tag
-	tag, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName)
+	tag, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName, agencyDoc.Database)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve tag: %w", err)
 	}
 	if tag == nil {
 		return fmt.Errorf("tag '%s' not found", tagName)
-	}
-
-	// Retrieve current agency
-	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
-	if err != nil {
-		return fmt.Errorf("failed to retrieve agency: %w", err)
 	}
 
 	// Verify agency is in draft state (can only restore to draft)
@@ -298,8 +315,14 @@ func (s *tagService) RestoreFromTag(ctx context.Context, agencyID string, tagNam
 
 // DeleteTag removes a tag
 func (s *tagService) DeleteTag(ctx context.Context, agencyID string, tagName string) error {
+	// Get agency to retrieve database name
+	agencyDoc, err := s.agencyRepo.GetByID(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve agency: %w", err)
+	}
+
 	// Check if tag exists
-	tag, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName)
+	tag, err := s.tagRepo.GetByAgencyAndName(ctx, agencyID, tagName, agencyDoc.Database)
 	if err != nil {
 		return fmt.Errorf("failed to check tag: %w", err)
 	}
@@ -308,7 +331,7 @@ func (s *tagService) DeleteTag(ctx context.Context, agencyID string, tagName str
 	}
 
 	// Delete tag
-	if err := s.tagRepo.Delete(ctx, agencyID, tagName); err != nil {
+	if err := s.tagRepo.Delete(ctx, agencyID, tagName, agencyDoc.Database); err != nil {
 		return fmt.Errorf("failed to delete tag: %w", err)
 	}
 

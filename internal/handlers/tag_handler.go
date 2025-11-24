@@ -50,7 +50,6 @@ func (h *TagHandler) CreateTag(c *gin.Context) {
 	// Create tag
 	tag, err := h.tagService.CreateTag(c.Request.Context(), agencyID, &req)
 	if err != nil {
-		h.logger.WithError(err).Error("failed to create tag")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to create tag",
 			"details": err.Error(),
@@ -204,12 +203,13 @@ func (h *TagHandler) RestoreFromTag(c *gin.Context) {
 	})
 }
 
-// CompareTags handles GET /api/v1/tags/:tag1/compare/:tag2
+// CompareTags handles GET /api/v1/agencies/:id/tags/:tag1/compare/:tag2
 func (h *TagHandler) CompareTags(c *gin.Context) {
-	tag1ID := c.Param("tag1")
-	tag2ID := c.Param("tag2")
+	agencyID := c.Param("id")
+	tag1Name := c.Param("tag1")
+	tag2Name := c.Param("tag2")
 
-	comparison, err := h.tagService.CompareTags(c.Request.Context(), tag1ID, tag2ID)
+	comparison, err := h.tagService.CompareTags(c.Request.Context(), agencyID, tag1Name, tag2Name)
 	if err != nil {
 		h.logger.WithError(err).Error("failed to compare tags")
 		c.JSON(http.StatusInternalServerError, gin.H{

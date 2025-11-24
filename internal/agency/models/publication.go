@@ -5,8 +5,8 @@ import "time"
 // AgencyPublication represents a published version of an agency
 type AgencyPublication struct {
 	// ArangoDB fields
-	Key string `json:"_key"`
-	ID  string `json:"_id"`
+	Key string `json:"_key,omitempty"`
+	ID  string `json:"_id,omitempty"`
 	Rev string `json:"_rev,omitempty"`
 
 	// Publication metadata

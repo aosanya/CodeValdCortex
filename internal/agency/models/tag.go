@@ -4,13 +4,13 @@ import "time"
 
 // AgencyTag represents an immutable snapshot of an agency
 type AgencyTag struct {
-	// ArangoDB fields
+	// ArangoDB fields (stored in agency-specific database)
 	Key string `json:"_key"`
 	ID  string `json:"_id"`
 	Rev string `json:"_rev,omitempty"`
 
 	// Tag metadata
-	AgencyID    string  `json:"agency_id"`
+	AgencyID    string  `json:"agency_id"`         // Reference to parent agency
 	Name        string  `json:"name"`              // Unique per agency
 	Version     string  `json:"version,omitempty"` // Semantic version (optional)
 	Description string  `json:"description"`

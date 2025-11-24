@@ -92,22 +92,19 @@ async function checkValidation() {
                     '</ul>';
             } else {
                 errorList.innerHTML = '<p class="is-size-7">No specific errors provided.</p>';
-            }
-
-            publishForm.style.display = 'none';
         }
-    } catch (error) {
-        console.error('Validation check failed:', error);
-        statusDiv.innerHTML = `
-            <p class="has-text-danger">
-                <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
-                Failed to check validation: ${error.message}
-            </p>
-        `;
-    }
-}
 
-/**
+        publishForm.style.display = 'none';
+    }
+} catch (error) {
+    statusDiv.innerHTML = `
+        <p class="has-text-danger">
+            <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
+            Failed to check validation: ${error.message}
+        </p>
+    `;
+}
+}/**
  * Handle publish form submission
  */
 async function handlePublishSubmit() {
@@ -165,26 +162,32 @@ async function handlePublishSubmit() {
             showNotification('Success', `Agency published as ${version}`, 'success');
 
             // Reload page to reflect new state
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-        } else {
-            // Error
-            throw new Error(result.error || 'Failed to publish agency');
-        }
-    } catch (error) {
-        console.error('Publish failed:', error);
-        alert(`Failed to publish agency: ${error.message}`);
-    } finally {
-        publishBtn.disabled = false;
-        progress.style.display = 'none';
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    } else {
+        // Error
+        throw new Error(result.error || 'Failed to publish agency');
     }
+} catch (error) {
+    alert(`Failed to publish agency: ${error.message}`);
+} finally {
+    publishBtn.disabled = false;
+    progress.style.display = 'none';
 }
-
-/**
- * Create tag before publishing
+}/**
+ * Create tag before publishing (or use existing if it already exists)
  */
 async function createTagBeforePublish(tagName, version, description) {
+    // Check if tag already exists
+    const checkResponse = await fetch(`/api/v1/agencies/${currentAgencyId}/tags/${tagName}`);
+
+    if (checkResponse.ok) {
+        const existingTag = await checkResponse.json();
+        return existingTag;
+    }
+
+    // Tag doesn't exist, create it
     const tagData = {
         name: tagName,
         type: 'snapshot',
@@ -207,6 +210,9 @@ async function createTagBeforePublish(tagName, version, description) {
         const error = await response.json();
         throw new Error(`Failed to create tag: ${error.error || error.details || 'Unknown error'}`);
     }
+
+    const result = await response.json();
+    return result;
 }
 
 /**
@@ -236,22 +242,19 @@ async function handleValidateAgency() {
             showNotification('Success', 'Agency validated successfully', 'success');
 
             // Transition state to validated
-            await updateAgencyState('validated');
+        await updateAgencyState('validated');
 
-            // Reload to show new buttons
-            setTimeout(() => window.location.reload(), 1000);
-        } else {
-            showNotification('Validation Failed', `Found ${result.errors?.length || 0} errors and ${result.warnings?.length || 0} warnings`, 'warning');
-        }
-    } catch (error) {
-        console.error('Validation failed:', error);
-        showNotification('Error', `Validation error: ${error.message}`, 'danger');
-    } finally {
-        btn.classList.remove('is-loading');
+        // Reload to show new buttons
+        setTimeout(() => window.location.reload(), 1000);
+    } else {
+        showNotification('Validation Failed', `Found ${result.errors?.length || 0} errors and ${result.warnings?.length || 0} warnings`, 'warning');
     }
+} catch (error) {
+    showNotification('Error', `Validation error: ${error.message}`, 'danger');
+} finally {
+    btn.classList.remove('is-loading');
 }
-
-/**
+}/**
  * Navigate to the validation section in overview
  */
 function navigateToValidationSection() {
@@ -339,21 +342,18 @@ async function handleActivateAgency() {
         });
 
         if (response.ok) {
-            showNotification('Success', 'Agency activated successfully', 'success');
-            setTimeout(() => window.location.reload(), 1500);
-        } else {
-            const error = await response.json();
-            throw new Error(error.error || 'Activation failed');
-        }
-    } catch (error) {
-        console.error('Activation failed:', error);
-        alert(`Failed to activate: ${error.message}`);
-    } finally {
-        btn.classList.remove('is-loading');
+        showNotification('Success', 'Agency activated successfully', 'success');
+        setTimeout(() => window.location.reload(), 1500);
+    } else {
+        const error = await response.json();
+        throw new Error(error.error || 'Activation failed');
     }
+} catch (error) {
+    alert(`Failed to activate: ${error.message}`);
+} finally {
+    btn.classList.remove('is-loading');
 }
-
-/**
+}/**
  * Update agency state via API
  */
 async function updateAgencyState(newState) {

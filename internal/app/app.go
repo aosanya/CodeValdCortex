@@ -119,7 +119,7 @@ func New(cfg *config.Config) *App {
 
 	// Initialize tag service
 	logger.Info("Initializing tag service")
-	tagRepo, err := arangodb.NewTagRepository(dbClient.Database())
+	tagRepo, err := arangodb.NewTagRepository(dbClient.Client())
 	if err != nil {
 		logger.WithError(err).Warn("Failed to initialize tag repository")
 	}
