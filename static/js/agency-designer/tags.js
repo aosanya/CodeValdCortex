@@ -459,25 +459,35 @@ function renderTagRow(tag) {
                 <span class="tag instance-count-badge" data-tag-name="${tag.name}">0</span>
             </td>
             <td>
-                <div class="buttons are-small">
-                    <button 
-                        class="button is-primary is-small" 
-                        onclick="openStartInstanceDialog('${escapeHtml(tag.name)}')"
-                        title="Start Instance">
-                        <span class="icon"><i class="fas fa-play"></i></span>
-                    </button>
-                    <button 
-                        class="button is-info is-small" 
-                        onclick="viewTagDetails('${escapeHtml(tag.name)}')"
-                        title="View Details">
-                        <span class="icon"><i class="fas fa-eye"></i></span>
-                    </button>
-                    <button 
-                        class="button is-danger is-small" 
-                        onclick="deleteTag('${escapeHtml(tag.name)}')"
-                        title="Delete Tag">
-                        <span class="icon"><i class="fas fa-trash"></i></span>
-                    </button>
+                <div class="dropdown is-hoverable is-right">
+                    <div class="dropdown-trigger">
+                        <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu-${escapeHtml(tag.name)}">
+                            <span class="icon is-small">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="dropdown-menu-${escapeHtml(tag.name)}" role="menu">
+                        <div class="dropdown-content">
+                            <a class="dropdown-item" onclick="openStartInstanceDialog('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-play"></i></span>
+                                <span>Start Instance</span>
+                            </a>
+                            <a class="dropdown-item" onclick="viewTagInstances('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-server"></i></span>
+                                <span>View Instances</span>
+                            </a>
+                            <a class="dropdown-item" onclick="viewTagDetails('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-eye"></i></span>
+                                <span>View Details</span>
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item has-text-danger" onclick="deleteTag('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-trash"></i></span>
+                                <span>Delete Tag</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </td>
         </tr>
@@ -508,6 +518,34 @@ function filterTags() {
  */
 function viewTagDetails(tagName) {
     alert(`View details for tag: ${tagName}\n\nThis feature will show full tag information and snapshot details.`);
+}
+
+/**
+ * View instances for a specific tag
+ */
+function viewTagInstances(tagName) {
+    // Switch to instances tab
+    const instancesTab = document.querySelector('[data-tab="instances"]');
+    if (instancesTab) {
+        instancesTab.click();
+    }
+    
+    // After a short delay to let the tab switch, apply the tag filter
+    setTimeout(() => {
+        const tagFilterSelect = document.getElementById('tag-filter');
+        if (tagFilterSelect) {
+            tagFilterSelect.value = tagName;
+            
+            // Trigger filter change event
+            const event = new Event('change', { bubbles: true });
+            tagFilterSelect.dispatchEvent(event);
+            
+            // If using instances.js filter function, call it
+            if (typeof filterInstances === 'function') {
+                filterInstances();
+            }
+        }
+    }, 100);
 }
 
 /**
