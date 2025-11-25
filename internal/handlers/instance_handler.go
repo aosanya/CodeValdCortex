@@ -278,3 +278,63 @@ func (h *InstanceHandler) ListInstancesByTag(c *gin.Context) {
 		"tag_name":  tagName,
 	})
 }
+
+// DeleteInstance handles DELETE /api/v1/agencies/:id/instances/:instance_id
+func (h *InstanceHandler) DeleteInstance(c *gin.Context) {
+	agencyID := c.Param("id")
+	instanceID := c.Param("instance_id")
+
+	err := h.instanceService.DeleteInstance(c.Request.Context(), agencyID, instanceID)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":   agencyID,
+			"instance_id": instanceID,
+			"error":       err.Error(),
+		}).Error("failed to delete instance")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to delete instance",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	h.logger.WithFields(logrus.Fields{
+		"agency_id":   agencyID,
+		"instance_id": instanceID,
+	}).Info("instance deleted")
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Instance deleted successfully",
+	})
+}
+
+// AcceptJob handles POST /api/v1/agencies/:id/instances/:instance_id/accept-job
+// Checks if instance is accepting new jobs
+func (h *InstanceHandler) AcceptJob(c *gin.Context) {
+	agencyID := c.Param("id")
+	instanceID := c.Param("instance_id")
+
+	instance, err := h.instanceService.GetInstance(c.Request.Context(), agencyID, instanceID)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":   agencyID,
+			"instance_id": instanceID,
+			"error":       err.Error(),
+		}).Error("failed to get instance for job acceptance check")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to check instance availability",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"instance_id":      instance.InstanceID,
+		"accepts_new_jobs": instance.AcceptsNewJobs,
+		"state":            instance.State,
+		"message": fmt.Sprintf("Instance is %s and accepts_new_jobs=%v",
+			instance.State, instance.AcceptsNewJobs),
+	})
+}

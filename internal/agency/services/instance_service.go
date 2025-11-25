@@ -119,7 +119,7 @@ func (s *instanceService) StartInstance(ctx context.Context, agencyID string, ta
 		AgencyID:       agencyID,
 		TagID:          tag.ID,
 		TagName:        tagName,
-		Name:           req.Name,
+		InstanceName:   req.Name,
 		Description:    req.Description,
 		State:          models.InstanceStateRunning, // Running immediately (optimistic start)
 		DeployedAt:     now,

@@ -1,0 +1,414 @@
+package pages
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// Helper function to get instances for a specific tag
+func getInstancesForTag(instances []*models.AgencyInstance, tagID string) []*models.AgencyInstance {
+	var result []*models.AgencyInstance
+	for _, inst := range instances {
+		if inst.TagID == tagID {
+			result = append(result, inst)
+		}
+	}
+	return result
+}
+
+// Helper function to get state CSS class
+func getStateClass(state models.InstanceState) string {
+	switch state {
+	case models.InstanceStateRunning:
+		return "is-success"
+	case models.InstanceStateStopping:
+		return "is-warning"
+	case models.InstanceStateStopped:
+		return "is-light"
+	case models.InstanceStateFailed:
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}
+
+// Helper function to get health CSS class
+func getHealthClass(health string) string {
+	switch health {
+	case "healthy":
+		return "is-success"
+	case "degraded":
+		return "is-warning"
+	case "unhealthy":
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}
+
+// Helper function to format uptime
+func formatUptime(seconds int64) string {
+	if seconds == 0 {
+		return "N/A"
+	}
+	duration := time.Duration(seconds) * time.Second
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	
+	if hours > 0 {
+		return fmt.Sprintf("%dh %dm", hours, minutes)
+	}
+	return fmt.Sprintf("%dm", minutes)
+}
+
+templ InstancesList(agency *models.Agency, tags []*models.AgencyTag, instances []*models.AgencyInstance) {
+	@components.LayoutWithAgency("Instances", agency) {
+		<section class="section">
+			<!-- Page Header -->
+			<div class="level">
+				<div class="level-left">
+					<div>
+						<h1 class="title">Instance Management</h1>
+						<p class="subtitle">{ strconv.Itoa(len(instances)) } instances</p>
+					</div>
+				</div>
+				<div class="level-right">
+					<button class="button is-primary" onclick="openStartInstanceDialog()">
+						<span class="icon"><i class="fas fa-plus"></i></span>
+						<span>New Instance</span>
+					</button>
+				</div>
+			</div>
+			
+			<!-- Filtering Controls -->
+			<div class="box" id="filter-controls">
+				<div class="columns">
+					<div class="column is-3">
+						<div class="field">
+							<label class="label">State</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="filter-state" onchange="applyFilters()">
+										<option value="">All States</option>
+										<option value="running">Running</option>
+										<option value="stopping">Stopping</option>
+										<option value="stopped">Stopped</option>
+										<option value="failed">Failed</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="column is-3">
+						<div class="field">
+							<label class="label">Tag</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="filter-tag" onchange="applyFilters()">
+										<option value="">All Tags</option>
+										for _, tag := range tags {
+											<option value={ tag.ID }>{ tag.Name }</option>
+										}
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="column is-4">
+						<div class="field">
+							<label class="label">Search</label>
+							<div class="control has-icons-left">
+								<input class="input" type="text" id="filter-search" 
+									placeholder="Search by name..." 
+									oninput="applyFilters()"/>
+								<span class="icon is-left">
+									<i class="fas fa-search"></i>
+								</span>
+							</div>
+						</div>
+					</div>
+					<div class="column is-2">
+						<div class="field">
+							<label class="label">Sort</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="filter-sort" onchange="applyFilters()">
+										<option value="name-asc">Name (A-Z)</option>
+										<option value="name-desc">Name (Z-A)</option>
+										<option value="date-desc">Newest First</option>
+										<option value="date-asc">Oldest First</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Tabs -->
+			<div class="tabs is-boxed">
+				<ul>
+					<li class="is-active" data-tab="by-tag">
+						<a onclick="switchTab('by-tag')">
+							<span class="icon"><i class="fas fa-tags"></i></span>
+							<span>By Tag</span>
+						</a>
+					</li>
+					<li data-tab="all-instances">
+						<a onclick="switchTab('all-instances')">
+							<span class="icon"><i class="fas fa-list"></i></span>
+							<span>All Instances</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			
+			<!-- Tab Content -->
+			<div id="tab-by-tag" class="tab-content is-active">
+				@instancesByTagView(tags, instances)
+			</div>
+			
+			<div id="tab-all-instances" class="tab-content" style="display: none;">
+				@instancesTableView(instances)
+			</div>
+		</section>
+		
+		<!-- Start Instance Dialog -->
+		@startInstanceDialog(agency, tags)
+		
+		<!-- Load JavaScript -->
+		<script src="/static/js/instances.js"></script>
+	}
+}
+
+templ instancesByTagView(tags []*models.AgencyTag, instances []*models.AgencyInstance) {
+	<div class="columns is-multiline">
+		for _, tag := range tags {
+			<div class="column is-4">
+				@tagCardWithInstances(tag, getInstancesForTag(instances, tag.ID))
+			</div>
+		}
+		if len(tags) == 0 {
+			<div class="column">
+				<div class="notification is-warning">
+					<p>No tags available. Create a tag first to start instances.</p>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ tagCardWithInstances(tag *models.AgencyTag, instances []*models.AgencyInstance) {
+	<div class="card">
+		<header class="card-header">
+			<p class="card-header-title">
+				<span class="icon"><i class="fas fa-tag"></i></span>
+				<span>{ tag.Name }</span>
+			</p>
+		</header>
+		<div class="card-content">
+			<!-- Tag metadata -->
+			<div class="content">
+				<p><strong>Version:</strong> { tag.Version }</p>
+				<p><strong>Type:</strong> <span class="tag">{ string(tag.Type) }</span></p>
+				<p><strong>Created:</strong> { tag.CreatedAt.Format("2006-01-02 15:04") }</p>
+			</div>
+			
+			<!-- Instances from this tag -->
+			if len(instances) > 0 {
+				<div class="mt-4">
+					<p class="heading">Running Instances ({ strconv.Itoa(len(instances)) })</p>
+					for _, inst := range instances {
+						@instanceListItem(inst)
+					}
+				</div>
+			} else {
+				<p class="has-text-grey-light">No instances running</p>
+			}
+		</div>
+		<footer class="card-footer">
+			<a class="card-footer-item" onclick={ templ.ComponentScript{Call: fmt.Sprintf("startInstanceFromTag('%s')", tag.Name)} }>
+				<span class="icon"><i class="fas fa-play"></i></span>
+				<span>Start Instance</span>
+			</a>
+		</footer>
+	</div>
+}
+
+templ instanceListItem(inst *models.AgencyInstance) {
+	<div class="box mb-2 p-3">
+		<div class="level is-mobile">
+			<div class="level-left">
+				<div>
+					<p class="is-size-6"><strong>{ inst.InstanceName }</strong></p>
+					<p class="is-size-7 has-text-grey">
+						<span class={ fmt.Sprintf("tag %s", getStateClass(inst.State)) }>
+							{ string(inst.State) }
+						</span>
+						<span class="ml-2">{ formatUptime(inst.UptimeSeconds) } uptime</span>
+					</p>
+				</div>
+			</div>
+			<div class="level-right">
+				<div class="buttons are-small">
+					<button class="button is-info" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} } title="View Dashboard">
+						<span class="icon"><i class="fas fa-eye"></i></span>
+					</button>
+					if inst.State == models.InstanceStateRunning {
+						<button class="button is-warning" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} } title="Stop">
+							<span class="icon"><i class="fas fa-stop"></i></span>
+						</button>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ instancesTableView(instances []*models.AgencyInstance) {
+	<div class="table-container">
+		<table class="table is-fullwidth is-striped is-hoverable" id="instances-table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Tag</th>
+					<th>State</th>
+					<th>Health</th>
+					<th>Agents</th>
+					<th>Uptime</th>
+					<th>Deployed</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, inst := range instances {
+					@instanceTableRow(inst)
+				}
+				if len(instances) == 0 {
+					<tr>
+						<td colspan="8" class="has-text-centered has-text-grey-light">
+							No instances found
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ instanceTableRow(inst *models.AgencyInstance) {
+	<tr data-instance-id={ inst.InstanceID } 
+		data-state={ string(inst.State) }
+		data-tag-id={ inst.TagID }
+		data-tag-name={ inst.TagName }
+		data-name={ inst.InstanceName }
+		data-deployed-at={ inst.DeployedAt.Format("2006-01-02") }>
+		<td>
+			<a href={ templ.URL(fmt.Sprintf("/agencies/%s/instances/%s", inst.AgencyID, inst.InstanceID)) }>
+				<strong>{ inst.InstanceName }</strong>
+			</a>
+		</td>
+		<td>
+			<span class="tag is-info">{ inst.TagName }</span>
+		</td>
+		<td>
+			<span class={ fmt.Sprintf("tag %s", getStateClass(inst.State)) }>
+				{ string(inst.State) }
+			</span>
+		</td>
+		<td>
+			<span class={ fmt.Sprintf("tag %s", getHealthClass(inst.HealthStatus)) }>
+				{ inst.HealthStatus }
+			</span>
+		</td>
+		<td>{ strconv.Itoa(inst.AgentCount) }</td>
+		<td>{ formatUptime(inst.UptimeSeconds) }</td>
+		<td>{ inst.DeployedAt.Format("2006-01-02 15:04") }</td>
+		<td>
+			<div class="buttons are-small">
+				if inst.State == models.InstanceStateRunning {
+					<button class="button is-warning" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} } title="Stop">
+						<span class="icon"><i class="fas fa-stop"></i></span>
+					</button>
+				}
+				if inst.State == models.InstanceStateStopped {
+					<button class="button is-success" onclick={ templ.ComponentScript{Call: fmt.Sprintf("restartInstance('%s')", inst.InstanceID)} } title="Restart">
+						<span class="icon"><i class="fas fa-redo"></i></span>
+					</button>
+					<button class="button is-danger" onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteInstance('%s')", inst.InstanceID)} } title="Delete">
+						<span class="icon"><i class="fas fa-trash"></i></span>
+					</button>
+				}
+				<button class="button is-info" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} } title="View Dashboard">
+					<span class="icon"><i class="fas fa-eye"></i></span>
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+templ startInstanceDialog(agency *models.Agency, tags []*models.AgencyTag) {
+	<div class="modal" id="start-instance-dialog">
+		<div class="modal-background" onclick="closeStartInstanceDialog()"></div>
+		<div class="modal-card">
+			<header class="modal-card-head">
+				<p class="modal-card-title">Start New Instance</p>
+				<button class="delete" aria-label="close" onclick="closeStartInstanceDialog()"></button>
+			</header>
+			<section class="modal-card-body">
+				<form id="start-instance-form">
+					<div class="field">
+						<label class="label">Tag <span class="has-text-danger">*</span></label>
+						<div class="control">
+							<div class="select is-fullwidth">
+								<select id="instance-tag" name="tag_name" required>
+									<option value="">Select a tag...</option>
+									for _, tag := range tags {
+										<option value={ tag.Name }>{ tag.Name } ({ tag.Version })</option>
+									}
+								</select>
+							</div>
+						</div>
+						<p class="help">Choose the tag snapshot to deploy</p>
+					</div>
+					
+					<div class="field">
+						<label class="label">Instance Name <span class="has-text-danger">*</span></label>
+						<div class="control">
+							<input class="input" type="text" id="instance-name" name="name" 
+								placeholder="e.g., Production-001" required/>
+						</div>
+						<p class="help">Must be unique within this agency</p>
+					</div>
+					
+					<div class="field">
+						<label class="label">Description</label>
+						<div class="control">
+							<textarea class="textarea" id="instance-description" name="description" 
+								placeholder="Optional description..." rows="3"></textarea>
+						</div>
+					</div>
+					
+					<div class="field">
+						<label class="label">Tags (Optional)</label>
+						<div class="control">
+							<input class="input" type="text" id="instance-tags" name="tags" 
+								placeholder="production, stable (comma-separated)"/>
+						</div>
+						<p class="help">Add labels for organization</p>
+					</div>
+				</form>
+			</section>
+			<footer class="modal-card-foot">
+				<button class="button is-success" onclick="submitStartInstance()">
+					<span class="icon"><i class="fas fa-play"></i></span>
+					<span>Start Instance</span>
+				</button>
+				<button class="button" onclick="closeStartInstanceDialog()">Cancel</button>
+			</footer>
+		</div>
+	</div>
+}

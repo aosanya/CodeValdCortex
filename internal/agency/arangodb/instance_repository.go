@@ -232,12 +232,19 @@ func (r *InstanceRepository) Delete(ctx context.Context, instanceID string, agen
 		return err
 	}
 
-	_, err = collection.RemoveDocument(ctx, instanceID)
+	// Soft delete: mark as deleted, don't remove from database
+	now := time.Now()
+	updateDoc := map[string]interface{}{
+		"is_deleted": true,
+		"deleted_at": now,
+	}
+
+	_, err = collection.UpdateDocument(ctx, instanceID, updateDoc)
 	if err != nil {
 		if driver.IsNotFound(err) {
 			return fmt.Errorf("instance not found: %s", instanceID)
 		}
-		return fmt.Errorf("failed to delete instance: %w", err)
+		return fmt.Errorf("failed to soft delete instance: %w", err)
 	}
 
 	return nil
@@ -253,6 +260,7 @@ func (r *InstanceRepository) ListByAgency(ctx context.Context, agencyID string, 
 	query := `
 		FOR instance IN @@collection
 			FILTER instance.agency_id == @agencyID
+			FILTER instance.is_deleted != true
 			SORT instance.started_at DESC
 			RETURN instance
 	`
@@ -292,6 +300,7 @@ func (r *InstanceRepository) ListByTag(ctx context.Context, agencyID string, tag
 		FOR instance IN @@collection
 			FILTER instance.agency_id == @agencyID
 			FILTER instance.tag_name == @tagName
+			FILTER instance.is_deleted != true
 			SORT instance.started_at DESC
 			RETURN instance
 	`
@@ -332,6 +341,7 @@ func (r *InstanceRepository) ListByState(ctx context.Context, agencyID string, s
 		FOR instance IN @@collection
 			FILTER instance.agency_id == @agencyID
 			FILTER instance.state == @state
+			FILTER instance.is_deleted != true
 			SORT instance.started_at DESC
 			RETURN instance
 	`

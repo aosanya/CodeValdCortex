@@ -252,7 +252,14 @@ async function loadAllInstances() {
         const data = await response.json();
         console.log('Instances loaded:', data);
 
-        if (data.instances) {
+        // Get all tag badges to reset counts to 0 first
+        const allBadges = document.querySelectorAll('.instance-count-badge');
+        allBadges.forEach(badge => {
+            badge.textContent = '0';
+            badge.className = 'tag instance-count-badge';
+        });
+
+        if (data.instances && data.instances.length > 0) {
             // Group instances by tag
             const instancesByTag = {};
             data.instances.forEach(instance => {

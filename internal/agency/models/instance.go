@@ -22,12 +22,12 @@ type AgencyInstance struct {
 	Rev string `json:"_rev,omitempty"`
 
 	// Instance metadata
-	AgencyID    string `json:"agency_id"`
-	TagID       string `json:"tag_id"`      // Immutable reference to source tag
-	TagName     string `json:"tag_name"`    // Cached for display
-	InstanceID  string `json:"instance_id"` // Unique identifier (UUID)
-	Name        string `json:"name"`        // User-friendly name (MUST be unique per agency)
-	Description string `json:"description"`
+	AgencyID     string `json:"agency_id"`
+	TagID        string `json:"tag_id"`        // Immutable reference to source tag
+	TagName      string `json:"tag_name"`      // Cached for display
+	InstanceID   string `json:"instance_id"`   // Unique identifier (UUID)
+	InstanceName string `json:"instance_name"` // User-friendly name (MUST be unique per agency)
+	Description  string `json:"description"`
 
 	// Runtime state
 	State        InstanceState `json:"state"`         // running, stopping, stopped, failed
