@@ -66,11 +66,18 @@ git branch -d feature/MVP-XXX_description
 
 *Multi-instance deployment and lifecycle management from tags*
 
-**Architecture Concept**: Enable running multiple independent instances of an agency from any tag snapshot. Each instance operates with isolated runtime state while sharing the immutable tag configuration.
+**Architecture Concept**: Enable running multiple independent instances of an agency from any tag snapshot. Each instance operates with isolated runtime state while sharing the immutable tag configuration. Instances use lazy agent initialization (agents spawn on-demand when jobs arrive) and optimistic start (immediate "running" state). Agent isolation via `instance_id` field filtering in flat agents collection.
+
+**Key Features**:
+- **Optimistic Start**: Instances immediately enter "running" state (no startup delay)
+- **Lazy Agents**: Agents spawn on-demand when jobs arrive (lightweight instance creation)
+- **Instance Isolation**: Separate agent pools per instance via `instance_id` field filtering
+- **Dashboard**: Centralized monitoring at `/instances` with 5-panel instance view
+- **Graceful Shutdown**: 30s timeout for completing in-flight work before stop
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-PUB-007 | Agency Instance Management System | Implement instance lifecycle management: agency_instances collection (per-agency DB), InstanceService with start/stop/restart from tag, Tag List UI with "Start Instance" buttons, multi-instance tracking, instance monitoring dashboard, isolated runtime state per instance, instance→tag immutable reference | 📋 Not Started | P0 | High | Go, ArangoDB, Templ, Frontend Dev | MVP-PUB-006 ✅ | [instance-management.md](mvp-details/agency-publishing/instance-management.md) |
+| MVP-PUB-007 | Agency Instance Management System | Implement instance lifecycle management: agency_instances collection (per-agency DB), InstanceService with start/stop/restart from tag, Tag List UI with "Start Instance" buttons, instance monitoring dashboard (5 panels: overview, agent refs, workflows, activity, controls), isolated runtime state via instance_id filtering, lazy agent initialization on job arrival, graceful shutdown with 30s timeout, real-time uptime calculation | 📋 Not Started | P0 | High | Go, ArangoDB, Templ, Frontend Dev | MVP-PUB-006 ✅ | [instance-management.md](mvp-details/agency-publishing/instance-management.md) |
 
 ---
 
