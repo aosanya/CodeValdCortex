@@ -75,9 +75,16 @@ git branch -d feature/MVP-XXX_description
 - **Dashboard**: Centralized monitoring at `/instances` with 5-panel instance view
 - **Graceful Shutdown**: 30s timeout for completing in-flight work before stop
 
+**Research Status**: ✅ Complete - 11 architectural questions answered. See [instance-research-session.md](mvp-details/agency-publishing/instance-research-session.md)
+
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-PUB-007 | Agency Instance Management System | Implement instance lifecycle management: agency_instances collection (per-agency DB), InstanceService with start/stop/restart from tag, Tag List UI with "Start Instance" buttons, instance monitoring dashboard (5 panels: overview, agent refs, workflows, activity, controls), isolated runtime state via instance_id filtering, lazy agent initialization on job arrival, graceful shutdown with 30s timeout, real-time uptime calculation | 📋 Not Started | P0 | High | Go, ArangoDB, Templ, Frontend Dev | MVP-PUB-006 ✅ | [instance-management.md](mvp-details/agency-publishing/instance-management.md) |
+| MVP-PUB-007A | Instance Data Layer & Schema | Create AgencyInstance model in internal/agency/models/instance.go, add agency_instances collection to ArangoDB schema, create indexes (instance_id, agency_id+name, tag_id, state), implement InstanceRepository with CRUD operations, add instance_id field to RUNTIME collections (agents - runtime entities spawned from roles). NOTE: Workflow definitions are blueprints (no instance_id). WorkflowExecution entities (internal/orchestration/types.go) have instance_id for runtime tracking. | ✅ Complete | P0 | Medium | Go, ArangoDB | MVP-PUB-006 ✅ | [instance-data-models.md](mvp-details/agency-publishing/instance-data-models.md), [gap-fix](coding_sessions/MVP-PUB-007A_documentation_gap_fix.md) |
+| MVP-PUB-007B | Instance Service Layer | Create InstanceService interface with 7 methods, implement StartInstance (tag retrieval, validation, creation with optimistic start), implement StopInstance (graceful shutdown, 30s timeout), implement RestartInstance, implement GetInstanceHealth (on-demand calculation), implement ListInstances with filtering support | 📋 Not Started | P0 | Medium | Go, Backend Dev | MVP-PUB-007A | [instance-services.md](mvp-details/agency-publishing/instance-services.md) |
+| MVP-PUB-007C | Instance API Endpoints | Create InstanceHandler in internal/web/handlers/instance_handler.go, implement 9 REST endpoints (POST /instances, GET /instances, GET /instances/:id, DELETE /instances/:id, POST /instances/:id/stop, POST /instances/:id/restart, GET /instances/:id/health, GET /instances/:id/agents, POST /instances/:id/accept-job), add validation middleware, error handling, route registration | 📋 Not Started | P0 | Medium | Go, REST API | MVP-PUB-007B | [instance-api.md](mvp-details/agency-publishing/instance-api.md) |
+| MVP-PUB-007D | Instance List UI (Hybrid View) | Create instances_list.templ with hybrid tabs (by-tag grouping + flat table), implement filtering controls (state, tag, search, sort), create start_instance_dialog.templ modal component, implement instances.js with tab switching and client-side filtering, style with Bulma CSS | 📋 Not Started | P0 | Medium | Templ, JavaScript, Frontend Dev | MVP-PUB-007C | [instance-ui-templates.md](mvp-details/agency-publishing/instance-ui-templates.md) |
+| MVP-PUB-007E | Instance Dashboard (5 Panels) | Create instance_dashboard.templ with 5-panel layout, implement 4 panel components (InstanceOverviewPanel, InstanceAgentsPanel, InstanceWorkflowsPanel, InstanceActivityPanel) with HTMX polling attributes, implement auto-refresh toggle with staggered intervals (30s, 30s, 20s, 60s), create 4 HTMX partial endpoints for panel updates, implement instance control functions (stop, restart, delete) | 📋 Not Started | P0 | High | Templ, HTMX, JavaScript, Frontend Dev | MVP-PUB-007D | [instance-ui-templates.md](mvp-details/agency-publishing/instance-ui-templates.md), [instance-ui-javascript.md](mvp-details/agency-publishing/instance-ui-javascript.md) |
+| MVP-PUB-007F | Instance Integration Testing | Test instance creation from tag, test graceful shutdown with active workflows, test restart flow, test filtering and sorting, test HTMX polling (enable/disable), test staggered panel updates, test soft delete flow, verify instance_id isolation across collections | 📋 Not Started | P0 | Low | Testing, Go | MVP-PUB-007E | [integration-testing.md](mvp-details/agency-publishing/integration-testing.md) |
 
 ---
 
@@ -230,13 +237,13 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Agency Instance Management**: 1 task (MVP-PUB-007)
+- **Agency Instance Management**: 6 tasks (MVP-PUB-007A through MVP-PUB-007F)
 - **Work Items Core**: 3 tasks (MVP-030, MVP-031, MVP-032)
 - **Gitea Integration**: 4 tasks (MVP-WI-001 through MVP-WI-004)
 - **A2A Protocol**: 3 foundational tasks (MVP-A2A-000, MVP-A2A-001, MVP-A2A-002, MVP-A2A-003, MVP-A2A-004, MVP-A2A-006)
 
 
-**Total P0**: 19 tasks
+**Total P0**: 24 tasks
 
 ### P1 (Critical - Core Features)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)

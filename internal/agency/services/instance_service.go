@@ -47,6 +47,7 @@ type InstanceRepository interface {
 	GetByID(ctx context.Context, instanceID string, agencyDB string) (*models.AgencyInstance, error)
 	Update(ctx context.Context, instance *models.AgencyInstance, agencyDB string) error
 	Delete(ctx context.Context, instanceID string, agencyDB string) error
+	ExistsByName(ctx context.Context, agencyID string, name string, agencyDB string) (bool, error)
 	ListByAgency(ctx context.Context, agencyID string, agencyDB string) ([]*models.AgencyInstance, error)
 	ListByTag(ctx context.Context, agencyID string, tagName string, agencyDB string) ([]*models.AgencyInstance, error)
 	ListByState(ctx context.Context, agencyID string, state models.InstanceState, agencyDB string) ([]*models.AgencyInstance, error)
@@ -83,7 +84,7 @@ func (s *instanceService) StartInstance(ctx context.Context, agencyID string, ta
 	s.logger.Info("Starting instance from tag",
 		"agency_id", agencyID,
 		"tag_name", tagName,
-		"instance_name", req.InstanceName,
+		"instance_name", req.Name,
 	)
 
 	// Get the agency to validate it exists and get database name
@@ -96,43 +97,40 @@ func (s *instanceService) StartInstance(ctx context.Context, agencyID string, ta
 		return nil, fmt.Errorf("agency does not have a database configured")
 	}
 
+	// Validate instance name is unique per agency
+	exists, err := s.instanceRepo.ExistsByName(ctx, agencyID, req.Name, agencyModel.Database)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check name uniqueness: %w", err)
+	}
+	if exists {
+		return nil, fmt.Errorf("instance name '%s' already exists for this agency", req.Name)
+	}
+
 	// Get the tag to load the snapshot
 	tag, err := s.tagService.GetTag(ctx, agencyID, tagName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get tag: %w", err)
 	}
 
-	// Create the instance model
-	createdBy := ""
-	if req.Metadata != nil {
-		if cb, ok := req.Metadata["created_by"].(string); ok {
-			createdBy = cb
-		}
-	}
-
+	// Create the instance model (optimistic start - immediately "running")
+	now := time.Now()
 	instance := &models.AgencyInstance{
-		InstanceID:   uuid.New().String(),
-		AgencyID:     agencyID,
-		TagName:      tagName,
-		InstanceName: req.InstanceName,
-		State:        models.InstanceStateStarting,
-		StateMessage: "Instance is being initialized",
-		Snapshot:     tag.Snapshot,
-		Config:       req.Config,
-		Resources: models.InstanceResourceStatus{
-			ActiveAgents:        0,
-			SpawnedAgents:       0,
-			TerminatedAgents:    0,
-			HealthScore:         1.0,
-			LastHealthCheck:     time.Now(),
-			ConsecutiveFailures: 0,
-		},
-		StartedAt:   time.Now(),
-		LastSeenAt:  time.Now(),
-		CreatedBy:   createdBy,
-		Environment: req.Environment,
-		Tags:        req.Tags,
-		Metadata:    req.Metadata,
+		InstanceID:     uuid.New().String(),
+		AgencyID:       agencyID,
+		TagID:          tag.ID,
+		TagName:        tagName,
+		Name:           req.Name,
+		Description:    req.Description,
+		State:          models.InstanceStateRunning, // Running immediately (optimistic start)
+		DeployedAt:     now,
+		StartedAt:      &now,
+		DeployedBy:     "system", // TODO: Get from auth context
+		AcceptsNewJobs: true,
+		AgentCount:     0, // Will be updated as agents spawn
+		WorkflowCount:  0,
+		LastHeartbeat:  now,
+		Tags:           req.Tags,
+		Metadata:       req.Metadata,
 	}
 
 	// Persist the instance
@@ -140,16 +138,8 @@ func (s *instanceService) StartInstance(ctx context.Context, agencyID string, ta
 		return nil, fmt.Errorf("failed to create instance: %w", err)
 	}
 
-	// Spawn agents from the snapshot (async operation)
-	go s.spawnInstanceAgents(context.Background(), instance, agencyModel.Database)
-
-	// Update state to running
-	instance.State = models.InstanceStateRunning
-	instance.StateMessage = "Instance is operational"
-	if err := s.instanceRepo.Update(ctx, instance, agencyModel.Database); err != nil {
-		s.logger.Error("Failed to update instance state", "error", err)
-		// Don't fail the operation, instance is created
-	}
+	// Spawn agents from the tag snapshot (async operation - lazy initialization)
+	go s.spawnInstanceAgents(context.Background(), instance, tag, agencyModel.Database)
 
 	s.logger.Info("Instance started successfully",
 		"instance_id", instance.InstanceID,
@@ -160,15 +150,28 @@ func (s *instanceService) StartInstance(ctx context.Context, agencyID string, ta
 	return instance, nil
 }
 
-// spawnInstanceAgents spawns agents for an instance based on the deployment manifest
-func (s *instanceService) spawnInstanceAgents(ctx context.Context, instance *models.AgencyInstance, agencyDB string) {
-	s.logger.Info("Spawning agents for instance", "instance_id", instance.InstanceID)
+// spawnInstanceAgents spawns agents for an instance based on the tag's snapshot
+// Note: Uses lazy initialization - agents are references, not physical entities
+func (s *instanceService) spawnInstanceAgents(ctx context.Context, instance *models.AgencyInstance, tag *models.AgencyTag, agencyDB string) {
+	s.logger.Info("Storing agent references for instance", "instance_id", instance.InstanceID)
 
-	// Get agent spawn plan from snapshot
-	agentCount := len(instance.Snapshot.Specification.Roles)
+	// Validate tag snapshot
+	if tag.Snapshot.Specification.ID == "" {
+		s.logger.Error("Tag snapshot specification is empty", "tag_id", tag.ID)
+		return
+	}
 
-	// Create instance agents (placeholder - actual agent spawning would integrate with agent factory)
-	for i, role := range instance.Snapshot.Specification.Roles {
+	// Get agent roles from specification
+	roles := tag.Snapshot.Specification.Roles
+	if len(roles) == 0 {
+		s.logger.Warn("No roles defined in tag snapshot", "tag_id", tag.ID)
+		return
+	}
+
+	agentCount := len(roles)
+
+	// Create agent references (not physical agents - lazy initialization)
+	for i, role := range roles {
 		agent := &models.InstanceAgent{
 			AgentID:       fmt.Sprintf("%s-agent-%d", instance.InstanceID, i),
 			InstanceID:    instance.InstanceID,
@@ -177,14 +180,14 @@ func (s *instanceService) spawnInstanceAgents(ctx context.Context, instance *mod
 			Name:          role.Name,
 			Type:          "worker", // Default type
 			AutonomyLevel: "supervised",
-			State:         "running",
+			State:         "registered", // Initial state (lazy spawn)
 			SpawnedAt:     time.Now(),
 			TaskCount:     0,
 			Metadata:      make(map[string]interface{}),
 		}
 
 		if err := s.instanceRepo.CreateAgent(ctx, agent, agencyDB); err != nil {
-			s.logger.Error("Failed to create instance agent",
+			s.logger.Error("Failed to create agent reference",
 				"instance_id", instance.InstanceID,
 				"agent_id", agent.AgentID,
 				"error", err,
@@ -192,24 +195,22 @@ func (s *instanceService) spawnInstanceAgents(ctx context.Context, instance *mod
 			continue
 		}
 
-		s.logger.Info("Agent spawned",
+		s.logger.Info("Agent reference stored",
 			"instance_id", instance.InstanceID,
 			"agent_id", agent.AgentID,
 			"role", role.Code,
 		)
 	}
 
-	// Update instance resource status
-	instance.Resources.SpawnedAgents = agentCount
-	instance.Resources.ActiveAgents = agentCount
-
+	// Update instance agent count
+	instance.AgentCount = agentCount
 	if err := s.instanceRepo.Update(ctx, instance, agencyDB); err != nil {
-		s.logger.Error("Failed to update instance resources", "error", err)
+		s.logger.Error("Failed to update instance agent count", "error", err)
 	}
 
-	s.logger.Info("Agent spawning completed",
+	s.logger.Info("Agent reference storage completed",
 		"instance_id", instance.InstanceID,
-		"spawned_count", agentCount,
+		"agent_count", agentCount,
 	)
 }
 
@@ -233,9 +234,9 @@ func (s *instanceService) StopInstance(ctx context.Context, agencyID string, ins
 		return fmt.Errorf("instance is already stopped")
 	}
 
-	// Update state
+	// Update state to "stopping" (reject new jobs)
 	instance.State = models.InstanceStateStopping
-	instance.StateMessage = "Instance is shutting down"
+	instance.AcceptsNewJobs = false
 	if err := s.instanceRepo.Update(ctx, instance, agencyModel.Database); err != nil {
 		return fmt.Errorf("failed to update instance state: %w", err)
 	}
@@ -246,9 +247,8 @@ func (s *instanceService) StopInstance(ctx context.Context, agencyID string, ins
 	// Mark instance as stopped
 	now := time.Now()
 	instance.State = models.InstanceStateStopped
-	instance.StateMessage = "Instance has been stopped"
 	instance.StoppedAt = &now
-	instance.Resources.ActiveAgents = 0
+	instance.AgentCount = 0 // All agents stopped
 
 	if err := s.instanceRepo.Update(ctx, instance, agencyModel.Database); err != nil {
 		return fmt.Errorf("failed to update instance: %w", err)
@@ -278,26 +278,26 @@ func (s *instanceService) RestartInstance(ctx context.Context, agencyID string, 
 		return nil, fmt.Errorf("instance must be stopped or failed to restart, current state: %s", instance.State)
 	}
 
-	// Update state
-	instance.State = models.InstanceStateStarting
-	instance.StateMessage = "Instance is restarting"
+	// Get the tag to reload agent references
+	tag, err := s.tagService.GetTag(ctx, agencyID, instance.TagName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tag: %w", err)
+	}
+
+	// Reset to running state
+	now := time.Now()
+	instance.State = models.InstanceStateRunning
 	instance.StoppedAt = nil
-	instance.LastSeenAt = time.Now()
+	instance.StartedAt = &now
+	instance.AcceptsNewJobs = true
+	instance.LastHeartbeat = now
 
 	if err := s.instanceRepo.Update(ctx, instance, agencyModel.Database); err != nil {
 		return nil, fmt.Errorf("failed to update instance state: %w", err)
 	}
 
-	// Restart agents (placeholder - actual agent restarting would integrate with agent factory)
-	go s.spawnInstanceAgents(context.Background(), instance, agencyModel.Database)
-
-	// Update to running
-	instance.State = models.InstanceStateRunning
-	instance.StateMessage = "Instance has been restarted"
-
-	if err := s.instanceRepo.Update(ctx, instance, agencyModel.Database); err != nil {
-		s.logger.Error("Failed to update instance state after restart", "error", err)
-	}
+	// Restart agents (re-store agent references)
+	go s.spawnInstanceAgents(context.Background(), instance, tag, agencyModel.Database)
 
 	s.logger.Info("Instance restarted successfully", "instance_id", instanceID)
 	return instance, nil
@@ -403,22 +403,25 @@ func (s *instanceService) GetInstanceHealth(ctx context.Context, agencyID string
 	}
 
 	// Calculate uptime
-	uptime := time.Since(instance.StartedAt)
-	if instance.StoppedAt != nil {
-		uptime = instance.StoppedAt.Sub(instance.StartedAt)
+	var uptime time.Duration
+	if instance.StartedAt != nil {
+		uptime = time.Since(*instance.StartedAt)
+		if instance.StoppedAt != nil {
+			uptime = instance.StoppedAt.Sub(*instance.StartedAt)
+		}
 	}
 
-	// Determine health status
-	healthy := instance.State == models.InstanceStateRunning && instance.Resources.HealthScore > 0.5
+	// Determine health status based on state and agent count
+	healthy := instance.State == models.InstanceStateRunning && instance.AgentCount > 0
 
 	health := &models.InstanceHealth{
 		InstanceID:       instance.InstanceID,
 		State:            instance.State,
 		Healthy:          healthy,
-		Message:          instance.StateMessage,
-		AgentsHealthy:    instance.Resources.ActiveAgents > 0,
-		WorkflowsHealthy: true, // Placeholder
-		ResourcesHealthy: instance.Resources.HealthScore > 0.7,
+		Message:          instance.HealthStatus, // Use the health_status field
+		AgentsHealthy:    instance.AgentCount > 0,
+		WorkflowsHealthy: true, // Placeholder - would check workflow states
+		ResourcesHealthy: instance.State == models.InstanceStateRunning,
 		Uptime:           uptime,
 		RequestCount:     0, // Placeholder - would come from metrics
 		ErrorCount:       0, // Placeholder - would come from metrics

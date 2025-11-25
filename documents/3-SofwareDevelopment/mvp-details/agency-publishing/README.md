@@ -14,6 +14,15 @@ The Agency Publishing & Tagging system transforms agencies from design artifacts
 4. **Activation**: Orchestrated agent spawning and workflow initialization
 5. **Instance Management**: Multi-instance deployment from tags with isolated runtime state
 
+**Research Status**: Complete research session conducted with 11 architectural questions answered. See [instance-research-session.md](instance-research-session.md) for full Q&A documentation.
+
+**Documentation Status**:
+- ✅ All specification files updated with research insights
+- ✅ Complete UI component templates designed (hybrid views, 5-panel dashboard)
+- ✅ Data models enhanced with instance isolation patterns
+- ✅ Service layer patterns established
+- 🔄 Implementation pending (Go handlers, Templ files, JavaScript)
+
 ## Conceptual Model
 
 ### Publishing vs. Tagging vs. Instances

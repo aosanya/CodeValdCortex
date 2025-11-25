@@ -48,11 +48,6 @@ func (h *InstanceHandler) StartInstance(c *gin.Context) {
 		req.Metadata["created_by"] = "system"
 	}
 
-	// Default environment if not provided
-	if req.Environment == "" {
-		req.Environment = "development"
-	}
-
 	// Start the instance
 	instance, err := h.instanceService.StartInstance(c.Request.Context(), agencyID, tagName, &req)
 	if err != nil {

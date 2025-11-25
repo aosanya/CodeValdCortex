@@ -60,6 +60,7 @@ func (d *databaseInitializer) InitializeAgencyDatabase(ctx context.Context, agen
 		"events",
 		"logs",
 		"metrics",
+		"agency_instances", // Instance management (MVP-PUB-007A)
 	}
 
 	for _, collName := range collections {

@@ -1,8 +1,32 @@
 # Research Session: Agency Instance Management (MVP-PUB-007)
 
 **Date**: November 24, 2025  
-**Status**: In Progress  
+**Status**: ✅ Complete  
 **Focus**: Architecture clarification and design decisions
+
+---
+
+## Session Summary
+
+**Total Questions Answered**: 11  
+**Duration**: Full research cycle completed  
+**Outcome**: Complete architectural specification ready for implementation
+
+**Key Outcomes**:
+1. ✅ **Instance Architecture**: Lazy agent initialization with optimistic start confirmed
+2. ✅ **Database Strategy**: `instance_id` field filtering across all collections (no separate DBs)
+3. ✅ **Navigation Structure**: Dual routes with hybrid list view (by-tag + flat table)
+4. ✅ **Filtering Strategy**: Standard dropdowns + search (state, tag, search, sort)
+5. ✅ **Data Loading**: Full server render for MVP (pagination planned for future)
+6. ✅ **Polling Mechanism**: Opt-in auto-refresh with staggered intervals per panel
+7. ✅ **UI Components**: 5 independent dashboard panels with configurable refresh
+
+**Documentation Updated**:
+- [instance-ui.md](instance-ui.md) - Complete Templ templates and JavaScript specifications (1,057 lines)
+- [instance-management.md](instance-management.md) - Enhanced with research-driven design decisions
+- [mvp.md](../../mvp.md) - Enhanced MVP-PUB-007 description with architectural insights
+
+**Next Steps**: Implementation phase - create actual `.templ` files, Go handlers, JavaScript modules based on documented specifications.
 
 ---
 
@@ -112,7 +136,7 @@ Explore and document the architecture, business logic, and implementation detail
 ### Q5: Job Routing to Instances
 
 **Category**: Business Logic  
-**Status**: 📝 Noted for Later
+**Status**: ✅ Answered with Critical Clarification
 
 **Question**: When a job arrives for a specific instance, how does the system route that job to the correct instance's agents?
 
@@ -121,16 +145,280 @@ Explore and document the architecture, business logic, and implementation detail
 - Instance-B's agents don't pick up Instance-A's jobs
 - Work orchestrator targets correct instance
 
-**What We're Looking For**:
-- Job instance_id field for filtering
-- Instance-specific job submission endpoints
-- Instance-scoped job queues
-- Workflow execution context binding
-- Combination of approaches
+**Answer**: **Critical architectural separation: Definitions vs Executions**
 
-**Importance**: Critical for complete instance isolation story
+**The Key Distinction**:
 
-**Note**: This is part of the broader job/workflow system architecture. Will document expected approach based on instance isolation pattern established (instance_id field filtering).
+1. **Workflow Definitions** (`internal/agency/models/workflow.go`):
+   - Blueprints/templates stored in agency database
+   - Agency-wide, NOT instance-specific
+   - Define workflow structure, steps, dependencies
+   - **DO NOT have `instance_id` field**
+   - Shared across all instances as reusable templates
+
+2. **Workflow Executions** (`internal/orchestration/types.go`):
+   - Runtime instances of workflow definitions
+   - **HAVE `instance_id` field** (optional)
+   - Track execution state, current step, agent assignments
+   - Link back to definition via `workflow_id`
+   - Instance-scoped OR agency-wide
+
+3. **Task Executions** (`internal/orchestration/types.go`):
+   - Runtime task execution within workflow
+   - Has `agent_id` field linking to instance's agents
+   - Part of WorkflowExecution context
+
+**Routing Mechanism**:
+```go
+// API accepts instance_id parameter
+POST /api/v1/agencies/{agency_id}/workflows/{workflow_id}/execute
+{
+  "instance_id": "inst-uuid-123",  // Optional - if provided, scopes to instance
+  "parameters": {...}
+}
+
+// Creates WorkflowExecution with instance_id
+execution := &WorkflowExecution{
+    WorkflowID: workflow_id,
+    InstanceID: instance_id,  // This ties execution to instance
+    ...
+}
+
+// Engine selects agents filtered by instance_id
+agents := GetAgents(ctx, AgentFilters{InstanceID: execution.InstanceID})
+```
+
+**Behavior**:
+- If `instance_id` provided: Execution uses only that instance's agents
+- If `instance_id` null/empty: Execution uses agency-wide agent pool (no instance)
+- Same workflow definition can run on multiple instances simultaneously
+- Each execution is isolated by its instance_id
+
+**Implications**:
+- Workflow definitions remain pure templates (no runtime state)
+- WorkflowExecution carries instance context
+- Agent assignment respects instance isolation
+- Job routing is execution-level, not definition-level
+
+**References**:
+- See `internal/orchestration/types.go` lines 256-300 for `WorkflowExecution` model
+- See `internal/orchestration/engine.go` for execution engine implementation
+
+---
+### Q6: Navigation Structure
+
+**Category**: Architecture & Design  
+**Status**: ✅ Answered
+
+**Question**: Where should the instances list page be located in the navigation - as a new top-level route `/instances` or nested under tags?
+
+**Answer**: **Dual navigation approach**
+- `/instances` - Top-level route showing ALL instances across all tags
+- `/agencies/:id/instances/:instance_id` - Per-instance dashboard
+
+**Implications**:
+- Two entry points: global instance view + tag-scoped view
+- Need handlers for both routes
+- Navigation breadcrumbs should reflect entry point
+
+---
+
+### Q7: Instances List Page Layout
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: On the `/instances` page, how should instances be organized and displayed?
+
+**Answer**: **C) Hybrid view with tabs**
+- Tab 1: "By Tag" - grouped view (tag cards with instances nested underneath)
+- Tab 2: "All Instances" - flat table view (sortable/filterable)
+- User can switch between views based on task
+
+**Implications**:
+- Need tab switching UI (Bulma tabs component)
+- Two data presentation modes in same template
+- Client-side tab switching (data pre-loaded)
+- More complex template but better UX flexibility
+
+---
+
+### Q8: Filtering Capabilities
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: For the "all instances" flat view, what filtering and sorting capabilities should be available?
+
+**Answer**: **B) Standard filtering**
+- State filter dropdown (running/stopping/stopped/failed)
+- Tag filter dropdown (from available tags)
+- Search box (by instance name)
+- Sort by name/date (ascending/descending)
+
+**Implications**:
+- Filter controls in page header
+- Client-side filtering (data already loaded)
+- Need to populate tag dropdown from all available tags
+- Standard Bulma select/input components
+
+---
+
+### Q9: Data Loading Strategy
+
+**Category**: API & Interfaces  
+**Status**: ✅ Answered
+
+**Question**: Should the `/instances` page load all instances data on initial page render, or use HTMX to lazy-load?
+
+**Answer**: **A) Full server render**
+- Handler fetches all instances + tags
+- Complete page rendered server-side
+- JavaScript handles tab switching client-side (all data in DOM)
+- **Future**: Pagination when instance counts grow
+
+**Implications**:
+- Single handler endpoint for instances list page
+- No separate HTMX endpoints for tabs (initially)
+- Simpler implementation for MVP
+- May need refactor to pagination when scaling
+
+---
+
+### Q10: Dashboard Auto-Refresh
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: For the instance dashboard, should the 5 panels auto-refresh, or manual refresh?
+
+**Answer**: **B) Polling with user toggle**
+- Default: Manual refresh (static page)
+- Toggle button: "Enable Auto-Refresh" (user opt-in)
+- When enabled: JavaScript polls and updates via HTMX
+
+**Implications**:
+- Toggle control in dashboard header
+- Polling state stored in JavaScript (not persisted)
+- Reduces default server load
+- Need clear UI feedback when polling active
+
+---
+
+### Q11: Panel Refresh Intervals
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: When polling is enabled, what should the refresh intervals be for each dashboard panel?
+
+**Answer**: **B) Staggered intervals with configurable components**
+- Each panel is separate component with own refresh interval
+- Panels can be configured independently
+- Different update frequencies based on data volatility
+
+**Implications**:
+- Need panel component abstraction (templ components)
+- Each panel has HTMX endpoint for partial updates
+- Panel configuration structure (interval, endpoint, enabled)
+- JavaScript manages multiple polling timers
+
+---
+
+## Remaining Topics to Explore
+
+**Answer**: **C) Hybrid view with tabs**
+- Tab 1: "By Tag" - grouped view (tag cards with instances nested)
+- Tab 2: "All Instances" - flat table view (sortable/filterable)
+- User can switch between views based on task
+
+**Implications**:
+- Need tab switching UI (Bulma tabs component)
+- Two data presentation modes in same template
+- Client-side tab switching (data pre-loaded)
+- More complex template but better UX flexibility
+
+---
+
+### Q8: Filtering Capabilities
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: For the "all instances" flat view, what filtering and sorting capabilities should be available?
+
+**Answer**: **B) Standard filtering**
+- State filter dropdown (running/stopping/stopped/failed)
+- Tag filter dropdown (from available tags)
+- Search box (by instance name)
+- Sort by name/date (ascending/descending)
+
+**Implications**:
+- Filter controls in page header
+- Client-side filtering (data already loaded) OR server-side (API params)
+- Need to populate tag dropdown from all available tags
+- Standard Bulma select/input components
+
+---
+
+### Q9: Data Loading Strategy
+
+**Category**: API & Interfaces  
+**Status**: ✅ Answered
+
+**Question**: Should the `/instances` page load all instances data on initial page render, or use HTMX to lazy-load instance data?
+
+**Answer**: **A) Full server render**
+- Handler fetches all instances + tags
+- Complete page rendered server-side
+- JavaScript handles tab switching client-side (all data in DOM)
+- **Future**: Pagination when instance counts grow
+
+**Implications**:
+- Single handler endpoint for instances list page
+- No separate HTMX endpoints for tabs (initially)
+- Simpler implementation for MVP
+- May need refactor to pagination when scaling
+
+---
+
+### Q10: Dashboard Auto-Refresh
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: For the instance dashboard, should the 5 panels auto-refresh, or does the user manually refresh?
+
+**Answer**: **B) Polling with user toggle**
+- Default: Manual refresh (static page)
+- Toggle button: "Enable Auto-Refresh" (user opt-in)
+- When enabled: JavaScript polls and updates via HTMX
+
+**Implications**:
+- Toggle control in dashboard header
+- Polling state stored in JavaScript (not persisted)
+- Reduces default server load (most users won't enable)
+- Need clear UI feedback when polling is active
+
+---
+
+### Q11: Panel Refresh Intervals
+
+**Category**: User Experience  
+**Status**: ✅ Answered
+
+**Question**: When polling is enabled, what should the refresh intervals be for each dashboard panel?
+
+**Answer**: **B) Staggered intervals with configurable components**
+- Each panel is separate component with own refresh interval
+- Panels can be configured independently
+- Different update frequencies based on data volatility
+
+**Implications**:
+- Need panel component abstraction (templ components)
+- Each panel has HTMX endpoint for partial updates
+- Panel configuration structure (interval, endpoint, enabled)
+- JavaScript manages multiple polling timers
 
 ---
 

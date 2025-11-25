@@ -1,7 +1,8 @@
 # Instance Management: Service Layer & Repository
 
 **Related Task**: MVP-PUB-007  
-**Component**: Business Logic Layer
+**Component**: Business Logic Layer  
+**Research Reference**: See [instance-research-session.md](instance-research-session.md) for architectural Q&A
 
 ---
 

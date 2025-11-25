@@ -35,6 +35,10 @@ type Task struct {
 	// AgentID is the agent that will execute the task
 	AgentID string `json:"agent_id"`
 
+	// InstanceID links task to specific instance (optional - null for agency-wide tasks)
+	// Used for filtering tasks by instance when multiple instances run simultaneously
+	InstanceID string `json:"instance_id,omitempty"`
+
 	// Type indicates the task type (determines which handler to use)
 	Type string `json:"type"`
 

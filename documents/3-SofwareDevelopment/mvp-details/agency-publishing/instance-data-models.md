@@ -1,7 +1,8 @@
 # Instance Management: Data Models & Database Schema
 
 **Related Task**: MVP-PUB-007  
-**Component**: Data Layer
+**Component**: Data Layer  
+**Research Reference**: See [instance-research-session.md](instance-research-session.md) for architectural Q&A
 
 ---
 
@@ -171,6 +172,57 @@ type InstanceHealth struct {
 ### Health Status
 - **Decision**: Calculated on-demand when requested, based on current agent states
 - **Rationale**: Reduces background processing overhead, ensures real-time accuracy
+
+### 🔴 CRITICAL: Workflow Definitions vs Executions
+
+**Decision**: Workflow definitions DO NOT have `instance_id` field. Only workflow executions do.
+
+**The Pattern**:
+
+```go
+// ❌ WRONG - Workflow is a definition/template
+type Workflow struct {
+    ID          string
+    Name        string
+    Steps       []Step
+    InstanceID  string  // ❌ NO! Definitions are agency-wide blueprints
+}
+
+// ✅ CORRECT - Workflow is just the blueprint
+type Workflow struct {
+    ID          string
+    Name        string
+    Steps       []Step
+    // No InstanceID - this is a reusable template
+}
+
+// ✅ CORRECT - WorkflowExecution tracks runtime state
+type WorkflowExecution struct {
+    ID          string
+    WorkflowID  string      // Links to definition
+    InstanceID  string      // Optional - scopes to instance if provided
+    Status      string
+    CurrentStep int
+    StartTime   time.Time
+    // ... execution state ...
+}
+```
+
+**Affected Collections**:
+- ✅ **Agents**: Runtime entities spawned from role definitions → HAVE `instance_id`
+- ❌ **Workflows** (definitions): Agency-wide blueprints → DO NOT have `instance_id`
+- ✅ **WorkflowExecutions** (runtime): Instance-scoped runs → HAVE `instance_id`
+- ✅ **TaskExecutions** (runtime): Part of workflow execution → HAVE `instance_id` via parent
+
+**Rationale**:
+- Workflow definitions are shared templates across all instances
+- Same workflow definition can run on multiple instances simultaneously
+- Execution state is separate from definition
+- Instance isolation happens at execution level, not definition level
+
+**References**:
+- See `internal/orchestration/types.go` for `WorkflowExecution` model (already implemented)
+- See `internal/agency/models/workflow.go` for Workflow definition (should NOT have instance_id)
 
 ---
 

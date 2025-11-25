@@ -25,21 +25,40 @@ This task is split across topic-based files (refactored from original 884-line f
 ### 🌐 [HTTP API Endpoints](instance-api.md)
 **353 lines** - 9 REST endpoints, handlers, error handling
 
-### 🎨 [UI Components](instance-ui.md)
-**382 lines** - Tags list, instance dialog, dashboard (5 panels)
+### 🎨 [UI Templates](instance-ui-templates.md)
+**658 lines** - Complete Templ template specifications: hybrid list view (by-tag + flat table tabs), 5-panel dashboard, start instance dialog
+
+### 💻 [JavaScript & Routing](instance-ui-javascript.md)
+**335 lines** - Tab switching, client-side filtering, auto-refresh control, dialog management, instance control functions, UI routes
+
+### 🔬 [Research Session](instance-research-session.md)
+**Full architectural Q&A** - 11 questions answered covering navigation structure, filtering approach, data loading strategy, polling mechanism, panel design
 
 ---
 
-## Key Design Decisions
+## Key Design Decisions (Research-Driven)
 
+### Instance Management Architecture
 1. **Storage**: All instances in `agency_instances` collection (agency DB)
-2. **Agents**: References to tag configs (not physical)
-3. **State**: "Running" immediately on creation
-4. **Health**: On-demand calculation
-5. **Shutdown**: Graceful (30s timeout, rejects new jobs)
-6. **Naming**: Unique per agency
-7. **Delete**: Soft delete only
-8. **Uptime**: Real-time (`current_time - started_at`)
+2. **Agent References**: Lazy initialization - agents spawn on-demand when jobs arrive
+3. **Optimistic Start**: Instances immediately enter "running" state without validation
+4. **Instance Isolation**: All collections use `instance_id` field for filtering/querying
+
+### UI/UX Architecture
+5. **Navigation**: Dual routes - `/instances` (top-level list) + `/agencies/:id/instances/:id` (dashboard)
+6. **List View**: Hybrid approach - Tab 1 (by-tag grouping), Tab 2 (flat table with filters)
+7. **Filtering**: Standard approach - state dropdown, tag dropdown, search box, sort dropdown
+8. **Data Loading**: Full server render on page load (future: pagination for 500+ instances)
+9. **Dashboard Polling**: Opt-in auto-refresh with staggered intervals per panel
+   - Overview: 30s, Agents: 30s, Workflows: 20s, Activity: 60s
+10. **Panel Independence**: Each panel is separate component with own HTMX endpoint
+
+### Operational Patterns
+11. **Health**: On-demand calculation (not stored)
+12. **Shutdown**: Graceful (30s timeout, rejects new jobs)
+13. **Naming**: Unique per agency
+14. **Delete**: Soft delete only (preserves audit trail)
+15. **Uptime**: Real-time calculation (`current_time - started_at`)
 
 ---
 

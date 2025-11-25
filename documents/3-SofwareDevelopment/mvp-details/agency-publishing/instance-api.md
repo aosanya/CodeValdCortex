@@ -1,7 +1,8 @@
 # Instance Management: HTTP API Endpoints
 
 **Related Task**: MVP-PUB-007  
-**Component**: API Layer
+**Component**: API Layer  
+**Research Reference**: See [instance-research-session.md](instance-research-session.md) for architectural Q&A
 
 ---
 
