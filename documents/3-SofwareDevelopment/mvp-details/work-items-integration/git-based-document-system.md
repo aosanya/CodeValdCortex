@@ -407,6 +407,59 @@ Backend:
 5. Update file index
 ```
 
+<!-- MVP-WI-006 -->
+### Implementation Status (MVP-WI-006)
+
+**Completed**: 2025-11-26  
+**Task**: [MVP-WI-006 File Explorer API](../../../mvp_done.md#mvp-wi-006-file-explorer-api)
+
+The file explorer API has been implemented with agency-specific database isolation using the InstanceRepository pattern. This provides the foundation for Git-backed file management.
+
+**Key Implementation Details**:
+
+1. **Multi-Tenant Architecture**: Each agency has its own ArangoDB database (e.g., `UC-CHAR-001`, `UC-INFRA-001`) with isolated data
+2. **Collections**: `git_artifacts` (file/folder metadata), `git_objects`, `git_refs`, `repositories`
+3. **Repository Pattern**: InstanceRepository using `driver.Client` with `agencyDB` parameter on all methods
+4. **Lazy Collection Creation**: Collections created on-demand during first write operation
+5. **ArangoDB Key Generation**: Path sanitization for compliance (alphanumeric, dash, underscore only)
+
+**Architecture Stack**:
+```
+Handler (files/handler.go)
+    ↓ calls
+Service (fileindex/service.go)  
+    ↓ calls  
+Repository (fileindex/repository.go)
+    ↓ queries
+ArangoDB (agency-specific database)
+```
+
+**Key Files Created**:
+- `internal/git/fileindex/repository.go` - Data access layer with lazy collection creation
+- `internal/git/fileindex/service.go` - Business logic for file operations  
+- `internal/web/handlers/files/handler.go` - REST API endpoints
+- `static/js/file-browser.js` - Client-side file explorer UI
+
+**API Endpoints Implemented**:
+- `GET /agencies/{agencyID}/instances/{instanceID}/files/explorer` - File explorer UI
+- `GET /agencies/{agencyID}/instances/{instanceID}/files` - List directory contents
+- `GET /agencies/{agencyID}/instances/{instanceID}/files/content` - Read file content
+- `POST /agencies/{agencyID}/instances/{instanceID}/files` - Create file
+- `PUT /agencies/{agencyID}/instances/{instanceID}/files` - Update file
+- `DELETE /agencies/{agencyID}/instances/{instanceID}/files` - Delete file
+- `POST /agencies/{agencyID}/instances/{instanceID}/files/directory` - Create folder
+- `POST /agencies/{agencyID}/instances/{instanceID}/files/rebuild` - Rebuild file index
+
+**Technical Challenges Solved**:
+1. **Collection Missing**: Implemented lazy creation on write errors instead of proactive checks
+2. **Query Field Mismatches**: Corrected field names (`repository_id` → `repo_id`, `type` → `is_dir`)
+3. **ArangoDB Key Validation**: Enhanced `makeKey()` function to sanitize special characters
+4. **Path Construction Bug**: Fixed `getCurrentPath()` in JavaScript to read from URL parameter first
+
+**Coding Session**: [MVP-WI-006_file_explorer_api](../../../coding_sessions/MVP-WI-006_file_explorer_api.md)
+
+<!-- /MVP-WI-006 -->
+
 ---
 
 ## Git Operations Implementation

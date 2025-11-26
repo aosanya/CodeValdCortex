@@ -18,6 +18,9 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
 	"github.com/aosanya/CodeValdCortex/internal/database"
+	"github.com/aosanya/CodeValdCortex/internal/git/fileindex"
+	"github.com/aosanya/CodeValdCortex/internal/git/ops"
+	gitstorage "github.com/aosanya/CodeValdCortex/internal/git/storage"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	giteaWork "github.com/aosanya/CodeValdCortex/internal/infrastructure/gitea"
 	"github.com/aosanya/CodeValdCortex/internal/lifecycle"
@@ -26,7 +29,9 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
 	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
+	"github.com/aosanya/CodeValdCortex/internal/web/handlers/files"
 	webmiddleware "github.com/aosanya/CodeValdCortex/internal/web/middleware"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -58,6 +63,8 @@ type App struct {
 	workflowService     *workflow.Service
 	policyService       *policy.Service
 	webhookHandler      *giteaWork.Handler
+	fileIndexService    fileindex.Service
+	gitOps              ops.GitOps
 }
 
 // New creates a new application instance
@@ -144,6 +151,27 @@ func New(cfg *config.Config) *App {
 		slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
 		instanceService = services.NewInstanceService(instanceRepo, tagService, agencyRepo, slogger)
 		logger.Info("Instance service initialized successfully")
+	}
+
+	// Initialize Git services for file browser (MVP-WI-006)
+	logger.Info("Initializing Git services")
+	var gitOps ops.GitOps
+	var fileIndexService fileindex.Service
+	{
+		gitStorage, err := gitstorage.NewRepository(dbClient.Database(), logger)
+		if err != nil {
+			logger.WithError(err).Warn("Failed to initialize Git storage")
+		} else {
+			gitOps = ops.NewGitOps(gitStorage, logger)
+
+			fileIndexRepo, err := fileindex.NewRepository(dbClient.Client(), logger)
+			if err != nil {
+				logger.WithError(err).Warn("Failed to initialize file index repository")
+			} else {
+				fileIndexService = fileindex.NewService(gitOps, fileIndexRepo, logger)
+				logger.Info("Git services initialized successfully")
+			}
+		}
 	}
 
 	// Initialize publication service (MVP-PUB-003)
@@ -262,6 +290,8 @@ func New(cfg *config.Config) *App {
 		workflowService:     workflowService,
 		policyService:       policyService,
 		webhookHandler:      webhookHandler,
+		fileIndexService:    fileIndexService,
+		gitOps:              gitOps,
 	}
 }
 
@@ -404,7 +434,46 @@ func (a *App) setupServer() error {
 		a.logger.Info("Instance management web routes registered")
 	}
 
-	// AI Agency Designer web routes (if available)
+	// File explorer web routes (if available)
+	if a.fileIndexService != nil {
+		filesHandler := files.NewHandler(a.fileIndexService, a.agencyRepository, a.logger)
+		router.GET("/agencies/:id/instances/:instance_id/explorer", func(c *gin.Context) {
+			agencyID := c.Param("id")
+			instanceID := c.Param("instance_id")
+
+			// Get path from query parameter (default to root)
+			currentPath := c.DefaultQuery("path", "/")
+
+			// Get agency
+			agency, err := a.agencyService.GetAgency(c.Request.Context(), agencyID)
+			if err != nil {
+				c.String(http.StatusNotFound, "Agency not found")
+				return
+			}
+
+			// Get agency database
+			agencyDB := agency.ID
+			if agency.Database != "" {
+				agencyDB = agency.Database
+			}
+
+			// List directory
+			entries, err := a.fileIndexService.ListDirectory(c.Request.Context(), agencyDB, instanceID, currentPath)
+			if err != nil {
+				a.logger.WithError(err).WithField("path", currentPath).Error("Failed to list directory")
+				entries = []*fileindex.DirectoryEntry{} // Empty list on error
+			}
+
+			// Render file browser page using Templ
+			component := pages.FileExplorerPage(agency, instanceID, currentPath, entries)
+			component.Render(c.Request.Context(), c.Writer)
+		})
+
+		// API routes for file operations
+		api := router.Group("/api")
+		filesHandler.RegisterRoutes(api)
+		a.logger.Info("File explorer routes registered")
+	} // AI Agency Designer web routes (if available)
 	if aiDesignerWebHandler != nil {
 		aiDesignerWebHandler.RegisterRoutes(router.Group(""))
 		a.logger.Info("AI Agency Designer web routes registered")

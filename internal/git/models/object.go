@@ -66,12 +66,13 @@ type Author struct {
 // Stored in git_refs collection
 type GitRef struct {
 	// ArangoDB fields
-	Key string `json:"_key"` // "refs/heads/main", "refs/heads/feature-xyz", "HEAD"
+	Key string `json:"_key"` // Safe key for ArangoDB (e.g., "refs_heads_main")
 	ID  string `json:"_id"`  // Full document ID
 	Rev string `json:"_rev"` // Document revision
 
 	// Reference data
 	RepoID string `json:"repo_id"` // Repository identifier
+	Name   string `json:"name"`    // Full ref name (e.g., "refs/heads/main")
 	Type   string `json:"type"`    // "branch", "tag", "HEAD"
 	Target string `json:"target"`  // Commit SHA (or ref path for symbolic refs like HEAD)
 }

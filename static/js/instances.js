@@ -263,6 +263,14 @@ function viewInstance(instanceID) {
 }
 
 /**
+ * Open file explorer for instance
+ */
+function openExplorer(instanceID) {
+    const agencyId = window.currentAgencyId || document.body.dataset.agencyId;
+    window.location.href = `/agencies/${agencyId}/instances/${instanceID}/explorer`;
+}
+
+/**
  * Stop instance with graceful shutdown
  */
 async function stopInstance(instanceID) {

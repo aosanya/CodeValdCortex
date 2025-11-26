@@ -1,0 +1,255 @@
+package components
+
+import (
+	"fmt"
+	"path/filepath"
+	"strings"
+	"github.com/aosanya/CodeValdCortex/internal/git/fileindex"
+)
+
+// FileBrowserPanel shows file explorer interface
+templ FileBrowserPanel(instanceID string, currentPath string, entries []*fileindex.DirectoryEntry) {
+	<div class="card" id="file-browser-panel">
+		<header class="card-header">
+			<p class="card-header-title">
+				<span class="icon"><i class="fas fa-folder"></i></span>
+				<span>Files</span>
+			</p>
+			<div class="card-header-icon">
+				<button class="button is-small is-primary" onclick="showCreateFileDialog()">
+					<span class="icon"><i class="fas fa-plus"></i></span>
+					<span>New File</span>
+				</button>
+				<button class="button is-small is-info ml-2" onclick="showCreateFolderDialog()">
+					<span class="icon"><i class="fas fa-folder-plus"></i></span>
+					<span>New Folder</span>
+				</button>
+			</div>
+		</header>
+		<div class="card-content">
+			<!-- Breadcrumb navigation -->
+			@FileBreadcrumb(instanceID, currentPath)
+			
+			<!-- File listing -->
+			<div class="file-list" id="file-list">
+				if len(entries) == 0 {
+					<div class="has-text-centered py-5">
+						<p class="has-text-grey">No files found</p>
+					</div>
+				} else {
+					<table class="table is-fullwidth is-hoverable">
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Type</th>
+								<th>Size</th>
+								<th>Modified</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, entry := range entries {
+								@FileListItem(instanceID, entry)
+							}
+						</tbody>
+					</table>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// FileBreadcrumb shows navigation breadcrumb
+templ FileBreadcrumb(instanceID string, currentPath string) {
+	<nav class="breadcrumb mb-4" aria-label="breadcrumbs">
+		<ul>
+			<li class={ templ.KV("is-active", currentPath == "/") }>
+				<a href="#" onclick={ templ.ComponentScript{Call: fmt.Sprintf("navigateToPath('%s', '/')", instanceID)} }>
+					<span class="icon is-small"><i class="fas fa-home"></i></span>
+					<span>Root</span>
+				</a>
+			</li>
+			if currentPath != "/" {
+				for i, part := range getBreadcrumbParts(currentPath) {
+					<li class={ templ.KV("is-active", isLastPart(currentPath, i)) }>
+						if isLastPart(currentPath, i) {
+							<a href="#">{ part }</a>
+						} else {
+							<a href="#" onclick={ templ.ComponentScript{Call: fmt.Sprintf("navigateToPath('%s', '%s')", instanceID, buildPathToIndex(currentPath, i))} }>
+								{ part }
+							</a>
+						}
+					</li>
+				}
+			}
+		</ul>
+	</nav>
+}
+
+// Helper functions for breadcrumb
+func getBreadcrumbParts(path string) []string {
+	if path == "/" || path == "" {
+		return []string{}
+	}
+	return strings.Split(strings.Trim(path, "/"), "/")
+}
+
+func isLastPart(fullPath string, index int) bool {
+	parts := getBreadcrumbParts(fullPath)
+	return index == len(parts)-1
+}
+
+func buildPathToIndex(fullPath string, index int) string {
+	parts := getBreadcrumbParts(fullPath)
+	accumulated := ""
+	for i := 0; i <= index && i < len(parts); i++ {
+		accumulated = accumulated + "/" + parts[i]
+	}
+	return accumulated
+}
+
+// FileListItem renders a single file/folder item
+templ FileListItem(instanceID string, entry *fileindex.DirectoryEntry) {
+	<tr class="file-item" data-path={ entry.Path }>
+		<td>
+			<span class="icon-text">
+				if entry.Type == "directory" {
+					<span class="icon has-text-info"><i class="fas fa-folder"></i></span>
+				} else {
+					<span class="icon has-text-grey-light">
+						<i class={ getFileIconClass(entry.Path) }></i>
+					</span>
+				}
+				if entry.Type == "directory" {
+					<a href="#" onclick={ templ.ComponentScript{Call: fmt.Sprintf("navigateToPath('%s', '%s')", instanceID, entry.Path)} }>
+						<span>{ entry.Name }</span>
+					</a>
+				} else {
+					<a href="#" onclick={ templ.ComponentScript{Call: fmt.Sprintf("openFile('%s', '%s')", instanceID, entry.Path)} }>
+						<span>{ entry.Name }</span>
+					</a>
+				}
+			</span>
+		</td>
+		<td>
+			if entry.Type == "directory" {
+				<span class="tag is-info is-light">Folder</span>
+			} else {
+				<span class="tag is-light">{ entry.MimeType }</span>
+			}
+		</td>
+		<td>
+			if entry.Type != "directory" {
+				{ formatFileSize(entry.Size) }
+			} else {
+				-
+			}
+		</td>
+		<td>
+			<span class="is-size-7 has-text-grey">
+				{ entry.UpdatedAt.Format("2006-01-02 15:04") }
+			</span>
+		</td>
+		<td>
+			<div class="buttons are-small">
+				if entry.Type != "directory" {
+					<button class="button is-small" onclick={ templ.ComponentScript{Call: fmt.Sprintf("openFile('%s', '%s')", instanceID, entry.Path)} } title="View">
+						<span class="icon"><i class="fas fa-eye"></i></span>
+					</button>
+					<button class="button is-small" onclick={ templ.ComponentScript{Call: fmt.Sprintf("editFile('%s', '%s')", instanceID, entry.Path)} } title="Edit">
+						<span class="icon"><i class="fas fa-edit"></i></span>
+					</button>
+				}
+				<button class="button is-small is-danger" onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteFileOrFolder('%s', '%s', '%s')", instanceID, entry.Path, entry.Type)} } title="Delete">
+					<span class="icon"><i class="fas fa-trash"></i></span>
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// getFileIconClass returns appropriate FontAwesome icon class for file type
+func getFileIconClass(filename string) string {
+	ext := filepath.Ext(filename)
+	switch ext {
+	case ".md", ".markdown":
+		return "fas fa-file-alt"
+	case ".go":
+		return "fab fa-golang"
+	case ".js":
+		return "fab fa-js"
+	case ".py":
+		return "fab fa-python"
+	case ".json":
+		return "fas fa-file-code"
+	case ".yaml", ".yml":
+		return "fas fa-file-code"
+	case ".txt":
+		return "fas fa-file-alt"
+	case ".pdf":
+		return "fas fa-file-pdf"
+	case ".zip", ".tar", ".gz":
+		return "fas fa-file-archive"
+	default:
+		return "fas fa-file"
+	}
+}
+
+// formatFileSize formats bytes to human-readable format
+func formatFileSize(bytes int) string {
+	const (
+		KB = 1024
+		MB = 1024 * KB
+		GB = 1024 * MB
+	)
+	
+	switch {
+	case bytes >= GB:
+		return fmt.Sprintf("%.2f GB", float64(bytes)/float64(GB))
+	case bytes >= MB:
+		return fmt.Sprintf("%.2f MB", float64(bytes)/float64(MB))
+	case bytes >= KB:
+		return fmt.Sprintf("%.2f KB", float64(bytes)/float64(KB))
+	default:
+		return fmt.Sprintf("%d B", bytes)
+	}
+}
+
+// FileEditorModal shows file content editor
+templ FileEditorModal(instanceID string, filePath string, content string) {
+	<div class="modal is-active" id="file-editor-modal">
+		<div class="modal-background" onclick="closeFileEditor()"></div>
+		<div class="modal-card" style="width: 80%; max-width: 1200px;">
+			<header class="modal-card-head">
+				<p class="modal-card-title">
+					<span class="icon"><i class="fas fa-edit"></i></span>
+					<span>{ filepath.Base(filePath) }</span>
+				</p>
+				<button class="delete" aria-label="close" onclick="closeFileEditor()"></button>
+			</header>
+			<section class="modal-card-body">
+				<div class="field">
+					<label class="label">File Path</label>
+					<p class="is-family-monospace is-size-7 has-text-grey">{ filePath }</p>
+				</div>
+				<div class="field">
+					<label class="label">Content</label>
+					<div class="control">
+						<textarea 
+							class="textarea is-family-monospace" 
+							id="file-content-editor" 
+							rows="20" 
+							style="font-size: 0.875rem;">{ content }</textarea>
+					</div>
+				</div>
+			</section>
+			<footer class="modal-card-foot">
+				<button class="button is-success" onclick={ templ.ComponentScript{Call: fmt.Sprintf("saveFile('%s', '%s')", instanceID, filePath)} }>
+					<span class="icon"><i class="fas fa-save"></i></span>
+					<span>Save Changes</span>
+				</button>
+				<button class="button" onclick="closeFileEditor()">Cancel</button>
+			</footer>
+		</div>
+	</div>
+}

@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aosanya/CodeValdCortex/internal/git/models"
 	driver "github.com/arangodb/go-driver"
@@ -151,8 +152,13 @@ func (r *repository) StoreRef(ctx context.Context, ref *models.GitRef) error {
 		return fmt.Errorf("failed to get collection: %w", err)
 	}
 
-	// Use ref name as key (e.g., "refs/heads/main")
-	ref.Key = ref.RepoID + "/" + ref.Type + "/" + ref.Target
+	// If Key is not already set, generate a safe one
+	if ref.Key == "" {
+		// Create safe key by replacing slashes and combining repo+name
+		safeName := strings.ReplaceAll(ref.Name, "/", "_")
+		safeRepoID := strings.ReplaceAll(ref.RepoID, "-", "_")
+		ref.Key = safeRepoID + "_" + safeName
+	}
 
 	_, err = collection.CreateDocument(ctx, ref)
 	if err != nil {
@@ -160,7 +166,8 @@ func (r *repository) StoreRef(ctx context.Context, ref *models.GitRef) error {
 	}
 
 	r.logger.WithFields(logrus.Fields{
-		"ref":     ref.Key,
+		"key":     ref.Key,
+		"name":    ref.Name,
 		"type":    ref.Type,
 		"target":  ref.Target,
 		"repo_id": ref.RepoID,
@@ -175,7 +182,7 @@ func (r *repository) GetRef(ctx context.Context, repoID, refName string) (*model
 	query := `
 		FOR ref IN @@collection
 			FILTER ref.repo_id == @repo_id
-			FILTER ref.key CONTAINS @ref_name
+			FILTER ref.name == @ref_name
 			LIMIT 1
 			RETURN ref
 	`

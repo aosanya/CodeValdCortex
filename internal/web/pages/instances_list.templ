@@ -273,6 +273,10 @@ templ instanceListItem(inst *models.AgencyInstance) {
 								<span class="icon"><i class="fas fa-eye"></i></span>
 								<span>View Dashboard</span>
 							</a>
+							<a class="dropdown-item" onclick={ templ.ComponentScript{Call: fmt.Sprintf("openExplorer('%s')", inst.InstanceID)} }>
+								<span class="icon"><i class="fas fa-folder-open"></i></span>
+								<span>Open Explorer</span>
+							</a>
 							if inst.State == models.InstanceStateRunning {
 								<a class="dropdown-item has-text-orange" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} }>
 									<span class="icon"><i class="fas fa-stop"></i></span>
@@ -371,6 +375,10 @@ templ instanceTableRow(inst *models.AgencyInstance) {
 						<a class="dropdown-item" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} }>
 							<span class="icon"><i class="fas fa-eye"></i></span>
 							<span>View Dashboard</span>
+						</a>
+						<a class="dropdown-item" onclick={ templ.ComponentScript{Call: fmt.Sprintf("openExplorer('%s')", inst.InstanceID)} }>
+							<span class="icon"><i class="fas fa-folder-open"></i></span>
+							<span>Open Explorer</span>
 						</a>
 						if inst.State == models.InstanceStateRunning {
 							<a class="dropdown-item has-text-orange" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} }>
