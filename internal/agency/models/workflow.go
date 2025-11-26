@@ -17,6 +17,7 @@ type Workflow struct {
 	AgencyID    string `json:"agency_id" binding:"required"`
 	Version     string `json:"version"`
 	Steps       Steps  `json:"steps"` // Simplified step-based model
+
 	// Status intentionally omitted: workflows currently do not have a runtime status.
 	// Future: add published/draft states when workflow publishing is implemented.
 	CreatedAt time.Time `json:"created_at"`

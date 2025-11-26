@@ -48,11 +48,6 @@ func (h *InstanceHandler) StartInstance(c *gin.Context) {
 		req.Metadata["created_by"] = "system"
 	}
 
-	// Default environment if not provided
-	if req.Environment == "" {
-		req.Environment = "development"
-	}
-
 	// Start the instance
 	instance, err := h.instanceService.StartInstance(c.Request.Context(), agencyID, tagName, &req)
 	if err != nil {
@@ -110,10 +105,10 @@ func (h *InstanceHandler) ListInstances(c *gin.Context) {
 	})
 }
 
-// GetInstance handles GET /api/v1/agencies/:id/instances/:instanceId
+// GetInstance handles GET /api/v1/agencies/:id/instances/:instance_id
 func (h *InstanceHandler) GetInstance(c *gin.Context) {
 	agencyID := c.Param("id")
-	instanceID := c.Param("instanceId")
+	instanceID := c.Param("instance_id")
 
 	instance, err := h.instanceService.GetInstance(c.Request.Context(), agencyID, instanceID)
 	if err != nil {
@@ -135,10 +130,10 @@ func (h *InstanceHandler) GetInstance(c *gin.Context) {
 	})
 }
 
-// StopInstance handles DELETE /api/v1/agencies/:id/instances/:instanceId
+// StopInstance handles DELETE /api/v1/agencies/:id/instances/:instance_id
 func (h *InstanceHandler) StopInstance(c *gin.Context) {
 	agencyID := c.Param("id")
-	instanceID := c.Param("instanceId")
+	instanceID := c.Param("instance_id")
 
 	err := h.instanceService.StopInstance(c.Request.Context(), agencyID, instanceID)
 	if err != nil {
@@ -165,10 +160,10 @@ func (h *InstanceHandler) StopInstance(c *gin.Context) {
 	})
 }
 
-// RestartInstance handles POST /api/v1/agencies/:id/instances/:instanceId/restart
+// RestartInstance handles POST /api/v1/agencies/:id/instances/:instance_id/restart
 func (h *InstanceHandler) RestartInstance(c *gin.Context) {
 	agencyID := c.Param("id")
-	instanceID := c.Param("instanceId")
+	instanceID := c.Param("instance_id")
 
 	instance, err := h.instanceService.RestartInstance(c.Request.Context(), agencyID, instanceID)
 	if err != nil {
@@ -196,10 +191,10 @@ func (h *InstanceHandler) RestartInstance(c *gin.Context) {
 	})
 }
 
-// GetInstanceHealth handles GET /api/v1/agencies/:id/instances/:instanceId/health
+// GetInstanceHealth handles GET /api/v1/agencies/:id/instances/:instance_id/health
 func (h *InstanceHandler) GetInstanceHealth(c *gin.Context) {
 	agencyID := c.Param("id")
-	instanceID := c.Param("instanceId")
+	instanceID := c.Param("instance_id")
 
 	health, err := h.instanceService.GetInstanceHealth(c.Request.Context(), agencyID, instanceID)
 	if err != nil {
@@ -221,10 +216,10 @@ func (h *InstanceHandler) GetInstanceHealth(c *gin.Context) {
 	})
 }
 
-// GetInstanceAgents handles GET /api/v1/agencies/:id/instances/:instanceId/agents
+// GetInstanceAgents handles GET /api/v1/agencies/:id/instances/:instance_id/agents
 func (h *InstanceHandler) GetInstanceAgents(c *gin.Context) {
 	agencyID := c.Param("id")
-	instanceID := c.Param("instanceId")
+	instanceID := c.Param("instance_id")
 
 	agents, err := h.instanceService.ListInstanceAgents(c.Request.Context(), agencyID, instanceID)
 	if err != nil {
@@ -281,5 +276,65 @@ func (h *InstanceHandler) ListInstancesByTag(c *gin.Context) {
 		"instances": instances,
 		"count":     len(instances),
 		"tag_name":  tagName,
+	})
+}
+
+// DeleteInstance handles DELETE /api/v1/agencies/:id/instances/:instance_id
+func (h *InstanceHandler) DeleteInstance(c *gin.Context) {
+	agencyID := c.Param("id")
+	instanceID := c.Param("instance_id")
+
+	err := h.instanceService.DeleteInstance(c.Request.Context(), agencyID, instanceID)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":   agencyID,
+			"instance_id": instanceID,
+			"error":       err.Error(),
+		}).Error("failed to delete instance")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to delete instance",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	h.logger.WithFields(logrus.Fields{
+		"agency_id":   agencyID,
+		"instance_id": instanceID,
+	}).Info("instance deleted")
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Instance deleted successfully",
+	})
+}
+
+// AcceptJob handles POST /api/v1/agencies/:id/instances/:instance_id/accept-job
+// Checks if instance is accepting new jobs
+func (h *InstanceHandler) AcceptJob(c *gin.Context) {
+	agencyID := c.Param("id")
+	instanceID := c.Param("instance_id")
+
+	instance, err := h.instanceService.GetInstance(c.Request.Context(), agencyID, instanceID)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":   agencyID,
+			"instance_id": instanceID,
+			"error":       err.Error(),
+		}).Error("failed to get instance for job acceptance check")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to check instance availability",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"instance_id":      instance.InstanceID,
+		"accepts_new_jobs": instance.AcceptsNewJobs,
+		"state":            instance.State,
+		"message": fmt.Sprintf("Instance is %s and accepts_new_jobs=%v",
+			instance.State, instance.AcceptsNewJobs),
 	})
 }

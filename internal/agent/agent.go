@@ -31,6 +31,10 @@ type Agent struct {
 	// ID is the unique identifier for the agent
 	ID string
 
+	// InstanceID links agent to a specific agency instance (MVP-PUB-007A)
+	// Used for filtering agents by instance when multiple instances run from same tag
+	InstanceID string
+
 	// Name is a human-readable name for the agent
 	Name string
 
@@ -123,6 +127,10 @@ type Resources struct {
 type Task struct {
 	// ID is the unique task identifier
 	ID string
+
+	// InstanceID links task to specific instance (optional - null for agency-wide tasks)
+	// Used for filtering tasks by instance when multiple instances run simultaneously
+	InstanceID string
 
 	// Type indicates the task type
 	Type string

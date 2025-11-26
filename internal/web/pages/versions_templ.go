@@ -60,7 +60,7 @@ func VersionsPage(agency *models.Agency) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</strong></p></div></div></div></div></div><!-- Info Box --> <div class=\"notification is-info is-light mb-5\"><p class=\"is-size-6\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <strong>Tags</strong> are immutable snapshots of your agency configuration.  Create multiple <strong>instances</strong> from any tag for testing, staging, or production.</p></div><!-- Tags List Card --> <div class=\"box\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</strong></p></div></div></div></div></div><!-- Info Box --> <div class=\"notification is-info mb-5\"><p class=\"is-size-6\"><span class=\"icon\"><i class=\"fas fa-info-circle\"></i></span> <strong>Tags</strong> are immutable snapshots of your agency configuration.  Create multiple <strong>instances</strong> from any tag for testing, staging, or production.</p></div><!-- Tags List Card --> <div class=\"box\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

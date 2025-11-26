@@ -62,135 +62,18 @@ templ StartInstanceDialog() {
 					</div>
 				</div>
 				
-				<!-- Resource Configuration -->
+				<!-- Tags (optional) -->
 				<div class="field">
-					<label class="label">Resource Configuration</label>
-					
-					<div class="field is-horizontal">
-						<div class="field-label is-small">
-							<label class="label">CPU Limit</label>
-						</div>
-						<div class="field-body">
-							<div class="field">
-								<div class="control has-icons-left">
-									<input 
-										class="input is-small" 
-										type="text" 
-										id="instance-cpu-limit"
-										placeholder="2000m"
-										value="2000m">
-									<span class="icon is-small is-left">
-										<i class="fas fa-microchip"></i>
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="field is-horizontal">
-						<div class="field-label is-small">
-							<label class="label">Memory Limit</label>
-						</div>
-						<div class="field-body">
-							<div class="field">
-								<div class="control has-icons-left">
-									<input 
-										class="input is-small" 
-										type="text" 
-										id="instance-memory-limit"
-										placeholder="1Gi"
-										value="1Gi">
-									<span class="icon is-small is-left">
-										<i class="fas fa-memory"></i>
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="field is-horizontal">
-						<div class="field-label is-small">
-							<label class="label">Max Agents</label>
-						</div>
-						<div class="field-body">
-							<div class="field">
-								<div class="control has-icons-left">
-									<input 
-										class="input is-small" 
-										type="number" 
-										id="instance-max-agents"
-										placeholder="10"
-										value="10"
-										min="1"
-										max="100">
-									<span class="icon is-small is-left">
-										<i class="fas fa-users"></i>
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				
-				<!-- Auto-Scaling -->
-				<div class="field">
-					<label class="checkbox">
-						<input type="checkbox" id="instance-autoscale" onchange="toggleAutoScaleSettings()">
-						Enable Auto-Scaling
-					</label>
-				</div>
-				
-				<div id="autoscale-settings" style="display: none;" class="box is-light">
-					<div class="field is-horizontal">
-						<div class="field-label is-small">
-							<label class="label">Min Agents</label>
-						</div>
-						<div class="field-body">
-							<div class="field">
-								<div class="control is-expanded">
-									<input 
-										class="input is-small" 
-										type="number" 
-										id="instance-min-agents"
-										placeholder="1"
-										value="1"
-										min="1">
-								</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="field is-horizontal">
-						<div class="field-label is-small">
-							<label class="label">Max Scale Agents</label>
-						</div>
-						<div class="field-body">
-							<div class="field">
-								<div class="control is-expanded">
-									<input 
-										class="input is-small" 
-										type="number" 
-										id="instance-max-scale-agents"
-										placeholder="20"
-										value="20"
-										min="1">
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				
-				<!-- Labels (optional) -->
-				<div class="field">
-					<label class="label">Labels (optional)</label>
+					<label class="label">Tags (optional)</label>
 					<div class="control">
-						<textarea 
-							class="textarea is-small" 
-							id="instance-labels"
-							placeholder='{"team": "backend", "version": "v1"}'
-							rows="2"></textarea>
+						<input 
+							class="input is-small" 
+							type="text"
+							id="instance-tags"
+							placeholder="production, critical, backend"
+							rows="2">
 					</div>
-					<p class="help">JSON object with key-value pairs</p>
+					<p class="help">Comma-separated list of tags</p>
 				</div>
 				
 				<!-- Validation Messages -->

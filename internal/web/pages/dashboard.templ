@@ -21,7 +21,7 @@ templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *mode
 		<div x-data="dashboard()" x-init="init()">
 		<!-- Current Agency Indicator -->
 		if currentAgency != nil {
-			<div class="notification is-info is-light mb-5">
+			<div class="notification is-info mb-5">
 				<div class="level is-mobile">
 					<div class="level-left">
 						<div class="level-item">
@@ -33,7 +33,7 @@ templ Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *mode
 						</div>
 						<div class="level-item">
 							<div>
-								<p class="is-size-7 has-text-weight-semibold has-text-grey-dark">Current Agency</p>
+								<p class="is-size-7 has-text-weight-semibold">Current Agency</p>
 								<p class="is-size-5 has-text-weight-bold">{ currentAgency.Name }</p>
 							</div>
 						</div>

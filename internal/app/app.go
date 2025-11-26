@@ -396,6 +396,14 @@ func (a *App) setupServer() error {
 	// Agency-specific dashboard (with middleware to inject agency context)
 	router.GET("/agencies/:id/dashboard", agencyMiddleware.InjectAgencyContext(), homepageHandler.ShowAgencyDashboard)
 
+	// Instance management web routes (if available)
+	if a.instanceService != nil && a.tagService != nil {
+		instanceWebHandler := webhandlers.NewInstanceWebHandler(a.instanceService, a.agencyService, *a.tagService, a.logger)
+		router.GET("/agencies/:id/instances", instanceWebHandler.ShowInstancesList)
+		router.GET("/agencies/:id/instances/:instance_id", instanceWebHandler.ShowInstanceDashboard)
+		a.logger.Info("Instance management web routes registered")
+	}
+
 	// AI Agency Designer web routes (if available)
 	if aiDesignerWebHandler != nil {
 		aiDesignerWebHandler.RegisterRoutes(router.Group(""))
@@ -495,11 +503,13 @@ func (a *App) setupServer() error {
 			instanceHandler := handlers.NewInstanceHandler(a.instanceService, a.logger)
 			v1.POST("/agencies/:id/tags/:name/instances", instanceHandler.StartInstance)
 			v1.GET("/agencies/:id/instances", instanceHandler.ListInstances)
-			v1.GET("/agencies/:id/instances/:instanceId", instanceHandler.GetInstance)
-			v1.DELETE("/agencies/:id/instances/:instanceId", instanceHandler.StopInstance)
-			v1.POST("/agencies/:id/instances/:instanceId/restart", instanceHandler.RestartInstance)
-			v1.GET("/agencies/:id/instances/:instanceId/health", instanceHandler.GetInstanceHealth)
-			v1.GET("/agencies/:id/instances/:instanceId/agents", instanceHandler.GetInstanceAgents)
+			v1.GET("/agencies/:id/instances/:instance_id", instanceHandler.GetInstance)
+			v1.DELETE("/agencies/:id/instances/:instance_id", instanceHandler.DeleteInstance)
+			v1.POST("/agencies/:id/instances/:instance_id/stop", instanceHandler.StopInstance)
+			v1.POST("/agencies/:id/instances/:instance_id/restart", instanceHandler.RestartInstance)
+			v1.GET("/agencies/:id/instances/:instance_id/health", instanceHandler.GetInstanceHealth)
+			v1.GET("/agencies/:id/instances/:instance_id/agents", instanceHandler.GetInstanceAgents)
+			v1.POST("/agencies/:id/instances/:instance_id/accept-job", instanceHandler.AcceptJob)
 			v1.GET("/agencies/:id/tags/:name/instances", instanceHandler.ListInstancesByTag)
 			a.logger.Info("Instance endpoints registered")
 		}

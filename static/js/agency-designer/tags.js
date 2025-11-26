@@ -370,7 +370,222 @@ async function performLifecycleAction(action, successMessage, force = false) {
             btn.classList.remove('is-loading');
         }
     }
-}/**
+}
+
+/**
+ * Load and display all tags for the current agency
+ */
+async function loadTags() {
+    const agencyID = getAgencyID();
+    if (!agencyID) {
+        return;
+    }
+
+    const tbody = document.getElementById('tags-table-body');
+    if (!tbody) {
+        return;
+    }
+
+    try {
+        const url = `/api/v1/agencies/${agencyID}/tags`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="has-text-danger has-text-centered py-5">
+                        <p><i class="fas fa-exclamation-triangle"></i> Failed to load tags</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!data.tags || data.tags.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="has-text-grey has-text-centered py-5">
+                        <p><i class="fas fa-info-circle"></i> No tags found. Create your first tag to get started.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Render tags
+        tbody.innerHTML = data.tags.map(tag => renderTagRow(tag)).join('');
+
+        // Load instance counts for each tag
+        for (const tag of data.tags) {
+            if (typeof loadInstancesForTag === 'function') {
+                await loadInstancesForTag(tag.name);
+            }
+        }
+
+    } catch (error) {
+        console.error('Error loading tags:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="has-text-danger has-text-centered py-5">
+                    <p><i class="fas fa-exclamation-triangle"></i> Error: ${error.message}</p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+/**
+ * Render a single tag row
+ */
+function renderTagRow(tag) {
+    const createdDate = new Date(tag.created_at).toLocaleDateString();
+    const typeColors = {
+        'release': 'is-success',
+        'snapshot': 'is-info',
+        'experimental': 'is-warning',
+        'checkpoint': 'is-primary'
+    };
+    const typeColor = typeColors[tag.type] || 'is-light';
+
+    return `
+        <tr data-tag-name="${tag.name}">
+            <td><i class="fas fa-tag has-text-${typeColor.replace('is-', '')}"></i></td>
+            <td><strong>${escapeHtml(tag.name)}</strong></td>
+            <td><span class="tag ${typeColor}">${escapeHtml(tag.type)}</span></td>
+            <td>${escapeHtml(tag.version || '-')}</td>
+            <td>${createdDate}</td>
+            <td>
+                <span class="tag instance-count-badge" data-tag-name="${tag.name}">0</span>
+            </td>
+            <td>
+                <div class="dropdown is-hoverable is-right">
+                    <div class="dropdown-trigger">
+                        <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu-${escapeHtml(tag.name)}">
+                            <span class="icon is-small">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="dropdown-menu" id="dropdown-menu-${escapeHtml(tag.name)}" role="menu">
+                        <div class="dropdown-content">
+                            <a class="dropdown-item" onclick="openStartInstanceDialog('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-play"></i></span>
+                                <span>Start Instance</span>
+                            </a>
+                            <a class="dropdown-item" onclick="viewTagInstances('${escapeHtml(tag._id)}')">
+                                <span class="icon"><i class="fas fa-server"></i></span>
+                                <span>View Instances</span>
+                            </a>
+                            <a class="dropdown-item" onclick="viewTagDetails('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-eye"></i></span>
+                                <span>View Details</span>
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item has-text-danger" onclick="deleteTag('${escapeHtml(tag.name)}')">
+                                <span class="icon"><i class="fas fa-trash"></i></span>
+                                <span>Delete Tag</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+/**
+ * Filter tags by search input
+ */
+function filterTags() {
+    const searchInput = document.getElementById('tags-search');
+    if (!searchInput) return;
+
+    const searchTerm = searchInput.value.toLowerCase();
+    const rows = document.querySelectorAll('#tags-table-body tr');
+
+    rows.forEach(row => {
+        const tagName = row.getAttribute('data-tag-name');
+        if (!tagName) return; // Skip empty state rows
+
+        const visible = tagName.toLowerCase().includes(searchTerm);
+        row.style.display = visible ? '' : 'none';
+    });
+}
+
+/**
+ * View tag details (placeholder)
+ */
+function viewTagDetails(tagName) {
+    alert(`View details for tag: ${tagName}\n\nThis feature will show full tag information and snapshot details.`);
+}
+
+/**
+ * View instances for a specific tag
+ */
+function viewTagInstances(tagName) {
+    const agencyID = getAgencyID();
+    if (!agencyID) {
+        return;
+    }
+
+    // Navigate to instances page with tag_key filter in URL
+    // Note: tagName is actually the tag ID from the renderTagRow function
+    window.location.href = `/agencies/${agencyID}/instances?tag_key=${encodeURIComponent(tagName)}`;
+}
+/**
+ * Delete a tag
+ */
+async function deleteTag(tagName) {
+    if (!confirm(`Are you sure you want to delete tag "${tagName}"?\n\nThis action cannot be undone.`)) {
+        return;
+    }
+
+    const agencyID = getAgencyID();
+    if (!agencyID) return;
+
+    try {
+        const response = await fetch(`/api/v1/agencies/${agencyID}/tags/${tagName}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showNotification('Success', `Tag "${tagName}" deleted successfully`, 'success');
+            loadTags(); // Reload tags list
+        } else {
+            const data = await response.json();
+            showNotification('Error', data.details || data.error || 'Failed to delete tag', 'danger');
+        }
+    } catch (error) {
+        console.error('Error deleting tag:', error);
+        showNotification('Error', 'Network error: ' + error.message, 'danger');
+    }
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Get agency ID from URL
+ */
+function getAgencyID() {
+    const pathParts = window.location.pathname.split('/');
+    const agencyIndex = pathParts.indexOf('agencies');
+    if (agencyIndex !== -1 && pathParts.length > agencyIndex + 1) {
+        return pathParts[agencyIndex + 1];
+    }
+    return null;
+}
+
+/**
  * Show notification
  */
 function showNotification(title, message, type = 'info') {

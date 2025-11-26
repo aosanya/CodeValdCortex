@@ -62,7 +62,7 @@ func Dashboard(agents []*agent.Agent, stats DashboardStats, currentAgency *model
 				return templ_7745c5c3_Err
 			}
 			if currentAgency != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"notification is-info is-light mb-5\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><span class=\"icon is-medium\"><svg style=\"width: 1.5rem; height: 1.5rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\"></path></svg></span></div><div class=\"level-item\"><div><p class=\"is-size-7 has-text-weight-semibold has-text-grey-dark\">Current Agency</p><p class=\"is-size-5 has-text-weight-bold\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"notification is-info mb-5\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><span class=\"icon is-medium\"><svg style=\"width: 1.5rem; height: 1.5rem;\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\"></path></svg></span></div><div class=\"level-item\"><div><p class=\"is-size-7 has-text-weight-semibold\">Current Agency</p><p class=\"is-size-5 has-text-weight-bold\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

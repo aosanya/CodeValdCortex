@@ -1,0 +1,287 @@
+package pages
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// Helper function to get CSS class for instance state
+func getStateBadgeClass(state models.InstanceState) string {
+	switch state {
+	case models.InstanceStateRunning:
+		return "is-success"
+	case models.InstanceStateStopping:
+		return "is-warning"
+	case models.InstanceStateStopped:
+		return "is-light"
+	case models.InstanceStateFailed:
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}
+
+// Helper function to get CSS class for health status
+func getHealthBadgeClass(health string) string {
+	switch health {
+	case "healthy":
+		return "is-success"
+	case "degraded":
+		return "is-warning"
+	case "unhealthy":
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}
+
+// Helper function to format uptime
+func formatUptimeDisplay(uptimeSeconds int64) string {
+	hours := uptimeSeconds / 3600
+	minutes := (uptimeSeconds % 3600) / 60
+	
+	if hours > 0 {
+		return fmt.Sprintf("%dh %dm", hours, minutes)
+	}
+	return fmt.Sprintf("%dm", minutes)
+}
+
+// InstanceDashboard displays comprehensive monitoring view for a single instance
+templ InstanceDashboard(agency *models.Agency, instance *models.AgencyInstance, agents []*models.InstanceAgent) {
+	@components.LayoutWithAgency("Instance Dashboard", agency) {
+		<!-- Agency ID meta tag for JavaScript -->
+		<meta name="agency-id" content={ agency.ID }/>
+		<meta name="instance-id" content={ instance.InstanceID }/>
+		
+		<!-- Instance Dashboard JavaScript -->
+		<script src="/static/js/instances.js"></script>
+		
+		<section class="section">
+			<!-- Header with Controls -->
+			<div class="level">
+				<div class="level-left">
+					<div>
+						<h1 class="title">{ instance.InstanceName }</h1>
+						<p class="subtitle">
+							Instance Dashboard
+							<span class={ fmt.Sprintf("tag %s ml-2", getStateBadgeClass(instance.State)) }>
+								{ string(instance.State) }
+							</span>
+							<span class={ fmt.Sprintf("tag %s ml-2", getHealthBadgeClass(instance.HealthStatus)) }>
+								{ instance.HealthStatus }
+							</span>
+						</p>
+					</div>
+				</div>
+				<div class="level-right">
+					<div class="buttons">
+						<!-- Instance controls -->
+						if instance.State == models.InstanceStateRunning {
+							<button class="button is-warning" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", instance.InstanceID)} }>
+								<span class="icon"><i class="fas fa-stop"></i></span>
+								<span>Stop</span>
+							</button>
+						}
+						if instance.State == models.InstanceStateStopped {
+							<button class="button is-success" onclick={ templ.ComponentScript{Call: fmt.Sprintf("restartInstance('%s')", instance.InstanceID)} }>
+								<span class="icon"><i class="fas fa-redo"></i></span>
+								<span>Restart</span>
+							</button>
+							<button class="button is-danger" onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteInstance('%s')", instance.InstanceID)} }>
+								<span class="icon"><i class="fas fa-trash"></i></span>
+								<span>Delete</span>
+							</button>
+						}
+						<a href={ templ.URL(fmt.Sprintf("/agencies/%s/instances", agency.ID)) } class="button is-light">
+							<span class="icon"><i class="fas fa-arrow-left"></i></span>
+							<span>Back to List</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Dashboard Panels -->
+			<div class="columns is-multiline">
+				<!-- Panel 1: Overview -->
+				<div class="column is-12">
+					@instanceOverviewPanel(instance)
+				</div>
+				
+				<!-- Panel 2: Agent References -->
+				<div class="column is-6">
+					@instanceAgentsPanel(instance, agents)
+				</div>
+				
+				<!-- Panel 3: Health & Metrics -->
+				<div class="column is-6">
+					@instanceHealthPanel(instance)
+				</div>
+			</div>
+		</section>
+	}
+}
+
+// instanceOverviewPanel shows instance details
+templ instanceOverviewPanel(instance *models.AgencyInstance) {
+	<div class="card" id="overview-panel">
+		<header class="card-header">
+			<p class="card-header-title">
+				<span class="icon"><i class="fas fa-info-circle"></i></span>
+				<span>Overview</span>
+			</p>
+		</header>
+		<div class="card-content">
+			<div class="columns">
+				<div class="column">
+					<div class="field">
+						<label class="label">State</label>
+						<span class={ fmt.Sprintf("tag is-medium %s", getStateBadgeClass(instance.State)) }>
+							{ string(instance.State) }
+						</span>
+					</div>
+					<div class="field">
+						<label class="label">Health</label>
+						<span class={ fmt.Sprintf("tag is-medium %s", getHealthBadgeClass(instance.HealthStatus)) }>
+							{ instance.HealthStatus }
+						</span>
+					</div>
+					<div class="field">
+						<label class="label">Tag Reference</label>
+						<span class="tag is-info is-medium">{ instance.TagName }</span>
+					</div>
+				</div>
+				<div class="column">
+					<div class="field">
+						<label class="label">Uptime</label>
+						<p id="uptime-display">{ formatUptimeDisplay(instance.UptimeSeconds) }</p>
+					</div>
+					<div class="field">
+						<label class="label">Deployed At</label>
+						<p>{ instance.DeployedAt.Format("2006-01-02 15:04:05") }</p>
+					</div>
+					<div class="field">
+						<label class="label">Deployed By</label>
+						<p>{ instance.DeployedBy }</p>
+					</div>
+				</div>
+				<div class="column">
+					<div class="field">
+						<label class="label">Job Acceptance</label>
+						<p>
+							if instance.AcceptsNewJobs {
+								<span class="tag is-success">Accepting New Jobs</span>
+							} else {
+								<span class="tag is-warning">Rejecting New Jobs</span>
+							}
+						</p>
+					</div>
+					if instance.Description != "" {
+						<div class="field">
+							<label class="label">Description</label>
+							<p>{ instance.Description }</p>
+						</div>
+					}
+					if len(instance.Tags) > 0 {
+						<div class="field">
+							<label class="label">Tags</label>
+							<div class="tags">
+								for _, tag := range instance.Tags {
+									<span class="tag">{ tag }</span>
+								}
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+// instanceAgentsPanel shows agent references
+templ instanceAgentsPanel(instance *models.AgencyInstance, agents []*models.InstanceAgent) {
+	<div class="card" id="agents-panel">
+		<header class="card-header">
+			<p class="card-header-title">
+				<span class="icon"><i class="fas fa-robot"></i></span>
+				<span>Agent References ({ strconv.Itoa(len(agents)) })</span>
+			</p>
+		</header>
+		<div class="card-content">
+			if len(agents) > 0 {
+				<div class="table-container">
+					<table class="table is-fullwidth is-striped">
+						<thead>
+							<tr>
+								<th>Role Code</th>
+								<th>State</th>
+								<th>Spawned</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, agent := range agents {
+								<tr>
+									<td><code>{ agent.RoleCode }</code></td>
+									<td>
+										<span class="tag is-light">{ agent.State }</span>
+									</td>
+									<td>{ agent.SpawnedAt.Format("2006-01-02 15:04") }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			} else {
+				<div class="content has-text-centered has-text-grey-light">
+					<p class="icon is-large">
+						<i class="fas fa-3x fa-robot"></i>
+					</p>
+					<p>No agents loaded yet</p>
+					<p class="is-size-7">Agents will spawn on-demand when jobs arrive</p>
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// instanceHealthPanel shows health metrics and status
+templ instanceHealthPanel(instance *models.AgencyInstance) {
+	<div class="card" id="health-panel">
+		<header class="card-header">
+			<p class="card-header-title">
+				<span class="icon"><i class="fas fa-heartbeat"></i></span>
+				<span>Health & Metrics</span>
+			</p>
+		</header>
+		<div class="card-content">
+			<div class="field">
+				<label class="label">Instance ID</label>
+				<p class="is-family-monospace is-size-7">{ instance.InstanceID }</p>
+			</div>
+			<div class="field">
+				<label class="label">Agent Count</label>
+				<p>{ strconv.Itoa(instance.AgentCount) } agents referenced</p>
+			</div>
+			<div class="field">
+				<label class="label">Workflow Count</label>
+				<p>{ strconv.Itoa(instance.WorkflowCount) } active workflows</p>
+			</div>
+			<div class="field">
+				<label class="label">Last Heartbeat</label>
+				<p>{ instance.LastHeartbeat.Format("2006-01-02 15:04:05") }</p>
+			</div>
+			if len(instance.Tags) > 0 {
+				<div class="field">
+					<label class="label">Instance Tags</label>
+					<div class="tags">
+						for _, tag := range instance.Tags {
+							<span class="tag is-info">{ tag }</span>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	</div>
+}

@@ -6,11 +6,12 @@ import "time"
 type InstanceState string
 
 const (
-	InstanceStateStarting InstanceState = "starting" // Instance is being initialized
-	InstanceStateRunning  InstanceState = "running"  // Instance is active and operational
-	InstanceStateStopping InstanceState = "stopping" // Instance is shutting down
-	InstanceStateStopped  InstanceState = "stopped"  // Instance is stopped
-	InstanceStateFailed   InstanceState = "failed"   // Instance encountered an error
+	// Optimistic start: instances immediately enter "running" state (no "starting" state)
+	// See: instance-research-session.md Q1-Q2 for architecture rationale
+	InstanceStateRunning  InstanceState = "running"  // Instance active (accepts jobs, agents spawn on-demand)
+	InstanceStateStopping InstanceState = "stopping" // Graceful shutdown (rejects new jobs, 30s timeout)
+	InstanceStateStopped  InstanceState = "stopped"  // All agents stopped
+	InstanceStateFailed   InstanceState = "failed"   // Failed to start/crashed
 )
 
 // AgencyInstance represents a running instance of an agency from a tag
@@ -20,69 +21,59 @@ type AgencyInstance struct {
 	ID  string `json:"_id,omitempty"`
 	Rev string `json:"_rev,omitempty"`
 
-	// Instance identification
-	InstanceID   string `json:"instance_id"`   // Unique instance identifier
-	AgencyID     string `json:"agency_id"`     // Source agency
-	TagName      string `json:"tag_name"`      // Source tag name
-	InstanceName string `json:"instance_name"` // User-friendly instance name
+	// Instance metadata
+	AgencyID     string `json:"agency_id"`
+	TagID        string `json:"tag_id"`        // Immutable reference to source tag
+	TagName      string `json:"tag_name"`      // Cached for display
+	InstanceID   string `json:"instance_id"`   // Unique identifier (UUID)
+	InstanceName string `json:"instance_name"` // User-friendly name (MUST be unique per agency)
+	Description  string `json:"description"`
 
-	// State management
-	State        InstanceState `json:"state"`
-	StateMessage string        `json:"state_message,omitempty"` // Human-readable state info
+	// Runtime state
+	State        InstanceState `json:"state"`         // running, stopping, stopped, failed
+	HealthStatus string        `json:"health_status"` // healthy, degraded, unhealthy (calculated on-demand)
 
-	// Runtime configuration
-	Snapshot AgencySnapshot         `json:"snapshot"`          // Config snapshot from tag
-	Config   InstanceConfiguration  `json:"config"`            // Runtime-specific config
-	Resources InstanceResourceStatus `json:"resources"`         // Resource allocation and usage
-
-	// Lifecycle tracking
-	StartedAt  time.Time  `json:"started_at"`
+	// Deployment info
+	DeployedAt time.Time  `json:"deployed_at"`
+	DeployedBy string     `json:"deployed_by"`
+	StartedAt  *time.Time `json:"started_at,omitempty"`
 	StoppedAt  *time.Time `json:"stopped_at,omitempty"`
-	LastSeenAt time.Time  `json:"last_seen_at"` // Last health check
 
-	// Metadata
-	CreatedBy   string                 `json:"created_by"`
-	Environment string                 `json:"environment"` // e.g., "production", "staging", "test"
-	Labels      map[string]string      `json:"labels,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	// Runtime tracking
+	AgentCount     int       `json:"agent_count"`    // Active agent references
+	WorkflowCount  int       `json:"workflow_count"` // Active workflows
+	LastHeartbeat  time.Time `json:"last_heartbeat"`
+	UptimeSeconds  int64     `json:"uptime_seconds"`   // Computed: current_time - started_at
+	AcceptsNewJobs bool      `json:"accepts_new_jobs"` // False when stopping
+
+	// Resource allocation (from tag snapshot)
+	ResourceLimits ResourceAllocation `json:"resource_limits"`
+
+	// Metadata and tagging
+	Tags     []string               `json:"tags,omitempty"`     // Uses existing tag system
+	Metadata map[string]interface{} `json:"metadata,omitempty"` // Additional tracking data
+
+	// Soft delete
+	IsDeleted bool       `json:"is_deleted"`
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	DeletedBy string     `json:"deleted_by,omitempty"`
 }
 
-// InstanceConfiguration holds runtime-specific settings
-type InstanceConfiguration struct {
-	// Resource allocation
-	CPULimit    string `json:"cpu_limit"`    // e.g., "2000m"
-	MemoryLimit string `json:"memory_limit"` // e.g., "1Gi"
-	MaxAgents   int    `json:"max_agents"`   // Maximum concurrent agents
-
-	// Auto-scaling settings
-	AutoScaleEnabled bool `json:"auto_scale_enabled"`
-	MinAgents        int  `json:"min_agents"`
-	MaxScaleAgents   int  `json:"max_scale_agents"`
-
-	// Networking
-	ExposedPorts []int  `json:"exposed_ports,omitempty"`
-	HostBinding  string `json:"host_binding,omitempty"`
-
-	// Monitoring
-	MetricsEnabled bool   `json:"metrics_enabled"`
-	LogLevel       string `json:"log_level"` // debug, info, warn, error
-}
-
-// InstanceResourceStatus tracks current resource usage
+// InstanceResourceStatus tracks current resource usage (kept for backward compatibility)
 type InstanceResourceStatus struct {
 	// Current usage
 	CPUUsage    string `json:"cpu_usage"`    // e.g., "850m"
 	MemoryUsage string `json:"memory_usage"` // e.g., "512Mi"
 
 	// Agent counts
-	ActiveAgents   int `json:"active_agents"`
-	SpawnedAgents  int `json:"spawned_agents"`
+	ActiveAgents     int `json:"active_agents"`
+	SpawnedAgents    int `json:"spawned_agents"`
 	TerminatedAgents int `json:"terminated_agents"`
 
 	// Health indicators
-	HealthScore      float64 `json:"health_score"` // 0.0 to 1.0
-	LastHealthCheck  time.Time `json:"last_health_check"`
-	ConsecutiveFailures int    `json:"consecutive_failures"`
+	HealthScore         float64   `json:"health_score"` // 0.0 to 1.0
+	LastHealthCheck     time.Time `json:"last_health_check"`
+	ConsecutiveFailures int       `json:"consecutive_failures"`
 }
 
 // InstanceHealth represents the health status of an instance
@@ -122,11 +113,11 @@ type InstanceListItem struct {
 
 // StartInstanceRequest represents the request to start a new instance
 type StartInstanceRequest struct {
-	InstanceName string                 `json:"instance_name"` // User-friendly name
-	Environment  string                 `json:"environment"`   // e.g., "production", "staging"
-	Config       InstanceConfiguration  `json:"config"`        // Runtime configuration
-	Labels       map[string]string      `json:"labels,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	TagName     string                 `json:"tag_name"`       // Source tag to instantiate
+	Name        string                 `json:"name"`           // User-friendly name (must be unique per agency)
+	Description string                 `json:"description"`    // Optional purpose/notes
+	Tags        []string               `json:"tags,omitempty"` // Uses existing tag system
+	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // InstanceAgent represents an agent belonging to an instance
@@ -148,8 +139,8 @@ type InstanceAgent struct {
 	AutonomyLevel string `json:"autonomy_level"`
 
 	// State
-	State     string    `json:"state"`
-	SpawnedAt time.Time `json:"spawned_at"`
+	State     string     `json:"state"`
+	SpawnedAt time.Time  `json:"spawned_at"`
 	StoppedAt *time.Time `json:"stopped_at,omitempty"`
 
 	// Resource tracking

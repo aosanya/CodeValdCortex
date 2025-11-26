@@ -110,12 +110,21 @@ func (r *InstanceRepository) createInstanceIndexes(ctx context.Context, collecti
 		return fmt.Errorf("failed to create agency_id index: %w", err)
 	}
 
-	// Index on tag_name for finding instances by tag
-	_, _, err = collection.EnsurePersistentIndex(ctx, []string{"tag_name"}, &driver.EnsurePersistentIndexOptions{
-		Name: "idx_tag_name",
+	// Unique index on agency_id + name (enforce unique names per agency)
+	_, _, err = collection.EnsurePersistentIndex(ctx, []string{"agency_id", "name"}, &driver.EnsurePersistentIndexOptions{
+		Unique: true,
+		Name:   "idx_agency_name_unique",
 	})
 	if err != nil {
-		return fmt.Errorf("failed to create tag_name index: %w", err)
+		return fmt.Errorf("failed to create agency_id+name unique index: %w", err)
+	}
+
+	// Index on tag_id for finding instances by tag
+	_, _, err = collection.EnsurePersistentIndex(ctx, []string{"tag_id"}, &driver.EnsurePersistentIndexOptions{
+		Name: "idx_tag_id",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create tag_id index: %w", err)
 	}
 
 	// Index on state for filtering by state
@@ -124,6 +133,14 @@ func (r *InstanceRepository) createInstanceIndexes(ctx context.Context, collecti
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create state index: %w", err)
+	}
+
+	// Index on deployed_at for chronological sorting
+	_, _, err = collection.EnsurePersistentIndex(ctx, []string{"deployed_at"}, &driver.EnsurePersistentIndexOptions{
+		Name: "idx_deployed_at",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create deployed_at index: %w", err)
 	}
 
 	return nil
@@ -145,10 +162,16 @@ func (r *InstanceRepository) Create(ctx context.Context, instance *models.Agency
 	instance.Key = instance.InstanceID
 
 	// Set timestamps
-	if instance.StartedAt.IsZero() {
-		instance.StartedAt = time.Now()
+	if instance.StartedAt == nil {
+		now := time.Now()
+		instance.StartedAt = &now
 	}
-	instance.LastSeenAt = time.Now()
+	if instance.DeployedAt.IsZero() {
+		instance.DeployedAt = time.Now()
+	}
+	if instance.LastHeartbeat.IsZero() {
+		instance.LastHeartbeat = time.Now()
+	}
 
 	meta, err := collection.CreateDocument(ctx, instance)
 	if err != nil {
@@ -209,12 +232,19 @@ func (r *InstanceRepository) Delete(ctx context.Context, instanceID string, agen
 		return err
 	}
 
-	_, err = collection.RemoveDocument(ctx, instanceID)
+	// Soft delete: mark as deleted, don't remove from database
+	now := time.Now()
+	updateDoc := map[string]interface{}{
+		"is_deleted": true,
+		"deleted_at": now,
+	}
+
+	_, err = collection.UpdateDocument(ctx, instanceID, updateDoc)
 	if err != nil {
 		if driver.IsNotFound(err) {
 			return fmt.Errorf("instance not found: %s", instanceID)
 		}
-		return fmt.Errorf("failed to delete instance: %w", err)
+		return fmt.Errorf("failed to soft delete instance: %w", err)
 	}
 
 	return nil
@@ -230,6 +260,7 @@ func (r *InstanceRepository) ListByAgency(ctx context.Context, agencyID string, 
 	query := `
 		FOR instance IN @@collection
 			FILTER instance.agency_id == @agencyID
+			FILTER instance.is_deleted != true
 			SORT instance.started_at DESC
 			RETURN instance
 	`
@@ -269,6 +300,7 @@ func (r *InstanceRepository) ListByTag(ctx context.Context, agencyID string, tag
 		FOR instance IN @@collection
 			FILTER instance.agency_id == @agencyID
 			FILTER instance.tag_name == @tagName
+			FILTER instance.is_deleted != true
 			SORT instance.started_at DESC
 			RETURN instance
 	`
@@ -309,6 +341,7 @@ func (r *InstanceRepository) ListByState(ctx context.Context, agencyID string, s
 		FOR instance IN @@collection
 			FILTER instance.agency_id == @agencyID
 			FILTER instance.state == @state
+			FILTER instance.is_deleted != true
 			SORT instance.started_at DESC
 			RETURN instance
 	`
@@ -429,6 +462,37 @@ func (r *InstanceRepository) DeleteAgentsByInstance(ctx context.Context, instanc
 	defer cursor.Close()
 
 	return nil
+}
+
+// ExistsByName checks if an instance with the given name exists for an agency
+func (r *InstanceRepository) ExistsByName(ctx context.Context, agencyID string, name string, agencyDB string) (bool, error) {
+	_, err := r.getInstanceCollection(ctx, agencyDB)
+	if err != nil {
+		return false, err
+	}
+
+	query := `
+		FOR instance IN @@collection
+			FILTER instance.agency_id == @agencyID
+			FILTER instance.name == @name
+			FILTER instance.is_deleted == false
+			LIMIT 1
+			RETURN true
+	`
+
+	bindVars := map[string]interface{}{
+		"@collection": instanceCollectionName,
+		"agencyID":    agencyID,
+		"name":        name,
+	}
+
+	cursor, err := r.executeQuery(ctx, agencyDB, query, bindVars)
+	if err != nil {
+		return false, err
+	}
+	defer cursor.Close()
+
+	return cursor.HasMore(), nil
 }
 
 // executeQuery executes an AQL query

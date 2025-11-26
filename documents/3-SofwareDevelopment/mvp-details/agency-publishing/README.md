@@ -14,6 +14,15 @@ The Agency Publishing & Tagging system transforms agencies from design artifacts
 4. **Activation**: Orchestrated agent spawning and workflow initialization
 5. **Instance Management**: Multi-instance deployment from tags with isolated runtime state
 
+**Research Status**: Complete research session conducted with 11 architectural questions answered. See [instance-research-session.md](instance-research-session.md) for full Q&A documentation.
+
+**Documentation Status**:
+- ✅ All specification files updated with research insights
+- ✅ Complete UI component templates designed (hybrid views, 5-panel dashboard)
+- ✅ Data models enhanced with instance isolation patterns
+- ✅ Service layer patterns established
+- 🔄 Implementation pending (Go handlers, Templ files, JavaScript)
+
 ## Conceptual Model
 
 ### Publishing vs. Tagging vs. Instances
@@ -150,13 +159,13 @@ type AgencyTag struct {
 
 | Task | Title | Status | Effort | Description |
 |------|-------|--------|--------|-------------|
-| [MVP-PUB-001](state-machine.md) | State Machine & Data Models | ✅ Complete | Medium | Update AgencyState enum, create Publication/Tag models, ArangoDB collections, migrations |
+| [MVP-PUB-001](#mvp-pub-001-state-machine--data-models) | State Machine & Data Models | ✅ Complete | Medium | Update AgencyState enum, create Publication/Tag models, ArangoDB collections, migrations ([models](./state-models.md), [transitions](./state-transitions.md), [database](./state-database.md)) |
 | [MVP-PUB-002](tag-service.md) | Tag Service Implementation | ✅ Complete | Medium | Tag CRUD, snapshot generation, SHA hashing, diff logic |
 | [MVP-PUB-003](publication-service.md) | Publication Service | ✅ Complete | High | Validation, publication workflow, manifest generation |
 | [MVP-PUB-004](activation-service.md) | Activation Service | ✅ Complete | High | Agent spawning, workflow init, pause/resume/drain |
 | [MVP-PUB-005](ui-implementation.md) | Publishing UI | ✅ Complete | Medium | Publish/tag dialogs, tag management page, state badges |
 | [MVP-PUB-006](integration-testing.md) | Integration & Testing | ✅ Complete | Medium | E2E testing, load testing, documentation |
-| [MVP-PUB-007](instance-management.md) | Instance Management | 📋 Not Started | High | Multi-instance deployment from tags with isolated runtime state |
+| [MVP-PUB-007](instance-management.md) | Instance Management | ✅ Complete | High | Multi-instance deployment from tags with isolated runtime state |
 
 ## Dependencies
 

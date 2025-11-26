@@ -287,20 +287,34 @@ body {
     color: var(--theme-text) !important;
 }
 
+/* Override text color for colored notifications to ensure legibility */
+.notification.is-info,
+.notification.is-success,
+.notification.is-warning,
+.notification.is-danger,
+.notification.is-primary {
+    color: white !important;
+}
+
 .notification.is-success {
-    background-color: var(--theme-success) !important;
+    background-color: #2d8659 !important;
+    /* Darker green */
 }
 
 .notification.is-warning {
-    background-color: var(--theme-warning) !important;
+    background-color: #d68b0d !important;
+    /* Darker orange */
+    color: #ffffff !important;
 }
 
 .notification.is-danger {
-    background-color: var(--theme-danger) !important;
+    background-color: #c53030 !important;
+    /* Darker red */
 }
 
 .notification.is-info {
-    background-color: var(--theme-info) !important;
+    background-color: #2563a8 !important;
+    /* Darker blue - easier on eyes */
 }
 
 /* Dropdown theming */
