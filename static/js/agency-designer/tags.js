@@ -378,24 +378,20 @@ async function performLifecycleAction(action, successMessage, force = false) {
 async function loadTags() {
     const agencyID = getAgencyID();
     if (!agencyID) {
-        console.warn('No agency ID found, cannot load tags');
         return;
     }
 
     const tbody = document.getElementById('tags-table-body');
     if (!tbody) {
-        console.warn('Tags table body not found');
         return;
     }
 
     try {
         const url = `/api/v1/agencies/${agencyID}/tags`;
-        console.log('Loading tags from:', url);
 
         const response = await fetch(url);
 
         if (!response.ok) {
-            console.error(`Failed to load tags: ${response.status} ${response.statusText}`);
             tbody.innerHTML = `
                 <tr>
                     <td colspan="7" class="has-text-danger has-text-centered py-5">
@@ -407,7 +403,6 @@ async function loadTags() {
         }
 
         const data = await response.json();
-        console.log('Tags loaded:', data);
 
         if (!data.tags || data.tags.length === 0) {
             tbody.innerHTML = `
@@ -422,6 +417,13 @@ async function loadTags() {
 
         // Render tags
         tbody.innerHTML = data.tags.map(tag => renderTagRow(tag)).join('');
+
+        // Load instance counts for each tag
+        for (const tag of data.tags) {
+            if (typeof loadInstancesForTag === 'function') {
+                await loadInstancesForTag(tag.name);
+            }
+        }
 
     } catch (error) {
         console.error('Error loading tags:', error);
@@ -473,7 +475,7 @@ function renderTagRow(tag) {
                                 <span class="icon"><i class="fas fa-play"></i></span>
                                 <span>Start Instance</span>
                             </a>
-                            <a class="dropdown-item" onclick="viewTagInstances('${escapeHtml(tag.name)}')">
+                            <a class="dropdown-item" onclick="viewTagInstances('${escapeHtml(tag._id)}')">
                                 <span class="icon"><i class="fas fa-server"></i></span>
                                 <span>View Instances</span>
                             </a>
@@ -525,10 +527,13 @@ function viewTagDetails(tagName) {
  */
 function viewTagInstances(tagName) {
     const agencyID = getAgencyID();
-    if (!agencyID) return;
+    if (!agencyID) {
+        return;
+    }
 
-    // Navigate to instances page with tag filter in URL
-    window.location.href = `/agencies/${agencyID}/instances?tag=${encodeURIComponent(tagName)}`;
+    // Navigate to instances page with tag_key filter in URL
+    // Note: tagName is actually the tag ID from the renderTagRow function
+    window.location.href = `/agencies/${agencyID}/instances?tag_key=${encodeURIComponent(tagName)}`;
 }
 /**
  * Delete a tag

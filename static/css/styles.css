@@ -1,5 +1,11 @@
 /* Custom styles for CodeValdCortex Dashboard */
 
+/* Darker orange color for stop actions */
+.has-text-orange {
+    color: #d97706 !important;
+    /* Darker amber/orange */
+}
+
 /* HTMX Loading Indicator */
 .htmx-indicator {
     display: none;

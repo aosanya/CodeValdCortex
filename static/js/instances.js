@@ -52,9 +52,13 @@ function applyFilters() {
     const sortOrder = document.getElementById('filter-sort').value;
 
     const table = document.getElementById('instances-table');
-    if (!table) return;
+    if (!table) {
+        return;
+    }
 
     const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+    let visibleCount = 0;
 
     // Filter rows
     rows.forEach(row => {
@@ -81,11 +85,29 @@ function applyFilters() {
         }
 
         row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
     });
+
+    // Update subtitle to show filtered count
+    updateInstanceCountSubtitle(visibleCount, rows.length);
 
     // Sort visible rows
     const visibleRows = rows.filter(r => r.style.display !== 'none');
     sortRows(visibleRows, sortOrder);
+}
+
+/**
+ * Update the instance count subtitle
+ */
+function updateInstanceCountSubtitle(visibleCount, totalCount) {
+    const subtitle = document.querySelector('.subtitle');
+    if (subtitle) {
+        if (visibleCount < totalCount) {
+            subtitle.textContent = `${visibleCount} of ${totalCount} instances`;
+        } else {
+            subtitle.textContent = `${totalCount} instances`;
+        }
+    }
 }
 
 /**
@@ -208,8 +230,18 @@ async function submitStartInstance() {
 
         if (response.ok) {
             closeStartInstanceDialog();
+
+            // Update instance count in subtitle immediately
+            const subtitle = document.querySelector('.subtitle');
+            if (subtitle) {
+                const currentCount = parseInt(subtitle.textContent.match(/\d+/)?.[0] || '0');
+                subtitle.textContent = `${currentCount + 1} instances`;
+            }
+
             showNotification('Success', `Instance "${instanceName}" created and running`, 'success');
-            setTimeout(() => window.location.reload(), 1500);
+
+            // Reload page immediately to show new instance in lists
+            setTimeout(() => window.location.reload(true), 500);
         } else {
             throw new Error(result.error || 'Failed to start instance');
         }
@@ -241,7 +273,13 @@ async function stopInstance(instanceID) {
     try {
         const agencyId = window.currentAgencyId || document.body.dataset.agencyId;
 
-        const response = await fetch(`/api/v1/agencies/${agencyId}/instances/${instanceID}/stop`, {
+        if (!agencyId) {
+            throw new Error('Agency ID not found');
+        }
+
+        const url = `/api/v1/agencies/${agencyId}/instances/${instanceID}/stop`;
+
+        const response = await fetch(url, {
             method: 'POST'
         });
 
@@ -347,16 +385,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Check for tag filter in URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const tagFilter = urlParams.get('tag');
-    if (tagFilter) {
-        // Switch to table view (better for filtered results)
-        switchTab('table');
+    const tagKey = urlParams.get('tag_key');
+
+    if (tagKey) {
+        // Switch to all-instances tab (better for filtered results)
+        switchTab('all-instances');
 
         // Apply the tag filter after a short delay to ensure DOM is ready
         setTimeout(() => {
             const tagFilterSelect = document.getElementById('filter-tag');
+
             if (tagFilterSelect) {
-                tagFilterSelect.value = tagFilter;
+                tagFilterSelect.value = tagKey;
 
                 // Trigger filter
                 applyFilters();

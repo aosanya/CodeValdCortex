@@ -62,32 +62,6 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P0: Agency Instance Management (CRITICAL)
-
-*Multi-instance deployment and lifecycle management from tags*
-
-**Architecture Concept**: Enable running multiple independent instances of an agency from any tag snapshot. Each instance operates with isolated runtime state while sharing the immutable tag configuration. Instances use lazy agent initialization (agents spawn on-demand when jobs arrive) and optimistic start (immediate "running" state). Agent isolation via `instance_id` field filtering in flat agents collection.
-
-**Key Features**:
-- **Optimistic Start**: Instances immediately enter "running" state (no startup delay)
-- **Lazy Agents**: Agents spawn on-demand when jobs arrive (lightweight instance creation)
-- **Instance Isolation**: Separate agent pools per instance via `instance_id` field filtering
-- **Dashboard**: Centralized monitoring at `/instances` with 5-panel instance view
-- **Graceful Shutdown**: 30s timeout for completing in-flight work before stop
-
-**Research Status**: ✅ Complete - 11 architectural questions answered. See [instance-research-session.md](mvp-details/agency-publishing/instance-research-session.md)
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-PUB-007A | Instance Data Layer & Schema | Create AgencyInstance model in internal/agency/models/instance.go, add agency_instances collection to ArangoDB schema, create indexes (instance_id, agency_id+name, tag_id, state), implement InstanceRepository with CRUD operations, add instance_id field to RUNTIME collections (agents - runtime entities spawned from roles). NOTE: Workflow definitions are blueprints (no instance_id). WorkflowExecution entities (internal/orchestration/types.go) have instance_id for runtime tracking. | ✅ Complete | P0 | Medium | Go, ArangoDB | MVP-PUB-006 ✅ | [instance-data-models.md](mvp-details/agency-publishing/instance-data-models.md), [gap-fix](coding_sessions/MVP-PUB-007A_documentation_gap_fix.md) |
-| MVP-PUB-007B | Instance Service Layer | Create InstanceService interface with 7 methods, implement StartInstance (tag retrieval, validation, creation with optimistic start), implement StopInstance (graceful shutdown, 30s timeout), implement RestartInstance, implement GetInstanceHealth (on-demand calculation), implement ListInstances with filtering support | ✅ Complete | P0 | Medium | Go, Backend Dev | MVP-PUB-007A | [instance-services.md](mvp-details/agency-publishing/instance-services.md), [verification](coding_sessions/MVP-PUB-007B_service_layer_verification.md) |
-| MVP-PUB-007C | Instance API Endpoints | Create InstanceHandler in internal/web/handlers/instance_handler.go, implement 9 REST endpoints (POST /instances, GET /instances, GET /instances/:id, DELETE /instances/:id, POST /instances/:id/stop, POST /instances/:id/restart, GET /instances/:id/health, GET /instances/:id/agents, POST /instances/:id/accept-job), add validation middleware, error handling, route registration | ✅ Complete | P0 | Medium | Go, REST API | MVP-PUB-007B | [instance-api.md](mvp-details/agency-publishing/instance-api.md), [implementation](coding_sessions/MVP-PUB-007C_api_endpoints.md) |
-| MVP-PUB-007D | Instance List UI (Hybrid View) | Create instances_list.templ with hybrid tabs (by-tag grouping + flat table), implement filtering controls (state, tag, search, sort), create start_instance_dialog.templ modal component, implement instances.js with tab switching and client-side filtering, style with Bulma CSS | 📋 Not Started | P0 | Medium | Templ, JavaScript, Frontend Dev | MVP-PUB-007C | [instance-ui-templates.md](mvp-details/agency-publishing/instance-ui-templates.md) |
-| MVP-PUB-007E | Instance Dashboard (5 Panels) | Create instance_dashboard.templ with 5-panel layout, implement 4 panel components (InstanceOverviewPanel, InstanceAgentsPanel, InstanceWorkflowsPanel, InstanceActivityPanel) with HTMX polling attributes, implement auto-refresh toggle with staggered intervals (30s, 30s, 20s, 60s), create 4 HTMX partial endpoints for panel updates, implement instance control functions (stop, restart, delete) | 📋 Not Started | P0 | High | Templ, HTMX, JavaScript, Frontend Dev | MVP-PUB-007D | [instance-ui-templates.md](mvp-details/agency-publishing/instance-ui-templates.md), [instance-ui-javascript.md](mvp-details/agency-publishing/instance-ui-javascript.md) |
-| MVP-PUB-007F | Instance Integration Testing | Test instance creation from tag, test graceful shutdown with active workflows, test restart flow, test filtering and sorting, test HTMX polling (enable/disable), test staggered panel updates, test soft delete flow, verify instance_id isolation across collections | 📋 Not Started | P0 | Low | Testing, Go | MVP-PUB-007E | [integration-testing.md](mvp-details/agency-publishing/integration-testing.md) |
-
----
-
 ## P0: Work Items & Workflows System (FOUNDATIONAL)
 
 *Kanban-based workflow automation with agent instantiation*
@@ -224,11 +198,15 @@ git branch -d feature/MVP-XXX_description
 
 ## Bugs and Issues
 
+### Resolved Bugs
+
+| Bug ID | Title | Description | Affected Area | Priority | Resolution |
+|--------|-------|-------------|---------------|----------|------------|
+| BUG-001 | Instance list not displaying when navigating from versions page | When clicking "View Instances" from tag dropdown on versions page, navigation to `/agencies/{id}/instances?tag_key={tagID}` occurs but no instances were displayed. Root cause: (1) Instances in database had empty `tag_id` field (created before field validation), (2) Tab switching code used wrong tab name ('table' instead of 'all-instances'). | Instance Management UI | P0 | ✅ Fixed - Updated existing instance `tag_id` manually, fixed tab name in instances.js, verified filter logic working correctly |
+
 ### Active Bugs
 
-| Bug ID | Title | Description | Affected Area | Priority | Status |
-|--------|-------|-------------|---------------|----------|--------|
-| BUG-001 | Instance list not displaying when navigating from versions page | When clicking "View Instances" from tag dropdown on versions page, navigation to `/agencies/{id}/instances?tag={tagName}` occurs but no instances are displayed. Filter appears to not be working correctly. Possible issues: (1) tag parameter value vs tag_id mismatch, (2) instances not loaded before filter applied, (3) filter-tag dropdown not populated with tag options | Instance Management UI | P0 | 🚀 In Progress |
+_(None)_
 
 ---
 
@@ -247,13 +225,12 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Agency Instance Management**: 6 tasks (MVP-PUB-007A through MVP-PUB-007F)
 - **Work Items Core**: 3 tasks (MVP-030, MVP-031, MVP-032)
 - **Gitea Integration**: 4 tasks (MVP-WI-001 through MVP-WI-004)
 - **A2A Protocol**: 3 foundational tasks (MVP-A2A-000, MVP-A2A-001, MVP-A2A-002, MVP-A2A-003, MVP-A2A-004, MVP-A2A-006)
 
 
-**Total P0**: 24 tasks
+**Total P0**: 18 tasks
 
 ### P1 (Critical - Core Features)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)
@@ -269,7 +246,7 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 **Total P2**: 7 tasks
 
-**Grand Total Active Tasks**: 46 tasks
+**Grand Total Active Tasks**: 40 tasks
 
 ---
 

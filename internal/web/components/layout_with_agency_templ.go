@@ -33,20 +33,33 @@ func LayoutWithAgency(title string, currentAgency *models.Agency) templ.Componen
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"agency-id\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/layout_with_agency.templ`, Line: 13, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/layout_with_agency.templ`, Line: 13, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - CodeValdCortex</title><!-- Bulma CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/css/bulma.min.css\"><!-- FontAwesome CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/fontawesome/css/all.min.css\"><!-- Custom styles --><link rel=\"stylesheet\" href=\"/static/css/common-layout.css\"><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><link rel=\"stylesheet\" href=\"/static/css/agencies.css\"><link rel=\"stylesheet\" href=\"/static/css/themes.css\"><!-- HTMX (self-hosted) --><script src=\"/static/js/htmx.min.js\"></script><!-- Alpine.js (self-hosted) --><script defer src=\"/static/js/alpine.min.js\"></script><!-- Chart.js (self-hosted) --><script src=\"/static/js/chart.umd.min.js\"></script><!-- Custom Alpine components --><script src=\"/static/js/alpine-components.js\"></script><!-- Theme manager --><script src=\"/static/js/theme-manager.js\"></script><!-- Progress bar for HTMX requests --><div id=\"htmx-progress\"></div></head><body>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/layout_with_agency.templ`, Line: 14, Col: 17}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " - CodeValdCortex</title><!-- Bulma CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/css/bulma.min.css\"><!-- FontAwesome CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/fontawesome/css/all.min.css\"><!-- Custom styles --><link rel=\"stylesheet\" href=\"/static/css/common-layout.css\"><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><link rel=\"stylesheet\" href=\"/static/css/agencies.css\"><link rel=\"stylesheet\" href=\"/static/css/themes.css\"><!-- HTMX (self-hosted) --><script src=\"/static/js/htmx.min.js\"></script><!-- Alpine.js (self-hosted) --><script defer src=\"/static/js/alpine.min.js\"></script><!-- Chart.js (self-hosted) --><script src=\"/static/js/chart.umd.min.js\"></script><!-- Custom Alpine components --><script src=\"/static/js/alpine-components.js\"></script><!-- Theme manager --><script src=\"/static/js/theme-manager.js\"></script><!-- Progress bar for HTMX requests --><div id=\"htmx-progress\"></div></head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -54,7 +67,7 @@ func LayoutWithAgency(title string, currentAgency *models.Agency) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<main class=\"section\"><div class=\"container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<main class=\"section\"><div class=\"container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -62,7 +75,7 @@ func LayoutWithAgency(title string, currentAgency *models.Agency) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></main><!-- Bulma navbar burger toggle --><script>\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', () => {\n\t\t\t\t\t// Get all \"navbar-burger\" elements\n\t\t\t\t\tconst $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);\n\t\t\t\t\t\n\t\t\t\t\t// Add a click event on each of them\n\t\t\t\t\t$navbarBurgers.forEach( el => {\n\t\t\t\t\t\tel.addEventListener('click', () => {\n\t\t\t\t\t\t\t// Get the target from the \"data-target\" attribute\n\t\t\t\t\t\t\tconst target = el.dataset.target;\n\t\t\t\t\t\t\tconst $target = document.getElementById(target);\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Toggle the \"is-active\" class on both the \"navbar-burger\" and the \"navbar-menu\"\n\t\t\t\t\t\t\tel.classList.toggle('is-active');\n\t\t\t\t\t\t\t$target.classList.toggle('is-active');\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></main><!-- Bulma navbar burger toggle --><script>\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', () => {\n\t\t\t\t\t// Get all \"navbar-burger\" elements\n\t\t\t\t\tconst $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);\n\t\t\t\t\t\n\t\t\t\t\t// Add a click event on each of them\n\t\t\t\t\t$navbarBurgers.forEach( el => {\n\t\t\t\t\t\tel.addEventListener('click', () => {\n\t\t\t\t\t\t\t// Get the target from the \"data-target\" attribute\n\t\t\t\t\t\t\tconst target = el.dataset.target;\n\t\t\t\t\t\t\tconst $target = document.getElementById(target);\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Toggle the \"is-active\" class on both the \"navbar-burger\" and the \"navbar-menu\"\n\t\t\t\t\t\t\tel.classList.toggle('is-active');\n\t\t\t\t\t\t\t$target.classList.toggle('is-active');\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

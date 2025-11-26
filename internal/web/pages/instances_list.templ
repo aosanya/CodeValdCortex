@@ -212,7 +212,13 @@ templ tagCardWithInstances(tag *models.AgencyTag, instances []*models.AgencyInst
 		<div class="card-content">
 			<!-- Tag metadata -->
 			<div class="content">
-				<p><strong>Version:</strong> { tag.Version }</p>
+				<p><strong>Version:</strong> 
+					if tag.Version != "" {
+						{ tag.Version }
+					} else {
+						{ tag.Name }
+					}
+				</p>
 				<p><strong>Type:</strong> <span class="tag">{ string(tag.Type) }</span></p>
 				<p><strong>Created:</strong> { tag.CreatedAt.Format("2006-01-02 15:04") }</p>
 			</div>
@@ -253,15 +259,39 @@ templ instanceListItem(inst *models.AgencyInstance) {
 				</div>
 			</div>
 			<div class="level-right">
-				<div class="buttons are-small">
-					<button class="button is-info" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} } title="View Dashboard">
-						<span class="icon"><i class="fas fa-eye"></i></span>
-					</button>
-					if inst.State == models.InstanceStateRunning {
-						<button class="button is-warning" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} } title="Stop">
-							<span class="icon"><i class="fas fa-stop"></i></span>
+				<div class="dropdown is-hoverable is-right">
+					<div class="dropdown-trigger">
+						<button class="button is-small" aria-haspopup="true" aria-controls={ fmt.Sprintf("dropdown-menu-card-%s", inst.InstanceID) }>
+							<span class="icon is-small">
+								<i class="fas fa-ellipsis-v"></i>
+							</span>
 						</button>
-					}
+					</div>
+					<div class="dropdown-menu" id={ fmt.Sprintf("dropdown-menu-card-%s", inst.InstanceID) } role="menu">
+						<div class="dropdown-content">
+							<a class="dropdown-item" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} }>
+								<span class="icon"><i class="fas fa-eye"></i></span>
+								<span>View Dashboard</span>
+							</a>
+							if inst.State == models.InstanceStateRunning {
+								<a class="dropdown-item has-text-orange" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} }>
+									<span class="icon"><i class="fas fa-stop"></i></span>
+									<span>Stop Instance</span>
+								</a>
+							}
+							if inst.State == models.InstanceStateStopped {
+								<a class="dropdown-item has-text-success" onclick={ templ.ComponentScript{Call: fmt.Sprintf("restartInstance('%s')", inst.InstanceID)} }>
+									<span class="icon"><i class="fas fa-redo"></i></span>
+									<span>Restart Instance</span>
+								</a>
+								<hr class="dropdown-divider"/>
+								<a class="dropdown-item has-text-danger" onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteInstance('%s')", inst.InstanceID)} }>
+									<span class="icon"><i class="fas fa-trash"></i></span>
+									<span>Delete Instance</span>
+								</a>
+							}
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -328,23 +358,39 @@ templ instanceTableRow(inst *models.AgencyInstance) {
 		<td>{ formatUptime(inst.UptimeSeconds) }</td>
 		<td>{ inst.DeployedAt.Format("2006-01-02 15:04") }</td>
 		<td>
-			<div class="buttons are-small">
-				if inst.State == models.InstanceStateRunning {
-					<button class="button is-warning" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} } title="Stop">
-						<span class="icon"><i class="fas fa-stop"></i></span>
+			<div class="dropdown is-hoverable is-right">
+				<div class="dropdown-trigger">
+					<button class="button is-small" aria-haspopup="true" aria-controls={ fmt.Sprintf("dropdown-menu-instance-%s", inst.InstanceID) }>
+						<span class="icon is-small">
+							<i class="fas fa-ellipsis-v"></i>
+						</span>
 					</button>
-				}
-				if inst.State == models.InstanceStateStopped {
-					<button class="button is-success" onclick={ templ.ComponentScript{Call: fmt.Sprintf("restartInstance('%s')", inst.InstanceID)} } title="Restart">
-						<span class="icon"><i class="fas fa-redo"></i></span>
-					</button>
-					<button class="button is-danger" onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteInstance('%s')", inst.InstanceID)} } title="Delete">
-						<span class="icon"><i class="fas fa-trash"></i></span>
-					</button>
-				}
-				<button class="button is-info" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} } title="View Dashboard">
-					<span class="icon"><i class="fas fa-eye"></i></span>
-				</button>
+				</div>
+				<div class="dropdown-menu" id={ fmt.Sprintf("dropdown-menu-instance-%s", inst.InstanceID) } role="menu">
+					<div class="dropdown-content">
+						<a class="dropdown-item" onclick={ templ.ComponentScript{Call: fmt.Sprintf("viewInstance('%s')", inst.InstanceID)} }>
+							<span class="icon"><i class="fas fa-eye"></i></span>
+							<span>View Dashboard</span>
+						</a>
+						if inst.State == models.InstanceStateRunning {
+							<a class="dropdown-item has-text-orange" onclick={ templ.ComponentScript{Call: fmt.Sprintf("stopInstance('%s')", inst.InstanceID)} }>
+								<span class="icon"><i class="fas fa-stop"></i></span>
+								<span>Stop Instance</span>
+							</a>
+						}
+						if inst.State == models.InstanceStateStopped {
+							<a class="dropdown-item has-text-success" onclick={ templ.ComponentScript{Call: fmt.Sprintf("restartInstance('%s')", inst.InstanceID)} }>
+								<span class="icon"><i class="fas fa-redo"></i></span>
+								<span>Restart Instance</span>
+							</a>
+							<hr class="dropdown-divider"/>
+							<a class="dropdown-item has-text-danger" onclick={ templ.ComponentScript{Call: fmt.Sprintf("deleteInstance('%s')", inst.InstanceID)} }>
+								<span class="icon"><i class="fas fa-trash"></i></span>
+								<span>Delete Instance</span>
+							</a>
+						}
+					</div>
+				</div>
 			</div>
 		</td>
 	</tr>

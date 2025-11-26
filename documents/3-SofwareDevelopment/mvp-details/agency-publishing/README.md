@@ -165,7 +165,7 @@ type AgencyTag struct {
 | [MVP-PUB-004](activation-service.md) | Activation Service | ✅ Complete | High | Agent spawning, workflow init, pause/resume/drain |
 | [MVP-PUB-005](ui-implementation.md) | Publishing UI | ✅ Complete | Medium | Publish/tag dialogs, tag management page, state badges |
 | [MVP-PUB-006](integration-testing.md) | Integration & Testing | ✅ Complete | Medium | E2E testing, load testing, documentation |
-| [MVP-PUB-007](instance-management.md) | Instance Management | 📋 Not Started | High | Multi-instance deployment from tags with isolated runtime state |
+| [MVP-PUB-007](instance-management.md) | Instance Management | ✅ Complete | High | Multi-instance deployment from tags with isolated runtime state |
 
 ## Dependencies
 

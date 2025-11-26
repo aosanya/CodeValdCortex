@@ -90,7 +90,8 @@ async function startInstanceFromTag() {
 
     // Build request
     const request = {
-        instance_name: instanceName,
+        name: instanceName,  // API expects "name" not "instance_name"
+        description: '',
         environment: environment,
         config: config,
         tags: tags,
@@ -118,8 +119,13 @@ async function startInstanceFromTag() {
             showNotification(`Instance "${instanceName}" started successfully`, 'success');
             closeStartInstanceDialog();
 
-            // Refresh instances list
+            // Refresh instances list for this tag
             await loadInstancesForTag(currentTagForInstance);
+
+            // Also reload all tags to update instance counts across all tags
+            if (typeof loadTags === 'function') {
+                await loadTags();
+            }
         } else {
             showValidationError(data.details || data.error || 'Failed to start instance');
         }
@@ -287,19 +293,21 @@ async function loadAllInstances() {
  */
 async function loadInstancesForTag(tagName) {
     const agencyID = getAgencyID();
-    if (!agencyID) return;
+    if (!agencyID) {
+        return;
+    }
 
     try {
-        const response = await fetch(`/api/v1/agencies/${agencyID}/tags/${tagName}/instances`);
+        const url = `/api/v1/agencies/${agencyID}/tags/${tagName}/instances`;
+        const response = await fetch(url);
         const data = await response.json();
 
         if (response.ok) {
-            console.log(`Instances for tag ${tagName}:`, data.instances);
             // Update the instance count badge for this tag
             updateTagInstanceCount(tagName, data.count);
         }
     } catch (error) {
-        console.error(`Error loading instances for tag ${tagName}:`, error);
+        console.error('Error loading instances for tag', tagName, ':', error);
     }
 }
 
@@ -320,7 +328,9 @@ function updateInstanceCounts(instancesByTag) {
  * @param {number} count - Number of instances
  */
 function updateTagInstanceCount(tagName, count) {
-    const badge = document.querySelector(`[data-tag-name="${tagName}"] .instance-count-badge`);
+    const selector = `.instance-count-badge[data-tag-name="${tagName}"]`;
+    const badge = document.querySelector(selector);
+
     if (badge) {
         badge.textContent = count;
         badge.className = count > 0 ? 'tag is-success instance-count-badge' : 'tag is-light instance-count-badge';
