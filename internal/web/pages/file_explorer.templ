@@ -1,0 +1,45 @@
+package pages
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/git/fileindex"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// FileExplorerPage displays the file explorer for an instance
+templ FileExplorerPage(agency *models.Agency, instanceID string, currentPath string, entries []*fileindex.DirectoryEntry) {
+	@components.LayoutWithAgency("File Explorer", agency) {
+		<!-- Agency and Instance meta tags -->
+		<meta name="agency-id" content={ agency.ID }/>
+		<meta name="instance-id" content={ instanceID }/>
+		
+		<!-- File Browser JavaScript -->
+		<script src="/static/js/file-browser.js"></script>
+		
+		<section class="section">
+			<div class="container">
+				<!-- Header -->
+				<div class="level">
+					<div class="level-left">
+						<div>
+							<h1 class="title">
+								<span class="icon"><i class="fas fa-folder-open"></i></span>
+								File Explorer
+							</h1>
+							<p class="subtitle">Browse and edit instance files</p>
+						</div>
+					</div>
+					<div class="level-right">
+						<a href={ templ.URL("/agencies/" + agency.ID + "/instances/" + instanceID) } class="button is-light">
+							<span class="icon"><i class="fas fa-arrow-left"></i></span>
+							<span>Back to Dashboard</span>
+						</a>
+					</div>
+				</div>
+				
+				<!-- File Browser Panel -->
+				@components.FileBrowserPanel(instanceID, currentPath, entries)
+			</div>
+		</section>
+	}
+}
