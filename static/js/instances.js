@@ -344,4 +344,23 @@ document.addEventListener('DOMContentLoaded', function () {
     if (agencyIdMeta) {
         window.currentAgencyId = agencyIdMeta.content;
     }
+
+    // Check for tag filter in URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagFilter = urlParams.get('tag');
+    if (tagFilter) {
+        // Switch to table view (better for filtered results)
+        switchTab('table');
+
+        // Apply the tag filter after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            const tagFilterSelect = document.getElementById('filter-tag');
+            if (tagFilterSelect) {
+                tagFilterSelect.value = tagFilter;
+
+                // Trigger filter
+                applyFilters();
+            }
+        }, 100);
+    }
 });

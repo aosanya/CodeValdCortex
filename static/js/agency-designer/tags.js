@@ -524,30 +524,12 @@ function viewTagDetails(tagName) {
  * View instances for a specific tag
  */
 function viewTagInstances(tagName) {
-    // Switch to instances tab
-    const instancesTab = document.querySelector('[data-tab="instances"]');
-    if (instancesTab) {
-        instancesTab.click();
-    }
+    const agencyID = getAgencyID();
+    if (!agencyID) return;
 
-    // After a short delay to let the tab switch, apply the tag filter
-    setTimeout(() => {
-        const tagFilterSelect = document.getElementById('tag-filter');
-        if (tagFilterSelect) {
-            tagFilterSelect.value = tagName;
-
-            // Trigger filter change event
-            const event = new Event('change', { bubbles: true });
-            tagFilterSelect.dispatchEvent(event);
-
-            // If using instances.js filter function, call it
-            if (typeof filterInstances === 'function') {
-                filterInstances();
-            }
-        }
-    }, 100);
+    // Navigate to instances page with tag filter in URL
+    window.location.href = `/agencies/${agencyID}/instances?tag=${encodeURIComponent(tagName)}`;
 }
-
 /**
  * Delete a tag
  */

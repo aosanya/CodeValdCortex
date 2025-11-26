@@ -222,6 +222,16 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
+## Bugs and Issues
+
+### Active Bugs
+
+| Bug ID | Title | Description | Affected Area | Priority | Status |
+|--------|-------|-------------|---------------|----------|--------|
+| BUG-001 | Instance list not displaying when navigating from versions page | When clicking "View Instances" from tag dropdown on versions page, navigation to `/agencies/{id}/instances?tag={tagName}` occurs but no instances are displayed. Filter appears to not be working correctly. Possible issues: (1) tag parameter value vs tag_id mismatch, (2) instances not loaded before filter applied, (3) filter-tag dropdown not populated with tag options | Instance Management UI | P0 | 🚀 In Progress |
+
+---
+
 ## Deprecated / Superseded Tasks
 
 The following tasks are marked as obsolete due to being superseded by completed work or architectural changes:
