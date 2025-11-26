@@ -62,26 +62,36 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P0: Work Items & Workflows System (FOUNDATIONAL)
+## P0: Work Items & Document Management System (FOUNDATIONAL)
 
-*Kanban-based workflow automation with agent instantiation*
+*Git-in-ArangoDB with Kanban workflow automation and agent instantiation*
 
-### Core Workflow Architecture
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-030 | Work Item Definitions & Workflows | Implement work item definition schema (agent blueprints), workflow/Kanban board definitions with columns, column→definition mappings, and workflow CRUD in Agency Designer | 📋 Not Started | P0 | Medium | Go, ArangoDB, JSON Schema | MVP-029 ✅ | [MVP-030.md](mvp-details/MVP-030.md) |
-| MVP-031 | Repository-Workflow Linking | Build repository→workflow mapping system, milestone→column configuration, WIP limit settings per column, and UI in Agency Designer to link Gitea repos to workflows | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-030 | [MVP-031.md](mvp-details/MVP-031.md) |
-| MVP-032 | Agent Factory & Lifecycle | Implement AgentFactory.CreateFromWorkItemDefinition(), agent lifecycle FSM (created→running→completed), agent→issue linking, WIP limit enforcement, and Orchestrator service that monitors ArangoDB change streams (gitea_issues collection) to detect milestoned issues and spawn agents | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-031 | [MVP-032.md](mvp-details/MVP-032.md) |
-
-### Gitea Integration for Kanban Workflows
+### Core Architecture
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-WI-005 | Git Core Layer in ArangoDB | Implement Git object model (blobs, trees, commits, refs) in ArangoDB collections, content-addressable storage with SHA-1 hashing, branch/ref management, commit creation/retrieval | 📋 Not Started | P0 | High | Go, ArangoDB, Git Internals | None | [work-items-integration/](mvp-details/work-items-integration/) |
+| MVP-WI-006 | File Explorer API & UI | Build file/folder browsing API, file CRUD operations, directory tree rendering, Git mechanics abstraction, Templ-based file explorer UI with breadcrumbs and navigation | 📋 Not Started | P0 | High | Go, Templ, HTMX, Frontend Dev | MVP-WI-005 | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md) |
+| MVP-WI-007 | Pull Request System | Implement PR creation/management, diff generation, three-way merge algorithm, conflict detection, PR review workflow, approval tracking, merge operations | 📋 Not Started | P0 | High | Go, ArangoDB, Git Merge Logic | MVP-WI-006 | [work-items-integration/pull-requests.md](mvp-details/work-items-integration/pull-requests.md) |
+| MVP-WI-008 | Kanban Board & Issue Management | Build Kanban board UI, issue creation form, column management, issue CRUD API, work item definitions integration, workflow step configuration | 📋 Not Started | P0 | Medium | Go, Templ, HTMX, Frontend Dev | MVP-030 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
+| MVP-WI-009 | Issue-Git Integration | Implement branch creation from issues, issue-branch linking, PR-issue association, automatic issue progression on PR merge, workflow orchestration service | 📋 Not Started | P0 | Medium | Go, ArangoDB, Event System | MVP-WI-007, MVP-WI-008 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
+| MVP-WI-010 | Agent Work Assignment | Implement flexible assignment model (manual + claim-based), agent-issue linking, work queue API, notification system, agent instance creation from work item definitions | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-WI-009, MVP-032 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
+| MVP-WI-011 | AI-Assisted Conflict Resolution | Build conflict detection in merges, AI-powered merge suggestions, conflict resolution UI, three-way merge with AI assistance, merge conflict analytics | 📋 Not Started | P1 | High | Go, AI/LLM, Git Merge, Frontend Dev | MVP-WI-007 | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md#ai-assisted-conflict-resolution) |
 
-**Architecture Reference**: `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md`
+### Work Item Definitions & Workflows
 
-**Note**: All Gitea integration tasks (MVP-WI-001 through MVP-WI-004) have been completed. See `mvp_done.md` for details.
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-030 | Work Item Definitions & Workflows | Implement work item definition schema (deliverables, goals, tags), workflow/Kanban board definitions with steps/columns, workflow CRUD in Agency Designer, work item templates | 📋 Not Started | P0 | Medium | Go, ArangoDB, JSON Schema | MVP-029 ✅ | [work-items-integration/work-item-schema.md](mvp-details/work-items-integration/work-item-schema.md) |
+| MVP-031 | Work Item Lifecycle & SLA | Build work item state machines (open→assigned→in_progress→ready_for_review→completed), SLA tracking, deadline management, state transition validation | 📋 Not Started | P0 | Medium | Go, ArangoDB, State Machine | MVP-030 | [work-items-integration/work-item-schema.md](mvp-details/work-items-integration/work-item-schema.md) |
+| MVP-032 | Agent Factory & Orchestration | Implement AgentFactory.CreateFromWorkItemDefinition(), agent lifecycle FSM (created→running→completed), agent→issue linking, workflow orchestrator that monitors issue events and spawns agents | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-031 | [MVP-032.md](mvp-details/MVP-032.md) |
+
+**Architecture Reference**: `/documents/3-SofwareDevelopment/mvp-details/work-items-integration/`
+
+**Key Documents**:
+- [Git-Based Document System](mvp-details/work-items-integration/git-based-document-system.md) - Complete Git implementation in ArangoDB
+- [Kanban Workflow](mvp-details/work-items-integration/kanban-workflow.md) - End-to-end workflow from issue creation to completion
+- [Architectural Decisions](mvp-details/work-items-integration/architecture/vcs-integration-decisions.md) - Why internal Git vs external VCS
 
 ---
 
@@ -210,14 +220,18 @@ _(None)_
 
 ---
 
-## Deprecated / Superseded Tasks
+## Deprecated / Removed Tasks
 
-The following tasks are marked as obsolete due to being superseded by completed work or architectural changes:
+The following tasks are no longer applicable due to architectural changes:
 
-| Task ID | Original Title | Reason | Superseded By |
-|---------|---------------|--------|---------------|
-| ~~MVP-052~~ (original) | ~~Workflow Visual Designer~~ | ⚠️ **Completed** 2025-11-18 | See mvp_done.md |
-| - | Any Gitea integration in MVP-030-032 | ⚠️ **Separated** into dedicated MVP-WI-001 through MVP-WI-004 | Work Items Gitea Integration section |
+| Task ID | Original Title | Reason | Replaced By |
+|---------|---------------|--------|-------------|
+| ~~MVP-WI-001~~ | ~~Gitea Webhook Integration~~ | ❌ **Removed** - External VCS integration not implemented | MVP-WI-005 through MVP-WI-011 (Git-in-ArangoDB) |
+| ~~MVP-WI-002~~ | ~~Gitea API Client~~ | ❌ **Removed** - No external VCS integration | MVP-WI-006 (File Explorer API) |
+| ~~MVP-WI-003~~ | ~~Bidirectional Sync~~ | ❌ **Removed** - No external system synchronization | MVP-WI-009 (Issue-Git Integration) |
+| ~~MVP-WI-004~~ | ~~PR Automation for External VCS~~ | ❌ **Removed** - Internal PR system instead | MVP-WI-007 (Pull Request System) |
+
+**Architectural Decision**: After research, decided to implement Git directly in ArangoDB rather than integrate with external VCS (Gitea/GitHub/GitLab). See [vcs-integration-decisions.md](mvp-details/work-items-integration/architecture/vcs-integration-decisions.md) for rationale.
 
 ---
 
@@ -225,20 +239,20 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Work Items Core**: 3 tasks (MVP-030, MVP-031, MVP-032)
-- **Gitea Integration**: 4 tasks (MVP-WI-001 through MVP-WI-004)
-- **A2A Protocol**: 3 foundational tasks (MVP-A2A-000, MVP-A2A-001, MVP-A2A-002, MVP-A2A-003, MVP-A2A-004, MVP-A2A-006)
+- **Work Items & Document Management**: 7 tasks (MVP-WI-005 through MVP-WI-010)
+- **Work Item Definitions**: 3 tasks (MVP-030, MVP-031, MVP-032)
+- **A2A Protocol**: 6 foundational tasks (MVP-A2A-000 through MVP-A2A-004, MVP-A2A-006)
 
-
-**Total P0**: 18 tasks
+**Total P0**: 21 tasks
 
 ### P1 (Critical - Core Features)
+- **Git AI Features**: 1 task (MVP-WI-011 - AI-Assisted Conflict Resolution)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)
 - **Platform Infrastructure**: 7 tasks (MVP-014, MVP-015, MVP-023, MVP-037 through MVP-040)
 - **Property Broadcasting**: 5 tasks (MVP-016 through MVP-020)
-- **A2A Advanced**: 3 tasks (MVP-A2A-005, MVP-A2A-007, MVP-A2A-008, MVP-A2A-009)
+- **A2A Advanced**: 4 tasks (MVP-A2A-005, MVP-A2A-007, MVP-A2A-008, MVP-A2A-009)
 
-**Total P1**: 19 tasks
+**Total P1**: 21 tasks
 
 ### P2 (Important - Quality & Enhancement)
 - **Security**: 4 tasks (MVP-026 through MVP-028, MVP-041)
@@ -246,8 +260,24 @@ The following tasks are marked as obsolete due to being superseded by completed 
 
 **Total P2**: 7 tasks
 
-**Grand Total Active Tasks**: 40 tasks
+**Grand Total Active Tasks**: 49 tasks
 
 ---
 
 **Note**: This document contains only active and pending tasks. All completed tasks are moved to `mvp_done.md` to maintain a clean, actionable backlog.
+
+Follow This sequence!!!
+
+Phase 1 (P0 Core):
+
+MVP-WI-005 - Git Core Layer
+MVP-WI-006 - File Explorer
+MVP-030 - Work Item Definitions
+MVP-WI-008 - Kanban Board
+MVP-WI-007 - Pull Requests
+MVP-031 - Work Item Lifecycle
+MVP-WI-009 - Issue-Git Integration
+MVP-032 - Agent Factory
+MVP-WI-010 - Agent Assignment
+Phase 2 (P1 Enhancement):
+10. MVP-WI-011 - AI Conflict Resolution

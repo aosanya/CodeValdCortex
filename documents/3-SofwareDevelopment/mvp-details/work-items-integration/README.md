@@ -1,124 +1,133 @@
-# Work Items Integration Domain
+# Work Items & Document Management Domain
 
 ## Overview
 
-The Work Items Integration system provides comprehensive infrastructure for managing work tracking across external systems (Gitea, GitHub, GitLab, Jira) and internal agent workflows. This domain encompasses webhook ingestion, work item definitions, lifecycle management, routing, and bidirectional synchronization with external platforms.
+This domain covers **work tracking** and **document/code versioning** within CodeValdCortex's multi-agent architecture. After extensive research (see [research-sessions/](./research-sessions/)), we implemented a **Git-in-ArangoDB** system that provides:
 
-### Vision
+- **Document & Code Versioning**: Full Git implementation stored in ArangoDB
+- **Collaborative Editing**: Section-based documents enabling parallel human/AI editing
+- **Intelligent Merging**: AI-assisted conflict resolution
+- **File Explorer UX**: Git mechanics abstracted behind familiar file/folder interface
+- **Kanban Integration**: Work items linked to file changes via branches and pull requests
 
-Enable CodeValdCortex agents to be automatically spawned and managed based on work items from external tracking systems, creating a seamless bridge between traditional project management tools and autonomous agent execution. Work items serve as both triggers and blueprints for agent creation, with full bidirectional sync keeping external systems updated on progress.
+## What We Built
 
-### Architecture
+✅ **Git-in-ArangoDB**: Complete Git implementation (commits, trees, blobs, refs) stored in ArangoDB  
+✅ **File Explorer UI**: Familiar file/folder interface - Git mechanics completely hidden from users  
+✅ **AI-Assisted Merging**: Intelligent conflict resolution for concurrent human/AI edits  
+✅ **Section-Based Documents**: Granular editing enabling parallel work without conflicts  
+✅ **Pull Request Workflow**: Internal PR system for review and approval (no external VCS)  
 
-```
-External Systems (Gitea/GitHub/etc.)
-    ↓ Webhooks
-┌─────────────────────────────────────────┐
-│  Work Tracking Abstraction Layer        │
-│  (pluggable provider architecture)      │
-└──────────────┬──────────────────────────┘
-               ↓ Persist
-         ┌──────────────┐
-         │  ArangoDB    │
-         │ work-issues  │
-         │ work-prs     │
-         └──────┬───────┘
-                ↓ Change Streams
-         ┌─────────────────┐
-         │  Orchestrator   │
-         │ (MVP-032)       │
-         └──────┬──────────┘
-                ↓ Creates
-         ┌─────────────────┐
-         │    Agents       │
-         └──────┬──────────┘
-                ↓ Sync Back
-    External Systems (Comments, Status)
-```
+## What We Did NOT Build
 
-### Key Concepts
+❌ **External VCS Integration**: No Gitea, GitHub, GitLab, or Bitbucket integration  
+❌ **Webhook-Based Sync**: No bidirectional synchronization with external systems  
+❌ **External Issue Tracking**: Issues are managed within CodeValdCortex, not external platforms  
+❌ **GitOps Workflows**: No external Git server operations or remote repository management  
 
-- **Work Items**: Abstract representations of work (issues, PRs, tasks, jobs) from any provider
-- **Work Item Definitions**: Blueprints for creating agents from work items
-- **Providers**: Pluggable integrations (Gitea, GitHub, GitLab, Jira)
-- **Lifecycle States**: State machines governing work item progression
-- **Routing Rules**: Intelligent assignment of work items to qualified agents
-- **Bidirectional Sync**: Keep external systems updated with agent progress
+**Why?** See [architectural decisions](./architecture/vcs-integration-decisions.md) for the rationale behind choosing internal Git implementation over external VCS integration.
 
 ---
 
 ## Topic Index
 
-This domain is organized into topic-based files covering related functionality:
-
-| Topic | File | Tasks Covered | Status | Description |
-|-------|------|---------------|--------|-------------|
-| **Webhook Integration** | [webhooks.md](./webhooks.md) | MVP-WI-001 | ✅ Complete | Ingest events from Gitea/GitHub/GitLab |
-| **API Client** | [api-client.md](./api-client.md) | MVP-WI-002 | ✅ Complete | Bidirectional communication with Gitea |
-| **Agent Synchronization** | [synchronization.md](./synchronization.md) | MVP-WI-003 | ✅ Complete | Update issues with agent progress |
-| **Pull Request Automation** | [pull-requests.md](./pull-requests.md) | MVP-WI-004 | 🔄 In Progress | Automated PR creation and merging |
-| **Work Item Schema** | [work-item-schema.md](./work-item-schema.md) | MVP-030, MVP-031, MVP-032 | 📋 Planned | Core schema, lifecycle, routing |
-
-### Quick Navigation
-
-- **New to this domain?** → Start with [webhooks.md](./webhooks.md) to understand event ingestion
-- **Need API integration?** → See [api-client.md](./api-client.md) for Gitea API patterns
-- **Building sync features?** → Review [synchronization.md](./synchronization.md) for event-driven updates
-- **Working on PR automation?** → Explore [pull-requests.md](./pull-requests.md) for current implementation
-- **Designing work items?** → Reference [work-item-schema.md](./work-item-schema.md) for data models
+| Topic | File | Tasks | Status | Description |
+|-------|------|-------|--------|-------------|
+| **📚 Core Architecture** | [git-based-document-system.md](./git-based-document-system.md) | MVP-WI-005, MVP-PUB-007 | 📋 Planned | Complete Git implementation in ArangoDB with file explorer UX |
+| **🎯 Implementation Roadmap** | [implementation-guide.md](./implementation-guide.md) | MVP-WI-005 | 📋 Planned | 7-phase implementation plan with tasks and acceptance criteria |
+| **� Pull Requests** | [pull-requests.md](./pull-requests.md) | MVP-WI-005 | �📋 Planned | Internal PR workflow, review process, AI-assisted merging |
+| **📊 Work Item Schema** | [work-item-schema.md](./work-item-schema.md) | MVP-WI-005 | 🔄 Needs Update | Data models for issues, milestones, workflows (update for Git integration) |
+| **📋 Architectural Decisions** | [architecture/vcs-integration-decisions.md](./architecture/vcs-integration-decisions.md) | MVP-WI-005 | ✅ Complete | 15 decisions documenting evolution from external VCS to Git-in-ArangoDB |
+| **🔬 Research Sessions** | [research-sessions/](./research-sessions/) | MVP-WI-005 | ✅ Complete | Dated research session summaries |
 
 ---
 
-## Adding New Content to This Domain
+## Quick Start
 
-### Topic-Based Organization Rules
+**For Understanding**: Read [git-based-document-system.md](./git-based-document-system.md) → [vcs-integration-decisions.md](./architecture/vcs-integration-decisions.md) → [research session](./research-sessions/2025-11-26_git-in-arangodb.md)
 
-1. **Use topic names, not task IDs**: Files should be named `webhooks.md`, `authentication.md`, NOT `MVP-001.md`
-2. **Group related tasks**: If 2+ tasks cover the same topic, put them in ONE file (e.g., MVP-030, MVP-031, MVP-032 → `work-item-schema.md`)
-3. **File size limits**:
-   - Topic files: MAX 500 lines
-   - This README: MAX 300 lines
-4. **Split when needed**: If topic file exceeds 500 lines, extract detailed designs to `architecture/` folder
+**For Implementing**: Follow [implementation-guide.md](./implementation-guide.md) for 7-phase roadmap
 
-### Adding a New Topic
+**For Contributing**: See Contributing Guidelines below
 
-1. **Create topic file**: `{topic-name}.md` (e.g., `authentication.md`)
-2. **Add to Topic Index**: Update the table above with new topic, tasks covered, status
-3. **Keep focused**: Each topic file covers ONE coherent area of functionality
-4. **Cross-reference**: Link between related topics using relative paths
+---
 
-### Example Topic File Structure
+## Implementation Status
 
-```markdown
-# {Topic Name}
+**Phase 0**: ✅ Research & Design Complete  
+**Phase 1-7**: 📋 Not Started
 
-<!-- MVP-XXX, MVP-YYY -->
-**Tasks Covered**: MVP-XXX, MVP-YYY  
-**Status**: ✅ Complete / 🔄 In Progress / 📋 Planned
+See [implementation-guide.md](./implementation-guide.md) for 7-phase roadmap with tasks and acceptance criteria.
 
-## Overview
-[What problem does this solve?]
+---
 
-## Requirements
-[Detailed requirements from all covered tasks]
+## Database Collections
 
-## Architecture
-[Technical approach, diagrams]
+```go
+// Git system
+git_objects, git_refs, repositories, pull_requests, file_index
 
-## Implementation
-[Code structure, key files]
+// Work tracking  
+work_issues, workflows
+```
 
-## Testing
-[Test strategy, validation]
+See [git-based-document-system.md](./git-based-document-system.md#git-object-model-in-arangodb) for detailed schemas.
 
-## Related Topics
-- See [api-client.md](./api-client.md) for API integration
-- See [webhooks.md](./webhooks.md) for event handling
+---
+
+## API Overview
+
+- **File Operations**: Browse, read, write, delete files
+- **Repository Management**: Branches, commits, history
+- **Pull Requests**: Create, review, merge, AI conflict resolution
+
+See [git-based-document-system.md](./git-based-document-system.md#file-explorer-implementation) for complete API documentation.
+
+---
+
+## Folder Structure
+
+```
+work-items-integration/
+├── README.md                          # Domain overview (this file)
+├── git-based-document-system.md       # Main architecture (945 lines - comprehensive spec)
+├── implementation-guide.md            # 7-phase roadmap (402 lines)
+├── pull-requests.md                   # Internal PR workflow (305 lines)
+├── work-item-schema.md                # Data models (369 lines - needs update)
+├── architecture/
+│   └── vcs-integration-decisions.md   # 15 architectural decisions
+└── research-sessions/
+    └── 2025-11-26_git-in-arangodb.md  # Research summary
 ```
 
 ---
 
-## Architecture Details
+## Contributing Guidelines
+
+### Adding New Content
+1. Check file sizes: `wc -l *.md`
+2. Add to existing topic file if related (keep < 500 lines)
+3. Create new topic file for new areas (descriptive name, not task ID)
+4. Update Topic Index in this README
+
+### Updating Architecture
+1. Document decisions in `architecture/vcs-integration-decisions.md`
+2. Update `git-based-document-system.md` for specs
+3. Update `implementation-guide.md` for phases
+4. Create research session summary for major changes
+
+### File Size Compliance
+- README.md: < 300 lines ✅
+- Topic files: < 500 lines (exception for comprehensive specs)
+- Architecture details: Split to `architecture/` if needed
+
+---
+
+**Last Updated**: 2025-11-26  
+**Phase**: Design Complete → Ready for Implementation  
+**Next**: Phase 1 - Git Core Layer
+
+See [implementation-guide.md](./implementation-guide.md) for detailed roadmap.
 
 ### Pluggable Provider System
 

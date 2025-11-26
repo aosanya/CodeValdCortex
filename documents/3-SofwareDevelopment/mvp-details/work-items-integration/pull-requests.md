@@ -1,52 +1,30 @@
-# Pull Request Automation
+# Pull Request Workflow - Internal Git System
 
-<!-- MVP-WI-004 -->
-**Tasks Covered**: MVP-WI-004  
-**Status**: 🔄 In Progress
+<!-- MVP-WI-005 -->
+**Tasks Covered**: MVP-WI-005  
+**Status**: � Planned - Part of Git-in-ArangoDB Implementation
 
 ## Overview
 
-Automate the complete pull request workflow for agent-generated code changes, from branch creation through merge and issue closure. This component enables agents to submit their work for review, handles automated quality checks, and completes the development cycle by merging approved changes and updating related issues.
+This document describes the **internal Pull Request workflow** for the Git-in-ArangoDB system. Pull requests enable collaborative review and approval of code/document changes before merging into main branches.
+
+**Key Point**: This is an **internal Git implementation** stored in ArangoDB, NOT integration with external VCS platforms (Gitea/GitHub/GitLab).
 
 ## Problem Statement
 
-When agents complete coding tasks, they need a streamlined way to:
-1. Submit code changes for human review (create PR)
-2. Link their work to the originating issue
-3. Trigger automated quality checks (tests, linting, security scans)
-4. Automatically merge when all checks pass and approval received
-5. Update issue state to reflect merged code
-6. Track which agent generated which code changes
+When humans or AI agents make changes to code or documents, those changes need:
+1. **Review and Approval**: Human oversight before merging to main branch
+2. **Conflict Detection**: Identify when changes conflict with main branch
+3. **AI-Assisted Merging**: Intelligent conflict resolution when possible
+4. **Audit Trail**: Track who approved what, when, and why
+5. **Quality Gates**: Optional validation (tests, linting) before merge
+6. **Issue Linking**: Connect file changes to work items (Kanban issues)
 
-**Without this capability**, agents would need manual intervention to:
-- Create branches and PRs manually
-- Copy/paste agent output into Git
-- Manually link PRs to issues
-- Wait for human to merge even if checks pass
-- Manually close/update issues after merge
-
-**With automation**, the entire code submission → review → merge → issue update cycle becomes autonomous.
-
-## Objectives
-
-1. **PR Creation Automation**: Agents create PRs directly from their work outputs
-2. **Issue Linking**: Automatic bi-directional linking between PRs and issues
-3. **Quality Gate Integration**: Run tests, linting, security scans before merge
-4. **Auto-Merge**: Merge approved PRs when all checks pass
-5. **Issue State Updates**: Update issue milestone/status on PR events
-6. **Agent Attribution**: Track code changes by agent for audit/analytics
+**With Internal PRs**, the system provides GitHub-like pull request functionality without any external dependencies.
 
 ## Architecture
 
-See [architecture/pr-workflow.md](./architecture/pr-workflow.md) for detailed component designs and data flow diagrams.
-
-### Components
-
-**1. PR Service** (`internal/infrastructure/work/pr_service.go`)
-**2. Git Operations Handler** (`internal/infrastructure/work/git_operations.go`)
-**3. PR Event Handler** (`internal/infrastructure/work/pr_event_handler.go`)
-**4. Quality Check Service** (`internal/infrastructure/work/quality_check_service.go`)
-**5. Auto-Merge Engine** (`internal/infrastructure/work/auto_merge_engine.go`)
+This is part of the larger [git-based-document-system.md](./git-based-document-system.md) architecture. See that document for complete Git implementation details.
 
 See [architecture/pr-workflow.md](./architecture/pr-workflow.md) for interface definitions and implementation details.
 
@@ -299,7 +277,6 @@ Retry logic: 3 attempts with exponential backoff (except validation errors)
 
 ## Related Topics
 
-- See [api-client.md](./api-client.md) for Gitea API integration
-- See [synchronization.md](./synchronization.md) for issue update workflows
-- See [webhooks.md](./webhooks.md) for PR webhook handling
-- See [architecture/pr-workflow.md](./architecture/pr-workflow.md) for detailed component designs
+- See [git-based-document-system.md](./git-based-document-system.md) for complete Git implementation and PR data models
+- See [work-item-schema.md](./work-item-schema.md) for work item linking to PRs
+- See [implementation-guide.md](./implementation-guide.md) for implementation phases

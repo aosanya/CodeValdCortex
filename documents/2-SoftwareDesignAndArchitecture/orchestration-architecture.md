@@ -559,7 +559,9 @@ work_item_definition:
 
 ## Architecture References
 
-- **Work Items System**: `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/`
-- **Gitea Integration**: `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items/gitea-integration.md`
+- **Work Items & Document System**: `/documents/3-SofwareDevelopment/mvp-details/work-items-integration/` - Git-in-ArangoDB implementation
+- **Git-Based Documents**: `/documents/3-SofwareDevelopment/mvp-details/work-items-integration/git-based-document-system.md`
 - **Agent Lifecycle**: MVP-033 through MVP-036
 - **Workflow Designer**: MVP-052 (completed)
+
+**Note**: External VCS integration (Gitea) was researched but NOT implemented. System uses internal Git in ArangoDB.

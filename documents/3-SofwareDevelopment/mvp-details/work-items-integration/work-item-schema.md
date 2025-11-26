@@ -1,12 +1,21 @@
-# Work Item Schema
+# Work Item Schema - Internal System
 
 <!-- MVP-030, MVP-031, MVP-032 -->
 **Tasks Covered**: MVP-030 (Core Schema & Registry), MVP-031 (Lifecycle & SLA), MVP-032 (Assignment & Routing)  
-**Status**: 📋 Planned
+**Status**: � Needs Update - Align with Git-in-ArangoDB Architecture
 
 ## Overview
 
-This document covers the internal work item type system that defines how agents are created and behave when assigned to work. While MVP-WI-001 handles external work tracking (Gitea issues), these tasks define the internal schemas, lifecycles, and orchestration logic.
+This document defines the **internal work item type system** for CodeValdCortex's Kanban-based work tracking. Work items are issues/tasks stored in ArangoDB that track work progress through workflow stages.
+
+**Important Context**: This is an **internal work tracking system** stored in ArangoDB, NOT integration with external platforms (Gitea/Jira/etc). Work items link to file changes via the internal Git system (see [git-based-document-system.md](./git-based-document-system.md)).
+
+### Relationship to Other Systems
+
+- **Git System**: Work items link to branches/PRs for code/document changes
+- **Kanban Workflows**: Work items move through workflow stages (columns)
+- **Agent Orchestration**: Work items trigger agent creation/assignment
+- **File Changes**: Work items track which files are being modified
 
 ### Covered Tasks
 
@@ -20,11 +29,12 @@ This document covers the internal work item type system that defines how agents 
 
 ### Problem
 
-When an external issue (from Gitea) arrives, the orchestrator needs to know:
+When a work item is created, the system needs to know:
 - What kind of agent to create?
 - What tools should it have access to?
 - What are the success criteria?
 - What are the SLA constraints?
+- Which files/documents does this affect?
 
 Work item type definitions provide these answers through JSON schemas.
 
@@ -38,16 +48,6 @@ Work item type definitions provide these answers through JSON schemas.
 4. **Change**: Modifications to existing systems with risk assessment
 5. **Remediation**: Corrective actions for incidents or problems
 6. **Experiment**: Hypothesis-driven work with success/failure outcomes
-
-### Data Model
-
-```go
-type WorkItemType struct {
-    ID             string                 `json:"id"`
-    Name           string                 `json:"name"`           // "Task", "Job", etc.
-    Category       string                 `json:"category"`       // Primary classification
-    Schema         map[string]interface{} `json:"schema"`         // JSON schema
-    Taxonomy       WorkItemTaxonomy       `json:"taxonomy"`
     DefaultSLA     SLAConfig              `json:"default_sla"`
     RequiredTools  []string               `json:"required_tools"`
     SuccessCriteria map[string]interface{} `json:"success_criteria"`
@@ -359,11 +359,11 @@ GET    /api/v1/work-items/queue             # Queued items
 
 ## Related Topics
 
-- See [webhooks.md](./webhooks.md) for external work item ingestion
-- See [api-client.md](./api-client.md) for Gitea API integration
-- See [synchronization.md](./synchronization.md) for agent-to-issue updates
-- See [pull-requests.md](./pull-requests.md) for PR automation workflows
+- See [git-based-document-system.md](./git-based-document-system.md) for Git implementation and file versioning
+- See [pull-requests.md](./pull-requests.md) for internal PR workflows
+- See [implementation-guide.md](./implementation-guide.md) for 7-phase implementation roadmap
 
 ## References
 
-- `/documents/2-SoftwareDesignAndArchitecture/agency-operation-framework/work-items.md`
+- Git-in-ArangoDB Architecture: [git-based-document-system.md](./git-based-document-system.md)
+- Architectural Decisions: [architecture/vcs-integration-decisions.md](./architecture/vcs-integration-decisions.md)
