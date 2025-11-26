@@ -11,67 +11,76 @@ import (
 )
 
 const (
-	FileIndexCollection = "file_index"
+	// GitArtifactsCollection stores file and directory metadata
+	GitArtifactsCollection = "git_artifacts"
 )
 
 // Repository handles file index operations in ArangoDB
 type Repository interface {
-	// Index operations
-	IndexFile(ctx context.Context, index *FileIndex) error
-	GetByPath(ctx context.Context, repoID, path string) (*FileIndex, error)
-	ListDirectory(ctx context.Context, repoID, path string) ([]*FileIndex, error)
-	DeleteByPath(ctx context.Context, repoID, path string) error
-	DeleteDirectory(ctx context.Context, repoID, path string) error
-	UpdateIndex(ctx context.Context, index *FileIndex) error
+	// Index operations (all methods now accept agencyDB parameter)
+	IndexFile(ctx context.Context, agencyDB string, index *FileIndex) error
+	GetByPath(ctx context.Context, agencyDB string, repoID, path string) (*FileIndex, error)
+	ListDirectory(ctx context.Context, agencyDB string, repoID, path string) ([]*FileIndex, error)
+	DeleteByPath(ctx context.Context, agencyDB string, repoID, path string) error
+	DeleteDirectory(ctx context.Context, agencyDB string, repoID, path string) error
+	UpdateIndex(ctx context.Context, agencyDB string, index *FileIndex) error
 
 	// Batch operations
-	RebuildIndex(ctx context.Context, repoID, commitSHA string, entries []*FileIndex) error
+	RebuildIndex(ctx context.Context, agencyDB string, repoID, commitSHA string, entries []*FileIndex) error
 }
 
 // repository implements Repository interface
 type repository struct {
-	db     driver.Database
+	client driver.Client // ArangoDB client to access different databases
 	logger *logrus.Logger
 }
 
 // NewRepository creates a new file index repository
-func NewRepository(db driver.Database, logger *logrus.Logger) (Repository, error) {
+func NewRepository(client driver.Client, logger *logrus.Logger) (Repository, error) {
 	r := &repository{
-		db:     db,
+		client: client,
 		logger: logger,
-	}
-
-	// Ensure collection exists
-	if err := r.ensureCollection(context.Background()); err != nil {
-		return nil, fmt.Errorf("failed to ensure collection: %w", err)
 	}
 
 	return r, nil
 }
 
-// ensureCollection creates file_index collection if it doesn't exist
-func (r *repository) ensureCollection(ctx context.Context) error {
-	exists, err := r.db.CollectionExists(ctx, FileIndexCollection)
+// ensureCollectionExists creates the git_artifacts collection if it doesn't exist
+// Call this only when we get a "collection not found" error
+func (r *repository) ensureCollectionExists(ctx context.Context, db driver.Database) error {
+	_, err := db.CreateCollection(ctx, GitArtifactsCollection, nil)
 	if err != nil {
-		return fmt.Errorf("failed to check collection: %w", err)
-	}
-
-	if !exists {
-		_, err = r.db.CreateCollection(ctx, FileIndexCollection, nil)
-		if err != nil {
+		// Ignore error if collection already exists (race condition)
+		if !driver.IsConflict(err) {
 			return fmt.Errorf("failed to create collection: %w", err)
 		}
-		r.logger.WithField("collection", FileIndexCollection).Info("Created file index collection")
+	} else {
+		r.logger.WithField("collection", GitArtifactsCollection).Info("Created git artifacts collection")
 	}
-
 	return nil
 }
 
-// IndexFile stores or updates a file index entry
-func (r *repository) IndexFile(ctx context.Context, index *FileIndex) error {
-	collection, err := r.db.Collection(ctx, FileIndexCollection)
+// IndexFile creates or updates a file index entry
+func (r *repository) IndexFile(ctx context.Context, agencyDB string, index *FileIndex) error {
+	db, err := r.client.Database(ctx, agencyDB)
 	if err != nil {
-		return fmt.Errorf("failed to get collection: %w", err)
+		return fmt.Errorf("failed to access database %s: %w", agencyDB, err)
+	}
+
+	collection, err := db.Collection(ctx, GitArtifactsCollection)
+	if err != nil {
+		// If collection doesn't exist, create it and retry
+		if driver.IsNotFoundGeneral(err) {
+			if createErr := r.ensureCollectionExists(ctx, db); createErr != nil {
+				return createErr
+			}
+			collection, err = db.Collection(ctx, GitArtifactsCollection)
+			if err != nil {
+				return fmt.Errorf("failed to get collection after creation: %w", err)
+			}
+		} else {
+			return fmt.Errorf("failed to get collection: %w", err)
+		}
 	}
 
 	// Use path as key for fast lookups
@@ -103,9 +112,14 @@ func (r *repository) IndexFile(ctx context.Context, index *FileIndex) error {
 	return nil
 }
 
-// GetByPath retrieves a file index by path
-func (r *repository) GetByPath(ctx context.Context, repoID, path string) (*FileIndex, error) {
-	collection, err := r.db.Collection(ctx, FileIndexCollection)
+// GetByPath retrieves a file index entry by path
+func (r *repository) GetByPath(ctx context.Context, agencyDB string, repoID, path string) (*FileIndex, error) {
+	db, err := r.client.Database(ctx, agencyDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to access database %s: %w", agencyDB, err)
+	}
+
+	collection, err := db.Collection(ctx, GitArtifactsCollection)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get collection: %w", err)
 	}
@@ -123,33 +137,40 @@ func (r *repository) GetByPath(ctx context.Context, repoID, path string) (*FileI
 	return &index, nil
 }
 
-// ListDirectory lists all files and folders in a directory
-func (r *repository) ListDirectory(ctx context.Context, repoID, path string) ([]*FileIndex, error) {
-	// Normalize path
+// ListDirectory retrieves all entries in a directory
+func (r *repository) ListDirectory(ctx context.Context, agencyDB string, repoID, path string) ([]*FileIndex, error) {
+	db, err := r.client.Database(ctx, agencyDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to access database %s: %w", agencyDB, err)
+	}
+
+	// Normalize path for root directory
 	if path == "" {
 		path = "/"
 	}
-	if !strings.HasSuffix(path, "/") && path != "/" {
-		path = path + "/"
-	}
 
 	query := `
-		FOR file IN @@collection
-			FILTER file.repo_id == @repo_id
-			FILTER file.parent_path == @parent_path
-			SORT file.is_dir DESC, file.name ASC
-			RETURN file
+		FOR doc IN @@collection
+		FILTER doc.repo_id == @repo_id
+		FILTER doc.parent_path == @parent_path
+		FILTER doc.deleted_at == null
+		SORT doc.is_dir DESC, doc.name ASC
+		RETURN doc
 	`
 
 	bindVars := map[string]interface{}{
-		"@collection": FileIndexCollection,
+		"@collection": GitArtifactsCollection,
 		"repo_id":     repoID,
-		"parent_path": strings.TrimSuffix(path, "/"),
+		"parent_path": path,
 	}
 
-	cursor, err := r.db.Query(ctx, query, bindVars)
+	cursor, err := db.Query(ctx, query, bindVars)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query directory: %w", err)
+		// If collection doesn't exist, return empty list instead of error
+		if driver.IsNotFoundGeneral(err) {
+			return []*FileIndex{}, nil
+		}
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer cursor.Close()
 
@@ -166,10 +187,19 @@ func (r *repository) ListDirectory(ctx context.Context, repoID, path string) ([]
 	return entries, nil
 }
 
-// DeleteByPath deletes a file index entry
-func (r *repository) DeleteByPath(ctx context.Context, repoID, path string) error {
-	collection, err := r.db.Collection(ctx, FileIndexCollection)
+// DeleteByPath soft-deletes a file index entry
+func (r *repository) DeleteByPath(ctx context.Context, agencyDB string, repoID, path string) error {
+	db, err := r.client.Database(ctx, agencyDB)
 	if err != nil {
+		return fmt.Errorf("failed to access database %s: %w", agencyDB, err)
+	}
+
+	collection, err := db.Collection(ctx, GitArtifactsCollection)
+	if err != nil {
+		// If collection doesn't exist, nothing to delete
+		if driver.IsNotFoundGeneral(err) {
+			return nil
+		}
 		return fmt.Errorf("failed to get collection: %w", err)
 	}
 
@@ -190,29 +220,35 @@ func (r *repository) DeleteByPath(ctx context.Context, repoID, path string) erro
 	return nil
 }
 
-// DeleteDirectory deletes all entries under a directory path
-func (r *repository) DeleteDirectory(ctx context.Context, repoID, path string) error {
-	// Normalize path
-	if !strings.HasSuffix(path, "/") {
-		path = path + "/"
+// DeleteDirectory soft-deletes a directory and all its contents recursively
+func (r *repository) DeleteDirectory(ctx context.Context, agencyDB string, repoID, path string) error {
+	db, err := r.client.Database(ctx, agencyDB)
+	if err != nil {
+		return fmt.Errorf("failed to access database %s: %w", agencyDB, err)
 	}
 
+	// Query to find the directory and all children recursively
 	query := `
-		FOR file IN @@collection
-			FILTER file.repo_id == @repo_id
-			FILTER STARTS_WITH(file.path, @path_prefix)
-			REMOVE file IN @@collection
+		FOR doc IN @@collection
+		FILTER doc.repo_id == @repo_id
+		FILTER (doc.path == @path OR STARTS_WITH(doc.path, CONCAT(@path, "/")))
+		FILTER doc.deleted_at == null
+		UPDATE doc WITH { deleted_at: DATE_ISO8601(DATE_NOW()) } IN @@collection
 	`
 
 	bindVars := map[string]interface{}{
-		"@collection": FileIndexCollection,
+		"@collection": GitArtifactsCollection,
 		"repo_id":     repoID,
-		"path_prefix": path,
+		"path":        path,
 	}
 
-	cursor, err := r.db.Query(ctx, query, bindVars)
+	cursor, err := db.Query(ctx, query, bindVars)
 	if err != nil {
-		return fmt.Errorf("failed to delete directory: %w", err)
+		// If collection doesn't exist, nothing to delete
+		if driver.IsNotFoundGeneral(err) {
+			return nil
+		}
+		return fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer cursor.Close()
 
@@ -224,11 +260,27 @@ func (r *repository) DeleteDirectory(ctx context.Context, repoID, path string) e
 	return nil
 }
 
-// UpdateIndex updates an existing file index
-func (r *repository) UpdateIndex(ctx context.Context, index *FileIndex) error {
-	collection, err := r.db.Collection(ctx, FileIndexCollection)
+// UpdateIndex updates an existing file index entry
+func (r *repository) UpdateIndex(ctx context.Context, agencyDB string, index *FileIndex) error {
+	db, err := r.client.Database(ctx, agencyDB)
 	if err != nil {
-		return fmt.Errorf("failed to get collection: %w", err)
+		return fmt.Errorf("failed to access database %s: %w", agencyDB, err)
+	}
+
+	collection, err := db.Collection(ctx, GitArtifactsCollection)
+	if err != nil {
+		// If collection doesn't exist, create it and retry
+		if driver.IsNotFoundGeneral(err) {
+			if createErr := r.ensureCollectionExists(ctx, db); createErr != nil {
+				return createErr
+			}
+			collection, err = db.Collection(ctx, GitArtifactsCollection)
+			if err != nil {
+				return fmt.Errorf("failed to get collection after creation: %w", err)
+			}
+		} else {
+			return fmt.Errorf("failed to get collection: %w", err)
+		}
 	}
 
 	index.Key = r.makeKey(index.RepoID, index.Path)
@@ -241,8 +293,13 @@ func (r *repository) UpdateIndex(ctx context.Context, index *FileIndex) error {
 }
 
 // RebuildIndex rebuilds the entire file index from a commit tree
-func (r *repository) RebuildIndex(ctx context.Context, repoID, commitSHA string, entries []*FileIndex) error {
-	// Delete all existing entries for this repo
+func (r *repository) RebuildIndex(ctx context.Context, agencyDB string, repoID, commitSHA string, entries []*FileIndex) error {
+	db, err := r.client.Database(ctx, agencyDB)
+	if err != nil {
+		return fmt.Errorf("failed to access database %s: %w", agencyDB, err)
+	}
+
+	// Delete all existing entries for this repo (collection might not exist yet)
 	query := `
 		FOR file IN @@collection
 			FILTER file.repo_id == @repo_id
@@ -250,19 +307,23 @@ func (r *repository) RebuildIndex(ctx context.Context, repoID, commitSHA string,
 	`
 
 	bindVars := map[string]interface{}{
-		"@collection": FileIndexCollection,
+		"@collection": GitArtifactsCollection,
 		"repo_id":     repoID,
 	}
 
-	cursor, err := r.db.Query(ctx, query, bindVars)
+	cursor, err := db.Query(ctx, query, bindVars)
 	if err != nil {
-		return fmt.Errorf("failed to clear index: %w", err)
+		// If collection doesn't exist, that's fine - we'll create it when adding entries
+		if !driver.IsNotFoundGeneral(err) {
+			return fmt.Errorf("failed to clear index: %w", err)
+		}
+	} else {
+		cursor.Close()
 	}
-	cursor.Close()
 
 	// Insert all new entries
 	for _, entry := range entries {
-		if err := r.IndexFile(ctx, entry); err != nil {
+		if err := r.IndexFile(ctx, agencyDB, entry); err != nil {
 			return fmt.Errorf("failed to index file %s: %w", entry.Path, err)
 		}
 	}
@@ -281,10 +342,23 @@ func (r *repository) makeKey(repoID, path string) string {
 	// Normalize path separators and remove leading slash
 	normalized := filepath.Clean(path)
 	normalized = strings.TrimPrefix(normalized, "/")
-	normalized = strings.ReplaceAll(normalized, "/", "_")
+
+	// Replace all non-alphanumeric characters except dash and underscore with underscore
+	// ArangoDB keys can only contain: a-z, A-Z, 0-9, _, -
+	normalized = strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_' {
+			return r
+		}
+		return '_'
+	}, normalized)
 
 	if normalized == "." || normalized == "" {
 		normalized = "root"
+	}
+
+	// Ensure the key starts with a letter or underscore (ArangoDB requirement)
+	if len(normalized) > 0 && normalized[0] >= '0' && normalized[0] <= '9' {
+		normalized = "_" + normalized
 	}
 
 	return fmt.Sprintf("%s_%s", repoID, normalized)

@@ -2,6 +2,22 @@
 // Handles file explorer interactions, file editing, and API calls
 
 /**
+ * Get agency ID from meta tag
+ */
+function getAgencyID() {
+    const meta = document.querySelector('meta[name="agency-id"]');
+    return meta ? meta.content : null;
+}
+
+/**
+ * Get instance ID from meta tag
+ */
+function getInstanceID() {
+    const meta = document.querySelector('meta[name="instance-id"]');
+    return meta ? meta.content : null;
+}
+
+/**
  * Navigate to a directory path
  */
 function navigateToPath(instanceID, path) {
@@ -13,28 +29,11 @@ function navigateToPath(instanceID, path) {
     // Normalize path
     path = path.replace(/\/+/g, '/');
 
-    // Call API to list directory
-    fetch(`/api/files?instance_id=${encodeURIComponent(instanceID)}&path=${encodeURIComponent(path)}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to list directory');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Update file list (HTMX will handle this)
-            htmx.ajax('GET', `/files/list?instance_id=${instanceID}&path=${path}`, {
-                target: '#file-browser-panel',
-                swap: 'outerHTML'
-            });
-        })
-        .catch(error => {
-            console.error('Error navigating:', error);
-            showNotification('Failed to navigate to directory', 'danger');
-        });
-}
-
-/**
+    // For now, just reload the page
+    // TODO: Implement HTMX partial updates for better UX
+    const agencyId = getAgencyID();
+    window.location.href = `/agencies/${agencyId}/instances/${instanceID}/explorer?path=${encodeURIComponent(path)}`;
+}/**
  * Open file for viewing
  */
 function openFile(instanceID, filePath) {
@@ -43,8 +42,10 @@ function openFile(instanceID, filePath) {
         return;
     }
 
+    const agencyID = getAgencyID();
+
     // Fetch file content
-    fetch(`/api/files/${encodeURIComponent(filePath)}?instance_id=${encodeURIComponent(instanceID)}`)
+    fetch(`/api/files/${encodeURIComponent(filePath)}?instance_id=${encodeURIComponent(instanceID)}&agency_id=${encodeURIComponent(agencyID)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to get file content');
@@ -70,8 +71,10 @@ function editFile(instanceID, filePath) {
         return;
     }
 
+    const agencyID = getAgencyID();
+
     // Fetch file content
-    fetch(`/api/files/${encodeURIComponent(filePath)}?instance_id=${encodeURIComponent(instanceID)}`)
+    fetch(`/api/files/${encodeURIComponent(filePath)}?instance_id=${encodeURIComponent(instanceID)}&agency_id=${encodeURIComponent(agencyID)}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to get file content');
@@ -94,6 +97,7 @@ function editFile(instanceID, filePath) {
 function saveFile(instanceID, filePath) {
     const content = document.getElementById('file-content-editor').value;
     const author = 'user'; // TODO: Get from session
+    const agencyID = getAgencyID();
 
     fetch(`/api/files/${encodeURIComponent(filePath)}`, {
         method: 'PUT',
@@ -102,6 +106,7 @@ function saveFile(instanceID, filePath) {
         },
         body: JSON.stringify({
             instance_id: instanceID,
+            agency_id: agencyID,
             path: filePath,
             content: content,
             author: author,
@@ -139,8 +144,9 @@ function deleteFileOrFolder(instanceID, path, type) {
     }
 
     const author = 'user'; // TODO: Get from session
+    const agencyID = getAgencyID();
 
-    fetch(`/api/files/${encodeURIComponent(path)}?instance_id=${encodeURIComponent(instanceID)}&author=${author}`, {
+    fetch(`/api/files/${encodeURIComponent(path)}?instance_id=${encodeURIComponent(instanceID)}&agency_id=${encodeURIComponent(agencyID)}&author=${author}`, {
         method: 'DELETE'
     })
         .then(response => {
@@ -198,6 +204,7 @@ function showCreateFolderDialog() {
  */
 function createFile(instanceID, path, content) {
     const author = 'user'; // TODO: Get from session
+    const agencyID = getAgencyID();
 
     fetch('/api/files', {
         method: 'POST',
@@ -206,6 +213,7 @@ function createFile(instanceID, path, content) {
         },
         body: JSON.stringify({
             instance_id: instanceID,
+            agency_id: agencyID,
             path: path,
             content: content || '',
             author: author,
@@ -236,6 +244,7 @@ function createFile(instanceID, path, content) {
  */
 function createDirectory(instanceID, path) {
     const author = 'user'; // TODO: Get from session
+    const agencyID = getAgencyID();
 
     fetch('/api/files/directory', {
         method: 'POST',
@@ -244,6 +253,7 @@ function createDirectory(instanceID, path) {
         },
         body: JSON.stringify({
             instance_id: instanceID,
+            agency_id: agencyID,
             path: path,
             author: author,
             message: `Create directory ${path}`
@@ -377,18 +387,32 @@ function closeFileViewer() {
  * Get current path from breadcrumb or URL
  */
 function getCurrentPath() {
-    // Try to get from breadcrumb active element
-    const activeBreadcrumb = document.querySelector('.breadcrumb li.is-active a');
-    if (activeBreadcrumb && activeBreadcrumb.textContent !== 'Root') {
-        // Build path from breadcrumb items
-        const items = Array.from(document.querySelectorAll('.breadcrumb li'));
-        const path = items
-            .filter(item => !item.classList.contains('is-active') && item.textContent !== 'Root')
-            .map(item => item.textContent.trim())
-            .join('/');
-        return '/' + path;
+    // Try to get from URL parameter first
+    const urlParams = new URLSearchParams(window.location.search);
+    const pathFromUrl = urlParams.get('path');
+    if (pathFromUrl) {
+        return pathFromUrl;
     }
-    return '/';
+
+    // Fallback: Build path from breadcrumb items (including active)
+    const items = Array.from(document.querySelectorAll('.breadcrumb li'));
+    if (items.length === 0) {
+        return '/';
+    }
+
+    // Collect all path segments (excluding "Root" text)
+    const pathSegments = items
+        .map(item => {
+            const link = item.querySelector('a');
+            return link ? link.textContent.trim() : '';
+        })
+        .filter(text => text && text !== 'Root');
+
+    if (pathSegments.length === 0) {
+        return '/';
+    }
+
+    return '/' + pathSegments.join('/');
 }
 
 /**

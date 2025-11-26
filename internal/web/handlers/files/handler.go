@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/git/fileindex"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -15,24 +16,44 @@ import (
 
 // Handler handles file browser API requests
 type Handler struct {
-	fileService fileindex.Service
-	logger      *logrus.Logger
+	fileService  fileindex.Service
+	agencyRepo   agency.Repository
+	instanceRepo interface {
+		GetByID(ctx context.Context, instanceID string, agencyDB string) (interface{}, error)
+	}
+	logger *logrus.Logger
 }
 
 // NewHandler creates a new file handler
-func NewHandler(fileService fileindex.Service, logger *logrus.Logger) *Handler {
+func NewHandler(fileService fileindex.Service, agencyRepo agency.Repository, logger *logrus.Logger) *Handler {
 	return &Handler{
 		fileService: fileService,
+		agencyRepo:  agencyRepo,
 		logger:      logger,
 	}
 }
 
-// RegisterRoutes registers file browser routes
+// getAgencyDatabase retrieves the agency database name
+func (h *Handler) getAgencyDatabase(ctx context.Context, agencyID string) (string, error) {
+	agency, err := h.agencyRepo.GetByID(ctx, agencyID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get agency: %w", err)
+	}
+
+	// Use agency.Database field, fallback to agency ID if not set
+	if agency.Database != "" {
+		return agency.Database, nil
+	}
+	return agency.ID, nil
+}
+
+// RegisterRoutes registers file browser API routes
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
+	// API routes remain simple, but handlers will lookup agency from instance
 	files := rg.Group("/files")
 	{
 		files.GET("", h.ListFiles)                   // List directory contents
-		files.GET("/*path", h.GetFile)               // Get file content or list directory
+		files.GET("/*path", h.GetFile)               // Get file content
 		files.POST("", h.CreateFile)                 // Create new file
 		files.PUT("/*path", h.UpdateFile)            // Update file content
 		files.DELETE("/*path", h.DeleteFile)         // Delete file or directory
@@ -44,12 +65,14 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 // ListFilesRequest represents directory listing request
 type ListFilesRequest struct {
 	InstanceID string `form:"instance_id" binding:"required"`
+	AgencyID   string `form:"agency_id" binding:"required"`
 	Path       string `form:"path"`
 }
 
 // FileRequest represents file operation request
 type FileRequest struct {
 	InstanceID string `json:"instance_id" binding:"required"`
+	AgencyID   string `json:"agency_id" binding:"required"`
 	Path       string `json:"path" binding:"required"`
 	Content    string `json:"content"`
 	Author     string `json:"author" binding:"required"`
@@ -59,6 +82,7 @@ type FileRequest struct {
 // DirectoryRequest represents directory creation request
 type DirectoryRequest struct {
 	InstanceID string `json:"instance_id" binding:"required"`
+	AgencyID   string `json:"agency_id" binding:"required"`
 	Path       string `json:"path" binding:"required"`
 	Author     string `json:"author" binding:"required"`
 	Message    string `json:"message"`
@@ -67,6 +91,7 @@ type DirectoryRequest struct {
 // RebuildIndexRequest represents index rebuild request
 type RebuildIndexRequest struct {
 	InstanceID string `json:"instance_id" binding:"required"`
+	AgencyID   string `json:"agency_id" binding:"required"`
 }
 
 // ListFiles lists directory contents
@@ -77,12 +102,20 @@ func (h *Handler) ListFiles(c *gin.Context) {
 		return
 	}
 
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), req.AgencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	// Default to root if no path specified
 	if req.Path == "" {
 		req.Path = "/"
 	}
 
-	entries, err := h.fileService.ListDirectory(c.Request.Context(), req.InstanceID, req.Path)
+	entries, err := h.fileService.ListDirectory(c.Request.Context(), agencyDB, req.InstanceID, req.Path)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to list directory")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list directory"})
@@ -103,20 +136,34 @@ func (h *Handler) GetFile(c *gin.Context) {
 		return
 	}
 
+	agencyID := c.Query("agency_id")
+	if agencyID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "agency_id is required"})
+		return
+	}
+
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	path := c.Param("path")
 	if path == "" {
 		path = "/"
 	}
 
 	// Try to get as file first
-	fileContent, err := h.fileService.GetFileContent(c.Request.Context(), instanceID, path)
+	fileContent, err := h.fileService.GetFileContent(c.Request.Context(), agencyDB, instanceID, path)
 	if err == nil {
 		c.JSON(http.StatusOK, fileContent)
 		return
 	}
 
 	// If not a file, try as directory
-	entries, err := h.fileService.ListDirectory(c.Request.Context(), instanceID, path)
+	entries, err := h.fileService.ListDirectory(c.Request.Context(), agencyDB, instanceID, path)
 	if err != nil {
 		h.logger.WithError(err).WithField("path", path).Error("Failed to get file or directory")
 		c.JSON(http.StatusNotFound, gin.H{"error": "File or directory not found"})
@@ -138,14 +185,23 @@ func (h *Handler) CreateFile(c *gin.Context) {
 		return
 	}
 
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), req.AgencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	// Validate path
 	if err := h.validatePath(req.Path); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.fileService.CreateFile(
+	err = h.fileService.CreateFile(
 		c.Request.Context(),
+		agencyDB,
 		req.InstanceID,
 		req.Path,
 		req.Content,
@@ -177,6 +233,14 @@ func (h *Handler) UpdateFile(c *gin.Context) {
 		return
 	}
 
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), req.AgencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	// Get path from URL if not in body
 	if req.Path == "" {
 		req.Path = c.Param("path")
@@ -188,8 +252,9 @@ func (h *Handler) UpdateFile(c *gin.Context) {
 		return
 	}
 
-	err := h.fileService.UpdateFile(
+	err = h.fileService.UpdateFile(
 		c.Request.Context(),
+		agencyDB,
 		req.InstanceID,
 		req.Path,
 		req.Content,
@@ -221,6 +286,20 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 		return
 	}
 
+	agencyID := c.Query("agency_id")
+	if agencyID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "agency_id is required"})
+		return
+	}
+
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	author := c.Query("author")
 	if author == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "author is required"})
@@ -235,13 +314,34 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 
 	message := c.Query("message")
 
-	err := h.fileService.DeleteFile(
+	// Try to delete as file first
+	err = h.fileService.DeleteFile(
 		c.Request.Context(),
+		agencyDB,
 		instanceID,
 		path,
 		author,
 		message,
 	)
+
+	// If it's a directory, try DeleteDirectory instead
+	if err != nil && strings.Contains(err.Error(), "path is a directory") {
+		err = h.fileService.DeleteDirectory(
+			c.Request.Context(),
+			agencyDB,
+			instanceID,
+			path,
+			author,
+			message,
+		)
+		if err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Directory deleted successfully",
+				"path":    path,
+			})
+			return
+		}
+	}
 
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to delete file")
@@ -249,7 +349,7 @@ func (h *Handler) DeleteFile(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete"})
 		return
 	}
 
@@ -267,14 +367,23 @@ func (h *Handler) CreateDirectory(c *gin.Context) {
 		return
 	}
 
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), req.AgencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	// Validate path
 	if err := h.validatePath(req.Path); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.fileService.CreateDirectory(
+	err = h.fileService.CreateDirectory(
 		c.Request.Context(),
+		agencyDB,
 		req.InstanceID,
 		req.Path,
 		req.Author,
@@ -305,7 +414,15 @@ func (h *Handler) RebuildIndex(c *gin.Context) {
 		return
 	}
 
-	err := h.fileService.RebuildIndex(c.Request.Context(), req.InstanceID)
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), req.AgencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
+	err = h.fileService.RebuildIndex(c.Request.Context(), agencyDB, req.InstanceID)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to rebuild index")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to rebuild index"})
@@ -346,6 +463,20 @@ func (h *Handler) UploadFile(c *gin.Context) {
 		return
 	}
 
+	agencyID := c.PostForm("agency_id")
+	if agencyID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "agency_id is required"})
+		return
+	}
+
+	// Get agency database
+	agencyDB, err := h.getAgencyDatabase(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency database")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get agency"})
+		return
+	}
+
 	author := c.PostForm("author")
 	if author == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "author is required"})
@@ -380,15 +511,15 @@ func (h *Handler) UploadFile(c *gin.Context) {
 
 	// Create or update file
 	ctx := context.Background()
-	_, getErr := h.fileService.GetFileContent(ctx, instanceID, path)
+	_, getErr := h.fileService.GetFileContent(ctx, agencyDB, instanceID, path)
 
 	var opErr error
 	if getErr != nil {
 		// File doesn't exist, create it
-		opErr = h.fileService.CreateFile(ctx, instanceID, path, content, author, message)
+		opErr = h.fileService.CreateFile(ctx, agencyDB, instanceID, path, content, author, message)
 	} else {
 		// File exists, update it
-		opErr = h.fileService.UpdateFile(ctx, instanceID, path, content, author, message)
+		opErr = h.fileService.UpdateFile(ctx, agencyDB, instanceID, path, content, author, message)
 	}
 
 	if opErr != nil {

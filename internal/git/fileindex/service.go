@@ -16,17 +16,18 @@ import (
 // Service provides file browser operations
 type Service interface {
 	// File operations
-	ListDirectory(ctx context.Context, instanceID, path string) ([]*DirectoryEntry, error)
-	GetFileContent(ctx context.Context, instanceID, path string) (*FileContent, error)
-	CreateFile(ctx context.Context, instanceID, path, content, author, message string) error
-	UpdateFile(ctx context.Context, instanceID, path, content, author, message string) error
-	DeleteFile(ctx context.Context, instanceID, path, author, message string) error
+	ListDirectory(ctx context.Context, agencyDB, instanceID, path string) ([]*DirectoryEntry, error)
+	GetFileContent(ctx context.Context, agencyDB, instanceID, path string) (*FileContent, error)
+	CreateFile(ctx context.Context, agencyDB, instanceID, path, content, author, message string) error
+	UpdateFile(ctx context.Context, agencyDB, instanceID, path, content, author, message string) error
+	DeleteFile(ctx context.Context, agencyDB, instanceID, path, author, message string) error
 
 	// Directory operations
-	CreateDirectory(ctx context.Context, instanceID, path, author, message string) error
+	CreateDirectory(ctx context.Context, agencyDB, instanceID, path, author, message string) error
+	DeleteDirectory(ctx context.Context, agencyDB, instanceID, path, author, message string) error
 
 	// Index operations
-	RebuildIndex(ctx context.Context, instanceID string) error
+	RebuildIndex(ctx context.Context, agencyDB, instanceID string) error
 }
 
 // service implements Service interface
@@ -46,17 +47,28 @@ func NewService(gitOps ops.GitOps, indexRepo Repository, logger *logrus.Logger) 
 }
 
 // ListDirectory lists files and folders in a directory
-func (s *service) ListDirectory(ctx context.Context, instanceID, path string) ([]*DirectoryEntry, error) {
+func (s *service) ListDirectory(ctx context.Context, agencyDB, instanceID, path string) ([]*DirectoryEntry, error) {
 	// Normalize path
 	if path == "" {
 		path = "/"
 	}
 
+	s.logger.WithFields(logrus.Fields{
+		"path":        path,
+		"instance_id": instanceID,
+	}).Debug("Listing directory")
+
 	// Get entries from index
-	entries, err := s.indexRepo.ListDirectory(ctx, instanceID, path)
+	entries, err := s.indexRepo.ListDirectory(ctx, agencyDB, instanceID, path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list directory: %w", err)
 	}
+
+	s.logger.WithFields(logrus.Fields{
+		"path":        path,
+		"entry_count": len(entries),
+		"instance_id": instanceID,
+	}).Debug("Listed directory entries")
 
 	// Convert to DirectoryEntry
 	result := make([]*DirectoryEntry, 0, len(entries))
@@ -83,9 +95,9 @@ func (s *service) ListDirectory(ctx context.Context, instanceID, path string) ([
 }
 
 // GetFileContent retrieves file content
-func (s *service) GetFileContent(ctx context.Context, instanceID, path string) (*FileContent, error) {
+func (s *service) GetFileContent(ctx context.Context, agencyDB, instanceID, path string) (*FileContent, error) {
 	// Get file index
-	index, err := s.indexRepo.GetByPath(ctx, instanceID, path)
+	index, err := s.indexRepo.GetByPath(ctx, agencyDB, instanceID, path)
 	if err != nil {
 		return nil, err
 	}
@@ -112,9 +124,19 @@ func (s *service) GetFileContent(ctx context.Context, instanceID, path string) (
 }
 
 // CreateFile creates a new file
-func (s *service) CreateFile(ctx context.Context, instanceID, path, content, author, message string) error {
+func (s *service) CreateFile(ctx context.Context, agencyDB, instanceID, path, content, author, message string) error {
+	// Ensure repository is initialized
+	_, err := s.gitOps.GetRepository(ctx, instanceID)
+	if err != nil {
+		// Repository doesn't exist, initialize it
+		s.logger.WithField("instance", instanceID).Info("Initializing Git repository for instance")
+		if initErr := s.gitOps.InitRepository(ctx, instanceID, "instance-"+instanceID); initErr != nil {
+			return fmt.Errorf("failed to initialize repository: %w", initErr)
+		}
+	}
+
 	// Check if file already exists
-	_, err := s.indexRepo.GetByPath(ctx, instanceID, path)
+	_, err = s.indexRepo.GetByPath(ctx, agencyDB, instanceID, path)
 	if err == nil {
 		return fmt.Errorf("file already exists: %s", path)
 	}
@@ -187,7 +209,7 @@ func (s *service) CreateFile(ctx context.Context, instanceID, path, content, aut
 		Created:    time.Now(),
 	}
 
-	err = s.indexRepo.IndexFile(ctx, index)
+	err = s.indexRepo.IndexFile(ctx, agencyDB, index)
 	if err != nil {
 		return fmt.Errorf("failed to update index: %w", err)
 	}
@@ -202,9 +224,9 @@ func (s *service) CreateFile(ctx context.Context, instanceID, path, content, aut
 }
 
 // UpdateFile updates an existing file
-func (s *service) UpdateFile(ctx context.Context, instanceID, path, content, author, message string) error {
+func (s *service) UpdateFile(ctx context.Context, agencyDB, instanceID, path, content, author, message string) error {
 	// Get current file index
-	index, err := s.indexRepo.GetByPath(ctx, instanceID, path)
+	index, err := s.indexRepo.GetByPath(ctx, agencyDB, instanceID, path)
 	if err != nil {
 		return fmt.Errorf("file not found: %w", err)
 	}
@@ -278,7 +300,7 @@ func (s *service) UpdateFile(ctx context.Context, instanceID, path, content, aut
 	index.UpdatedBy = author
 	index.UpdatedAt = time.Now()
 
-	err = s.indexRepo.UpdateIndex(ctx, index)
+	err = s.indexRepo.UpdateIndex(ctx, agencyDB, index)
 	if err != nil {
 		return fmt.Errorf("failed to update index: %w", err)
 	}
@@ -293,9 +315,9 @@ func (s *service) UpdateFile(ctx context.Context, instanceID, path, content, aut
 }
 
 // DeleteFile deletes a file
-func (s *service) DeleteFile(ctx context.Context, instanceID, path, author, message string) error {
+func (s *service) DeleteFile(ctx context.Context, agencyDB, instanceID, path, author, message string) error {
 	// Check file exists
-	index, err := s.indexRepo.GetByPath(ctx, instanceID, path)
+	index, err := s.indexRepo.GetByPath(ctx, agencyDB, instanceID, path)
 	if err != nil {
 		return fmt.Errorf("file not found: %w", err)
 	}
@@ -352,7 +374,7 @@ func (s *service) DeleteFile(ctx context.Context, instanceID, path, author, mess
 	}
 
 	// Delete from index
-	err = s.indexRepo.DeleteByPath(ctx, instanceID, path)
+	err = s.indexRepo.DeleteByPath(ctx, agencyDB, instanceID, path)
 	if err != nil {
 		return fmt.Errorf("failed to delete from index: %w", err)
 	}
@@ -367,18 +389,37 @@ func (s *service) DeleteFile(ctx context.Context, instanceID, path, author, mess
 }
 
 // CreateDirectory creates a new directory
-func (s *service) CreateDirectory(ctx context.Context, instanceID, path, author, message string) error {
+func (s *service) CreateDirectory(ctx context.Context, agencyDB, instanceID, path, author, message string) error {
 	// Normalize path
 	path = filepath.Clean(path)
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
 
+	// Ensure repository is initialized
+	_, err := s.gitOps.GetRepository(ctx, instanceID)
+	if err != nil {
+		// Repository doesn't exist, initialize it
+		s.logger.WithField("instance", instanceID).Info("Initializing Git repository for instance")
+		if initErr := s.gitOps.InitRepository(ctx, instanceID, "instance-"+instanceID); initErr != nil {
+			return fmt.Errorf("failed to initialize repository: %w", initErr)
+		}
+	}
+
 	// Check if directory already exists
-	_, err := s.indexRepo.GetByPath(ctx, instanceID, path)
+	existingIndex, err := s.indexRepo.GetByPath(ctx, agencyDB, instanceID, path)
 	if err == nil {
+		s.logger.WithFields(logrus.Fields{
+			"path":        path,
+			"existing":    existingIndex,
+			"parent_path": existingIndex.ParentPath,
+		}).Warn("Directory already exists in index")
 		return fmt.Errorf("directory already exists: %s", path)
 	}
+	s.logger.WithFields(logrus.Fields{
+		"path":  path,
+		"error": err,
+	}).Debug("Directory does not exist, proceeding with creation")
 
 	// Create empty tree for directory
 	treeSHA, err := s.gitOps.WriteTree(ctx, instanceID, []models.TreeEntry{})
@@ -400,7 +441,7 @@ func (s *service) CreateDirectory(ctx context.Context, instanceID, path, author,
 		Created:    time.Now(),
 	}
 
-	err = s.indexRepo.IndexFile(ctx, index)
+	err = s.indexRepo.IndexFile(ctx, agencyDB, index)
 	if err != nil {
 		return fmt.Errorf("failed to index directory: %w", err)
 	}
@@ -413,8 +454,50 @@ func (s *service) CreateDirectory(ctx context.Context, instanceID, path, author,
 	return nil
 }
 
+// DeleteDirectory deletes a directory (must be empty)
+func (s *service) DeleteDirectory(ctx context.Context, agencyDB, instanceID, path, author, message string) error {
+	// Normalize path
+	path = filepath.Clean(path)
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
+	// Check if directory exists
+	index, err := s.indexRepo.GetByPath(ctx, agencyDB, instanceID, path)
+	if err != nil {
+		return fmt.Errorf("directory not found: %w", err)
+	}
+
+	if !index.IsDir {
+		return fmt.Errorf("path is not a directory: %s", path)
+	}
+
+	// Check if directory is empty
+	entries, err := s.indexRepo.ListDirectory(ctx, agencyDB, instanceID, path)
+	if err != nil {
+		return fmt.Errorf("failed to check directory contents: %w", err)
+	}
+
+	if len(entries) > 0 {
+		return fmt.Errorf("directory is not empty: %s", path)
+	}
+
+	// Delete from index
+	err = s.indexRepo.DeleteByPath(ctx, agencyDB, instanceID, path)
+	if err != nil {
+		return fmt.Errorf("failed to delete directory from index: %w", err)
+	}
+
+	s.logger.WithFields(logrus.Fields{
+		"path":     path,
+		"instance": instanceID,
+	}).Info("Deleted directory")
+
+	return nil
+}
+
 // RebuildIndex rebuilds the file index from the current commit
-func (s *service) RebuildIndex(ctx context.Context, instanceID string) error {
+func (s *service) RebuildIndex(ctx context.Context, agencyDB, instanceID string) error {
 	// Get repository
 	repo, err := s.gitOps.GetRepository(ctx, instanceID)
 	if err != nil {
@@ -439,7 +522,7 @@ func (s *service) RebuildIndex(ctx context.Context, instanceID string) error {
 	}
 
 	// Rebuild index
-	err = s.indexRepo.RebuildIndex(ctx, instanceID, commit.SHA, entries)
+	err = s.indexRepo.RebuildIndex(ctx, agencyDB, instanceID, commit.SHA, entries)
 	if err != nil {
 		return fmt.Errorf("failed to rebuild index: %w", err)
 	}

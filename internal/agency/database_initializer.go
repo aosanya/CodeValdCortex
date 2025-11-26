@@ -63,10 +63,13 @@ func (d *databaseInitializer) InitializeAgencyDatabase(ctx context.Context, agen
 		"agency_instances", // Instance management (MVP-PUB-007A)
 
 		// Git-based document system (MVP-WI-005, MVP-WI-006)
-		"git_objects",  // Content-addressable Git objects (blobs, trees, commits)
-		"git_refs",     // Git references (branches, tags, HEAD)
-		"repositories", // Repository metadata (one per instance)
-		"file_index",   // File path index for fast lookups (MVP-WI-006)
+		"git_objects",   // Content-addressable Git objects (blobs, trees, commits)
+		"git_refs",      // Git references (branches, tags, HEAD)
+		"repositories",  // Repository metadata (one per instance)
+		"git_objects",   // Git storage objects (blobs, trees, commits)
+		"git_refs",      // Git references (branches, tags, HEAD)
+		"repositories",  // Git repository metadata
+		"git_artifacts", // File and directory metadata for file explorer (MVP-WI-006)
 	}
 
 	for _, collName := range collections {

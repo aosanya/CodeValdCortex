@@ -251,8 +251,13 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 	ref, err := g.storage.GetRef(ctx, repoID, refName)
 	if err != nil {
 		// Ref doesn't exist, create it
+		// Create a safe document key by replacing slashes with underscores
+		safeKey := strings.ReplaceAll(refName, "/", "_")
+
 		ref = &models.GitRef{
+			Key:    safeKey,
 			RepoID: repoID,
+			Name:   refName,
 			Type:   "branch",
 			Target: commitSHA,
 		}

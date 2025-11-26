@@ -164,7 +164,7 @@ func New(cfg *config.Config) *App {
 		} else {
 			gitOps = ops.NewGitOps(gitStorage, logger)
 
-			fileIndexRepo, err := fileindex.NewRepository(dbClient.Database(), logger)
+			fileIndexRepo, err := fileindex.NewRepository(dbClient.Client(), logger)
 			if err != nil {
 				logger.WithError(err).Warn("Failed to initialize file index repository")
 			} else {
@@ -436,29 +436,40 @@ func (a *App) setupServer() error {
 
 	// File explorer web routes (if available)
 	if a.fileIndexService != nil {
-		filesHandler := files.NewHandler(a.fileIndexService, a.logger)
+		filesHandler := files.NewHandler(a.fileIndexService, a.agencyRepository, a.logger)
 		router.GET("/agencies/:id/instances/:instance_id/explorer", func(c *gin.Context) {
 			agencyID := c.Param("id")
 			instanceID := c.Param("instance_id")
-			
+
+			// Get path from query parameter (default to root)
+			currentPath := c.DefaultQuery("path", "/")
+
 			// Get agency
 			agency, err := a.agencyService.GetAgency(c.Request.Context(), agencyID)
 			if err != nil {
 				c.String(http.StatusNotFound, "Agency not found")
 				return
 			}
-			
-			// List root directory
-			entries, err := a.fileIndexService.ListDirectory(c.Request.Context(), instanceID, "/")
+
+			// Get agency database
+			agencyDB := agency.ID
+			if agency.Database != "" {
+				agencyDB = agency.Database
+			}
+
+			// List directory
+			entries, err := a.fileIndexService.ListDirectory(c.Request.Context(), agencyDB, instanceID, currentPath)
 			if err != nil {
-				a.logger.WithError(err).Error("Failed to list directory")
+				a.logger.WithError(err).WithField("path", currentPath).Error("Failed to list directory")
 				entries = []*fileindex.DirectoryEntry{} // Empty list on error
 			}
-			
+
 			// Render file browser page using Templ
-			component := pages.FileExplorerPage(agency, instanceID, "/", entries)
+			component := pages.FileExplorerPage(agency, instanceID, currentPath, entries)
 			component.Render(c.Request.Context(), c.Writer)
-		})		// API routes for file operations
+		})
+
+		// API routes for file operations
 		api := router.Group("/api")
 		filesHandler.RegisterRoutes(api)
 		a.logger.Info("File explorer routes registered")
