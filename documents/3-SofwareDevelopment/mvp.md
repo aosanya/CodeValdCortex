@@ -70,8 +70,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-WI-005 | Git Core Layer in ArangoDB | Implement Git object model (blobs, trees, commits, refs) in ArangoDB collections, content-addressable storage with SHA-1 hashing, branch/ref management, commit creation/retrieval | 📋 Not Started | P0 | High | Go, ArangoDB, Git Internals | None | [work-items-integration/](mvp-details/work-items-integration/) |
-| MVP-WI-006 | File Explorer API & UI | Build file/folder browsing API, file CRUD operations, directory tree rendering, Git mechanics abstraction, Templ-based file explorer UI with breadcrumbs and navigation | 📋 Not Started | P0 | High | Go, Templ, HTMX, Frontend Dev | MVP-WI-005 | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md) |
+| MVP-WI-006 | File Explorer API & UI | Build file/folder browsing API, file CRUD operations, directory tree rendering, Git mechanics abstraction, Templ-based file explorer UI with breadcrumbs and navigation | 📋 Not Started | P0 | High | Go, Templ, HTMX, Frontend Dev | ~~MVP-WI-005~~ ✅ | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md) |
 | MVP-WI-007 | Pull Request System | Implement PR creation/management, diff generation, three-way merge algorithm, conflict detection, PR review workflow, approval tracking, merge operations | 📋 Not Started | P0 | High | Go, ArangoDB, Git Merge Logic | MVP-WI-006 | [work-items-integration/pull-requests.md](mvp-details/work-items-integration/pull-requests.md) |
 | MVP-WI-008 | Kanban Board & Issue Management | Build Kanban board UI, issue creation form, column management, issue CRUD API, work item definitions integration, workflow step configuration | 📋 Not Started | P0 | Medium | Go, Templ, HTMX, Frontend Dev | MVP-030 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-009 | Issue-Git Integration | Implement branch creation from issues, issue-branch linking, PR-issue association, automatic issue progression on PR merge, workflow orchestration service | 📋 Not Started | P0 | Medium | Go, ArangoDB, Event System | MVP-WI-007, MVP-WI-008 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
@@ -239,11 +238,11 @@ The following tasks are no longer applicable due to architectural changes:
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Work Items & Document Management**: 7 tasks (MVP-WI-005 through MVP-WI-010)
-- **Work Item Definitions**: 3 tasks (MVP-030, MVP-031, MVP-032)
+- **Work Items & Document Management**: 6 tasks (MVP-WI-006 through MVP-WI-010, MVP-030)
+- **Work Item Definitions**: 2 tasks (MVP-031, MVP-032)
 - **A2A Protocol**: 6 foundational tasks (MVP-A2A-000 through MVP-A2A-004, MVP-A2A-006)
 
-**Total P0**: 21 tasks
+**Total P0**: 19 tasks
 
 ### P1 (Critical - Core Features)
 - **Git AI Features**: 1 task (MVP-WI-011 - AI-Assisted Conflict Resolution)
@@ -260,7 +259,7 @@ The following tasks are no longer applicable due to architectural changes:
 
 **Total P2**: 7 tasks
 
-**Grand Total Active Tasks**: 49 tasks
+**Grand Total Active Tasks**: 48 tasks
 
 ---
 
