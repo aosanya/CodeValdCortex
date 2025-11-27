@@ -71,7 +71,7 @@ git branch -d feature/MVP-XXX_description
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
 | MVP-WI-007 | Pull Request System | Implement PR creation/management, diff generation, three-way merge algorithm, conflict detection, PR review workflow, approval tracking, merge operations | 📋 Not Started | P0 | High | Go, ArangoDB, Git Merge Logic | ~~MVP-WI-006~~ ✅ | [work-items-integration/pull-requests.md](mvp-details/work-items-integration/pull-requests.md) |
-| MVP-WI-008 | Kanban Board & Issue Management | Build Kanban board UI, issue creation form, column management, issue CRUD API, work item definitions integration, workflow step configuration | 📋 Not Started | P0 | Medium | Go, Templ, HTMX, Frontend Dev | MVP-030 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
+| MVP-WI-008 | Kanban Board & Issue Management | Build Kanban board UI, issue creation form, column management, issue CRUD API, work item definitions integration, workflow step configuration | 📋 Not Started | P0 | Medium | Go, Templ, HTMX, Frontend Dev | ~~MVP-030~~ ✅ | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-009 | Issue-Git Integration | Implement branch creation from issues, issue-branch linking, PR-issue association, automatic issue progression on PR merge, workflow orchestration service | 📋 Not Started | P0 | Medium | Go, ArangoDB, Event System | MVP-WI-007, MVP-WI-008 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-010 | Agent Work Assignment | Implement flexible assignment model (manual + claim-based), agent-issue linking, work queue API, notification system, agent instance creation from work item definitions | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-WI-009, MVP-032 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-011 | AI-Assisted Conflict Resolution | Build conflict detection in merges, AI-powered merge suggestions, conflict resolution UI, three-way merge with AI assistance, merge conflict analytics | 📋 Not Started | P1 | High | Go, AI/LLM, Git Merge, Frontend Dev | MVP-WI-007 | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md#ai-assisted-conflict-resolution) |
@@ -80,8 +80,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-030 | Work Item Definitions & Workflows | Implement work item definition schema (deliverables, goals, tags), workflow/Kanban board definitions with steps/columns, workflow CRUD in Agency Designer, work item templates | 📋 Not Started | P0 | Medium | Go, ArangoDB, JSON Schema | MVP-029 ✅ | [work-items-integration/work-item-schema.md](mvp-details/work-items-integration/work-item-schema.md) |
-| MVP-031 | Work Item Lifecycle & SLA | Build work item state machines (open→assigned→in_progress→ready_for_review→completed), SLA tracking, deadline management, state transition validation | 📋 Not Started | P0 | Medium | Go, ArangoDB, State Machine | MVP-030 | [work-items-integration/work-item-schema.md](mvp-details/work-items-integration/work-item-schema.md) |
+| MVP-031 | Work Item Lifecycle & SLA | Build work item state machines (open→assigned→in_progress→ready_for_review→completed), SLA tracking, deadline management, state transition validation | 📋 Not Started | P0 | Medium | Go, ArangoDB, State Machine | ~~MVP-030~~ ✅ | [work-items-integration/work-item-schema.md](mvp-details/work-items-integration/work-item-schema.md) |
 | MVP-032 | Agent Factory & Orchestration | Implement AgentFactory.CreateFromWorkItemDefinition(), agent lifecycle FSM (created→running→completed), agent→issue linking, workflow orchestrator that monitors issue events and spawns agents | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-031 | [MVP-032.md](mvp-details/MVP-032.md) |
 
 **Architecture Reference**: `/documents/3-SofwareDevelopment/mvp-details/work-items-integration/`
@@ -237,11 +236,11 @@ The following tasks are no longer applicable due to architectural changes:
 
 ### P0 (Blocking - Must Complete First)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Work Items & Document Management**: 6 tasks (MVP-WI-006 through MVP-WI-010, MVP-030)
+- **Work Items & Document Management**: 5 tasks (MVP-WI-007 through MVP-WI-010, ~~MVP-030~~ ✅)
 - **Work Item Definitions**: 2 tasks (MVP-031, MVP-032)
 - **A2A Protocol**: 6 foundational tasks (MVP-A2A-000 through MVP-A2A-004, MVP-A2A-006)
 
-**Total P0**: 19 tasks
+**Total P0**: 18 tasks
 
 ### P1 (Critical - Core Features)
 - **Git AI Features**: 1 task (MVP-WI-011 - AI-Assisted Conflict Resolution)
@@ -258,7 +257,7 @@ The following tasks are no longer applicable due to architectural changes:
 
 **Total P2**: 7 tasks
 
-**Grand Total Active Tasks**: 48 tasks
+**Grand Total Active Tasks**: 47 tasks
 
 ---
 
@@ -268,14 +267,15 @@ Follow This sequence!!!
 
 Phase 1 (P0 Core):
 
-MVP-WI-005 - Git Core Layer
-MVP-WI-006 - File Explorer
-MVP-030 - Work Item Definitions
-MVP-WI-008 - Kanban Board
-MVP-WI-007 - Pull Requests
-MVP-031 - Work Item Lifecycle
-MVP-WI-009 - Issue-Git Integration
-MVP-032 - Agent Factory
-MVP-WI-010 - Agent Assignment
+1. ~~MVP-WI-005 - Git Core Layer~~ ✅
+2. ~~MVP-WI-006 - File Explorer~~ ✅
+3. ~~MVP-030 - Work Item Definitions~~ ✅
+4. MVP-WI-008 - Kanban Board
+5. MVP-WI-007 - Pull Requests
+6. MVP-031 - Work Item Lifecycle
+7. MVP-WI-009 - Issue-Git Integration
+8. MVP-032 - Agent Factory
+9. MVP-WI-010 - Agent Assignment
+
 Phase 2 (P1 Enhancement):
 10. MVP-WI-011 - AI Conflict Resolution
