@@ -57,7 +57,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 					</div>
 					<div class="level-right">
 						<div class="level-item">
-							<button class="button is-primary" onclick="openCreateIssueModal()">
+							<button class="button is-primary" onclick="toggleCreateIssuePanel()">
 								<span class="icon"><i class="fas fa-plus"></i></span>
 								<span>Create Issue</span>
 							</button>
@@ -77,7 +77,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 									<div class="level-left">
 										<div style="max-width: 240px;">
 											<p class="heading mb-1">{ column.WorkItemCode }</p>
-											<p class="title is-6 mb-0" style="white-space: normal; line-height: 1.3;">{ column.Name }</p>
+											<p class="title is-6 mb-0" style="white-space: normal; line-height: 1.3; overflow-wrap: anywhere; word-break: break-word;">{ column.Name }</p>
 										</div>
 									</div>
 									<div class="level-right">
@@ -109,65 +109,77 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 			</div>
 		</section>
 
-		<!-- Create Issue Modal -->
-		<div id="createIssueModal" class="modal">
-			<div class="modal-background" onclick="closeCreateIssueModal()"></div>
-			<div class="modal-card">
-				<header class="modal-card-head">
-					<p class="modal-card-title">Create New Issue</p>
-					<button class="delete" aria-label="close" onclick="closeCreateIssueModal()"></button>
-				</header>
-				<section class="modal-card-body">
-					<form id="createIssueForm">
-						<div class="field">
-							<label class="label">Title</label>
-							<div class="control">
-								<input class="input" type="text" name="title" placeholder="Issue title" required/>
-							</div>
+			<!-- Create Issue Panel (inline, not a popup) -->
+			<div id="createIssuePanel" class="box" style="display: none; margin-bottom: 1rem;">
+				<div class="level">
+					<div class="level-left">
+						<div class="level-item">
+							<strong>Create New Issue</strong>
 						</div>
+					</div>
+					<div class="level-right">
+						<div class="level-item">
+							<button class="button" onclick="closeCreateIssuePanel()">Close</button>
+						</div>
+					</div>
+				</div>
 
-						<div class="field">
-							<label class="label">Description</label>
-							<div class="control">
-								<textarea class="textarea" name="description" placeholder="Issue description" rows="4"></textarea>
-							</div>
+				<form id="createIssueForm">
+					<div class="field">
+						<label class="label">Title</label>
+						<div class="control">
+							<input class="input" type="text" name="title" placeholder="Issue title" required/>
 						</div>
+					</div>
 
-						<div class="field">
-							<label class="label">Workflow</label>
-							<div class="control">
-								<input class="input" type="text" name="workflow_id" value={ board.WorkflowID } readonly/>
-							</div>
-							<p class="help">Issues will start at the first step of this workflow</p>
+					<div class="field">
+						<label class="label">Description</label>
+						<div class="control">
+							<textarea class="textarea" name="description" placeholder="Issue description" rows="4"></textarea>
 						</div>
-					</form>
-				</section>
-				<footer class="modal-card-foot">
-					<button class="button is-primary" onclick="submitCreateIssue()">Create Issue</button>
-					<button class="button" onclick="closeCreateIssueModal()">Cancel</button>
-				</footer>
+					</div>
+
+					<!-- Workflow is not shown to the user; we attach board.WorkflowID in the request -->
+					<div class="field is-grouped">
+						<div class="control">
+							<button type="button" class="button is-primary" onclick="submitCreateIssue()">Create Issue</button>
+						</div>
+						<div class="control">
+							<button type="button" class="button" onclick="closeCreateIssuePanel()">Cancel</button>
+						</div>
+					</div>
+				</form>
 			</div>
-		</div>
 
 		<!-- Workbench JavaScript -->
 		<script>
-			function openCreateIssueModal() {
-				document.getElementById('createIssueModal').classList.add('is-active');
+			function toggleCreateIssuePanel() {
+				const panel = document.getElementById('createIssuePanel');
+				if (!panel) return;
+				if (panel.style.display === 'none' || panel.style.display === '') {
+					panel.style.display = 'block';
+				} else {
+					panel.style.display = 'none';
+					document.getElementById('createIssueForm').reset();
+				}
 			}
 
-			function closeCreateIssueModal() {
-				document.getElementById('createIssueModal').classList.remove('is-active');
+			function closeCreateIssuePanel() {
+				const panel = document.getElementById('createIssuePanel');
+				if (!panel) return;
+				panel.style.display = 'none';
 				document.getElementById('createIssueForm').reset();
 			}
 
 			function submitCreateIssue() {
 				const form = document.getElementById('createIssueForm');
 				const formData = new FormData(form);
-				
+
 				const data = {
 					title: formData.get('title'),
 					description: formData.get('description'),
-					workflow_id: formData.get('workflow_id')
+					// workflow_id is attached from the server-side board context
+					workflow_id: '{ board.WorkflowID }'
 				};
 
 				const agencyID = '{ agency.Key }';
@@ -182,7 +194,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 				})
 				.then(response => response.json())
 				.then(data => {
-					closeCreateIssueModal();
+					closeCreateIssuePanel();
 					// Reload page to show new issue
 					window.location.reload();
 				})
