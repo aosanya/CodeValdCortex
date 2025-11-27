@@ -1,0 +1,169 @@
+package components
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
+
+// InstanceSelector displays a list of instances for selection
+// targetPath is where clicking an instance should navigate (use {instance_id} as placeholder)
+// e.g., "/agencies/{agency_id}/instances/{instance_id}/workbench"
+templ InstanceSelector(agency *models.Agency, instances []*models.AgencyInstance, targetPath string, title string, emptyMessage string) {
+	<div class="box">
+		if title != "" {
+			<h2 class="title is-4 mb-4">{ title }</h2>
+		}
+		
+		if len(instances) == 0 {
+			<div class="notification is-info is-light">
+				<p class="has-text-centered">
+					<span class="icon is-large">
+						<i class="fas fa-info-circle fa-2x"></i>
+					</span>
+				</p>
+				<p class="has-text-centered mt-3">
+					if emptyMessage != "" {
+						{ emptyMessage }
+					} else {
+						No instances available. Create an instance from a tag first.
+					}
+				</p>
+			</div>
+		} else {
+			<div class="columns is-multiline">
+				for _, instance := range instances {
+					<div class="column is-4">
+						@InstanceCard(agency, instance, targetPath)
+					</div>
+				}
+			</div>
+		}
+	</div>
+}
+
+// InstanceCard renders a single instance card with link
+templ InstanceCard(agency *models.Agency, instance *models.AgencyInstance, targetPath string) {
+	<div class="card instance-card" style="height: 100%; transition: transform 0.2s, box-shadow 0.2s;">
+		<a 
+			href={ templ.SafeURL(fmt.Sprintf(targetPath, instance.ID)) }
+			style="text-decoration: none; color: inherit; display: block; height: 100%;"
+			onmouseover="this.parentElement.style.transform='translateY(-4px)'; this.parentElement.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
+			onmouseout="this.parentElement.style.transform='translateY(0)'; this.parentElement.style.boxShadow='';"
+		>
+			<div class="card-content">
+				<div class="media">
+					<div class="media-left">
+						<span class={ "icon is-large has-text-" + getInstanceStateColor(instance.State) }>
+							<i class={ "fas fa-2x " + getInstanceStateIcon(instance.State) }></i>
+						</span>
+					</div>
+					<div class="media-content">
+						<p class="title is-5">{ instance.InstanceName }</p>
+						<p class="subtitle is-6 has-text-grey">
+							<span class="tag is-light">{ instance.TagName }</span>
+						</p>
+					</div>
+				</div>
+				
+				<div class="content">
+					<div class="field is-grouped is-grouped-multiline">
+						<div class="control">
+							<div class="tags has-addons">
+								<span class="tag is-dark">State</span>
+								<span class={ "tag " + getInstanceStateTagClass(instance.State) }>
+									{ string(instance.State) }
+								</span>
+							</div>
+						</div>
+						if instance.HealthStatus != "" {
+							<div class="control">
+								<div class="tags has-addons">
+									<span class="tag is-dark">Health</span>
+									<span class={ "tag " + getInstanceHealthTagClass(instance.HealthStatus) }>
+										{ instance.HealthStatus }
+									</span>
+								</div>
+							</div>
+						}
+					</div>
+					
+					if instance.Description != "" {
+						<p class="is-size-7 has-text-grey mt-2" style="min-height: 2.5rem;">
+							{ instance.Description }
+						</p>
+					}
+				</div>
+			</div>
+			
+			<footer class="card-footer">
+				<p class="card-footer-item">
+					<span class="icon-text">
+						<span class="icon has-text-info">
+							<i class="fas fa-arrow-right"></i>
+						</span>
+						<span>Select Instance</span>
+					</span>
+				</p>
+			</footer>
+		</a>
+	</div>
+}
+
+// Helper functions for instance state styling
+func getInstanceStateColor(state models.InstanceState) string {
+	switch state {
+	case models.InstanceStateRunning:
+		return "success"
+	case models.InstanceStateStopping:
+		return "warning"
+	case models.InstanceStateStopped:
+		return "grey"
+	case models.InstanceStateFailed:
+		return "danger"
+	default:
+		return "grey-light"
+	}
+}
+
+func getInstanceStateIcon(state models.InstanceState) string {
+	switch state {
+	case models.InstanceStateRunning:
+		return "fa-circle-check"
+	case models.InstanceStateStopping:
+		return "fa-circle-pause"
+	case models.InstanceStateStopped:
+		return "fa-circle-stop"
+	case models.InstanceStateFailed:
+		return "fa-circle-xmark"
+	default:
+		return "fa-circle"
+	}
+}
+
+func getInstanceStateTagClass(state models.InstanceState) string {
+	switch state {
+	case models.InstanceStateRunning:
+		return "is-success"
+	case models.InstanceStateStopping:
+		return "is-warning"
+	case models.InstanceStateStopped:
+		return "is-light"
+	case models.InstanceStateFailed:
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}
+
+func getInstanceHealthTagClass(health string) string {
+	switch health {
+	case "healthy":
+		return "is-success"
+	case "degraded":
+		return "is-warning"
+	case "unhealthy":
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}

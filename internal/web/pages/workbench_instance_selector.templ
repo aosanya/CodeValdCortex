@@ -1,0 +1,68 @@
+package pages
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// WorkbenchInstanceSelector displays instances for workbench selection
+templ WorkbenchInstanceSelector(agency *models.Agency, instances []*models.AgencyInstance) {
+	@components.LayoutWithAgency("Select Instance - Workbench", agency) {
+		<section class="section">
+			<div class="container">
+				<!-- Page Header -->
+				<div class="block">
+					<h1 class="title">
+						<span class="icon-text">
+							<span class="icon has-text-primary">
+								<i class="fas fa-tasks"></i>
+							</span>
+							<span>Workbench - Select Instance</span>
+						</span>
+					</h1>
+					<p class="subtitle">
+						Choose an instance to view its workbench and manage work items
+					</p>
+				</div>
+				
+				<!-- Help Text -->
+				<div class="notification is-info is-light mb-5">
+					<p>
+						<strong>What is a Workbench?</strong>
+					</p>
+					<p class="mt-2">
+						The Workbench provides a Kanban board view of work items progressing through your workflow.
+						Select a running instance below to view and manage its work items.
+					</p>
+				</div>
+				
+				<!-- Instance Selector Component -->
+				@components.InstanceSelector(
+					agency,
+					instances,
+					"/agencies/" + agency.ID + "/instances/%s/workbench",
+					"Available Instances",
+					"No instances available. Create and start an instance from the Instances page to use the workbench.",
+				)
+				
+				<!-- Quick Actions -->
+				<div class="block mt-5">
+					<div class="buttons">
+						<a href={ templ.SafeURL("/agencies/" + agency.ID + "/instances") } class="button is-light">
+							<span class="icon">
+								<i class="fas fa-server"></i>
+							</span>
+							<span>Manage Instances</span>
+						</a>
+						<a href={ templ.SafeURL("/agencies/" + agency.ID + "/versions") } class="button is-light">
+							<span class="icon">
+								<i class="fas fa-tags"></i>
+							</span>
+							<span>View Tags</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+	}
+}
