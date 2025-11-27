@@ -103,7 +103,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.IssueCreateForm(agency, board).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.IssueManageForm(agency, board).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -173,7 +173,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></section><!-- Workbench JavaScript --> <script>\n\t\t\tfunction refreshWorkbench() {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\n\t\t\tfunction openIssueDetails(agencyID, instanceID, issueKey) {\n\t\t\t\t// Navigate to issue details page\n\t\t\t\twindow.location.href = `/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`;\n\t\t\t}\n\t\t</script> <!-- Workbench Styles --> <style>\n\t\t\t.workbench-board {\n\t\t\t\tpadding-bottom: 1rem;\n\t\t\t}\n\n\t\t\t.workbench-column {\n\t\t\t\tflex-shrink: 0;\n\t\t\t}\n\n\t\t\t.workbench-issues {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tgap: 0.75rem;\n\t\t\t}\n\n\t\t\t.issue-card {\n\t\t\t\tcursor: pointer;\n\t\t\t\ttransition: transform 0.2s, box-shadow 0.2s;\n\t\t\t}\n\n\t\t\t.issue-card:hover {\n\t\t\t\ttransform: translateY(-2px);\n\t\t\t\tbox-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.15), 0 0px 0 1px rgba(10, 10, 10, 0.02);\n\t\t\t}\n\t\t</style>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></section><!-- Workbench JavaScript --> <script>\n\t\t\tfunction refreshWorkbench() {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\n\t\t\tfunction openIssueDetails(agencyID, instanceID, issueKey) {\n\t\t\t\t// Load issue data and populate the create form for editing\n\t\t\t\tconst panel = document.getElementById('createIssuePanel');\n\t\t\t\tif (!panel) return;\n\n\t\t\t\tconsole.log('[MVP-WI-008] Opening issue details:', { agencyID, instanceID, issueKey });\n\n\t\t\t\t// Fetch issue data from API\n\t\t\t\tfetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)\n\t\t\t\t\t.then(response => {\n\t\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\t\tthrow new Error(`Failed to load issue: ${response.status}`);\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn response.json();\n\t\t\t\t\t})\n\t\t\t\t\t.then(data => {\n\t\t\t\t\t\tconsole.log('[MVP-WI-008] Loaded issue data:', data);\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Populate form fields\n\t\t\t\t\t\tconst form = document.getElementById('createIssueForm');\n\t\t\t\t\t\tif (form) {\n\t\t\t\t\t\t\tconst titleInput = form.querySelector('input[name=\"title\"]');\n\t\t\t\t\t\t\tconst descInput = form.querySelector('textarea[name=\"description\"]');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (titleInput) titleInput.value = data.title || '';\n\t\t\t\t\t\t\tif (descInput) descInput.value = data.description || '';\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Store issue key in panel for update mode\n\t\t\t\t\t\t\tpanel.dataset.editingIssueKey = issueKey;\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Update panel header to show edit mode\n\t\t\t\t\t\t\tconst header = panel.querySelector('.level-left .level-item strong');\n\t\t\t\t\t\t\tif (header) {\n\t\t\t\t\t\t\t\theader.textContent = `Edit Issue #${data.number}`;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Update button text to \"Update Issue\"\n\t\t\t\t\t\t\tconst submitBtn = panel.querySelector('button[onclick=\"submitCreateIssue()\"]');\n\t\t\t\t\t\t\tif (submitBtn) {\n\t\t\t\t\t\t\t\tsubmitBtn.textContent = 'Update Issue';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Show the panel\n\t\t\t\t\t\tpanel.style.display = 'block';\n\t\t\t\t\t})\n\t\t\t\t\t.catch(error => {\n\t\t\t\t\t\tconsole.error('[MVP-WI-008] Error loading issue:', error);\n\t\t\t\t\t\talert('Failed to load issue details: ' + error.message);\n\t\t\t\t\t});\n\t\t\t}\n\t\t</script> <!-- Workbench Styles --> <style>\n\t\t\t.workbench-board {\n\t\t\t\tpadding-bottom: 1rem;\n\t\t\t}\n\n\t\t\t.workbench-column {\n\t\t\t\tflex-shrink: 0;\n\t\t\t}\n\n\t\t\t.workbench-issues {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tgap: 0.75rem;\n\t\t\t}\n\n\t\t\t.issue-card {\n\t\t\t\tcursor: pointer;\n\t\t\t\ttransition: transform 0.2s, box-shadow 0.2s;\n\t\t\t}\n\n\t\t\t.issue-card:hover {\n\t\t\t\ttransform: translateY(-2px);\n\t\t\t\tbox-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.15), 0 0px 0 1px rgba(10, 10, 10, 0.02);\n\t\t\t}\n\t\t</style>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -229,7 +229,7 @@ func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) temp
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(formatIssueNumber(issue.Number))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 161, Col: 64}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 208, Col: 64}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -264,7 +264,7 @@ func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) temp
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(issue.Status)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 164, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 211, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -277,7 +277,7 @@ func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) temp
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(issue.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 168, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 215, Col: 130}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -295,7 +295,7 @@ func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) temp
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(issue.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 172, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 219, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -318,7 +318,7 @@ func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) temp
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(issue.AssignedTo)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 184, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 231, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -336,7 +336,7 @@ func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) temp
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(issue.CreatedAt.Format("Jan 02"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 191, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 238, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {

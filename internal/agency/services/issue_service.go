@@ -177,6 +177,14 @@ func (s *IssueService) UpdateIssue(ctx context.Context, agencyID, instanceID, is
 	}
 
 	// Update fields if provided
+	if req.Title != nil {
+		issue.Title = *req.Title
+	}
+
+	if req.Description != nil {
+		issue.Description = *req.Description
+	}
+
 	if req.Status != nil {
 		issue.Status = *req.Status
 	}

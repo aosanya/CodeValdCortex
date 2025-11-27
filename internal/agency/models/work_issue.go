@@ -81,6 +81,8 @@ type CreateIssueRequest struct {
 
 // UpdateIssueRequest represents the request to update an issue
 type UpdateIssueRequest struct {
+	Title         *string `json:"title,omitempty"`
+	Description   *string `json:"description,omitempty"`
 	Status        *string `json:"status,omitempty"`
 	AssignedTo    *string `json:"assigned_to,omitempty"`
 	BranchName    *string `json:"branch_name,omitempty"`

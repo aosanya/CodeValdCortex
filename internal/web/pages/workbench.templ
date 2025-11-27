@@ -67,7 +67,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 			</div>
 
 			<!-- Create Issue Form Component -->
-			@components.IssueCreateForm(agency, board)
+			@components.IssueManageForm(agency, board)
 
 			<!-- Kanban Board -->
 			<div class="workbench-board" style="overflow-x: auto;">
@@ -119,22 +119,55 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 			}
 
 			function openIssueDetails(agencyID, instanceID, issueKey) {
-				// TODO: Load issue data and populate the create form for editing
-				// For now, just open the create panel
+				// Load issue data and populate the create form for editing
 				const panel = document.getElementById('createIssuePanel');
-				if (panel) {
-					panel.style.display = 'block';
-					
-					// TODO: Fetch issue data from API
-					// fetch(`/api/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
-					//   .then(response => response.json())
-					//   .then(issue => {
-					//     document.getElementById('issueTitle').value = issue.title;
-					//     document.getElementById('issueDescription').value = issue.description;
-					//   });
-					
-					console.log('Issue details - TODO: implement edit mode', { agencyID, instanceID, issueKey });
-				}
+				if (!panel) return;
+
+				console.log('[MVP-WI-008] Opening issue details:', { agencyID, instanceID, issueKey });
+
+				// Fetch issue data from API
+				fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
+					.then(response => {
+						if (!response.ok) {
+							throw new Error(`Failed to load issue: ${response.status}`);
+						}
+						return response.json();
+					})
+					.then(data => {
+						console.log('[MVP-WI-008] Loaded issue data:', data);
+						
+						// Populate form fields
+						const form = document.getElementById('createIssueForm');
+						if (form) {
+							const titleInput = form.querySelector('input[name="title"]');
+							const descInput = form.querySelector('textarea[name="description"]');
+							
+							if (titleInput) titleInput.value = data.title || '';
+							if (descInput) descInput.value = data.description || '';
+							
+							// Store issue key in panel for update mode
+							panel.dataset.editingIssueKey = issueKey;
+							
+							// Update panel header to show edit mode
+							const header = panel.querySelector('.level-left .level-item strong');
+							if (header) {
+								header.textContent = `Edit Issue #${data.number}`;
+							}
+							
+							// Update button text to "Update Issue"
+							const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
+							if (submitBtn) {
+								submitBtn.textContent = 'Update Issue';
+							}
+						}
+						
+						// Show the panel
+						panel.style.display = 'block';
+					})
+					.catch(error => {
+						console.error('[MVP-WI-008] Error loading issue:', error);
+						alert('Failed to load issue details: ' + error.message);
+					});
 			}
 		</script>
 

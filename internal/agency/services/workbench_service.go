@@ -98,11 +98,28 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 		workflow.Key, workflow.Name, len(spec.WorkItems))
 	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
 
+	// Track seen work items to avoid duplicate columns
+	seenWorkItems := make(map[string]bool)
+
 	for stepIdx, step := range workflow.Steps {
 		log.Printf("[MVP-WI-008] Step %d (Order: %d) has %d items", stepIdx, step.Order, len(step.Items))
 		for itemIdx, item := range step.Items {
 			log.Printf("[MVP-WI-008] Step item [%d][%d] - ID: '%s', WorkItemID: '%s', WorkItemKey: '%s', WorkItemName: '%s'",
 				stepIdx, itemIdx, item.ID, item.WorkItemID, item.WorkItemKey, item.WorkItemName)
+
+			// Get the step identifier to use for deduplication and querying
+			// Use WorkItemID if WorkItemKey is empty
+			stepIdentifier := item.WorkItemKey
+			if stepIdentifier == "" {
+				stepIdentifier = item.WorkItemID
+			}
+
+			// Skip if we've already created a column for this work item
+			if seenWorkItems[stepIdentifier] {
+				log.Printf("[MVP-WI-008] Skipping duplicate work item: '%s'", stepIdentifier)
+				continue
+			}
+			seenWorkItems[stepIdentifier] = true
 
 			// Find work item details in specification
 			var workItem *models.WorkItem
@@ -139,12 +156,6 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 					workItem.Code, workItem.Title)
 			}
 
-			// Get the step identifier to use for querying issues
-			// Use WorkItemID if WorkItemKey is empty
-			stepIdentifier := item.WorkItemKey
-			if stepIdentifier == "" {
-				stepIdentifier = item.WorkItemID
-			}
 			log.Printf("[MVP-WI-008] GenerateBoard - Querying issues with stepIdentifier: '%s' (WorkItemKey='%s', WorkItemID='%s')",
 				stepIdentifier, item.WorkItemKey, item.WorkItemID)
 
@@ -257,11 +268,28 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 		workflow.Key, workflow.Name, len(spec.WorkItems))
 	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
 
+	// Track seen work items to avoid duplicate columns
+	seenWorkItems := make(map[string]bool)
+
 	for stepIdx, step := range workflow.Steps {
 		log.Printf("[MVP-WI-008] Step %d (Order: %d) has %d items", stepIdx, step.Order, len(step.Items))
 		for itemIdx, item := range step.Items {
 			log.Printf("[MVP-WI-008] Step item [%d][%d] - ID: '%s', WorkItemID: '%s', WorkItemKey: '%s', WorkItemName: '%s'",
 				stepIdx, itemIdx, item.ID, item.WorkItemID, item.WorkItemKey, item.WorkItemName)
+
+			// Get the step identifier to use for deduplication and querying
+			// Use WorkItemID if WorkItemKey is empty
+			stepIdentifier := item.WorkItemKey
+			if stepIdentifier == "" {
+				stepIdentifier = item.WorkItemID
+			}
+
+			// Skip if we've already created a column for this work item
+			if seenWorkItems[stepIdentifier] {
+				log.Printf("[MVP-WI-008] Skipping duplicate work item: '%s'", stepIdentifier)
+				continue
+			}
+			seenWorkItems[stepIdentifier] = true
 
 			// Find work item details in specification
 			var workItem *models.WorkItem
@@ -298,12 +326,6 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 					workItem.Code, workItem.Title)
 			}
 
-			// Get the step identifier to use for querying issues
-			// Use WorkItemID if WorkItemKey is empty
-			stepIdentifier := item.WorkItemKey
-			if stepIdentifier == "" {
-				stepIdentifier = item.WorkItemID
-			}
 			log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - Querying issues with stepIdentifier: '%s' (WorkItemKey='%s', WorkItemID='%s')",
 				stepIdentifier, item.WorkItemKey, item.WorkItemID)
 

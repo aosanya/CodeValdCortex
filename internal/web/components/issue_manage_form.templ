@@ -2,8 +2,8 @@ package components
 
 import "github.com/aosanya/CodeValdCortex/internal/agency/models"
 
-// IssueCreateForm renders an inline panel for creating new issues
-templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
+// IssueManageForm renders an inline panel for creating and editing issues
+templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 	<!-- Create Issue Panel (inline, not a popup) -->
 	<div id="createIssuePanel" class="box" style="display: none; margin-bottom: 1rem;" 
 		data-agency-id={ agency.Key } 
@@ -55,6 +55,8 @@ templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
 			const panel = document.getElementById('createIssuePanel');
 			if (!panel) return;
 			if (panel.style.display === 'none' || panel.style.display === '') {
+				// Reset to create mode when opening
+				resetPanelToCreateMode();
 				panel.style.display = 'block';
 			} else {
 				panel.style.display = 'none';
@@ -62,11 +64,35 @@ templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
 			}
 		}
 
+		function resetPanelToCreateMode() {
+			const panel = document.getElementById('createIssuePanel');
+			const form = document.getElementById('createIssueForm');
+			if (!panel || !form) return;
+
+			// Reset form
+			form.reset();
+
+			// Clear edit mode flag
+			delete panel.dataset.editingIssueKey;
+
+			// Reset header text
+			const header = panel.querySelector('.level-left .level-item strong');
+			if (header) {
+				header.textContent = 'Create New Issue';
+			}
+
+			// Reset button text
+			const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
+			if (submitBtn) {
+				submitBtn.textContent = 'Create Issue';
+			}
+		}
+
 		function closeCreateIssuePanel() {
 			const panel = document.getElementById('createIssuePanel');
 			if (!panel) return;
 			panel.style.display = 'none';
-			document.getElementById('createIssueForm').reset();
+			resetPanelToCreateMode();
 		}
 
 		function submitCreateIssue() {
@@ -78,6 +104,7 @@ templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
 			const agencyID = panel.dataset.agencyId;
 			const instanceID = panel.dataset.instanceId;
 			const workflowID = panel.dataset.workflowId;
+			const editingIssueKey = panel.dataset.editingIssueKey;
 
 			const data = {
 				title: formData.get('title'),
@@ -85,11 +112,18 @@ templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
 				workflow_id: workflowID
 			};
 
-			console.log('[MVP-WI-008] Creating issue with data:', data);
+			// Check if we're in edit mode
+			const isEditMode = !!editingIssueKey;
+			const method = isEditMode ? 'PUT' : 'POST';
+			const url = isEditMode 
+				? `/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${editingIssueKey}`
+				: `/api/v1/agencies/${agencyID}/instances/${instanceID}/issues`;
+
+			console.log(`[MVP-WI-008] ${isEditMode ? 'Updating' : 'Creating'} issue with data:`, data);
 			console.log('[MVP-WI-008] Agency ID:', agencyID, 'Instance ID:', instanceID);
 
-			fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues`, {
-				method: 'POST',
+			fetch(url, {
+				method: method,
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -102,12 +136,12 @@ templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
 			.then(data => {
 				console.log('[MVP-WI-008] Response data:', data);
 				closeCreateIssuePanel();
-				// Reload page to show new issue
+				// Reload page to show updated/new issue
 				window.location.reload();
 			})
 			.catch(error => {
-				console.error('[MVP-WI-008] Error creating issue:', error);
-				alert('Failed to create issue: ' + error.message);
+				console.error(`[MVP-WI-008] Error ${isEditMode ? 'updating' : 'creating'} issue:`, error);
+				alert(`Failed to ${isEditMode ? 'update' : 'create'} issue: ` + error.message);
 			});
 		}
 	</script>
