@@ -74,15 +74,6 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 		"context_bytes":   []byte(context),
 	}).Info("Processing chat message")
 
-	fmt.Printf("\n[CHAT DEBUG] ========================================\n")
-	fmt.Printf("[CHAT DEBUG] Processing message with context: '%s'\n", context)
-	fmt.Printf("[CHAT DEBUG] Context is empty: %v\n", context == "")
-	fmt.Printf("[CHAT DEBUG] Context bytes: %v\n", []byte(context))
-	fmt.Printf("[CHAT DEBUG] Message: '%s'\n", userMessage)
-	fmt.Printf("[CHAT DEBUG] Is introduction context? %v\n", context == "introduction")
-	fmt.Printf("[CHAT DEBUG] Is goal-definition context? %v\n", context == "goal-definition")
-	fmt.Printf("[CHAT DEBUG] ========================================\n")
-
 	// Handle context-specific processing
 	conversation, convErr := h.designerService.GetConversation(conversationID)
 	if convErr == nil && conversation != nil {

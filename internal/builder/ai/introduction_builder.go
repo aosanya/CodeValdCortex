@@ -97,19 +97,6 @@ func (r *IntroductionBuilder) RefineIntroduction(ctx context.Context, req *build
 		"tokens_used":      response.Usage.TotalTokens,
 	}).Info("==== PARSED RESULT - Introduction refinement completed ====")
 
-	// Add debug logging to terminal output
-	fmt.Printf("\n========================================\n")
-	fmt.Printf("AI RAW RESPONSE:\n")
-	fmt.Printf("========================================\n")
-	fmt.Printf("%s\n", response.Content)
-	fmt.Printf("========================================\n")
-	fmt.Printf("PARSED RESULT:\n")
-	fmt.Printf("  - Changed: %v\n", wasChanged)
-	fmt.Printf("  - Explanation: %s\n", explanation)
-	fmt.Printf("  - Sections: %v\n", changedSections)
-	fmt.Printf("  - Refined length: %d chars\n", len(refined))
-	fmt.Printf("========================================\n\n")
-
 	return &builder.RefineIntroductionResponse{
 		WasChanged:      wasChanged,
 		Explanation:     explanation,

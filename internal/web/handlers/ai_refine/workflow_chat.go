@@ -133,8 +133,6 @@ func (h *Handler) ProcessWorkflowsChatRequestStreaming(c *gin.Context) {
 	chunkCount := 0
 	totalChunkBytes := 0
 
-	h.logger.Info("🔍 DEBUG: Starting workflow refinement stream")
-
 	result, err := h.workflowBuilder.RefineWorkflowsStream(
 		c.Request.Context(),
 		refineReq,
@@ -208,7 +206,6 @@ func (h *Handler) ProcessWorkflowsChatRequestStreaming(c *gin.Context) {
 	c.SSEvent("complete", completionData)
 	c.Writer.Flush()
 
-	h.logger.Info("✅ Streaming workflows chat completed")
 }
 
 // formatWorkflowsChatMessage formats the workflows AI response for chat display
@@ -321,21 +318,13 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 			removedKeys := make(map[string]bool)
 			for _, removedKey := range result.ConsolidatedData.RemovedWorkflows {
 				removedKeys[removedKey] = true
-				h.logger.Info("🔍 DEBUG: Marking workflow for removal", "key", removedKey)
 			}
-
-			h.logger.WithFields(logrus.Fields{
-				"total_existing_workflows": len(existingWorkflows),
-				"workflows_to_remove":      len(removedKeys),
-			}).Info("🔍 DEBUG: Processing workflow removal/consolidation")
 
 			// Keep workflows that are NOT in the removed list
 			for _, wf := range existingWorkflows {
 				if !removedKeys[wf.Key] {
 					updatedWorkflows = append(updatedWorkflows, *wf)
-					h.logger.Info("🔍 DEBUG: Keeping workflow", "key", wf.Key, "name", wf.Name)
 				} else {
-					h.logger.Info("🗑️ Removing workflow", "key", wf.Key, "name", wf.Name)
 					workflowsModified = true
 				}
 			}
@@ -343,10 +332,6 @@ func (h *Handler) applyAndSaveWorkflows(ctx context.Context, agencyID string, re
 			// Add consolidated workflows (these are new or updated workflows)
 			for _, cwf := range result.ConsolidatedData.ConsolidatedWorkflows {
 				workflowKey := generateWorkflowKey(cwf.Name)
-				h.logger.WithFields(logrus.Fields{
-					"name": cwf.Name,
-					"key":  workflowKey,
-				}).Info("🔄 Adding consolidated workflow")
 
 				newWorkflow := models.Workflow{
 					Key:         workflowKey,
