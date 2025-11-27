@@ -1,36 +1,10 @@
 package pages
 
 import (
-	"fmt"
 	"strconv"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
-
-// Helper function to get status badge class
-func getStatusBadgeClass(status string) string {
-	switch status {
-	case models.IssueStatusOpen:
-		return "is-info"
-	case models.IssueStatusAssigned:
-		return "is-warning"
-	case models.IssueStatusInProgress:
-		return "is-primary"
-	case models.IssueStatusReadyForReview:
-		return "is-link"
-	case models.IssueStatusCompleted:
-		return "is-success"
-	case models.IssueStatusBlocked:
-		return "is-danger"
-	default:
-		return "is-light"
-	}
-}
-
-// Helper function to format issue number
-func formatIssueNumber(number int) string {
-	return fmt.Sprintf("#%d", number)
-}
 
 templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 	@components.LayoutWithAgency("Workbench", agency) {
@@ -102,7 +76,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 									</div>
 								} else {
 									for _, issue := range column.Issues {
-										@IssueCard(&issue, agency.Key, board.InstanceID)
+										@components.IssueCard(&issue, agency.Key, board.InstanceID)
 									}
 								}
 							</div>
@@ -188,56 +162,29 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 			}
 
 			.issue-card {
-				cursor: pointer;
-				transition: transform 0.2s, box-shadow 0.2s;
+				transition: box-shadow 0.2s;
 			}
 
-			.issue-card:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.15), 0 0px 0 1px rgba(10, 10, 10, 0.02);
+			.issue-card .card-header:hover {
+				background-color: hsl(0, 0%, 98%);
+			}
+
+			.issue-title {
+				font-size: 1rem;
+				line-height: 1.4;
+				word-wrap: break-word;
+				overflow-wrap: break-word;
+			}
+
+			.issue-description {
+				line-height: 1.4;
+				max-height: 4.2em; /* 3 lines */
+				overflow: hidden;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;
+				-webkit-box-orient: vertical;
+				word-wrap: break-word;
 			}
 		</style>
 	}
-}
-
-// IssueCard component renders a single issue card
-templ IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) {
-	<div class="box issue-card" onclick={ templ.ComponentScript{Call: fmt.Sprintf("openIssueDetails('%s', '%s', '%s')", agencyID, instanceID, issue.Key)} }>
-		<div class="level mb-2">
-			<div class="level-left">
-				<span class="tag is-light">{ formatIssueNumber(issue.Number) }</span>
-			</div>
-			<div class="level-right">
-				<span class={ "tag", getStatusBadgeClass(issue.Status) }>{ issue.Status }</span>
-			</div>
-		</div>
-		
-		<p class="title is-6 mb-2" style="overflow-wrap: break-word; word-break: break-word; display: block; clear: both;">{ issue.Title }</p>
-		
-		if issue.Description != "" {
-			<p class="subtitle is-7 has-text-grey mb-3" style="line-height: 1.4; max-height: 4.2em; overflow: hidden; text-overflow: ellipsis; display: block; clear: both; word-wrap: break-word;">
-				{ issue.Description }
-			</p>
-		}
-		
-		<div class="level mb-0">
-			<div class="level-left">
-				if issue.AssignedTo != "" {
-					<div class="level-item">
-						<span class="icon-text">
-							<span class="icon has-text-grey-light">
-								<i class="fas fa-user"></i>
-							</span>
-							<span class="is-size-7 has-text-grey">{ issue.AssignedTo }</span>
-						</span>
-					</div>
-				}
-			</div>
-			<div class="level-right">
-				<span class="is-size-7 has-text-grey-light">
-					{ issue.CreatedAt.Format("Jan 02") }
-				</span>
-			</div>
-		</div>
-	</div>
 }

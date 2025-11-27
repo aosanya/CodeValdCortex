@@ -9,36 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/web/components"
 	"strconv"
 )
-
-// Helper function to get status badge class
-func getStatusBadgeClass(status string) string {
-	switch status {
-	case models.IssueStatusOpen:
-		return "is-info"
-	case models.IssueStatusAssigned:
-		return "is-warning"
-	case models.IssueStatusInProgress:
-		return "is-primary"
-	case models.IssueStatusReadyForReview:
-		return "is-link"
-	case models.IssueStatusCompleted:
-		return "is-success"
-	case models.IssueStatusBlocked:
-		return "is-danger"
-	default:
-		return "is-light"
-	}
-}
-
-// Helper function to format issue number
-func formatIssueNumber(number int) string {
-	return fmt.Sprintf("#%d", number)
-}
 
 func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -80,7 +54,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(board.InstanceName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 47, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 21, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -93,7 +67,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(board.WorkflowName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 54, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 28, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -119,7 +93,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(column.WorkItemCode)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 82, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 56, Col: 56}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -132,7 +106,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(column.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 83, Col: 147}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 57, Col: 147}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -145,7 +119,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(column.Issues)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 87, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 61, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -162,7 +136,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 					}
 				} else {
 					for _, issue := range column.Issues {
-						templ_7745c5c3_Err = IssueCard(&issue, agency.Key, board.InstanceID).Render(ctx, templ_7745c5c3_Buffer)
+						templ_7745c5c3_Err = components.IssueCard(&issue, agency.Key, board.InstanceID).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
@@ -173,176 +147,13 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></section><!-- Workbench JavaScript --> <script>\n\t\t\tfunction refreshWorkbench() {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\n\t\t\tfunction openIssueDetails(agencyID, instanceID, issueKey) {\n\t\t\t\t// Load issue data and populate the create form for editing\n\t\t\t\tconst panel = document.getElementById('createIssuePanel');\n\t\t\t\tif (!panel) return;\n\n\t\t\t\tconsole.log('[MVP-WI-008] Opening issue details:', { agencyID, instanceID, issueKey });\n\n\t\t\t\t// Fetch issue data from API\n\t\t\t\tfetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)\n\t\t\t\t\t.then(response => {\n\t\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\t\tthrow new Error(`Failed to load issue: ${response.status}`);\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn response.json();\n\t\t\t\t\t})\n\t\t\t\t\t.then(data => {\n\t\t\t\t\t\tconsole.log('[MVP-WI-008] Loaded issue data:', data);\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Populate form fields\n\t\t\t\t\t\tconst form = document.getElementById('createIssueForm');\n\t\t\t\t\t\tif (form) {\n\t\t\t\t\t\t\tconst titleInput = form.querySelector('input[name=\"title\"]');\n\t\t\t\t\t\t\tconst descInput = form.querySelector('textarea[name=\"description\"]');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (titleInput) titleInput.value = data.title || '';\n\t\t\t\t\t\t\tif (descInput) descInput.value = data.description || '';\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Store issue key in panel for update mode\n\t\t\t\t\t\t\tpanel.dataset.editingIssueKey = issueKey;\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Update panel header to show edit mode\n\t\t\t\t\t\t\tconst header = panel.querySelector('.level-left .level-item strong');\n\t\t\t\t\t\t\tif (header) {\n\t\t\t\t\t\t\t\theader.textContent = `Edit Issue #${data.number}`;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Update button text to \"Update Issue\"\n\t\t\t\t\t\t\tconst submitBtn = panel.querySelector('button[onclick=\"submitCreateIssue()\"]');\n\t\t\t\t\t\t\tif (submitBtn) {\n\t\t\t\t\t\t\t\tsubmitBtn.textContent = 'Update Issue';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Show the panel\n\t\t\t\t\t\tpanel.style.display = 'block';\n\t\t\t\t\t})\n\t\t\t\t\t.catch(error => {\n\t\t\t\t\t\tconsole.error('[MVP-WI-008] Error loading issue:', error);\n\t\t\t\t\t\talert('Failed to load issue details: ' + error.message);\n\t\t\t\t\t});\n\t\t\t}\n\t\t</script> <!-- Workbench Styles --> <style>\n\t\t\t.workbench-board {\n\t\t\t\tpadding-bottom: 1rem;\n\t\t\t}\n\n\t\t\t.workbench-column {\n\t\t\t\tflex-shrink: 0;\n\t\t\t}\n\n\t\t\t.workbench-issues {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tgap: 0.75rem;\n\t\t\t}\n\n\t\t\t.issue-card {\n\t\t\t\tcursor: pointer;\n\t\t\t\ttransition: transform 0.2s, box-shadow 0.2s;\n\t\t\t}\n\n\t\t\t.issue-card:hover {\n\t\t\t\ttransform: translateY(-2px);\n\t\t\t\tbox-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.15), 0 0px 0 1px rgba(10, 10, 10, 0.02);\n\t\t\t}\n\t\t</style>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></section><!-- Workbench JavaScript --> <script>\n\t\t\tfunction refreshWorkbench() {\n\t\t\t\twindow.location.reload();\n\t\t\t}\n\n\t\t\tfunction openIssueDetails(agencyID, instanceID, issueKey) {\n\t\t\t\t// Load issue data and populate the create form for editing\n\t\t\t\tconst panel = document.getElementById('createIssuePanel');\n\t\t\t\tif (!panel) return;\n\n\t\t\t\tconsole.log('[MVP-WI-008] Opening issue details:', { agencyID, instanceID, issueKey });\n\n\t\t\t\t// Fetch issue data from API\n\t\t\t\tfetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)\n\t\t\t\t\t.then(response => {\n\t\t\t\t\t\tif (!response.ok) {\n\t\t\t\t\t\t\tthrow new Error(`Failed to load issue: ${response.status}`);\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn response.json();\n\t\t\t\t\t})\n\t\t\t\t\t.then(data => {\n\t\t\t\t\t\tconsole.log('[MVP-WI-008] Loaded issue data:', data);\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Populate form fields\n\t\t\t\t\t\tconst form = document.getElementById('createIssueForm');\n\t\t\t\t\t\tif (form) {\n\t\t\t\t\t\t\tconst titleInput = form.querySelector('input[name=\"title\"]');\n\t\t\t\t\t\t\tconst descInput = form.querySelector('textarea[name=\"description\"]');\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\tif (titleInput) titleInput.value = data.title || '';\n\t\t\t\t\t\t\tif (descInput) descInput.value = data.description || '';\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Store issue key in panel for update mode\n\t\t\t\t\t\t\tpanel.dataset.editingIssueKey = issueKey;\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Update panel header to show edit mode\n\t\t\t\t\t\t\tconst header = panel.querySelector('.level-left .level-item strong');\n\t\t\t\t\t\t\tif (header) {\n\t\t\t\t\t\t\t\theader.textContent = `Edit Issue #${data.number}`;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Update button text to \"Update Issue\"\n\t\t\t\t\t\t\tconst submitBtn = panel.querySelector('button[onclick=\"submitCreateIssue()\"]');\n\t\t\t\t\t\t\tif (submitBtn) {\n\t\t\t\t\t\t\t\tsubmitBtn.textContent = 'Update Issue';\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\t\n\t\t\t\t\t\t// Show the panel\n\t\t\t\t\t\tpanel.style.display = 'block';\n\t\t\t\t\t})\n\t\t\t\t\t.catch(error => {\n\t\t\t\t\t\tconsole.error('[MVP-WI-008] Error loading issue:', error);\n\t\t\t\t\t\talert('Failed to load issue details: ' + error.message);\n\t\t\t\t\t});\n\t\t\t}\n\t\t</script> <!-- Workbench Styles --> <style>\n\t\t\t.workbench-board {\n\t\t\t\tpadding-bottom: 1rem;\n\t\t\t}\n\n\t\t\t.workbench-column {\n\t\t\t\tflex-shrink: 0;\n\t\t\t}\n\n\t\t\t.workbench-issues {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\tgap: 0.75rem;\n\t\t\t}\n\n\t\t\t.issue-card {\n\t\t\t\ttransition: box-shadow 0.2s;\n\t\t\t}\n\n\t\t\t.issue-card .card-header:hover {\n\t\t\t\tbackground-color: hsl(0, 0%, 98%);\n\t\t\t}\n\n\t\t\t.issue-title {\n\t\t\t\tfont-size: 1rem;\n\t\t\t\tline-height: 1.4;\n\t\t\t\tword-wrap: break-word;\n\t\t\t\toverflow-wrap: break-word;\n\t\t\t}\n\n\t\t\t.issue-description {\n\t\t\t\tline-height: 1.4;\n\t\t\t\tmax-height: 4.2em; /* 3 lines */\n\t\t\t\toverflow: hidden;\n\t\t\t\tdisplay: -webkit-box;\n\t\t\t\t-webkit-line-clamp: 3;\n\t\t\t\t-webkit-box-orient: vertical;\n\t\t\t\tword-wrap: break-word;\n\t\t\t}\n\t\t</style>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
 		templ_7745c5c3_Err = components.LayoutWithAgency("Workbench", agency).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-// IssueCard component renders a single issue card
-func IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, templ.ComponentScript{Call: fmt.Sprintf("openIssueDetails('%s', '%s', '%s')", agencyID, instanceID, issue.Key)})
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<div class=\"box issue-card\" onclick=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 templ.ComponentScript = templ.ComponentScript{Call: fmt.Sprintf("openIssueDetails('%s', '%s', '%s')", agencyID, instanceID, issue.Key)}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9.Call)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\"><div class=\"level mb-2\"><div class=\"level-left\"><span class=\"tag is-light\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(formatIssueNumber(issue.Number))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 208, Col: 64}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</span></div><div class=\"level-right\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var11 = []any{"tag", getStatusBadgeClass(issue.Status)}
-		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var11...)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<span class=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var11).String())
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 1, Col: 0}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(issue.Status)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 211, Col: 75}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></div></div><p class=\"title is-6 mb-2\" style=\"overflow-wrap: break-word; word-break: break-word; display: block; clear: both;\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(issue.Title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 215, Col: 130}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</p>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if issue.Description != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<p class=\"subtitle is-7 has-text-grey mb-3\" style=\"line-height: 1.4; max-height: 4.2em; overflow: hidden; text-overflow: ellipsis; display: block; clear: both; word-wrap: break-word;\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var15 string
-			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(issue.Description)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 219, Col: 23}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</p>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<div class=\"level mb-0\"><div class=\"level-left\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if issue.AssignedTo != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"level-item\"><span class=\"icon-text\"><span class=\"icon has-text-grey-light\"><i class=\"fas fa-user\"></i></span> <span class=\"is-size-7 has-text-grey\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var16 string
-			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(issue.AssignedTo)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 231, Col: 63}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</span></span></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</div><div class=\"level-right\"><span class=\"is-size-7 has-text-grey-light\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(issue.CreatedAt.Format("Jan 02"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 238, Col: 39}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

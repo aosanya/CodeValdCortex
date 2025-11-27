@@ -1,0 +1,95 @@
+package components
+
+import (
+	"fmt"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
+
+// Helper function to get status badge class
+func getStatusBadgeClass(status string) string {
+	switch status {
+	case models.IssueStatusOpen:
+		return "is-info"
+	case models.IssueStatusAssigned:
+		return "is-warning"
+	case models.IssueStatusInProgress:
+		return "is-primary"
+	case models.IssueStatusReadyForReview:
+		return "is-link"
+	case models.IssueStatusCompleted:
+		return "is-success"
+	case models.IssueStatusBlocked:
+		return "is-danger"
+	default:
+		return "is-light"
+	}
+}
+
+// Helper function to format issue number
+func formatIssueNumber(number int) string {
+	return fmt.Sprintf("#%d", number)
+}
+
+// IssueCard component renders a single issue card
+templ IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) {
+	<div class="card issue-card" x-data="{ expanded: false }">
+		<header class="card-header" style="cursor: pointer;" @click="expanded = !expanded">
+			<p class="card-header-title">
+				{ issue.Title }
+			</p>
+			<button class="card-header-icon" type="button">
+				<span class="icon">
+					<i class="fas" :class="expanded ? 'fa-angle-up' : 'fa-angle-down'"></i>
+				</span>
+			</button>
+		</header>
+		<div class="card-content" x-show="expanded" x-collapse>
+			<div class="level mb-2">
+				<div class="level-left">
+					<span class="tag is-light">{ formatIssueNumber(issue.Number) }</span>
+				</div>
+				<div class="level-right">
+					<span class={ "tag", getStatusBadgeClass(issue.Status) }>{ issue.Status }</span>
+				</div>
+			</div>
+			
+			if issue.Description != "" {
+				<div class="issue-description has-text-grey is-size-7 mb-3">
+					{ issue.Description }
+				</div>
+			}
+			
+			<div class="level mb-0">
+				<div class="level-left">
+					if issue.AssignedTo != "" {
+						<div class="level-item">
+							<span class="icon-text">
+								<span class="icon has-text-grey-light">
+									<i class="fas fa-user"></i>
+								</span>
+								<span class="is-size-7 has-text-grey">{ issue.AssignedTo }</span>
+							</span>
+						</div>
+					}
+				</div>
+				<div class="level-right">
+					<span class="is-size-7 has-text-grey-light">
+						{ issue.CreatedAt.Format("Jan 02") }
+					</span>
+				</div>
+			</div>
+			
+			<div class="mt-3">
+				<button 
+					class="button is-small is-primary is-light"
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("openIssueDetails('%s', '%s', '%s'); event.stopPropagation();", agencyID, instanceID, issue.Key)} }
+					type="button">
+					<span class="icon is-small">
+						<i class="fas fa-edit"></i>
+					</span>
+					<span>Edit</span>
+				</button>
+			</div>
+		</div>
+	</div>
+}
