@@ -97,8 +97,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 				const panel = document.getElementById('createIssuePanel');
 				if (!panel) return;
 
-				console.log('[MVP-WI-008] Opening issue details:', { agencyID, instanceID, issueKey });
-
+				
 				// Fetch issue data from API
 				fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
 					.then(response => {
@@ -108,7 +107,6 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 						return response.json();
 					})
 					.then(data => {
-						console.log('[MVP-WI-008] Loaded issue data:', data);
 						
 						// Populate form fields
 						const form = document.getElementById('createIssueForm');
@@ -139,7 +137,6 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 						panel.style.display = 'block';
 					})
 					.catch(error => {
-						console.error('[MVP-WI-008] Error loading issue:', error);
 						alert('Failed to load issue details: ' + error.message);
 					});
 			}

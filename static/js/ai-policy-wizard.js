@@ -140,7 +140,7 @@ window.policyWizard = function () {
                     const existingPolicy = JSON.parse(existingPolicyData);
                     this.loadExistingPolicy(existingPolicy);
                 } catch (e) {
-                    console.error('Failed to parse existing policy:', e);
+
                 }
             } else {
                 // Initialize with one default provider
@@ -208,17 +208,14 @@ window.policyWizard = function () {
         isValid() {
             // Check all required fields
             if (!this.policy.agency_id) {
-                console.log('Validation failed: Missing agency_id');
                 return false;
             }
             if (!this.policy.owner) {
-                console.log('Validation failed: Missing owner');
                 return false;
             }
 
             // Check models - must have at least one valid provider
             if (this.policy.models.allowed_providers.length === 0) {
-                console.log('Validation failed: No providers');
                 return false;
             }
 
@@ -228,11 +225,9 @@ window.policyWizard = function () {
             );
 
             if (hasInvalidProvider) {
-                console.log('Validation failed: Invalid provider configuration');
                 return false;
             }
 
-            console.log('Validation passed!');
             return true;
         },
 
@@ -373,7 +368,6 @@ window.policyWizard = function () {
                 }
 
                 const result = await response.json();
-                console.log('Policy saved:', result);
 
                 this.saveSuccess = true;
                 setTimeout(() => this.saveSuccess = false, 5000);
@@ -383,7 +377,6 @@ window.policyWizard = function () {
                     this.policy = result.policy;
                 }
             } catch (error) {
-                console.error('Save error:', error);
                 this.errorMessage = error.message;
                 this.saveError = true;
                 setTimeout(() => this.saveError = false, 5000);

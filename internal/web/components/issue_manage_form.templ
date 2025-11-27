@@ -119,9 +119,6 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 				? `/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${editingIssueKey}`
 				: `/api/v1/agencies/${agencyID}/instances/${instanceID}/issues`;
 
-			console.log(`[MVP-WI-008] ${isEditMode ? 'Updating' : 'Creating'} issue with data:`, data);
-			console.log('[MVP-WI-008] Agency ID:', agencyID, 'Instance ID:', instanceID);
-
 			fetch(url, {
 				method: method,
 				headers: {
@@ -130,17 +127,14 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 				body: JSON.stringify(data)
 			})
 			.then(response => {
-				console.log('[MVP-WI-008] Response status:', response.status);
 				return response.json();
 			})
 			.then(data => {
-				console.log('[MVP-WI-008] Response data:', data);
 				closeCreateIssuePanel();
 				// Reload page to show updated/new issue
 				window.location.reload();
 			})
 			.catch(error => {
-				console.error(`[MVP-WI-008] Error ${isEditMode ? 'updating' : 'creating'} issue:`, error);
 				alert(`Failed to ${isEditMode ? 'update' : 'create'} issue: ` + error.message);
 			});
 		}

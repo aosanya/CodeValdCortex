@@ -327,10 +327,8 @@ templ AIPolicyContent(currentAgency *models.Agency) {
 					const aiPolicySection = document.getElementById('content-ai-policy');
 					const agencyId = aiPolicySection.querySelector('.overview-section').dataset.agencyId;
 					const response = await fetch(`/api/agencies/${agencyId}/policy/summary`);
-					console.log('Policy summary response:', response.status);
 					if (response.ok) {
 						const summary = await response.json();
-						console.log('Policy summary loaded:', summary);
 						document.getElementById('policy-summary-container').style.display = 'block';
 						document.getElementById('policy-no-config').style.display = 'none';
 						
@@ -350,10 +348,10 @@ templ AIPolicyContent(currentAgency *models.Agency) {
 						'</div>' +
 						'<p class="help is-info">Note: Compliance frameworks (SOC2, GDPR, HIPAA, ISO27001) will be implemented as intelligent agents (see MVP-051-053)</p>';
 					} else {
-						console.log('Policy summary not found');
+						
 					}
 				} catch (error) {
-					console.debug('Error loading policy summary:', error);
+				
 				}
 			}
 
