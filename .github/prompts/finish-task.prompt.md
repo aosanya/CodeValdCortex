@@ -111,10 +111,90 @@ Follow the **mandatory completion process** for MVP tasks:
      - `grep -r "log.Printf.*\[MVP-" internal/` (should return no results)
      - `grep -r "🔍\|📊\|💾\|🔹\|✅\|⚠️" internal/ cmd/` (emoji indicators often mean debug logs)
      - `grep -r "DEBUG \[" internal/ cmd/`
-   - After removal, check for orphaned lines and unused imports (e.g., `"log"` import)
+   
+   **CRITICAL: Handle Multiline Logs Properly**:
+   - **Multiline log statements** span multiple lines and MUST be removed completely:
+     ```go
+     // ❌ Remove entire multiline statement (all 4 lines):
+     log.Printf("[MVP-XXX] Complex data: %+v, status: %s, count: %d",
+         complexObject,
+         statusValue,
+         itemCount)
+     ```
+   - **Look for continuation patterns**: Logs with trailing commas, unclosed parentheses
+   - **Use automated tools** that track parentheses matching (like `remove-mvp-logs-v2.py`)
+   - **Manual check**: Ensure no orphaned lines remain after log removal
+   
+   **CRITICAL: Remove Orphaned Constructs**:
+   - **After removing logs, check for orphaned code blocks**:
+     ```go
+     // ❌ BEFORE: Loop only for debug logging
+     for i, item := range items {
+         log.Printf("[MVP-XXX] Item %d: %+v", i, item)
+     }
+     
+     // ✅ AFTER: Remove entire loop (orphaned construct)
+     // [delete the entire for loop block]
+     ```
+   - **Check for orphaned variables**:
+     ```go
+     // ❌ BEFORE: Variable only used in debug log
+     debugInfo := fmt.Sprintf("Status: %s", status)
+     log.Printf("[MVP-XXX] %s", debugInfo)
+     
+     // ✅ AFTER: Remove both variable and log
+     // [delete both lines]
+     ```
+   - **Check for orphaned conditionals**:
+     ```go
+     // ❌ BEFORE: If block only for logging
+     if len(results) > 0 {
+         log.Printf("[MVP-XXX] Found %d results", len(results))
+     }
+     
+     // ✅ AFTER: Remove entire conditional
+     // [delete the entire if block]
+     ```
+   - **Check for orphaned imports**:
+     ```go
+     // If "log" package only used for debug logs, remove import
+     import (
+         "fmt"  // ❌ Remove if only used for debug Printf
+         "log"  // ❌ Remove if only used for debug logs
+     )
+     ```
+   
+   **Post-Cleanup Validation**:
+   - **Run `go vet ./...`** - Will catch orphaned variables, unused imports
+   - **Run `go fmt ./...`** - Clean up formatting after deletions
+   - **Check for empty blocks**: Search for `{\n\s*}` patterns
+   - **Verify compilation**: `go build ./...` must succeed
+   - **Manual file review**: Scan files that had logs removed for:
+     - Orphaned variable declarations
+     - Empty loops/conditionals
+     - Unused function parameters that were only logged
+     - Comments referring to removed debug statements
    
    **Frontend JavaScript Logs**:
    - Search for and remove all `console.log()`, `console.warn()` statements in JavaScript files
+   - **Handle multiline console statements**:
+     ```javascript
+     // ❌ Remove entire multiline statement:
+     console.log('[MVP-XXX] Data:', 
+         data, 
+         'status:', status,
+         'timestamp:', timestamp);
+     ```
+   - **Remove orphaned blocks**:
+     ```javascript
+     // ❌ BEFORE: Only used for logging
+     if (response.debug) {
+         console.log('[MVP-XXX] Debug info:', response.debug);
+     }
+     
+     // ✅ AFTER: Remove entire conditional
+     // [delete the entire if block]
+     ```
    - Search patterns to check:
      - `grep -r "console.log" static/js/`
      - `grep -r "console.warn" static/js/`
@@ -123,7 +203,15 @@ Follow the **mandatory completion process** for MVP tasks:
    
    **General Rules**:
    - Remove TODO comments that reference debug logging
+   - Remove comments like `// Debug:`, `// TODO: remove after testing`, etc.
    - Keep only essential production logging (errors, critical warnings)
+   - **After cleanup, verify**:
+     ```bash
+     # Check for common orphaned patterns
+     grep -r "^\s*}$" internal/ | grep -B2 "^\s*$"  # Empty blocks
+     go vet ./...                                     # Unused vars, imports
+     go build ./...                                   # Still compiles
+     ```
    - **Test the application after removing logs to ensure nothing breaks**
    - This is MANDATORY - no debug logs should remain in merged code
 
