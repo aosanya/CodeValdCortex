@@ -139,11 +139,22 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 					workItem.Code, workItem.Title)
 			}
 
-			// Query issues for this step
-			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, item.WorkItemKey)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get issues for step %s: %w", item.WorkItemKey, err)
+			// Get the step identifier to use for querying issues
+			// Use WorkItemID if WorkItemKey is empty
+			stepIdentifier := item.WorkItemKey
+			if stepIdentifier == "" {
+				stepIdentifier = item.WorkItemID
 			}
+			log.Printf("[MVP-WI-008] GenerateBoard - Querying issues with stepIdentifier: '%s' (WorkItemKey='%s', WorkItemID='%s')",
+				stepIdentifier, item.WorkItemKey, item.WorkItemID)
+
+			// Query issues for this step
+			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, stepIdentifier)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get issues for step %s: %w", stepIdentifier, err)
+			}
+
+			log.Printf("[MVP-WI-008] GenerateBoard - Found %d issues for step '%s'", len(issues), stepIdentifier)
 
 			// Convert pointers to values for BoardColumn
 			issueValues := make([]models.WorkIssue, len(issues))
@@ -287,11 +298,22 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 					workItem.Code, workItem.Title)
 			}
 
-			// Query issues for this step
-			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, item.WorkItemKey)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get issues for step %s: %w", item.WorkItemKey, err)
+			// Get the step identifier to use for querying issues
+			// Use WorkItemID if WorkItemKey is empty
+			stepIdentifier := item.WorkItemKey
+			if stepIdentifier == "" {
+				stepIdentifier = item.WorkItemID
 			}
+			log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - Querying issues with stepIdentifier: '%s' (WorkItemKey='%s', WorkItemID='%s')",
+				stepIdentifier, item.WorkItemKey, item.WorkItemID)
+
+			// Query issues for this step
+			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, stepIdentifier)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get issues for step %s: %w", stepIdentifier, err)
+			}
+
+			log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - Found %d issues for step '%s'", len(issues), stepIdentifier)
 
 			// Convert pointers to values for BoardColumn
 			issueValues := make([]models.WorkIssue, len(issues))

@@ -127,24 +127,50 @@ func (h *WorkbenchHandler) CreateIssue(c *gin.Context) {
 	agencyID := c.Param("id")
 	instanceID := c.Param("instance_id")
 
+	h.logger.WithFields(logrus.Fields{
+		"task":       "MVP-WI-008",
+		"agencyID":   agencyID,
+		"instanceID": instanceID,
+	}).Info("CreateIssue handler called")
+
 	var req models.CreateIssueRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"task":  "MVP-WI-008",
+			"error": err.Error(),
+		}).Error("Failed to bind JSON request")
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	h.logger.WithFields(logrus.Fields{
+		"task":        "MVP-WI-008",
+		"title":       req.Title,
+		"description": req.Description,
+		"workflowID":  req.WorkflowID,
+	}).Info("CreateIssue request data")
 
 	// TODO: Get user ID from context/session
 	createdBy := "system"
 
 	issue, err := h.issueService.CreateIssue(c.Request.Context(), agencyID, instanceID, req)
 	if err != nil {
-		h.logger.WithError(err).Error("Failed to create issue")
+		h.logger.WithError(err).WithField("task", "MVP-WI-008").Error("Failed to create issue")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create issue"})
 		return
 	}
 
 	// Set created_by
 	issue.CreatedBy = createdBy
+
+	h.logger.WithFields(logrus.Fields{
+		"task":        "MVP-WI-008",
+		"issueKey":    issue.Key,
+		"issueNum":    issue.Number,
+		"title":       issue.Title,
+		"status":      issue.Status,
+		"currentStep": issue.CurrentStep,
+	}).Info("Issue created successfully")
 
 	c.JSON(http.StatusCreated, issue)
 }

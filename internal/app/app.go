@@ -157,7 +157,9 @@ func New(cfg *config.Config) *App {
 	{
 		// Note: IssueRepository is initialized per agency database, not master database
 		// The service will create agency-specific repositories when needed using dbClient
-		issueService = services.NewIssueService(nil, agencyRepo)
+		issueService = services.NewIssueService(agencyRepo, dbClient)
+		issueService.SetIssueRepositoryFactory(arangodb.NewIssueRepository)
+
 		if tagService != nil && instanceService != nil {
 			workbenchService = services.NewWorkbenchService(tagService, instanceService, dbClient, agencyRepo)
 			// Set the factory function for creating issue repositories

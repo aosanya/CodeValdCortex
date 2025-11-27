@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
@@ -11,57 +12,115 @@ import (
 
 // IssueService handles business logic for work issues
 type IssueService struct {
-	issueRepo agency.IssueRepository
-	specRepo  agency.Repository
+	specRepo         agency.Repository
+	dbClient         DBClient
+	issueRepoFactory agency.IssueRepositoryFactory
 }
 
 // NewIssueService creates a new issue service
-func NewIssueService(issueRepo agency.IssueRepository, specRepo agency.Repository) *IssueService {
+func NewIssueService(specRepo agency.Repository, dbClient DBClient) *IssueService {
 	return &IssueService{
-		issueRepo: issueRepo,
-		specRepo:  specRepo,
+		specRepo:         specRepo,
+		dbClient:         dbClient,
+		issueRepoFactory: nil, // Will be set by app initialization
 	}
+}
+
+// SetIssueRepositoryFactory sets the factory function for creating issue repositories
+func (s *IssueService) SetIssueRepositoryFactory(factory agency.IssueRepositoryFactory) {
+	s.issueRepoFactory = factory
+}
+
+// getIssueRepo creates an agency-specific issue repository
+func (s *IssueService) getIssueRepo(ctx context.Context, agencyID string) (agency.IssueRepository, error) {
+	if s.issueRepoFactory == nil {
+		return nil, fmt.Errorf("issue repository factory not configured")
+	}
+
+	// Use agencyID as database name (standard pattern)
+	db, err := s.dbClient.GetDatabase(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get agency database: %w", err)
+	}
+
+	// Create repository with agency-specific database
+	repo, err := s.issueRepoFactory(s.dbClient.Client(), db)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create issue repository: %w", err)
+	}
+
+	return repo, nil
 }
 
 // CreateIssue creates a new issue at the workflow entry point
 func (s *IssueService) CreateIssue(ctx context.Context, agencyID, instanceID string, req models.CreateIssueRequest) (*models.WorkIssue, error) {
+	log.Printf("[MVP-WI-008] CreateIssue - agencyID: %s, instanceID: %s, title: '%s', workflowID: '%s'",
+		agencyID, instanceID, req.Title, req.WorkflowID)
+
 	// Get agency specification to access workflows
 	spec, err := s.specRepo.GetSpecification(ctx, agencyID)
 	if err != nil {
+		log.Printf("[MVP-WI-008] Failed to get agency specification: %v", err)
 		return nil, fmt.Errorf("failed to get agency specification: %w", err)
 	}
+
+	log.Printf("[MVP-WI-008] Retrieved specification with %d workflows", len(spec.Workflows))
 
 	// Find workflow in specification
 	var workflow *models.Workflow
 	for i := range spec.Workflows {
+		log.Printf("[MVP-WI-008] Checking workflow[%d] - Key: '%s', Name: '%s'", i, spec.Workflows[i].Key, spec.Workflows[i].Name)
 		if spec.Workflows[i].Key == req.WorkflowID {
 			workflow = &spec.Workflows[i]
+			log.Printf("[MVP-WI-008] Found matching workflow: %s", workflow.Name)
 			break
 		}
 	}
 
 	if workflow == nil {
+		log.Printf("[MVP-WI-008] Workflow not found for ID: %s", req.WorkflowID)
 		return nil, fmt.Errorf("workflow not found")
 	}
 
 	// Enforce entry point: issues MUST start at first workflow step
 	if len(workflow.Steps) == 0 {
+		log.Printf("[MVP-WI-008] Workflow %s has no steps defined", workflow.Key)
 		return nil, fmt.Errorf("workflow has no steps defined")
 	}
 
+	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
+
 	firstStep := workflow.Steps[0]
 	if len(firstStep.Items) == 0 {
+		log.Printf("[MVP-WI-008] First workflow step has no work items")
 		return nil, fmt.Errorf("first workflow step has no work items")
 	}
 
-	// Get entry point work item code
+	log.Printf("[MVP-WI-008] First step has %d items", len(firstStep.Items))
+
+	// Get entry point work item code - use WorkItemID if WorkItemKey is empty
 	entryPointCode := firstStep.Items[0].WorkItemKey
+	if entryPointCode == "" {
+		entryPointCode = firstStep.Items[0].WorkItemID
+	}
+	log.Printf("[MVP-WI-008] Entry point WorkItemKey: '%s', WorkItemID: '%s', WorkItemName: '%s', Using: '%s'",
+		firstStep.Items[0].WorkItemKey, firstStep.Items[0].WorkItemID, firstStep.Items[0].WorkItemName, entryPointCode)
+
+	// Get issue repository for this agency
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		log.Printf("[MVP-WI-008] Failed to get issue repository: %v", err)
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
 
 	// Get next issue number
-	number, err := s.issueRepo.GetNextIssueNumber(ctx, agencyID, instanceID)
+	number, err := issueRepo.GetNextIssueNumber(ctx, agencyID, instanceID)
 	if err != nil {
+		log.Printf("[MVP-WI-008] Failed to get next issue number: %v", err)
 		return nil, fmt.Errorf("failed to get next issue number: %w", err)
 	}
+
+	log.Printf("[MVP-WI-008] Next issue number: %d", number)
 
 	// Create issue at entry point
 	issue := &models.WorkIssue{
@@ -77,17 +136,27 @@ func (s *IssueService) CreateIssue(ctx context.Context, agencyID, instanceID str
 		CompletedSteps: []string{},
 	}
 
+	log.Printf("[MVP-WI-008] Creating issue: Number=%d, Title='%s', CurrentStep='%s', Status='%s'",
+		issue.Number, issue.Title, issue.CurrentStep, issue.Status)
+
 	// Create in repository
-	if err := s.issueRepo.Create(ctx, issue); err != nil {
+	if err := issueRepo.Create(ctx, issue); err != nil {
+		log.Printf("[MVP-WI-008] Failed to create issue in repository: %v", err)
 		return nil, fmt.Errorf("failed to create issue: %w", err)
 	}
 
+	log.Printf("[MVP-WI-008] Issue created successfully with Key: %s", issue.Key)
 	return issue, nil
 }
 
 // GetIssue retrieves an issue by ID
 func (s *IssueService) GetIssue(ctx context.Context, agencyID, instanceID, issueID string) (*models.WorkIssue, error) {
-	issue, err := s.issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	issue, err := issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issue: %w", err)
 	}
@@ -96,8 +165,13 @@ func (s *IssueService) GetIssue(ctx context.Context, agencyID, instanceID, issue
 
 // UpdateIssue updates an existing issue
 func (s *IssueService) UpdateIssue(ctx context.Context, agencyID, instanceID, issueID string, req models.UpdateIssueRequest) (*models.WorkIssue, error) {
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
 	// Get current issue
-	issue, err := s.issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
+	issue, err := issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issue: %w", err)
 	}
@@ -122,7 +196,7 @@ func (s *IssueService) UpdateIssue(ctx context.Context, agencyID, instanceID, is
 	issue.UpdatedAt = time.Now()
 
 	// Save updates
-	if err := s.issueRepo.Update(ctx, issue); err != nil {
+	if err := issueRepo.Update(ctx, issue); err != nil {
 		return nil, fmt.Errorf("failed to update issue: %w", err)
 	}
 
@@ -131,7 +205,12 @@ func (s *IssueService) UpdateIssue(ctx context.Context, agencyID, instanceID, is
 
 // DeleteIssue deletes an issue
 func (s *IssueService) DeleteIssue(ctx context.Context, agencyID, instanceID, issueID string) error {
-	if err := s.issueRepo.Delete(ctx, agencyID, instanceID, issueID); err != nil {
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	if err := issueRepo.Delete(ctx, agencyID, instanceID, issueID); err != nil {
 		return fmt.Errorf("failed to delete issue: %w", err)
 	}
 	return nil
@@ -139,8 +218,13 @@ func (s *IssueService) DeleteIssue(ctx context.Context, agencyID, instanceID, is
 
 // AssignIssue assigns an issue to a worker
 func (s *IssueService) AssignIssue(ctx context.Context, agencyID, instanceID, issueID, workerID string) (*models.WorkIssue, error) {
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
 	// Get current issue
-	issue, err := s.issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
+	issue, err := issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issue: %w", err)
 	}
@@ -156,7 +240,7 @@ func (s *IssueService) AssignIssue(ctx context.Context, agencyID, instanceID, is
 	issue.UpdatedAt = time.Now()
 
 	// Save updates
-	if err := s.issueRepo.Update(ctx, issue); err != nil {
+	if err := issueRepo.Update(ctx, issue); err != nil {
 		return nil, fmt.Errorf("failed to assign issue: %w", err)
 	}
 
@@ -165,8 +249,13 @@ func (s *IssueService) AssignIssue(ctx context.Context, agencyID, instanceID, is
 
 // ClaimIssue allows a worker to self-assign an available issue
 func (s *IssueService) ClaimIssue(ctx context.Context, agencyID, instanceID, issueID, workerID string) (*models.WorkIssue, error) {
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
 	// Get current issue
-	issue, err := s.issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
+	issue, err := issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issue: %w", err)
 	}
@@ -186,7 +275,7 @@ func (s *IssueService) ClaimIssue(ctx context.Context, agencyID, instanceID, iss
 	issue.UpdatedAt = time.Now()
 
 	// Save updates
-	if err := s.issueRepo.Update(ctx, issue); err != nil {
+	if err := issueRepo.Update(ctx, issue); err != nil {
 		return nil, fmt.Errorf("failed to claim issue: %w", err)
 	}
 
@@ -195,6 +284,11 @@ func (s *IssueService) ClaimIssue(ctx context.Context, agencyID, instanceID, iss
 
 // UpdateIssueStatus updates the status of an issue
 func (s *IssueService) UpdateIssueStatus(ctx context.Context, agencyID, instanceID, issueID, status string) (*models.WorkIssue, error) {
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
 	// Validate status
 	validStatuses := []string{
 		models.IssueStatusOpen,
@@ -218,7 +312,7 @@ func (s *IssueService) UpdateIssueStatus(ctx context.Context, agencyID, instance
 	}
 
 	// Get current issue
-	issue, err := s.issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
+	issue, err := issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issue: %w", err)
 	}
@@ -228,7 +322,7 @@ func (s *IssueService) UpdateIssueStatus(ctx context.Context, agencyID, instance
 	issue.UpdatedAt = time.Now()
 
 	// Save updates
-	if err := s.issueRepo.Update(ctx, issue); err != nil {
+	if err := issueRepo.Update(ctx, issue); err != nil {
 		return nil, fmt.Errorf("failed to update status: %w", err)
 	}
 
@@ -237,8 +331,13 @@ func (s *IssueService) UpdateIssueStatus(ctx context.Context, agencyID, instance
 
 // ProgressIssue moves an issue to the next workflow step
 func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, issueID string) (*models.WorkIssue, error) {
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
 	// Get current issue
-	issue, err := s.issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
+	issue, err := issueRepo.GetByID(ctx, agencyID, instanceID, issueID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issue: %w", err)
 	}
@@ -266,7 +365,12 @@ func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, 
 	currentStepIndex := -1
 	for i, step := range workflow.Steps {
 		for _, item := range step.Items {
-			if item.WorkItemKey == issue.CurrentStep {
+			// Use WorkItemID if WorkItemKey is empty
+			stepID := item.WorkItemKey
+			if stepID == "" {
+				stepID = item.WorkItemID
+			}
+			if stepID == issue.CurrentStep {
 				currentStepIndex = i
 				break
 			}
@@ -296,14 +400,19 @@ func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, 
 		issue.CompletedSteps = append(issue.CompletedSteps, issue.CurrentStep)
 
 		// Move to next step's first work item
-		issue.CurrentStep = nextStep.Items[0].WorkItemKey
+		// Use WorkItemID if WorkItemKey is empty
+		nextStepID := nextStep.Items[0].WorkItemKey
+		if nextStepID == "" {
+			nextStepID = nextStep.Items[0].WorkItemID
+		}
+		issue.CurrentStep = nextStepID
 		issue.Status = models.IssueStatusOpen
 		issue.AssignedTo = "" // Clear assignment for next step
 		issue.UpdatedAt = time.Now()
 	}
 
 	// Save updates
-	if err := s.issueRepo.Update(ctx, issue); err != nil {
+	if err := issueRepo.Update(ctx, issue); err != nil {
 		return nil, fmt.Errorf("failed to progress issue: %w", err)
 	}
 
@@ -312,7 +421,12 @@ func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, 
 
 // GetIssuesByStep retrieves all issues at a specific workflow step
 func (s *IssueService) GetIssuesByStep(ctx context.Context, agencyID, instanceID, workflowID, step string) ([]*models.WorkIssue, error) {
-	issues, err := s.issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflowID, step)
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflowID, step)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get issues by step: %w", err)
 	}
@@ -321,7 +435,12 @@ func (s *IssueService) GetIssuesByStep(ctx context.Context, agencyID, instanceID
 
 // GetAvailableWork retrieves all available (unassigned) issues
 func (s *IssueService) GetAvailableWork(ctx context.Context, agencyID, instanceID string, step string) ([]*models.WorkIssue, error) {
-	issues, err := s.issueRepo.ListAvailable(ctx, agencyID, instanceID, step)
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	issues, err := issueRepo.ListAvailable(ctx, agencyID, instanceID, step)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get available work: %w", err)
 	}
@@ -330,7 +449,12 @@ func (s *IssueService) GetAvailableWork(ctx context.Context, agencyID, instanceI
 
 // ListIssues retrieves issues with filters
 func (s *IssueService) ListIssues(ctx context.Context, agencyID, instanceID string, filters agency.IssueFilters) ([]*models.WorkIssue, error) {
-	issues, err := s.issueRepo.List(ctx, agencyID, instanceID, filters)
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	issues, err := issueRepo.List(ctx, agencyID, instanceID, filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list issues: %w", err)
 	}
@@ -339,7 +463,12 @@ func (s *IssueService) ListIssues(ctx context.Context, agencyID, instanceID stri
 
 // CountIssuesByStep counts issues at a specific workflow step
 func (s *IssueService) CountIssuesByStep(ctx context.Context, agencyID, instanceID, workflowID, step string) (int, error) {
-	count, err := s.issueRepo.CountByStep(ctx, agencyID, instanceID, workflowID, step)
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	count, err := issueRepo.CountByStep(ctx, agencyID, instanceID, workflowID, step)
 	if err != nil {
 		return 0, fmt.Errorf("failed to count issues: %w", err)
 	}

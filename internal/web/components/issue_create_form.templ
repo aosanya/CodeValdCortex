@@ -1,0 +1,114 @@
+package components
+
+import "github.com/aosanya/CodeValdCortex/internal/agency/models"
+
+// IssueCreateForm renders an inline panel for creating new issues
+templ IssueCreateForm(agency *models.Agency, board *models.WorkbenchBoard) {
+	<!-- Create Issue Panel (inline, not a popup) -->
+	<div id="createIssuePanel" class="box" style="display: none; margin-bottom: 1rem;" 
+		data-agency-id={ agency.Key } 
+		data-instance-id={ board.InstanceID } 
+		data-workflow-id={ board.WorkflowID }>
+		<div class="level">
+			<div class="level-left">
+				<div class="level-item">
+					<strong>Create New Issue</strong>
+				</div>
+			</div>
+			<div class="level-right">
+				<div class="level-item">
+					<button class="button" onclick="closeCreateIssuePanel()">Close</button>
+				</div>
+			</div>
+		</div>
+
+		<form id="createIssueForm">
+			<div class="field">
+				<label class="label">Title</label>
+				<div class="control">
+					<input class="input" type="text" name="title" placeholder="Issue title" required/>
+				</div>
+			</div>
+
+			<div class="field">
+				<label class="label">Description</label>
+				<div class="control">
+					<textarea class="textarea" name="description" placeholder="Issue description" rows="4"></textarea>
+				</div>
+			</div>
+
+			<!-- Workflow is not shown to the user; we attach board.WorkflowID in the request -->
+			<div class="field is-grouped">
+				<div class="control">
+					<button type="button" class="button is-primary" onclick="submitCreateIssue()">Create Issue</button>
+				</div>
+				<div class="control">
+					<button type="button" class="button" onclick="closeCreateIssuePanel()">Cancel</button>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<!-- Issue Creation JavaScript -->
+	<script>
+		function toggleCreateIssuePanel() {
+			const panel = document.getElementById('createIssuePanel');
+			if (!panel) return;
+			if (panel.style.display === 'none' || panel.style.display === '') {
+				panel.style.display = 'block';
+			} else {
+				panel.style.display = 'none';
+				document.getElementById('createIssueForm').reset();
+			}
+		}
+
+		function closeCreateIssuePanel() {
+			const panel = document.getElementById('createIssuePanel');
+			if (!panel) return;
+			panel.style.display = 'none';
+			document.getElementById('createIssueForm').reset();
+		}
+
+		function submitCreateIssue() {
+			const panel = document.getElementById('createIssuePanel');
+			const form = document.getElementById('createIssueForm');
+			const formData = new FormData(form);
+
+			// Read data from panel data attributes
+			const agencyID = panel.dataset.agencyId;
+			const instanceID = panel.dataset.instanceId;
+			const workflowID = panel.dataset.workflowId;
+
+			const data = {
+				title: formData.get('title'),
+				description: formData.get('description'),
+				workflow_id: workflowID
+			};
+
+			console.log('[MVP-WI-008] Creating issue with data:', data);
+			console.log('[MVP-WI-008] Agency ID:', agencyID, 'Instance ID:', instanceID);
+
+			fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data)
+			})
+			.then(response => {
+				console.log('[MVP-WI-008] Response status:', response.status);
+				return response.json();
+			})
+			.then(data => {
+				console.log('[MVP-WI-008] Response data:', data);
+				closeCreateIssuePanel();
+				// Reload page to show new issue
+				window.location.reload();
+			})
+			.catch(error => {
+				console.error('[MVP-WI-008] Error creating issue:', error);
+				alert('Failed to create issue: ' + error.message);
+			});
+		}
+	</script>
+}

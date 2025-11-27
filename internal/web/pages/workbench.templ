@@ -66,6 +66,9 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 				</div>
 			</div>
 
+			<!-- Create Issue Form Component -->
+			@components.IssueCreateForm(agency, board)
+
 			<!-- Kanban Board -->
 			<div class="workbench-board" style="overflow-x: auto;">
 				<div class="columns is-variable is-2" style="min-width: max-content;">
@@ -109,103 +112,29 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 			</div>
 		</section>
 
-			<!-- Create Issue Panel (inline, not a popup) -->
-			<div id="createIssuePanel" class="box" style="display: none; margin-bottom: 1rem;">
-				<div class="level">
-					<div class="level-left">
-						<div class="level-item">
-							<strong>Create New Issue</strong>
-						</div>
-					</div>
-					<div class="level-right">
-						<div class="level-item">
-							<button class="button" onclick="closeCreateIssuePanel()">Close</button>
-						</div>
-					</div>
-				</div>
-
-				<form id="createIssueForm">
-					<div class="field">
-						<label class="label">Title</label>
-						<div class="control">
-							<input class="input" type="text" name="title" placeholder="Issue title" required/>
-						</div>
-					</div>
-
-					<div class="field">
-						<label class="label">Description</label>
-						<div class="control">
-							<textarea class="textarea" name="description" placeholder="Issue description" rows="4"></textarea>
-						</div>
-					</div>
-
-					<!-- Workflow is not shown to the user; we attach board.WorkflowID in the request -->
-					<div class="field is-grouped">
-						<div class="control">
-							<button type="button" class="button is-primary" onclick="submitCreateIssue()">Create Issue</button>
-						</div>
-						<div class="control">
-							<button type="button" class="button" onclick="closeCreateIssuePanel()">Cancel</button>
-						</div>
-					</div>
-				</form>
-			</div>
-
 		<!-- Workbench JavaScript -->
 		<script>
-			function toggleCreateIssuePanel() {
-				const panel = document.getElementById('createIssuePanel');
-				if (!panel) return;
-				if (panel.style.display === 'none' || panel.style.display === '') {
-					panel.style.display = 'block';
-				} else {
-					panel.style.display = 'none';
-					document.getElementById('createIssueForm').reset();
-				}
-			}
-
-			function closeCreateIssuePanel() {
-				const panel = document.getElementById('createIssuePanel');
-				if (!panel) return;
-				panel.style.display = 'none';
-				document.getElementById('createIssueForm').reset();
-			}
-
-			function submitCreateIssue() {
-				const form = document.getElementById('createIssueForm');
-				const formData = new FormData(form);
-
-				const data = {
-					title: formData.get('title'),
-					description: formData.get('description'),
-					// workflow_id is attached from the server-side board context
-					workflow_id: '{ board.WorkflowID }'
-				};
-
-				const agencyID = '{ agency.Key }';
-				const instanceID = '{ board.InstanceID }';
-
-				fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(data)
-				})
-				.then(response => response.json())
-				.then(data => {
-					closeCreateIssuePanel();
-					// Reload page to show new issue
-					window.location.reload();
-				})
-				.catch(error => {
-					console.error('Error creating issue:', error);
-					alert('Failed to create issue');
-				});
-			}
-
 			function refreshWorkbench() {
 				window.location.reload();
+			}
+
+			function openIssueDetails(agencyID, instanceID, issueKey) {
+				// TODO: Load issue data and populate the create form for editing
+				// For now, just open the create panel
+				const panel = document.getElementById('createIssuePanel');
+				if (panel) {
+					panel.style.display = 'block';
+					
+					// TODO: Fetch issue data from API
+					// fetch(`/api/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
+					//   .then(response => response.json())
+					//   .then(issue => {
+					//     document.getElementById('issueTitle').value = issue.title;
+					//     document.getElementById('issueDescription').value = issue.description;
+					//   });
+					
+					console.log('Issue details - TODO: implement edit mode', { agencyID, instanceID, issueKey });
+				}
 			}
 		</script>
 
@@ -250,10 +179,10 @@ templ IssueCard(issue *models.WorkIssue, agencyID string, instanceID string) {
 			</div>
 		</div>
 		
-		<p class="title is-6 mb-2">{ issue.Title }</p>
+		<p class="title is-6 mb-2" style="overflow-wrap: break-word; word-break: break-word; display: block; clear: both;">{ issue.Title }</p>
 		
 		if issue.Description != "" {
-			<p class="subtitle is-7 has-text-grey mb-3" style="line-height: 1.3; max-height: 3.9em; overflow: hidden;">
+			<p class="subtitle is-7 has-text-grey mb-3" style="line-height: 1.4; max-height: 4.2em; overflow: hidden; text-overflow: ellipsis; display: block; clear: both; word-wrap: break-word;">
 				{ issue.Description }
 			</p>
 		}
