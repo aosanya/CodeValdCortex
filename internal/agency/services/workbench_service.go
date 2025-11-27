@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
@@ -93,13 +94,37 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 		return nil, fmt.Errorf("failed to get issue repository: %w", err)
 	}
 
-	for _, step := range workflow.Steps {
-		for _, item := range step.Items {
+	log.Printf("[MVP-WI-008] GenerateBoard - workflow.Key: %s, workflow.Name: %s, spec has %d work items",
+		workflow.Key, workflow.Name, len(spec.WorkItems))
+	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
+
+	for stepIdx, step := range workflow.Steps {
+		log.Printf("[MVP-WI-008] Step %d (Order: %d) has %d items", stepIdx, step.Order, len(step.Items))
+		for itemIdx, item := range step.Items {
+			log.Printf("[MVP-WI-008] Step item [%d][%d] - ID: '%s', WorkItemID: '%s', WorkItemKey: '%s', WorkItemName: '%s'",
+				stepIdx, itemIdx, item.ID, item.WorkItemID, item.WorkItemKey, item.WorkItemName)
+
 			// Find work item details in specification
 			var workItem *models.WorkItem
+
+			// Try to match by WorkItemKey first, then by WorkItemID if Key is empty
+			matchKey := item.WorkItemKey
+			if matchKey == "" && item.WorkItemID != "" {
+				// WorkItemKey is empty, try to extract key from WorkItemID
+				// WorkItemID format is typically: "work_items/{key}"
+				log.Printf("[MVP-WI-008] WorkItemKey is empty, trying to extract from WorkItemID: '%s'", item.WorkItemID)
+				// For now, just use WorkItemID as-is for matching
+				matchKey = item.WorkItemID
+			}
+
+			log.Printf("[MVP-WI-008] Attempting to match with key: '%s'", matchKey)
+
 			for i := range spec.WorkItems {
-				if spec.WorkItems[i].Code == item.WorkItemKey {
+				// Match by Key field (ArangoDB _key) or by ID
+				if spec.WorkItems[i].Key == matchKey || spec.WorkItems[i].ID == matchKey {
 					workItem = &spec.WorkItems[i]
+					log.Printf("[MVP-WI-008] Found matching work item in spec - Key: %s, ID: %s, Code: %s, Title: %s",
+						workItem.Key, workItem.ID, workItem.Code, workItem.Title)
 					break
 				}
 			}
@@ -107,9 +132,11 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 			if workItem == nil {
 				// Work item not found in spec, use basic info from workflow
 				workItem = &models.WorkItem{
-					Code:  item.WorkItemKey,
+					Code:  item.WorkItemName, // Use the name as fallback for code
 					Title: item.WorkItemName,
 				}
+				log.Printf("[MVP-WI-008] Work item NOT found in spec, using fallback - Code: %s, Title: %s",
+					workItem.Code, workItem.Title)
 			}
 
 			// Query issues for this step
@@ -128,16 +155,21 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 			column := models.BoardColumn{
 				ID:           fmt.Sprintf("col-%s", item.WorkItemKey),
 				Name:         workItem.Title,
-				WorkItemCode: item.WorkItemKey,
+				WorkItemCode: workItem.Code, // Use the actual Code field from WorkItem
 				WorkItemKey:  item.WorkItemKey,
 				Order:        columnOrder,
 				Issues:       issueValues,
 			}
 
+			log.Printf("[MVP-WI-008] Created column - ID: %s, Name: '%s', Code: '%s', Order: %d, Issues: %d",
+				column.ID, column.Name, column.WorkItemCode, column.Order, len(column.Issues))
+
 			columns = append(columns, column)
 			columnOrder++
 		}
 	}
+
+	log.Printf("[MVP-WI-008] Total columns created: %d", len(columns))
 
 	// Get instance to retrieve name
 	instance, err := s.instanceService.GetInstance(ctx, agencyID, instanceID)
@@ -210,13 +242,37 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 		return nil, fmt.Errorf("failed to get issue repository: %w", err)
 	}
 
-	for _, step := range workflow.Steps {
-		for _, item := range step.Items {
+	log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - workflow.Key: %s, workflow.Name: %s, spec has %d work items",
+		workflow.Key, workflow.Name, len(spec.WorkItems))
+	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
+
+	for stepIdx, step := range workflow.Steps {
+		log.Printf("[MVP-WI-008] Step %d (Order: %d) has %d items", stepIdx, step.Order, len(step.Items))
+		for itemIdx, item := range step.Items {
+			log.Printf("[MVP-WI-008] Step item [%d][%d] - ID: '%s', WorkItemID: '%s', WorkItemKey: '%s', WorkItemName: '%s'",
+				stepIdx, itemIdx, item.ID, item.WorkItemID, item.WorkItemKey, item.WorkItemName)
+
 			// Find work item details in specification
 			var workItem *models.WorkItem
+
+			// Try to match by WorkItemKey first, then by WorkItemID if Key is empty
+			matchKey := item.WorkItemKey
+			if matchKey == "" && item.WorkItemID != "" {
+				// WorkItemKey is empty, try to extract key from WorkItemID
+				// WorkItemID format is typically: "work_items/{key}"
+				log.Printf("[MVP-WI-008] WorkItemKey is empty, trying to extract from WorkItemID: '%s'", item.WorkItemID)
+				// For now, just use WorkItemID as-is for matching
+				matchKey = item.WorkItemID
+			}
+
+			log.Printf("[MVP-WI-008] Attempting to match with key: '%s'", matchKey)
+
 			for i := range spec.WorkItems {
-				if spec.WorkItems[i].Code == item.WorkItemKey {
+				// Match by Key field (ArangoDB _key) or by ID
+				if spec.WorkItems[i].Key == matchKey || spec.WorkItems[i].ID == matchKey {
 					workItem = &spec.WorkItems[i]
+					log.Printf("[MVP-WI-008] Found matching work item in spec - Key: %s, ID: %s, Code: %s, Title: %s",
+						workItem.Key, workItem.ID, workItem.Code, workItem.Title)
 					break
 				}
 			}
@@ -224,9 +280,11 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 			if workItem == nil {
 				// Work item not found in spec, use basic info from workflow
 				workItem = &models.WorkItem{
-					Code:  item.WorkItemKey,
+					Code:  item.WorkItemName, // Use the name as fallback for code
 					Title: item.WorkItemName,
 				}
+				log.Printf("[MVP-WI-008] Work item NOT found in spec, using fallback - Code: %s, Title: %s",
+					workItem.Code, workItem.Title)
 			}
 
 			// Query issues for this step
@@ -245,16 +303,21 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 			column := models.BoardColumn{
 				ID:           fmt.Sprintf("col-%s", item.WorkItemKey),
 				Name:         workItem.Title,
-				WorkItemCode: item.WorkItemKey,
+				WorkItemCode: workItem.Code, // Use the actual Code field from WorkItem
 				WorkItemKey:  item.WorkItemKey,
 				Order:        columnOrder,
 				Issues:       issueValues,
 			}
 
+			log.Printf("[MVP-WI-008] Created column - ID: %s, Name: '%s', Code: '%s', Order: %d, Issues: %d",
+				column.ID, column.Name, column.WorkItemCode, column.Order, len(column.Issues))
+
 			columns = append(columns, column)
 			columnOrder++
 		}
 	}
+
+	log.Printf("[MVP-WI-008] Total columns created: %d", len(columns))
 
 	// Get instance to retrieve name
 	instance, err := s.instanceService.GetInstance(ctx, agencyID, instanceID)

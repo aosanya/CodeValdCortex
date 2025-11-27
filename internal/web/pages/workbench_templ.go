@@ -104,7 +104,7 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 				return templ_7745c5c3_Err
 			}
 			for _, column := range board.Columns {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"column workbench-column\" style=\"min-width: 320px; max-width: 320px;\"><!-- Column Header --><div class=\"box has-background-light mb-3\"><div class=\"level mb-0\"><div class=\"level-left\"><div><p class=\"heading mb-1\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"column workbench-column\" style=\"min-width: 320px; max-width: 320px;\"><!-- Column Header --><div class=\"box has-background-light mb-3\"><div class=\"level mb-0\"><div class=\"level-left\"><div style=\"max-width: 240px;\"><p class=\"heading mb-1\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -117,14 +117,14 @@ func Workbench(agency *models.Agency, board *models.WorkbenchBoard) templ.Compon
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p><p class=\"title is-6 mb-0\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</p><p class=\"title is-6 mb-0\" style=\"white-space: normal; line-height: 1.3;\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(column.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 80, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 80, Col: 98}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
