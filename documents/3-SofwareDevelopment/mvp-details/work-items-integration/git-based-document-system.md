@@ -234,7 +234,7 @@ type WorkIssue struct {
 - [pull-requests.md](pull-requests.md) - Code review workflow
 - [workflow-automation.md](workflow-automation.md) - Orchestration and progression logic
 - [workflow-integration.md](workflow-integration.md) - API endpoints, event handling, notifications
-- [kanban-workflow.md](kanban-workflow.md) - Issue management and Kanban boards
+- [kanban-workflow.md](kanban-workflow.md) - Issue management and Workbench (Kanban-style board)
 
 **Next steps for implementation**:
 - Build Git object storage layer

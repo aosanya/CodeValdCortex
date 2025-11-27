@@ -6,9 +6,9 @@
 
 ## Overview
 
-This document defines how **WorkItems from Agency Specifications** integrate with **Workflows** to create **Kanban boards** in CodeValdCortex. The system uses published agency tags as the single source of truth.
+This document defines how **WorkItems from Agency Specifications** integrate with **Workflows** to create the **Workbench** (Kanban-style board accessible via navbar after Instances) in CodeValdCortex. The system uses published agency tags as the single source of truth.
 
-**Key Architectural Principle**: WorkItems are defined in the Agency Specification (not as separate types). When an agency is published/tagged, these WorkItems become Kanban columns through Workflow definitions that reference them.
+**Key Architectural Principle**: WorkItems are defined in the Agency Specification (not as separate types). When an agency is published/tagged, these WorkItems become Workbench columns through Workflow definitions that reference them.
 
 ### Architecture Flow
 
@@ -42,9 +42,9 @@ Agency Specification (internal/agency/models/specification.go)
       workflows: [...]      # Workflow definitions referencing WorkItems
     }
        ↓
-  Kanban Board Generation
+  Workbench Board Generation (UI: navbar link after Instances)
     ↓
-  Kanban Columns (created from Workflow steps)
+  Workbench Columns (created from Workflow steps)
     └─> Each column represents a WorkItem from the specification
          └─> Issues/Tickets move through these columns
               └─> Agent assignment based on WorkItem metadata
@@ -99,8 +99,8 @@ type Step struct {
 - **Agency Specification**: WorkItems defined as part of agency design in specification document
 - **Workflows**: Reference WorkItems by code to create ordered process flow
 - **Tags**: Published snapshots containing complete specification (WorkItems + Workflows + Goals + Roles + RACI)
-- **Kanban Boards**: Generated from tag's workflow.steps, each step maps to a Kanban column
-- **Git System**: Issues created in Kanban link to branches/PRs for code/document changes
+- **Workbench**: Generated from tag's workflow.steps, each step maps to a Workbench column (UI: navbar link after Instances)
+- **Git System**: Issues created in Workbench link to branches/PRs for code/document changes
 - **Agent Orchestration**: Issues trigger agent creation based on WorkItem deliverables and requirements
 
 ---
@@ -109,7 +109,7 @@ type Step struct {
 
 ### Objective
 
-Connect Workflows to Agency Specification WorkItems to enable Kanban board generation from published agency tags.
+Connect Workflows to Agency Specification WorkItems to enable Workbench board generation from published agency tags.
 
 ### Problem
 
@@ -117,8 +117,8 @@ Currently:
 - ✅ WorkItems exist in Agency Specification (`specification.work_items`)
 - ✅ Workflows exist in Agency Specification (`specification.workflows`)
 - ❌ Workflows don't explicitly reference WorkItems
-- ❌ No clear mapping from Workflow steps to Kanban columns
-- ❌ Kanban board generation logic missing
+- ❌ No clear mapping from Workflow steps to Workbench columns
+- ❌ Workbench board generation logic missing
 
 ### Solution
 
@@ -141,21 +141,21 @@ type Step struct {
 Add workflow designer interface that:
 - Lists all WorkItems from specification
 - Allows drag-and-drop WorkItems into workflow steps
-- Visualizes workflow as a Kanban board preview
+- Visualizes workflow as a Workbench board preview
 - Validates WorkItem references (ensure Code exists in specification)
 
-**3. Kanban Board Generation Service**
+**3. Workbench Board Generation Service**
 
 When an agency is activated (tag is used):
 ```go
 // Pseudo-code
-func GenerateKanbanBoard(tagSnapshot *models.TagSnapshot) (*KanbanBoard, error) {
+func GenerateWorkbenchBoard(tagSnapshot *models.TagSnapshot) (*WorkbenchBoard, error) {
     workItems := tagSnapshot.Specification.WorkItems
     workflows := tagSnapshot.Specification.Workflows
     
-    // For each workflow, create a Kanban board
+    // For each workflow, create a Workbench board
     for _, workflow := range workflows {
-        board := &KanbanBoard{
+        board := &WorkbenchBoard{
             Name: workflow.Name,
             Columns: []Column{},
         }
@@ -188,7 +188,7 @@ func GenerateKanbanBoard(tagSnapshot *models.TagSnapshot) (*KanbanBoard, error) 
   - [ ] Workflow canvas (drag-drop to create steps)
   - [ ] Step configuration modal (link to WorkItem)
   - [ ] Workflow validation (ensure all WorkItem codes exist)
-- [ ] Implement Kanban board generation service
+- [ ] Implement Workbench board generation service
   - [ ] Read tag snapshot
   - [ ] Parse workflows and WorkItems
   - [ ] Create board structure
@@ -197,15 +197,15 @@ func GenerateKanbanBoard(tagSnapshot *models.TagSnapshot) (*KanbanBoard, error) 
   - [ ] GET /api/v1/agencies/:id/workflows (already exists)
   - [ ] POST /api/v1/agencies/:id/workflows (already exists)
   - [ ] PUT /api/v1/workflows/:id (already exists)
-  - [ ] GET /api/v1/agencies/:id/kanban-boards (NEW - from tag)
+  - [ ] GET /api/v1/agencies/:id/workbench (NEW - from tag)
 
 ### Acceptance Criteria
 
 - [ ] Workflow steps can reference WorkItems by code
 - [ ] Agency Designer shows WorkItem-Workflow integration UI
 - [ ] Workflow validation prevents invalid WorkItem references
-- [ ] Kanban boards are generated from published tag workflows
-- [ ] Each Kanban column maps to a WorkItem from specification
+- [ ] Workbench boards are generated from published tag workflows
+- [ ] Each Workbench column maps to a WorkItem from specification
 - [ ] Workflow CRUD operations maintain WorkItem references
 - [ ] Tag snapshots preserve WorkItem-Workflow relationships
 
@@ -215,7 +215,7 @@ func GenerateKanbanBoard(tagSnapshot *models.TagSnapshot) (*KanbanBoard, error) 
 
 ### Problem
 
-Issues (tickets) created in Kanban boards need:
+Issues (tickets) created in Workbench need:
 - State management (as they move through columns)
 - SLA tracking (time limits per WorkItem)
 - Escalation policies (when SLAs are breached)

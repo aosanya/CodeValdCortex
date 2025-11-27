@@ -1,14 +1,16 @@
 # Issue Management & Lifecycle
 
-**Related Tasks**: MVP-WI-008 (Kanban Board), MVP-030 (Work Item Definitions), MVP-031 (Agent Assignment)  
+**Related Tasks**: MVP-WI-008 (Workbench/Kanban Board), MVP-030 (Work Item Definitions), MVP-031 (Agent Assignment)  
 **Status**: 📋 Planned - Architecture Defined
 
 ## Overview
 
 This document describes the complete lifecycle of work items (issues) in CodeValdCortex, from creation through completion. Issues are runtime instances of work that progress through workflow stages, with Git integration for all artifacts produced.
 
+**UI Location**: Workbench (navbar link after Instances)
+
 **Key Concepts**:
-- **Issues**: Runtime work instances created by users on Kanban board
+- **Issues**: Runtime work instances created by users on Workbench board
 - **Work Items**: Templates defined in agency specs (REQ1, IMPL1, etc.)
 - **Assignment**: Manual or claim-based worker allocation
 - **Git Integration**: All work produces commits/PRs in internal Git system
@@ -27,10 +29,10 @@ This traces a feature request from creation to completion through the software d
 ## Step 1: Issue Creation (User Action)
 
 **Actor**: Human user  
-**Location**: Agency Kanban Board UI
+**Location**: Workbench UI (navbar link)
 
 **Process**:
-1. User navigates to agency instance Kanban board
+1. User navigates to agency instance Workbench
 2. Clicks **"Create Issue"** button
 3. Fills out issue creation form:
    ```
@@ -64,7 +66,7 @@ This traces a feature request from creation to completion through the software d
 ```
 
 **UI State**:
-- Issue appears as card in **REQ1** column of Kanban board
+- Issue appears as card in **REQ1** column of Workbench board
 - Available for assignment/claiming
 
 ---
@@ -72,7 +74,7 @@ This traces a feature request from creation to completion through the software d
 ## Step 2: Work Assignment (Flexible Model)
 
 **Actors**: Admin or Agent/Human worker  
-**Location**: Kanban Board or Work Queue
+**Location**: Workbench or Work Queue
 
 **Two Assignment Modes**:
 

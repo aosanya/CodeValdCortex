@@ -1,15 +1,17 @@
-# Kanban Workflow & Issue Lifecycle
+# Workbench (Kanban Workflow) & Issue Lifecycle
 
 **Status**: 📋 Planned - Architecture Defined  
 **Related**: [git-based-document-system.md](./git-based-document-system.md), [work-item-schema.md](./work-item-schema.md)
 
 ## Overview
 
-This document provides an overview of the Kanban workflow system in CodeValdCortex. The system uses a workflow-based approach where issues progress through stages defined in agency specifications, with work performed by humans or AI agents, and all changes tracked in the internal Git-in-ArangoDB system.
+This document provides an overview of the **Workbench** system in CodeValdCortex - a Kanban-style workflow board accessible via the navbar (positioned after Instances). The Workbench uses a workflow-based approach where issues progress through stages defined in agency specifications, with work performed by humans or AI agents, and all changes tracked in the internal Git-in-ArangoDB system.
+
+**UI Location**: Navbar link "Workbench" (after Instances link)
 
 **Key Concepts**:
 - **Work Item Definitions**: Templates defined in agency specs (REQ1, IMPL1, etc.)
-- **Issues**: Runtime instances created by users on Kanban board
+- **Issues**: Runtime instances created by users on Workbench board
 - **Workflows**: Sequential steps that issues progress through
 - **Agents/Humans**: Workers who claim and execute work on issues
 - **Git Integration**: All work results in commits/PRs in internal Git system
@@ -31,9 +33,9 @@ This overview has been split into focused topic areas:
 - Pull request creation workflow
 - Human review process
 - Issue data models and API endpoints
-- UI components (Kanban board, issue cards)
+- UI components (Workbench board, issue cards, drag-and-drop)
 
-**Read this for**: Understanding how issues are created, assigned, worked on, and reviewed.
+**Read this for**: Understanding how issues are created, assigned, worked on, and reviewed on the Workbench.
 
 ---
 
