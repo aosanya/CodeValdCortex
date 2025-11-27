@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
@@ -54,73 +53,52 @@ func (s *IssueService) getIssueRepo(ctx context.Context, agencyID string) (agenc
 
 // CreateIssue creates a new issue at the workflow entry point
 func (s *IssueService) CreateIssue(ctx context.Context, agencyID, instanceID string, req models.CreateIssueRequest) (*models.WorkIssue, error) {
-	log.Printf("[MVP-WI-008] CreateIssue - agencyID: %s, instanceID: %s, title: '%s', workflowID: '%s'",
-		agencyID, instanceID, req.Title, req.WorkflowID)
-
 	// Get agency specification to access workflows
 	spec, err := s.specRepo.GetSpecification(ctx, agencyID)
 	if err != nil {
-		log.Printf("[MVP-WI-008] Failed to get agency specification: %v", err)
 		return nil, fmt.Errorf("failed to get agency specification: %w", err)
 	}
-
-	log.Printf("[MVP-WI-008] Retrieved specification with %d workflows", len(spec.Workflows))
 
 	// Find workflow in specification
 	var workflow *models.Workflow
 	for i := range spec.Workflows {
-		log.Printf("[MVP-WI-008] Checking workflow[%d] - Key: '%s', Name: '%s'", i, spec.Workflows[i].Key, spec.Workflows[i].Name)
 		if spec.Workflows[i].Key == req.WorkflowID {
 			workflow = &spec.Workflows[i]
-			log.Printf("[MVP-WI-008] Found matching workflow: %s", workflow.Name)
 			break
 		}
 	}
 
 	if workflow == nil {
-		log.Printf("[MVP-WI-008] Workflow not found for ID: %s", req.WorkflowID)
 		return nil, fmt.Errorf("workflow not found")
 	}
 
 	// Enforce entry point: issues MUST start at first workflow step
 	if len(workflow.Steps) == 0 {
-		log.Printf("[MVP-WI-008] Workflow %s has no steps defined", workflow.Key)
 		return nil, fmt.Errorf("workflow has no steps defined")
 	}
 
-	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
-
 	firstStep := workflow.Steps[0]
 	if len(firstStep.Items) == 0 {
-		log.Printf("[MVP-WI-008] First workflow step has no work items")
 		return nil, fmt.Errorf("first workflow step has no work items")
 	}
-
-	log.Printf("[MVP-WI-008] First step has %d items", len(firstStep.Items))
 
 	// Get entry point work item code - use WorkItemID if WorkItemKey is empty
 	entryPointCode := firstStep.Items[0].WorkItemKey
 	if entryPointCode == "" {
 		entryPointCode = firstStep.Items[0].WorkItemID
 	}
-	log.Printf("[MVP-WI-008] Entry point WorkItemKey: '%s', WorkItemID: '%s', WorkItemName: '%s', Using: '%s'",
-		firstStep.Items[0].WorkItemKey, firstStep.Items[0].WorkItemID, firstStep.Items[0].WorkItemName, entryPointCode)
 
 	// Get issue repository for this agency
 	issueRepo, err := s.getIssueRepo(ctx, agencyID)
 	if err != nil {
-		log.Printf("[MVP-WI-008] Failed to get issue repository: %v", err)
 		return nil, fmt.Errorf("failed to get issue repository: %w", err)
 	}
 
 	// Get next issue number
 	number, err := issueRepo.GetNextIssueNumber(ctx, agencyID, instanceID)
 	if err != nil {
-		log.Printf("[MVP-WI-008] Failed to get next issue number: %v", err)
 		return nil, fmt.Errorf("failed to get next issue number: %w", err)
 	}
-
-	log.Printf("[MVP-WI-008] Next issue number: %d", number)
 
 	// Create issue at entry point
 	issue := &models.WorkIssue{
@@ -136,16 +114,11 @@ func (s *IssueService) CreateIssue(ctx context.Context, agencyID, instanceID str
 		CompletedSteps: []string{},
 	}
 
-	log.Printf("[MVP-WI-008] Creating issue: Number=%d, Title='%s', CurrentStep='%s', Status='%s'",
-		issue.Number, issue.Title, issue.CurrentStep, issue.Status)
-
 	// Create in repository
 	if err := issueRepo.Create(ctx, issue); err != nil {
-		log.Printf("[MVP-WI-008] Failed to create issue in repository: %v", err)
 		return nil, fmt.Errorf("failed to create issue: %w", err)
 	}
 
-	log.Printf("[MVP-WI-008] Issue created successfully with Key: %s", issue.Key)
 	return issue, nil
 }
 

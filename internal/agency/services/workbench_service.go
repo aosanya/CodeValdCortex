@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
@@ -94,19 +93,11 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 		return nil, fmt.Errorf("failed to get issue repository: %w", err)
 	}
 
-	log.Printf("[MVP-WI-008] GenerateBoard - workflow.Key: %s, workflow.Name: %s, spec has %d work items",
-		workflow.Key, workflow.Name, len(spec.WorkItems))
-	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
-
 	// Track seen work items to avoid duplicate columns
 	seenWorkItems := make(map[string]bool)
 
-	for stepIdx, step := range workflow.Steps {
-		log.Printf("[MVP-WI-008] Step %d (Order: %d) has %d items", stepIdx, step.Order, len(step.Items))
-		for itemIdx, item := range step.Items {
-			log.Printf("[MVP-WI-008] Step item [%d][%d] - ID: '%s', WorkItemID: '%s', WorkItemKey: '%s', WorkItemName: '%s'",
-				stepIdx, itemIdx, item.ID, item.WorkItemID, item.WorkItemKey, item.WorkItemName)
-
+	for _, step := range workflow.Steps {
+		for _, item := range step.Items {
 			// Get the step identifier to use for deduplication and querying
 			// Use WorkItemID if WorkItemKey is empty
 			stepIdentifier := item.WorkItemKey
@@ -116,7 +107,6 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 
 			// Skip if we've already created a column for this work item
 			if seenWorkItems[stepIdentifier] {
-				log.Printf("[MVP-WI-008] Skipping duplicate work item: '%s'", stepIdentifier)
 				continue
 			}
 			seenWorkItems[stepIdentifier] = true
@@ -129,19 +119,14 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 			if matchKey == "" && item.WorkItemID != "" {
 				// WorkItemKey is empty, try to extract key from WorkItemID
 				// WorkItemID format is typically: "work_items/{key}"
-				log.Printf("[MVP-WI-008] WorkItemKey is empty, trying to extract from WorkItemID: '%s'", item.WorkItemID)
 				// For now, just use WorkItemID as-is for matching
 				matchKey = item.WorkItemID
 			}
-
-			log.Printf("[MVP-WI-008] Attempting to match with key: '%s'", matchKey)
 
 			for i := range spec.WorkItems {
 				// Match by Key field (ArangoDB _key) or by ID
 				if spec.WorkItems[i].Key == matchKey || spec.WorkItems[i].ID == matchKey {
 					workItem = &spec.WorkItems[i]
-					log.Printf("[MVP-WI-008] Found matching work item in spec - Key: %s, ID: %s, Code: %s, Title: %s",
-						workItem.Key, workItem.ID, workItem.Code, workItem.Title)
 					break
 				}
 			}
@@ -152,20 +137,13 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 					Code:  item.WorkItemName, // Use the name as fallback for code
 					Title: item.WorkItemName,
 				}
-				log.Printf("[MVP-WI-008] Work item NOT found in spec, using fallback - Code: %s, Title: %s",
-					workItem.Code, workItem.Title)
 			}
-
-			log.Printf("[MVP-WI-008] GenerateBoard - Querying issues with stepIdentifier: '%s' (WorkItemKey='%s', WorkItemID='%s')",
-				stepIdentifier, item.WorkItemKey, item.WorkItemID)
 
 			// Query issues for this step
 			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, stepIdentifier)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get issues for step %s: %w", stepIdentifier, err)
 			}
-
-			log.Printf("[MVP-WI-008] GenerateBoard - Found %d issues for step '%s'", len(issues), stepIdentifier)
 
 			// Convert pointers to values for BoardColumn
 			issueValues := make([]models.WorkIssue, len(issues))
@@ -183,15 +161,10 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 				Issues:       issueValues,
 			}
 
-			log.Printf("[MVP-WI-008] Created column - ID: %s, Name: '%s', Code: '%s', Order: %d, Issues: %d",
-				column.ID, column.Name, column.WorkItemCode, column.Order, len(column.Issues))
-
 			columns = append(columns, column)
 			columnOrder++
 		}
 	}
-
-	log.Printf("[MVP-WI-008] Total columns created: %d", len(columns))
 
 	// Get instance to retrieve name
 	instance, err := s.instanceService.GetInstance(ctx, agencyID, instanceID)
@@ -264,18 +237,11 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 		return nil, fmt.Errorf("failed to get issue repository: %w", err)
 	}
 
-	log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - workflow.Key: %s, workflow.Name: %s, spec has %d work items",
-		workflow.Key, workflow.Name, len(spec.WorkItems))
-	log.Printf("[MVP-WI-008] Workflow has %d steps", len(workflow.Steps))
-
 	// Track seen work items to avoid duplicate columns
 	seenWorkItems := make(map[string]bool)
 
-	for stepIdx, step := range workflow.Steps {
-		log.Printf("[MVP-WI-008] Step %d (Order: %d) has %d items", stepIdx, step.Order, len(step.Items))
-		for itemIdx, item := range step.Items {
-			log.Printf("[MVP-WI-008] Step item [%d][%d] - ID: '%s', WorkItemID: '%s', WorkItemKey: '%s', WorkItemName: '%s'",
-				stepIdx, itemIdx, item.ID, item.WorkItemID, item.WorkItemKey, item.WorkItemName)
+	for _, step := range workflow.Steps {
+		for _, item := range step.Items {
 
 			// Get the step identifier to use for deduplication and querying
 			// Use WorkItemID if WorkItemKey is empty
@@ -286,7 +252,6 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 
 			// Skip if we've already created a column for this work item
 			if seenWorkItems[stepIdentifier] {
-				log.Printf("[MVP-WI-008] Skipping duplicate work item: '%s'", stepIdentifier)
 				continue
 			}
 			seenWorkItems[stepIdentifier] = true
@@ -299,19 +264,14 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 			if matchKey == "" && item.WorkItemID != "" {
 				// WorkItemKey is empty, try to extract key from WorkItemID
 				// WorkItemID format is typically: "work_items/{key}"
-				log.Printf("[MVP-WI-008] WorkItemKey is empty, trying to extract from WorkItemID: '%s'", item.WorkItemID)
 				// For now, just use WorkItemID as-is for matching
 				matchKey = item.WorkItemID
 			}
-
-			log.Printf("[MVP-WI-008] Attempting to match with key: '%s'", matchKey)
 
 			for i := range spec.WorkItems {
 				// Match by Key field (ArangoDB _key) or by ID
 				if spec.WorkItems[i].Key == matchKey || spec.WorkItems[i].ID == matchKey {
 					workItem = &spec.WorkItems[i]
-					log.Printf("[MVP-WI-008] Found matching work item in spec - Key: %s, ID: %s, Code: %s, Title: %s",
-						workItem.Key, workItem.ID, workItem.Code, workItem.Title)
 					break
 				}
 			}
@@ -322,20 +282,12 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 					Code:  item.WorkItemName, // Use the name as fallback for code
 					Title: item.WorkItemName,
 				}
-				log.Printf("[MVP-WI-008] Work item NOT found in spec, using fallback - Code: %s, Title: %s",
-					workItem.Code, workItem.Title)
 			}
-
-			log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - Querying issues with stepIdentifier: '%s' (WorkItemKey='%s', WorkItemID='%s')",
-				stepIdentifier, item.WorkItemKey, item.WorkItemID)
-
 			// Query issues for this step
 			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, stepIdentifier)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get issues for step %s: %w", stepIdentifier, err)
 			}
-
-			log.Printf("[MVP-WI-008] GenerateBoardFromSpecification - Found %d issues for step '%s'", len(issues), stepIdentifier)
 
 			// Convert pointers to values for BoardColumn
 			issueValues := make([]models.WorkIssue, len(issues))
@@ -353,15 +305,10 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 				Issues:       issueValues,
 			}
 
-			log.Printf("[MVP-WI-008] Created column - ID: %s, Name: '%s', Code: '%s', Order: %d, Issues: %d",
-				column.ID, column.Name, column.WorkItemCode, column.Order, len(column.Issues))
-
 			columns = append(columns, column)
 			columnOrder++
 		}
 	}
-
-	log.Printf("[MVP-WI-008] Total columns created: %d", len(columns))
 
 	// Get instance to retrieve name
 	instance, err := s.instanceService.GetInstance(ctx, agencyID, instanceID)

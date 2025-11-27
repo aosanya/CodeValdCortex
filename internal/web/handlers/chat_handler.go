@@ -53,16 +53,6 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 	userMessage := c.PostForm("message")
 	context := c.PostForm("context") // Get current section context (introduction, goal-definition, work-items, roles, raci-matrix)
 
-	fmt.Printf("\n[CHAT HANDLER] ========== REQUEST RECEIVED ==========\n")
-	fmt.Printf("[CHAT HANDLER] ConversationID: %s\n", conversationID)
-	fmt.Printf("[CHAT HANDLER] Message: %s\n", userMessage)
-	fmt.Printf("[CHAT HANDLER] Context: '%s'\n", context)
-	fmt.Printf("[CHAT HANDLER] Context length: %d\n", len(context))
-	fmt.Printf("[CHAT HANDLER] Context bytes: %v\n", []byte(context))
-	fmt.Printf("[CHAT HANDLER] All form values: %+v\n", c.Request.PostForm)
-	fmt.Printf("[CHAT HANDLER] =====================================\n\n")
-
-	// TEMPORARY DEBUG: Return error with context info
 	if context == "" {
 		errMsg := fmt.Sprintf("DEBUG: Context is EMPTY! Form values: %+v", c.Request.PostForm)
 		h.logger.Error(errMsg)
