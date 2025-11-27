@@ -22,7 +22,6 @@ function getInstanceID() {
  */
 function navigateToPath(instanceID, path) {
     if (!instanceID || !path) {
-        console.error('Missing instanceID or path');
         return;
     }
 
@@ -38,7 +37,6 @@ function navigateToPath(instanceID, path) {
  */
 function openFile(instanceID, filePath) {
     if (!instanceID || !filePath) {
-        console.error('Missing instanceID or filePath');
         return;
     }
 
@@ -57,7 +55,6 @@ function openFile(instanceID, filePath) {
             showFileViewer(data.path, data.content, data.mime_type);
         })
         .catch(error => {
-            console.error('Error opening file:', error);
             showNotification('Failed to open file', 'danger');
         });
 }
@@ -67,7 +64,6 @@ function openFile(instanceID, filePath) {
  */
 function editFile(instanceID, filePath) {
     if (!instanceID || !filePath) {
-        console.error('Missing instanceID or filePath');
         return;
     }
 
@@ -86,7 +82,6 @@ function editFile(instanceID, filePath) {
             showFileEditor(instanceID, data.path, data.content);
         })
         .catch(error => {
-            console.error('Error loading file:', error);
             showNotification('Failed to load file for editing', 'danger');
         });
 }
@@ -128,7 +123,6 @@ function saveFile(instanceID, filePath) {
             navigateToPath(instanceID, currentPath);
         })
         .catch(error => {
-            console.error('Error saving file:', error);
             showNotification('Failed to save file', 'danger');
         });
 }
@@ -163,7 +157,6 @@ function deleteFileOrFolder(instanceID, path, type) {
             navigateToPath(instanceID, currentPath);
         })
         .catch(error => {
-            console.error(`Error deleting ${itemType}:`, error);
             showNotification(`Failed to delete ${itemType}`, 'danger');
         });
 }
@@ -234,7 +227,6 @@ function createFile(instanceID, path, content) {
             navigateToPath(instanceID, currentPath);
         })
         .catch(error => {
-            console.error('Error creating file:', error);
             showNotification('Failed to create file', 'danger');
         });
 }
@@ -273,7 +265,6 @@ function createDirectory(instanceID, path) {
             navigateToPath(instanceID, currentPath);
         })
         .catch(error => {
-            console.error('Error creating directory:', error);
             showNotification('Failed to create directory', 'danger');
         });
 }

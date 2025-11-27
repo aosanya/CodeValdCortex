@@ -426,7 +426,6 @@ async function loadTags() {
         }
 
     } catch (error) {
-        console.error('Error loading tags:', error);
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="has-text-danger has-text-centered py-5">
@@ -559,7 +558,6 @@ async function deleteTag(tagName) {
             showNotification('Error', data.details || data.error || 'Failed to delete tag', 'danger');
         }
     } catch (error) {
-        console.error('Error deleting tag:', error);
         showNotification('Error', 'Network error: ' + error.message, 'danger');
     }
 }

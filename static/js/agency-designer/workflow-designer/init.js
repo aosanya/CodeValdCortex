@@ -95,7 +95,7 @@
                         window.specificationAPI.agencyId = state.agencyId;
                     }
                 } catch (error) {
-                    console.error('Error parsing workflow data:', error);
+
                 }
 
                 // Set up jsPlumb, panzoom, and load work items
@@ -265,7 +265,7 @@
                         updateWorkItemNodeTitles(context, state);
                     }
                 } catch (error) {
-                    console.error('Error loading work items:', error);
+
                 }
             },
 

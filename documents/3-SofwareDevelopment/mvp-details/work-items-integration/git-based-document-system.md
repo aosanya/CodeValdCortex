@@ -38,7 +38,7 @@ Enable collaborative editing of code and documents by humans and AI agents with:
 - Content-addressable storage using SHA-1 hashing
 - Full Git compatibility at data model level
 
-**Implementation Details**: See [git-operations.md](git-operations.md) for complete Git object model and operations.
+**Implementation Details**: See [git-data-models.md](git-data-models.md) for data models and [git-core-operations.md](git-core-operations.md) for complete Git operations.
 
 ---
 
@@ -226,7 +226,8 @@ type WorkIssue struct {
 - Works for code AND documents
 
 **Implementation Documentation**:
-- [git-operations.md](git-operations.md) - Git object model, core operations (write/read/branch)
+- [git-data-models.md](git-data-models.md) - Git object model (GitObject, GitBlob, GitTree, GitCommit, GitRef)
+- [git-core-operations.md](git-core-operations.md) - Core Git operations (write/read/branch)
 - [git-merge-strategies.md](git-merge-strategies.md) - Three-way merge algorithms and conflict detection
 - [file-explorer.md](file-explorer.md) - File browser API, indexing, MVP-WI-006 implementation
 - [sectioned-documents.md](sectioned-documents.md) - Document format and section-level merging

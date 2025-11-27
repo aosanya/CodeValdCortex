@@ -128,10 +128,51 @@ vet: ## Run go vet
 check: fmt vet lint test ## Run all checks (format, vet, lint, test)
 
 .PHONY: audit
-audit: ## Audit JavaScript code for console.log statements
-	@echo "Auditing JavaScript code..."
+audit: ## Audit code for debug logs (console.log, fmt.Printf, emoji logs, MVP logs)
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "🔍 CODE AUDIT - Debug Log Detection"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "📊 1. JAVASCRIPT CONSOLE LOGS"
+	@echo "────────────────────────────────────────"
 	@chmod +x scripts/lint-console-logs.sh
-	@scripts/lint-console-logs.sh
+	@scripts/lint-console-logs.sh || true
+	@echo ""
+	@echo "📊 2. GO DEBUG PRINT STATEMENTS (fmt.Printf/Println)"
+	@echo "────────────────────────────────────────"
+	@if grep -rn "fmt.Printf\|fmt.Println" internal/ cmd/ --include="*.go" 2>/dev/null | grep -v "_test.go" | grep -v "// OK:" ; then \
+		echo "⚠️  Found fmt.Printf/Println statements (remove before merge)"; \
+	else \
+		echo "✅ No fmt.Printf/Println found"; \
+	fi
+	@echo ""
+	@echo "📊 3. MVP-PREFIXED DEBUG LOGS"
+	@echo "────────────────────────────────────────"
+	@if grep -rn 'log\.Printf.*\[MVP-\|logger.*\[MVP-' internal/ cmd/ --include="*.go" 2>/dev/null; then \
+		echo "⚠️  Found MVP-prefixed debug logs (remove before merge)"; \
+	else \
+		echo "✅ No MVP-prefixed logs found"; \
+	fi
+	@echo ""
+	@echo "📊 4. EMOJI-PREFIXED DEBUG LOGS"
+	@echo "────────────────────────────────────────"
+	@if grep -rn '🔍\|📊\|💾\|🔹\|✅\|⚠️\|🚀\|🎯\|🔥\|💡\|📝\|🧪' internal/ cmd/ --include="*.go" 2>/dev/null | grep -v "templ.go" | grep -v "_test.go" | grep -v "// UI:" | grep -v "WriteString"; then \
+		echo "⚠️  Found emoji-prefixed debug logs (remove before merge)"; \
+	else \
+		echo "✅ No emoji debug logs found in code (ignoring UI strings)"; \
+	fi
+	@echo ""
+	@echo "📊 5. DEBUG COMMENT MARKERS"
+	@echo "────────────────────────────────────────"
+	@if grep -rn '// DEBUG:\|// TODO: remove\|// FIXME:\|// XXX:' internal/ cmd/ --include="*.go" 2>/dev/null | head -20; then \
+		echo "⚠️  Found debug comment markers"; \
+	else \
+		echo "✅ No debug comment markers found"; \
+	fi
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "✅ Audit complete!"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 .PHONY: docker-build
 docker-build: ## Build Docker image

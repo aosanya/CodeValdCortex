@@ -175,34 +175,6 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 		return
 	}
 
-	h.logger.WithFields(logrus.Fields{
-		"action":           result.Action,
-		"refined_count":    len(result.RefinedGoals),
-		"generated_count":  len(result.GeneratedGoals),
-		"no_action_needed": result.NoActionNeeded,
-		"has_consolidated": result.ConsolidatedData != nil,
-	}).Info("🔵 Dynamic goal refinement completed - AI analysis received")
-
-	// 🔍 DEBUG: Log what the AI wants to do
-	h.logger.Info("🔍 DEBUG: AI Result Analysis",
-		"action", result.Action,
-		"explanation", result.Explanation)
-
-	if result.ConsolidatedData != nil {
-		h.logger.WithFields(logrus.Fields{
-			"consolidated_goals_count": len(result.ConsolidatedData.ConsolidatedGoals),
-			"removed_goals_count":      len(result.ConsolidatedData.RemovedGoals),
-		}).Info("🔍 DEBUG: Consolidation data present")
-
-		// Log removed goals details (RemovedGoals is []string of keys/codes)
-		for i, removedKey := range result.ConsolidatedData.RemovedGoals {
-			h.logger.WithFields(logrus.Fields{
-				"index": i,
-				"key":   removedKey,
-			}).Info("🔍 DEBUG: Goal marked for removal by AI")
-		}
-	}
-
 	// ⚠️ CRITICAL: Apply the changes to the database
 	// The AI returns what should be done, but we need to execute those operations
 	ctx := c.Request.Context()
@@ -269,13 +241,7 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 			removedKeys := make(map[string]bool)
 			for _, removedKey := range result.ConsolidatedData.RemovedGoals {
 				removedKeys[removedKey] = true
-				h.logger.Info("🔍 DEBUG: Marking goal for removal", "key", removedKey)
 			}
-
-			h.logger.WithFields(logrus.Fields{
-				"total_existing_goals": len(existingGoals),
-				"goals_to_remove":      len(removedKeys),
-			}).Info("🔍 DEBUG: Processing goal removal/consolidation")
 
 			// Keep goals that are NOT in the removed list
 			for _, g := range existingGoals {
@@ -312,17 +278,7 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 
 	// Save the updated goals list if modified
 	if goalsModified {
-		h.logger.WithFields(logrus.Fields{
-			"previous_count": len(existingGoals),
-			"updated_count":  len(updatedGoals),
-		}).Info("💾 Saving updated goals to database")
-
 		_, err = h.agencyService.UpdateSpecificationGoals(ctx, agencyID, updatedGoals, "ai-refine")
-		if err != nil {
-			h.logger.WithError(err).Error("❌ Failed to save goals to database")
-		} else {
-			h.logger.Info("✅ Successfully saved goals to database")
-		}
 	} else {
 		h.logger.Info("ℹ️ No goals modifications needed")
 	}

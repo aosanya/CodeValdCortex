@@ -179,7 +179,6 @@ func (h *Handler) ProcessRolesChatRequestStreaming(c *gin.Context) {
 	c.SSEvent("complete", completionData)
 	c.Writer.Flush()
 
-	h.logger.Info("✅ Streaming roles chat completed")
 }
 
 // formatRolesChatMessage formats the roles AI response for chat display

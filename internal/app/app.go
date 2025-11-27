@@ -21,17 +21,12 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/git/fileindex"
 	"github.com/aosanya/CodeValdCortex/internal/git/ops"
 	gitstorage "github.com/aosanya/CodeValdCortex/internal/git/storage"
-	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	giteaWork "github.com/aosanya/CodeValdCortex/internal/infrastructure/gitea"
 	"github.com/aosanya/CodeValdCortex/internal/lifecycle"
 	"github.com/aosanya/CodeValdCortex/internal/policy"
 	"github.com/aosanya/CodeValdCortex/internal/registry"
 	"github.com/aosanya/CodeValdCortex/internal/runtime"
-	webhandlers "github.com/aosanya/CodeValdCortex/internal/web/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
-	"github.com/aosanya/CodeValdCortex/internal/web/handlers/files"
-	webmiddleware "github.com/aosanya/CodeValdCortex/internal/web/middleware"
-	"github.com/aosanya/CodeValdCortex/internal/web/pages"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -48,6 +43,8 @@ type App struct {
 	agencyRepository    agency.Repository
 	tagService          *services.TagService
 	instanceService     services.InstanceService
+	issueService        *services.IssueService
+	workbenchService    *services.WorkbenchService
 	publicationService  services.PublicationService
 	activationService   services.ActivationService
 	runtimeManager      *runtime.Manager
@@ -151,6 +148,24 @@ func New(cfg *config.Config) *App {
 		slogger := slog.New(slog.NewJSONHandler(logger.WriterLevel(logrus.InfoLevel), nil))
 		instanceService = services.NewInstanceService(instanceRepo, tagService, agencyRepo, slogger)
 		logger.Info("Instance service initialized successfully")
+	}
+
+	// Initialize workbench services (MVP-WI-008)
+	logger.Info("Initializing workbench services")
+	var issueService *services.IssueService
+	var workbenchService *services.WorkbenchService
+	{
+		// Note: IssueRepository is initialized per agency database, not master database
+		// The service will create agency-specific repositories when needed using dbClient
+		issueService = services.NewIssueService(agencyRepo, dbClient)
+		issueService.SetIssueRepositoryFactory(arangodb.NewIssueRepository)
+
+		if tagService != nil && instanceService != nil {
+			workbenchService = services.NewWorkbenchService(tagService, instanceService, dbClient, agencyRepo)
+			// Set the factory function for creating issue repositories
+			workbenchService.SetIssueRepositoryFactory(arangodb.NewIssueRepository)
+			logger.Info("Workbench services initialized successfully")
+		}
 	}
 
 	// Initialize Git services for file browser (MVP-WI-006)
@@ -275,6 +290,8 @@ func New(cfg *config.Config) *App {
 		agencyRepository:    agencyRepo,
 		tagService:          &tagService,
 		instanceService:     instanceService,
+		issueService:        issueService,
+		workbenchService:    workbenchService,
 		publicationService:  publicationService,
 		activationService:   activationService,
 		runtimeManager:      runtimeManager,
@@ -365,35 +382,12 @@ func (a *App) setupServer() error {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	// Register agent handler routes
-	agentHandler := handlers.NewAgentHandler(a.runtimeManager, a.logger)
-	agentHandler.RegisterRoutes(router)
+	// Register web routes
+	a.registerWebRoutes(router)
 
-	// Register task handler routes
-	taskHandler := handlers.NewTaskHandler(a.runtimeManager)
-	taskHandler.RegisterRoutes(router)
-
-	// Register communication handler routes (if services are available)
-	if a.messageService != nil && a.pubSubService != nil {
-		commHandler := handlers.NewCommunicationHandler(a.messageService, a.pubSubService, a.logger)
-		commHandler.RegisterRoutes(router)
-		a.logger.Info("Communication endpoints registered")
-	} else {
-		a.logger.Warn("Communication services not available, endpoints not registered")
-	}
-
-	// Register web dashboard handler
-	dashboardHandler := webhandlers.NewDashboardHandler(a.runtimeManager, a.logger)
-	topologyVisualizerHandler := webhandlers.NewTopologyVisualizerHandler(a.runtimeManager, a.logger)
-	// Initialize homepage handler
-	homepageHandler := webhandlers.NewHomepageHandler(a.agencyService, a.runtimeManager, a.dbClient, a.registry, a.logger)
-
-	// Initialize AI agency designer web handler (if service available)
-	var aiDesignerWebHandler *webhandlers.AgencyDesignerWebHandler
-	var chatHandler *webhandlers.ChatHandler
-	var aiRefineHandler *ai_refine.Handler
+	// Get AI refine handler for API routes (if available)
+	var aiRefineHandler interface{}
 	if a.aiDesignerService != nil && a.introductionRefiner != nil {
-		// Create AI refine handler (needed by chat handler and API routes)
 		aiRefineHandler = ai_refine.NewHandler(
 			a.agencyService,
 			a.workflowService,
@@ -406,291 +400,10 @@ func (a *App) setupServer() error {
 			a.aiDesignerService,
 			a.logger,
 		)
-
-		aiDesignerWebHandler = webhandlers.NewAgencyDesignerWebHandler(a.aiDesignerService, a.agencyRepository, a.workflowService, a.logger)
-		chatHandler = webhandlers.NewChatHandler(a.aiDesignerService, a.agencyService, a.introductionRefiner, a.goalRefiner, aiRefineHandler, a.logger)
-		a.logger.Info("AI Agency Designer web handler initialized")
-	} // Agency middleware
-	agencyMiddleware := webmiddleware.NewAgencyMiddleware(a.agencyService, a.logger) // Serve static files
-	router.Static("/static", "./static")
-
-	// Web dashboard routes
-	router.GET("/", homepageHandler.ShowHomepage)
-	router.GET("/topology", topologyVisualizerHandler.ShowTopologyVisualizer)
-	router.GET("/geo-network", topologyVisualizerHandler.ShowGeographicVisualizer)
-
-	// Agency routes
-	router.POST("/agencies/:id/select", homepageHandler.SelectAgency)
-	router.GET("/agencies/:id", homepageHandler.RedirectToAgencyDashboard)
-
-	// Agency-specific dashboard (with middleware to inject agency context)
-	router.GET("/agencies/:id/dashboard", agencyMiddleware.InjectAgencyContext(), homepageHandler.ShowAgencyDashboard)
-
-	// Instance management web routes (if available)
-	if a.instanceService != nil && a.tagService != nil {
-		instanceWebHandler := webhandlers.NewInstanceWebHandler(a.instanceService, a.agencyService, *a.tagService, a.logger)
-		router.GET("/agencies/:id/instances", instanceWebHandler.ShowInstancesList)
-		router.GET("/agencies/:id/instances/:instance_id", instanceWebHandler.ShowInstanceDashboard)
-		a.logger.Info("Instance management web routes registered")
 	}
 
-	// File explorer web routes (if available)
-	if a.fileIndexService != nil {
-		filesHandler := files.NewHandler(a.fileIndexService, a.agencyRepository, a.logger)
-		router.GET("/agencies/:id/instances/:instance_id/explorer", func(c *gin.Context) {
-			agencyID := c.Param("id")
-			instanceID := c.Param("instance_id")
-
-			// Get path from query parameter (default to root)
-			currentPath := c.DefaultQuery("path", "/")
-
-			// Get agency
-			agency, err := a.agencyService.GetAgency(c.Request.Context(), agencyID)
-			if err != nil {
-				c.String(http.StatusNotFound, "Agency not found")
-				return
-			}
-
-			// Get agency database
-			agencyDB := agency.ID
-			if agency.Database != "" {
-				agencyDB = agency.Database
-			}
-
-			// List directory
-			entries, err := a.fileIndexService.ListDirectory(c.Request.Context(), agencyDB, instanceID, currentPath)
-			if err != nil {
-				a.logger.WithError(err).WithField("path", currentPath).Error("Failed to list directory")
-				entries = []*fileindex.DirectoryEntry{} // Empty list on error
-			}
-
-			// Render file browser page using Templ
-			component := pages.FileExplorerPage(agency, instanceID, currentPath, entries)
-			component.Render(c.Request.Context(), c.Writer)
-		})
-
-		// API routes for file operations
-		api := router.Group("/api")
-		filesHandler.RegisterRoutes(api)
-		a.logger.Info("File explorer routes registered")
-	} // AI Agency Designer web routes (if available)
-	if aiDesignerWebHandler != nil {
-		aiDesignerWebHandler.RegisterRoutes(router.Group(""))
-		a.logger.Info("AI Agency Designer web routes registered")
-	}
-
-	// AI Policy web routes (if available)
-	if a.policyService != nil {
-		aiPolicyHandler := webhandlers.NewAIPolicyWebHandler(a.policyService, a.agencyService, a.logger)
-		aiPolicyHandler.RegisterRoutes(router.Group(""))
-		a.logger.Info("AI Policy web routes registered")
-	}
-
-	// Chat routes for web interface (if available)
-	if chatHandler != nil {
-		// Web-specific chat routes (return HTML instead of JSON)
-		router.POST("/api/v1/conversations/:conversationId/messages/web", chatHandler.SendMessage)
-		router.POST("/api/v1/agencies/:id/designer/conversations/web", chatHandler.StartConversation)
-		a.logger.Info("Web chat routes registered")
-	}
-
-	// Main dashboard route with agency context injection
-	router.GET("/dashboard", agencyMiddleware.InjectAgencyContext(), dashboardHandler.ShowDashboard)
-
-	// API routes for web dashboard (HTMX endpoints)
-	webAPI := router.Group("/api/web")
-	{
-		webAPI.GET("/agents/live", dashboardHandler.GetAgentsLive)
-		webAPI.GET("/agents/json", dashboardHandler.GetAgentsJSON) // JSON API for large datasets
-		webAPI.POST("/agents/:id/:action", dashboardHandler.HandleAgentAction)
-
-		// Topology visualizer endpoints
-		webAPI.GET("/topology/data", topologyVisualizerHandler.GetTopologyData)
-		webAPI.GET("/topology/updates", topologyVisualizerHandler.GetTopologyUpdates)
-	}
-
-	// Health check endpoint
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":    "healthy",
-			"timestamp": time.Now().UTC(),
-			"version":   "dev",
-		})
-	})
-
-	// API routes
-	v1 := router.Group("/api/v1")
-	{
-		// Agency endpoints
-		agencyHandler := handlers.NewAgencyHandler(a.agencyService, a.logger)
-		v1.GET("/agencies", agencyHandler.ListAgencies)
-		v1.GET("/agencies/:id", agencyHandler.GetAgency)
-		v1.POST("/agencies", agencyHandler.CreateAgency)
-		v1.PUT("/agencies/:id", agencyHandler.UpdateAgency)
-		v1.DELETE("/agencies/:id", agencyHandler.DeleteAgency)
-		v1.GET("/agencies/active", agencyHandler.GetActiveAgency)
-		v1.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
-
-		// Unified Specification endpoints (replaces separate overview/goals/work-items)
-		v1.GET("/agencies/:id/specification", agencyHandler.GetSpecification)
-		v1.PUT("/agencies/:id/specification", agencyHandler.UpdateSpecification)
-		v1.PUT("/agencies/:id/specification/introduction", agencyHandler.UpdateIntroduction)
-		v1.PUT("/agencies/:id/specification/goals", agencyHandler.UpdateGoals)
-		v1.PUT("/agencies/:id/specification/work-items", agencyHandler.UpdateWorkItems)
-		v1.PUT("/agencies/:id/specification/workflows", agencyHandler.UpdateWorkflows)
-		v1.PUT("/agencies/:id/specification/roles", agencyHandler.UpdateRoles)
-		v1.PUT("/agencies/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
-
-		// RACI Matrix CRUD endpoints
-		v1.GET("/agencies/:id/raci-matrix", agencyHandler.GetRACIMatrix)
-		v1.POST("/agencies/:id/raci-matrix", agencyHandler.SaveRACIMatrix)
-
-		// Roles endpoints
-		v1.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
-		v1.GET("/agencies/:id/roles/html", agencyHandler.GetAgencyRolesHTML)
-		v1.POST("/agencies/:id/roles", agencyHandler.CreateAgencyRole)
-		v1.GET("/agencies/:id/roles/:key", agencyHandler.GetAgencyRole)
-		v1.PUT("/agencies/:id/roles/:key", agencyHandler.UpdateAgencyRole)
-		v1.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
-
-		// RACI Matrix is now part of unified specification endpoint
-
-		// Tag endpoints (if tag service is available)
-		if a.tagService != nil {
-			tagHandler := handlers.NewTagHandler(*a.tagService, a.logger)
-			v1.POST("/agencies/:id/tags", tagHandler.CreateTag)
-			v1.GET("/agencies/:id/tags", tagHandler.ListTags)
-			v1.GET("/agencies/:id/tags/:name", tagHandler.GetTag)
-			v1.DELETE("/agencies/:id/tags/:name", tagHandler.DeleteTag)
-			v1.POST("/agencies/:id/tags/:name/restore", tagHandler.RestoreFromTag)
-			v1.GET("/tags/:tag1/compare/:tag2", tagHandler.CompareTags)
-			a.logger.Info("Tag endpoints registered")
-		}
-
-		// Instance endpoints (MVP-PUB-007)
-		if a.instanceService != nil {
-			instanceHandler := handlers.NewInstanceHandler(a.instanceService, a.logger)
-			v1.POST("/agencies/:id/tags/:name/instances", instanceHandler.StartInstance)
-			v1.GET("/agencies/:id/instances", instanceHandler.ListInstances)
-			v1.GET("/agencies/:id/instances/:instance_id", instanceHandler.GetInstance)
-			v1.DELETE("/agencies/:id/instances/:instance_id", instanceHandler.DeleteInstance)
-			v1.POST("/agencies/:id/instances/:instance_id/stop", instanceHandler.StopInstance)
-			v1.POST("/agencies/:id/instances/:instance_id/restart", instanceHandler.RestartInstance)
-			v1.GET("/agencies/:id/instances/:instance_id/health", instanceHandler.GetInstanceHealth)
-			v1.GET("/agencies/:id/instances/:instance_id/agents", instanceHandler.GetInstanceAgents)
-			v1.POST("/agencies/:id/instances/:instance_id/accept-job", instanceHandler.AcceptJob)
-			v1.GET("/agencies/:id/tags/:name/instances", instanceHandler.ListInstancesByTag)
-			a.logger.Info("Instance endpoints registered")
-		}
-
-		// Publication endpoints (MVP-PUB-003)
-		if a.publicationService != nil {
-			pubHandler := handlers.NewPublicationHandler(a.publicationService, a.logger)
-			v1.POST("/agencies/:id/validate", pubHandler.ValidateForPublish)
-			v1.POST("/agencies/:id/publish", pubHandler.Publish)
-			v1.POST("/agencies/:id/activate", pubHandler.Activate)
-			v1.POST("/agencies/:id/deactivate", pubHandler.Deactivate)
-			v1.GET("/agencies/:id/publications", pubHandler.GetPublicationHistory)
-			v1.POST("/publications/:id/activate", pubHandler.ActivatePublication)
-			a.logger.Info("Publication endpoints registered")
-		}
-
-		// Activation/Lifecycle endpoints (MVP-PUB-004)
-		if a.activationService != nil {
-			activationHandler := handlers.NewActivationHandler(a.activationService, a.logger)
-			v1.POST("/agencies/:id/lifecycle/pause", activationHandler.PauseAgency)
-			v1.POST("/agencies/:id/lifecycle/resume", activationHandler.ResumeAgency)
-			v1.POST("/agencies/:id/lifecycle/drain", activationHandler.DrainAgency)
-			v1.POST("/agencies/:id/lifecycle/stop", activationHandler.StopAgency)
-			a.logger.Info("Activation lifecycle endpoints registered")
-		}
-
-		// Workflow endpoints
-		if a.workflowService != nil {
-			workflowHandler := handlers.NewWorkflowHandler(a.workflowService, a.agencyService, a.logger)
-			v1.POST("/agencies/:id/workflows", workflowHandler.CreateWorkflow)
-			v1.GET("/agencies/:id/workflows", workflowHandler.GetWorkflows)
-			v1.GET("/agencies/:id/workflows/html", workflowHandler.GetWorkflowsHTML)
-			v1.GET("/workflows/:id", workflowHandler.GetWorkflow)
-			v1.PUT("/workflows/:id", workflowHandler.UpdateWorkflow)
-			v1.DELETE("/workflows/:id", workflowHandler.DeleteWorkflow)
-			v1.POST("/workflows/:id/duplicate", workflowHandler.DuplicateWorkflow)
-			v1.POST("/workflows/validate", workflowHandler.ValidateWorkflow)
-			a.logger.Info("Workflow endpoints registered")
-		}
-
-		// AI Refine endpoints (if AI services are available)
-		if aiRefineHandler != nil {
-			v1.POST("/agencies/:id/overview/refine", aiRefineHandler.RefineIntroduction)
-			if a.goalRefiner != nil {
-				// Main dynamic router - handles all goal operations through natural language prompts
-				v1.POST("/agencies/:id/goals/refine-dynamic", aiRefineHandler.RefineGoals)
-				// Convenience routes that use RefineGoals with preset prompts
-				v1.POST("/agencies/:id/goals/:goalKey/refine", aiRefineHandler.RefineSpecificGoal)
-				v1.POST("/agencies/:id/goals/generate", aiRefineHandler.GenerateGoalWithPrompt)
-				v1.POST("/agencies/:id/goals/consolidate", aiRefineHandler.ConsolidateGoalsWithPrompt)
-			}
-			if a.workItemBuilder != nil {
-				// DISABLED: Work item AI handlers need refactoring for unified specification model
-				// Main dynamic router - handles all work item operations through natural language prompts
-				// v1.POST("/agencies/:id/work-items/refine-dynamic", aiRefineHandler.RefineWorkItems)
-				// v1.POST("/agencies/:id/work-items/refine-specific", aiRefineHandler.RefineSpecificWorkItem)
-				// v1.POST("/agencies/:id/work-items/generate", aiRefineHandler.GenerateWorkItemWithPrompt)
-				// v1.POST("/agencies/:id/work-items/consolidate", aiRefineHandler.ConsolidateWorkItemsWithPrompt)
-				// v1.POST("/agencies/:id/work-items/enhance-all", aiRefineHandler.EnhanceAllWorkItems)
-				a.logger.Warn("Work item AI refine endpoints disabled - need refactoring for unified specification")
-			}
-			if a.roleBuilder != nil {
-				// Main dynamic router - handles all role operations through natural language prompts
-				v1.POST("/agencies/:id/roles/refine-dynamic", aiRefineHandler.RefineRoles)
-				// Convenience routes that use RefineRoles with preset prompts
-				v1.POST("/agencies/:id/roles/refine-specific", aiRefineHandler.RefineSpecificRole)
-				v1.POST("/agencies/:id/roles/generate", aiRefineHandler.GenerateRoleWithPrompt)
-				v1.POST("/agencies/:id/roles/consolidate", aiRefineHandler.ConsolidateRolesWithPrompt)
-				v1.POST("/agencies/:id/roles/enhance-all", aiRefineHandler.EnhanceAllRolesWithPrompt)
-			}
-			if a.raciBuilder != nil {
-				// Main dynamic router - handles all RACI operations through natural language prompts
-				v1.POST("/agencies/:id/raci-matrix/refine-dynamic", aiRefineHandler.RefineRACIMappings)
-				// Convenience routes that use RefineRACIMappings with preset prompts
-				v1.POST("/agencies/:id/raci-matrix/refine-specific", aiRefineHandler.RefineSpecificRACIMapping)
-				v1.POST("/agencies/:id/raci-matrix/generate", aiRefineHandler.GenerateRACIMappingWithPrompt)
-				v1.POST("/agencies/:id/raci-matrix/consolidate", aiRefineHandler.ConsolidateRACIMappingsWithPrompt)
-				v1.POST("/agencies/:id/raci-matrix/create-complete", aiRefineHandler.CreateCompleteRACIMatrixWithPrompt)
-			}
-			if a.workflowBuilder != nil {
-				// DISABLED: Workflow handler needs refactoring for unified specification model
-				// v1.POST("/agencies/:id/workflows/refine-dynamic", aiRefineHandler.RefineWorkflows)
-				a.logger.Warn("Workflow AI refine endpoint disabled - needs refactoring for unified specification")
-			}
-			a.logger.Info("AI Refine endpoints registered")
-		}
-
-		// AI Agency Designer endpoints (if available)
-		if a.aiDesignerService != nil {
-			aiDesignerHandler := ai.NewAgencyDesignerHandler(a.aiDesignerService, a.logger)
-			aiDesignerHandler.RegisterRoutes(v1)
-			a.logger.Info("AI Agency Designer endpoints registered")
-		}
-
-		// Webhook endpoints for work item integration (if available)
-		if a.webhookHandler != nil {
-			work := v1.Group("/work")
-			{
-				work.POST("/issues", a.webhookHandler.HandleIssueWebhook)
-				work.POST("/pull-requests", a.webhookHandler.HandlePullRequestWebhook)
-			}
-			a.logger.Info("Work item webhook endpoints registered")
-		}
-
-		v1.GET("/status", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"app_name": a.config.AppName,
-				"status":   "running",
-				"version":  "dev",
-			})
-		})
-	}
+	// Register API routes
+	a.registerAPIRoutes(router, aiRefineHandler)
 
 	// Create server
 	a.server = &http.Server{

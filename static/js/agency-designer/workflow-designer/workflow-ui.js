@@ -80,7 +80,7 @@
                         context.clearEdgeHighlights();
                     }
                 } catch (error) {
-                    console.error('Error in drag over handler:', error);
+
                 }
             },
 

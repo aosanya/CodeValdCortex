@@ -286,5 +286,4 @@ func (h *Handler) ExecuteChatStreaming(c *gin.Context, options ChatStreamingOpti
 	c.SSEvent("complete", completionData)
 	c.Writer.Flush()
 
-	h.logger.Info("✅ Chat streaming completed")
 }

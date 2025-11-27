@@ -130,7 +130,6 @@ async function startInstanceFromTag() {
             showValidationError(data.details || data.error || 'Failed to start instance');
         }
     } catch (error) {
-        console.error('Error starting instance:', error);
         showValidationError('Network error: ' + error.message);
     } finally {
         btn.disabled = false;
@@ -167,7 +166,6 @@ async function stopInstance(instanceID) {
             showNotification(data.details || data.error || 'Failed to stop instance', 'danger');
         }
     } catch (error) {
-        console.error('Error stopping instance:', error);
         showNotification('Network error: ' + error.message, 'danger');
     }
 }
@@ -197,7 +195,6 @@ async function restartInstance(instanceID) {
             showNotification(data.details || data.error || 'Failed to restart instance', 'danger');
         }
     } catch (error) {
-        console.error('Error restarting instance:', error);
         showNotification('Network error: ' + error.message, 'danger');
     }
 }
@@ -219,13 +216,11 @@ async function viewInstanceDetails(instanceID) {
 
         if (response.ok) {
             // TODO: Display instance details in a modal or panel
-            console.log('Instance details:', data.instance);
             alert('Instance details:\n' + JSON.stringify(data.instance, null, 2));
         } else {
             showNotification(data.details || data.error || 'Failed to load instance', 'danger');
         }
     } catch (error) {
-        console.error('Error loading instance:', error);
         showNotification('Network error: ' + error.message, 'danger');
     }
 }
@@ -238,25 +233,20 @@ async function viewInstanceDetails(instanceID) {
 async function loadAllInstances() {
     const agencyID = getAgencyID();
     if (!agencyID) {
-        console.warn('No agency ID found, skipping instance load');
         return;
     }
 
     try {
         const url = `/api/v1/agencies/${agencyID}/instances`;
-        console.log('Loading instances from:', url);
 
         const response = await fetch(url);
 
         if (!response.ok) {
-            console.error(`Failed to load instances: ${response.status} ${response.statusText}`);
             const errorText = await response.text();
-            console.error('Error response:', errorText);
             return;
         }
 
         const data = await response.json();
-        console.log('Instances loaded:', data);
 
         // Get all tag badges to reset counts to 0 first
         const allBadges = document.querySelectorAll('.instance-count-badge');
@@ -279,11 +269,7 @@ async function loadAllInstances() {
             updateInstanceCounts(instancesByTag);
         }
     } catch (error) {
-        console.error('Error loading instances:', error);
-        console.error('Error details:', {
-            message: error.message,
-            stack: error.stack
-        });
+
     }
 }
 
@@ -307,7 +293,7 @@ async function loadInstancesForTag(tagName) {
             updateTagInstanceCount(tagName, data.count);
         }
     } catch (error) {
-        console.error('Error loading instances for tag', tagName, ':', error);
+
     }
 }
 
@@ -374,8 +360,6 @@ function getAgencyID() {
  * Initializes instance management when the page loads
  */
 function initializeInstanceManagement() {
-    console.log('Instance management initialized');
-
     // Load instances on page load
     loadAllInstances();
 

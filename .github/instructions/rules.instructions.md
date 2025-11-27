@@ -194,13 +194,18 @@ window.handleMyComponentClick = async function() {
 
 ## Code Quality and File Organization
 
-**Keep files small and focused. Break down large files.**
+**🚨 CRITICAL: Keep files small and focused. Break down large files immediately.**
 
-- **Maximum file size**: ~500-700 lines
-- If a file exceeds 700 lines, it should be broken down into smaller, focused modules
-- Each file should have a single, clear responsibility
-- Handler files should be split by domain/feature area
-- Service files should be modular and composable
+- **MAXIMUM FILE SIZE: 500-700 lines** (HARD LIMIT - NO EXCEPTIONS)
+- **If a file exceeds 700 lines, it MUST be broken down into smaller, focused modules IMMEDIATELY**
+- **Each file MUST have a single, clear responsibility**
+- **Handler files MUST be split by domain/feature area**
+- **Service files MUST be modular and composable**
+- **⚠️ WARNING: We currently have several non-compliant files that violate these rules**
+  - These MUST be refactored as they are encountered
+  - Do NOT create new files that violate these limits
+  - Do NOT add to existing files that already exceed limits
+- **Enforcement**: Check line count before editing. If file is >600 lines, split it FIRST before adding new code
 
 **Functions should be concise and testable.**
 

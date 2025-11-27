@@ -75,7 +75,6 @@ git branch -d feature/MVP-XXX_description
 | MVP-WI-009 | Issue-Git Integration | Implement branch creation from issues, issue-branch linking, PR-issue association, automatic issue progression on PR merge, workflow orchestration service | 📋 Not Started | P0 | Medium | Go, ArangoDB, Event System | MVP-WI-007, MVP-WI-008 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-010 | Agent Work Assignment | Implement flexible assignment model (manual + claim-based), agent-issue linking, work queue API, notification system, agent instance creation from work item definitions | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-WI-009, MVP-032 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-011 | AI-Assisted Conflict Resolution | Build conflict detection in merges, AI-powered merge suggestions, conflict resolution UI, three-way merge with AI assistance, merge conflict analytics | 📋 Not Started | P1 | High | Go, AI/LLM, Git Merge, Frontend Dev | MVP-WI-007 | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md#ai-assisted-conflict-resolution) |
-
 ### Work Item Definitions & Workflows
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |

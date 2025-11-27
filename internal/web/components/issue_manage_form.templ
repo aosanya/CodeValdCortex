@@ -1,0 +1,142 @@
+package components
+
+import "github.com/aosanya/CodeValdCortex/internal/agency/models"
+
+// IssueManageForm renders an inline panel for creating and editing issues
+templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
+	<!-- Create Issue Panel (inline, not a popup) -->
+	<div id="createIssuePanel" class="box" style="display: none; margin-bottom: 1rem;" 
+		data-agency-id={ agency.Key } 
+		data-instance-id={ board.InstanceID } 
+		data-workflow-id={ board.WorkflowID }>
+		<div class="level">
+			<div class="level-left">
+				<div class="level-item">
+					<strong>Create New Issue</strong>
+				</div>
+			</div>
+			<div class="level-right">
+				<div class="level-item">
+					<button class="button" onclick="closeCreateIssuePanel()">Close</button>
+				</div>
+			</div>
+		</div>
+
+		<form id="createIssueForm">
+			<div class="field">
+				<label class="label">Title</label>
+				<div class="control">
+					<input class="input" type="text" name="title" placeholder="Issue title" required/>
+				</div>
+			</div>
+
+			<div class="field">
+				<label class="label">Description</label>
+				<div class="control">
+					<textarea class="textarea" name="description" placeholder="Issue description" rows="4"></textarea>
+				</div>
+			</div>
+
+			<!-- Workflow is not shown to the user; we attach board.WorkflowID in the request -->
+			<div class="field is-grouped">
+				<div class="control">
+					<button type="button" class="button is-primary" onclick="submitCreateIssue()">Create Issue</button>
+				</div>
+				<div class="control">
+					<button type="button" class="button" onclick="closeCreateIssuePanel()">Cancel</button>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<!-- Issue Creation JavaScript -->
+	<script>
+		function toggleCreateIssuePanel() {
+			const panel = document.getElementById('createIssuePanel');
+			if (!panel) return;
+			if (panel.style.display === 'none' || panel.style.display === '') {
+				// Reset to create mode when opening
+				resetPanelToCreateMode();
+				panel.style.display = 'block';
+			} else {
+				panel.style.display = 'none';
+				document.getElementById('createIssueForm').reset();
+			}
+		}
+
+		function resetPanelToCreateMode() {
+			const panel = document.getElementById('createIssuePanel');
+			const form = document.getElementById('createIssueForm');
+			if (!panel || !form) return;
+
+			// Reset form
+			form.reset();
+
+			// Clear edit mode flag
+			delete panel.dataset.editingIssueKey;
+
+			// Reset header text
+			const header = panel.querySelector('.level-left .level-item strong');
+			if (header) {
+				header.textContent = 'Create New Issue';
+			}
+
+			// Reset button text
+			const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
+			if (submitBtn) {
+				submitBtn.textContent = 'Create Issue';
+			}
+		}
+
+		function closeCreateIssuePanel() {
+			const panel = document.getElementById('createIssuePanel');
+			if (!panel) return;
+			panel.style.display = 'none';
+			resetPanelToCreateMode();
+		}
+
+		function submitCreateIssue() {
+			const panel = document.getElementById('createIssuePanel');
+			const form = document.getElementById('createIssueForm');
+			const formData = new FormData(form);
+
+			// Read data from panel data attributes
+			const agencyID = panel.dataset.agencyId;
+			const instanceID = panel.dataset.instanceId;
+			const workflowID = panel.dataset.workflowId;
+			const editingIssueKey = panel.dataset.editingIssueKey;
+
+			const data = {
+				title: formData.get('title'),
+				description: formData.get('description'),
+				workflow_id: workflowID
+			};
+
+			// Check if we're in edit mode
+			const isEditMode = !!editingIssueKey;
+			const method = isEditMode ? 'PUT' : 'POST';
+			const url = isEditMode 
+				? `/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${editingIssueKey}`
+				: `/api/v1/agencies/${agencyID}/instances/${instanceID}/issues`;
+
+			fetch(url, {
+				method: method,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data)
+			})
+			.then(response => {
+				return response.json();
+			})
+			.then(data => {
+				closeCreateIssuePanel();
+				// Reload page to show updated/new issue
+				window.location.reload();
+			})
+			.catch(error => {
+				alert(`Failed to ${isEditMode ? 'update' : 'create'} issue: ` + error.message);
+			});
+		}
+	</script>
+}

@@ -66,10 +66,10 @@ func (d *databaseInitializer) InitializeAgencyDatabase(ctx context.Context, agen
 		"git_objects",   // Content-addressable Git objects (blobs, trees, commits)
 		"git_refs",      // Git references (branches, tags, HEAD)
 		"repositories",  // Repository metadata (one per instance)
-		"git_objects",   // Git storage objects (blobs, trees, commits)
-		"git_refs",      // Git references (branches, tags, HEAD)
-		"repositories",  // Git repository metadata
 		"git_artifacts", // File and directory metadata for file explorer (MVP-WI-006)
+
+		// Workbench and issue management (MVP-WI-008)
+		"work_issues", // Runtime work issues that progress through workflows
 	}
 
 	for _, collName := range collections {
