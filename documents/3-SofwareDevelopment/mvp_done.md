@@ -47,6 +47,7 @@ This document tracks all completed MVP tasks with completion dates and outcomes.
 | MVP-PUB-007 | Agency Instance Management | Implemented complete multi-instance deployment system enabling multiple isolated instances from tag snapshots. Created 15 files (2,229 LOC): AgencyInstance model with 5-state lifecycle (pending/running/stopping/stopped/failed), InstanceRepository (CRUD + tag filtering), InstanceService with graceful shutdown (30s timeout) and health calculation, 9 REST API endpoints (/instances, /instances/:id/stop, /instances/:id/restart, etc.), hybrid UI (by-tag grouped cards + flat searchable table), 3-panel dashboard (overview/agents/metrics), JavaScript with auto-refreshing instance counts, dropdown action menus. Modified 8 files: added meta tag to LayoutWithAgency for agency context, fixed parameter naming (instance_id not instanceId), integrated with versions page start dialog. Resolved 5 critical bugs (tag filter navigation, agency ID undefined, parameter mismatch, count badges, field names). Features: database-per-agency isolation, tag-based deployment, real-time count updates, instance lifecycle control. Build passing, full lifecycle tested (create/list/filter/stop/restart/delete) | 2025-11-26     | `feature/MVP-PUB-007_agency_instance_management`   | ~7 days   | ✅ Complete |
 | MVP-WI-005 | Git Core Layer in ArangoDB | Implemented foundational Git object model for internal version control system. Created 4 files (~1,100 LOC): Git data models (GitObject/GitBlob/GitTree/GitCommit/GitRef/Repository), storage layer with content-addressable SHA-1 hashing, operations layer (WriteBlob/WriteTree/Commit/UpdateRef/InitRepository), 5 unit tests (testify/mock). Modified 2 files: added 3 Git collections (git_objects/git_refs/repositories) to agency database initializer. Features: plain text storage for text files (no base64), idempotent operations (same content→same SHA), Git-compatible serialization format, automatic deduplication. Test results: 5/5 passing (0.002s). Build: 12MB binary, no errors. Unblocks MVP-WI-006 (File Explorer API), MVP-WI-007 (Pull Requests), MVP-WI-008 (Kanban Board) | 2025-11-26     | `feature/MVP-WI-005_git_core_layer`   | ~3 hours   | ✅ Complete |
 | MVP-WI-006 | File Explorer API | Implemented multi-tenant file explorer API with agency-specific database isolation. Created 4 files (~1,976 LOC): Repository with lazy collection creation, Service with business logic, Handler with 8 REST endpoints, JavaScript UI. Modified 2 files: app initialization, database initializer. Features: InstanceRepository pattern (driver.Client + agencyDB parameter), lazy git_artifacts collection creation, ArangoDB-compliant key generation, folder/file CRUD operations. Solved: collection missing errors, query field mismatches (repository_id→repo_id, type→is_dir), path sanitization for special characters, JavaScript getCurrentPath() bug. API endpoints: list/create/read/update/delete files and folders. Build passing, all operations tested (create/list/navigate nested folders). Unblocks MVP-WI-007 (File Versioning) | 2025-11-26     | `feature/MVP-WI-006_file_explorer_api`   | ~6 hours   | ✅ Complete |
+| MVP-030 | Work Item Definitions & Workflows | Work item schema and workflow integration were already implemented during Goals and Workflow Visual Designer tasks. No new code required - WorkItem model exists in internal/agency/models/work_item.go with all required fields (Code, Title, Description, Deliverables, GoalKeys, Tags). Workflow model already references WorkItems via work_item_id/work_item_key/work_item_name in StepItem struct. Agency Designer UI functional with work item CRUD, AI-powered generation/refinement, and workflow designer drag-and-drop integration. Tag snapshots include complete specification (Goals, WorkItems, Workflows). Corrected architecture understanding: WorkItems ARE the work types in specification, not separate WorkItemType system. Documentation updated to reflect actual implementation | 2025-11-27     | `feature/MVP-030_work_item_definitions`   | ~0 hours (already complete)   | ✅ Complete |
 
 ---
 
@@ -2155,6 +2156,155 @@ DELETE /agencies/{id}/units/{id}      # Delete unit
 #### Next Tasks
 **MVP-030**: Work Items Core Schema & Registry - Build on Goals foundation
 **MVP-031**: Graph Relationships System - Connect goals to work items
+
+---
+
+### MVP-030: Work Item Definitions & Workflows
+**Completed**: November 27, 2025  
+**Branch**: `feature/MVP-030_work_item_definitions`  
+**Status**: ✅ Complete (Already Implemented)
+
+#### Summary
+Discovered that MVP-030 was already functionally complete. Work item schema and workflow integration were implemented during MVP-029 (Goals Module), MVP-044 (Roles UI), and MVP-052 (Workflow Visual Designer) tasks. No additional code implementation required.
+
+#### Key Deliverables
+- ✅ WorkItem data model implemented (internal/agency/models/work_item.go)
+- ✅ Workflow model with WorkItem references (internal/agency/models/workflow.go)
+- ✅ Agency Designer UI for WorkItem CRUD operations
+- ✅ AI-powered work item generation and refinement
+- ✅ Workflow Designer with drag-and-drop WorkItem integration
+- ✅ Tag snapshots include complete specification (Goals, WorkItems, Workflows)
+- ✅ WorkItem ↔ Workflow integration working in production
+
+#### Technical Highlights
+
+**WorkItem Model** (`internal/agency/models/work_item.go`):
+```go
+type WorkItem struct {
+    Key          string    `json:"_key,omitempty"`
+    ID           string    `json:"_id,omitempty"`
+    AgencyID     string    `json:"agency_id"`
+    Code         string    `json:"code"`        // e.g., "REQ1", "IMPL1"
+    Title        string    `json:"title"`
+    Description  string    `json:"description"`
+    Deliverables []string  `json:"deliverables"`
+    GoalKeys     []string  `json:"goal_keys,omitempty"` // Links to Goals
+    Tags         []string  `json:"tags,omitempty"`
+    CreatedAt    time.Time `json:"created_at"`
+    UpdatedAt    time.Time `json:"updated_at"`
+}
+```
+
+**Workflow Integration** (`internal/agency/models/workflow.go`):
+```go
+type StepItem struct {
+    ID           string `json:"id" binding:"required"`
+    WorkItemID   string `json:"work_item_id" binding:"required"`   // References WorkItem
+    WorkItemKey  string `json:"work_item_key" binding:"required"`  // ArangoDB _key
+    WorkItemName string `json:"work_item_name" binding:"required"` // Denormalized display
+}
+```
+
+**Agency Specification Structure**:
+- Introduction (markdown)
+- Goals (array of Goal objects)
+- **WorkItems** (array of WorkItem objects) ← Work item definitions
+- Roles (array of Role objects)
+- RACIMatrix (activity assignments)
+- **Workflows** (array of Workflow objects) ← Reference WorkItems via Steps
+
+**Tag Snapshot Example** (from production data):
+```json
+{
+  "work_items": [
+    {"code": "REQ1", "title": "Conduct stakeholder requirements gathering", ...},
+    {"code": "REV1", "title": "Review and validate technical specification", ...},
+    {"code": "ARCH1", "title": "Design system architecture using Go microservices", ...}
+  ],
+  "workflows": [
+    {
+      "name": "Development Pipeline",
+      "steps": [
+        {
+          "items": [
+            {"work_item_id": "...", "work_item_key": "REQ1", "work_item_name": "..."},
+            {"work_item_id": "...", "work_item_key": "IMPL1", "work_item_name": "..."}
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### Architecture Correction
+
+**Initial Misunderstanding**: Thought MVP-030 required creating separate "WorkItemType" system with 6 predefined types (task, job, investigation, change, remediation, experiment).
+
+**Actual Architecture**: WorkItems in the agency specification ARE the work type definitions. Each WorkItem defines:
+- What work needs to be done (Title, Description)
+- What gets delivered (Deliverables array)
+- Which goals it supports (GoalKeys array)
+- How to categorize it (Tags array)
+
+**Workflow = Kanban Board**: Each Workflow represents one Kanban board. Workflow Steps reference WorkItems to create Kanban columns. When agency is published/tagged, the tag snapshot contains the immutable specification used to generate Kanban boards.
+
+#### Files Involved (Existing)
+**Models**:
+- `internal/agency/models/work_item.go` (48 lines)
+- `internal/agency/models/workflow.go` (65 lines)
+- `internal/agency/models/specification.go` (includes WorkItems field)
+
+**UI Templates**:
+- `internal/web/pages/agency_designer/work_items_list_card.templ`
+- `internal/web/pages/agency_designer/work_item_editor_card.templ`
+- `internal/web/pages/agency_designer/workflow_designer.templ`
+- `internal/web/pages/agency_designer/agency_designer_work_items.templ`
+
+**JavaScript**:
+- `static/js/workflow-designer.js` (509 lines with WorkItem integration)
+
+**Services/Handlers** (from existing modules):
+- Work item CRUD already implemented in Goals/Specification services
+- Workflow CRUD already implemented in Workflow service
+- AI generation/refinement already implemented in AI Builder
+
+#### Incorrect Implementation Deleted
+During this task, created and then deleted incorrect WorkItemType system (~900 LOC across 4 files):
+- `internal/workflow/models/work_item.go` (WorkItemType struct) ❌ DELETED
+- `internal/workflow/work_item_type_repository.go` (329 lines) ❌ DELETED  
+- `internal/workflow/work_item_type_service.go` (287 lines) ❌ DELETED
+- `internal/handlers/work_item_type_handler.go` (149 lines) ❌ DELETED
+
+This incorrect approach was based on outdated documentation that described a separate type system.
+
+#### Documentation Updates
+- ✅ Created `work-item-workflow-integration.md` (319 lines) documenting correct architecture
+- ✅ Created `coding_sessions/MVP-030_architecture_correction.md` (210 lines) documenting the correction process
+- ⚠️ `work-item-schema.md` still describes incorrect WorkItemType approach (needs update in future task)
+
+#### Validation Results
+✅ WorkItem model complete with all required fields  
+✅ Workflow model references WorkItems correctly  
+✅ Agency Designer UI functional for WorkItem CRUD  
+✅ AI-powered generation/refinement working  
+✅ Workflow Designer drag-and-drop integration working  
+✅ Tag snapshots include complete specification  
+✅ Production data shows 20 WorkItems, 2 Workflows with valid references  
+✅ No additional code implementation required  
+
+#### Dependencies Unblocked
+This task unblocks:
+- ✅ **MVP-WI-008**: Kanban Board (can read WorkItems from tag snapshots to create columns)
+- ✅ **MVP-031**: Work Item Lifecycle (can build state machine for runtime instances)
+- ✅ **MVP-032**: Agent Factory (can instantiate agents from WorkItem definitions)
+
+#### Key Learning
+**Always research existing models before implementing new features**. Used semantic_search to discover WorkItem model already existed. This prevented duplicate implementation and ensured architectural consistency with existing specification structure.
+
+#### Session Documentation
+- Session: `documents/3-SofwareDevelopment/coding_sessions/MVP-030_architecture_correction.md`
+- Architecture: `documents/3-SofwareDevelopment/mvp-details/work-items-integration/work-item-workflow-integration.md`
 
 ---
 
