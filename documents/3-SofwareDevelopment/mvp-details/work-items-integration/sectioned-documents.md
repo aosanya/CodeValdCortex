@@ -9,7 +9,8 @@ This document describes the sectioned document format that enables granular merg
 
 **Related Documentation**:
 - [AI Conflict Resolution](ai-conflict-resolution.md) - AI-assisted merge strategies for conflicts
-- [Git Operations](git-operations.md) - Low-level merge operations
+- [Git Data Models](git-data-models.md) - Git object model
+- [Git Core Operations](git-core-operations.md) - Low-level merge operations
 - [Pull Requests](pull-requests.md) - Code review workflow
 
 ---

@@ -24,7 +24,7 @@ This document provides an overview of the **Workbench** system in CodeValdCortex
 This overview has been split into focused topic areas:
 
 ### 1. Issue Management & Lifecycle
-**File**: [issue-management.md](issue-management.md)
+**Files**: [issue-lifecycle-workflow.md](issue-lifecycle-workflow.md) (workflow walkthrough), [issue-data-models-api.md](issue-data-models-api.md) (data models & API)
 
 **Covers**:
 - Issue creation process
@@ -211,7 +211,7 @@ GET    /api/v1/work-items/:code          # Get work item by code
 - Stores all objects in ArangoDB
 - Provides file explorer UI
 
-**Details**: See [git-operations.md](git-operations.md) and [file-explorer.md](file-explorer.md)
+**Details**: See [git-core-operations.md](git-core-operations.md) and [file-explorer.md](file-explorer.md)
 
 ### 4. Notification System
 - Notifies on issue assignment
@@ -236,10 +236,12 @@ See [implementation-guide.md](./implementation-guide.md) for detailed 7-phase ro
 
 ## Related Documentation
 
-- **Issue Management**: [issue-management.md](issue-management.md) - Detailed issue lifecycle, assignment, Git integration
+- **Issue Lifecycle**: [issue-lifecycle-workflow.md](issue-lifecycle-workflow.md) - Complete workflow walkthrough
+- **Issue Data & API**: [issue-data-models-api.md](issue-data-models-api.md) - Models, endpoints, UI components
 - **Workflow Automation**: [workflow-automation.md](workflow-automation.md) - Orchestration logic, progression algorithms
 - **Git Implementation**: [git-based-document-system.md](./git-based-document-system.md) - Git architecture
-- **Git Operations**: [git-operations.md](git-operations.md) - Low-level Git operations
+- **Git Data Models**: [git-data-models.md](git-data-models.md) - Git object model
+- **Git Core Operations**: [git-core-operations.md](git-core-operations.md) - Low-level Git operations
 - **Work Item Schema**: [work-item-schema.md](./work-item-schema.md) - Work item definitions
 - **Pull Requests**: [pull-requests.md](./pull-requests.md) - Review workflow
 - **Implementation Roadmap**: [implementation-guide.md](./implementation-guide.md) - Development phases

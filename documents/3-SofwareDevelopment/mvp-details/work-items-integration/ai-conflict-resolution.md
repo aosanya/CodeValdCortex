@@ -9,7 +9,8 @@ This document describes the AI-powered conflict resolution system that intellige
 
 **Related Documentation**:
 - [Sectioned Documents](sectioned-documents.md) - Document format and section-level merging
-- [Git Operations](git-operations.md) - Low-level merge operations
+- [Git Data Models](git-data-models.md) - Git object model  
+- [Git Core Operations](git-core-operations.md) - Low-level merge operations
 - [Pull Requests](pull-requests.md) - Code review workflow
 
 ---

@@ -373,8 +373,10 @@ func TestEndToEndProgression(t *testing.T) {
 ## Related Documentation
 
 - **[Workflow Automation](workflow-automation.md)** - Orchestration logic and progression algorithms
-- [Issue Management](issue-management.md) - Issue lifecycle, assignment
-- [Git Operations](git-operations.md) - Branch/commit management
+- [Issue Lifecycle Workflow](issue-lifecycle-workflow.md) - Complete issue lifecycle
+- [Issue Data & API](issue-data-models-api.md) - Models, endpoints, UI components
+- [Git Data Models](git-data-models.md) - Git object model
+- [Git Core Operations](git-core-operations.md) - Branch/commit management
 - [Pull Requests](pull-requests.md) - Review workflow, merge events
 - [Work Item Schema](work-item-schema.md) - Work item definitions
 - [Implementation Guide](implementation-guide.md) - Development roadmap
