@@ -86,8 +86,8 @@ func (a *App) registerAPIRoutes(router *gin.Engine, aiRefineHandler interface{})
 		}
 
 		// Workbench and issue management endpoints (MVP-WI-008)
-		if a.workbenchService != nil && a.issueService != nil {
-			workbenchHandler := webhandlers.NewWorkbenchHandler(a.issueService, a.workbenchService, a.agencyService, a.logger)
+		if a.workbenchService != nil && a.issueService != nil && a.instanceService != nil {
+			workbenchHandler := webhandlers.NewWorkbenchHandler(a.issueService, a.workbenchService, a.instanceService, a.agencyService, a.logger)
 			v1.GET("/agencies/:id/instances/:instance_id/workbench", workbenchHandler.ShowWorkbench)
 			v1.POST("/agencies/:id/instances/:instance_id/issues", workbenchHandler.CreateIssue)
 			v1.GET("/agencies/:id/instances/:instance_id/issues", workbenchHandler.ListIssues)

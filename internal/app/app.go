@@ -156,11 +156,12 @@ func New(cfg *config.Config) *App {
 	var workbenchService *services.WorkbenchService
 	{
 		// Note: IssueRepository is initialized per agency database, not master database
-		// The handler will create agency-specific repositories when needed
-		// For now, we create services with nil repos and they'll be initialized per-request
+		// The service will create agency-specific repositories when needed using dbClient
 		issueService = services.NewIssueService(nil, agencyRepo)
-		if tagService != nil {
-			workbenchService = services.NewWorkbenchService(tagService, nil, agencyRepo)
+		if tagService != nil && instanceService != nil {
+			workbenchService = services.NewWorkbenchService(tagService, instanceService, dbClient, agencyRepo)
+			// Set the factory function for creating issue repositories
+			workbenchService.SetIssueRepositoryFactory(arangodb.NewIssueRepository)
 			logger.Info("Workbench services initialized successfully")
 		}
 	}

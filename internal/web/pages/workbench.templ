@@ -36,18 +36,33 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 	@components.LayoutWithAgency("Workbench", agency) {
 		<section class="section">
 			<!-- Page Header -->
-			<div class="level mb-5">
-				<div class="level-left">
-					<div>
-						<h1 class="title">Workbench</h1>
-						<p class="subtitle">Instance: { board.InstanceID }</p>
+			<div class="mb-5">
+				<div class="level">
+					<div class="level-left">
+						<div class="level-item">
+							<div>
+								<h1 class="title mb-2">Workbench</h1>
+								<div class="tags has-addons">
+									<span class="tag is-medium is-light">Instance</span>
+									<span class="tag is-medium is-info">{ board.InstanceName }</span>
+								</div>
+							</div>
+						</div>
+						<div class="level-item">
+							<div>
+								<p class="heading">Workflow</p>
+								<p class="subtitle is-5 mb-0">{ board.WorkflowName }</p>
+							</div>
+						</div>
 					</div>
-				</div>
-				<div class="level-right">
-					<button class="button is-primary" onclick="openCreateIssueModal()">
-						<span class="icon"><i class="fas fa-plus"></i></span>
-						<span>Create Issue</span>
-					</button>
+					<div class="level-right">
+						<div class="level-item">
+							<button class="button is-primary" onclick="openCreateIssueModal()">
+								<span class="icon"><i class="fas fa-plus"></i></span>
+								<span>Create Issue</span>
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -90,32 +105,6 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
 							</div>
 						</div>
 					}
-				</div>
-			</div>
-
-			<!-- Board Info -->
-			<div class="box mt-5">
-				<div class="columns">
-					<div class="column">
-						<p class="heading">Workflow</p>
-						<p>{ board.WorkflowID }</p>
-					</div>
-					if board.TagKey != "" {
-						<div class="column">
-							<p class="heading">Tag</p>
-							<p>{ board.TagKey }</p>
-						</div>
-					}
-					<div class="column">
-						<p class="heading">Generated</p>
-						<p>{ board.GeneratedAt.Format("Jan 02, 2006 15:04:05") }</p>
-					</div>
-					<div class="column has-text-right">
-						<button class="button is-small" onclick="refreshWorkbench()">
-							<span class="icon"><i class="fas fa-sync-alt"></i></span>
-							<span>Refresh</span>
-						</button>
-					</div>
 				</div>
 			</div>
 		</section>

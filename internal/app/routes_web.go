@@ -89,8 +89,8 @@ func (a *App) registerWebRoutes(router *gin.Engine) {
 	}
 
 	// Workbench web routes (MVP-WI-008)
-	if a.workbenchService != nil && a.issueService != nil {
-		workbenchHandler := webhandlers.NewWorkbenchHandler(a.issueService, a.workbenchService, a.agencyService, a.logger)
+	if a.workbenchService != nil && a.issueService != nil && a.instanceService != nil {
+		workbenchHandler := webhandlers.NewWorkbenchHandler(a.issueService, a.workbenchService, a.instanceService, a.agencyService, a.logger)
 		router.GET("/agencies/:id/workbench", workbenchHandler.ShowInstanceSelector)
 		router.GET("/agencies/:id/instances/:instance_id/workbench", workbenchHandler.ShowWorkbench)
 		a.logger.Info("Workbench web routes registered")

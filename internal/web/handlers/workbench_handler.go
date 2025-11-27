@@ -16,6 +16,7 @@ import (
 type WorkbenchHandler struct {
 	issueService     *services.IssueService
 	workbenchService *services.WorkbenchService
+	instanceService  services.InstanceService
 	agencyService    agency.Service
 	logger           *logrus.Logger
 }
@@ -24,12 +25,14 @@ type WorkbenchHandler struct {
 func NewWorkbenchHandler(
 	issueService *services.IssueService,
 	workbenchService *services.WorkbenchService,
+	instanceService services.InstanceService,
 	agencyService agency.Service,
 	logger *logrus.Logger,
 ) *WorkbenchHandler {
 	return &WorkbenchHandler{
 		issueService:     issueService,
 		workbenchService: workbenchService,
+		instanceService:  instanceService,
 		agencyService:    agencyService,
 		logger:           logger,
 	}
@@ -49,13 +52,19 @@ func (h *WorkbenchHandler) ShowInstanceSelector(c *gin.Context) {
 		return
 	}
 
-	// Get instance service to list instances
-	// Note: We need to get instances - this requires the instance service
-	// For now, we'll return empty list and add proper integration later
-	instances := []*models.AgencyInstance{}
-
-	// TODO: Add instance service dependency to get actual instances
-	// instances, err := h.instanceService.ListInstances(c.Request.Context(), agencyID)
+	// Get instances for this agency
+	var instances []*models.AgencyInstance
+	if h.instanceService != nil {
+		instances, err = h.instanceService.ListInstances(c.Request.Context(), agencyID)
+		if err != nil {
+			h.logger.WithError(err).Error("Failed to list instances")
+			// Continue with empty list rather than failing completely
+			instances = []*models.AgencyInstance{}
+		}
+	} else {
+		h.logger.Warn("Instance service not available")
+		instances = []*models.AgencyInstance{}
+	}
 
 	// Render instance selector page
 	component := pages.WorkbenchInstanceSelector(agency, instances)

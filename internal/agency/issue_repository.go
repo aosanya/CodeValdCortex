@@ -4,7 +4,11 @@ import (
 	"context"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	driver "github.com/arangodb/go-driver"
 )
+
+// IssueRepositoryFactory creates issue repositories for specific databases
+type IssueRepositoryFactory func(client driver.Client, db driver.Database) (IssueRepository, error)
 
 // IssueRepository defines the interface for work issue data persistence
 type IssueRepository interface {

@@ -45,7 +45,7 @@ templ InstanceSelector(agency *models.Agency, instances []*models.AgencyInstance
 templ InstanceCard(agency *models.Agency, instance *models.AgencyInstance, targetPath string) {
 	<div class="card instance-card" style="height: 100%; transition: transform 0.2s, box-shadow 0.2s;">
 		<a 
-			href={ templ.SafeURL(fmt.Sprintf(targetPath, instance.ID)) }
+			href={ templ.SafeURL(fmt.Sprintf(targetPath, instance.InstanceID)) }
 			style="text-decoration: none; color: inherit; display: block; height: 100%;"
 			onmouseover="this.parentElement.style.transform='translateY(-4px)'; this.parentElement.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
 			onmouseout="this.parentElement.style.transform='translateY(0)'; this.parentElement.style.boxShadow='';"

@@ -52,12 +52,14 @@ const (
 
 // WorkbenchBoard represents a generated Kanban board from a workflow
 type WorkbenchBoard struct {
-	AgencyID    string        `json:"agency_id"`
-	InstanceID  string        `json:"instance_id"`
-	WorkflowID  string        `json:"workflow_id"`
-	TagKey      string        `json:"tag_key"` // Agency tag (specification snapshot)
-	Columns     []BoardColumn `json:"columns"` // Kanban columns
-	GeneratedAt time.Time     `json:"generated_at"`
+	AgencyID     string        `json:"agency_id"`
+	InstanceID   string        `json:"instance_id"`
+	InstanceName string        `json:"instance_name"` // User-friendly instance name
+	WorkflowID   string        `json:"workflow_id"`
+	WorkflowName string        `json:"workflow_name"` // User-friendly workflow name
+	TagKey       string        `json:"tag_key"`       // Agency tag (specification snapshot)
+	Columns      []BoardColumn `json:"columns"`       // Kanban columns
+	GeneratedAt  time.Time     `json:"generated_at"`
 }
 
 // BoardColumn represents a single column in the Workbench board
