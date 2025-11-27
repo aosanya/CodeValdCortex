@@ -97,19 +97,28 @@ Follow the **mandatory completion process** for MVP tasks:
    
    **Backend Go Logs**:
    - Search for and remove all debug `fmt.Printf()`, `fmt.Println()` statements
-   - Remove MVP-XXX prefixed debug logs: `fmt.Printf("MVP-XXX-DEBUG:`, `fmt.Printf("MVP-XXX-TRACE:`, etc.
+   - Remove MVP-XXX prefixed debug logs: `log.Printf("[MVP-XXX]`, `fmt.Printf("MVP-XXX-DEBUG:`, etc.
    - Remove emoji-prefixed debug logs: `🔍 DEBUG [`, `📊 BEFORE UPDATE`, `💾 Saved workflow`, `🔹 Workflow[`, etc.
    - Remove detailed trace logs with object dumps and state inspection
-   - Search patterns to check:
+   - **Automated removal tool** (for log.Printf with [MVP-XXX] pattern):
+     ```bash
+     # Edit scripts/remove-mvp-logs-v2.py to update the files list, then run:
+     python3 scripts/remove-mvp-logs-v2.py
+     # This properly handles multiline log.Printf statements by tracking parentheses
+     ```
+   - Search patterns to verify removal:
      - `grep -r "fmt.Printf" internal/ cmd/` (should only show essential production logs)
+     - `grep -r "log.Printf.*\[MVP-" internal/` (should return no results)
      - `grep -r "🔍\|📊\|💾\|🔹\|✅\|⚠️" internal/ cmd/` (emoji indicators often mean debug logs)
      - `grep -r "DEBUG \[" internal/ cmd/`
+   - After removal, check for orphaned lines and unused imports (e.g., `"log"` import)
    
    **Frontend JavaScript Logs**:
    - Search for and remove all `console.log()`, `console.warn()` statements in JavaScript files
    - Search patterns to check:
      - `grep -r "console.log" static/js/`
      - `grep -r "console.warn" static/js/`
+     - `grep -r "console.log.*\[MVP-" internal/web/` (check templ files)
    - Keep only `console.error()` for actual error handling
    
    **General Rules**:
@@ -118,7 +127,7 @@ Follow the **mandatory completion process** for MVP tasks:
    - **Test the application after removing logs to ensure nothing breaks**
    - This is MANDATORY - no debug logs should remain in merged code
 
-7. **Prepare next task (if applicable)**
+8. **Prepare next task (if applicable)**
    - Identify the next priority task from `mvp.md`
    - Check if `documents/3-SofwareDevelopment/mvp-details/MVP-XXX.md` exists for next task
    - **If details file doesn't exist for next task:**
@@ -153,7 +162,7 @@ Follow the **mandatory completion process** for MVP tasks:
        [Implementation details, architecture decisions]
        ```
 
-8. **Fix all linting issues before merge**
+9. **Fix all linting issues before merge**
    - Run `go vet ./...` and fix ALL errors and warnings (must show 0 issues)
    - Run `gofmt -w .` or `go fmt ./...` to ensure consistent code formatting
    - Run `golangci-lint run` if configured in project
@@ -166,7 +175,7 @@ Follow the **mandatory completion process** for MVP tasks:
      - Inefficient string concatenation
      - Missing documentation comments (if enabled)
 
-9. **Merge to main after testing validation**
+10. **Merge to main after testing validation**
    - Ensure all debug logs removed (no fmt.Printf/Println, no console.log)
    - Ensure `go vet ./...` shows 0 issues
    - Ensure `gofmt` or `go fmt` has been run
