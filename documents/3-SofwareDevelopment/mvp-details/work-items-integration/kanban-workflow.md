@@ -1,7 +1,40 @@
 # Workbench (Kanban Workflow) & Issue Lifecycle
 
-**Status**: 📋 Planned - Architecture Defined  
 **Related**: [git-based-document-system.md](./git-based-document-system.md), [work-item-schema.md](./work-item-schema.md)
+**Status**: ✅ Complete - Implemented (MVP-WI-008, Nov 27, 2025)  
+**Related**: [git-based-document-system.md](./git-based-document-system.md), [work-item-schema.md](./work-item-schema.md)
+
+---
+
+## MVP-WI-008 Implementation Summary
+
+**Files Created/Modified:**
+- Backend: `internal/agency/services/workbench_service.go`, `internal/web/handlers/workbench_handler.go`, `internal/agency/models/issue.go`, `internal/agency/arangodb/issue_repository.go`
+- Frontend: `internal/web/pages/workbench.templ`, `internal/web/components/kanban_board.templ`, `static/js/kanban-board.js`
+- Integration: `internal/agency/services/workflow_orchestrator.go`, `internal/git/`, `internal/web/pages/instances.templ` (navbar link)
+
+**Technical Details:**
+- Kanban board columns are generated from agency workflow specification (REQ1, ARCH1, IMPL1, TEST1, etc.)
+- Issues are created via a modal form, validated, and persisted in agency-specific ArangoDB database
+- Issue cards display key metadata (title, status, assignee, step)
+- Drag-and-drop implemented with Alpine.js; HTMX used for real-time updates and CRUD operations
+- Backend provides endpoints for issue creation, update, move, delete, and board generation
+- Workflow orchestrator listens for PR merge events and moves issues to next step automatically
+- All debug logs, MVP-prefixed, and emoji-prefixed logs removed from backend and frontend code
+- Linting, formatting, and build validation completed (go vet, go fmt, templ generate)
+
+**Testing & Validation:**
+- Manual and automated tests for issue CRUD, board generation, workflow step progression
+- UI tested for drag-and-drop, real-time updates, and error handling
+- Backend tested for correct workflow logic, data persistence, and event handling
+- All linting and build checks passed
+
+**Known Limitations & Future Work:**
+- Advanced filtering, search, and analytics planned for future releases
+- Agent assignment notifications and multi-agent collaboration to be enhanced
+- Integration with external Git providers (Gitea/GitHub) in progress
+
+---
 
 ## Overview
 
