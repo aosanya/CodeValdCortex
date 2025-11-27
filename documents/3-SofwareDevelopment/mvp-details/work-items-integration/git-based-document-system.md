@@ -108,7 +108,7 @@ Content here...
 Content here...
 ```
 
-**Implementation Details**: See [collaborative-editing.md](collaborative-editing.md) for sectioned documents and merge strategies.
+**Implementation Details**: See [sectioned-documents.md](sectioned-documents.md) for document format and section-level merging.
 
 ---
 
@@ -140,7 +140,7 @@ Content here...
 6. Human reviews and approves (or manually edits)
 ```
 
-**Implementation Details**: See [collaborative-editing.md](collaborative-editing.md) for AI conflict resolution workflow.
+**Implementation Details**: See [ai-conflict-resolution.md](ai-conflict-resolution.md) for AI-powered conflict resolution workflow.
 
 ---
 
@@ -226,11 +226,15 @@ type WorkIssue struct {
 - Works for code AND documents
 
 **Implementation Documentation**:
-- [git-operations.md](git-operations.md) - Git object model, write/read/merge operations
+- [git-operations.md](git-operations.md) - Git object model, core operations (write/read/branch)
+- [git-merge-strategies.md](git-merge-strategies.md) - Three-way merge algorithms and conflict detection
 - [file-explorer.md](file-explorer.md) - File browser API, indexing, MVP-WI-006 implementation
-- [collaborative-editing.md](collaborative-editing.md) - Sectioned documents, AI conflict resolution
+- [sectioned-documents.md](sectioned-documents.md) - Document format and section-level merging
+- [ai-conflict-resolution.md](ai-conflict-resolution.md) - AI-powered merge conflict resolution
 - [pull-requests.md](pull-requests.md) - Code review workflow
-- [kanban-workflow.md](kanban-workflow.md) - Issue management, workflow automation
+- [workflow-automation.md](workflow-automation.md) - Orchestration and progression logic
+- [workflow-integration.md](workflow-integration.md) - API endpoints, event handling, notifications
+- [kanban-workflow.md](kanban-workflow.md) - Issue management and Kanban boards
 
 **Next steps for implementation**:
 - Build Git object storage layer

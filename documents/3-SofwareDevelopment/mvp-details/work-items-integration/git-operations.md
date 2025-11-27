@@ -5,7 +5,9 @@
 
 ## Overview
 
-This document describes the low-level Git implementation in ArangoDB, including object storage, operations (commit, branch, merge), and data models.
+This document describes the low-level Git implementation in ArangoDB, including object storage, data models, and basic operations (write, read, branch management).
+
+**For merge algorithms and conflict handling**, see [Git Merge Strategies](git-merge-strategies.md).
 
 ---
 
@@ -471,145 +473,6 @@ func (g *GitOps) ReadFile(repoID, commitSHA, filePath string) (string, error) {
 
 ---
 
-## Merge Operations
-
-### Three-Way Merge
-
-```go
-// Merge performs three-way merge
-func (g *GitOps) Merge(repoID, sourceBranch, targetBranch string) (*MergeResult, error) {
-    // 1. Get branch heads
-    sourceRef := g.getRef(repoID, sourceBranch)
-    targetRef := g.getRef(repoID, targetBranch)
-    
-    sourceCommit, _ := g.GetCommit(sourceRef.Target)
-    targetCommit, _ := g.GetCommit(targetRef.Target)
-    
-    // 2. Find merge base (common ancestor)
-    baseCommit := g.findMergeBase(sourceCommit, targetCommit)
-    
-    // 3. Get trees
-    baseTree, _ := g.GetTree(baseCommit.Tree)
-    sourceTree, _ := g.GetTree(sourceCommit.Tree)
-    targetTree, _ := g.GetTree(targetCommit.Tree)
-    
-    // 4. Three-way merge
-    mergedTree, conflicts := g.mergeTreesThreeWay(baseTree, sourceTree, targetTree)
-    
-    if len(conflicts) > 0 {
-        return &MergeResult{
-            Status:    "conflict",
-            Conflicts: conflicts,
-        }, nil
-    }
-    
-    // 5. Create merge commit
-    treeSHA, _ := g.WriteTree(repoID, mergedTree.Entries)
-    commitSHA, _ := g.Commit(
-        repoID,
-        treeSHA,
-        []string{sourceCommit.SHA, targetCommit.SHA},
-        "system",
-        fmt.Sprintf("Merge %s into %s", sourceBranch, targetBranch),
-    )
-    
-    // 6. Update target branch
-    g.UpdateRef(repoID, targetBranch, commitSHA)
-    
-    return &MergeResult{
-        Status:      "merged",
-        CommitSHA:   commitSHA,
-        MergeCommit: commitSHA,
-    }, nil
-}
-```
-
-### Merge Algorithm (File-Level)
-
-```go
-// mergeTreesThreeWay performs file-level three-way merge
-func (g *GitOps) mergeTreesThreeWay(base, source, target *GitTree) (*GitTree, []Conflict) {
-    merged := &GitTree{Entries: []TreeEntry{}}
-    conflicts := []Conflict{}
-    
-    // Build maps for comparison
-    baseMap := toEntryMap(base)
-    sourceMap := toEntryMap(source)
-    targetMap := toEntryMap(target)
-    
-    // Get all file paths
-    allPaths := getAllPaths(base, source, target)
-    
-    for _, path := range allPaths {
-        baseEntry := baseMap[path]
-        sourceEntry := sourceMap[path]
-        targetEntry := targetMap[path]
-        
-        // Case 1: File unchanged in both
-        if baseEntry != nil && sourceEntry != nil && targetEntry != nil {
-            if sourceEntry.SHA == targetEntry.SHA {
-                merged.Entries = append(merged.Entries, sourceEntry)
-                continue
-            }
-        }
-        
-        // Case 2: File modified in source only
-        if baseEntry != nil && targetEntry != nil && targetEntry.SHA == baseEntry.SHA && sourceEntry != nil {
-            merged.Entries = append(merged.Entries, sourceEntry)
-            continue
-        }
-        
-        // Case 3: File modified in target only
-        if baseEntry != nil && sourceEntry != nil && sourceEntry.SHA == baseEntry.SHA && targetEntry != nil {
-            merged.Entries = append(merged.Entries, targetEntry)
-            continue
-        }
-        
-        // Case 4: File added in source only
-        if baseEntry == nil && targetEntry == nil && sourceEntry != nil {
-            merged.Entries = append(merged.Entries, sourceEntry)
-            continue
-        }
-        
-        // Case 5: File added in target only
-        if baseEntry == nil && sourceEntry == nil && targetEntry != nil {
-            merged.Entries = append(merged.Entries, targetEntry)
-            continue
-        }
-        
-        // Case 6: CONFLICT - File modified in both
-        if sourceEntry != nil && targetEntry != nil && sourceEntry.SHA != targetEntry.SHA {
-            conflicts = append(conflicts, Conflict{
-                Path:       path,
-                BaseSHA:    baseEntry.SHA,
-                SourceSHA:  sourceEntry.SHA,
-                TargetSHA:  targetEntry.SHA,
-            })
-            continue
-        }
-    }
-    
-    return merged, conflicts
-}
-
-type Conflict struct {
-    Path      string `json:"path"`
-    BaseSHA   string `json:"base_sha"`
-    SourceSHA string `json:"source_sha"`
-    TargetSHA string `json:"target_sha"`
-}
-```
-
-**Merge Cases**:
-1. ✅ Unchanged → Keep either version
-2. ✅ Modified in source only → Use source
-3. ✅ Modified in target only → Use target
-4. ✅ Added in source only → Include from source
-5. ✅ Added in target only → Include from target
-6. ⚠️ Modified in both → **CONFLICT**
-
----
-
 ## Performance Considerations
 
 ### Content-Addressable Benefits
@@ -661,7 +524,9 @@ FOR ref IN git_refs
 
 ## Related Documentation
 
+- **[Git Merge Strategies](git-merge-strategies.md)** - Three-way merge algorithms and conflict handling
 - [File Explorer](file-explorer.md) - High-level file operations
-- [Collaborative Editing](collaborative-editing.md) - Sectioned documents and AI merging
+- [Sectioned Documents](sectioned-documents.md) - Section-level merging
+- [AI Conflict Resolution](ai-conflict-resolution.md) - AI-assisted merging
 - [Pull Requests](pull-requests.md) - Code review workflow
 - [Git-Based Document System](git-based-document-system.md) - Architecture overview
