@@ -65,9 +65,14 @@ Files: 6 changed, 222 insertions(+), 6 deletions(-)
   - ~~Test responsive behavior on mobile~~
   
 ### Priority 1: File Size Violations
-- [ ] **Split `agency-designer.css` (1,792 lines → 4 files)**
-  - Extract to: `agency-designer-layout.css`, `-chat.css`, `-context.css`, `-forms.css`
-  - Update templ files to include split files
+- [x] **Extract shared VS Code designer styles** ✅ COMPLETED (Commit: TBD)
+  - Created `vscode-designer-shared.css` (485 lines) with base layout, panels, chat
+  - Reduced `agency-designer.css` from 1,812 → 1,706 lines
+  - Shared between agency-designer AND workbench pages
+  - Added to `head_includes.templ` for global availability
+- [ ] **Further split `agency-designer.css` (1,706 lines → modular files)** 🔄 IN PROGRESS
+  - Consider extracting: overview sections, details views, form overrides
+  - Target: All files under 700 lines
   
 ### Priority 2: Consolidation
 - [x] **Create `common-animations.css`** ✅ COMPLETED (Commit: 847c77b)
@@ -97,7 +102,8 @@ Files: 6 changed, 222 insertions(+), 6 deletions(-)
 
 | File | Lines | Purpose | Status |
 |------|-------|---------|--------|
-| `agency-designer.css` | 1,792 | VS Code-style designer layout | ⚠️ **MASSIVE** |
+| `agency-designer.css` | 1,706 | Agency Designer page-specific | 🟡 Still large |
+| `vscode-designer-shared.css` | 485 | **NEW** - Shared VS Code layout (agency + workbench) | ✅ **SHARED** |
 | `workflow-designer.css` | 442 | Workflow drag-drop designer | 🔴 Medium complexity |
 | `themes.css` | 361 | Theme system (6 themes) | ✅ Well-organized |
 | `styles.css` | 359 | "Custom styles for dashboard" | 🔴 Mixed concerns |
