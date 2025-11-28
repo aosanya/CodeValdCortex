@@ -19,9 +19,8 @@ body {
     font-size: 1rem;
 }
 
-.navbar-brand {
-    margin-left: -5rem;
-}
+/* Removed negative margin - was causing navbar to overflow off-screen */
+/* See: documents/3-SofwareDevelopment/css_consolidation_research.md Q4 */
 
 .navbar-menu {
     margin-left: 1.25rem;
