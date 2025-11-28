@@ -1,0 +1,196 @@
+/* AI Policy Wizard Styles */
+
+@import 'variables';
+@import 'mixins';
+
+.policy-wizard-container {
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    font-size: 1rem;
+    /* Match Bulma default */
+}
+
+/* ===================================
+   STEPS PROGRESS INDICATOR
+   =================================== */
+
+.steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.step-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 60%;
+        right: -40%;
+        height: 2px;
+        background-color: #dbdbdb;
+        transition: background-color 0.3s ease;
+    }
+
+    &.is-completed {
+        &::after {
+            background-color: #48c774;
+        }
+
+        .step-marker {
+            background-color: #48c774;
+
+            &::before {
+                content: '✓';
+                font-size: 1.2rem;
+            }
+        }
+    }
+
+    &.is-active .step-marker {
+        background-color: #3273dc;
+        box-shadow: 0 0 0 4px rgba(50, 115, 220, 0.2);
+    }
+
+    &:not(.is-active):not(.is-completed) .step-title {
+        color: #7a7a7a;
+    }
+}
+
+.step-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #dbdbdb;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    z-index: 1;
+    margin-right: 0.75rem;
+}
+
+.step-details {
+    flex: 1;
+}
+
+.step-title {
+    font-weight: 600;
+    color: #363636;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* ===================================
+   FORM & BOX STYLING
+   =================================== */
+
+.box {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .box {
+        background-color: #f9f9f9;
+        border: 1px solid #e8e8e8;
+    }
+}
+
+.field:not(:last-child) {
+    margin-bottom: 1.5rem;
+}
+
+.checkbox,
+.radio {
+    margin-right: 1rem;
+}
+
+.help {
+    font-size: 0.875rem;
+}
+
+/* ===================================
+   FORM VALIDATION STATES
+   =================================== */
+
+.input,
+.textarea,
+.select select {
+    &.is-danger {
+        border-color: #f14668;
+    }
+
+    &.is-success {
+        border-color: #48c774;
+    }
+}
+
+/* ===================================
+   BUTTON STYLES
+   =================================== */
+
+.button {
+    &.is-primary:hover {
+        background-color: #2366d1;
+    }
+
+    &.is-danger.is-light:hover {
+        background-color: #fce4ec;
+    }
+
+    &.is-primary.is-light:hover {
+        background-color: #e8f0fe;
+    }
+}
+
+/* ===================================
+   SELECT DROPDOWNS
+   =================================== */
+
+.select:not(.is-multiple):not(.is-loading)::after {
+    border-color: #3273dc;
+}
+
+/* ===================================
+   UTILITIES
+   =================================== */
+
+[x-cloak] {
+    display: none !important;
+}
+
+.notification {
+    min-width: 300px;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media screen and (max-width: 768px) {
+    .steps {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .step-item {
+        width: 100%;
+        margin-bottom: 1rem;
+
+        &:not(:last-child)::after {
+            display: none;
+        }
+    }
+}
