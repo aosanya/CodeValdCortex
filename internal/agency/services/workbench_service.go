@@ -345,3 +345,30 @@ func (s *WorkbenchService) GetIssuesForColumn(ctx context.Context, agencyID, ins
 	}
 	return issues, nil
 }
+
+// GetWorkflowsFromTag retrieves all workflows from a tag snapshot
+func (s *WorkbenchService) GetWorkflowsFromTag(ctx context.Context, agencyID, tagName string) ([]models.Workflow, error) {
+	// Get tag snapshot
+	tag, err := s.tagService.GetTag(ctx, agencyID, tagName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tag: %w", err)
+	}
+
+	// Verify tag has a specification
+	if tag.Snapshot.Specification.Key == "" {
+		return nil, fmt.Errorf("tag has no specification snapshot")
+	}
+
+	return tag.Snapshot.Specification.Workflows, nil
+}
+
+// GetWorkflowsFromSpecification retrieves all workflows from current specification
+func (s *WorkbenchService) GetWorkflowsFromSpecification(ctx context.Context, agencyID string) ([]models.Workflow, error) {
+	// Get agency specification
+	spec, err := s.specRepo.GetSpecification(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get agency specification: %w", err)
+	}
+
+	return spec.Workflows, nil
+}

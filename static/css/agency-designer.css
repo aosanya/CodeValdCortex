@@ -2,11 +2,30 @@
 /* CACHE BUST: v2025-10-30-17:00 - Themed Status Bar */
 /* Note: vscode-status-bar.css is loaded separately in the template */
 
-/* Prevent page scrolling */
+/* Prevent page scrolling but allow navbar to be visible */
 html,
 body {
-    overflow: hidden;
-    height: 100%;
+    overflow-x: hidden;
+    overflow-y: visible !important;
+    height: auto !important;
+}
+
+/* Ensure navbar is always visible on top */
+.navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure section and container don't interfere with navbar */
+.section {
+    overflow: visible !important;
+}
+
+.container {
+    overflow: visible !important;
 }
 
 /* Override Bulma's default section and container padding/margin */

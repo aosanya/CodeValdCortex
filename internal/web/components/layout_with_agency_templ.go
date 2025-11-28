@@ -53,13 +53,21 @@ func LayoutWithAgency(title string, currentAgency *models.Agency) templ.Componen
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/layout_with_agency.templ`, Line: 14, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/layout_with_agency.templ`, Line: 14, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " - CodeValdCortex</title><!-- Bulma CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/css/bulma.min.css\"><!-- FontAwesome CSS (self-hosted) --><link rel=\"stylesheet\" href=\"/static/fontawesome/css/all.min.css\"><!-- Custom styles --><link rel=\"stylesheet\" href=\"/static/css/common-layout.css\"><link rel=\"stylesheet\" href=\"/static/css/styles.css\"><link rel=\"stylesheet\" href=\"/static/css/agencies.css\"><link rel=\"stylesheet\" href=\"/static/css/themes.css\"><!-- HTMX (self-hosted) --><script src=\"/static/js/htmx.min.js\"></script><!-- Alpine.js (self-hosted) --><script defer src=\"/static/js/alpine.min.js\"></script><!-- Chart.js (self-hosted) --><script src=\"/static/js/chart.umd.min.js\"></script><!-- Custom Alpine components --><script src=\"/static/js/alpine-components.js\"></script><!-- Theme manager --><script src=\"/static/js/theme-manager.js\"></script><!-- Progress bar for HTMX requests --><div id=\"htmx-progress\"></div></head><body><main class=\"section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " - CodeValdCortex</title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = HeadIncludes().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</head><body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +75,7 @@ func LayoutWithAgency(title string, currentAgency *models.Agency) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<main class=\"section\"><div class=\"container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -75,7 +83,15 @@ func LayoutWithAgency(title string, currentAgency *models.Agency) templ.Componen
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></main><!-- Bulma navbar burger toggle --><script>\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', () => {\n\t\t\t\t\t// Get all \"navbar-burger\" elements\n\t\t\t\t\tconst $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);\n\t\t\t\t\t\n\t\t\t\t\t// Add a click event on each of them\n\t\t\t\t\t$navbarBurgers.forEach( el => {\n\t\t\t\t\t\tel.addEventListener('click', () => {\n\t\t\t\t\t\t\t// Get the target from the \"data-target\" attribute\n\t\t\t\t\t\t\tconst target = el.dataset.target;\n\t\t\t\t\t\t\tconst $target = document.getElementById(target);\n\t\t\t\t\t\t\t\n\t\t\t\t\t\t\t// Toggle the \"is-active\" class on both the \"navbar-burger\" and the \"navbar-menu\"\n\t\t\t\t\t\t\tel.classList.toggle('is-active');\n\t\t\t\t\t\t\t$target.classList.toggle('is-active');\n\t\t\t\t\t\t});\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></main>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = NavbarBurgerScript().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

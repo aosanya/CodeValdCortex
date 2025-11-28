@@ -224,11 +224,13 @@
 
 /* Hero Section for Homepage */
 .hero.is-light {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    /* Replaced purple gradient with a dark grey gradient for better contrast and reduced vibrance */
+    background: linear-gradient(135deg, #2b2b2b 0%, #1f1f1f 100%);
+    color: #ffffff;
 }
 
 .hero.is-light .title,
 .hero.is-light .subtitle {
-    color: white;
+    /* Keep headings readable on the darker background */
+    color: #ffffff;
 }
