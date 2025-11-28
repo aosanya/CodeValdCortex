@@ -1,0 +1,79 @@
+// Workflow Designer - Drop Zones Module
+// Drop zone styling and interactions
+
+/* Drop Zones - Unified class for all drop zones */
+.drop-zone {
+    width: 50px;
+    height: 50px;
+    border: 4px dashed $vscode-accent;
+    border-radius: 12px;
+    transition: all $transition-normal ease;
+    background: rgba(50, 115, 220, 0.2);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(50, 115, 220, 0.3);
+    z-index: 10;
+    
+    &::before {
+        content: "+";
+        font-size: 1.5rem;
+        color: $vscode-accent;
+        font-weight: bold;
+        transition: all $transition-normal ease;
+    }
+    
+    /* Hover and active states */
+    &:hover {
+        border-color: #2366d1;
+        border-width: 5px;
+        border-style: solid;
+        background: rgba(50, 115, 220, 0.35);
+        box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
+        transform: scale(1.05);
+        
+        &::before {
+            color: #2366d1;
+            font-size: 2rem;
+        }
+    }
+    
+    &.is-active {
+        border-color: #2366d1;
+        border-width: 5px;
+        border-style: solid;
+        background: rgba(50, 115, 220, 0.35);
+        box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
+        
+        &::before {
+            color: #2366d1;
+            font-size: 2rem;
+        }
+    }
+}
+
+/* Horizontal drop zones (between steps) - container is full width, but box is 50x50 */
+.horizontal-drop-zone {
+    width: 100%;
+    padding: $spacing-lg 0;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+/* Override for the actual drop zone inside horizontal container */
+.flow-connector .drop-zone {
+    width: 50px;
+    height: 50px;
+    margin-left: 100px; /* Offset to the right */
+}
+
+/* Side drop zones positioning */
+.left-drop-zone {
+    margin-right: $spacing-md;
+}
+
+.right-drop-zone {
+    margin-left: $spacing-md;
+}

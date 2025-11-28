@@ -1,0 +1,118 @@
+// Workflow Designer - Canvas Module
+// Workflow canvas with grid background and markers
+
+/* Workflow Canvas */
+.workflow-canvas {
+    background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px), 
+                linear-gradient(#f0f0f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-color: #ffffff;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    padding: $spacing-xl $spacing-lg;
+}
+
+.canvas-content {
+    width: 100%;
+    max-width: 800px;
+    @include flex-column;
+    align-items: center;
+}
+
+/* Workflow Markers (START/END) */
+.workflow-marker {
+    display: flex;
+    justify-content: center;
+    padding: $spacing-lg 0;
+}
+
+.marker-content {
+    background: white;
+    border: 2px solid $vscode-border;
+    border-radius: 8px;
+    padding: $spacing-lg $spacing-xl;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+}
+
+.start-marker .marker-content {
+    border-color: #48c774;
+    color: #48c774;
+}
+
+.end-marker .marker-content {
+    border-color: #f14668;
+    color: #f14668;
+}
+
+/* Empty State */
+.empty-state-drop-zone {
+    width: 100%;
+    min-height: 300px;
+    border: 3px dashed $vscode-border;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: $spacing-lg 0;
+    transition: all $transition-normal;
+    background: rgba(255, 255, 255, 0.5);
+    
+    &.is-active {
+        border-color: $vscode-accent;
+        background: rgba(50, 115, 220, 0.05);
+        border-width: 4px;
+    }
+}
+
+.empty-state-content {
+    text-align: center;
+    padding: $spacing-xl;
+}
+
+/* Flow Connector - Contains arrow and drop zone */
+.flow-connector {
+    position: relative;
+    width: 100%;
+    min-height: 120px;
+    @include flex-column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Flow Arrow - Stretches vertically */
+.flow-arrow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    @include flex-column;
+    align-items: center;
+    z-index: 1;
+    pointer-events: none;
+    
+    .arrow-line {
+        width: 100%;
+        flex: 1;
+        background: linear-gradient(to bottom,
+                transparent 0%,
+                $vscode-accent 20%,
+                $vscode-accent 80%,
+                transparent 100%);
+        opacity: 0.6;
+    }
+    
+    .arrow-head {
+        color: $vscode-accent;
+        font-size: 1.5rem;
+        line-height: 1;
+        margin-top: -8px;
+        opacity: 0.8;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+}

@@ -1,0 +1,143 @@
+// Workflow Designer - Steps Module
+// Workflow steps, step items, and parallel execution
+
+/* Workflow Steps */
+.workflow-steps-container {
+    width: 100%;
+}
+
+.workflow-step-wrapper {
+    width: 100%;
+    position: relative;
+    animation: slideIn 0.4s ease-out;
+    transition: all $transition-normal ease;
+}
+
+/* Workflow Step */
+.workflow-step {
+    width: 100%;
+    margin: $spacing-sm 0;
+    
+    &.is-parallel {
+        @include flex-column;
+        align-items: center;
+    }
+}
+
+/* Step Item Container (for side drop zones) */
+.step-item-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+}
+
+/* Step Item */
+.step-item {
+    cursor: move;
+    transition: all $transition-normal ease;
+    position: relative;
+    min-width: 140px;
+    flex: 1;
+    max-width: 280px;
+    
+    .card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all $transition-normal ease;
+    }
+    
+    &:hover .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        border-color: $vscode-accent;
+    }
+    
+    &[draggable="true"]:active {
+        opacity: 0.5;
+        cursor: grabbing;
+    }
+    
+    .delete {
+        position: absolute;
+        top: $spacing-sm;
+        right: $spacing-sm;
+    }
+}
+
+/* Parallel Items */
+.parallel-items-container {
+    width: 100%;
+    border: 2px dashed $vscode-accent;
+    border-radius: 12px;
+    padding: $spacing-xl;
+    background: rgba(50, 115, 220, 0.02);
+}
+
+.parallel-label {
+    text-align: center;
+    margin-bottom: $spacing-lg;
+}
+
+.parallel-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-lg;
+    justify-content: center;
+}
+
+.parallel-item {
+    min-width: 126px;
+    max-width: 100%;
+}
+
+/* Parallel add zone - for adding new items to parallel execution */
+.parallel-add-zone {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: $spacing-sm 0;
+    
+    .drop-zone {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Drag State */
+.is-dragging {
+    opacity: 0.4;
+}
+
+/* Card Header Toggle Animation */
+.card-header-icon {
+    .icon {
+        transition: transform $transition-fast ease;
+        
+        &.is-rotated {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+/* Card Header Title Spacing */
+.card-header-title {
+    flex-grow: 1;
+    overflow: hidden;
+    
+    span:last-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .parallel-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .step-item {
+        min-width: 150px;
+    }
+}

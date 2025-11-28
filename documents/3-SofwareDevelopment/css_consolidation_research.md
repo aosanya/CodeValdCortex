@@ -1,8 +1,42 @@
-# CSS Consolidation Research & Strategy
+# SCSS Consolidation Research & Strategy
 
 **Date**: November 28, 2025  
 **Current Branch**: feature/MVP-WI-012_workbench_chat_panel  
-**Issue**: CSS organization is messy, common patterns are duplicated, navbar visibility issues
+**Status**: ✅ **MIGRATED TO SCSS** - All custom CSS now uses modular SCSS architecture
+
+---
+
+## 🎯 Current Architecture (SCSS-First)
+
+### SCSS Source Structure
+```
+static/scss/
+├── _variables.scss          # Shared variables (colors, spacing, fonts, transitions)
+├── _mixins.scss            # Reusable mixins (flex, panels, scrollbars, hover states)
+├── agency-designer.scss    # Main entry point for agency designer
+└── agency-designer/        # Modular SCSS files
+    ├── _layout.scss        # Designer panels, view switching, sidebars
+    ├── _overview.scss      # Overview sections, navigation, cards, tips
+    ├── _details.scss       # Agent details, properties, relationships
+    ├── _chat.scss          # Chat panel, messages, typing indicators
+    ├── _context.scss       # Context selection system, menus, badges
+    └── _forms.scss         # Form overrides, publish toolbar, dialogs
+```
+
+### Build Process
+- **Source**: `static/scss/*.scss` (tracked in git)
+- **Compilation**: `make css` (or `make build`, `make run` - auto-runs)
+- **Output**: `static/css/*.css` (auto-generated, gitignored)
+- **Compiler**: Sass via npm (`npx sass`)
+
+### CSS Output (Auto-Generated)
+```
+static/css/
+├── agency-designer.css           # 🤖 Compiled from SCSS (18K minified)
+├── vscode-designer-shared.css    # Shared VS Code layout (still plain CSS)
+├── common-animations.css         # Shared animations (still plain CSS)
+└── [3rd-party CSS files]         # bulma.min.css, etc. (unchanged)
+```
 
 ---
 
@@ -70,35 +104,120 @@ Files: 6 changed, 222 insertions(+), 6 deletions(-)
   - Reduced `agency-designer.css` from 1,812 → 1,706 lines
   - Shared between agency-designer AND workbench pages
   - Added to `head_includes.templ` for global availability
-- [x] **Migrate to SCSS** ✅ COMPLETED (Commit: TBD)
-  - Created modular SCSS structure in `static/scss/`
-  - Split agency-designer into 6 modules (layout, overview, details, chat, context, forms)
-  - Created shared `_variables.scss` and `_mixins.scss`
-  - Auto-compilation via Makefile (`make css`)
-  - Compiled output: agency-designer.css (18K minified)
-  - All module files under 400 lines ✅
-- [ ] **Further modularization** 🔄 OPTIONAL
-  - Consider extracting more common patterns as project grows
+
+- [x] **Migrate agency-designer to SCSS** ✅ COMPLETED (Commit: 08c8836)
+  - **Architecture**: Created modular SCSS structure in `static/scss/`
+  - **Modules**: Split into 6 domain-focused files:
+    - `_layout.scss` (280 lines) - Designer panels, view switching, sidebars
+    - `_overview.scss` (220 lines) - Overview sections, navigation, cards
+    - `_details.scss` (200 lines) - Agent details, properties, relationships
+    - `_chat.scss` (260 lines) - Chat panel, messages, typing indicators
+    - `_context.scss` (150 lines) - Context selection system, menus
+    - `_forms.scss` (140 lines) - Form overrides, publish toolbar, dialogs
+  - **Shared System**: 
+    - `_variables.scss` (60 lines) - Design tokens (colors, spacing, fonts, transitions)
+    - `_mixins.scss` (80 lines) - Reusable patterns (flex, panels, scrollbars, hover states)
+  - **Build Integration**: 
+    - `make css` compiles SCSS to minified CSS
+    - Auto-runs with `make build` and `make run`
+    - Compiled output: `agency-designer.css` (18K minified, single line)
+  - **Git Configuration**: `.gitignore` updated to exclude compiled CSS (keep SCSS source)
+  - **Benefits**: 
+    - All modules under 400 lines ✅ (complies with style guide)
+    - Design system with variables (consistent colors, spacing)
+    - Reusable mixins (DRY principle for common patterns)
+    - Nesting for cleaner code hierarchy
+    - Single source of truth for styling
+
+- [ ] **Migrate remaining CSS files to SCSS** 🔄 NEXT PRIORITY
+  - `workflow-designer.css` (442 lines) - Prime candidate for SCSS migration
+  - `styles.css` (1,044 lines) - Should be split into modular SCSS
+  - `agencies.css` (360 lines) - Can be migrated to SCSS modules
+  - Consider converting `vscode-designer-shared.css` to SCSS partial
   
-### Priority 2: Consolidation
+### Priority 2: Consolidation & Migration
 - [x] **Create `common-animations.css`** ✅ COMPLETED (Commit: 847c77b)
   - ~~Move all `@keyframes` from `styles.css`, `agencies.css`, `agency-designer.css`, `workflow-designer.css`~~
   - ~~Standardize animation names (remove duplicates: spin, fade, slide, pulse)~~
   - Note: Original definitions kept in source files for backward compatibility, can be removed in future cleanup
+
+- [ ] **Migrate `workflow-designer.css` to SCSS** 🔄 HIGH PRIORITY
+  - File size: 442 lines - good candidate for modularization
+  - Create `static/scss/workflow-designer.scss` with modules:
+    - `_layout.scss` - Canvas, panels, drag-drop zones
+    - `_nodes.scss` - Work items, step items, connections
+    - `_toolbar.scss` - Tools, buttons, controls
+    - `_sidebar.scss` - Property panels, forms
+  - Use shared `_variables.scss` and `_mixins.scss`
+  - Follow agency-designer pattern
+
+- [ ] **Migrate `styles.css` to SCSS** 🔄 MEDIUM PRIORITY
+  - File size: 1,044 lines (previously - needs current check)
+  - Split by domain: dashboard, charts, tables, forms, utilities
+  - Extract shared patterns to mixins
+  - Consolidate with other dashboard styles
+
+- [ ] **Migrate `agencies.css` to SCSS** 🔄 MEDIUM PRIORITY
+  - File size: 233 lines - straightforward migration
+  - Create `static/scss/agencies.scss`
+  - Extract card patterns to shared mixins (reusable across modules)
+
+- [ ] **Convert `vscode-designer-shared.css` to SCSS partial** 🔄 MEDIUM PRIORITY
+  - Rename to `static/scss/_vscode-designer-shared.scss`
+  - Use variables for VS Code colors, spacing
+  - Import in both agency-designer and workbench SCSS
   
-- [ ] **Extract common component styles**
-  - Create `common-components.css` for buttons, cards, modals
+- [ ] **Extract common component styles to SCSS modules**
+  - Create `static/scss/_components.scss` with:
+    - `@mixin button-variant` for consistent button styles
+    - `@mixin card-base` for card patterns
+    - `@mixin modal-base` for modal dialogs
   - Remove duplicates across files
   
-### Priority 3: Theme System Review
-- [ ] **Reduce `!important` usage in `themes.css`**
-- [ ] **Evaluate if all 6 themes are needed**
-- [ ] **Consider extracting theme variables** to separate file
+### Priority 3: Theme System & SCSS Enhancement
+- [ ] **Migrate `themes.css` to SCSS with CSS custom properties**
+  - Create `static/scss/_themes.scss`
+  - Use SCSS maps for theme definitions
+  - Generate CSS custom properties from SCSS
+  - Example:
+    ```scss
+    $themes: (
+      "light": (bg: #ffffff, text: #1a1a1a, ...),
+      "dark": (bg: #1e1e1e, text: #d4d4d4, ...)
+    );
+    ```
 
-### Priority 4: Optimization (Future)
-- [ ] Set up CSS linting (Stylelint)
-- [ ] Implement CSS purging for production builds
-- [ ] Add bundle size monitoring
+- [ ] **Reduce `!important` usage**
+  - Refactor theme overrides to use proper CSS specificity
+  - Use SCSS nesting to increase specificity naturally
+  
+- [ ] **Evaluate if all 6 themes are needed**
+  - Analyze theme usage metrics (if available)
+  - Consider consolidating similar themes
+
+### Priority 4: Modern SCSS Practices
+- [ ] **Migrate from `@import` to `@use` syntax** 🔄 RECOMMENDED
+  - Current: Using deprecated `@import`
+  - Future: Use `@use` and `@forward` for better namespacing
+  - Reference: [Sass @use documentation](https://sass-lang.com/documentation/at-rules/use)
+  - Benefits: Namespace protection, explicit dependencies
+
+- [ ] **Set up Stylelint for SCSS** 🔄 RECOMMENDED
+  - Install: `stylelint`, `stylelint-config-standard-scss`
+  - Configure `.stylelintrc.json` with SCSS rules
+  - Add `make lint-css` to Makefile
+  - Integrate with CI/CD
+
+- [ ] **Add SCSS documentation** 📝
+  - Create `docs/scss-architecture.md`
+  - Document naming conventions
+  - Provide examples of using variables/mixins
+  - Developer onboarding guide
+
+### Priority 5: Optimization (Future)
+- [ ] Implement CSS purging for production builds (PurgeCSS)
+- [ ] Add bundle size monitoring (bundlewatch)
+- [ ] Consider CSS-in-JS alternatives for dynamic components
 
 ---
 
@@ -633,4 +752,186 @@ Someone tried to make the navbar-brand align with the left viewport edge (ignori
 
 - **Instruction Files**: `.github/copilot-instructions.md`, `.github/instructions/rules.instructions.md`
 - **Current Branch**: `feature/MVP-WI-012_workbench_chat_panel`
-- **Related Files**: All CSS files in `static/css/`
+- **Related Files**: All CSS/SCSS files in `static/css/` and `static/scss/`
+- **SCSS Documentation**: [Sass Official Docs](https://sass-lang.com/documentation)
+- **Build Integration**: See `Makefile` for `make css` target
+
+---
+
+## 🎓 SCSS Developer Guide
+
+### How to Work with SCSS
+
+#### 1. Editing SCSS Files
+```bash
+# Edit source files in static/scss/ (NOT static/css/)
+vim static/scss/agency-designer/_layout.scss
+
+# Compile changes
+make css
+
+# Or build/run (auto-compiles)
+make run
+```
+
+#### 2. Using Variables
+```scss
+// Import variables at the top of your SCSS file
+@import 'variables';
+
+// Use variables in your styles
+.my-component {
+    background-color: $vscode-bg;
+    padding: $spacing-md;
+    font-size: $font-size-sm;
+    transition: all $transition-normal;
+}
+```
+
+#### 3. Using Mixins
+```scss
+// Import mixins
+@import 'mixins';
+
+// Use mixins with @include
+.my-panel {
+    @include vscode-panel;
+    @include custom-scrollbar(8px);
+    
+    &:hover {
+        @include hover-bg;
+    }
+}
+```
+
+#### 4. Adding New Modules
+```bash
+# Create new module file
+touch static/scss/my-feature/_module.scss
+
+# Import in main entry point
+echo "@import 'my-feature/module';" >> static/scss/my-feature.scss
+
+# Compile
+make css
+```
+
+#### 5. SCSS Best Practices
+- **Use nesting** for cleaner hierarchy (max 3 levels deep)
+- **Extract variables** for repeated values
+- **Create mixins** for repeated patterns
+- **Keep modules focused** - one domain per file
+- **Use descriptive names** - `$vscode-accent-hover` not `$color-blue-light`
+- **Avoid `!important`** - use proper specificity instead
+
+### Example: Creating a New SCSS Module
+
+```scss
+// static/scss/my-feature.scss
+@import 'variables';
+@import 'mixins';
+@import 'my-feature/layout';
+@import 'my-feature/components';
+
+// static/scss/my-feature/_layout.scss
+.my-feature-container {
+    @include flex-column;
+    background-color: $vscode-bg;
+    padding: $spacing-lg;
+    
+    .header {
+        @include panel-header;
+        margin-bottom: $spacing-md;
+    }
+    
+    .content {
+        @include custom-scrollbar(6px);
+        flex: 1;
+    }
+}
+```
+
+### Compilation Details
+
+**Input**: `static/scss/**/*.scss`  
+**Output**: `static/css/**/*.css`  
+**Compiler**: Dart Sass via npm  
+**Options**: 
+- `--no-source-map` - No source maps (cleaner output)
+- `--style=compressed` - Minified output
+
+**Build process**:
+```makefile
+# Makefile target
+css:
+    npx sass static/scss:static/css --no-source-map --style=compressed
+```
+
+**Git configuration**:
+```gitignore
+# .gitignore - Don't commit compiled CSS
+static/css/*.css
+static/css/*.css.map
+!static/css/bulma.min.css     # Keep 3rd party
+!static/css/mapbox-gl.css
+!static/css/maplibre-gl.css
+```
+
+### Migration Checklist (for other CSS files)
+
+When migrating a plain CSS file to SCSS:
+
+- [ ] Create SCSS directory: `static/scss/[feature-name]/`
+- [ ] Split CSS into logical modules (<400 lines each)
+- [ ] Extract colors/spacing to `_variables.scss`
+- [ ] Identify repeated patterns for `_mixins.scss`
+- [ ] Convert classes to use nesting
+- [ ] Replace hardcoded values with variables
+- [ ] Use mixins for common patterns
+- [ ] Create main entry point that imports modules
+- [ ] Update `head_includes.templ` if needed
+- [ ] Compile: `make css`
+- [ ] Test in browser (hard refresh: Ctrl+Shift+R)
+- [ ] Add to `.gitignore` if output CSS is auto-generated
+- [ ] Commit SCSS sources only (not compiled CSS)
+
+---
+
+## 🎯 SCSS Migration Roadmap
+
+### Phase 1: Foundation (✅ COMPLETED - Nov 28, 2025)
+- [x] Set up SCSS infrastructure (Sass, Makefile, .gitignore)
+- [x] Create shared `_variables.scss` with design tokens
+- [x] Create shared `_mixins.scss` with reusable patterns
+- [x] Migrate `agency-designer.css` to modular SCSS (6 modules)
+- [x] Verify build integration (`make css` in `make build`/`make run`)
+
+### Phase 2: Core Pages (Q1 2026)
+- [ ] Migrate `workflow-designer.css` (442 lines)
+- [ ] Migrate `agencies.css` (233 lines)
+- [ ] Migrate `vscode-designer-shared.css` (485 lines) to SCSS partial
+- [ ] Expand `_variables.scss` with workflow/agency-specific tokens
+- [ ] Create workflow-specific mixins
+
+### Phase 3: Global Styles (Q1 2026)
+- [ ] Migrate `styles.css` (1,044 lines) - split into multiple modules
+- [ ] Migrate `themes.css` (361 lines) - use SCSS maps for theme system
+- [ ] Migrate `common-layout.css` (118 lines)
+- [ ] Create `_components.scss` for shared button/card/modal patterns
+- [ ] Consolidate all animations into SCSS with variables
+
+### Phase 4: Modern Practices (Q2 2026)
+- [ ] Migrate from `@import` to `@use`/`@forward` syntax
+- [ ] Set up Stylelint for SCSS linting
+- [ ] Add CSS bundle size monitoring
+- [ ] Implement CSS purging for production (PurgeCSS)
+- [ ] Create comprehensive SCSS documentation
+
+### Phase 5: Optimization (Q2 2026)
+- [ ] Analyze CSS bundle sizes and optimize
+- [ ] Remove unused styles (PurgeCSS)
+- [ ] Set up CSS performance budgets
+- [ ] Consider CSS-in-JS for dynamic components
+- [ ] Automate CSS linting in CI/CD pipeline
+
+**End Goal**: 100% of custom styles in modular SCSS by mid-2026
