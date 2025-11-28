@@ -1,0 +1,215 @@
+// Common Animations SCSS
+// Consolidated animations from multiple CSS files
+
+@import 'variables';
+
+/* =============================================================================
+   SPINNING ANIMATIONS
+   ============================================================================= */
+
+/* Standard spin animation - used for loading spinners */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin,
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* =============================================================================
+   FADE ANIMATIONS
+   ============================================================================= */
+
+/* Simple fade in */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    
+    to {
+        opacity: 1;
+    }
+}
+
+/* Fade in with upward motion */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============================================================================
+   SLIDE ANIMATIONS
+   ============================================================================= */
+
+/* Slide in from right (for toasts, notifications) */
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Slide out to right */
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Alternative naming (kebab-case for compatibility) */
+@keyframes slide-in {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* =============================================================================
+   PULSE ANIMATIONS
+   ============================================================================= */
+
+/* Pulse effect (general) */
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* Pulse with green glow (for health indicators) */
+@keyframes pulse-green {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    
+    50% {
+        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+    }
+}
+
+/* =============================================================================
+   TYPING ANIMATION (for chat/messaging)
+   ============================================================================= */
+
+@keyframes typing {
+    0%,
+    60%,
+    100% {
+        opacity: 0.3;
+    }
+    
+    30% {
+        opacity: 1;
+    }
+}
+
+/* =============================================================================
+   SHIMMER EFFECT (for loading skeletons)
+   ============================================================================= */
+
+@keyframes shimmer {
+    100% {
+        left: 100%;
+    }
+}
+
+/* =============================================================================
+   CONTEXT MENU ANIMATIONS
+   ============================================================================= */
+
+@keyframes context-menu-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes context-added {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    
+    50% {
+        transform: scale(1.05);
+    }
+    
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+.fade-in {
+    animation: fadeIn $transition-normal ease-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 400ms ease-out;
+}
+
+.slide-in-right {
+    animation: slideIn $transition-normal ease-out;
+}
+
+.slide-out-right {
+    animation: slideOut $transition-normal ease-in;
+}
+
+.pulse-effect {
+    animation: pulse 2s ease-in-out infinite;
+}
