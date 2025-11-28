@@ -1,7 +1,8 @@
 /* Theme System for CodeValdCortex */
 
-@import 'variables';
-@import 'mixins';
+@use 'sass:map';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 /* ===================================
    THEME DEFINITIONS (SCSS Maps)
@@ -143,7 +144,7 @@ $themes: (
 
 // Default theme (root)
 :root {
-    @each $property, $value in map-get($themes, 'default') {
+    @each $property, $value in map.get($themes, 'default') {
         --theme-#{$property}: #{$value};
     }
 }

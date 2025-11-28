@@ -2,13 +2,13 @@
 // Modular SCSS architecture for workflow drag-drop designer
 
 // Import shared utilities
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 // Import workflow designer modules
-@import 'workflow-designer/layout';
-@import 'workflow-designer/toolbar';
-@import 'workflow-designer/canvas';
-@import 'workflow-designer/steps';
-@import 'workflow-designer/dropzones';
-@import 'workflow-designer/animations';
+@use 'workflow-designer/layout';
+@use 'workflow-designer/toolbar';
+@use 'workflow-designer/canvas';
+@use 'workflow-designer/steps';
+@use 'workflow-designer/dropzones';
+@use 'workflow-designer/animations';

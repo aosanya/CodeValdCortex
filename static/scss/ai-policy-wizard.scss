@@ -1,7 +1,7 @@
-/* AI Policy Wizard Styles */
+// AI Policy Wizard Styles
 
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 .policy-wizard-container {
     min-height: 100vh;

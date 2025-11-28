@@ -1,8 +1,8 @@
 // Agencies Homepage SCSS
 // Agency cards, filters, and homepage layout
 
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 /* Agency Card Styling */
 .agency-card {

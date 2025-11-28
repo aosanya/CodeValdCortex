@@ -1,8 +1,8 @@
 /* VS Code Status Bar - Reusable Component */
 /* Note: Common navbar and status bar styles are in common-layout.css */
 
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 /* ===================================
    STATUS BAR NOTIFICATIONS

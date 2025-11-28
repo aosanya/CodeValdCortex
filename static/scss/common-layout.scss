@@ -1,8 +1,8 @@
 // Common Layout SCSS
 // Navbar and status bar shared styles
 
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 /* ===========================
    GLOBAL FONT SIZE

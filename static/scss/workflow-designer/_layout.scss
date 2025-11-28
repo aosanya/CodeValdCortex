@@ -1,6 +1,9 @@
 // Workflow Designer - Layout Module
 // Main container layout and work items panel
 
+@use '../variables' as *;
+@use '../mixins' as *;
+
 /* Alpine.js cloak */
 [x-cloak] {
     display: none !important;

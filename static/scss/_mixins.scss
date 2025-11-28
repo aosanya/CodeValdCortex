@@ -1,5 +1,7 @@
 // Reusable mixins for common patterns
 
+@use 'variables' as *;
+
 // Flexbox centering
 @mixin flex-center {
     display: flex;

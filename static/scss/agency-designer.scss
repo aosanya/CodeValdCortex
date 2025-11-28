@@ -1,14 +1,14 @@
 // Agency Designer - Main Entry Point
 // This file imports all modular SCSS files and compiles to agency-designer.css
 
-// Import shared variables and mixins (use @import for now, will migrate to @use later)
-@import 'variables';
-@import 'mixins';
+// Import shared variables and mixins
+@use 'variables' as *;
+@use 'mixins' as *;
 
 // Import agency-designer modules
-@import 'agency-designer/layout';
-@import 'agency-designer/overview';
-@import 'agency-designer/details';
-@import 'agency-designer/chat';
-@import 'agency-designer/context';
-@import 'agency-designer/forms';
+@use 'agency-designer/layout';
+@use 'agency-designer/overview';
+@use 'agency-designer/details';
+@use 'agency-designer/chat';
+@use 'agency-designer/context';
+@use 'agency-designer/forms';

@@ -1,6 +1,9 @@
 // Agency Designer - Layout Module
 // Top-level layout structures, view switching, and panel organization
 
+@use '../variables' as *;
+@use '../mixins' as *;
+
 /* ===================================
    DESIGNER PANELS
    =================================== */

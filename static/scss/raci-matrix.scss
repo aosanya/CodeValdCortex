@@ -1,7 +1,7 @@
 /* Styles for RACI matrix editor */
 
-@import 'variables';
-@import 'mixins';
+@use 'variables' as *;
+@use 'mixins' as *;
 
 .raci-matrix-container {
     overflow-x: auto;
