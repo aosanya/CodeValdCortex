@@ -1,0 +1,15 @@
+/* Custom styles for CodeValdCortex Dashboard */
+
+@import 'variables';
+@import 'mixins';
+
+/* Import modular styles */
+@import 'styles/utilities';
+@import 'styles/htmx';
+@import 'styles/scrollbar';
+@import 'styles/animations';
+@import 'styles/components';
+@import 'styles/logs';
+@import 'styles/charts';
+@import 'styles/status';
+@import 'styles/responsive';
