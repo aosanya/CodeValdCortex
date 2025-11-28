@@ -1,0 +1,41 @@
+/* ===================================
+   DETAILS PANEL (CENTER)
+   =================================== */
+
+.details-panel {
+    flex: 1;
+    background: var(--vscode-panel-bg);
+    border-right: 1px solid var(--vscode-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    height: 100%;
+}
+
+.details-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--vscode-border);
+    background: var(--vscode-sidebar-bg);
+    flex-shrink: 0;
+}
+
+.details-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--vscode-text-muted);
+    margin: 0;
+}
+
+.details-content {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+    padding: 0;
+    flex: 1;
+    min-height: 0;
+}

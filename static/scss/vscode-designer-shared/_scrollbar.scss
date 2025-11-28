@@ -1,0 +1,30 @@
+/* ===================================
+   SCROLLBAR STYLING
+   =================================== */
+
+.sidebar-content,
+.details-content,
+.chat-messages-container,
+.context-list {
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--vscode-sidebar-bg);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 6px;
+
+        &:hover {
+            background: #555;
+        }
+    }
+}
+
+/* Narrow scrollbar for context list */
+.context-list::-webkit-scrollbar {
+    width: 6px;
+}
