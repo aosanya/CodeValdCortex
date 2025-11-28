@@ -4,6 +4,8 @@
 **Current Branch**: feature/MVP-WI-012_workbench_chat_panel  
 **Status**: 🎉 **SCSS MIGRATION 100% COMPLETE** - All 11 custom CSS files migrated to modular SCSS!
 
+**Build Status**: ✅ All SCSS compiles successfully (deprecation warnings expected - see notes below)
+
 ---
 
 ## 🎯 Current Architecture (SCSS-First)
@@ -67,6 +69,7 @@ static/scss/
 - **Compilation**: `make css` (or `make build`, `make run` - auto-runs)
 - **Output**: `static/css/*.css` (auto-generated, gitignored)
 - **Compiler**: Sass via npm (`npx sass`)
+- **Status**: ✅ Working - Produces expected deprecation warnings (see Known Issues below)
 
 ### CSS Output (Auto-Generated)
 ```
@@ -93,16 +96,76 @@ static/css/
 
 ---
 
+## ⚠️ Known Issues and Deprecation Warnings
+
+### SCSS `@import` Deprecation Warnings (Expected)
+
+**Status**: ⚠️ Expected warnings - does not affect functionality
+
+**What you'll see when running `make css`:**
+```
+Deprecation Warning [import]: Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+More info and automated migrator: https://sass-lang.com/d/import
+```
+
+**Why this happens**:
+- All our SCSS files use the older `@import` syntax
+- Dart Sass is deprecating `@import` in favor of `@use` and `@forward`
+- **This is NOT an error** - the CSS still compiles correctly
+- Warnings will appear for every `@import` statement across all 40+ SCSS files
+
+**Impact**: 
+- ✅ No functional impact - CSS compiles and works perfectly
+- ✅ No urgency to fix - will not break until Dart Sass 3.0.0 (future major version)
+- ⚠️ Should migrate to `@use`/`@forward` syntax in Phase 4 (see Roadmap below)
+
+**Example warnings**:
+```
+static/scss/agencies.scss 4:9       @import 'variables';
+static/scss/agency-designer.scss 5:9  @import 'variables';
+static/scss/themes.scss 146:32     map-get() global function (deprecated)
+```
+
+**Future migration** (Priority: Low - Q2 2026):
+- Migrate all `@import` statements to `@use` syntax
+- Use `@forward` for re-exporting modules
+- Update `map-get()` to `map.get()` from `sass:map` module
+- Reference: https://sass-lang.com/documentation/at-rules/use
+
+---
+
 ## ✅ Completed Work (November 28, 2025)
 
-### 1. Fixed Navbar Visibility Issue
+### Migration Session Summary
+
+**🎯 Goal**: Migrate all 11 custom CSS files to modular SCSS architecture
+
+**📊 Results**:
+- ✅ 11 CSS files → 11 SCSS entry points + 27 module files (40+ total SCSS files)
+- ✅ Shared design system created (`_variables.scss`, `_mixins.scss`)
+- ✅ All modules comply with <250 line guideline
+- ✅ Build integration working (`make css` auto-compiles)
+- ✅ Git commits clean with descriptive messages
+- ✅ Compiled CSS properly minified (~77KB total)
+- ✅ .gitignore correctly configured
+- ✅ 3rd-party CSS files preserved
+
+**📈 Impact**:
+- Single source of truth for all styling
+- Modular, maintainable code structure
+- Shared design tokens (colors, spacing, transitions)
+- Reusable mixins for common patterns
+- Easy to add/modify styles
+- Better developer experience
+
+### 1. Fixed Navbar Visibility Issue (Previous Session)
 - **Problem**: Navbar not visible on agency designer pages
 - **Root Cause**: `@NavbarWithAgency()` was rendered inside `<main class="section">` container
 - **Solution**: Moved navbar outside main section to body top level in `layout_with_agency.templ`
 - **Files Changed**: `internal/web/components/layout_with_agency.templ`
 - **Status**: ✅ Fixed and committed
 
-### 2. Created Shared Layout Components (DRY Principle)
+### 2. Created Shared Layout Components (DRY Principle) (Previous Session)
 - **Created**: `internal/web/components/head_includes.templ`
   - `HeadIncludes()` - Centralizes all CSS/JS imports (Bulma, FontAwesome, Alpine, HTMX, Chart.js, etc.)
   - `NavbarBurgerScript()` - Shared navbar toggle script
@@ -110,12 +173,12 @@ static/css/
 - **Benefit**: Single source of truth for CSS/JS includes, easier maintenance
 - **Status**: ✅ Implemented and committed
 
-### 3. Fixed Code Quality Issues
+### 3. Fixed Code Quality Issues (Previous Session)
 - **Linting**: Fixed QF1003 warning in `chat_panel.templ` by converting if-else chain to switch statement
 - **Missing File**: Created `static/js/workbench-chat.js` for workbench chat functionality
 - **Status**: ✅ Fixed and committed
 
-### 4. Git Commit
+### 4. Git Commit History (Previous Sessions)
 ```
 Commit: 15c5ffd - feat(ui): refactor layout components and add workbench chat
 Files: 16 changed, 1315 insertions(+), 401 deletions(-)
@@ -155,7 +218,7 @@ Files: 6 changed, 339 insertions(+), 294 deletions(-)
 **Total Lines Changed**: ~3,500+ insertions, ~3,300+ deletions  
 **SCSS Modules Created**: 40+ modular SCSS files
 
-### 5. Applied CSS Consolidation Recommendations
+### 5. Applied CSS Consolidation Recommendations (Previous Session)
 - **Priority 0 (Critical)**: ✅ Removed navbar negative margin bug
   - Removed CSS `.navbar-brand { margin-left: -5rem; }` from `common-layout.css`
   - Removed inline `style="margin-left: -5rem;"` from `navbar_with_agency.templ`
@@ -169,7 +232,7 @@ Files: 6 changed, 339 insertions(+), 294 deletions(-)
   
 - **Status**: ✅ Implemented and committed
 
-### 6. SCSS Migration - 100% COMPLETE! 🎉 (November 28, 2025)
+### 6. SCSS Migration - 100% COMPLETE! 🎉 (November 28, 2025 - Current Session)
 
 **All 11 Custom CSS Files Migrated to SCSS**:
 
@@ -242,15 +305,33 @@ Files: 6 changed, 339 insertions(+), 294 deletions(-)
   - Utility classes for easy application
 
 **Migration Statistics**:
-- **Files migrated**: 5 CSS files → 5 SCSS entry points + 12 module files
-- **Total SCSS**: ~1,835 lines (modular, organized)
-- **Total compiled CSS**: ~42K minified
-- **Percentage complete**: ~65% of custom CSS (by line count)
+- **Files migrated**: 11 CSS files → 11 SCSS entry points + 27 module files
+- **Total SCSS modules**: 40+ files
+- **Total compiled CSS**: ~77KB minified
+- **Migration completeness**: ✅ **100% COMPLETE**
 
-**Remaining Files** (deferred for separate tasks):
-- `vscode-designer-shared.css` (485 lines) - Complex shared layout, needs careful migration
-- `styles.css` (300+ lines) - Dashboard styles, needs analysis and splitting
-- `themes.css` (361 lines) - Complex theme system, requires SCSS maps approach
+**Git Commits**:
+1. `08c8836` - agency-designer.css migration (6 modules)
+2. `097010f` - workflow-designer.css migration (6 modules)
+3. `59e2f23` - agencies, common-layout, common-animations migration
+4. `cc99e74` - Documentation update (intermediate)
+5. `c2a8b7d` - vscode-designer-shared.css migration (6 modules)
+6. `358f26b` - styles.css migration (9 modules)
+7. `7487a52` - themes.css migration (SCSS maps)
+8. `48e9f89` - 3 small files (ai-policy-wizard, vscode-status-bar, raci-matrix)
+
+**All Files Migrated** ✅:
+- ✅ agency-designer.css → 6 SCSS modules
+- ✅ workflow-designer.css → 6 SCSS modules  
+- ✅ vscode-designer-shared.css → 6 SCSS modules
+- ✅ styles.css → 9 SCSS modules
+- ✅ themes.css → SCSS with maps
+- ✅ agencies.css → Single SCSS file
+- ✅ common-layout.css → Single SCSS file
+- ✅ common-animations.css → Single SCSS file
+- ✅ ai-policy-wizard.css → Single SCSS file
+- ✅ vscode-status-bar.css → Single SCSS file
+- ✅ raci-matrix.css → Single SCSS file
 
 ---
 
@@ -295,72 +376,44 @@ Files: 6 changed, 339 insertions(+), 294 deletions(-)
   - All animations consolidated (~200 lines)
   - Utility classes for easy application
 
-- [ ] **Migrate remaining CSS files to SCSS** 🔄 NEXT PRIORITY
-  - `vscode-designer-shared.css` (485 lines) - Deferred (complex shared layout)
-  - `styles.css` (300+ lines) - Deferred (needs analysis)
-  - `themes.css` (361 lines) - Deferred (needs SCSS maps approach)
+- [x] **Migrate vscode-designer-shared.css to SCSS** ✅ COMPLETED (Commit: c2a8b7d)
+  - Split into 6 modules: _layout, _sidebar, _details, _chat, _scrollbar, _responsive
+  - All modules under 240 lines each
+  - CSS custom properties for VS Code theme
   
-### Priority 2: Consolidation & Migration
+- [x] **Migrate styles.css to SCSS** ✅ COMPLETED (Commit: 358f26b)
+  - Split into 9 modules: _utilities, _htmx, _scrollbar, _animations, _components, _logs, _charts, _status, _responsive
+  - All modules under 80 lines each
+  - Dashboard custom styles properly organized
+
+- [x] **Migrate themes.css to SCSS** ✅ COMPLETED (Commit: 7487a52)
+  - SCSS map-based theme system (~360 lines)
+  - 7 themes in central $themes map
+  - Automatic CSS custom property generation
+
+- [x] **Migrate ai-policy-wizard.css, vscode-status-bar.css, raci-matrix.css to SCSS** ✅ COMPLETED (Commit: 48e9f89)
+  - All 3 small files migrated to single SCSS files
+  - Clean, maintainable structure
+  
+### Priority 2: Consolidation & Migration - ✅ ALL COMPLETE!
 - [x] **Create `common-animations.css`** ✅ COMPLETED (Commit: 847c77b)
-  - ~~Move all `@keyframes` from `styles.css`, `agencies.css`, `agency-designer.css`, `workflow-designer.css`~~
-  - ~~Standardize animation names (remove duplicates: spin, fade, slide, pulse)~~
-  - Note: Original definitions kept in source files for backward compatibility, can be removed in future cleanup
+  - All animations consolidated from multiple files
+  - Standardized animation names
+  - Utility classes for easy application
 
-- [ ] **Migrate `workflow-designer.css` to SCSS** 🔄 HIGH PRIORITY
-  - File size: 442 lines - good candidate for modularization
-  - Create `static/scss/workflow-designer.scss` with modules:
-    - `_layout.scss` - Canvas, panels, drag-drop zones
-    - `_nodes.scss` - Work items, step items, connections
-    - `_toolbar.scss` - Tools, buttons, controls
-    - `_sidebar.scss` - Property panels, forms
-  - Use shared `_variables.scss` and `_mixins.scss`
-  - Follow agency-designer pattern
-
-- [ ] **Migrate `styles.css` to SCSS** 🔄 MEDIUM PRIORITY
-  - File size: 1,044 lines (previously - needs current check)
-  - Split by domain: dashboard, charts, tables, forms, utilities
-  - Extract shared patterns to mixins
-  - Consolidate with other dashboard styles
-
-- [ ] **Migrate `agencies.css` to SCSS** 🔄 MEDIUM PRIORITY
-  - File size: 233 lines - straightforward migration
-  - Create `static/scss/agencies.scss`
-  - Extract card patterns to shared mixins (reusable across modules)
-
-- [ ] **Convert `vscode-designer-shared.css` to SCSS partial** 🔄 MEDIUM PRIORITY
-  - Rename to `static/scss/_vscode-designer-shared.scss`
-  - Use variables for VS Code colors, spacing
-  - Import in both agency-designer and workbench SCSS
+- [x] **All CSS files migrated to SCSS** ✅ COMPLETED (See section 6 above for details)
   
-- [ ] **Extract common component styles to SCSS modules**
-  - Create `static/scss/_components.scss` with:
-    - `@mixin button-variant` for consistent button styles
-    - `@mixin card-base` for card patterns
-    - `@mixin modal-base` for modal dialogs
-  - Remove duplicates across files
-  
-### Priority 3: Theme System & SCSS Enhancement
-- [ ] **Migrate `themes.css` to SCSS with CSS custom properties**
-  - Create `static/scss/_themes.scss`
-  - Use SCSS maps for theme definitions
-  - Generate CSS custom properties from SCSS
-  - Example:
-    ```scss
-    $themes: (
-      "light": (bg: #ffffff, text: #1a1a1a, ...),
-      "dark": (bg: #1e1e1e, text: #d4d4d4, ...)
-    );
-    ```
-
-- [ ] **Reduce `!important` usage**
+### Priority 3: Theme System & SCSS Enhancement (Optional Future Work)
+- [ ] **Reduce `!important` usage** (Low priority)
   - Refactor theme overrides to use proper CSS specificity
   - Use SCSS nesting to increase specificity naturally
   
-- [ ] **Evaluate if all 6 themes are needed**
+- [ ] **Evaluate if all 7 themes are needed** (Low priority)
+  - Current: 7 themes in themes.css (default, midnight-coral, slate-purple, charcoal-emerald, navy-orange, obsidian-cyan, dark)
   - Analyze theme usage metrics (if available)
   - Consider consolidating similar themes
 
-### Priority 4: Modern SCSS Practices
+### Priority 4: Modern SCSS Practices (Planned for Q2 2026)
 - [ ] **Migrate from `@import` to `@use` syntax** 🔄 RECOMMENDED
   - Current: Using deprecated `@import`
   - Future: Use `@use` and `@forward` for better namespacing
