@@ -1,0 +1,241 @@
+// Agency Designer - Details Module
+// Agent details view, properties, relationships, configurations
+
+/* ===================================
+   DETAILS PANEL (OVERRIDES)
+   =================================== */
+
+.details-panel {
+  @include flex-column;
+  flex: 1;
+  background: $vscode-panel-bg;
+  border-right: 1px solid $vscode-border;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+}
+
+.details-header {
+  @include panel-header;
+}
+
+.details-title {
+  @include panel-title;
+}
+
+.details-content {
+  @include custom-scrollbar;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  overflow: hidden;
+  padding: 0;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ===================================
+   EMPTY DETAILS VIEW
+   =================================== */
+
+.empty-details {
+  @include flex-center;
+  height: 100%;
+}
+
+.empty-details-content {
+  text-align: center;
+  max-width: 300px;
+
+  .title,
+  .subtitle {
+    color: $vscode-text-muted;
+  }
+}
+
+/* ===================================
+   AGENT DETAILS VIEW
+   =================================== */
+
+.agent-details-view {
+  max-width: 900px;
+}
+
+.details-section {
+  margin-bottom: $spacing-lg;
+}
+
+.agent-header {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.agent-icon-large {
+  @include icon-container(48px);
+  background: $vscode-accent;
+  color: white;
+  border-radius: $border-radius-md;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: $vscode-text;
+  margin-bottom: $spacing-sm;
+  padding-bottom: $spacing-xs;
+  border-bottom: 1px solid $vscode-border;
+}
+
+.section-content {
+  padding-left: $spacing-lg;
+}
+
+/* ===================================
+   PROPERTIES AND CONFIG
+   =================================== */
+
+.properties-list,
+.config-list {
+  @include vscode-panel;
+  padding: $spacing-sm;
+}
+
+.property-item,
+.config-item {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-xs 0;
+  border-bottom: 1px solid $vscode-border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.property-key code,
+.config-key {
+  color: #0451a5;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: $font-size-base;
+}
+
+.property-value,
+.config-value {
+  flex: 1;
+  font-size: $font-size-base;
+}
+
+// Syntax highlighting for values
+.value-string {
+  color: #a31515;
+}
+
+.value-number {
+  color: #098658;
+}
+
+.value-boolean {
+  color: #0000ff;
+}
+
+.value-object,
+.value-array {
+  padding-left: $spacing-sm;
+}
+
+/* ===================================
+   RELATIONSHIPS GRID
+   =================================== */
+
+.relationships-grid {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.relationship-card {
+  @include vscode-panel;
+  padding: $spacing-sm;
+}
+
+.relationship-direction {
+  margin-bottom: $spacing-sm;
+}
+
+.relationship-path {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-top: $spacing-sm;
+}
+
+.path-node {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: $vscode-text;
+}
+
+.relationship-meta {
+  display: flex;
+  gap: $spacing-md;
+  font-size: $font-size-sm;
+  color: $vscode-text-muted;
+  margin-bottom: $spacing-sm;
+}
+
+.relationship-description {
+  font-size: $font-size-base;
+  color: $vscode-text-muted;
+  margin-top: $spacing-sm;
+}
+
+/* ===================================
+   INSTANCE COUNT
+   =================================== */
+
+.instance-count {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.instance-number {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* ===================================
+   TAGS OVERRIDE
+   =================================== */
+
+.tag {
+  background: $vscode-sidebar-bg;
+  color: $vscode-text;
+  border: 1px solid $vscode-border;
+
+  &.is-info {
+    background: $vscode-accent;
+    border-color: $vscode-accent;
+    color: white;
+  }
+
+  &.is-success {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+  }
+
+  &.is-primary {
+    background: #6f42c1;
+    border-color: #6f42c1;
+    color: white;
+  }
+
+  &.is-light {
+    background: $vscode-active;
+    color: $vscode-text;
+  }
+}

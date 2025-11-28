@@ -32,10 +32,15 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: build
-build: ## Build the application
+build: css ## Build the application
 	@echo "Building $(BINARY_NAME)..."
 	@mkdir -p bin
 	CGO_ENABLED=0 GOOS=linux $(GOBUILD) -ldflags="$(LDFLAGS)" -o $(BINARY_PATH) ./cmd
+
+.PHONY: css
+css: ## Compile SCSS to CSS
+	@echo "Compiling SCSS..."
+	@npx sass static/scss:static/css --no-source-map --style=compressed
 
 .PHONY: build-all
 build-all: ## Build for all platforms
@@ -48,7 +53,7 @@ build-all: ## Build for all platforms
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o bin/$(BINARY_NAME)-windows-amd64.exe ./cmd
 
 .PHONY: run
-run: ## Build and run the application 
+run: css ## Build and run the application 
 	@echo "Generating templates..."
 	templ generate
 	@echo "Building $(BINARY_NAME)..."
@@ -102,6 +107,7 @@ clean: ## Clean build artifacts
 	$(GOCLEAN)
 	rm -rf bin/
 	rm -f coverage.out coverage.html
+	rm -rf static/css/*.css static/css/*.css.map
 
 .PHONY: deps
 deps: ## Download and tidy dependencies

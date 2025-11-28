@@ -1,0 +1,55 @@
+// VS Code Theme Variables
+// Used across all VS Code-style designer interfaces
+
+// Colors
+$vscode-bg: #ffffff;
+$vscode-sidebar-bg: #f3f3f3;
+$vscode-panel-bg: #ffffff;
+$vscode-border: #e5e5e5;
+$vscode-text: #333333;
+$vscode-text-muted: #6c6c6c;
+$vscode-active: #e8e8e8;
+$vscode-hover: #f0f0f0;
+$vscode-accent: #007acc;
+$vscode-accent-hover: #005a9e;
+
+// Scrollbar colors
+$scrollbar-thumb: #888;
+$scrollbar-thumb-hover: #555;
+
+// Spacing
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+
+// Font sizes
+$font-size-xs: 0.65rem;
+$font-size-sm: 0.75rem;
+$font-size-base: 0.85rem;
+$font-size-md: 0.9rem;
+$font-size-lg: 1rem;
+
+// Panel widths
+$sidebar-width: 250px;
+$sidebar-width-mobile: 200px;
+$chat-panel-width: 400px;
+$chat-panel-width-mobile: 320px;
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-normal: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+// Border radius
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 8px;
+
+// Z-index layers
+$z-index-base: 1;
+$z-index-dropdown: 10;
+$z-index-sticky: 20;
+$z-index-modal: 30;
+$z-index-navbar: 50;

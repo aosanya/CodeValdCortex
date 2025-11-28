@@ -65,14 +65,20 @@ Files: 6 changed, 222 insertions(+), 6 deletions(-)
   - ~~Test responsive behavior on mobile~~
   
 ### Priority 1: File Size Violations
-- [x] **Extract shared VS Code designer styles** ✅ COMPLETED (Commit: TBD)
+- [x] **Extract shared VS Code designer styles** ✅ COMPLETED (Commit: 666057d)
   - Created `vscode-designer-shared.css` (485 lines) with base layout, panels, chat
   - Reduced `agency-designer.css` from 1,812 → 1,706 lines
   - Shared between agency-designer AND workbench pages
   - Added to `head_includes.templ` for global availability
-- [ ] **Further split `agency-designer.css` (1,706 lines → modular files)** 🔄 IN PROGRESS
-  - Consider extracting: overview sections, details views, form overrides
-  - Target: All files under 700 lines
+- [x] **Migrate to SCSS** ✅ COMPLETED (Commit: TBD)
+  - Created modular SCSS structure in `static/scss/`
+  - Split agency-designer into 6 modules (layout, overview, details, chat, context, forms)
+  - Created shared `_variables.scss` and `_mixins.scss`
+  - Auto-compilation via Makefile (`make css`)
+  - Compiled output: agency-designer.css (18K minified)
+  - All module files under 400 lines ✅
+- [ ] **Further modularization** 🔄 OPTIONAL
+  - Consider extracting more common patterns as project grows
   
 ### Priority 2: Consolidation
 - [x] **Create `common-animations.css`** ✅ COMPLETED (Commit: 847c77b)
@@ -102,9 +108,20 @@ Files: 6 changed, 222 insertions(+), 6 deletions(-)
 
 | File | Lines | Purpose | Status |
 |------|-------|---------|--------|
-| `agency-designer.css` | 1,706 | Agency Designer page-specific | 🟡 Still large |
-| `vscode-designer-shared.css` | 485 | **NEW** - Shared VS Code layout (agency + workbench) | ✅ **SHARED** |
-| `workflow-designer.css` | 442 | Workflow drag-drop designer | 🔴 Medium complexity |
+| **SCSS Source Files** | | | |
+| `static/scss/_variables.scss` | ~60 | Shared variables (colors, spacing, fonts) | ✅ **NEW** |
+| `static/scss/_mixins.scss` | ~80 | Reusable mixins (flex, panels, scrollbars) | ✅ **NEW** |
+| `static/scss/agency-designer.scss` | ~15 | Main entry point (imports modules) | ✅ **NEW** |
+| `static/scss/agency-designer/_layout.scss` | ~280 | Layout, panels, views, sidebars | ✅ **NEW** |
+| `static/scss/agency-designer/_overview.scss` | ~220 | Overview sections, cards, tips | ✅ **NEW** |
+| `static/scss/agency-designer/_details.scss` | ~200 | Agent details, properties, relationships | ✅ **NEW** |
+| `static/scss/agency-designer/_chat.scss` | ~260 | Chat panel, messages, typing | ✅ **NEW** |
+| `static/scss/agency-designer/_context.scss` | ~150 | Context selection, menus, badges | ✅ **NEW** |
+| `static/scss/agency-designer/_forms.scss` | ~140 | Form overrides, publish toolbar | ✅ **NEW** |
+| **Compiled CSS Files** | | | |
+| `static/css/agency-designer.css` | 1 line | **AUTO-GENERATED** from SCSS | 🤖 Minified (18K) |
+| `static/css/vscode-designer-shared.css` | 485 | Shared VS Code layout (agency + workbench) | ✅ **SHARED** |
+| `static/css/workflow-designer.css` | 442 | Workflow drag-drop designer | 🔴 Medium complexity |
 | `themes.css` | 361 | Theme system (6 themes) | ✅ Well-organized |
 | `styles.css` | 359 | "Custom styles for dashboard" | 🔴 Mixed concerns |
 | `agencies.css` | 233 | Agency homepage/cards | ✅ Focused |
