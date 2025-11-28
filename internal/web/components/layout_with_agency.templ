@@ -44,9 +44,10 @@ templ LayoutWithAgency(title string, currentAgency *models.Agency) {
 			<div id="htmx-progress"></div>
 		</head>
 		<body>
-			@NavbarWithAgency(currentAgency)
+			
 			
 			<main class="section">
+			@NavbarWithAgency(currentAgency)
 				<div class="container">
 					{ children... }
 				</div>
