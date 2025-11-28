@@ -17,7 +17,7 @@
 .workflow-step {
     width: 100%;
     margin: $spacing-sm 0;
-    
+
     &.is-parallel {
         @include flex-column;
         align-items: center;
@@ -41,22 +41,22 @@
     min-width: 140px;
     flex: 1;
     max-width: 280px;
-    
+
     .card {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         transition: all $transition-normal ease;
     }
-    
+
     &:hover .card {
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         border-color: $vscode-accent;
     }
-    
+
     &[draggable="true"]:active {
         opacity: 0.5;
         cursor: grabbing;
     }
-    
+
     .delete {
         position: absolute;
         top: $spacing-sm;
@@ -96,7 +96,7 @@
     display: flex;
     justify-content: center;
     padding: $spacing-sm 0;
-    
+
     .drop-zone {
         width: 50px;
         height: 50px;
@@ -112,7 +112,7 @@
 .card-header-icon {
     .icon {
         transition: transform $transition-fast ease;
-        
+
         &.is-rotated {
             transform: rotate(180deg);
         }
@@ -123,7 +123,7 @@
 .card-header-title {
     flex-grow: 1;
     overflow: hidden;
-    
+
     span:last-child {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -136,7 +136,7 @@
     .parallel-items {
         grid-template-columns: 1fr;
     }
-    
+
     .step-item {
         min-width: 150px;
     }

@@ -6,28 +6,28 @@
    =================================== */
 
 .context-panel {
-  background: $vscode-sidebar-bg;
+    background: $vscode-sidebar-bg;
 
-  .title {
-    font-size: $font-size-sm !important;
-    margin-bottom: 0 !important;
-  }
-
-  .context-help {
-    padding: $spacing-sm !important;
-    margin-bottom: $spacing-sm !important;
-
-    p {
-      font-size: $font-size-xs !important;
-      margin: 0;
+    .title {
+        font-size: $font-size-sm !important;
+        margin-bottom: 0 !important;
     }
-  }
+
+    .context-help {
+        padding: $spacing-sm !important;
+        margin-bottom: $spacing-sm !important;
+
+        p {
+            font-size: $font-size-xs !important;
+            margin: 0;
+        }
+    }
 }
 
 .context-list {
-  @include custom-scrollbar(6px);
-  max-height: 150px;
-  overflow-y: auto;
+    @include custom-scrollbar(6px);
+    max-height: 150px;
+    overflow-y: auto;
 }
 
 /* ===================================
@@ -35,13 +35,13 @@
    =================================== */
 
 .chat-context-section {
-  grid-area: context;
-  border-top: 1px solid $vscode-border;
-  border-bottom: 1px solid $vscode-border;
-  max-height: 200px;
-  overflow-y: auto;
-  transition: all $transition-slow;
-  display: block;
+    grid-area: context;
+    border-top: 1px solid $vscode-border;
+    border-bottom: 1px solid $vscode-border;
+    max-height: 200px;
+    overflow-y: auto;
+    transition: all $transition-slow;
+    display: block;
 }
 
 /* ===================================
@@ -49,12 +49,12 @@
    =================================== */
 
 .context-selectable {
-  cursor: text;
-  position: relative;
+    cursor: text;
+    position: relative;
 
-  &::selection {
-    background: rgba($vscode-accent, 0.3);
-  }
+    &::selection {
+        background: rgba($vscode-accent, 0.3);
+    }
 }
 
 /* ===================================
@@ -62,47 +62,47 @@
    =================================== */
 
 .context-menu {
-  position: absolute;
-  background: white;
-  border: 1px solid $vscode-border;
-  border-radius: $border-radius-sm;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: $spacing-xs;
-  z-index: $z-index-dropdown;
-  display: none;
-  animation: context-menu-appear 0.15s ease-out;
+    position: absolute;
+    background: white;
+    border: 1px solid $vscode-border;
+    border-radius: $border-radius-sm;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: $spacing-xs;
+    z-index: $z-index-dropdown;
+    display: none;
+    animation: context-menu-appear 0.15s ease-out;
 
-  &.is-active {
-    display: block;
-  }
+    &.is-active {
+        display: block;
+    }
 }
 
 .context-menu-button {
-  display: block;
-  width: 100%;
-  padding: $spacing-sm;
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background $transition-fast;
-  border-radius: $border-radius-sm;
+    display: block;
+    width: 100%;
+    padding: $spacing-sm;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background $transition-fast;
+    border-radius: $border-radius-sm;
 
-  &:hover {
-    background: $vscode-hover;
-  }
+    &:hover {
+        background: $vscode-hover;
+    }
 }
 
 @keyframes context-menu-appear {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Dark theme support for context menu */
@@ -112,11 +112,11 @@
 .theme-charcoal-emerald,
 .theme-navy-orange,
 .theme-obsidian-cyan {
-  .context-menu {
-    background: $vscode-sidebar-bg;
-    border-color: $vscode-border;
-    color: $vscode-text;
-  }
+    .context-menu {
+        background: $vscode-sidebar-bg;
+        border-color: $vscode-border;
+        color: $vscode-text;
+    }
 }
 
 /* ===================================
@@ -124,15 +124,15 @@
    =================================== */
 
 .context-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: $spacing-xs;
-  padding: $spacing-xs $spacing-sm;
-  background: rgba($vscode-accent, 0.1);
-  border: 1px solid rgba($vscode-accent, 0.3);
-  border-radius: $border-radius-sm;
-  font-size: $font-size-sm;
-  color: $vscode-accent;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-sm;
+    background: rgba($vscode-accent, 0.1);
+    border: 1px solid rgba($vscode-accent, 0.3);
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    color: $vscode-accent;
 }
 
 /* ===================================
@@ -140,11 +140,11 @@
    =================================== */
 
 .context-indicator {
-  margin-top: $spacing-sm;
+    margin-top: $spacing-sm;
 
-  .tag {
-    font-size: $font-size-sm;
-  }
+    .tag {
+        font-size: $font-size-sm;
+    }
 }
 
 /* ===================================
@@ -152,24 +152,24 @@
    =================================== */
 
 @keyframes context-added {
-  0% {
-    transform: scale(1);
-    background-color: transparent;
-  }
+    0% {
+        transform: scale(1);
+        background-color: transparent;
+    }
 
-  50% {
-    transform: scale(1.05);
-    background-color: rgba($vscode-accent, 0.2);
-  }
+    50% {
+        transform: scale(1.05);
+        background-color: rgba($vscode-accent, 0.2);
+    }
 
-  100% {
-    transform: scale(1);
-    background-color: transparent;
-  }
+    100% {
+        transform: scale(1);
+        background-color: transparent;
+    }
 }
 
 .context-added-animation {
-  animation: context-added 0.5s ease;
+    animation: context-added 0.5s ease;
 }
 
 /* ===================================
@@ -177,10 +177,10 @@
    =================================== */
 
 .buttons .button.is-light {
-  transition: all $transition-normal;
+    transition: all $transition-normal;
 
-  &:hover {
-    background-color: $vscode-hover;
-    border-color: $vscode-accent;
-  }
+    &:hover {
+        background-color: $vscode-hover;
+        border-color: $vscode-accent;
+    }
 }

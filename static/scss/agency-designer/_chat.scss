@@ -6,45 +6,45 @@
    =================================== */
 
 .chat-panel {
-  background: $vscode-sidebar-bg;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
-  grid-template-areas:
-    "header"
-    "messages"
-    "context"
-    "input";
-  height: 100%;
-  width: 100%;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
+    background: $vscode-sidebar-bg;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+        "header"
+        "messages"
+        "context"
+        "input";
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
 }
 
 .chat-header {
-  grid-area: header;
-  padding: $spacing-sm;
-  border-bottom: 1px solid $vscode-border;
-  background: $vscode-sidebar-bg;
+    grid-area: header;
+    padding: $spacing-sm;
+    border-bottom: 1px solid $vscode-border;
+    background: $vscode-sidebar-bg;
 }
 
 .chat-header-content {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
 }
 
 .chat-title {
-  font-size: $font-size-base;
-  font-weight: 600;
-  color: $vscode-text;
-  margin: 0;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $vscode-text;
+    margin: 0;
 }
 
 .chat-subtitle {
-  font-size: $font-size-sm;
-  color: $vscode-text-muted;
-  margin: 0;
+    font-size: $font-size-sm;
+    color: $vscode-text-muted;
+    margin: 0;
 }
 
 /* ===================================
@@ -52,56 +52,56 @@
    =================================== */
 
 .chat-messages-container {
-  grid-area: messages;
-  @include custom-scrollbar;
-  overflow-y: auto;
-  padding: $spacing-sm;
-  background: $vscode-panel-bg;
-  min-height: 0;
-  max-height: 100%;
+    grid-area: messages;
+    @include custom-scrollbar;
+    overflow-y: auto;
+    padding: $spacing-sm;
+    background: $vscode-panel-bg;
+    min-height: 0;
+    max-height: 100%;
 }
 
 .message {
-  display: flex;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-sm;
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
 }
 
 .message-content {
-  @include flex-column;
-  flex: 1;
-  gap: $spacing-xs;
+    @include flex-column;
+    flex: 1;
+    gap: $spacing-xs;
 }
 
 .message-bubble {
-  padding: $spacing-sm;
-  border-radius: $border-radius-sm;
-  @include vscode-panel;
-  line-height: 1.5;
-  font-size: $font-size-base;
+    padding: $spacing-sm;
+    border-radius: $border-radius-sm;
+    @include vscode-panel;
+    line-height: 1.5;
+    font-size: $font-size-base;
 
-  p {
-    margin-bottom: $spacing-sm;
+    p {
+        margin-bottom: $spacing-sm;
 
-    &:last-child {
-      margin-bottom: 0;
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
-  }
 
-  ul {
-    margin: $spacing-sm 0;
-    padding-left: $spacing-lg;
-  }
+    ul {
+        margin: $spacing-sm 0;
+        padding-left: $spacing-lg;
+    }
 
-  li {
-    margin-bottom: $spacing-xs;
-  }
+    li {
+        margin-bottom: $spacing-xs;
+    }
 }
 
 .message-time {
-  font-size: $font-size-xs;
-  color: $vscode-text-muted;
-  padding: 0 $spacing-sm;
+    font-size: $font-size-xs;
+    color: $vscode-text-muted;
+    padding: 0 $spacing-sm;
 }
 
 /* ===================================
@@ -109,23 +109,23 @@
    =================================== */
 
 .user-message {
-  flex-direction: row-reverse;
-  background-color: transparent !important;
-
-  .message-content {
-    align-items: flex-end;
+    flex-direction: row-reverse;
     background-color: transparent !important;
-  }
 
-  .message-bubble {
-    background: #d1ecf1 !important;
-    border: 1px solid #bee5eb !important;
-    color: #0c5460 !important;
-  }
+    .message-content {
+        align-items: flex-end;
+        background-color: transparent !important;
+    }
 
-  .message-time {
-    text-align: right;
-  }
+    .message-bubble {
+        background: #d1ecf1 !important;
+        border: 1px solid #bee5eb !important;
+        color: #0c5460 !important;
+    }
+
+    .message-time {
+        text-align: right;
+    }
 }
 
 /* ===================================
@@ -133,11 +133,11 @@
    =================================== */
 
 .ai-message {
-  .message-bubble {
-    background: $vscode-sidebar-bg;
-    color: $vscode-text;
-    border: 1px solid $vscode-border;
-  }
+    .message-bubble {
+        background: $vscode-sidebar-bg;
+        color: $vscode-text;
+        border: 1px solid $vscode-border;
+    }
 }
 
 /* ===================================
@@ -145,11 +145,11 @@
    =================================== */
 
 .welcome-message {
-  .message-bubble {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-  }
+    .message-bubble {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
 }
 
 /* ===================================
@@ -157,47 +157,48 @@
    =================================== */
 
 .typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  padding: $spacing-sm;
-  @include vscode-panel;
-  max-width: 85%;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    @include vscode-panel;
+    max-width: 85%;
 }
 
 .typing-bubble {
-  display: flex;
-  gap: $spacing-xs;
+    display: flex;
+    gap: $spacing-xs;
 
-  span {
-    width: 8px;
-    height: 8px;
-    background: $vscode-text-muted;
-    border-radius: 50%;
-    animation: typing 1.4s infinite;
+    span {
+        width: 8px;
+        height: 8px;
+        background: $vscode-text-muted;
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
 
-    &:nth-child(2) {
-      animation-delay: 0.2s;
+        &:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.4s;
+        }
     }
-
-    &:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-  }
 }
 
 @keyframes typing {
-  0%,
-  60%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.4;
-  }
 
-  30% {
-    transform: translateY(-8px);
-    opacity: 1;
-  }
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
 }
 
 /* ===================================
@@ -205,42 +206,42 @@
    =================================== */
 
 .ai-process-status {
-  @include vscode-panel;
-  padding: $spacing-sm;
-  display: none;
-  margin-bottom: $spacing-sm;
+    @include vscode-panel;
+    padding: $spacing-sm;
+    display: none;
+    margin-bottom: $spacing-sm;
 }
 
 .process-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: $spacing-sm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $spacing-sm;
 }
 
 .process-info {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  flex: 1;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex: 1;
 }
 
 .process-text {
-  font-size: $font-size-base;
-  color: $vscode-text;
-  font-weight: 500;
+    font-size: $font-size-base;
+    color: $vscode-text;
+    font-weight: 500;
 }
 
 .ai-process-status .button {
-  background: transparent;
-  border-color: #e74c3c;
-  color: #e74c3c;
-  font-size: $font-size-sm;
+    background: transparent;
+    border-color: #e74c3c;
+    color: #e74c3c;
+    font-size: $font-size-sm;
 
-  &:hover {
-    background: #e74c3c;
-    color: white;
-  }
+    &:hover {
+        background: #e74c3c;
+        color: white;
+    }
 }
 
 /* ===================================
@@ -248,41 +249,41 @@
    =================================== */
 
 .chat-input-container {
-  grid-area: input;
-  padding: $spacing-sm;
-  background: $vscode-sidebar-bg;
-  border-top: 1px solid $vscode-border;
-  position: relative;
-  z-index: $z-index-sticky;
+    grid-area: input;
+    padding: $spacing-sm;
+    background: $vscode-sidebar-bg;
+    border-top: 1px solid $vscode-border;
+    position: relative;
+    z-index: $z-index-sticky;
 
-  .field {
-    margin-bottom: 0;
-  }
-
-  input {
-    background: $vscode-panel-bg;
-    border-color: $vscode-border;
-    color: $vscode-text;
-    font-size: $font-size-lg !important;
-
-    &::placeholder {
-      color: $vscode-text-muted;
+    .field {
+        margin-bottom: 0;
     }
 
-    &:focus {
-      border-color: $vscode-accent;
-      box-shadow: 0 0 0 0.125em rgba($vscode-accent, 0.25);
-    }
-  }
+    input {
+        background: $vscode-panel-bg;
+        border-color: $vscode-border;
+        color: $vscode-text;
+        font-size: $font-size-lg !important;
 
-  button {
-    background: $vscode-accent;
-    border-color: $vscode-accent;
+        &::placeholder {
+            color: $vscode-text-muted;
+        }
 
-    &:hover {
-      background: $vscode-accent-hover;
+        &:focus {
+            border-color: $vscode-accent;
+            box-shadow: 0 0 0 0.125em rgba($vscode-accent, 0.25);
+        }
     }
-  }
+
+    button {
+        background: $vscode-accent;
+        border-color: $vscode-accent;
+
+        &:hover {
+            background: $vscode-accent-hover;
+        }
+    }
 }
 
 /* ===================================
@@ -290,12 +291,12 @@
    =================================== */
 
 .bottom-action-bar {
-  padding: $spacing-sm $spacing-md;
-  background: $vscode-sidebar-bg;
-  border-top: 1px solid $vscode-border;
-  @include flex-center;
-  gap: $spacing-md;
-  flex-shrink: 0;
+    padding: $spacing-sm $spacing-md;
+    background: $vscode-sidebar-bg;
+    border-top: 1px solid $vscode-border;
+    @include flex-center;
+    gap: $spacing-md;
+    flex-shrink: 0;
 }
 
 /* ===================================
@@ -303,16 +304,16 @@
    =================================== */
 
 @media screen and (max-width: 1200px) {
-  .chat-panel {
-    width: $chat-panel-width-mobile;
-  }
+    .chat-panel {
+        width: $chat-panel-width-mobile;
+    }
 }
 
 @media screen and (max-width: 1024px) {
-  .chat-panel {
-    width: 100%;
-    height: 300px;
-    border-left: none;
-    border-top: 1px solid $vscode-border;
-  }
+    .chat-panel {
+        width: 100%;
+        height: 300px;
+        border-left: none;
+        border-top: 1px solid $vscode-border;
+    }
 }

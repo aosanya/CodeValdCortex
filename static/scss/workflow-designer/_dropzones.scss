@@ -15,7 +15,7 @@
     justify-content: center;
     box-shadow: 0 2px 8px rgba(50, 115, 220, 0.3);
     z-index: 10;
-    
+
     &::before {
         content: "+";
         font-size: 1.5rem;
@@ -23,7 +23,7 @@
         font-weight: bold;
         transition: all $transition-normal ease;
     }
-    
+
     /* Hover and active states */
     &:hover {
         border-color: #2366d1;
@@ -32,20 +32,20 @@
         background: rgba(50, 115, 220, 0.35);
         box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
         transform: scale(1.05);
-        
+
         &::before {
             color: #2366d1;
             font-size: 2rem;
         }
     }
-    
+
     &.is-active {
         border-color: #2366d1;
         border-width: 5px;
         border-style: solid;
         background: rgba(50, 115, 220, 0.35);
         box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
-        
+
         &::before {
             color: #2366d1;
             font-size: 2rem;
@@ -66,7 +66,8 @@
 .flow-connector .drop-zone {
     width: 50px;
     height: 50px;
-    margin-left: 100px; /* Offset to the right */
+    margin-left: 100px;
+    /* Offset to the right */
 }
 
 /* Side drop zones positioning */

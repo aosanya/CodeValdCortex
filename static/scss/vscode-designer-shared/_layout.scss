@@ -43,7 +43,8 @@ body {
    =================================== */
 
 .vscode-designer-container {
-    height: calc(100vh - 52px); /* Subtract navbar height (52px) */
+    height: calc(100vh - 52px);
+    /* Subtract navbar height (52px) */
     background: var(--vscode-bg);
     color: var(--vscode-text);
     display: grid;

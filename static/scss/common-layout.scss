@@ -12,7 +12,8 @@
 html,
 body {
     font-size: 0.9rem;
-    padding-bottom: 32px; /* Account for fixed status bar */
+    padding-bottom: 32px;
+    /* Account for fixed status bar */
 }
 
 /* ===========================
@@ -33,7 +34,7 @@ body {
 
 .navbar-item {
     font-size: 0.95rem;
-    
+
     &.has-dropdown .navbar-link {
         display: flex;
         align-items: center;
@@ -72,9 +73,9 @@ body {
     border-top: 1px solid var(--theme-status-bar-border, $vscode-accent-hover) !important;
     flex-shrink: 0;
     z-index: 9999 !important;
-    transition: background-color $transition-normal ease, 
-                color $transition-normal ease, 
-                border-color $transition-normal ease;
+    transition: background-color $transition-normal ease,
+        color $transition-normal ease,
+        border-color $transition-normal ease;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -94,7 +95,7 @@ body {
     gap: $spacing-xs;
     padding: 0 $spacing-sm;
     cursor: default;
-    
+
     i {
         font-size: 0.7rem;
     }

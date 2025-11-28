@@ -3,8 +3,8 @@
 
 /* Workflow Canvas */
 .workflow-canvas {
-    background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px), 
-                linear-gradient(#f0f0f0 1px, transparent 1px);
+    background: linear-gradient(90deg, #f0f0f0 1px, transparent 1px),
+        linear-gradient(#f0f0f0 1px, transparent 1px);
     background-size: 20px 20px;
     background-color: #ffffff;
     overflow-y: auto;
@@ -60,7 +60,7 @@
     margin: $spacing-lg 0;
     transition: all $transition-normal;
     background: rgba(255, 255, 255, 0.5);
-    
+
     &.is-active {
         border-color: $vscode-accent;
         background: rgba(50, 115, 220, 0.05);
@@ -95,7 +95,7 @@
     align-items: center;
     z-index: 1;
     pointer-events: none;
-    
+
     .arrow-line {
         width: 100%;
         flex: 1;
@@ -106,7 +106,7 @@
                 transparent 100%);
         opacity: 0.6;
     }
-    
+
     .arrow-head {
         color: $vscode-accent;
         font-size: 1.5rem;

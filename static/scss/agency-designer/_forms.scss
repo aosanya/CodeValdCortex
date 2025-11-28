@@ -7,26 +7,26 @@
 
 // Make all labels smaller
 .label {
-  font-size: $font-size-sm !important;
+    font-size: $font-size-sm !important;
 }
 
 // Make all help text smaller
 .help {
-  font-size: $font-size-xs !important;
+    font-size: $font-size-xs !important;
 }
 
 // Make all inputs and textareas smaller
 .input,
 .textarea,
 .select select {
-  font-size: $font-size-base !important;
+    font-size: $font-size-base !important;
 }
 
 // Apply smaller size to .is-small variants
 .input.is-small,
 .textarea.is-small,
 .select.is-small select {
-  font-size: $font-size-sm !important;
+    font-size: $font-size-sm !important;
 }
 
 /* ===================================
@@ -34,13 +34,13 @@
    =================================== */
 
 #work-item-goals-editor {
-  .checkbox {
-    font-size: $font-size-sm !important;
+    .checkbox {
+        font-size: $font-size-sm !important;
 
-    input[type="checkbox"] {
-      transform: scale(0.9);
+        input[type="checkbox"] {
+            transform: scale(0.9);
+        }
     }
-  }
 }
 
 /* ===================================
@@ -48,16 +48,17 @@
    =================================== */
 
 table.is-small {
-  td:not([align]),
-  th:not([align]) {
-    font-size: $font-size-base;
-    padding: 0.5em 0.75em;
-  }
 
-  td,
-  th {
-    text-align: inherit;
-  }
+    td:not([align]),
+    th:not([align]) {
+        font-size: $font-size-base;
+        padding: 0.5em 0.75em;
+    }
+
+    td,
+    th {
+        text-align: inherit;
+    }
 }
 
 /* ===================================
@@ -65,19 +66,19 @@ table.is-small {
    =================================== */
 
 .publish-toolbar {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-  padding: $spacing-sm;
-
-  .buttons {
-    margin-bottom: 0;
-  }
-
-  .state-badge {
     display: flex;
     align-items: center;
-  }
+    gap: $spacing-md;
+    padding: $spacing-sm;
+
+    .buttons {
+        margin-bottom: 0;
+    }
+
+    .state-badge {
+        display: flex;
+        align-items: center;
+    }
 }
 
 /* ===================================
@@ -86,20 +87,20 @@ table.is-small {
 
 #publish-dialog,
 #tag-dialog {
-  .modal-card {
-    max-height: 90vh;
-    overflow-y: auto;
-  }
+    .modal-card {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
 
-  .modal-card-body {
-    max-height: 70vh;
-    overflow-y: auto;
-  }
+    .modal-card-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
 
-  // Preview boxes in dialogs
-  .box {
-    border: 1px solid #e5e5e5;
-  }
+    // Preview boxes in dialogs
+    .box {
+        border: 1px solid #e5e5e5;
+    }
 }
 
 /* ===================================
@@ -107,19 +108,19 @@ table.is-small {
    =================================== */
 
 #metadata-pairs {
-  .field-body {
-    display: flex;
-    gap: $spacing-sm;
-    align-items: center;
-  }
-
-  .field {
-    flex: 1;
-
-    &.is-narrow {
-      flex: 0 0 auto;
+    .field-body {
+        display: flex;
+        gap: $spacing-sm;
+        align-items: center;
     }
-  }
+
+    .field {
+        flex: 1;
+
+        &.is-narrow {
+            flex: 0 0 auto;
+        }
+    }
 }
 
 /* ===================================
@@ -127,21 +128,21 @@ table.is-small {
    =================================== */
 
 @keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(50, 115, 220, 0.7);
-  }
+    0% {
+        box-shadow: 0 0 0 0 rgba(50, 115, 220, 0.7);
+    }
 
-  70% {
-    box-shadow: 0 0 0 10px rgba(50, 115, 220, 0);
-  }
+    70% {
+        box-shadow: 0 0 0 10px rgba(50, 115, 220, 0);
+    }
 
-  100% {
-    box-shadow: 0 0 0 0 rgba(50, 115, 220, 0);
-  }
+    100% {
+        box-shadow: 0 0 0 0 rgba(50, 115, 220, 0);
+    }
 }
 
 .button.is-pulsing {
-  animation: pulse 2s infinite;
+    animation: pulse 2s infinite;
 }
 
 /* ===================================
@@ -149,21 +150,21 @@ table.is-small {
    =================================== */
 
 @media screen and (max-width: 768px) {
-  .publish-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+    .publish-toolbar {
+        flex-direction: column;
+        align-items: stretch;
 
-    .buttons {
-      justify-content: stretch;
+        .buttons {
+            justify-content: stretch;
 
-      .button {
-        flex: 1;
-      }
+            .button {
+                flex: 1;
+            }
+        }
     }
-  }
 
-  #metadata-pairs .field-body {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    #metadata-pairs .field-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

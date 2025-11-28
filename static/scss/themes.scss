@@ -9,8 +9,7 @@
 
 // Define all theme colors in one place
 $themes: (
-    'default': (
-        navbar-bg: #ffffff,
+    'default': (navbar-bg: #ffffff,
         navbar-text: #363636,
         primary: #3273dc,
         primary-hover: #2366d1,
@@ -27,10 +26,8 @@ $themes: (
         info: #3298dc,
         status-bar-bg: #007acc,
         status-bar-border: #005a9e,
-        status-bar-text: #ffffff
-    ),
-    'midnight-coral': (
-        navbar-bg: #1a1f36,
+        status-bar-text: #ffffff),
+    'midnight-coral': (navbar-bg: #1a1f36,
         navbar-text: #ffffff,
         primary: #FF6B6B,
         primary-hover: #ff5252,
@@ -47,10 +44,8 @@ $themes: (
         info: #4299e1,
         status-bar-bg: #FF6B6B,
         status-bar-border: #ff5252,
-        status-bar-text: #ffffff
-    ),
-    'slate-purple': (
-        navbar-bg: #0f172a,
+        status-bar-text: #ffffff),
+    'slate-purple': (navbar-bg: #0f172a,
         navbar-text: #ffffff,
         primary: #8b5cf6,
         primary-hover: #7c3aed,
@@ -67,10 +62,8 @@ $themes: (
         info: #3b82f6,
         status-bar-bg: #8b5cf6,
         status-bar-border: #7c3aed,
-        status-bar-text: #ffffff
-    ),
-    'charcoal-emerald': (
-        navbar-bg: #1c1c1c,
+        status-bar-text: #ffffff),
+    'charcoal-emerald': (navbar-bg: #1c1c1c,
         navbar-text: #ffffff,
         primary: #10b981,
         primary-hover: #059669,
@@ -87,10 +80,8 @@ $themes: (
         info: #06b6d4,
         status-bar-bg: #10b981,
         status-bar-border: #059669,
-        status-bar-text: #ffffff
-    ),
-    'navy-orange': (
-        navbar-bg: #0a1929,
+        status-bar-text: #ffffff),
+    'navy-orange': (navbar-bg: #0a1929,
         navbar-text: #ffffff,
         primary: #f97316,
         primary-hover: #ea580c,
@@ -107,10 +98,8 @@ $themes: (
         info: #0ea5e9,
         status-bar-bg: #f97316,
         status-bar-border: #ea580c,
-        status-bar-text: #ffffff
-    ),
-    'obsidian-cyan': (
-        navbar-bg: #18181b,
+        status-bar-text: #ffffff),
+    'obsidian-cyan': (navbar-bg: #18181b,
         navbar-text: #ffffff,
         primary: #06b6d4,
         primary-hover: #0891b2,
@@ -127,10 +116,8 @@ $themes: (
         info: #06b6d4,
         status-bar-bg: #06b6d4,
         status-bar-border: #0891b2,
-        status-bar-text: #ffffff
-    ),
-    'dark': (
-        navbar-bg: #1e1e1e,
+        status-bar-text: #ffffff),
+    'dark': (navbar-bg: #1e1e1e,
         navbar-text: #ffffff,
         primary: #4dabf7,
         primary-hover: #339af0,
@@ -147,8 +134,7 @@ $themes: (
         info: #4dabf7,
         status-bar-bg: #4dabf7,
         status-bar-border: #339af0,
-        status-bar-text: #ffffff
-    )
+        status-bar-text: #ffffff)
 );
 
 /* ===================================
@@ -164,7 +150,7 @@ $themes: (
 
 // Generate theme-specific custom properties
 @each $theme-name, $theme-colors in $themes {
-    @if $theme-name != 'default' {
+    @if $theme-name !='default' {
         [data-theme="#{$theme-name}"] {
             @each $property, $value in $theme-colors {
                 --theme-#{$property}: #{$value};
