@@ -1,10 +1,26 @@
 package pages
 
 import (
+"encoding/json"
 "strconv"
 "github.com/aosanya/CodeValdCortex/internal/agency/models"
 "github.com/aosanya/CodeValdCortex/internal/web/components"
 )
+
+// buildColumnsJSON creates a JSON array of column codes for Alpine.js
+func buildColumnsJSON(columns []models.BoardColumn) string {
+	type columnData struct {
+		Code string `json:"code"`
+	}
+	
+	data := make([]columnData, len(columns))
+	for i, col := range columns {
+		data[i] = columnData{Code: col.WorkItemCode}
+	}
+	
+	jsonBytes, _ := json.Marshal(data)
+	return string(jsonBytes)
+}
 
 // Workbench renders the workflow instance workbench with Kanban board and AI chat
 templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows []models.Workflow) {
@@ -17,47 +33,55 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows [
     .workbench-header {
         background-color: #1f1f1f;
         border-bottom: 1px solid #2b2b2b;
-        padding: 1rem;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .workbench-header .title {
+        font-size: 1.25rem;
+    }
+    
+    .workbench-header .tags {
+        font-size: 0.75rem;
     }
 </style>
 
-<div class="vscode-designer-container">
-        <!-- Common Header Bar -->
-        <div class="workbench-header">
-            <div class="level mb-0">
-                <div class="level-left">
-                    <div class="level-item">
-                        <h3 class="title is-4 has-text-white mb-0">
-                            <span class="icon mr-2">
-                                <i class="fas fa-tasks"></i>
-                            </span>
-                            <span>Workbench</span>
-                        </h3>
-                    </div>
-                    <div class="level-item ml-4">
-                        <div class="tags has-addons are-medium">
-                            <span class="tag is-dark has-text-grey-light">Instance</span>
-                            <span class="tag is-info is-light has-text-weight-bold">{ board.InstanceName }</span>
-                        </div>
-                    </div>
-                    <div class="level-item">
-                        <div class="tags has-addons are-medium">
-                            <span class="tag is-dark has-text-grey-light">Workflow</span>
-                            <span class="tag is-primary is-light has-text-weight-bold">{ board.WorkflowName }</span>
-                        </div>
-                    </div>
+<!-- Common Header Bar (Under Navbar) -->
+<div class="workbench-header">
+    <div class="level mb-0">
+        <div class="level-left">
+            <div class="level-item">
+                <h3 class="title is-5 has-text-white mb-0">
+                    <span class="icon is-small mr-2">
+                        <i class="fas fa-tasks"></i>
+                    </span>
+                    <span>Workbench</span>
+                </h3>
+            </div>
+            <div class="level-item ml-3">
+                <div class="tags has-addons are-small">
+                    <span class="tag is-dark has-text-grey-light">Instance</span>
+                    <span class="tag is-info is-light has-text-weight-semibold">{ board.InstanceName }</span>
                 </div>
-                <div class="level-right">
-                    <div class="level-item">
-                        <button class="button is-primary" onclick="toggleCreateIssuePanel()">
-                            <span class="icon"><i class="fas fa-plus"></i></span>
-                            <span>Create Issue</span>
-                        </button>
-                    </div>
+            </div>
+            <div class="level-item">
+                <div class="tags has-addons are-small">
+                    <span class="tag is-dark has-text-grey-light">Workflow</span>
+                    <span class="tag is-primary is-light has-text-weight-semibold">{ board.WorkflowName }</span>
                 </div>
             </div>
         </div>
+        <div class="level-right">
+            <div class="level-item">
+                <button class="button is-primary is-small" onclick="toggleCreateIssuePanel()">
+                    <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                    <span>Create Issue</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="vscode-designer-container">
         <!-- Main Content Area with Columns -->
         <div class="columns is-gapless vscode-main-content">
             <!-- Left Panel: Workflow Navigation -->
@@ -95,13 +119,42 @@ templ WorkflowSidebar(board *models.WorkbenchBoard, workflows []models.Workflow)
 for _, workflow := range workflows {
 <div 
 class={ "overview-nav-item", templ.KV("is-active", workflow.Key == board.WorkflowID) }
-data-workflow-id={ workflow.Key }>
+data-workflow-id={ workflow.Key }
+x-data="{ expanded: false }">
 <div class="nav-icon">
 <i class="fas fa-project-diagram"></i>
 </div>
 <div class="nav-info">
 <div class="nav-name">{ workflow.Name }</div>
 <div class="nav-description">{ workflow.Description }</div>
+if workflow.Key == board.WorkflowID {
+<!-- Collapsible columns tree for active workflow -->
+<div class="mt-2">
+<button 
+@click="expanded = !expanded"
+class="button is-small is-text is-fullwidth has-text-left px-0 py-1"
+type="button">
+<span class="icon is-small has-text-info">
+<i class="fas" :class="expanded ? 'fa-folder-open' : 'fa-folder'"></i>
+</span>
+<span class="is-size-7 has-text-weight-semibold">Columns ({ strconv.Itoa(len(board.Columns)) })</span>
+</button>
+<div x-show="expanded" x-collapse class="mt-1" style="border-left: 2px solid #e0e0e0; margin-left: 0.5rem;">
+for _, column := range board.Columns {
+<div class="is-flex is-align-items-center py-1 pl-2" style="position: relative;">
+<span style="position: absolute; left: -2px; width: 10px; height: 1px; background: #e0e0e0;"></span>
+<span class="icon is-small has-text-grey-light">
+<i class="fas fa-file-alt"></i>
+</span>
+<span class="is-size-7 has-text-grey ml-1">
+{ column.WorkItemCode }
+</span>
+<span class="tag is-small is-light is-info ml-auto">{ strconv.Itoa(len(column.Issues)) }</span>
+</div>
+}
+</div>
+</div>
+}
 </div>
 </div>
 }
@@ -115,7 +168,7 @@ templ KanbanBoard(agency *models.Agency, board *models.WorkbenchBoard) {
 <main class="details-panel">
 <div class="details-content">
 @components.IssueManageForm(agency, board)
-<div class="workbench-board" x-data={ "{ currentColumnIndex: 0, totalColumns: " + strconv.Itoa(len(board.Columns)) + " }" }>
+<div class="workbench-board" x-data={ "{ currentColumnIndex: 0, totalColumns: " + strconv.Itoa(len(board.Columns)) + ", columns: " + buildColumnsJSON(board.Columns) + " }" }>
 <!-- Navigation Controls -->
 <div class="level mb-4">
 <div class="level-left">
@@ -129,6 +182,9 @@ type="button">
 <i class="fas fa-chevron-left"></i>
 </span>
 <span>Previous</span>
+<template x-if="currentColumnIndex > 0">
+<span class="tag is-light is-info ml-2" x-text="columns[currentColumnIndex - 1].code"></span>
+</template>
 </button>
 </div>
 <div class="level-item">
@@ -141,6 +197,9 @@ class="button is-light"
 :disabled="currentColumnIndex === totalColumns - 1"
 type="button">
 <span>Next</span>
+<template x-if="currentColumnIndex < totalColumns - 1">
+<span class="tag is-light is-info ml-2" x-text="columns[currentColumnIndex + 1].code"></span>
+</template>
 <span class="icon">
 <i class="fas fa-chevron-right"></i>
 </span>
