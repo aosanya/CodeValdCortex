@@ -185,17 +185,30 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
 
 // Get deliverables structured data from tree builder
 window.getDeliverablesStructuredData = function () {
-    const hiddenInput = document.getElementById('deliverables-structured-data');
-    if (!hiddenInput || !hiddenInput.value) {
-        return null;
+    // Try to get data from Alpine.js component directly
+    const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
+    if (treeContainer && treeContainer._x_dataStack && treeContainer._x_dataStack.length > 0) {
+        const alpineData = treeContainer._x_dataStack[0];
+        if (alpineData && alpineData.nodes) {
+            console.log('Got deliverables from Alpine.js:', alpineData.nodes);
+            return alpineData.nodes;
+        }
     }
 
-    try {
-        return JSON.parse(hiddenInput.value);
-    } catch (error) {
-        console.error('Failed to parse deliverables structured data:', error);
-        return null;
+    // Fallback: try to get from hidden input
+    const hiddenInput = document.getElementById('deliverables-structured-data');
+    if (hiddenInput && hiddenInput.value) {
+        try {
+            const data = JSON.parse(hiddenInput.value);
+            console.log('Got deliverables from hidden input:', data);
+            return data;
+        } catch (error) {
+            console.error('Failed to parse deliverables structured data:', error);
+        }
     }
+
+    console.warn('No deliverables data found');
+    return null;
 };
 
 // Check if using simple mode

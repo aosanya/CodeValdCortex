@@ -8,6 +8,7 @@ function deliverableTree() {
         nodes: [],
         validationErrors: [],
         draggedNode: null,
+        newlyCreatedNodeId: null,
 
         /**
          * Initialize the tree with existing deliverables
@@ -39,12 +40,15 @@ function deliverableTree() {
             const nodeId = node.id;
             // Sanitize node ID for use in Alpine.js variable names (replace hyphens with underscores)
             const safeNodeId = nodeId.replace(/-/g, '_');
+            // Check if this is a newly created node that should start in edit mode
+            const isNewlyCreated = this.newlyCreatedNodeId === nodeId;
 
             return `
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
                      style="padding-left: ${paddingLeft}px"
                      data-node-id="${nodeId}"
-                     x-data="{ editing_${safeNodeId}: false, expanded_${safeNodeId}: true }">
+                     x-data="{ editing_${safeNodeId}: ${isNewlyCreated}, expanded_${safeNodeId}: true }"
+                     x-init="${isNewlyCreated ? `$nextTick(() => { $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
                     
                     <div class="node-row level is-mobile mb-1">
                         <div class="level-left">
@@ -194,8 +198,9 @@ function deliverableTree() {
          * Add a new root folder
          */
         addRootFolder() {
+            const nodeId = this.generateId();
             const node = {
-                id: this.generateId(),
+                id: nodeId,
                 name: 'New Folder',
                 description: '',
                 path: 'New Folder',
@@ -206,6 +211,7 @@ function deliverableTree() {
                 order: this.nodes.length
             };
             this.nodes.push(node);
+            this.newlyCreatedNodeId = nodeId;
             this.computeAllPaths();
             this.validate();
         },
@@ -214,8 +220,9 @@ function deliverableTree() {
          * Add a new root file
          */
         addRootFile() {
+            const nodeId = this.generateId();
             const node = {
-                id: this.generateId(),
+                id: nodeId,
                 name: 'new-file',
                 description: '',
                 path: 'new-file.md',
@@ -226,6 +233,7 @@ function deliverableTree() {
                 order: this.nodes.length
             };
             this.nodes.push(node);
+            this.newlyCreatedNodeId = nodeId;
             this.computeAllPaths();
             this.validate();
         },
@@ -243,8 +251,9 @@ function deliverableTree() {
                 parent.children = [];
             }
 
+            const nodeId = this.generateId();
             const node = {
-                id: this.generateId(),
+                id: nodeId,
                 name: 'New Folder',
                 description: '',
                 path: '',
@@ -257,6 +266,7 @@ function deliverableTree() {
             };
 
             parent.children.push(node);
+            this.newlyCreatedNodeId = nodeId;
             this.computeAllPaths();
             this.validate();
         },
@@ -274,8 +284,9 @@ function deliverableTree() {
                 parent.children = [];
             }
 
+            const nodeId = this.generateId();
             const node = {
-                id: this.generateId(),
+                id: nodeId,
                 name: 'new-file',
                 description: '',
                 path: '',
@@ -288,6 +299,7 @@ function deliverableTree() {
             };
 
             parent.children.push(node);
+            this.newlyCreatedNodeId = nodeId;
             this.computeAllPaths();
             this.validate();
         },
