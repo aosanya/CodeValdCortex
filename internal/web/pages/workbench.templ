@@ -25,6 +25,9 @@ func buildColumnsJSON(columns []models.BoardColumn) string {
 // Workbench renders the workflow instance workbench with Kanban board and AI chat
 templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows []models.Workflow) {
 @components.LayoutWithAgency("Workbench", agency) {
+<!-- Workbench CSS -->
+<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
+
 <!-- Workbench JavaScript -->
 <script src="/static/js/workbench-chat.js" defer></script>
 
@@ -45,6 +48,7 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows [
     }
 </style>
 
+<div x-data="{ showWorkflows: false }">
 <!-- Common Header Bar (Under Navbar) -->
 <div class="workbench-header">
     <div class="level mb-0">
@@ -57,18 +61,6 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows [
                     <span>Workbench</span>
                 </h3>
             </div>
-            <div class="level-item ml-3">
-                <div class="tags has-addons are-small">
-                    <span class="tag is-dark has-text-grey-light">Instance</span>
-                    <span class="tag is-info is-light has-text-weight-semibold">{ board.InstanceName }</span>
-                </div>
-            </div>
-            <div class="level-item">
-                <div class="tags has-addons are-small">
-                    <span class="tag is-dark has-text-grey-light">Workflow</span>
-                    <span class="tag is-primary is-light has-text-weight-semibold">{ board.WorkflowName }</span>
-                </div>
-            </div>
         </div>
         <div class="level-right">
             <div class="level-item">
@@ -77,14 +69,32 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows [
                     <span>Create Issue</span>
                 </button>
             </div>
+            <div class="level-item">
+                <button class="button is-light is-small" @click="showWorkflows = !showWorkflows" type="button">
+                    <span class="icon is-small"><i class="fas fa-exchange-alt"></i></span>
+                    <span x-text="showWorkflows ? 'Show Columns' : 'Switch Workflow'"></span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="vscode-designer-container">
+        <!-- Workflow Selector Overlay (Full Screen) -->
+        <div x-show="showWorkflows" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0, 0, 0, 0.95);">
+            @WorkflowSelector(board, workflows)
+        </div>
+
         <!-- Main Content Area with Columns -->
-        <div class="columns is-gapless vscode-main-content">
-            <!-- Left Panel: Workflow Navigation -->
+        <div class="columns is-gapless vscode-main-content" x-show="!showWorkflows">
+            <!-- Left Panel: Columns -->
             <div class="column is-narrow">
                 @WorkflowSidebar(board, workflows)
             </div>
@@ -99,72 +109,154 @@ templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows [
                 @WorkbenchChatPanel(agency, board)
             </div>
         </div>
+        
+        <!-- Status Bar at Bottom (VS Code style) -->
+        @components.StatusBarSimple(agency, "Instance: " + board.InstanceName, "Workflow: " + board.WorkflowName)
     </div>
+</div>
 }
 }
 
-// WorkflowSidebar renders the left sidebar with all workflows from the tag
+// WorkflowSidebar renders the left sidebar with workflow columns
 templ WorkflowSidebar(board *models.WorkbenchBoard, workflows []models.Workflow) {
 <aside class="sidebar-panel">
 <header class="sidebar-header">
 <h3 class="sidebar-title">
 <span class="icon">
-<i class="fas fa-sitemap"></i>
+<i class="fas fa-layer-group"></i>
 </span>
-<span>Workflows</span>
+<span>Columns</span>
 </h3>
 </header>
 <div class="sidebar-content">
 <div class="overview-nav-list">
-for _, workflow := range workflows {
-<a 
-href={ templ.SafeURL("/agencies/" + board.AgencyID + "/instances/" + board.InstanceID + "/workbench?workflow=" + workflow.Key) }
-class={ "overview-nav-item", templ.KV("is-active", workflow.Key == board.WorkflowID) }
-data-workflow-id={ workflow.Key }
-x-data={ "{ expanded: " + strconv.FormatBool(workflow.Key == board.WorkflowID) + " }" }
-style="text-decoration: none; color: inherit;">
+for _, column := range board.Columns {
+<div 
+class="overview-nav-item"
+data-column-id={ column.ID }>
 <div class="nav-icon">
-<i class="fas fa-project-diagram"></i>
+<i class="fas fa-file-alt"></i>
 </div>
 <div class="nav-info">
-<div class="is-flex is-align-items-center">
-if workflow.Key == board.WorkflowID {
-<button 
-@click.stop="expanded = !expanded"
-class="button is-small is-text p-0 mr-1"
-type="button"
-style="height: auto; min-height: auto;">
-<span class="icon is-small has-text-info">
-<i class="fas" :class="expanded ? 'fa-folder-open' : 'fa-folder'"></i>
-</span>
-</button>
-}
-<div class="nav-name">{ workflow.Name }</div>
-</div>
-<div class="nav-description">{ workflow.Description }</div>
-if workflow.Key == board.WorkflowID {
-<!-- Collapsible columns tree for active workflow -->
-<div x-show="expanded" x-collapse class="mt-1" style="border-left: 2px solid #e0e0e0; margin-left: 0.5rem;">
-for _, column := range board.Columns {
-<div class="is-flex is-align-items-center py-1 pl-2" style="position: relative;">
-<span style="position: absolute; left: -2px; width: 10px; height: 1px; background: #e0e0e0;"></span>
-<span class="icon is-small has-text-grey-light">
-<i class="fas fa-file-alt"></i>
-</span>
-<span class="is-size-7 has-text-grey ml-1">
+<div class="nav-name">
 { column.WorkItemCode }
-</span>
-<span class="tag is-small is-light is-info ml-auto">{ strconv.Itoa(len(column.Issues)) }</span>
+<span class="tag is-small is-light is-info ml-2">{ strconv.Itoa(len(column.Issues)) }</span>
 </div>
-}
+<div class="nav-description">{ column.Name }</div>
 </div>
-}
 </div>
-</a>
 }
 </div>
 </div>
 </aside>
+}
+
+// WorkflowSelector renders the workflow selection panel with dramatic card design
+templ WorkflowSelector(board *models.WorkbenchBoard, workflows []models.Workflow) {
+<div style="height: 100%; overflow-y: auto; padding: 3rem;">
+<div class="container is-max-desktop">
+<div class="has-text-centered mb-6">
+<h1 class="title is-1 has-text-white mb-3">
+<span class="icon is-large has-text-warning mr-3">
+<i class="fas fa-code-branch fa-3x"></i>
+</span>
+<span>Select Workflow</span>
+</h1>
+<p class="subtitle is-4 has-text-grey-light">
+Choose a workflow to switch your workbench view
+</p>
+<p class="has-text-grey is-size-6">
+Current: <span class="has-text-info has-text-weight-bold">{ board.WorkflowName }</span>
+</p>
+</div>
+
+<div class="columns is-multiline is-centered">
+for _, workflow := range workflows {
+<div class="column is-half-tablet is-one-third-desktop">
+<div class="card" 
+     style="background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%); border: 2px solid #3d3d3d; height: 100%; transition: all 0.3s ease; cursor: pointer;"
+     x-data="{ hover: false }"
+     @mouseenter="hover = true"
+     @mouseleave="hover = false"
+     :style="hover ? 'transform: translateY(-8px); border-color: #4a9eff; box-shadow: 0 12px 24px rgba(74, 158, 255, 0.3);' : ''">
+<a href={ templ.SafeURL("/agencies/" + board.AgencyID + "/instances/" + board.InstanceID + "/workbench?workflow=" + workflow.Key) }
+   style="text-decoration: none; color: inherit; display: block; height: 100%;">
+<div class="card-content" style="padding: 2rem; display: flex; flex-direction: column; height: 100%;">
+<div class="has-text-centered mb-4">
+<span class="icon is-large" style={ "color: " + templ.SafeURL(getWorkflowIconColor(workflow.Key == board.WorkflowID)) }>
+<i class="fas fa-project-diagram fa-3x"></i>
+</span>
+</div>
+<div class="has-text-centered mb-3">
+<p class="title is-4 has-text-white mb-2">{ workflow.Name }</p>
+if workflow.Key == board.WorkflowID {
+<span class="tag is-success is-medium is-light">
+<span class="icon">
+<i class="fas fa-check-circle"></i>
+</span>
+<span>Currently Active</span>
+</span>
+} else {
+<span class="tag is-link is-medium is-light">
+<span class="icon">
+<i class="fas fa-arrow-right"></i>
+</span>
+<span>Click to Switch</span>
+</span>
+}
+</div>
+<div class="mb-3">
+<p class="has-text-grey-light has-text-centered is-size-7 mb-2">
+Workflow ID
+</p>
+<p class="has-text-centered">
+<code class="has-text-info is-size-6">{ workflow.Key }</code>
+</p>
+</div>
+if workflow.Description != "" {
+<div class="content has-text-grey-light is-size-6 mb-4" style="line-height: 1.6; flex-grow: 1;">
+<p class="has-text-centered">{ workflow.Description }</p>
+</div>
+}
+<div class="mt-auto">
+<div class="tags are-medium is-centered">
+<span class="tag is-dark">
+<span class="icon">
+<i class="fas fa-stream"></i>
+</span>
+<span>{ strconv.Itoa(len(workflow.Steps)) } Steps</span>
+</span>
+</div>
+</div>
+</div>
+</a>
+</div>
+</div>
+}
+if len(workflows) == 0 {
+<div class="column is-full">
+<div class="notification is-warning is-light" style="background: rgba(255, 221, 87, 0.1); border: 2px solid #ffe56b;">
+<p class="has-text-centered has-text-white is-size-5">
+<span class="icon is-large">
+<i class="fas fa-exclamation-triangle fa-2x"></i>
+</span>
+<br/>
+<span>No workflows available</span>
+</p>
+</div>
+</div>
+}
+</div>
+</div>
+</div>
+}
+
+// getWorkflowIconColor returns the color for workflow icon based on active state
+func getWorkflowIconColor(isActive bool) string {
+if isActive {
+return "#48c78e" // Success green
+}
+return "#4a9eff" // Info blue
 }
 
 // KanbanBoard renders the center panel with the Kanban board and issue management

@@ -331,6 +331,159 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 	return board, nil
 }
 
+// GenerateBoardForWorkflow generates a board for a specific workflow from a tag
+func (s *WorkbenchService) GenerateBoardForWorkflow(ctx context.Context, agencyID, instanceID, tagName, workflowID string) (*models.WorkbenchBoard, error) {
+	// Get tag snapshot
+	tag, err := s.tagService.GetTag(ctx, agencyID, tagName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tag: %w", err)
+	}
+
+	// Verify tag has a specification
+	if tag.Snapshot.Specification.Key == "" {
+		return nil, fmt.Errorf("tag has no specification snapshot")
+	}
+
+	spec := &tag.Snapshot.Specification
+
+	// Find the specified workflow
+	var workflow *models.Workflow
+	for i := range spec.Workflows {
+		if spec.Workflows[i].Key == workflowID {
+			workflow = &spec.Workflows[i]
+			break
+		}
+	}
+
+	if workflow == nil {
+		return nil, fmt.Errorf("workflow %s not found in tag", workflowID)
+	}
+
+	// Generate board using the common logic
+	return s.generateBoardForWorkflow(ctx, agencyID, instanceID, spec, workflow, tagName)
+}
+
+// GenerateBoardForWorkflowFromSpecification generates a board for a specific workflow from current specification
+func (s *WorkbenchService) GenerateBoardForWorkflowFromSpecification(ctx context.Context, agencyID, instanceID, workflowID string) (*models.WorkbenchBoard, error) {
+	// Get agency specification
+	spec, err := s.specRepo.GetSpecification(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get agency specification: %w", err)
+	}
+
+	// Find the specified workflow
+	var workflow *models.Workflow
+	for i := range spec.Workflows {
+		if spec.Workflows[i].Key == workflowID {
+			workflow = &spec.Workflows[i]
+			break
+		}
+	}
+
+	if workflow == nil {
+		return nil, fmt.Errorf("workflow %s not found in specification", workflowID)
+	}
+
+	// Generate board using the common logic
+	return s.generateBoardForWorkflow(ctx, agencyID, instanceID, spec, workflow, "")
+}
+
+// generateBoardForWorkflow is the common logic for generating a board from a workflow
+func (s *WorkbenchService) generateBoardForWorkflow(ctx context.Context, agencyID, instanceID string, spec *models.AgencySpecification, workflow *models.Workflow, tagKey string) (*models.WorkbenchBoard, error) {
+	// Create columns from workflow steps
+	var columns []models.BoardColumn
+	columnOrder := 0
+
+	// Get issue repository for this agency
+	issueRepo, err := s.getIssueRepo(ctx, agencyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get issue repository: %w", err)
+	}
+
+	// Track seen work items to avoid duplicate columns
+	seenWorkItems := make(map[string]bool)
+
+	for _, step := range workflow.Steps {
+		for _, item := range step.Items {
+			stepIdentifier := item.WorkItemKey
+			if stepIdentifier == "" {
+				stepIdentifier = item.WorkItemID
+			}
+
+			if seenWorkItems[stepIdentifier] {
+				continue
+			}
+			seenWorkItems[stepIdentifier] = true
+
+			// Find work item details in specification
+			var workItem *models.WorkItem
+			matchKey := item.WorkItemKey
+			if matchKey == "" && item.WorkItemID != "" {
+				matchKey = item.WorkItemID
+			}
+
+			for i := range spec.WorkItems {
+				if spec.WorkItems[i].Key == matchKey || spec.WorkItems[i].ID == matchKey {
+					workItem = &spec.WorkItems[i]
+					break
+				}
+			}
+
+			if workItem == nil {
+				workItem = &models.WorkItem{
+					Code:  item.WorkItemName,
+					Title: item.WorkItemName,
+				}
+			}
+
+			// Query issues for this step
+			issues, err := issueRepo.ListByWorkflowStep(ctx, agencyID, instanceID, workflow.Key, stepIdentifier)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get issues for step %s: %w", stepIdentifier, err)
+			}
+
+			// Convert pointers to values for BoardColumn
+			issueValues := make([]models.WorkIssue, len(issues))
+			for i, issue := range issues {
+				issueValues[i] = *issue
+			}
+
+			// Create column
+			column := models.BoardColumn{
+				ID:           fmt.Sprintf("col-%s", item.WorkItemKey),
+				Name:         workItem.Title,
+				WorkItemCode: workItem.Code,
+				WorkItemKey:  item.WorkItemKey,
+				Order:        columnOrder,
+				Issues:       issueValues,
+			}
+
+			columns = append(columns, column)
+			columnOrder++
+		}
+	}
+
+	// Get instance name
+	instance, err := s.instanceService.GetInstance(ctx, agencyID, instanceID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get instance: %w", err)
+	}
+
+	// Create board
+	board := &models.WorkbenchBoard{
+		AgencyID:     agencyID,
+		InstanceID:   instanceID,
+		InstanceName: instance.InstanceName,
+		WorkflowID:   workflow.Key,
+		WorkflowName: workflow.Name,
+		TagKey:       tagKey,
+		Columns:      columns,
+		GeneratedAt:  time.Now(),
+	}
+
+	return board, nil
+}
+
 // GetIssuesForColumn retrieves all issues in a specific board column
 func (s *WorkbenchService) GetIssuesForColumn(ctx context.Context, agencyID, instanceID, workflowID, workItemKey string) ([]*models.WorkIssue, error) {
 	// Get issue repository for this agency

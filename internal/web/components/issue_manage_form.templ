@@ -51,6 +51,46 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 
 	<!-- Issue Creation JavaScript -->
 	<script>
+		function openIssueDetails(agencyID, instanceID, issueKey) {
+			// Fetch issue details and populate the form for editing
+			fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
+				.then(response => response.json())
+				.then(issue => {
+					const panel = document.getElementById('createIssuePanel');
+					const form = document.getElementById('createIssueForm');
+					if (!panel || !form) return;
+
+					// Set form to edit mode
+					panel.dataset.editingIssueKey = issueKey;
+
+					// Update header text
+					const header = panel.querySelector('.level-left .level-item strong');
+					if (header) {
+						header.textContent = 'Edit Issue';
+					}
+
+					// Update button text
+					const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
+					if (submitBtn) {
+						submitBtn.textContent = 'Update Issue';
+					}
+
+					// Populate form fields
+					form.querySelector('input[name="title"]').value = issue.title || '';
+					form.querySelector('textarea[name="description"]').value = issue.description || '';
+
+					// Show the panel
+					panel.style.display = 'block';
+
+					// Scroll to the panel
+					panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+				})
+				.catch(error => {
+					console.error('Failed to fetch issue details:', error);
+					alert('Failed to load issue details: ' + error.message);
+				});
+		}
+
 		function toggleCreateIssuePanel() {
 			const panel = document.getElementById('createIssuePanel');
 			if (!panel) return;
