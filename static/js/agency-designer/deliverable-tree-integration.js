@@ -34,7 +34,7 @@ window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDe
 // Create tree builder HTML structure
 function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
     return `
-        <div class="deliverable-tree-builder box" x-data="deliverableTree()">
+        <div class="deliverable-tree-builder" x-data="deliverableTree()">
             <!-- Toolbar -->
             <div class="level mb-4">
                 <div class="level-left">

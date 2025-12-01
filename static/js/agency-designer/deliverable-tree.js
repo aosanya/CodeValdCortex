@@ -37,21 +37,23 @@ function deliverableTree() {
             const paddingLeft = depth * 20;
             const hasChildren = node.children && node.children.length > 0;
             const nodeId = node.id;
+            // Sanitize node ID for use in Alpine.js variable names (replace hyphens with underscores)
+            const safeNodeId = nodeId.replace(/-/g, '_');
 
             return `
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
                      style="padding-left: ${paddingLeft}px"
                      data-node-id="${nodeId}"
-                     x-data="{ editing_${nodeId}: false, expanded_${nodeId}: true }">
+                     x-data="{ editing_${safeNodeId}: false, expanded_${safeNodeId}: true }">
                     
                     <div class="node-row level is-mobile mb-1">
                         <div class="level-left">
                             ${node.type === 'folder' && hasChildren ? `
                                 <div class="level-item">
                                     <button type="button" class="button is-small is-ghost" 
-                                            @click="expanded_${nodeId} = !expanded_${nodeId}">
+                                            @click="expanded_${safeNodeId} = !expanded_${safeNodeId}">
                                         <span class="icon is-small">
-                                            <i class="fas" :class="expanded_${nodeId} ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                            <i class="fas" :class="expanded_${safeNodeId} ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                                         </span>
                                     </button>
                                 </div>
@@ -64,16 +66,16 @@ function deliverableTree() {
                             </div>
                             
                             <div class="level-item">
-                                <div x-show="!editing_${nodeId}" class="node-name">
+                                <div x-show="!editing_${safeNodeId}" class="node-name">
                                     <span>${node.name}${node.type === 'file' ? node.file_extension : ''}</span>
                                     ${node.description ? `<span class="has-text-grey is-size-7 ml-2">- ${node.description}</span>` : ''}
                                 </div>
-                                <div x-show="editing_${nodeId}" class="field is-grouped">
+                                <div x-show="editing_${safeNodeId}" class="field is-grouped">
                                     <p class="control">
                                         <input type="text" class="input is-small" 
                                                value="${node.name}"
-                                               @keydown.enter="editing_${nodeId} = false; updateNodeName('${nodeId}', $event.target.value)"
-                                               @keydown.escape="editing_${nodeId} = false"
+                                               @keydown.enter="editing_${safeNodeId} = false; updateNodeName('${nodeId}', $event.target.value)"
+                                               @keydown.escape="editing_${safeNodeId} = false"
                                                placeholder="Name">
                                     </p>
                                     ${node.type === 'file' ? '<p class="control"><span class="button is-small is-static">.md</span></p>' : ''}
@@ -85,7 +87,7 @@ function deliverableTree() {
                             <div class="level-item">
                                 <div class="buttons are-small">
                                     <button type="button" class="button is-small is-ghost"
-                                            @click="editing_${nodeId} = !editing_${nodeId}"
+                                            @click="editing_${safeNodeId} = !editing_${safeNodeId}"
                                             title="Edit name">
                                         <span class="icon is-small">
                                             <i class="fas fa-pen"></i>
@@ -141,7 +143,7 @@ function deliverableTree() {
                     </div>
                     
                     ${node.prompt_instructions && !editing ? `
-                        <div x-show="!editing_${nodeId}" class="node-prompt-preview ml-4 mb-2">
+                        <div x-show="!editing_${safeNodeId}" class="node-prompt-preview ml-4 mb-2">
                             <div class="message is-small is-light">
                                 <div class="message-body py-2 px-3 is-size-7">
                                     <span class="icon is-small has-text-grey-light">
@@ -154,7 +156,7 @@ function deliverableTree() {
                     ` : ''}
                     
                     ${node.type === 'folder' && hasChildren ? `
-                        <div x-show="expanded_${nodeId}" class="node-children">
+                        <div x-show="expanded_${safeNodeId}" class="node-children">
                             ${node.children.map((child, childIndex) => this.renderNode(child, depth + 1, childIndex)).join('')}
                         </div>
                     ` : ''}

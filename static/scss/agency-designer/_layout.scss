@@ -320,6 +320,7 @@
         font-size: 0.75rem;
     }
 }
+
 /* ===================================
    PANEL TABS STYLING
    =================================== */
@@ -330,19 +331,19 @@
         padding: 0.5rem 0.75rem;
         margin: 0;
         border-bottom: 1px solid #dbdbdb;
-        
+
         a {
             border-bottom: 2px solid transparent;
             padding: 0.5rem 1rem;
             margin: 0 0.25rem;
             border-radius: 4px 4px 0 0;
             transition: all 0.2s ease;
-            
+
             &:hover {
                 background-color: #ffffff;
                 color: #363636;
             }
-            
+
             &.is-active {
                 background-color: #ffffff;
                 border-bottom-color: #3273dc;
