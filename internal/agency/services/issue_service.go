@@ -342,10 +342,11 @@ func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, 
 		return nil, fmt.Errorf("workflow not found")
 	}
 
-	// Find current step index
+	// Find current work item position (step index and item index within that step)
 	currentStepIndex := -1
+	currentItemIndex := -1
 	for i, step := range workflow.Steps {
-		for _, item := range step.Items {
+		for j, item := range step.Items {
 			// Use WorkItemID if WorkItemKey is empty
 			stepID := item.WorkItemKey
 			if stepID == "" {
@@ -353,6 +354,7 @@ func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, 
 			}
 			if stepID == issue.CurrentStep {
 				currentStepIndex = i
+				currentItemIndex = j
 				break
 			}
 		}
@@ -365,30 +367,43 @@ func (s *IssueService) ProgressIssue(ctx context.Context, agencyID, instanceID, 
 		return nil, fmt.Errorf("current step not found in workflow")
 	}
 
-	// Check if there's a next step
-	if currentStepIndex >= len(workflow.Steps)-1 {
-		// Already at final step, mark as completed
-		issue.Status = models.IssueStatusCompleted
+	currentStep := workflow.Steps[currentStepIndex]
+
+	// Check if there's a next work item in the current step
+	if currentItemIndex < len(currentStep.Items)-1 {
+		// Move to next work item in same step
+		nextItem := currentStep.Items[currentItemIndex+1]
+		nextItemID := nextItem.WorkItemKey
+		if nextItemID == "" {
+			nextItemID = nextItem.WorkItemID
+		}
+
+		issue.CompletedSteps = append(issue.CompletedSteps, issue.CurrentStep)
+		issue.CurrentStep = nextItemID
+		issue.Status = models.IssueStatusOpen
+		issue.AssignedTo = "" // Clear assignment for next item
 		issue.UpdatedAt = time.Now()
-	} else {
-		// Move to next step
+	} else if currentStepIndex < len(workflow.Steps)-1 {
+		// Move to first work item of next step
 		nextStep := workflow.Steps[currentStepIndex+1]
+
 		if len(nextStep.Items) == 0 {
 			return nil, fmt.Errorf("next step has no work items")
 		}
 
-		// Add current step to completed steps
-		issue.CompletedSteps = append(issue.CompletedSteps, issue.CurrentStep)
-
-		// Move to next step's first work item
-		// Use WorkItemID if WorkItemKey is empty
-		nextStepID := nextStep.Items[0].WorkItemKey
-		if nextStepID == "" {
-			nextStepID = nextStep.Items[0].WorkItemID
+		nextItemID := nextStep.Items[0].WorkItemKey
+		if nextItemID == "" {
+			nextItemID = nextStep.Items[0].WorkItemID
 		}
-		issue.CurrentStep = nextStepID
+
+		issue.CompletedSteps = append(issue.CompletedSteps, issue.CurrentStep)
+		issue.CurrentStep = nextItemID
 		issue.Status = models.IssueStatusOpen
 		issue.AssignedTo = "" // Clear assignment for next step
+		issue.UpdatedAt = time.Now()
+	} else {
+		// Already at final work item of final step, mark as completed
+		issue.Status = models.IssueStatusCompleted
 		issue.UpdatedAt = time.Now()
 	}
 

@@ -1,187 +1,442 @@
 package pages
 
 import (
-	"strconv"
-	"github.com/aosanya/CodeValdCortex/internal/agency/models"
-	"github.com/aosanya/CodeValdCortex/internal/web/components"
+"encoding/json"
+"strconv"
+"github.com/aosanya/CodeValdCortex/internal/agency/models"
+"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
-templ Workbench(agency *models.Agency, board *models.WorkbenchBoard) {
-	@components.LayoutWithAgency("Workbench", agency) {
-		<section class="section">
-			<!-- Page Header -->
-			<div class="mb-5">
-				<div class="level">
-					<div class="level-left">
-						<div class="level-item">
-							<div>
-								<h1 class="title mb-2">Workbench</h1>
-								<div class="tags has-addons">
-									<span class="tag is-medium is-light">Instance</span>
-									<span class="tag is-medium is-info">{ board.InstanceName }</span>
-								</div>
-							</div>
-						</div>
-						<div class="level-item">
-							<div>
-								<p class="heading">Workflow</p>
-								<p class="subtitle is-5 mb-0">{ board.WorkflowName }</p>
-							</div>
-						</div>
-					</div>
-					<div class="level-right">
-						<div class="level-item">
-							<button class="button is-primary" onclick="toggleCreateIssuePanel()">
-								<span class="icon"><i class="fas fa-plus"></i></span>
-								<span>Create Issue</span>
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Create Issue Form Component -->
-			@components.IssueManageForm(agency, board)
-
-			<!-- Kanban Board -->
-			<div class="workbench-board" style="overflow-x: auto;">
-				<div class="columns is-variable is-2" style="min-width: max-content;">
-					for _, column := range board.Columns {
-						<div class="column workbench-column" style="min-width: 320px; max-width: 320px;">
-							<!-- Column Header -->
-							<div class="box has-background-light mb-3">
-								<div class="level mb-0">
-									<div class="level-left">
-										<div style="max-width: 240px;">
-											<p class="heading mb-1">{ column.WorkItemCode }</p>
-											<p class="title is-6 mb-0" style="white-space: normal; line-height: 1.3; overflow-wrap: anywhere; word-break: break-word;">{ column.Name }</p>
-										</div>
-									</div>
-									<div class="level-right">
-										<span class="tag is-rounded">{ strconv.Itoa(len(column.Issues)) }</span>
-									</div>
-								</div>
-							</div>
-
-							<!-- Issues in Column -->
-							<div class="workbench-issues" style="min-height: 200px;">
-								if len(column.Issues) == 0 {
-									<div class="box has-background-white-ter has-text-centered" style="padding: 2rem;">
-										<p class="has-text-grey-light">
-											<span class="icon is-large">
-												<i class="fas fa-inbox fa-2x"></i>
-											</span>
-										</p>
-										<p class="has-text-grey">No issues</p>
-									</div>
-								} else {
-									for _, issue := range column.Issues {
-										@components.IssueCard(&issue, agency.Key, board.InstanceID)
-									}
-								}
-							</div>
-						</div>
-					}
-				</div>
-			</div>
-		</section>
-
-		<!-- Workbench JavaScript -->
-		<script>
-			function refreshWorkbench() {
-				window.location.reload();
-			}
-
-			function openIssueDetails(agencyID, instanceID, issueKey) {
-				// Load issue data and populate the create form for editing
-				const panel = document.getElementById('createIssuePanel');
-				if (!panel) return;
-
-				
-				// Fetch issue data from API
-				fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
-					.then(response => {
-						if (!response.ok) {
-							throw new Error(`Failed to load issue: ${response.status}`);
-						}
-						return response.json();
-					})
-					.then(data => {
-						
-						// Populate form fields
-						const form = document.getElementById('createIssueForm');
-						if (form) {
-							const titleInput = form.querySelector('input[name="title"]');
-							const descInput = form.querySelector('textarea[name="description"]');
-							
-							if (titleInput) titleInput.value = data.title || '';
-							if (descInput) descInput.value = data.description || '';
-							
-							// Store issue key in panel for update mode
-							panel.dataset.editingIssueKey = issueKey;
-							
-							// Update panel header to show edit mode
-							const header = panel.querySelector('.level-left .level-item strong');
-							if (header) {
-								header.textContent = `Edit Issue #${data.number}`;
-							}
-							
-							// Update button text to "Update Issue"
-							const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
-							if (submitBtn) {
-								submitBtn.textContent = 'Update Issue';
-							}
-						}
-						
-						// Show the panel
-						panel.style.display = 'block';
-					})
-					.catch(error => {
-						alert('Failed to load issue details: ' + error.message);
-					});
-			}
-		</script>
-
-		<!-- Workbench Styles -->
-		<style>
-			.workbench-board {
-				padding-bottom: 1rem;
-			}
-
-			.workbench-column {
-				flex-shrink: 0;
-			}
-
-			.workbench-issues {
-				display: flex;
-				flex-direction: column;
-				gap: 0.75rem;
-			}
-
-			.issue-card {
-				transition: box-shadow 0.2s;
-			}
-
-			.issue-card .card-header:hover {
-				background-color: hsl(0, 0%, 98%);
-			}
-
-			.issue-title {
-				font-size: 1rem;
-				line-height: 1.4;
-				word-wrap: break-word;
-				overflow-wrap: break-word;
-			}
-
-			.issue-description {
-				line-height: 1.4;
-				max-height: 4.2em; /* 3 lines */
-				overflow: hidden;
-				display: -webkit-box;
-				-webkit-line-clamp: 3;
-				-webkit-box-orient: vertical;
-				word-wrap: break-word;
-			}
-		</style>
+// buildColumnsJSON creates a JSON array of column codes for Alpine.js
+func buildColumnsJSON(columns []models.BoardColumn) string {
+	type columnData struct {
+		Code string `json:"code"`
 	}
+	
+	data := make([]columnData, len(columns))
+	for i, col := range columns {
+		data[i] = columnData{Code: col.WorkItemCode}
+	}
+	
+	jsonBytes, _ := json.Marshal(data)
+	return string(jsonBytes)
+}
+
+// Workbench renders the workflow instance workbench with Kanban board and AI chat
+templ Workbench(agency *models.Agency, board *models.WorkbenchBoard, workflows []models.Workflow) {
+@components.LayoutWithAgency("Workbench", agency) {
+<!-- Workbench CSS -->
+<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
+
+<!-- Workbench JavaScript -->
+<script src="/static/js/workbench-chat.js" defer></script>
+
+<style>
+    /* Workbench Layout Overrides */        
+    .workbench-header {
+        background-color: #1f1f1f;
+        border-bottom: 1px solid #2b2b2b;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .workbench-header .title {
+        font-size: 1.25rem;
+    }
+    
+    .workbench-header .tags {
+        font-size: 0.75rem;
+    }
+</style>
+
+<div x-data="{ showWorkflows: false }">
+<!-- Common Header Bar (Under Navbar) -->
+<div class="workbench-header">
+    <div class="level mb-0">
+        <div class="level-left">
+            <div class="level-item">
+                <h3 class="title is-5 has-text-white mb-0">
+                    <span class="icon is-small mr-2">
+                        <i class="fas fa-tasks"></i>
+                    </span>
+                    <span>Workbench</span>
+                </h3>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <button class="button is-primary is-small" onclick="toggleCreateIssuePanel()">
+                    <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                    <span>Create Issue</span>
+                </button>
+            </div>
+            <div class="level-item">
+                <button class="button is-light is-small" @click="showWorkflows = !showWorkflows" type="button">
+                    <span class="icon is-small"><i class="fas fa-exchange-alt"></i></span>
+                    <span x-text="showWorkflows ? 'Show Columns' : 'Switch Workflow'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="vscode-designer-container">
+        <!-- Workflow Selector Overlay (Full Screen) -->
+        <div x-show="showWorkflows" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1000; background: rgba(0, 0, 0, 0.95);">
+            @WorkflowSelector(board, workflows)
+        </div>
+
+        <!-- Main Content Area with Columns -->
+        <div class="columns is-gapless vscode-main-content" x-show="!showWorkflows">
+            <!-- Left Panel: Columns -->
+            <div class="column is-narrow">
+                @WorkflowSidebar(board, workflows)
+            </div>
+
+            <!-- Center Panel: Kanban Board -->
+            <div class="column">
+                @KanbanBoard(agency, board)
+            </div>
+
+            <!-- Right Panel: AI Chat -->
+            <div class="column is-one-third">
+                @WorkbenchChatPanel(agency, board)
+            </div>
+        </div>
+        
+        <!-- Status Bar at Bottom (VS Code style) -->
+        @components.StatusBarSimple(agency, "Instance: " + board.InstanceName, "Workflow: " + board.WorkflowName)
+    </div>
+</div>
+}
+}
+
+// WorkflowSidebar renders the left sidebar with workflow columns
+templ WorkflowSidebar(board *models.WorkbenchBoard, workflows []models.Workflow) {
+<aside class="sidebar-panel">
+<header class="sidebar-header">
+<h3 class="sidebar-title">
+<span class="icon">
+<i class="fas fa-layer-group"></i>
+</span>
+<span>Columns</span>
+</h3>
+</header>
+<div class="sidebar-content">
+<div class="overview-nav-list">
+for _, column := range board.Columns {
+<div 
+class="overview-nav-item"
+data-column-id={ column.ID }>
+<div class="nav-icon">
+<i class="fas fa-file-alt"></i>
+</div>
+<div class="nav-info">
+<div class="nav-name">
+{ column.WorkItemCode }
+<span class="tag is-small is-light is-info ml-2">{ strconv.Itoa(len(column.Issues)) }</span>
+</div>
+<div class="nav-description">{ column.Name }</div>
+</div>
+</div>
+}
+</div>
+</div>
+</aside>
+}
+
+// WorkflowSelector renders the workflow selection panel with dramatic card design
+templ WorkflowSelector(board *models.WorkbenchBoard, workflows []models.Workflow) {
+<div style="height: 100%; overflow-y: auto; padding: 3rem;">
+<div class="container is-max-desktop">
+<div class="has-text-centered mb-6">
+<h1 class="title is-1 has-text-white mb-3">
+<span class="icon is-large has-text-warning mr-3">
+<i class="fas fa-code-branch fa-3x"></i>
+</span>
+<span>Select Workflow</span>
+</h1>
+<p class="subtitle is-4 has-text-grey-light">
+Choose a workflow to switch your workbench view
+</p>
+<p class="has-text-grey is-size-6">
+Current: <span class="has-text-info has-text-weight-bold">{ board.WorkflowName }</span>
+</p>
+</div>
+
+<div class="columns is-multiline is-centered">
+for _, workflow := range workflows {
+<div class="column is-half-tablet is-one-third-desktop">
+<div class="card" 
+     style="background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%); border: 2px solid #3d3d3d; height: 100%; transition: all 0.3s ease; cursor: pointer;"
+     x-data="{ hover: false }"
+     @mouseenter="hover = true"
+     @mouseleave="hover = false"
+     :style="hover ? 'transform: translateY(-8px); border-color: #4a9eff; box-shadow: 0 12px 24px rgba(74, 158, 255, 0.3);' : ''">
+<a href={ templ.SafeURL("/agencies/" + board.AgencyID + "/instances/" + board.InstanceID + "/workbench?workflow=" + workflow.Key) }
+   style="text-decoration: none; color: inherit; display: block; height: 100%;">
+<div class="card-content" style="padding: 2rem; display: flex; flex-direction: column; height: 100%;">
+<div class="has-text-centered mb-4">
+<span class="icon is-large" style={ "color: " + templ.SafeURL(getWorkflowIconColor(workflow.Key == board.WorkflowID)) }>
+<i class="fas fa-project-diagram fa-3x"></i>
+</span>
+</div>
+<div class="has-text-centered mb-3">
+<p class="title is-4 has-text-white mb-2">{ workflow.Name }</p>
+if workflow.Key == board.WorkflowID {
+<span class="tag is-success is-medium is-light">
+<span class="icon">
+<i class="fas fa-check-circle"></i>
+</span>
+<span>Currently Active</span>
+</span>
+} else {
+<span class="tag is-link is-medium is-light">
+<span class="icon">
+<i class="fas fa-arrow-right"></i>
+</span>
+<span>Click to Switch</span>
+</span>
+}
+</div>
+<div class="mb-3">
+<p class="has-text-grey-light has-text-centered is-size-7 mb-2">
+Workflow ID
+</p>
+<p class="has-text-centered">
+<code class="has-text-info is-size-6">{ workflow.Key }</code>
+</p>
+</div>
+if workflow.Description != "" {
+<div class="content has-text-grey-light is-size-6 mb-4" style="line-height: 1.6; flex-grow: 1;">
+<p class="has-text-centered">{ workflow.Description }</p>
+</div>
+}
+<div class="mt-auto">
+<div class="tags are-medium is-centered">
+<span class="tag is-dark">
+<span class="icon">
+<i class="fas fa-stream"></i>
+</span>
+<span>{ strconv.Itoa(len(workflow.Steps)) } Steps</span>
+</span>
+</div>
+</div>
+</div>
+</a>
+</div>
+</div>
+}
+if len(workflows) == 0 {
+<div class="column is-full">
+<div class="notification is-warning is-light" style="background: rgba(255, 221, 87, 0.1); border: 2px solid #ffe56b;">
+<p class="has-text-centered has-text-white is-size-5">
+<span class="icon is-large">
+<i class="fas fa-exclamation-triangle fa-2x"></i>
+</span>
+<br/>
+<span>No workflows available</span>
+</p>
+</div>
+</div>
+}
+</div>
+</div>
+</div>
+}
+
+// getWorkflowIconColor returns the color for workflow icon based on active state
+func getWorkflowIconColor(isActive bool) string {
+if isActive {
+return "#48c78e" // Success green
+}
+return "#4a9eff" // Info blue
+}
+
+// KanbanBoard renders the center panel with the Kanban board and issue management
+templ KanbanBoard(agency *models.Agency, board *models.WorkbenchBoard) {
+<main class="details-panel">
+<div class="details-content">
+@components.IssueManageForm(agency, board)
+<div class="workbench-board" x-data={ "{ currentColumnIndex: 0, totalColumns: " + strconv.Itoa(len(board.Columns)) + ", columns: " + buildColumnsJSON(board.Columns) + " }" }>
+<!-- Navigation Controls -->
+<div class="level mb-4">
+<div class="level-left">
+<div class="level-item">
+<button 
+class="button is-light" 
+@click="currentColumnIndex = Math.max(0, currentColumnIndex - 1)"
+:disabled="currentColumnIndex === 0"
+type="button">
+<span class="icon">
+<i class="fas fa-chevron-left"></i>
+</span>
+<span>Previous</span>
+<template x-if="currentColumnIndex > 0">
+<span class="tag is-light is-info ml-2" x-text="columns[currentColumnIndex - 1].code"></span>
+</template>
+</button>
+</div>
+<div class="level-item">
+<span class="tag is-medium is-info" x-text="`${currentColumnIndex + 1} / ${totalColumns}`"></span>
+</div>
+<div class="level-item">
+<button 
+class="button is-light"
+@click="currentColumnIndex = Math.min(totalColumns - 1, currentColumnIndex + 1)"
+:disabled="currentColumnIndex === totalColumns - 1"
+type="button">
+<span>Next</span>
+<template x-if="currentColumnIndex < totalColumns - 1">
+<span class="tag is-light is-info ml-2" x-text="columns[currentColumnIndex + 1].code"></span>
+</template>
+<span class="icon">
+<i class="fas fa-chevron-right"></i>
+</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Single Column Display -->
+for i, column := range board.Columns {
+<div 
+class="workbench-column"
+id={ "column-" + column.ID }
+x-show={ "currentColumnIndex === " + strconv.Itoa(i) }
+x-cloak>
+<div class="box has-background-light mb-3">
+<div class="level mb-0">
+<div class="level-left">
+<div>
+<p class="heading mb-1">{ column.WorkItemCode }</p>
+<p class="title is-5 mb-0">{ column.Name }</p>
+</div>
+</div>
+<div class="level-right">
+<span class="tag is-rounded is-medium">{ strconv.Itoa(len(column.Issues)) } issues</span>
+</div>
+</div>
+</div>
+<div class="workbench-issues" style="min-height: 300px;">
+if len(column.Issues) == 0 {
+<div class="box has-background-white-ter has-text-centered" style="padding: 3rem;">
+<p class="has-text-grey-light">
+<span class="icon is-large">
+<i class="fas fa-inbox fa-3x"></i>
+</span>
+</p>
+<p class="title is-5 has-text-grey">No issues</p>
+<p class="has-text-grey">Create a new issue to get started</p>
+</div>
+} else {
+<div class="columns is-multiline">
+for _, issue := range column.Issues {
+<div class="column is-full">
+@components.IssueCard(&issue, agency.Key, board.InstanceID)
+</div>
+}
+</div>
+}
+</div>
+</div>
+}
+</div>
+</div>
+</main>
+}
+
+// WorkbenchChatPanel renders the right panel with AI chat interface
+templ WorkbenchChatPanel(agency *models.Agency, board *models.WorkbenchBoard) {
+<aside class="chat-panel">
+<header class="chat-header">
+<div class="chat-header-content">
+<span class="icon is-medium has-text-dark">
+<i class="fas fa-comments"></i>
+</span>
+<div>
+<h3 class="chat-title">Workbench Chat</h3>
+<p class="chat-subtitle">{ board.WorkflowName }</p>
+</div>
+</div>
+</header>
+<div class="chat-messages-container" id="chat-messages">
+<div class="message ai-message welcome-message">
+<div class="message-content">
+<div class="message-bubble">
+<p><strong>Hi! I'm your Workbench Assistant.</strong> 🤖</p>
+<p>How can I help?</p>
+</div>
+</div>
+</div>
+</div>
+<div class="chat-context-section">
+@WorkbenchContextPanel()
+</div>
+<div class="chat-input-container">
+@WorkbenchChatInput(agency, board)
+</div>
+</aside>
+}
+
+// WorkbenchContextPanel renders the context selection panel
+templ WorkbenchContextPanel() {
+<div class="box context-panel m-0 p-1">
+<header class="level is-mobile m-0 p-0">
+<div class="level-left">
+<div class="level-item">
+<h5 class="title is-6">
+<span class="icon has-text-info">
+<i class="fas fa-layer-group"></i>
+</span>
+<span>Context</span> : <span id="context-current" class="ml-2 has-text-weight-semibold is-size-7"></span>
+</h5>
+</div>
+</div>
+<div class="level-right">
+<div class="level-item">
+<button class="button is-small is-text" onclick="window.ContextManager.clearAllContexts()" title="Clear all contexts" style="display: none;">
+<span class="icon is-small">
+<i class="fas fa-trash"></i>
+</span>
+<span>Clear All</span>
+</button>
+</div>
+</div>
+</header>
+<div id="context-container" class="context-list"></div>
+</div>
+}
+
+// WorkbenchChatInput renders the message input form
+templ WorkbenchChatInput(agency *models.Agency, board *models.WorkbenchBoard) {
+<form id="chat-form" data-agency-id={ agency.Key } data-instance-id={ board.InstanceID } data-workflow-id={ board.WorkflowID } onsubmit="return handleWorkbenchChatSubmit(event)">
+<div class="field has-addons">
+<div class="control is-expanded">
+<input class="input" type="text" name="message" id="user-input" placeholder="Ask about issues, workflows, or get help..." required autocomplete="off"/>
+</div>
+<div class="control">
+<button class="button is-dark" type="submit" id="chat-submit-btn">
+<span class="icon" id="chat-submit-icon">
+<i class="fas fa-paper-plane"></i>
+</span>
+</button>
+</div>
+</div>
+<div id="context-indicator" class="mt-2" style="display: none;">
+<div class="tags">
+<span class="tag is-info is-light">
+<span class="icon is-small">
+<i class="fas fa-layer-group"></i>
+</span>
+<span id="context-count">0 contexts</span>
+</span>
+</div>
+</div>
+</form>
 }

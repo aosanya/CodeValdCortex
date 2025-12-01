@@ -1,0 +1,101 @@
+// Reusable mixins for common patterns
+
+@use 'variables' as *;
+
+// Flexbox centering
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Flex column layout
+@mixin flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+// VS Code panel base styles
+@mixin vscode-panel {
+    background: $vscode-panel-bg;
+    border: 1px solid $vscode-border;
+    border-radius: $border-radius-sm;
+}
+
+// Scrollbar styling
+@mixin custom-scrollbar($width: 12px) {
+    &::-webkit-scrollbar {
+        width: $width;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: $vscode-sidebar-bg;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $scrollbar-thumb;
+        border-radius: $border-radius-md;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: $scrollbar-thumb-hover;
+    }
+}
+
+// Text truncation
+@mixin truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Multi-line truncation
+@mixin truncate-lines($lines: 2) {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// Hover state
+@mixin hover-bg {
+    transition: background $transition-fast;
+
+    &:hover {
+        background: $vscode-hover;
+    }
+}
+
+// Active/selected state
+@mixin active-state {
+    background: $vscode-active;
+    border-left-color: $vscode-accent;
+}
+
+// Icon container
+@mixin icon-container($size: 32px) {
+    width: $size;
+    height: $size;
+    @include flex-center;
+    flex-shrink: 0;
+}
+
+// Panel header
+@mixin panel-header {
+    padding: $spacing-sm $spacing-md;
+    border-bottom: 1px solid $vscode-border;
+    background: $vscode-sidebar-bg;
+    flex-shrink: 0;
+}
+
+// Panel title
+@mixin panel-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-base;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: $vscode-text-muted;
+    margin: 0;
+}

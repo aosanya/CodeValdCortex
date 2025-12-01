@@ -1,0 +1,289 @@
+// Overview Module
+
+@use '../variables' as *;
+@use '../mixins' as *;
+
+// Agency Designer - Overview Module
+// Overview sections, navigation, cards, tips, getting started
+
+/* ===================================
+   OVERVIEW NAVIGATION
+   =================================== */
+
+.overview-nav-list {
+    @include flex-column;
+}
+
+.overview-nav-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    @include hover-bg;
+
+    &.is-active {
+        @include active-state;
+    }
+}
+
+.nav-icon {
+    @include icon-container;
+    background: $vscode-accent;
+    color: white;
+    border-radius: $border-radius-sm;
+    font-size: 1.25rem;
+}
+
+.nav-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.nav-name {
+    @include truncate;
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $vscode-text;
+}
+
+.nav-description {
+    @include truncate;
+    font-size: $font-size-sm;
+    color: $vscode-text-muted;
+}
+
+/* ===================================
+   OVERVIEW CONTENT SECTIONS
+   =================================== */
+
+.overview-section {
+    @include custom-scrollbar;
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-lg;
+}
+
+.section-hero {
+    text-align: center;
+    padding: $spacing-xl $spacing-md;
+    margin-bottom: $spacing-xl;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: $border-radius-lg;
+    border-left: 4px solid $vscode-accent;
+
+    .hero-icon {
+        color: $vscode-accent;
+        margin-bottom: $spacing-md;
+    }
+
+    .title {
+        margin-bottom: $spacing-sm;
+        color: $vscode-text;
+    }
+
+    .subtitle {
+        color: $vscode-text-muted;
+    }
+}
+
+/* ===================================
+   INFO CARDS
+   =================================== */
+
+.agency-info-card {
+    @include vscode-panel;
+    padding: $spacing-lg;
+    border-left: 4px solid $vscode-accent;
+}
+
+.agency-meta {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    margin-top: $spacing-md;
+}
+
+/* ===================================
+   CONTENT LISTS
+   =================================== */
+
+.content-list {
+    list-style: none;
+    padding-left: 0;
+
+    li {
+        padding: $spacing-sm 0;
+        padding-left: $spacing-lg;
+        position: relative;
+
+        &:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: $vscode-accent;
+            font-weight: bold;
+        }
+    }
+}
+
+/* ===================================
+   GETTING STARTED STEPS
+   =================================== */
+
+.getting-started-steps {
+    @include flex-column;
+    gap: $spacing-md;
+}
+
+.step-card {
+    display: flex;
+    gap: $spacing-md;
+    padding: $spacing-md;
+    @include vscode-panel;
+    transition: all $transition-normal;
+
+    &:hover {
+        border-color: $vscode-accent;
+        transform: translateX(4px);
+    }
+}
+
+.step-number {
+    @include flex-center;
+    @include icon-container(40px);
+    background: $vscode-accent;
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-title {
+    font-weight: 600;
+    margin-bottom: $spacing-sm;
+    color: $vscode-text;
+}
+
+/* ===================================
+   TIPS GRID
+   =================================== */
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-md;
+}
+
+.tip-card {
+    display: flex;
+    gap: $spacing-md;
+    padding: $spacing-md;
+    @include vscode-panel;
+}
+
+.tip-icon {
+    color: $vscode-accent;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.tip-content {
+    h4 {
+        font-weight: 600;
+        margin-bottom: $spacing-sm;
+        color: $vscode-text;
+    }
+
+    p {
+        font-size: $font-size-base;
+        color: $vscode-text-muted;
+        margin: 0;
+    }
+}
+
+/* ===================================
+   REQUIREMENTS & GOALS
+   =================================== */
+
+.requirements-list,
+.problem-statement {
+    @include vscode-panel;
+    padding: $spacing-lg;
+    border-left: 4px solid $vscode-accent;
+    font-size: $font-size-lg;
+    line-height: 1.6;
+}
+
+.agent-requirements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: $spacing-md;
+}
+
+.requirement-card,
+.goal-card {
+    @include vscode-panel;
+    padding: $spacing-md;
+}
+
+.req-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $vscode-border;
+
+    .icon {
+        color: $vscode-accent;
+    }
+}
+
+/* ===================================
+   PROGRESS INFO
+   =================================== */
+
+.progress-info {
+    @include vscode-panel;
+    padding: $spacing-md;
+
+    p {
+        margin-bottom: $spacing-sm;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+/* ===================================
+   EMPTY STATES
+   =================================== */
+
+.empty-state {
+    @include flex-center;
+    text-align: center;
+    padding: $spacing-xl;
+    color: $vscode-text-muted;
+}
+
+/* ===================================
+   PROBLEMS LIST
+   =================================== */
+
+.problems-list {
+    @include flex-column;
+    gap: $spacing-sm;
+}
+
+.problem-item {
+    @include vscode-panel;
+    padding: $spacing-md;
+    border-left: 4px solid $vscode-accent;
+}

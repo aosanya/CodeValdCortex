@@ -1,0 +1,13 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+// Workflow Designer - Toolbar Module
+// Top toolbar with controls
+
+/* Toolbar */
+.designer-toolbar {
+    background: $vscode-sidebar-bg;
+    border-bottom: 1px solid $vscode-border;
+    padding: $spacing-md $spacing-lg;
+    flex-shrink: 0;
+}

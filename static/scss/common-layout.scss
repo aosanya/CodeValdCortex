@@ -1,0 +1,115 @@
+// Common Layout SCSS
+// Navbar and status bar shared styles
+
+@use 'variables' as *;
+@use 'mixins' as *;
+
+/* ===========================
+   GLOBAL FONT SIZE
+   =========================== */
+
+/* Apply consistent smaller font size across all agency pages */
+html,
+body {
+    font-size: 0.9rem;
+    padding-bottom: 32px;
+    /* Account for fixed status bar */
+}
+
+/* ===========================
+   NAVBAR COMMON STYLES
+   =========================== */
+
+.navbar {
+    font-size: 1rem;
+}
+
+/* Removed negative margin - was causing navbar to overflow off-screen */
+/* See: documents/3-SofwareDevelopment/css_consolidation_research.md Q4 */
+
+.navbar-menu {
+    margin-left: $spacing-lg;
+    padding-left: $spacing-lg;
+}
+
+.navbar-item {
+    font-size: 0.95rem;
+
+    &.has-dropdown .navbar-link {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+    }
+}
+
+.theme-preview {
+    background-color: #ffffff;
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.navbar-dropdown .navbar-item {
+    white-space: normal;
+}
+
+/* ===========================
+   STATUS BAR COMMON STYLES
+   =========================== */
+
+.vscode-status-bar {
+    grid-area: status;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--theme-status-bar-bg, $vscode-accent) !important;
+    color: var(--theme-status-bar-text, white);
+    padding: $spacing-sm $spacing-lg;
+    font-size: $font-size-sm;
+    height: 32px !important;
+    border-top: 1px solid var(--theme-status-bar-border, $vscode-accent-hover) !important;
+    flex-shrink: 0;
+    z-index: 9999 !important;
+    transition: background-color $transition-normal ease,
+        color $transition-normal ease,
+        border-color $transition-normal ease;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.status-bar-left,
+.status-bar-right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: 0 $spacing-sm;
+    cursor: default;
+
+    i {
+        font-size: 0.7rem;
+    }
+}
+
+.status-text {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+.status-separator {
+    opacity: 0.5;
+    padding: 0 $spacing-xs;
+}

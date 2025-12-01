@@ -61,12 +61,14 @@ templ WelcomeMessage(agencyName string) {
 // ChatMessages renders the conversation history
 templ ChatMessages(messages []ai.Message) {
 	for _, msg := range messages {
-		if msg.Role == "user" {
+		switch msg.Role {
+		case "user":
 			@UserMessage(msg)
-		} else if msg.Role == "assistant" {
+		case "assistant":
 			@AIMessage(msg)
+		default:
+			// Skip system messages and other types - they should not be displayed to users
 		}
-		// Skip system messages - they should not be displayed to users
 	}
 }
 

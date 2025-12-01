@@ -72,7 +72,7 @@ func AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversat
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><!-- Layout View --><div class=\"view-content\" data-view-content=\"layout\"><div class=\"layout-panel\"><h2>Layout Diagram - Coming Soon</h2></div></div></div></div><!-- Right Column: AI Chat (Always Visible) --><div class=\"column is-one-third\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div></div><!-- Right Column: AI Chat (Always Visible) --><div class=\"column is-one-third\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -136,7 +136,7 @@ func ViewSwitcher() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"view-switcher\"><div class=\"view-tab is-active\" data-view=\"overview\"><span class=\"view-icon\">📊</span> <span class=\"view-label\">Overview</span></div><div class=\"view-tab\" data-view=\"layout\"><span class=\"view-icon\">🔗</span> <span class=\"view-label\">Layout</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"view-switcher\"><div class=\"view-tab is-active\" data-view=\"overview\"><span class=\"view-icon\">📊</span> <span class=\"view-label\">Overview</span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
