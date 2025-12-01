@@ -22,7 +22,7 @@ type CompositionFormat string
 const (
 	// FormatHierarchicalSections uses distinct sections for project/folder/task
 	FormatHierarchicalSections CompositionFormat = "hierarchical_sections"
-	
+
 	// FormatConcatenated simply concatenates all prompts
 	FormatConcatenated CompositionFormat = "concatenated"
 )
@@ -108,7 +108,7 @@ func (pc *PromptComposer) composeConcatenated(node *models.DeliverableNode, pare
 // BuildParentChain traverses up the tree to build the parent chain for a node
 func (pc *PromptComposer) BuildParentChain(nodeID string, rootNodes []models.DeliverableNode) []models.DeliverableNode {
 	var chain []models.DeliverableNode
-	
+
 	// Find the node and build its parent chain
 	for i := range rootNodes {
 		if found, parents := pc.findNodeWithParents(&rootNodes[i], nodeID, []models.DeliverableNode{}); found != nil {
@@ -116,7 +116,7 @@ func (pc *PromptComposer) BuildParentChain(nodeID string, rootNodes []models.Del
 			return append(parents, *found)
 		}
 	}
-	
+
 	return chain
 }
 
@@ -126,19 +126,19 @@ func (pc *PromptComposer) findNodeWithParents(current *models.DeliverableNode, t
 	if current.ID == targetID {
 		return current, parents
 	}
-	
+
 	// If this is a folder, search in children
 	if current.Type == models.DeliverableTypeFolder {
 		// Add current to parent chain
 		newParents := append(parents, *current)
-		
+
 		for i := range current.Children {
 			if found, chain := pc.findNodeWithParents(&current.Children[i], targetID, newParents); found != nil {
 				return found, chain
 			}
 		}
 	}
-	
+
 	return nil, nil
 }
 
@@ -146,26 +146,26 @@ func (pc *PromptComposer) findNodeWithParents(current *models.DeliverableNode, t
 func (pc *PromptComposer) ComposePromptForNode(nodeID string, rootNodes []models.DeliverableNode, format CompositionFormat) string {
 	// Build parent chain
 	chain := pc.BuildParentChain(nodeID, rootNodes)
-	
+
 	if len(chain) == 0 {
 		return "Node not found in tree."
 	}
-	
+
 	// Last element in chain is the target node
 	node := chain[len(chain)-1]
 	parents := chain[:len(chain)-1]
-	
+
 	return pc.ComposePrompt(&node, parents, format)
 }
 
 // GeneratePromptPreview creates a summary preview of how prompts will be inherited
 func (pc *PromptComposer) GeneratePromptPreview(rootNodes []models.DeliverableNode) map[string]PromptPreview {
 	previews := make(map[string]PromptPreview)
-	
+
 	for i := range rootNodes {
 		pc.generatePreviewRecursive(&rootNodes[i], []models.DeliverableNode{}, previews)
 	}
-	
+
 	return previews
 }
 
@@ -188,10 +188,10 @@ func (pc *PromptComposer) generatePreviewRecursive(node *models.DeliverableNode,
 			inheritedFrom = append(inheritedFrom, parent.Name)
 		}
 	}
-	
+
 	// Compose the full prompt to get its length
 	fullPrompt := pc.ComposePrompt(node, parents, FormatHierarchicalSections)
-	
+
 	// Create preview
 	previews[node.ID] = PromptPreview{
 		NodeID:             node.ID,
@@ -201,7 +201,7 @@ func (pc *PromptComposer) generatePreviewRecursive(node *models.DeliverableNode,
 		InheritedFrom:      inheritedFrom,
 		TotalPromptLength:  len(fullPrompt),
 	}
-	
+
 	// Recurse into children
 	if node.Type == models.DeliverableTypeFolder {
 		newParents := append(parents, *node)

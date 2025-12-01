@@ -126,7 +126,7 @@ func TestDeliverableValidator_ValidateNode(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validator.ValidateNode(&tt.node, tt.depth)
-			
+
 			if tt.wantError {
 				if err == nil {
 					t.Errorf("expected error but got nil")
@@ -215,7 +215,7 @@ func TestDeliverableValidator_ValidateTree(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validator.ValidateTree(tt.nodes)
-			
+
 			if tt.wantError && err == nil {
 				t.Errorf("expected error but got nil")
 			}

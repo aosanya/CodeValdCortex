@@ -3,16 +3,16 @@ package models
 // DeliverableNode represents a hierarchical deliverable structure (folder or file)
 // with associated prompt instructions and nested children.
 type DeliverableNode struct {
-	ID                 string            `json:"id"`                   // UUID for UI tracking and references
-	Name               string            `json:"name"`                 // "stakeholders.md" or "introduction"
-	Description        string            `json:"description"`          // Brief description of the deliverable
-	Path               string            `json:"path"`                 // Computed full path (e.g., "docs/requirements/stakeholders.md")
-	Type               DeliverableType   `json:"type"`                 // "folder" or "file"
-	PromptInstructions string            `json:"prompt_instructions"`  // AI instructions (what to achieve)
-	Children           []DeliverableNode `json:"children,omitempty"`   // Nested deliverables (for folders)
-	FileExtension      string            `json:"file_extension"`       // ".md" (initially only markdown)
-	ParentID           string            `json:"parent_id,omitempty"`  // Reference to parent node (for validation)
-	Order              int               `json:"order"`                // Display order within parent
+	ID                 string            `json:"id"`                  // UUID for UI tracking and references
+	Name               string            `json:"name"`                // "stakeholders.md" or "introduction"
+	Description        string            `json:"description"`         // Brief description of the deliverable
+	Path               string            `json:"path"`                // Computed full path (e.g., "docs/requirements/stakeholders.md")
+	Type               DeliverableType   `json:"type"`                // "folder" or "file"
+	PromptInstructions string            `json:"prompt_instructions"` // AI instructions (what to achieve)
+	Children           []DeliverableNode `json:"children,omitempty"`  // Nested deliverables (for folders)
+	FileExtension      string            `json:"file_extension"`      // ".md" (initially only markdown)
+	ParentID           string            `json:"parent_id,omitempty"` // Reference to parent node (for validation)
+	Order              int               `json:"order"`               // Display order within parent
 }
 
 // DeliverableType defines whether a deliverable is a folder or file
