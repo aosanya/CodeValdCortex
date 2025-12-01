@@ -295,3 +295,60 @@
         border-bottom: 1px solid $vscode-border;
     }
 }
+
+/* ===================================
+   AGENCY DESIGNER HEADER
+   (Matches Workbench Header Styling)
+   =================================== */
+
+.agency-designer-header {
+    background-color: #1f1f1f;
+    border-bottom: 1px solid #2b2b2b;
+    padding: 0.75rem 1.5rem;
+
+    .level {
+        margin-bottom: 0;
+    }
+
+    .title {
+        font-size: 1.25rem;
+        color: white;
+        margin-bottom: 0;
+    }
+
+    .tags {
+        font-size: 0.75rem;
+    }
+}
+/* ===================================
+   PANEL TABS STYLING
+   =================================== */
+
+.panel-tabs {
+    &.has-background {
+        background-color: #f5f5f5;
+        padding: 0.5rem 0.75rem;
+        margin: 0;
+        border-bottom: 1px solid #dbdbdb;
+        
+        a {
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.2s ease;
+            
+            &:hover {
+                background-color: #ffffff;
+                color: #363636;
+            }
+            
+            &.is-active {
+                background-color: #ffffff;
+                border-bottom-color: #3273dc;
+                color: #3273dc;
+                font-weight: 600;
+            }
+        }
+    }
+}

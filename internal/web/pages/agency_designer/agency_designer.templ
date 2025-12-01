@@ -12,6 +12,7 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 		<!-- Agency Designer Specific CSS -->
 		<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
 		<link rel="stylesheet" href="/static/css/agency-designer.css?v=20251031-context"/>
+		<link rel="stylesheet" href="/static/css/deliverable-tree.css"/>
 		
 		<!-- Agency Designer JavaScript -->
 		<script src="/static/js/agency-designer/utils.js" defer></script>
@@ -23,6 +24,8 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 		<script src="/static/js/agency-designer/introduction.js" defer></script>
 		<script src="/static/js/agency-designer/overview.js" defer></script>
 		<script src="/static/js/agency-designer/goals.js" defer></script>
+		<script src="/static/js/agency-designer/deliverable-tree.js" defer></script>
+		<script src="/static/js/agency-designer/deliverable-tree-integration.js" defer></script>
 		<script src="/static/js/agency-designer/work-items.js" defer></script>
 		<script src="/static/js/agency-designer/roles.js" defer></script>
 		<script src="/static/js/agency-designer/chat.js" defer></script>
@@ -42,17 +45,8 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 			<div class="columns is-gapless vscode-main-content">
 				<!-- Left Column: Designer Panels -->
 				<div class="column is-two-thirds">
-					<!-- View Switcher and Publish Toolbar at Top -->
-					<div class="top-toolbar">
-						<div class="is-flex is-justify-content-space-between is-align-items-center">
-							<div>
-								@ViewSwitcher()
-							</div>
-							<div>
-								@PublishToolbar(currentAgency)
-							</div>
-						</div>
-					</div>
+					<!-- Agency Designer Header with Actions -->
+					@AgencyDesignerHeader(currentAgency)
 					<div class="designer-panels">
 						<!-- Overview View -->
 						<div class="view-content is-active" data-view-content="overview">

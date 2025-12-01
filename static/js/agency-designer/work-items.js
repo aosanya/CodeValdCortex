@@ -74,6 +74,11 @@ window.showWorkItemEditor = async function (mode, workItemKey = null) {
 
     if (mode === 'add') {
         clearWorkItemForm();
+        // Initialize empty tree builder
+        const agencyId = window.getCurrentAgencyId();
+        if (typeof window.initDeliverableTreeBuilder === 'function') {
+            window.initDeliverableTreeBuilder(agencyId, '', []);
+        }
     } else if (mode === 'edit') {
         await loadWorkItemData(workItemKey);
     }
@@ -137,6 +142,13 @@ function populateWorkItemForm(workItem) {
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
     };
     populateForm(formData);
+
+    // Initialize tree builder with existing structured deliverables if available
+    const agencyId = window.getCurrentAgencyId();
+    const deliverables = workItem.deliverables_structured || [];
+    if (typeof window.initDeliverableTreeBuilder === 'function') {
+        window.initDeliverableTreeBuilder(agencyId, workItem.code || '', deliverables);
+    }
 }
 
 // Clear work item form
@@ -167,10 +179,24 @@ window.saveWorkItemFromEditor = async function () {
     const code = document.getElementById('work-item-code-editor')?.value.trim();
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
-    const deliverables = document.getElementById('work-item-deliverables-editor')?.value
-        .split('\n')
-        .map(d => d.trim())
-        .filter(d => d.length > 0);
+
+    // Get deliverables based on mode (tree builder or simple text)
+    let deliverables = [];
+    let deliverablesStructured = null;
+
+    if (typeof window.isUsingSimpleDeliverables === 'function' && window.isUsingSimpleDeliverables()) {
+        // Simple text mode
+        deliverables = document.getElementById('work-item-deliverables-editor')?.value
+            .split('\n')
+            .map(d => d.trim())
+            .filter(d => d.length > 0);
+    } else {
+        // Tree builder mode
+        if (typeof window.getDeliverablesStructuredData === 'function') {
+            deliverablesStructured = window.getDeliverablesStructuredData();
+        }
+    }
+
     const tags = document.getElementById('work-item-tags-editor')?.value
         .split(',')
         .map(t => t.trim())
@@ -205,6 +231,7 @@ window.saveWorkItemFromEditor = async function () {
         title,
         description,
         deliverables,
+        deliverables_structured: deliverablesStructured,
         goal_keys: selectedGoals,
         tags
     };

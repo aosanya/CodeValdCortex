@@ -16,7 +16,28 @@ title="Cancel">
 <span class="icon"><i class="fas fa-times"></i></span>
 </button>
 </header>
-<div class="card-content">
+<div class="card-content m-0 p-0">
+<!-- Single Panel with Tabs -->
+<nav class="panel">
+<p class="panel-tabs has-background">
+<a class="is-active" data-tab="basic" onclick="switchWorkItemTab(event, 'basic')">
+<span class="icon is-small"><i class="fas fa-info-circle"></i></span>
+<span>Basic Info</span>
+</a>
+<a data-tab="deliverables" onclick="switchWorkItemTab(event, 'deliverables')">
+<span class="icon is-small"><i class="fas fa-folder-tree"></i></span>
+<span>Deliverables</span>
+</a>
+<a data-tab="goals" onclick="switchWorkItemTab(event, 'goals')">
+<span class="icon is-small"><i class="fas fa-bullseye"></i></span>
+<span>Goals & Tags</span>
+</a>
+</p>
+
+<!-- Tab Content 1: Basic Information -->
+<div id="work-item-tab-basic" class="work-item-tab-content">
+<div class="panel-block is-block">
+<div class="content p-3">
 <!-- Code Field -->
 <div class="field">
 <label class="label">Work Item Code</label>
@@ -58,10 +79,23 @@ style="font-family: monospace; font-size: 14px;"></textarea>
 </div>
 <p class="help">Provide a detailed description of the work to be done.</p>
 </div>
+</div>
+</div>
+</div>
 
-<!-- Deliverables Field -->
+<!-- Tab Content 2: Deliverables -->
+<div id="work-item-tab-deliverables" class="work-item-tab-content" style="display: none;">
+<div class="panel-block is-block">
+<div class="content p-3">
+<!-- Deliverable Tree Builder Component -->
+<div id="deliverable-tree-container">
+<!-- Tree builder will be rendered here dynamically -->
+</div>
+
+<!-- Fallback: Simple text input (hidden by default) -->
+<div id="deliverable-simple-input" class="is-hidden">
 <div class="field">
-<label class="label">Deliverables</label>
+<label class="label">Expected Deliverables (Simple Mode)</label>
 <div class="control">
 <textarea 
 class="textarea"
@@ -72,7 +106,24 @@ style="font-family: monospace; font-size: 14px;"></textarea>
 </div>
 <p class="help">List the expected deliverables or outputs (one per line).</p>
 </div>
+</div>
 
+<div class="field mt-4">
+<div class="control">
+<label class="checkbox">
+<input type="checkbox" id="use-simple-deliverables" onchange="toggleDeliverableMode(this.checked)"/>
+<span class="ml-2">Use simple text mode instead of tree builder</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Tab Content 3: Goals & Tags -->
+<div id="work-item-tab-goals" class="work-item-tab-content" style="display: none;">
+<div class="panel-block is-block">
+<div class="content p-3">
 <!-- Goals Field -->
 <div class="field">
 <label class="label">Linked Goals</label>
@@ -96,6 +147,38 @@ placeholder="e.g., backend, api, security">
 </div>
 <p class="help">Comma-separated tags for categorization.</p>
 </div>
+</div>
+</div>
+</div>
+</nav>
+
+<script>
+// Tab switching function for work item editor
+window.switchWorkItemTab = function(event, tabName) {
+    event.preventDefault();
+    
+    // Hide all tab contents
+    const tabContents = document.querySelectorAll('.work-item-tab-content');
+    tabContents.forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    // Remove active class from all tabs
+    const tabs = document.querySelectorAll('.panel-tabs a');
+    tabs.forEach(tab => {
+        tab.classList.remove('is-active');
+    });
+    
+    // Show selected tab content
+    const selectedContent = document.getElementById('work-item-tab-' + tabName);
+    if (selectedContent) {
+        selectedContent.style.display = 'block';
+    }
+    
+    // Add active class to clicked tab
+    event.currentTarget.classList.add('is-active');
+}
+</script>
 </div>
 <footer class="card-footer">
 <div class="card-footer-item">

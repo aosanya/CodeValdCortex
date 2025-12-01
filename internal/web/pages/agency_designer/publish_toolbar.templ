@@ -139,6 +139,68 @@ templ PublishToolbar(currentAgency *models.Agency) {
 	</div>
 }
 
+// AgencyDesignerHeader renders a full-width header bar similar to the workbench header
+// Contains title on the left and action buttons (Validate/Publish) on the right
+templ AgencyDesignerHeader(currentAgency *models.Agency) {
+	<div class="agency-designer-header">
+		<div class="level mb-0">
+			<div class="level-left">
+				<div class="level-item">
+					<h3 class="title is-5 has-text-white mb-0">
+						<span class="icon is-small mr-2">
+							<i class="fas fa-pencil-ruler"></i>
+						</span>
+						<span>Agency Designer</span>
+					</h3>
+				</div>
+			</div>
+			<div class="level-right">
+				<div class="level-item">
+					<button 
+						class="button is-info is-small"
+						onclick="handleValidateAgency()"
+						id="validate-btn"
+						title="Validate agency specification">
+						<span class="icon is-small">
+							<i class="fas fa-check-circle"></i>
+						</span>
+						<span>Validate</span>
+					</button>
+				</div>
+				<div class="level-item">
+					<button 
+						class="button is-primary is-small"
+						onclick="openPublishDialog()"
+						id="publish-btn"
+						title="Publish agency as new version">
+						<span class="icon is-small">
+							<i class="fas fa-upload"></i>
+						</span>
+						<span>Publish</span>
+					</button>
+				</div>
+				if string(currentAgency.State) != "draft" && string(currentAgency.State) != "" {
+					<div class="level-item">
+						<button 
+							class="button is-link is-small"
+							onclick="openTagDialog()"
+							id="tag-btn"
+							title="Create tag for current state">
+							<span class="icon is-small">
+								<i class="fas fa-tag"></i>
+							</span>
+							<span>Tag</span>
+						</button>
+					</div>
+				}
+				<div class="level-item">
+					@StateBadge(string(currentAgency.State))
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
 // StateBadge renders a colored badge showing the current agency state
 templ StateBadge(state string) {
 	<span class={ "tag", "is-medium", stateToClass(state) }>

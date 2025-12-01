@@ -26,7 +26,7 @@ function deliverableTree() {
             if (this.nodes.length === 0) {
                 return '';
             }
-            
+
             return `<div class="tree-nodes">${this.nodes.map((node, index) => this.renderNode(node, 0, index)).join('')}</div>`;
         },
 
@@ -37,7 +37,7 @@ function deliverableTree() {
             const paddingLeft = depth * 20;
             const hasChildren = node.children && node.children.length > 0;
             const nodeId = node.id;
-            
+
             return `
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
                      style="padding-left: ${paddingLeft}px"
