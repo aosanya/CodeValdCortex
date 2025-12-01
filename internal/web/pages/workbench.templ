@@ -117,28 +117,33 @@ templ WorkflowSidebar(board *models.WorkbenchBoard, workflows []models.Workflow)
 <div class="sidebar-content">
 <div class="overview-nav-list">
 for _, workflow := range workflows {
-<div 
+<a 
+href={ templ.SafeURL("/agencies/" + board.AgencyID + "/instances/" + board.InstanceID + "/workbench?workflow=" + workflow.Key) }
 class={ "overview-nav-item", templ.KV("is-active", workflow.Key == board.WorkflowID) }
 data-workflow-id={ workflow.Key }
-x-data="{ expanded: false }">
+x-data={ "{ expanded: " + strconv.FormatBool(workflow.Key == board.WorkflowID) + " }" }
+style="text-decoration: none; color: inherit;">
 <div class="nav-icon">
 <i class="fas fa-project-diagram"></i>
 </div>
 <div class="nav-info">
-<div class="nav-name">{ workflow.Name }</div>
-<div class="nav-description">{ workflow.Description }</div>
+<div class="is-flex is-align-items-center">
 if workflow.Key == board.WorkflowID {
-<!-- Collapsible columns tree for active workflow -->
-<div class="mt-2">
 <button 
-@click="expanded = !expanded"
-class="button is-small is-text is-fullwidth has-text-left px-0 py-1"
-type="button">
+@click.stop="expanded = !expanded"
+class="button is-small is-text p-0 mr-1"
+type="button"
+style="height: auto; min-height: auto;">
 <span class="icon is-small has-text-info">
 <i class="fas" :class="expanded ? 'fa-folder-open' : 'fa-folder'"></i>
 </span>
-<span class="is-size-7 has-text-weight-semibold">Columns ({ strconv.Itoa(len(board.Columns)) })</span>
 </button>
+}
+<div class="nav-name">{ workflow.Name }</div>
+</div>
+<div class="nav-description">{ workflow.Description }</div>
+if workflow.Key == board.WorkflowID {
+<!-- Collapsible columns tree for active workflow -->
 <div x-show="expanded" x-collapse class="mt-1" style="border-left: 2px solid #e0e0e0; margin-left: 0.5rem;">
 for _, column := range board.Columns {
 <div class="is-flex is-align-items-center py-1 pl-2" style="position: relative;">
@@ -153,10 +158,9 @@ for _, column := range board.Columns {
 </div>
 }
 </div>
-</div>
 }
 </div>
-</div>
+</a>
 }
 </div>
 </div>

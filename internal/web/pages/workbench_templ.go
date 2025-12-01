@@ -186,97 +186,107 @@ func WorkflowSidebar(board *models.WorkbenchBoard, workflows []models.Workflow) 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" x-data=\"{ expanded: false }\"><div class=\"nav-icon\"><i class=\"fas fa-project-diagram\"></i></div><div class=\"nav-info\"><div class=\"nav-name\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" x-data=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(workflow.Name)
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs("{ expanded: " + strconv.FormatBool(workflow.Key == board.WorkflowID) + " }")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 128, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 123, Col: 85}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div class=\"nav-description\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"><div class=\"nav-icon\"><i class=\"fas fa-project-diagram\"></i></div><div class=\"nav-info\"><div class=\"is-flex is-align-items-center\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if workflow.Key == board.WorkflowID {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<button @click=\"expanded = !expanded\" class=\"button is-small is-text p-0 mr-1\" type=\"button\" style=\"height: auto; min-height: auto;\"><span class=\"icon is-small has-text-info\"><i class=\"fas\" :class=\"expanded ? 'fa-folder-open' : 'fa-folder'\"></i></span></button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"nav-name\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(workflow.Description)
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(workflow.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 129, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 140, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div></div><div class=\"nav-description\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(workflow.Description)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 142, Col: 51}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if workflow.Key == board.WorkflowID {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<!-- Collapsible columns tree for active workflow --> <div class=\"mt-2\"><button @click=\"expanded = !expanded\" class=\"button is-small is-text is-fullwidth has-text-left px-0 py-1\" type=\"button\"><span class=\"icon is-small has-text-info\"><i class=\"fas\" :class=\"expanded ? 'fa-folder-open' : 'fa-folder'\"></i></span> <span class=\"is-size-7 has-text-weight-semibold\">Columns (")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(board.Columns)))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 140, Col: 92}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ")</span></button><div x-show=\"expanded\" x-collapse class=\"mt-1\" style=\"border-left: 2px solid #e0e0e0; margin-left: 0.5rem;\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<!-- Collapsible columns tree for active workflow --> <div x-show=\"expanded\" x-collapse class=\"mt-1\" style=\"border-left: 2px solid #e0e0e0; margin-left: 0.5rem;\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, column := range board.Columns {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div class=\"is-flex is-align-items-center py-1 pl-2\" style=\"position: relative;\"><span style=\"position: absolute; left: -2px; width: 10px; height: 1px; background: #e0e0e0;\"></span> <span class=\"icon is-small has-text-grey-light\"><i class=\"fas fa-file-alt\"></i></span> <span class=\"is-size-7 has-text-grey ml-1\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"is-flex is-align-items-center py-1 pl-2\" style=\"position: relative;\"><span style=\"position: absolute; left: -2px; width: 10px; height: 1px; background: #e0e0e0;\"></span> <span class=\"icon is-small has-text-grey-light\"><i class=\"fas fa-file-alt\"></i></span> <span class=\"is-size-7 has-text-grey ml-1\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(column.WorkItemCode)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 150, Col: 21}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 153, Col: 21}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span> <span class=\"tag is-small is-light is-info ml-auto\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span> <span class=\"tag is-small is-light is-info ml-auto\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(column.Issues)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 152, Col: 86}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 155, Col: 86}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div></div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -306,7 +316,7 @@ func KanbanBoard(agency *models.Agency, board *models.WorkbenchBoard) templ.Comp
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<main class=\"details-panel\"><div class=\"details-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<main class=\"details-panel\"><div class=\"details-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -314,105 +324,105 @@ func KanbanBoard(agency *models.Agency, board *models.WorkbenchBoard) templ.Comp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<div class=\"workbench-board\" x-data=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"workbench-board\" x-data=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs("{ currentColumnIndex: 0, totalColumns: " + strconv.Itoa(len(board.Columns)) + ", columns: " + buildColumnsJSON(board.Columns) + " }")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 171, Col: 171}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 173, Col: 171}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><!-- Navigation Controls --><div class=\"level mb-4\"><div class=\"level-left\"><div class=\"level-item\"><button class=\"button is-light\" @click=\"currentColumnIndex = Math.max(0, currentColumnIndex - 1)\" :disabled=\"currentColumnIndex === 0\" type=\"button\"><span class=\"icon\"><i class=\"fas fa-chevron-left\"></i></span> <span>Previous</span><template x-if=\"currentColumnIndex > 0\"><span class=\"tag is-light is-info ml-2\" x-text=\"columns[currentColumnIndex - 1].code\"></span></template></button></div><div class=\"level-item\"><span class=\"tag is-medium is-info\" x-text=\"`${currentColumnIndex + 1} / ${totalColumns}`\"></span></div><div class=\"level-item\"><button class=\"button is-light\" @click=\"currentColumnIndex = Math.min(totalColumns - 1, currentColumnIndex + 1)\" :disabled=\"currentColumnIndex === totalColumns - 1\" type=\"button\"><span>Next</span><template x-if=\"currentColumnIndex < totalColumns - 1\"><span class=\"tag is-light is-info ml-2\" x-text=\"columns[currentColumnIndex + 1].code\"></span></template><span class=\"icon\"><i class=\"fas fa-chevron-right\"></i></span></button></div></div></div><!-- Single Column Display -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\"><!-- Navigation Controls --><div class=\"level mb-4\"><div class=\"level-left\"><div class=\"level-item\"><button class=\"button is-light\" @click=\"currentColumnIndex = Math.max(0, currentColumnIndex - 1)\" :disabled=\"currentColumnIndex === 0\" type=\"button\"><span class=\"icon\"><i class=\"fas fa-chevron-left\"></i></span> <span>Previous</span><template x-if=\"currentColumnIndex > 0\"><span class=\"tag is-light is-info ml-2\" x-text=\"columns[currentColumnIndex - 1].code\"></span></template></button></div><div class=\"level-item\"><span class=\"tag is-medium is-info\" x-text=\"`${currentColumnIndex + 1} / ${totalColumns}`\"></span></div><div class=\"level-item\"><button class=\"button is-light\" @click=\"currentColumnIndex = Math.min(totalColumns - 1, currentColumnIndex + 1)\" :disabled=\"currentColumnIndex === totalColumns - 1\" type=\"button\"><span>Next</span><template x-if=\"currentColumnIndex < totalColumns - 1\"><span class=\"tag is-light is-info ml-2\" x-text=\"columns[currentColumnIndex + 1].code\"></span></template><span class=\"icon\"><i class=\"fas fa-chevron-right\"></i></span></button></div></div></div><!-- Single Column Display -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for i, column := range board.Columns {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"workbench-column\" id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div class=\"workbench-column\" id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs("column-" + column.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 214, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 216, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" x-show=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\" x-show=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs("currentColumnIndex === " + strconv.Itoa(i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 215, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 217, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" x-cloak><div class=\"box has-background-light mb-3\"><div class=\"level mb-0\"><div class=\"level-left\"><div><p class=\"heading mb-1\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" x-cloak><div class=\"box has-background-light mb-3\"><div class=\"level mb-0\"><div class=\"level-left\"><div><p class=\"heading mb-1\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(column.WorkItemCode)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 221, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 223, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</p><p class=\"title is-5 mb-0\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</p><p class=\"title is-5 mb-0\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(column.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 222, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 224, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</p></div></div><div class=\"level-right\"><span class=\"tag is-rounded is-medium\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</p></div></div><div class=\"level-right\"><span class=\"tag is-rounded is-medium\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(len(column.Issues)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 226, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 228, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, " issues</span></div></div></div><div class=\"workbench-issues\" style=\"min-height: 300px;\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, " issues</span></div></div></div><div class=\"workbench-issues\" style=\"min-height: 300px;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(column.Issues) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div class=\"box has-background-white-ter has-text-centered\" style=\"padding: 3rem;\"><p class=\"has-text-grey-light\"><span class=\"icon is-large\"><i class=\"fas fa-inbox fa-3x\"></i></span></p><p class=\"title is-5 has-text-grey\">No issues</p><p class=\"has-text-grey\">Create a new issue to get started</p></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"box has-background-white-ter has-text-centered\" style=\"padding: 3rem;\"><p class=\"has-text-grey-light\"><span class=\"icon is-large\"><i class=\"fas fa-inbox fa-3x\"></i></span></p><p class=\"title is-5 has-text-grey\">No issues</p><p class=\"has-text-grey\">Create a new issue to get started</p></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"columns is-multiline\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div class=\"columns is-multiline\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, issue := range column.Issues {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<div class=\"column is-full\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div class=\"column is-full\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -420,22 +430,22 @@ func KanbanBoard(agency *models.Agency, board *models.WorkbenchBoard) templ.Comp
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div></div></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div></div></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -465,20 +475,20 @@ func WorkbenchChatPanel(agency *models.Agency, board *models.WorkbenchBoard) tem
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<aside class=\"chat-panel\"><header class=\"chat-header\"><div class=\"chat-header-content\"><span class=\"icon is-medium has-text-dark\"><i class=\"fas fa-comments\"></i></span><div><h3 class=\"chat-title\">Workbench Chat</h3><p class=\"chat-subtitle\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<aside class=\"chat-panel\"><header class=\"chat-header\"><div class=\"chat-header-content\"><span class=\"icon is-medium has-text-dark\"><i class=\"fas fa-comments\"></i></span><div><h3 class=\"chat-title\">Workbench Chat</h3><p class=\"chat-subtitle\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(board.WorkflowName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 268, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 270, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</p></div></div></header><div class=\"chat-messages-container\" id=\"chat-messages\"><div class=\"message ai-message welcome-message\"><div class=\"message-content\"><div class=\"message-bubble\"><p><strong>Hi! I'm your Workbench Assistant.</strong> 🤖</p><p>How can I help?</p></div></div></div></div><div class=\"chat-context-section\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</p></div></div></header><div class=\"chat-messages-container\" id=\"chat-messages\"><div class=\"message ai-message welcome-message\"><div class=\"message-content\"><div class=\"message-bubble\"><p><strong>Hi! I'm your Workbench Assistant.</strong> 🤖</p><p>How can I help?</p></div></div></div></div><div class=\"chat-context-section\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -486,7 +496,7 @@ func WorkbenchChatPanel(agency *models.Agency, board *models.WorkbenchBoard) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "</div><div class=\"chat-input-container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "</div><div class=\"chat-input-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -494,7 +504,7 @@ func WorkbenchChatPanel(agency *models.Agency, board *models.WorkbenchBoard) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</div></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -524,7 +534,7 @@ func WorkbenchContextPanel() templ.Component {
 			templ_7745c5c3_Var23 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div class=\"box context-panel m-0 p-1\"><header class=\"level is-mobile m-0 p-0\"><div class=\"level-left\"><div class=\"level-item\"><h5 class=\"title is-6\"><span class=\"icon has-text-info\"><i class=\"fas fa-layer-group\"></i></span> <span>Context</span> : <span id=\"context-current\" class=\"ml-2 has-text-weight-semibold is-size-7\"></span></h5></div></div><div class=\"level-right\"><div class=\"level-item\"><button class=\"button is-small is-text\" onclick=\"window.ContextManager.clearAllContexts()\" title=\"Clear all contexts\" style=\"display: none;\"><span class=\"icon is-small\"><i class=\"fas fa-trash\"></i></span> <span>Clear All</span></button></div></div></header><div id=\"context-container\" class=\"context-list\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div class=\"box context-panel m-0 p-1\"><header class=\"level is-mobile m-0 p-0\"><div class=\"level-left\"><div class=\"level-item\"><h5 class=\"title is-6\"><span class=\"icon has-text-info\"><i class=\"fas fa-layer-group\"></i></span> <span>Context</span> : <span id=\"context-current\" class=\"ml-2 has-text-weight-semibold is-size-7\"></span></h5></div></div><div class=\"level-right\"><div class=\"level-item\"><button class=\"button is-small is-text\" onclick=\"window.ContextManager.clearAllContexts()\" title=\"Clear all contexts\" style=\"display: none;\"><span class=\"icon is-small\"><i class=\"fas fa-trash\"></i></span> <span>Clear All</span></button></div></div></header><div id=\"context-container\" class=\"context-list\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -554,46 +564,46 @@ func WorkbenchChatInput(agency *models.Agency, board *models.WorkbenchBoard) tem
 			templ_7745c5c3_Var24 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<form id=\"chat-form\" data-agency-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<form id=\"chat-form\" data-agency-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(agency.Key)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 322, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 324, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" data-instance-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" data-instance-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(board.InstanceID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 322, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 324, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" data-workflow-id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" data-workflow-id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var27 string
 		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(board.WorkflowID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 322, Col: 124}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workbench.templ`, Line: 324, Col: 124}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" onsubmit=\"return handleWorkbenchChatSubmit(event)\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Ask about issues, workflows, or get help...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-dark\" type=\"submit\" id=\"chat-submit-btn\"><span class=\"icon\" id=\"chat-submit-icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" onsubmit=\"return handleWorkbenchChatSubmit(event)\"><div class=\"field has-addons\"><div class=\"control is-expanded\"><input class=\"input\" type=\"text\" name=\"message\" id=\"user-input\" placeholder=\"Ask about issues, workflows, or get help...\" required autocomplete=\"off\"></div><div class=\"control\"><button class=\"button is-dark\" type=\"submit\" id=\"chat-submit-btn\"><span class=\"icon\" id=\"chat-submit-icon\"><i class=\"fas fa-paper-plane\"></i></span></button></div></div><div id=\"context-indicator\" class=\"mt-2\" style=\"display: none;\"><div class=\"tags\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-layer-group\"></i></span> <span id=\"context-count\">0 contexts</span></span></div></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

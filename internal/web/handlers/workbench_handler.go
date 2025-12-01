@@ -81,7 +81,8 @@ func (h *WorkbenchHandler) ShowInstanceSelector(c *gin.Context) {
 func (h *WorkbenchHandler) ShowWorkbench(c *gin.Context) {
 	agencyID := c.Param("id")
 	instanceID := c.Param("instance_id")
-	tagName := c.Query("tag") // Optional: specific tag to use
+	tagName := c.Query("tag")         // Optional: specific tag to use
+	workflowID := c.Query("workflow") // Optional: specific workflow to display
 
 	// Get agency
 	agency, err := h.agencyService.GetAgency(c.Request.Context(), agencyID)
@@ -98,7 +99,13 @@ func (h *WorkbenchHandler) ShowWorkbench(c *gin.Context) {
 	var workflows []models.Workflow
 	if tagName != "" {
 		// Use specific tag
-		board, err = h.workbenchService.GenerateBoard(c.Request.Context(), agencyID, instanceID, tagName)
+		if workflowID != "" {
+			// Generate board for specific workflow
+			board, err = h.workbenchService.GenerateBoardForWorkflow(c.Request.Context(), agencyID, instanceID, tagName, workflowID)
+		} else {
+			// Use first workflow from tag
+			board, err = h.workbenchService.GenerateBoard(c.Request.Context(), agencyID, instanceID, tagName)
+		}
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to generate workbench board")
 			c.HTML(http.StatusInternalServerError, "error.html", gin.H{
@@ -115,7 +122,13 @@ func (h *WorkbenchHandler) ShowWorkbench(c *gin.Context) {
 		}
 	} else {
 		// Use current specification
-		board, err = h.workbenchService.GenerateBoardFromSpecification(c.Request.Context(), agencyID, instanceID)
+		if workflowID != "" {
+			// Generate board for specific workflow
+			board, err = h.workbenchService.GenerateBoardForWorkflowFromSpecification(c.Request.Context(), agencyID, instanceID, workflowID)
+		} else {
+			// Use first workflow from specification
+			board, err = h.workbenchService.GenerateBoardFromSpecification(c.Request.Context(), agencyID, instanceID)
+		}
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to generate workbench board")
 			c.HTML(http.StatusInternalServerError, "error.html", gin.H{
