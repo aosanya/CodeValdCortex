@@ -88,6 +88,7 @@ git branch -d feature/MVP-XXX_description
 **Key Documents**:
 - [Git-Based Document System](mvp-details/work-items-integration/git-based-document-system.md) - Complete Git implementation in ArangoDB
 - [Kanban Workflow](mvp-details/work-items-integration/kanban-workflow.md) - End-to-end workflow from issue creation to completion
+- [Deliverables Structure](mvp-details/work-items-integration/deliverables-structure-research.md) - Enhanced deliverable architecture with folder trees and AI prompt instructions
 - [Architectural Decisions](mvp-details/work-items-integration/architecture/vcs-integration-decisions.md) - Why internal Git vs external VCS
 
 ---
