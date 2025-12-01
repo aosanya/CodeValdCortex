@@ -153,10 +153,10 @@ func (s *WorkbenchService) GenerateBoard(ctx context.Context, agencyID, instance
 
 			// Create column
 			column := models.BoardColumn{
-				ID:           fmt.Sprintf("col-%s", item.WorkItemKey),
+				ID:           fmt.Sprintf("col-%s", stepIdentifier),
 				Name:         workItem.Title,
 				WorkItemCode: workItem.Code, // Use the actual Code field from WorkItem
-				WorkItemKey:  item.WorkItemKey,
+				WorkItemKey:  stepIdentifier,
 				Order:        columnOrder,
 				Issues:       issueValues,
 			}
@@ -297,10 +297,10 @@ func (s *WorkbenchService) GenerateBoardFromSpecification(ctx context.Context, a
 
 			// Create column
 			column := models.BoardColumn{
-				ID:           fmt.Sprintf("col-%s", item.WorkItemKey),
+				ID:           fmt.Sprintf("col-%s", stepIdentifier),
 				Name:         workItem.Title,
 				WorkItemCode: workItem.Code, // Use the actual Code field from WorkItem
-				WorkItemKey:  item.WorkItemKey,
+				WorkItemKey:  stepIdentifier,
 				Order:        columnOrder,
 				Issues:       issueValues,
 			}
@@ -450,10 +450,10 @@ func (s *WorkbenchService) generateBoardForWorkflow(ctx context.Context, agencyI
 
 			// Create column
 			column := models.BoardColumn{
-				ID:           fmt.Sprintf("col-%s", item.WorkItemKey),
+				ID:           fmt.Sprintf("col-%s", stepIdentifier),
 				Name:         workItem.Title,
 				WorkItemCode: workItem.Code,
-				WorkItemKey:  item.WorkItemKey,
+				WorkItemKey:  stepIdentifier,
 				Order:        columnOrder,
 				Issues:       issueValues,
 			}

@@ -12,12 +12,15 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 		<div class="level">
 			<div class="level-left">
 				<div class="level-item">
-					<strong>Create New Issue</strong>
+					<strong id="panelHeaderText">Create New Issue</strong>
 				</div>
 			</div>
 			<div class="level-right">
 				<div class="level-item">
-					<button class="button" onclick="closeCreateIssuePanel()">Close</button>
+					<button class="button" onclick="closeCreateIssuePanel()">
+						<span class="icon"><i class="fas fa-times"></i></span>
+						<span>Close</span>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -37,10 +40,33 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 				</div>
 			</div>
 
+			<div class="field">
+				<label class="checkbox">
+					<input type="checkbox" id="moveIssueCheckbox" onchange="toggleMoveToColumn()"/>
+					<span>Move to next workflow step</span>
+				</label>
+			</div>
+
+			<div class="field" id="columnField" style="display: none;">
+				<label class="label">Next Step</label>
+				<div class="control">
+					<div class="select is-fullwidth">
+						<select name="column_id" id="columnSelect">
+							<!-- Only immediate next step populated by JavaScript -->
+						</select>
+					</div>
+				</div>
+				<p class="help">Move this issue to the next workflow step</p>
+			</div>
+
+			<!-- Hidden field to store all columns data -->
+			<input type="hidden" id="columnsData" value={ templ.JSONString(board.Columns) }/>
+			<input type="hidden" id="currentColumnId" value=""/>
+
 			<!-- Workflow is not shown to the user; we attach board.WorkflowID in the request -->
 			<div class="field is-grouped">
 				<div class="control">
-					<button type="button" class="button is-primary" onclick="submitCreateIssue()">Create Issue</button>
+					<button type="button" class="button is-primary" id="submitIssueBtn" onclick="submitCreateIssue()">Create Issue</button>
 				</div>
 				<div class="control">
 					<button type="button" class="button" onclick="closeCreateIssuePanel()">Cancel</button>
@@ -51,6 +77,101 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 
 	<!-- Issue Creation JavaScript -->
 	<script>
+		// Toggle the move to column field
+		function toggleMoveToColumn() {
+			const checkbox = document.getElementById('moveIssueCheckbox');
+			const columnField = document.getElementById('columnField');
+			if (!checkbox || !columnField) return;
+
+			if (checkbox.checked) {
+				// Populate next step when checkbox is checked
+				const currentColId = document.getElementById('currentColumnId').value;
+				populateNextSteps(currentColId);
+				columnField.style.display = 'block';
+			} else {
+				columnField.style.display = 'none';
+			}
+		}
+
+		// Get all columns from hidden input
+		function getAllColumns() {
+			const columnsData = document.getElementById('columnsData');
+			if (!columnsData) return [];
+			try {
+				return JSON.parse(columnsData.value || '[]');
+			} catch (e) {
+				console.error('Failed to parse columns data:', e);
+				return [];
+			}
+		}
+
+		// Find which column contains an issue
+		function findIssueColumn(issueKey) {
+			const allColumns = getAllColumns();
+			for (let i = 0; i < allColumns.length; i++) {
+				const column = allColumns[i];
+				if (column.issues && Array.isArray(column.issues)) {
+					const found = column.issues.find(issue => issue._key === issueKey || issue.key === issueKey);
+					if (found) {
+						return { columnId: column.id, columnIndex: i };
+					}
+				}
+			}
+			return { columnId: null, columnIndex: -1 };
+		}
+
+		// Populate next step options based on current column
+		function populateNextSteps(currentColumnId) {
+			const columnSelect = document.getElementById('columnSelect');
+			const columnField = document.getElementById('columnField');
+			const moveCheckbox = document.getElementById('moveIssueCheckbox');
+			const checkboxContainer = moveCheckbox ? moveCheckbox.closest('.field') : null;
+			
+			if (!columnSelect || !columnField) return;
+
+			const allColumns = getAllColumns();
+			if (allColumns.length === 0) return;
+
+			// Find current column index - match by ID
+			const currentIndex = allColumns.findIndex(col => {
+				// Try exact match first
+				if (col.id === currentColumnId) return true;
+				// Try case-insensitive match
+				if (col.id && col.id.toLowerCase() === (currentColumnId || '').toLowerCase()) return true;
+				// Try trimmed match
+				if (col.id && col.id.trim() === (currentColumnId || '').trim()) return true;
+				return false;
+			});
+			
+			// Clear existing options
+			columnSelect.innerHTML = '';
+
+			if (currentIndex === -1) {
+				// If no current column found, show first column only
+				const firstCol = allColumns[0];
+				const option = document.createElement('option');
+				option.value = firstCol.id;
+				option.textContent = `${firstCol.work_item_code} - ${firstCol.name}`;
+				columnSelect.appendChild(option);
+				columnField.style.display = 'block';
+				if (checkboxContainer) checkboxContainer.style.display = 'block';
+			} else if (currentIndex < allColumns.length - 1) {
+				// Show ONLY the immediate next step
+				const nextCol = allColumns[currentIndex + 1];
+				const option = document.createElement('option');
+				option.value = nextCol.id;
+				option.textContent = `${nextCol.work_item_code} - ${nextCol.name}`;
+				columnSelect.appendChild(option);
+				columnField.style.display = 'block';
+				if (checkboxContainer) checkboxContainer.style.display = 'block';
+			} else {
+				// Already in last column, hide both the field and checkbox completely
+				columnField.style.display = 'none';
+				if (checkboxContainer) checkboxContainer.style.display = 'none';
+				if (moveCheckbox) moveCheckbox.checked = false;
+			}
+		}
+
 		function openIssueDetails(agencyID, instanceID, issueKey) {
 			// Fetch issue details and populate the form for editing
 			fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${issueKey}`)
@@ -64,26 +185,68 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 					panel.dataset.editingIssueKey = issueKey;
 
 					// Update header text
-					const header = panel.querySelector('.level-left .level-item strong');
+					const header = document.getElementById('panelHeaderText');
 					if (header) {
-						header.textContent = 'Edit Issue';
+						header.textContent = 'Edit Issue #' + (issue.issue_number || issueKey);
 					}
 
 					// Update button text
-					const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
+					const submitBtn = document.getElementById('submitIssueBtn');
 					if (submitBtn) {
-						submitBtn.textContent = 'Update Issue';
+						submitBtn.innerHTML = '<span class="icon"><i class="fas fa-save"></i></span><span>Update Issue</span>';
 					}
 
 					// Populate form fields
 					form.querySelector('input[name="title"]').value = issue.title || '';
 					form.querySelector('textarea[name="description"]').value = issue.description || '';
+					
+					// Find which column this issue is currently in and store it
+					const { columnId, columnIndex } = findIssueColumn(issueKey);
+					document.getElementById('currentColumnId').value = columnId || '';
+					
+					// Reset the move checkbox to unchecked
+					const moveCheckbox = document.getElementById('moveIssueCheckbox');
+					if (moveCheckbox) {
+						moveCheckbox.checked = false;
+					}
+					
+					// Check if we're at the last column - if so, hide both checkbox and field
+					const allColumns = getAllColumns();
+					const isLastColumn = columnIndex >= 0 && columnIndex === allColumns.length - 1;
+					
+					const checkboxContainer = moveCheckbox ? moveCheckbox.closest('.field') : null;
+					if (isLastColumn) {
+						// Hide both checkbox and column field when at last step
+						if (checkboxContainer) checkboxContainer.style.display = 'none';
+						const columnField = document.getElementById('columnField');
+						if (columnField) columnField.style.display = 'none';
+					} else {
+						// Show checkbox for non-final columns
+						if (checkboxContainer) checkboxContainer.style.display = 'block';
+					}
+					
+					// Hide the column field initially (will be shown when checkbox is checked)
+					const columnField = document.getElementById('columnField');
+					if (columnField && !isLastColumn) {
+						columnField.style.display = 'none';
+					}
+
+					// Hide the workbench board
+					const workbenchBoard = document.querySelector('.workbench-board');
+					if (workbenchBoard) {
+						workbenchBoard.style.display = 'none';
+					}
 
 					// Show the panel
 					panel.style.display = 'block';
 
 					// Scroll to the panel
-					panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+					panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+					// Focus on title input
+					setTimeout(() => {
+						form.querySelector('input[name="title"]').focus();
+					}, 300);
 				})
 				.catch(error => {
 					console.error('Failed to fetch issue details:', error);
@@ -97,10 +260,52 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 			if (panel.style.display === 'none' || panel.style.display === '') {
 				// Reset to create mode when opening
 				resetPanelToCreateMode();
+				
+				// For new issues, set first column as default and auto-select it
+				const allColumns = getAllColumns();
+				if (allColumns.length > 0) {
+					const firstCol = allColumns[0];
+					// Store first column ID
+					document.getElementById('currentColumnId').value = firstCol.id;
+					
+					// Populate the select with first column
+					const columnSelect = document.getElementById('columnSelect');
+					if (columnSelect) {
+						columnSelect.innerHTML = '';
+						const option = document.createElement('option');
+						option.value = firstCol.id;
+						option.textContent = `${firstCol.work_item_code} - ${firstCol.name}`;
+						option.selected = true;
+						columnSelect.appendChild(option);
+					}
+					
+					// Auto-check the move checkbox for new issues
+					const moveCheckbox = document.getElementById('moveIssueCheckbox');
+					if (moveCheckbox) {
+						moveCheckbox.checked = true;
+					}
+					
+					// Show the column field
+					const columnField = document.getElementById('columnField');
+					if (columnField) {
+						columnField.style.display = 'block';
+					}
+				}
+				
+				// Hide the workbench board
+				const workbenchBoard = document.querySelector('.workbench-board');
+				if (workbenchBoard) {
+					workbenchBoard.style.display = 'none';
+				}
+				
 				panel.style.display = 'block';
+				
+				// Focus on title input
+				setTimeout(() => {
+					document.querySelector('input[name="title"]').focus();
+				}, 100);
 			} else {
-				panel.style.display = 'none';
-				document.getElementById('createIssueForm').reset();
+				closeCreateIssuePanel();
 			}
 		}
 
@@ -116,23 +321,30 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 			delete panel.dataset.editingIssueKey;
 
 			// Reset header text
-			const header = panel.querySelector('.level-left .level-item strong');
+			const header = document.getElementById('panelHeaderText');
 			if (header) {
 				header.textContent = 'Create New Issue';
 			}
 
-			// Reset button text
-			const submitBtn = panel.querySelector('button[onclick="submitCreateIssue()"]');
+			// Reset button
+			const submitBtn = document.getElementById('submitIssueBtn');
 			if (submitBtn) {
-				submitBtn.textContent = 'Create Issue';
+				submitBtn.innerHTML = '<span class="icon"><i class="fas fa-plus"></i></span><span>Create Issue</span>';
 			}
 		}
 
 		function closeCreateIssuePanel() {
 			const panel = document.getElementById('createIssuePanel');
 			if (!panel) return;
+			
 			panel.style.display = 'none';
 			resetPanelToCreateMode();
+			
+			// Show the workbench board again
+			const workbenchBoard = document.querySelector('.workbench-board');
+			if (workbenchBoard) {
+				workbenchBoard.style.display = 'block';
+			}
 		}
 
 		function submitCreateIssue() {
@@ -152,6 +364,16 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 				workflow_id: workflowID
 			};
 
+			// Check if user wants to move the issue
+			const moveCheckbox = document.getElementById('moveIssueCheckbox');
+			const shouldMove = moveCheckbox && moveCheckbox.checked;
+			const columnId = formData.get('column_id');
+
+			// For new issues, include column_id
+			if (!editingIssueKey && columnId) {
+				data.column_id = columnId;
+			}
+
 			// Check if we're in edit mode
 			const isEditMode = !!editingIssueKey;
 			const method = isEditMode ? 'PUT' : 'POST';
@@ -166,15 +388,29 @@ templ IssueManageForm(agency *models.Agency, board *models.WorkbenchBoard) {
 				},
 				body: JSON.stringify(data)
 			})
-			.then(response => {
-				return response.json();
-			})
+			.then(response => response.json())
 			.then(data => {
-				closeCreateIssuePanel();
-				// Reload page to show updated/new issue
-				window.location.reload();
+				// If editing and user wants to move, call progress endpoint
+				if (isEditMode && shouldMove) {
+					return fetch(`/api/v1/agencies/${agencyID}/instances/${instanceID}/issues/${editingIssueKey}/progress`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						}
+					})
+					.then(response => response.json())
+					.then(progressData => {
+						closeCreateIssuePanel();
+						// Force a hard reload to ensure we see the updated state
+						window.location.reload(true);
+					});
+				} else {
+					closeCreateIssuePanel();
+					window.location.reload(true);
+				}
 			})
 			.catch(error => {
+				console.error('Error:', error);
 				alert(`Failed to ${isEditMode ? 'update' : 'create'} issue: ` + error.message);
 			});
 		}
