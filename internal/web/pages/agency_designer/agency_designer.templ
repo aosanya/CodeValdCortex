@@ -58,13 +58,6 @@ templ AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversa
 						<div class="view-content is-active" data-view-content="overview">
 							@OverviewContent(currentAgency, conversation, overview)
 						</div>
-						
-						<!-- Layout View -->
-						<div class="view-content" data-view-content="layout">
-							<div class="layout-panel">
-								<h2>Layout Diagram - Coming Soon</h2>
-							</div>
-						</div>
 					</div>
 				</div>
 				
@@ -88,10 +81,6 @@ templ ViewSwitcher() {
 		<div class="view-tab is-active" data-view="overview">
 			<span class="view-icon">📊</span>
 			<span class="view-label">Overview</span>
-		</div>
-		<div class="view-tab" data-view="layout">
-			<span class="view-icon">🔗</span>
-			<span class="view-label">Layout</span>
 		</div>
 	</div>
 }
