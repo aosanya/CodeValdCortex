@@ -87,39 +87,6 @@ templ WorkItemEditorCard() {
 				<div id="work-item-tab-deliverables" class="work-item-tab-content" style="display: none;">
 					<div class="panel-block is-block">
 						<div class="content p-0 m-0">
-							<!-- AI Refinement Section -->
-							<div class="box mb-4 has-background-info-light">
-								<div class="level is-mobile">
-									<div class="level-left">
-										<div class="level-item">
-											<span class="icon-text">
-												<span class="icon has-text-info">
-													<i class="fas fa-wand-magic-sparkles"></i>
-												</span>
-												<span class="has-text-weight-semibold">AI-Powered Deliverable Generation</span>
-											</span>
-										</div>
-									</div>
-									<div class="level-right">
-										<div class="level-item">
-											<button
-												type="button"
-												class="button is-small is-info"
-												onclick="refineDeliverablesWithAI()"
-												title="Generate or refine deliverables using AI"
-											>
-												<span class="icon is-small">
-													<i class="fas fa-sparkles"></i>
-												</span>
-												<span>Generate with AI</span>
-											</button>
-										</div>
-									</div>
-								</div>
-								<p class="is-size-7 has-text-grey-dark mt-2">
-									Use AI to automatically generate a deliverable structure based on the work item title and description, or refine the existing structure.
-								</p>
-							</div>
 							<!-- Deliverable Tree Builder Component -->
 							<div id="deliverable-tree-container">
 								<!-- Tree builder will be rendered here dynamically -->

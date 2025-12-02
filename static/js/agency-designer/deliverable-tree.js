@@ -11,6 +11,7 @@ function deliverableTree() {
         newlyCreatedNodeId: null,
         expandedNodes: {}, // Track expanded state of all nodes
         editingNodeId: null, // Track which node is currently being edited
+        selectedNodeId: null, // Track which node is selected for detail view
 
         /**
          * Initialize the tree with existing deliverables
@@ -20,6 +21,54 @@ function deliverableTree() {
                 this.nodes = JSON.parse(JSON.stringify(data.deliverables));
                 this.computeAllPaths();
             }
+        },
+
+        /**
+         * Initialize watchers (called by Alpine.js)
+         */
+        init() {
+            // Watch for selectedNodeId changes and update properties panel
+            this.$watch('selectedNodeId', (newNodeId) => {
+                if (newNodeId && window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties) {
+                    const node = this.findNodeById(newNodeId);
+                    if (node) {
+                        window.PropertiesPanel.showDeliverableNodeProperties(node);
+                    }
+                }
+            });
+        },
+
+        /**
+         * Get the currently selected node
+         */
+        getSelectedNode() {
+            if (!this.selectedNodeId) return null;
+            return this.findNodeById(this.selectedNodeId);
+        },
+
+        /**
+         * Update a specific field of a node
+         */
+        updateNodeField(nodeId, field, value) {
+            const node = this.findNodeById(nodeId);
+            if (node) {
+                node[field] = value;
+                if (field === 'name') {
+                    this.computeAllPaths();
+                }
+
+                // Notify Properties Panel of the change
+                if (window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties) {
+                    window.PropertiesPanel.showDeliverableNodeProperties(node);
+                }
+            }
+        },
+
+        /**
+         * Watch for selected node changes and update properties panel
+         */
+        $watch(prop, callback) {
+            // Alpine.js will handle this automatically through Alpine's reactivity
         },
 
         /**
@@ -82,14 +131,17 @@ function deliverableTree() {
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
                      data-node-id="${nodeId}"
                      data-depth="${depth}"
+                     :class="selectedNodeId === '${nodeId}' ? 'is-selected' : ''"
                      x-init="${isNewlyCreated ? `$nextTick(() => { startEditing('${nodeId}'); $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
                     
-                    <div class="node-row level is-mobile" style="margin-bottom: 0.25rem;">
+                    <div class="node-row level is-mobile" 
+                         style="margin-bottom: 0.25rem; cursor: pointer;"
+                         @click="selectedNodeId = '${nodeId}'">
                         <div class="level-left">
                             ${node.type === 'folder' ? `
                                 <div class="level-item">
                                     <button type="button" class="button is-small is-ghost" 
-                                            @click="toggleExpanded('${nodeId}')">
+                                            @click.stop="toggleExpanded('${nodeId}')">
                                         <span class="icon is-small">
                                             <i class="fas" :class="isExpanded('${nodeId}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                                         </span>
@@ -126,7 +178,7 @@ function deliverableTree() {
                             <div class="level-item">
                                 <div class="buttons are-small">
                                     <button type="button" class="button is-small is-ghost"
-                                            @click="startEditing('${nodeId}')"
+                                            @click.stop="startEditing('${nodeId}')"
                                             title="Edit name">
                                         <span class="icon is-small">
                                             <i class="fas fa-pen"></i>
@@ -134,7 +186,7 @@ function deliverableTree() {
                                     </button>
                                     
                                     <button type="button" class="button is-small is-ghost"
-                                            @click="editPrompt('${nodeId}')"
+                                            @click.stop="editPrompt('${nodeId}')"
                                             title="${node.prompt_instructions ? 'Edit instructions' : 'Add instructions'}">
                                         <span class="icon is-small ${node.prompt_instructions ? 'has-text-success' : 'has-text-grey-light'}">
                                             <i class="fas fa-message-lines"></i>
@@ -144,7 +196,7 @@ function deliverableTree() {
                                     ${node.type === 'folder' ? `
                                         <div class="dropdown is-hoverable is-right">
                                             <div class="dropdown-trigger">
-                                                <button type="button" class="button is-small is-ghost" title="Add child">
+                                                <button type="button" class="button is-small is-ghost" title="Add child" @click.stop="">
                                                     <span class="icon is-small">
                                                         <i class="fas fa-plus"></i>
                                                     </span>
@@ -171,7 +223,7 @@ function deliverableTree() {
                                     
                                     <div class="dropdown is-hoverable is-right">
                                         <div class="dropdown-trigger">
-                                            <button type="button" class="button is-small is-ghost" title="Move">
+                                            <button type="button" class="button is-small is-ghost" title="Move" @click.stop="">
                                                 <span class="icon is-small">
                                                     <i class="fas fa-arrows-up-down-left-right"></i>
                                                 </span>
@@ -199,7 +251,7 @@ function deliverableTree() {
                                     </div>
                                     
                                     <button type="button" class="button is-small is-ghost has-text-danger"
-                                            @click="deleteNode('${nodeId}')"
+                                            @click.stop="deleteNode('${nodeId}')"
                                             title="Delete">
                                         <span class="icon is-small">
                                             <i class="fas fa-trash"></i>
@@ -210,8 +262,8 @@ function deliverableTree() {
                         </div>
                     </div>
                     
-                    ${node.prompt_instructions && !editing ? `
-                        <div x-show="!editing_${safeNodeId}" class="node-prompt-preview ml-4 mb-2">
+                    ${node.prompt_instructions ? `
+                        <div x-show="!isEditing('${nodeId}')" class="node-prompt-preview ml-4 mb-2">
                             <div class="message is-small is-light">
                                 <div class="message-body py-2 px-3 is-size-7">
                                     <span class="icon is-small has-text-grey-light">

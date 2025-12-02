@@ -529,60 +529,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateWorkItemSelectionButtons();
 });
 
-// AI Refinement for Deliverables
-window.refineDeliverablesWithAI = async function () {
-    // Get work item context
-    const title = document.getElementById('work-item-title-editor')?.value.trim();
-    const description = document.getElementById('work-item-description-editor')?.value.trim();
-    const code = document.getElementById('work-item-code-editor')?.value.trim();
-
-    if (!title || !description) {
-        window.showNotification('Please enter work item title and description first', 'warning');
-        return;
-    }
-
-    // Build context for AI
-    let contextMessage = `Generate a structured deliverable hierarchy for this work item:\n\n`;
-    contextMessage += `**Work Item Code**: ${code}\n`;
-    contextMessage += `**Title**: ${title}\n`;
-    contextMessage += `**Description**: ${description}\n\n`;
-    contextMessage += `Please analyze the work item and suggest a complete deliverable structure (folders and files) that would be appropriate for this work. `;
-    contextMessage += `Consider documentation requirements, code artifacts, configuration files, and any other relevant deliverables. `;
-    contextMessage += `Format the response as a hierarchical structure that can be used to build a directory tree.`;
-
-    // Add current deliverables as context if they exist
-    const currentDeliverables = window.getDeliverablesStructuredData?.();
-    if (currentDeliverables && currentDeliverables.length > 0) {
-        contextMessage += `\n\n**Current Deliverables Structure**:\n`;
-        contextMessage += JSON.stringify(currentDeliverables, null, 2);
-        contextMessage += `\n\nYou can refine or expand this structure as needed.`;
-    }
-
-    // Add context to context manager
-    if (window.ContextManager) {
-        window.ContextManager.createContext(
-            window.ContextManager.ContextType.WORK_ITEM,
-            code || 'DELIVERABLES',
-            contextMessage,
-            {
-                isNavigational: true,
-                section: 'work-items',
-                tab: 'deliverables'
-            }
-        );
-    }
-
-    // Show notification to user
-    window.showNotification('Context added to AI chat. Please use the chat panel to generate or refine deliverables.', 'info');
-
-    // Optionally, trigger chat focus
-    const chatInput = document.getElementById('chat-input-field') || document.querySelector('[data-chat-input]');
-    if (chatInput) {
-        chatInput.focus();
-        chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-};
-
 window.cancelWorkItemEdit = cancelWorkItemEdit;
 window.deleteWorkItem = deleteWorkItem;
 window.filterWorkItems = filterWorkItems;

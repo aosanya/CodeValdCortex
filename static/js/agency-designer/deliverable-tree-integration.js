@@ -99,47 +99,199 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
                 </div>
             </div>
 
-            <!-- Tree Container -->
-            <div class="deliverable-tree-container" 
-                 id="deliverable-tree-root"
-                 x-init="if (window.__tempDeliverables && window.__tempDeliverables.length > 0) { nodes = window.__tempDeliverables; computeAllPaths(); }">
-                
-                <!-- Empty state -->
-                <template x-if="nodes.length === 0">
-                    <div class="notification is-light has-text-centered">
-                        <p class="mb-3">
-                            <span class="icon is-large has-text-grey-light">
-                                <i class="fas fa-folder-tree fa-3x"></i>
-                            </span>
-                        </p>
-                        <p class="has-text-grey">
-                            No deliverables defined yet. Add folders and files to define the structure of artifacts this work item will produce.
-                        </p>
-                        <p class="mt-4">
-                            <button 
-                                type="button"
-                                class="button is-info"
-                                @click="addRootFolder()">
-                                <span class="icon">
-                                    <i class="fas fa-folder-plus"></i>
-                                </span>
-                                <span>Create First Folder</span>
-                            </button>
-                            <button 
-                                type="button"
-                                class="button is-primary"
-                                @click="addRootFile()">
-                                <span class="icon">
-                                    <i class="fas fa-file-circle-plus"></i>
-                                </span>
-                                <span>Create First File</span>
-                            </button>
-                        </p>
-                    </div>
-                </template>
+            <!-- Main content: Tree and Detail View -->
+            <div class="columns">
+                <!-- Tree Column -->
+                <div class="column" :class="selectedNodeId ? 'is-8' : 'is-12'">
+                    <div class="deliverable-tree-container" 
+                         id="deliverable-tree-root"
+                         x-init="if (window.__tempDeliverables && window.__tempDeliverables.length > 0) { nodes = window.__tempDeliverables; computeAllPaths(); }">
+                        
+                        <!-- Empty state -->
+                        <template x-if="nodes.length === 0">
+                            <div class="notification is-light has-text-centered">
+                                <p class="mb-3">
+                                    <span class="icon is-large has-text-grey-light">
+                                        <i class="fas fa-folder-tree fa-3x"></i>
+                                    </span>
+                                </p>
+                                <p class="has-text-grey">
+                                    No deliverables defined yet. Add folders and files to define the structure of artifacts this work item will produce.
+                                </p>
+                                <p class="mt-4">
+                                    <button 
+                                        type="button"
+                                        class="button is-info"
+                                        @click="addRootFolder()">
+                                        <span class="icon">
+                                            <i class="fas fa-folder-plus"></i>
+                                        </span>
+                                        <span>Create First Folder</span>
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        class="button is-primary"
+                                        @click="addRootFile()">
+                                        <span class="icon">
+                                            <i class="fas fa-file-circle-plus"></i>
+                                        </span>
+                                        <span>Create First File</span>
+                                    </button>
+                                </p>
+                            </div>
+                        </template>
 
-                <!-- Tree nodes will be rendered by JavaScript -->
-                <div id="tree-nodes-container" x-html="renderTree()"></div>
+                        <!-- Tree nodes will be rendered by JavaScript -->
+                        <div id="tree-nodes-container" x-html="renderTree()"></div>
+                    </div>
+                </div>
+
+                <!-- Detail View Column - HIDDEN: Now using Properties tab in chat panel -->
+                <div class="column is-4" x-show="false" style="display: none;">
+                    <div class="box">
+                        <template x-if="selectedNodeId">
+                            <div>
+                                <!-- Header -->
+                                <div class="level mb-4">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <h4 class="title is-6">
+                                                <span class="icon-text">
+                                                    <span class="icon" x-html="getSelectedNode()?.type === 'folder' ? '<i class=\\'fas fa-folder\\'></i>' : '<i class=\\'fas fa-file-lines\\'></i>'"></span>
+                                                    <span>Node Details</span>
+                                                </span>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div class="level-right">
+                                        <div class="level-item">
+                                            <button type="button" 
+                                                    class="delete" 
+                                                    @click="selectedNodeId = null"
+                                                    title="Close detail view"></button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Node Info -->
+                                <template x-if="getSelectedNode()">
+                                    <div>
+                                        <div class="field">
+                                            <label class="label">Name</label>
+                                            <div class="control">
+                                                <input type="text" 
+                                                       class="input" 
+                                                       :value="getSelectedNode().name"
+                                                       @input="updateNodeField(selectedNodeId, 'name', $event.target.value)"
+                                                       placeholder="Node name">
+                                            </div>
+                                        </div>
+
+                                        <div class="field" x-show="getSelectedNode().type === 'file'">
+                                            <label class="label">File Extension</label>
+                                            <div class="control">
+                                                <input type="text" 
+                                                       class="input" 
+                                                       :value="getSelectedNode().file_extension || '.md'"
+                                                       disabled
+                                                       placeholder=".md">
+                                            </div>
+                                            <p class="help">Currently only .md (Markdown) files are supported</p>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label">Description</label>
+                                            <div class="control">
+                                                <input type="text" 
+                                                       class="input" 
+                                                       :value="getSelectedNode().description"
+                                                       @input="updateNodeField(selectedNodeId, 'description', $event.target.value)"
+                                                       placeholder="Brief description of this node">
+                                            </div>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label">
+                                                AI Prompt Instructions
+                                                <span class="tag is-info is-light ml-2" x-show="getSelectedNode().prompt_instructions">
+                                                    <span class="icon is-small">
+                                                        <i class="fas fa-check"></i>
+                                                    </span>
+                                                    <span>Set</span>
+                                                </span>
+                                            </label>
+                                            <div class="control">
+                                                <textarea 
+                                                    class="textarea" 
+                                                    rows="6"
+                                                    :value="getSelectedNode().prompt_instructions"
+                                                    @input="updateNodeField(selectedNodeId, 'prompt_instructions', $event.target.value)"
+                                                    placeholder="Describe what content should be included in this file/folder. Be specific about sections, data points, or structure."></textarea>
+                                            </div>
+                                            <p class="help">
+                                                These instructions guide AI agents on what to include when generating this deliverable.
+                                            </p>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label">Path</label>
+                                            <div class="control">
+                                                <input type="text" 
+                                                       class="input is-static" 
+                                                       :value="getSelectedNode().path || getSelectedNode().name"
+                                                       readonly>
+                                            </div>
+                                            <p class="help">Full path in the deliverables tree</p>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label">Type</label>
+                                            <div class="control">
+                                                <span class="tag" :class="getSelectedNode().type === 'folder' ? 'is-info' : 'is-primary'">
+                                                    <span class="icon">
+                                                        <i class="fas" :class="getSelectedNode().type === 'folder' ? 'fa-folder' : 'fa-file'"></i>
+                                                    </span>
+                                                    <span x-text="getSelectedNode().type === 'folder' ? 'Folder' : 'File'"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="field" x-show="getSelectedNode().type === 'folder' && getSelectedNode().children && getSelectedNode().children.length > 0">
+                                            <label class="label">Children</label>
+                                            <div class="tags">
+                                                <template x-for="child in getSelectedNode().children" :key="child.id">
+                                                    <span class="tag" 
+                                                          :class="child.type === 'folder' ? 'is-info is-light' : 'is-primary is-light'"
+                                                          @click="selectedNodeId = child.id"
+                                                          style="cursor: pointer;">
+                                                        <span class="icon is-small">
+                                                            <i class="fas" :class="child.type === 'folder' ? 'fa-folder' : 'fa-file'"></i>
+                                                        </span>
+                                                        <span x-text="child.name + (child.type === 'file' ? (child.file_extension || '.md') : '')"></span>
+                                                    </span>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div class="field is-grouped mt-5">
+                                            <p class="control">
+                                                <button type="button" 
+                                                        class="button is-danger is-light"
+                                                        @click="if(confirm('Delete this node?')) { deleteNode(selectedNodeId); selectedNodeId = null; }">
+                                                    <span class="icon">
+                                                        <i class="fas fa-trash"></i>
+                                                    </span>
+                                                    <span>Delete Node</span>
+                                                </button>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
             </div>
 
             <!-- Hidden input to store tree data -->
