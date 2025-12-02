@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/sirupsen/logrus"
 )
@@ -155,10 +156,12 @@ func (w *WorkItemsBuilder) buildDynamicWorkItemsPrompt(req *builder.RefineWorkIt
 			if item.Description != "" {
 				builder.WriteString(fmt.Sprintf("  Description: %s\n", item.Description))
 			}
-			if len(item.Deliverables) > 0 {
-				builder.WriteString("  Deliverables:\n")
-				for _, deliverable := range item.Deliverables {
-					builder.WriteString(fmt.Sprintf("    - %s\n", deliverable))
+			if len(item.DeliverablesStructured) > 0 {
+				deliverablesJSON, err := json.MarshalIndent(item.DeliverablesStructured, "  ", "  ")
+				if err == nil {
+					builder.WriteString("  Deliverables Structure (JSON):\n  ")
+					builder.WriteString(string(deliverablesJSON))
+					builder.WriteString("\n")
 				}
 			}
 			if len(item.Tags) > 0 {
@@ -175,13 +178,13 @@ func (w *WorkItemsBuilder) buildDynamicWorkItemsPrompt(req *builder.RefineWorkIt
 
 // aiWorkItemRefinementResponse represents the JSON structure returned by the AI
 type aiWorkItemRefinementResponse struct {
-	RefinedTitle        string   `json:"refined_title"`
-	RefinedDescription  string   `json:"refined_description"`
-	RefinedDeliverables []string `json:"refined_deliverables"`
-	GoalKeys            []string `json:"goal_keys"`
-	SuggestedTags       []string `json:"suggested_tags"`
-	Explanation         string   `json:"explanation"`
-	Changed             bool     `json:"changed"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	GoalKeys               []string                 `json:"goal_keys"`
+	SuggestedTags          []string                 `json:"suggested_tags"`
+	Explanation            string                   `json:"explanation"`
+	Changed                bool                     `json:"changed"`
 }
 
 // RefineWorkItem uses AI to refine a work item definition based on all available context
@@ -220,21 +223,21 @@ func (r *WorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.Refi
 
 	// Convert to our response format
 	result := &builder.RefineWorkItemResponse{
-		RefinedTitle:        aiResponse.RefinedTitle,
-		RefinedDescription:  aiResponse.RefinedDescription,
-		RefinedDeliverables: aiResponse.RefinedDeliverables,
-		GoalKeys:            aiResponse.GoalKeys,
-		SuggestedTags:       aiResponse.SuggestedTags,
-		WasChanged:          aiResponse.Changed,
-		Explanation:         aiResponse.Explanation,
+		Title:                  aiResponse.Title,
+		Description:            aiResponse.Description,
+		DeliverablesStructured: aiResponse.DeliverablesStructured,
+		GoalKeys:               aiResponse.GoalKeys,
+		SuggestedTags:          aiResponse.SuggestedTags,
+		WasChanged:             aiResponse.Changed,
+		Explanation:            aiResponse.Explanation,
 	}
 
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":    req.AgencyID,
 		"was_changed":  result.WasChanged,
-		"title":        len(result.RefinedTitle),
-		"description":  len(result.RefinedDescription),
-		"deliverables": len(result.RefinedDeliverables),
+		"title":        len(result.Title),
+		"description":  len(result.Description),
+		"deliverables": len(result.DeliverablesStructured),
 	}).Info("AI work item refinement completed")
 
 	return result, nil
@@ -429,61 +432,85 @@ const dynamicWorkItemsSystemPrompt = SharedAgencyContext + `
 
 Act as a strategic work item management AI. Modify work items based on user requests.
 
-CRITICAL: Work items are AGENT ACTIONS that appear on Kanban boards (To Do → In Progress → Done).
-They are NOT system implementation tasks or features to build.
+**CRITICAL**: Work items are AGENT ACTIONS for Kanban boards (To Do → In Progress → Done), NOT system implementation tasks.
 
-AGENT ACTION work items (✅): Operational tasks agents perform
-- "Review technical specification for API completeness"
-- "Execute unit test suite for authentication module"
-- "Deploy release v1.2.3 to staging environment"
-- "Analyze code coverage report and identify gaps"
-- "Process stakeholder feedback from requirements meeting"
-- "Validate gRPC service contract compliance"
-- "Generate weekly project status report"
-- "Scan codebase for security vulnerabilities"
-- "Monitor production system performance metrics"
-- "Respond to critical incident alert #1234"
+**TIME LIMIT**: You have approximately 90 seconds to complete your analysis. If processing many items:
+- Prioritize quality over quantity
+- Process items in order of importance
+- If running out of time, return what you've completed so far with a partial explanation
+- It's better to return 5 well-refined items than timeout trying to process 20
 
-IMPLEMENTATION tasks (❌): System building (NOT work items)
-- "Build payment processing API"
-- "Create monitoring dashboard"
-- "Implement CI/CD pipeline"
-- "Design database schema"
-
-## Kanban-Ready Characteristics:
-- **Action verbs**: Review, Analyze, Execute, Test, Deploy, Monitor, Process, Validate, Generate, Scan, Track, Coordinate
-- **Specific scope**: Completable within a sprint
-- **Measurable completion**: Clear done criteria
-- **Agent-executable**: Autonomous or human-in-loop can perform
+Examples:
+✅ Agent Actions: "Review API spec v2.1", "Execute auth tests", "Deploy v1.2 to staging"
+❌ Implementation: "Build payment API", "Create dashboard", "Implement CI/CD"
 
 ## Actions:
-**remove** - Delete work items (return in consolidated_data.removed_work_items)
-**refine** - Improve existing work items to be more action-oriented
-**generate** - Create new agent action work items aligned with goals
-**consolidate** - Merge duplicate actions
-**enhance_all** - Refine all work items
-**no_action** - Already optimal
+- **remove**: Delete work items
+- **refine**: Improve existing items
+- **generate**: Create new items aligned with goals
+- **consolidate**: Merge duplicates
+- **enhance_all**: Refine all items
+- **no_action**: Already optimal
 
 ## Response JSON:
 {
   "action": "remove|refine|generate|consolidate|enhance_all|no_action",
-  "refined_work_items": [{"original_key": "key", "refined_title": "...", "refined_description": "...", "refined_deliverables": [...], "goal_keys": ["goal_key1", "goal_key2"], "suggested_code": "CODE", "suggested_tags": [...], "was_changed": true, "explanation": "Brief"}],
-  "generated_work_items": [{"title": "...", "description": "...", "deliverables": [...], "goal_keys": ["goal_key1", "goal_key2"], "suggested_code": "CODE", "suggested_tags": [...], "explanation": "Brief"}],
+  "refined_work_items": [
+    {
+      "original_key": "key",
+      "title": "Clear action-oriented title",
+      "description": "Specific description",
+      "deliverables_structured": [
+        {
+          "id": "uuid",
+          "name": "folder_name",
+          "description": "Folder description",
+          "type": "folder",
+          "prompt_instructions": "What to organize in this folder",
+          "children": [
+            {
+              "id": "uuid",
+              "name": "file_name",
+              "description": "File description",
+              "type": "file",
+              "file_extension": ".md",
+              "prompt_instructions": "Specific content to include in this file",
+              "order": 1
+            }
+          ],
+          "order": 1
+        }
+      ],
+      "goal_keys": ["goal_key1"],
+      "suggested_code": "CODE",
+      "suggested_tags": ["tag1"],
+      "was_changed": true,
+      "explanation": "Brief explanation"
+    }
+  ],
+  "generated_work_items": [...],
   "consolidated_data": {"consolidated_work_items": [...], "removed_work_items": ["key1"], "summary": "Brief", "explanation": "Brief"},
-  "explanation": "Brief overall summary",
+  "explanation": "Brief summary. If time-limited, note: 'Processed X of Y items before time limit'",
   "no_action_needed": false
 }
 
-Guidelines:
-- Work items = AGENT ACTIONS (what agents DO), not system features (what we BUILD)
-- Start with action verbs: Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate
-- Be specific: "Review API spec document v2.1" not "Review documentation"
-- Kanban-ready: Small enough to track on board
-- Align with goals: Each work item should support at least one agency goal
-- **IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses
-- Use existing goal keys from the context when linking work items to goals
+**PARTIAL RESPONSES**: If approaching time limit, return completed items with explanation noting how many were processed.
+
+## Deliverables Guidelines:
+deliverables_structured is a hierarchical tree of folders/files with AI prompt instructions.
+
+**Structure**: Use folders to group related deliverables (planning/, execution/, reports/)
+**Naming**: Descriptive lowercase with underscores (technical_spec.md, not doc.md)
+**Prompt Instructions**: Explain WHAT content goes in each file/folder with specific sections
+**Order**: Use order field to sequence items
+**File Type**: Only .md (Markdown) supported
+
+Requirements:
+- Use action verbs: Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate
+- Be specific with scope
+- Link to goals via goal_keys array
 - Keep explanations concise (1-2 sentences)
-- Codes: Short, memorable (2-4 uppercase letters)`
+- Codes: 2-4 uppercase letters`
 
 const workItemRefinementSystemPrompt = `You are an expert project manager and technical architect helping to refine work items for software development.
 
@@ -495,9 +522,29 @@ Your task is to refine work items to be:
 
 Return your response as a JSON object with this structure:
 {
-  "refined_title": "Clear, concise title",
-  "refined_description": "Detailed description of what needs to be done",
-  "refined_deliverables": ["Deliverable 1", "Deliverable 2"],
+  "title": "Clear, concise title",
+  "description": "Detailed description of what needs to be done",
+  "deliverables_structured": [
+    {
+      "id": "unique-uuid",
+      "name": "requirements",
+      "description": "Requirements documentation folder",
+      "type": "folder",
+      "prompt_instructions": "Organize all requirements documents",
+      "children": [
+        {
+          "id": "unique-uuid-2",
+          "name": "stakeholders",
+          "description": "Stakeholder requirements",
+          "type": "file",
+          "file_extension": ".md",
+          "prompt_instructions": "Document stakeholder needs",
+          "order": 1
+        }
+      ],
+      "order": 1
+    }
+  ],
   "goal_keys": ["goal_key1", "goal_key2"],
   "suggested_tags": ["tag1", "tag2"],
   "explanation": "Brief explanation of changes made",
@@ -505,7 +552,12 @@ Return your response as a JSON object with this structure:
 }
 
 Set "changed" to false if the work item is already well-defined and needs no improvements.
-**IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses.`
+**IMPORTANT**: 
+- Always include goal_keys array with the keys of goals this work item addresses.
+- Use deliverables_structured for hierarchical folder/file structure with prompt instructions.
+- Each deliverable node must have: id, name, description, type ("folder" or "file"), prompt_instructions, order.
+- Files must have file_extension (currently only ".md" supported).
+- Folders can have children array with nested deliverables.`
 
 const workItemGenerationSystemPrompt = `You are an expert project manager helping to create agent action work items.
 
@@ -532,7 +584,27 @@ Return your response as a JSON object with this structure:
 {
   "title": "Action-oriented title starting with verb",
   "description": "Detailed description of the agent action",
-  "deliverables": ["Specific output 1", "Specific output 2"],
+  "deliverables_structured": [
+    {
+      "id": "unique-uuid",
+      "name": "reports",
+      "description": "Analysis reports folder",
+      "type": "folder",
+      "prompt_instructions": "Store all analysis outputs",
+      "children": [
+        {
+          "id": "unique-uuid-2",
+          "name": "security_scan_results",
+          "description": "Security scan findings",
+          "type": "file",
+          "file_extension": ".md",
+          "prompt_instructions": "Document all security vulnerabilities found",
+          "order": 1
+        }
+      ],
+      "order": 1
+    }
+  ],
   "goal_keys": ["goal_key1", "goal_key2"],
   "suggested_code": "SHORT-CODE",
   "suggested_tags": ["tag1", "tag2"],
@@ -540,7 +612,12 @@ Return your response as a JSON object with this structure:
 }
 
 Use short, memorable codes (2-4 uppercase letters).
-**IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses.`
+**IMPORTANT**: 
+- Always include goal_keys array with the keys of goals this work item addresses.
+- Use deliverables_structured for hierarchical folder/file structure with prompt instructions.
+- Each deliverable node must have: id, name, description, type ("folder" or "file"), prompt_instructions, order.
+- Files must have file_extension (currently only ".md" supported).
+- Folders can have children array with nested deliverables.`
 
 const workItemsGenerationSystemPrompt = `You are an expert project manager helping to break down goals into actionable work items.
 
@@ -571,7 +648,27 @@ Return your response as a JSON object with this structure:
     {
       "title": "Action-oriented title starting with verb (Review, Execute, Deploy, etc.)",
       "description": "Detailed description of what the agent does",
-      "deliverables": ["Specific output 1", "Specific output 2"],
+      "deliverables_structured": [
+        {
+          "id": "unique-uuid",
+          "name": "documentation",
+          "description": "Project documentation",
+          "type": "folder",
+          "prompt_instructions": "Maintain all project docs",
+          "children": [
+            {
+              "id": "unique-uuid-2",
+              "name": "api_spec",
+              "description": "API specification document",
+              "type": "file",
+              "file_extension": ".md",
+              "prompt_instructions": "Document all API endpoints and schemas",
+              "order": 1
+            }
+          ],
+          "order": 1
+        }
+      ],
       "goal_keys": ["goal_key1", "goal_key2"],
       "suggested_code": "SHORT-CODE",
       "suggested_tags": ["tag1", "tag2"],
@@ -582,8 +679,13 @@ Return your response as a JSON object with this structure:
 }
 
 Use short, memorable codes (2-4 uppercase letters) that are unique.
-**IMPORTANT**: Always include goal_keys array with the keys of goals each work item addresses.
-Link work items to the relevant goals from the agency context provided.`
+**IMPORTANT**: 
+- Always include goal_keys array with the keys of goals each work item addresses.
+- Link work items to the relevant goals from the agency context provided.
+- Use deliverables_structured for hierarchical folder/file structure with prompt instructions.
+- Each deliverable node must have: id, name, description, type ("folder" or "file"), prompt_instructions, order.
+- Files must have file_extension (currently only ".md" supported).
+- Folders can have children array with nested deliverables.`
 
 const workItemConsolidationSystemPrompt = `Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.
 
@@ -639,7 +741,27 @@ If consolidation IS beneficial:
     {
       "title": "Clear, actionable title",
       "description": "Detailed description of what needs to be done",
-      "deliverables": ["Deliverable 1", "Deliverable 2", "Deliverable 3"],
+      "deliverables_structured": [
+        {
+          "id": "unique-uuid",
+          "name": "deliverables",
+          "description": "Project deliverables",
+          "type": "folder",
+          "prompt_instructions": "All consolidated outputs",
+          "children": [
+            {
+              "id": "unique-uuid-2",
+              "name": "merged_output",
+              "description": "Consolidated deliverable",
+              "type": "file",
+              "file_extension": ".md",
+              "prompt_instructions": "Combined requirements from merged work items",
+              "order": 1
+            }
+          ],
+          "order": 1
+        }
+      ],
       "goal_keys": ["goal_key1", "goal_key2"],
       "suggested_code": "SHORT-CODE",
       "suggested_tags": ["tag1", "tag2"],

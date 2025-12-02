@@ -69,7 +69,7 @@ func (h *AgencyDesignerHandler) SendMessage(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
 	defer cancel()
 
 	response, err := h.service.SendMessage(ctx, conversationID, req.Message)

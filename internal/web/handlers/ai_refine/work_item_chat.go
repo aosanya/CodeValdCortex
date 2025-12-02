@@ -241,15 +241,15 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 				h.logger.WithFields(logrus.Fields{
 					"key":       workItem.Key,
 					"old_title": workItem.Title,
-					"new_title": refined.RefinedTitle,
+					"new_title": refined.Title,
 					"old_code":  workItem.Code,
 					"new_code":  refined.SuggestedCode,
 				}).Info("✏️ Refining work item")
 
 				updatedWorkItem := *workItem
-				updatedWorkItem.Title = refined.RefinedTitle
-				updatedWorkItem.Description = refined.RefinedDescription
-				updatedWorkItem.Deliverables = refined.RefinedDeliverables
+				updatedWorkItem.Title = refined.Title
+				updatedWorkItem.Description = refined.Description
+				updatedWorkItem.DeliverablesStructured = refined.DeliverablesStructured
 				if refined.SuggestedCode != "" {
 					updatedWorkItem.Code = refined.SuggestedCode
 				}
@@ -281,12 +281,12 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 			}).Info("🆕 Adding generated work item")
 
 			newWorkItem := models.WorkItem{
-				Code:         gwi.SuggestedCode,
-				Title:        gwi.Title,
-				Description:  gwi.Description,
-				Deliverables: gwi.Deliverables,
-				GoalKeys:     gwi.GoalKeys,
-				Tags:         gwi.SuggestedTags,
+				Code:                   gwi.SuggestedCode,
+				Title:                  gwi.Title,
+				Description:            gwi.Description,
+				DeliverablesStructured: gwi.DeliverablesStructured,
+				GoalKeys:               gwi.GoalKeys,
+				Tags:                   gwi.SuggestedTags,
 			}
 
 			updatedWorkItems = append(updatedWorkItems, newWorkItem)
@@ -326,12 +326,12 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 				}).Info("🔄 Adding consolidated work item")
 
 				newWorkItem := models.WorkItem{
-					Code:         cwi.SuggestedCode,
-					Title:        cwi.Title,
-					Description:  cwi.Description,
-					Deliverables: cwi.Deliverables,
-					GoalKeys:     cwi.GoalKeys,
-					Tags:         cwi.SuggestedTags,
+					Code:                   cwi.SuggestedCode,
+					Title:                  cwi.Title,
+					Description:            cwi.Description,
+					DeliverablesStructured: cwi.DeliverablesStructured,
+					GoalKeys:               cwi.GoalKeys,
+					Tags:                   cwi.SuggestedTags,
 				}
 
 				updatedWorkItems = append(updatedWorkItems, newWorkItem)

@@ -3,12 +3,7 @@
 
 // Uses global functions: getCurrentAgencyId, showNotification, scrollToBottom, loadEntityList, etc., specificationAPI
 
-// Work item editor state management
-let workItemEditorState = {
-    mode: 'add', // 'add' or 'edit'
-    workItemKey: null,
-    originalData: {}
-};
+// Work item editor state management is in work-items-editor.js (shared variable)
 
 // Load goals for the checkbox list
 async function loadGoalsForSelection() {
@@ -533,16 +528,6 @@ function updateWorkItemSelectionCount(count) {
 document.addEventListener('DOMContentLoaded', function () {
     updateWorkItemSelectionButtons();
 });
-
-// Make functions available globally
-window.loadWorkItems = loadWorkItems;
-window.showWorkItemEditor = showWorkItemEditor;
-window.saveWorkItemFromEditor = saveWorkItemFromEditor;
-window.cancelWorkItemEdit = cancelWorkItemEdit;
-window.editWorkItem = editWorkItem;
-window.deleteWorkItem = deleteWorkItem;
-window.updateWorkItemSelectionButtons = updateWorkItemSelectionButtons;
-window.toggleAllWorkItems = toggleAllWorkItems;
 
 // AI Refinement for Deliverables
 window.refineDeliverablesWithAI = async function () {

@@ -31,7 +31,7 @@ func NewOpenAIClient(config *LLMConfig) (LLMClient, error) {
 		config.Model = "gpt-4-turbo-preview"
 	}
 
-	timeout := 60 * time.Second
+	timeout := 120 * time.Second
 	if config.Timeout > 0 {
 		timeout = time.Duration(config.Timeout) * time.Second
 	}

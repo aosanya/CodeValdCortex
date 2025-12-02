@@ -31,7 +31,7 @@ func NewClaudeClient(config *LLMConfig) (LLMClient, error) {
 		config.Model = "claude-3-5-sonnet-20241022"
 	}
 
-	timeout := 60 * time.Second
+	timeout := 120 * time.Second
 	if config.Timeout > 0 {
 		timeout = time.Duration(config.Timeout) * time.Second
 	}
