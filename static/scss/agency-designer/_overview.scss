@@ -65,6 +65,27 @@
     padding: $spacing-lg;
 }
 
+// Individual content sections (tabs) - universal scroll solution
+.overview-content-section {
+    @include custom-scrollbar;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: calc(100vh - 120px); // Account for header and navbar
+    overflow-y: auto;
+    padding: $spacing-lg;
+    
+    // Ensure inner content can grow
+    > .box {
+        flex-shrink: 0;
+        margin-bottom: $spacing-md;
+        
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
 .section-hero {
     text-align: center;
     padding: $spacing-xl $spacing-md;
