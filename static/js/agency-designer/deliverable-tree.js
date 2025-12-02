@@ -45,7 +45,7 @@ function deliverableTree() {
 
             return `
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
-                     style="padding-left: ${paddingLeft}px"
+                    
                      data-node-id="${nodeId}"
                      x-data="{ editing_${safeNodeId}: ${isNewlyCreated}, expanded_${safeNodeId}: true }"
                      x-init="${isNewlyCreated ? `$nextTick(() => { $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
@@ -161,11 +161,27 @@ function deliverableTree() {
                     
                     ${node.type === 'folder' && hasChildren ? `
                         <div x-show="expanded_${safeNodeId}" class="node-children">
-                            ${node.children.map((child, childIndex) => this.renderNode(child, depth + 1, childIndex)).join('')}
+                            ${this.getSortedChildren(node.children).map((child, childIndex) => this.renderNode(child, depth + 1, childIndex)).join('')}
                         </div>
                     ` : ''}
                 </div>
             `;
+        },
+
+        /**
+         * Sort children alphabetically (folders first, then files)
+         */
+        getSortedChildren(children) {
+            if (!children || children.length === 0) return [];
+
+            return [...children].sort((a, b) => {
+                // Folders first, then files
+                if (a.type === 'folder' && b.type === 'file') return -1;
+                if (a.type === 'file' && b.type === 'folder') return 1;
+
+                // Within same type, sort alphabetically by name
+                return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+            });
         },
 
         /**

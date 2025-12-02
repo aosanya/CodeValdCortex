@@ -17,7 +17,8 @@
 
 /* Make tree more compact */
 .tree-node .level-item {
-    margin-right: 0.25rem;
+    margin-right: 0.1rem;
+    /* Reduced from 0.25rem to bring icon closer to chevron */
 }
 
 .tree-node .button.is-small {
@@ -36,6 +37,7 @@
     &.is-folder {
         /* Folder nodes - show tree structure lines */
         position: relative;
+        margin-left: 5px;
 
         /* Vertical line for tree structure - positioned relative to the folder icon */
         .node-row::before {
@@ -83,7 +85,7 @@
         /* File nodes - no tree lines */
         position: relative;
         padding-left: 0 !important;
-        margin-left: 0px;
+        margin-left: 5px;
     }
 
     .node-row {
@@ -121,6 +123,15 @@
             background-color: #e8e8e8;
             color: #363636;
         }
+    }
+}
+
+/* Depth-based indentation: use data-depth attribute set by JS */
+$tree-indent: 12px;
+
+@for $i from 0 through 10 {
+    .tree-node[data-depth="#{$i}"] {
+        padding-left: $i * $tree-indent;
     }
 }
 
