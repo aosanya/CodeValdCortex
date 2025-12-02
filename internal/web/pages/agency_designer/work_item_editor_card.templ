@@ -150,6 +150,42 @@ window.switchWorkItemTab = function(event, tabName) {
     
     // Add active class to clicked tab
     event.currentTarget.classList.add('is-active');
+    
+    // Clear navigational contexts when switching tabs
+    if (window.ContextManager && typeof window.ContextManager.clearNavigationalContexts === 'function') {
+        window.ContextManager.clearNavigationalContexts('work-items');
+    }
+    
+    // Add context based on which tab is selected
+    if (window.ContextManager && typeof window.ContextManager.createContext === 'function') {
+        const ContextType = window.ContextManager.ContextType || window.ContextType;
+        
+        let contextContent = '';
+        switch(tabName) {
+            case 'basic':
+                contextContent = 'Work Items: Basic Info - Viewing work item code, title, and description';
+                break;
+            case 'deliverables':
+                contextContent = 'Work Items: Deliverables - Managing deliverable structure and documentation';
+                break;
+            case 'goals':
+                contextContent = 'Work Items: Goals and Tags - Linking goals and managing tags';
+                break;
+        }
+        
+        if (contextContent) {
+            window.ContextManager.createContext(
+                ContextType.WORK_ITEM,
+                'WI-TAB',
+                contextContent,
+                {
+                    isNavigational: true,
+                    section: 'work-items',
+                    tab: tabName
+                }
+            );
+        }
+    }
 }
 </script>
 		</div>
