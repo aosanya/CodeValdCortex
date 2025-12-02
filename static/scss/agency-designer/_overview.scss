@@ -74,12 +74,12 @@
     max-height: calc(100vh - 120px); // Account for header and navbar
     overflow-y: auto;
     padding: $spacing-lg;
-    
+
     // Ensure inner content can grow
-    > .box {
+    >.box {
         flex-shrink: 0;
         margin-bottom: $spacing-md;
-        
+
         &:last-child {
             margin-bottom: 0;
         }
