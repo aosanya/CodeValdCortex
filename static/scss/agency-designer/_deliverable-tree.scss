@@ -3,6 +3,13 @@
  * Hierarchical file/folder tree component for work item deliverables
  */
 
+/* Universal input styling for tree nodes */
+.deliverable-tree-builder input.input,
+.deliverable-tree-container input.input {
+    font-size: 1rem;
+    height: 2.25em;
+}
+
 .deliverable-tree-builder {
     background: transparent;
     border: none;
@@ -39,7 +46,7 @@
     &.is-folder {
         /* Folder nodes - show tree structure lines */
         position: relative;
-        margin-left: 5px;
+        margin-left: 10px;
 
         /* Vertical line for tree structure - positioned relative to the folder icon */
         .node-row::before {
@@ -87,7 +94,7 @@
         /* File nodes - no tree lines */
         position: relative;
         padding-left: 0 !important;
-        margin-left: 5px;
+        margin-left: 10px;
     }
 
     .node-row {

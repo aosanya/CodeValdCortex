@@ -1,20 +1,6 @@
 // Deliverable Tree Integration for Work Items
 // Handles integration between deliverable tree builder and work item editor
-// Updated: 2025-12-01 21:10 - Fixed tree initialization with existing deliverables
-
-// Toggle between tree builder and simple text mode
-window.toggleDeliverableMode = function (useSimple) {
-    const treeContainer = document.getElementById('deliverable-tree-container');
-    const simpleInput = document.getElementById('deliverable-simple-input');
-
-    if (useSimple) {
-        treeContainer.classList.add('is-hidden');
-        simpleInput.classList.remove('is-hidden');
-    } else {
-        treeContainer.classList.remove('is-hidden');
-        simpleInput.classList.add('is-hidden');
-    }
-};
+// Updated: 2025-12-02 - Removed simple text mode, tree builder only
 
 // Initialize deliverable tree builder for work item editor
 window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = []) {
@@ -229,8 +215,72 @@ window.getDeliverablesStructuredData = function () {
     return null;
 };
 
-// Check if using simple mode
-window.isUsingSimpleDeliverables = function () {
-    const checkbox = document.getElementById('use-simple-deliverables');
-    return checkbox ? checkbox.checked : false;
+// Handle move-to-folder modal
+window.addEventListener('show-move-to-folder-modal', function (event) {
+    const { nodeId } = event.detail;
+    const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
+
+    if (!treeContainer || !treeContainer._x_dataStack || treeContainer._x_dataStack.length === 0) {
+        alert('Tree not initialized');
+        return;
+    }
+
+    const alpineData = treeContainer._x_dataStack[0];
+    const node = alpineData.findNodeById(nodeId);
+    const folders = alpineData.getAllFolders().filter(f => f.id !== nodeId);
+
+    if (folders.length === 0) {
+        alert('No folders available to move to.');
+        return;
+    }
+
+    // Create modal HTML
+    showMoveToFolderModal(nodeId, node, folders, alpineData);
+});
+
+function showMoveToFolderModal(nodeId, node, folders, alpineData) {
+    const modalHTML = `
+        <div class="modal is-active" id="move-to-folder-modal">
+            <div class="modal-background" onclick="document.getElementById('move-to-folder-modal').remove()"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Move "${node.name}" to Folder</p>
+                    <button class="delete" aria-label="close" onclick="document.getElementById('move-to-folder-modal').remove()"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="field">
+                        <label class="label">Select Target Folder</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="target-folder-select">
+                                    ${folders.map(f => `<option value="${f.id}">${f.path || f.name}</option>`).join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" onclick="executeMove('${nodeId}')">Move</button>
+                    <button class="button" onclick="document.getElementById('move-to-folder-modal').remove()">Cancel</button>
+                </footer>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Store alpineData reference for executeMove
+    window.__moveAlpineData = alpineData;
+}
+
+window.executeMove = function (nodeId) {
+    const select = document.getElementById('target-folder-select');
+    const targetFolderId = select.value;
+    const alpineData = window.__moveAlpineData;
+
+    if (alpineData && targetFolderId) {
+        alpineData.moveNodeToFolder(nodeId, targetFolderId);
+        document.getElementById('move-to-folder-modal').remove();
+        delete window.__moveAlpineData;
+    }
 };

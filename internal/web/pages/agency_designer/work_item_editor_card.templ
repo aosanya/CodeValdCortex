@@ -91,30 +91,6 @@ templ WorkItemEditorCard() {
 							<div id="deliverable-tree-container">
 								<!-- Tree builder will be rendered here dynamically -->
 							</div>
-							<!-- Fallback: Simple text input (hidden by default) -->
-							<div id="deliverable-simple-input" class="is-hidden">
-								<div class="field">
-									<label class="label">Expected Deliverables (Simple Mode)</label>
-									<div class="control">
-										<textarea
-											class="textarea"
-											id="work-item-deliverables-editor"
-											placeholder="- Deliverable 1&#10;- Deliverable 2&#10;- Deliverable 3"
-											rows="4"
-											style="font-family: monospace; font-size: 14px;"
-										></textarea>
-									</div>
-									<p class="help">List the expected deliverables or outputs (one per line).</p>
-								</div>
-							</div>
-							<div class="field mt-4">
-								<div class="control">
-									<label class="checkbox">
-										<input type="checkbox" id="use-simple-deliverables" onchange="toggleDeliverableMode(this.checked)"/>
-										<span class="ml-2">Use simple text mode instead of tree builder</span>
-									</label>
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>

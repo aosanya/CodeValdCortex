@@ -187,26 +187,17 @@ window.saveWorkItemFromEditor = async function () {
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
 
-    // Get deliverables based on mode (tree builder or simple text)
+    // Get deliverables from tree builder
     let deliverables = [];
     let deliverablesStructured = null;
 
     console.log('[MVP-054] saveWorkItemFromEditor: Starting deliverables extraction');
 
-    if (typeof window.isUsingSimpleDeliverables === 'function' && window.isUsingSimpleDeliverables()) {
-        // Simple text mode
-        deliverables = document.getElementById('work-item-deliverables-editor')?.value
-            .split('\n')
-            .map(d => d.trim())
-            .filter(d => d.length > 0);
-        console.log('[MVP-054] Using simple deliverables mode:', deliverables);
-    } else {
-        // Tree builder mode
-        console.log('[MVP-054] Using tree builder mode, getDeliverablesStructuredData exists?', typeof window.getDeliverablesStructuredData === 'function');
-        if (typeof window.getDeliverablesStructuredData === 'function') {
-            deliverablesStructured = window.getDeliverablesStructuredData();
-            console.log('[MVP-054] Retrieved structured deliverables:', deliverablesStructured);
-        }
+    // Tree builder mode (only mode now)
+    console.log('[MVP-054] Using tree builder mode, getDeliverablesStructuredData exists?', typeof window.getDeliverablesStructuredData === 'function');
+    if (typeof window.getDeliverablesStructuredData === 'function') {
+        deliverablesStructured = window.getDeliverablesStructuredData();
+        console.log('[MVP-054] Retrieved structured deliverables:', deliverablesStructured);
     }
 
     const tags = document.getElementById('work-item-tags-editor')?.value

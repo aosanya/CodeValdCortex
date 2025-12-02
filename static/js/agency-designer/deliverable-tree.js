@@ -52,7 +52,7 @@ function deliverableTree() {
                     
                     <div class="node-row level is-mobile" style="margin-bottom: 0.25rem;">
                         <div class="level-left">
-                            ${node.type === 'folder' && hasChildren ? `
+                            ${node.type === 'folder' ? `
                                 <div class="level-item">
                                     <button type="button" class="button is-small is-ghost" 
                                             @click="expanded_${safeNodeId} = !expanded_${safeNodeId}">
@@ -64,8 +64,8 @@ function deliverableTree() {
                             ` : `<div class="level-item" style="width: 32px;"></div>`}
                             
                             <div class="level-item">
-                                <span class="icon ${node.type === 'folder' ? 'has-text-info' : 'has-text-grey'}">
-                                    <i class="fas ${node.type === 'folder' ? 'fa-folder' : 'fa-file-lines'}"></i>
+                                <span class="icon ${node.type === 'folder' ? (hasChildren ? 'has-text-info' : 'has-text-grey-light') : 'has-text-grey'}">
+                                    <i class="fas ${node.type === 'folder' ? (hasChildren ? 'fa-folder' : 'fa-folder-open') : 'fa-file-lines'}"></i>
                                 </span>
                             </div>
                             
@@ -133,6 +133,35 @@ function deliverableTree() {
                                             </div>
                                         </div>
                                     ` : ''}
+                                    
+                                    <div class="dropdown is-hoverable is-right">
+                                        <div class="dropdown-trigger">
+                                            <button type="button" class="button is-small is-ghost" title="Move">
+                                                <span class="icon is-small">
+                                                    <i class="fas fa-arrows-up-down-left-right"></i>
+                                                </span>
+                                            </button>
+                                        </div>
+                                        <div class="dropdown-menu">
+                                            <div class="dropdown-content">
+                                                ${depth > 0 ? `
+                                                    <a class="dropdown-item" @click.prevent="moveNodeUp('${nodeId}')">
+                                                        <span class="icon-text">
+                                                            <span class="icon"><i class="fas fa-arrow-up"></i></span>
+                                                            <span>Move Up One Level</span>
+                                                        </span>
+                                                    </a>
+                                                    <hr class="dropdown-divider">
+                                                ` : ''}
+                                                <a class="dropdown-item" @click.prevent="window.dispatchEvent(new CustomEvent('show-move-to-folder-modal', { detail: { nodeId: '${nodeId}' } }))">
+                                                    <span class="icon-text">
+                                                        <span class="icon"><i class="fas fa-folder-arrow-up"></i></span>
+                                                        <span>Move to Folder...</span>
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                     
                                     <button type="button" class="button is-small is-ghost has-text-danger"
                                             @click="deleteNode('${nodeId}')"
@@ -367,6 +396,183 @@ function deliverableTree() {
          */
         findNodeById(nodeId) {
             return this.findNodeByIdRecursive(this.nodes, nodeId);
+        },
+
+        /**
+         * Move node up one level (to parent's parent)
+         */
+        moveNodeUp(nodeId) {
+            const result = this.findNodeWithParent(nodeId);
+            if (!result || !result.parent || !result.grandparent) {
+                alert('Cannot move this node up - it is already at the top level or has no valid parent.');
+                return;
+            }
+
+            const { node, parent, grandparent } = result;
+
+            // Remove from current parent
+            const childIndex = parent.children.findIndex(c => c.id === nodeId);
+            if (childIndex !== -1) {
+                parent.children.splice(childIndex, 1);
+            }
+
+            // Add to grandparent's children (after the parent)
+            const parentIndex = grandparent.children.findIndex(c => c.id === parent.id);
+            grandparent.children.splice(parentIndex + 1, 0, node);
+
+            this.computeAllPaths();
+            this.validate();
+        },
+
+        /**
+         * Move node to another folder
+         */
+        moveNodeToFolder(nodeId, targetFolderId) {
+            if (nodeId === targetFolderId) {
+                alert('Cannot move a node to itself.');
+                return;
+            }
+
+            // Check if target is a descendant of the node being moved
+            if (this.isDescendant(nodeId, targetFolderId)) {
+                alert('Cannot move a node into its own descendant.');
+                return;
+            }
+
+            const node = this.findNodeById(nodeId);
+            const targetFolder = this.findNodeById(targetFolderId);
+
+            if (!node) {
+                alert('Source node not found.');
+                return;
+            }
+
+            if (!targetFolder || targetFolder.type !== 'folder') {
+                alert('Target must be a folder.');
+                return;
+            }
+
+            // Remove from current location
+            this.removeNodeFromParent(nodeId);
+
+            // Add to target folder
+            if (!targetFolder.children) {
+                targetFolder.children = [];
+            }
+            targetFolder.children.push(node);
+
+            this.computeAllPaths();
+            this.validate();
+        },
+
+        /**
+         * Check if targetId is a descendant of nodeId
+         */
+        isDescendant(nodeId, targetId) {
+            const node = this.findNodeById(nodeId);
+            if (!node || !node.children) return false;
+
+            return this.isDescendantRecursive(node.children, targetId);
+        },
+
+        /**
+         * Recursively check if targetId exists in children
+         */
+        isDescendantRecursive(children, targetId) {
+            for (const child of children) {
+                if (child.id === targetId) return true;
+                if (child.children && this.isDescendantRecursive(child.children, targetId)) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        /**
+         * Remove node from its parent (keeps the node object intact)
+         */
+        removeNodeFromParent(nodeId) {
+            // Try to remove from root
+            const rootIndex = this.nodes.findIndex(n => n.id === nodeId);
+            if (rootIndex !== -1) {
+                this.nodes.splice(rootIndex, 1);
+                return true;
+            }
+
+            // Recursively search and remove from children
+            return this.removeNodeFromParentRecursive(this.nodes, nodeId);
+        },
+
+        /**
+         * Recursively remove node from parent's children
+         */
+        removeNodeFromParentRecursive(nodes, nodeId) {
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].children && Array.isArray(nodes[i].children)) {
+                    const childIndex = nodes[i].children.findIndex(c => c.id === nodeId);
+                    if (childIndex !== -1) {
+                        nodes[i].children.splice(childIndex, 1);
+                        return true;
+                    }
+                    if (this.removeNodeFromParentRecursive(nodes[i].children, nodeId)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+
+        /**
+         * Find node along with its parent and grandparent
+         */
+        findNodeWithParent(nodeId) {
+            return this.findNodeWithParentRecursive(this.nodes, nodeId, null, null);
+        },
+
+        /**
+         * Recursively find node with parent context
+         */
+        findNodeWithParentRecursive(nodes, targetId, parent, grandparent) {
+            for (const node of nodes) {
+                if (node.id === targetId) {
+                    return { node, parent, grandparent };
+                }
+                if (node.children && Array.isArray(node.children)) {
+                    const result = this.findNodeWithParentRecursive(
+                        node.children,
+                        targetId,
+                        node,
+                        parent
+                    );
+                    if (result) {
+                        return result;
+                    }
+                }
+            }
+            return null;
+        },
+
+        /**
+         * Get all folders (for move-to dropdown)
+         */
+        getAllFolders() {
+            const folders = [];
+            this.collectFoldersRecursive(this.nodes, folders);
+            return folders;
+        },
+
+        /**
+         * Recursively collect all folders
+         */
+        collectFoldersRecursive(nodes, result) {
+            for (const node of nodes) {
+                if (node.type === 'folder') {
+                    result.push(node);
+                    if (node.children && Array.isArray(node.children)) {
+                        this.collectFoldersRecursive(node.children, result);
+                    }
+                }
+            }
         },
 
         /**
