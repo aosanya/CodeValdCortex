@@ -9,6 +9,7 @@ function deliverableTree() {
         validationErrors: [],
         draggedNode: null,
         newlyCreatedNodeId: null,
+        expandedNodes: {}, // Track expanded state of all nodes
 
         /**
          * Initialize the tree with existing deliverables
@@ -18,6 +19,20 @@ function deliverableTree() {
                 this.nodes = JSON.parse(JSON.stringify(data.deliverables));
                 this.computeAllPaths();
             }
+        },
+
+        /**
+         * Toggle node expanded state
+         */
+        toggleExpanded(nodeId) {
+            this.expandedNodes[nodeId] = !this.expandedNodes[nodeId];
+        },
+
+        /**
+         * Check if node is expanded
+         */
+        isExpanded(nodeId) {
+            return this.expandedNodes[nodeId] === true;
         },
 
         /**
@@ -47,7 +62,7 @@ function deliverableTree() {
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
                     
                      data-node-id="${nodeId}"
-                     x-data="{ editing_${safeNodeId}: ${isNewlyCreated}, expanded_${safeNodeId}: true }"
+                     x-data="{ editing_${safeNodeId}: ${isNewlyCreated} }"
                      x-init="${isNewlyCreated ? `$nextTick(() => { $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
                     
                     <div class="node-row level is-mobile" style="margin-bottom: 0.25rem;">
@@ -55,9 +70,9 @@ function deliverableTree() {
                             ${node.type === 'folder' ? `
                                 <div class="level-item">
                                     <button type="button" class="button is-small is-ghost" 
-                                            @click="expanded_${safeNodeId} = !expanded_${safeNodeId}">
+                                            @click="toggleExpanded('${nodeId}')">
                                         <span class="icon is-small">
-                                            <i class="fas" :class="expanded_${safeNodeId} ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                                            <i class="fas" :class="isExpanded('${nodeId}') ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                                         </span>
                                     </button>
                                 </div>
@@ -189,7 +204,7 @@ function deliverableTree() {
                     ` : ''}
                     
                     ${node.type === 'folder' && hasChildren ? `
-                        <div x-show="expanded_${safeNodeId}" class="node-children">
+                        <div x-show="isExpanded('${nodeId}')" class="node-children">
                             ${this.getSortedChildren(node.children).map((child, childIndex) => this.renderNode(child, depth + 1, childIndex)).join('')}
                         </div>
                     ` : ''}
