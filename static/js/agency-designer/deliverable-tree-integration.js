@@ -1,5 +1,6 @@
 // Deliverable Tree Integration for Work Items
 // Handles integration between deliverable tree builder and work item editor
+// Updated: 2025-12-01 21:10 - Fixed tree initialization with existing deliverables
 
 // Toggle between tree builder and simple text mode
 window.toggleDeliverableMode = function (useSimple) {
@@ -17,9 +18,16 @@ window.toggleDeliverableMode = function (useSimple) {
 
 // Initialize deliverable tree builder for work item editor
 window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = []) {
+    console.log('[MVP-054] initDeliverableTreeBuilder called with:', {
+        agencyId,
+        workItemCode,
+        deliverables: existingDeliverables,
+        count: existingDeliverables.length
+    });
+
     const container = document.getElementById('deliverable-tree-container');
     if (!container) {
-        console.error('Deliverable tree container not found');
+        console.error('[MVP-054] Deliverable tree container not found');
         return;
     }
 
@@ -27,14 +35,24 @@ window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDe
     const treeHTML = createTreeBuilderHTML(agencyId, workItemCode, existingDeliverables);
     container.innerHTML = treeHTML;
 
+    console.log('[MVP-054] Tree HTML inserted, Alpine.js should initialize now');
+
     // Initialize Alpine.js component if not already initialized
     // Alpine.js will auto-initialize when the HTML is rendered
 };
 
 // Create tree builder HTML structure
 function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
+    // Store deliverables in a global temporary variable that Alpine can access
+    // This avoids HTML escaping issues with complex JSON in attributes
+    window.__tempDeliverables = deliverables || [];
+
+    console.log('[MVP-054] createTreeBuilderHTML: deliverables count=', deliverables?.length || 0);
+
     return `
-        <div class="deliverable-tree-builder" x-data="deliverableTree()">
+        <div class="deliverable-tree-builder" 
+             x-data="deliverableTree()"
+             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); window.__tempDeliverables = null; console.log('[MVP-054] Alpine initialized with', nodes.length, 'nodes')">
             <!-- Toolbar -->
             <div class="level mb-4">
                 <div class="level-left">
@@ -98,7 +116,7 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
             <!-- Tree Container -->
             <div class="deliverable-tree-container" 
                  id="deliverable-tree-root"
-                 x-init="initTree(${JSON.stringify(deliverables)})">
+                 x-init="if (window.__tempDeliverables && window.__tempDeliverables.length > 0) { nodes = window.__tempDeliverables; computeAllPaths(); }">
                 
                 <!-- Empty state -->
                 <template x-if="nodes.length === 0">

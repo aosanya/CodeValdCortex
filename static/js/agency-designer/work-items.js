@@ -134,6 +134,9 @@ async function loadLinkedGoals(workItemKey) {
 
 // Populate form with work item data
 function populateWorkItemForm(workItem) {
+    console.log('[MVP-054] populateWorkItemForm called with:', workItem);
+    console.log('[MVP-054] workItem.deliverables_structured:', workItem.deliverables_structured);
+
     const formData = {
         'work-item-code-editor': workItem.code || '',
         'work-item-title-editor': workItem.title || '',
@@ -146,8 +149,12 @@ function populateWorkItemForm(workItem) {
     // Initialize tree builder with existing structured deliverables if available
     const agencyId = window.getCurrentAgencyId();
     const deliverables = workItem.deliverables_structured || [];
+    console.log('[MVP-054] About to call initDeliverableTreeBuilder with', deliverables.length, 'deliverables');
     if (typeof window.initDeliverableTreeBuilder === 'function') {
         window.initDeliverableTreeBuilder(agencyId, workItem.code || '', deliverables);
+        console.log('[MVP-054] initDeliverableTreeBuilder called');
+    } else {
+        console.warn('[MVP-054] initDeliverableTreeBuilder function not found!');
     }
 }
 
@@ -184,16 +191,21 @@ window.saveWorkItemFromEditor = async function () {
     let deliverables = [];
     let deliverablesStructured = null;
 
+    console.log('[MVP-054] saveWorkItemFromEditor: Starting deliverables extraction');
+
     if (typeof window.isUsingSimpleDeliverables === 'function' && window.isUsingSimpleDeliverables()) {
         // Simple text mode
         deliverables = document.getElementById('work-item-deliverables-editor')?.value
             .split('\n')
             .map(d => d.trim())
             .filter(d => d.length > 0);
+        console.log('[MVP-054] Using simple deliverables mode:', deliverables);
     } else {
         // Tree builder mode
+        console.log('[MVP-054] Using tree builder mode, getDeliverablesStructuredData exists?', typeof window.getDeliverablesStructuredData === 'function');
         if (typeof window.getDeliverablesStructuredData === 'function') {
             deliverablesStructured = window.getDeliverablesStructuredData();
+            console.log('[MVP-054] Retrieved structured deliverables:', deliverablesStructured);
         }
     }
 
@@ -236,16 +248,31 @@ window.saveWorkItemFromEditor = async function () {
         tags
     };
 
+    console.log('[MVP-054] Data object being sent to API:', {
+        code,
+        title: title.substring(0, 30) + '...',
+        deliverables: deliverables,
+        deliverables_structured: deliverablesStructured,
+        goal_keys: selectedGoals,
+        tags: tags
+    });
+
     // Save the work item using specification API
     try {
         const agencyId = window.getCurrentAgencyId();
 
+        console.log('[MVP-054] About to save work item, mode:', workItemEditorState.mode);
+
         let savedWorkItem;
         if (workItemEditorState.mode === 'add') {
+            console.log('[MVP-054] Calling addWorkItem with data');
             savedWorkItem = await window.specificationAPI.addWorkItem(data);
         } else {
+            console.log('[MVP-054] Calling updateWorkItem with key:', workItemEditorState.workItemKey);
             savedWorkItem = await window.specificationAPI.updateWorkItem(workItemEditorState.workItemKey, data);
         }
+
+        console.log('[MVP-054] Work item saved successfully:', savedWorkItem);
 
         // No need to save goal links separately - they're part of the work item now
 
@@ -253,6 +280,7 @@ window.saveWorkItemFromEditor = async function () {
         cancelWorkItemEdit();
         loadWorkItems();
     } catch (error) {
+        console.error('[MVP-054] Error saving work item:', error);
         window.showNotification('Error saving work item', 'error');
     }
 }

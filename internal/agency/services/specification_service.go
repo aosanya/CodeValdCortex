@@ -59,7 +59,26 @@ func (s *SpecificationService) UpdateGoals(ctx context.Context, agencyID string,
 
 // UpdateWorkItems updates only the work items section
 func (s *SpecificationService) UpdateWorkItems(ctx context.Context, agencyID string, workItems []models.WorkItem, updatedBy string) (*models.AgencySpecification, error) {
-	return s.repo.PatchSpecificationSection(ctx, agencyID, "work_items", workItems, updatedBy)
+	s.logger.WithFields(logrus.Fields{
+		"agency_id":       agencyID,
+		"work_item_count": len(workItems),
+		"updated_by":      updatedBy,
+	}).Info("[MVP-054] UpdateWorkItems service called")
+
+	// Log deliverables info
+	for i, wi := range workItems {
+		s.logger.Infof("[MVP-054] Service layer - WorkItem[%d]: code=%s, deliverables_structured=%d items",
+			i, wi.Code, len(wi.DeliverablesStructured))
+	}
+
+	result, err := s.repo.PatchSpecificationSection(ctx, agencyID, "work_items", workItems, updatedBy)
+	if err != nil {
+		s.logger.WithError(err).Error("[MVP-054] PatchSpecificationSection failed for work items")
+		return nil, err
+	}
+
+	s.logger.Infof("[MVP-054] UpdateWorkItems completed, saved %d work items", len(result.WorkItems))
+	return result, nil
 }
 
 // UpdateWorkflows updates only the workflows section

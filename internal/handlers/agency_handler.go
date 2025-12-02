@@ -368,16 +368,30 @@ func (h *AgencyHandler) UpdateWorkItems(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Errorf("[MVP-054] Error binding JSON in UpdateWorkItems: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
 	}
 
+	h.logger.Infof("[MVP-054] UpdateWorkItems called for agency: %s with %d work items", id, len(req.WorkItems))
+
+	// Log deliverables for each work item
+	for i, wi := range req.WorkItems {
+		h.logger.Infof("[MVP-054] WorkItem[%d]: code=%s, title=%s, deliverables=%d, deliverables_structured=%d",
+			i, wi.Code, wi.Title, len(wi.Deliverables), len(wi.DeliverablesStructured))
+		if len(wi.DeliverablesStructured) > 0 {
+			h.logger.Infof("[MVP-054] WorkItem[%d] structured deliverables: %+v", i, wi.DeliverablesStructured)
+		}
+	}
+
 	spec, err := h.service.UpdateSpecificationWorkItems(c.Request.Context(), id, req.WorkItems, req.UpdatedBy)
 	if err != nil {
+		h.logger.Errorf("[MVP-054] Error updating work items: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	h.logger.Infof("[MVP-054] Work items updated successfully, returning specification")
 	c.JSON(http.StatusOK, spec)
 }
 

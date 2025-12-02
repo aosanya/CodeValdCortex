@@ -35,7 +35,7 @@ function deliverableTree() {
          * Render a single node with its children
          */
         renderNode(node, depth, nodeIndex) {
-            const paddingLeft = depth * 20;
+            const paddingLeft = depth * 12;
             const hasChildren = node.children && node.children.length > 0;
             const nodeId = node.id;
             // Sanitize node ID for use in Alpine.js variable names (replace hyphens with underscores)
@@ -50,7 +50,7 @@ function deliverableTree() {
                      x-data="{ editing_${safeNodeId}: ${isNewlyCreated}, expanded_${safeNodeId}: true }"
                      x-init="${isNewlyCreated ? `$nextTick(() => { $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
                     
-                    <div class="node-row level is-mobile mb-1">
+                    <div class="node-row level is-mobile" style="margin-bottom: 0.25rem;">
                         <div class="level-left">
                             ${node.type === 'folder' && hasChildren ? `
                                 <div class="level-item">
