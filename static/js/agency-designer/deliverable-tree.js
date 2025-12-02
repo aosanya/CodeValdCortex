@@ -10,6 +10,7 @@ function deliverableTree() {
         draggedNode: null,
         newlyCreatedNodeId: null,
         expandedNodes: {}, // Track expanded state of all nodes
+        editingNodeId: null, // Track which node is currently being edited
 
         /**
          * Initialize the tree with existing deliverables
@@ -36,6 +37,27 @@ function deliverableTree() {
         },
 
         /**
+         * Start editing a node (closes all other editing states)
+         */
+        startEditing(nodeId) {
+            this.editingNodeId = nodeId;
+        },
+
+        /**
+         * Check if a node is being edited
+         */
+        isEditing(nodeId) {
+            return this.editingNodeId === nodeId;
+        },
+
+        /**
+         * Stop editing the current node
+         */
+        stopEditing() {
+            this.editingNodeId = null;
+        },
+
+        /**
          * Render the tree as HTML (for Alpine x-html)
          */
         renderTree() {
@@ -53,17 +75,14 @@ function deliverableTree() {
             const paddingLeft = depth * 12;
             const hasChildren = node.children && node.children.length > 0;
             const nodeId = node.id;
-            // Sanitize node ID for use in Alpine.js variable names (replace hyphens with underscores)
-            const safeNodeId = nodeId.replace(/-/g, '_');
             // Check if this is a newly created node that should start in edit mode
             const isNewlyCreated = this.newlyCreatedNodeId === nodeId;
 
             return `
                 <div class="tree-node ${node.type === 'folder' ? 'is-folder' : 'is-file'}" 
-                    
                      data-node-id="${nodeId}"
-                     x-data="{ editing_${safeNodeId}: ${isNewlyCreated} }"
-                     x-init="${isNewlyCreated ? `$nextTick(() => { $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
+                     data-depth="${depth}"
+                     x-init="${isNewlyCreated ? `$nextTick(() => { startEditing('${nodeId}'); $el.querySelector('input[type=text]')?.focus(); }); newlyCreatedNodeId = null;` : ''}">
                     
                     <div class="node-row level is-mobile" style="margin-bottom: 0.25rem;">
                         <div class="level-left">
@@ -85,16 +104,17 @@ function deliverableTree() {
                             </div>
                             
                             <div class="level-item">
-                                <div x-show="!editing_${safeNodeId}" class="node-name">
+                                <div x-show="!isEditing('${nodeId}')" class="node-name">
                                     <span>${node.name}${node.type === 'file' ? node.file_extension : ''}</span>
                                     ${node.description ? `<span class="has-text-grey is-size-7 ml-2">- ${node.description}</span>` : ''}
                                 </div>
-                                <div x-show="editing_${safeNodeId}" class="field is-grouped">
+                                <div x-show="isEditing('${nodeId}')" class="field is-grouped">
                                     <p class="control">
                                         <input type="text" class="input is-small" 
                                                value="${node.name}"
-                                               @keydown.enter="editing_${safeNodeId} = false; updateNodeName('${nodeId}', $event.target.value)"
-                                               @keydown.escape="editing_${safeNodeId} = false"
+                                               @keydown.enter="stopEditing(); updateNodeName('${nodeId}', $event.target.value)"
+                                               @keydown.escape="stopEditing()"
+                                               @blur="stopEditing(); updateNodeName('${nodeId}', $event.target.value)"
                                                placeholder="Name">
                                     </p>
                                     ${node.type === 'file' ? '<p class="control"><span class="button is-small is-static">.md</span></p>' : ''}
@@ -106,7 +126,7 @@ function deliverableTree() {
                             <div class="level-item">
                                 <div class="buttons are-small">
                                     <button type="button" class="button is-small is-ghost"
-                                            @click="editing_${safeNodeId} = !editing_${safeNodeId}"
+                                            @click="startEditing('${nodeId}')"
                                             title="Edit name">
                                         <span class="icon is-small">
                                             <i class="fas fa-pen"></i>
