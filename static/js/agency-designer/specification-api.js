@@ -130,20 +130,10 @@ window.SpecificationAPI = class SpecificationAPI {
      */
     async updateWorkItems(workItems, updatedBy = 'user') {
         try {
-            console.log('[MVP-054] SpecificationAPI.updateWorkItems: Sending', workItems.length, 'work items to API');
-            console.log('[MVP-054] Work items being sent:', workItems.map(wi => ({
-                code: wi.code,
-                title: wi.title?.substring(0, 30),
-                has_deliverables_structured: !!wi.deliverables_structured,
-                deliverables_structured_count: wi.deliverables_structured?.length || 0
-            })));
-
             const payload = {
                 work_items: workItems,
                 updated_by: updatedBy
             };
-
-            console.log('[MVP-054] Full payload to /work-items endpoint:', JSON.stringify(payload, null, 2));
 
             const response = await fetch(`${this.baseUrl}/work-items`, {
                 method: 'PUT',
@@ -155,15 +145,14 @@ window.SpecificationAPI = class SpecificationAPI {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('[MVP-054] API error response:', response.status, errorText);
+                console.error('API error response:', response.status, errorText);
                 throw new Error(`Failed to update work items: ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('[MVP-054] API response received:', result);
             return result;
         } catch (error) {
-            console.error('[MVP-054] Error in updateWorkItems:', error);
+            console.error('Error in updateWorkItems:', error);
             throw error;
         }
     }
@@ -342,10 +331,8 @@ window.SpecificationAPI = class SpecificationAPI {
      * Add a new work item to the specification
      */
     async addWorkItem(workItem, updatedBy = 'user') {
-        console.log('[MVP-054] SpecificationAPI.addWorkItem called with:', workItem);
         const spec = await this.getSpecification();
         const updatedWorkItems = [...(spec.work_items || []), workItem];
-        console.log('[MVP-054] Updated work items array (after add):', updatedWorkItems.length, 'items');
         return await this.updateWorkItems(updatedWorkItems, updatedBy);
     }
 
@@ -353,18 +340,16 @@ window.SpecificationAPI = class SpecificationAPI {
      * Update a specific work item in the specification
      */
     async updateWorkItem(workItemKey, updatedWorkItem, updatedBy = 'user') {
-        console.log('[MVP-054] SpecificationAPI.updateWorkItem called with key:', workItemKey, 'data:', updatedWorkItem);
         const spec = await this.getSpecification();
         const workItems = spec.work_items || [];
         const workItemIndex = workItems.findIndex(wi => wi._key === workItemKey);
 
         if (workItemIndex === -1) {
-            console.error('[MVP-054] Work item not found with key:', workItemKey);
+            console.error('Work item not found with key:', workItemKey);
             throw new Error(`Work item with key ${workItemKey} not found`);
         }
 
         workItems[workItemIndex] = { ...workItems[workItemIndex], ...updatedWorkItem };
-        console.log('[MVP-054] Updated work item at index', workItemIndex, ':', workItems[workItemIndex]);
         return await this.updateWorkItems(workItems, updatedBy);
     }
 

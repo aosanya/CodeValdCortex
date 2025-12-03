@@ -197,7 +197,7 @@ func (r *InstanceRepository) GetByID(ctx context.Context, instanceID string, age
 	var instance models.AgencyInstance
 	_, err = collection.ReadDocument(ctx, instanceID, &instance)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("instance not found: %s", instanceID)
 		}
 		return nil, fmt.Errorf("failed to read instance: %w", err)
@@ -215,7 +215,7 @@ func (r *InstanceRepository) Update(ctx context.Context, instance *models.Agency
 
 	meta, err := collection.UpdateDocument(ctx, instance.Key, instance)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("instance not found: %s", instance.InstanceID)
 		}
 		return fmt.Errorf("failed to update instance: %w", err)
@@ -241,7 +241,7 @@ func (r *InstanceRepository) Delete(ctx context.Context, instanceID string, agen
 
 	_, err = collection.UpdateDocument(ctx, instanceID, updateDoc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("instance not found: %s", instanceID)
 		}
 		return fmt.Errorf("failed to soft delete instance: %w", err)

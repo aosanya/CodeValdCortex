@@ -27,7 +27,7 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*models.Agency, er
 	var agencyDoc models.Agency
 	_, err := r.collection.ReadDocument(ctx, id, &agencyDoc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("agency not found: %s", id)
 		}
 		return nil, fmt.Errorf("failed to read agency: %w", err)
@@ -66,7 +66,7 @@ func (r *Repository) List(ctx context.Context, filters models.AgencyFilters) ([]
 func (r *Repository) Update(ctx context.Context, agencyDoc *models.Agency) error {
 	_, err := r.collection.UpdateDocument(ctx, agencyDoc.Key, agencyDoc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("agency not found: %s", agencyDoc.ID)
 		}
 		return fmt.Errorf("failed to update agency: %w", err)
@@ -79,7 +79,7 @@ func (r *Repository) Update(ctx context.Context, agencyDoc *models.Agency) error
 func (r *Repository) Delete(ctx context.Context, id string) error {
 	_, err := r.collection.RemoveDocument(ctx, id)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("agency not found: %s", id)
 		}
 		return fmt.Errorf("failed to delete agency: %w", err)

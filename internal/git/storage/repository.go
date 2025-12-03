@@ -121,7 +121,7 @@ func (r *repository) GetObject(ctx context.Context, sha string) (*models.GitObje
 	var obj models.GitObject
 	_, err = collection.ReadDocument(ctx, sha, &obj)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("git object not found: %s", sha)
 		}
 		return nil, fmt.Errorf("failed to read git object: %w", err)
@@ -298,7 +298,7 @@ func (r *repository) GetRepository(ctx context.Context, instanceID string) (*mod
 	var repo models.Repository
 	_, err = collection.ReadDocument(ctx, instanceID, &repo)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("repository not found for instance: %s", instanceID)
 		}
 		return nil, fmt.Errorf("failed to read repository: %w", err)

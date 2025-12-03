@@ -217,7 +217,7 @@ func (r *Repository) GetIssue(ctx context.Context, provider string, issueID stri
 	var issue work.WorkIssue
 	_, err := r.issuesCol.ReadDocument(ctx, key, &issue)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, nil // Issue not found
 		}
 		return nil, fmt.Errorf("failed to read issue: %w", err)
@@ -233,7 +233,7 @@ func (r *Repository) GetPullRequest(ctx context.Context, provider string, prID s
 	var pr work.WorkPullRequest
 	_, err := r.prsCol.ReadDocument(ctx, key, &pr)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to read PR: %w", err)
@@ -249,7 +249,7 @@ func (r *Repository) GetMilestone(ctx context.Context, provider string, mileston
 	var milestone work.WorkMilestone
 	_, err := r.milestonesCol.ReadDocument(ctx, key, &milestone)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to read milestone: %w", err)

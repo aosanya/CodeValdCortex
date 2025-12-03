@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
@@ -100,24 +99,6 @@ func (r *Repository) GetSpecification(ctx context.Context, agencyID string) (*mo
 			return nil, fmt.Errorf("failed to read raw document: %w", err)
 		}
 
-		log.Printf("[MVP-054] GetSpecification: Read raw document from DB")
-		if workItems, ok := rawDoc["work_items"].([]interface{}); ok {
-			log.Printf("[MVP-054] GetSpecification: Raw document has %d work items", len(workItems))
-			if len(workItems) > 0 {
-				if wi, ok := workItems[0].(map[string]interface{}); ok {
-					if deliv, ok := wi["deliverables_structured"]; ok {
-						if delivArr, ok := deliv.([]interface{}); ok {
-							log.Printf("[MVP-054] GetSpecification: First work item has %d deliverables_structured", len(delivArr))
-						} else {
-							log.Printf("[MVP-054] GetSpecification: First work item deliverables_structured is not an array: %T", deliv)
-						}
-					} else {
-						log.Printf("[MVP-054] GetSpecification: First work item has NO deliverables_structured field")
-					}
-				}
-			}
-		}
-
 		// Convert raw document to JSON and then unmarshal properly
 		jsonData, err := json.Marshal(rawDoc)
 		if err != nil {
@@ -126,11 +107,6 @@ func (r *Repository) GetSpecification(ctx context.Context, agencyID string) (*mo
 
 		if err := json.Unmarshal(jsonData, &spec); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal specification document: %w", err)
-		}
-
-		log.Printf("[MVP-054] GetSpecification: After unmarshal, spec has %d work items", len(spec.WorkItems))
-		if len(spec.WorkItems) > 0 {
-			log.Printf("[MVP-054] GetSpecification: First work item has %d deliverables_structured", len(spec.WorkItems[0].DeliverablesStructured))
 		}
 
 		return &spec, nil
@@ -315,17 +291,7 @@ func (r *Repository) PatchSpecificationSection(ctx context.Context, agencyID, se
 		}
 	case "work_items":
 		if items, ok := data.([]models.WorkItem); ok {
-			log.Printf("[MVP-054] Repository: Setting %d work items", len(items))
-			for i, wi := range items {
-				log.Printf("[MVP-054] Repository - WorkItem[%d] before SetWorkItems: code=%s, deliverables_structured=%d",
-					i, wi.Code, len(wi.DeliverablesStructured))
-			}
 			existing.SetWorkItems(items, updatedBy)
-			log.Printf("[MVP-054] Repository: After SetWorkItems, existing.WorkItems=%d", len(existing.WorkItems))
-			for i, wi := range existing.WorkItems {
-				log.Printf("[MVP-054] Repository - existing.WorkItems[%d]: code=%s, deliverables_structured=%d",
-					i, wi.Code, len(wi.DeliverablesStructured))
-			}
 		} else {
 			return nil, fmt.Errorf("invalid data type for work_items section")
 		}
@@ -351,21 +317,12 @@ func (r *Repository) PatchSpecificationSection(ctx context.Context, agencyID, se
 		return nil, fmt.Errorf("unknown section: %s", section)
 	}
 
-	// Log before database update
-	log.Printf("[MVP-054] Repository: About to update document in database, key=%s", existing.Key)
-	log.Printf("[MVP-054] Repository: Document has %d work items before DB update", len(existing.WorkItems))
-	if len(existing.WorkItems) > 0 {
-		log.Printf("[MVP-054] Repository: First work item deliverables_structured=%d", len(existing.WorkItems[0].DeliverablesStructured))
-	}
-
 	// Update in database
 	meta, err := collection.UpdateDocument(ctx, existing.Key, existing)
 	if err != nil {
-		log.Printf("[MVP-054] Repository: UpdateDocument FAILED: %v", err)
 		return nil, fmt.Errorf("failed to update specification document: %w", err)
 	}
 
-	log.Printf("[MVP-054] Repository: UpdateDocument SUCCESS, new rev=%s", meta.Rev)
 	existing.Rev = meta.Rev
 
 	return existing, nil

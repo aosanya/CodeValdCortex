@@ -348,11 +348,3 @@ func (r *IntroductionBuilder) parseAIResponse(response, original string) (refine
 
 	return refined, wasChanged, explanation, changedSections
 }
-
-// min returns the minimum of two integers
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

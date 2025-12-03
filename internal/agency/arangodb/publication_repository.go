@@ -83,7 +83,7 @@ func (r *publicationRepository) GetByID(ctx context.Context, pubID string) (*mod
 	var pub models.AgencyPublication
 	meta, err := coll.ReadDocument(ctx, pubID, &pub)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("publication not found: %s", pubID)
 		}
 		r.logger.Error("failed to read publication", "error", err, "publication_id", pubID)
@@ -227,7 +227,7 @@ func (r *publicationRepository) Update(ctx context.Context, pub *models.AgencyPu
 	// Update document
 	meta, err := coll.UpdateDocument(ctx, pub.Key, updateDoc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("publication not found: %s", pub.Key)
 		}
 		r.logger.Error("failed to update publication", "error", err, "publication_id", pub.Key)

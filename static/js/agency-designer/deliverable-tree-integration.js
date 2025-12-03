@@ -4,24 +4,15 @@
 
 // Initialize deliverable tree builder for work item editor
 window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = []) {
-    console.log('[MVP-054] initDeliverableTreeBuilder called with:', {
-        agencyId,
-        workItemCode,
-        deliverables: existingDeliverables,
-        count: existingDeliverables.length
-    });
-
     const container = document.getElementById('deliverable-tree-container');
     if (!container) {
-        console.error('[MVP-054] Deliverable tree container not found');
+        console.error('Deliverable tree container not found');
         return;
     }
 
     // Create the tree builder HTML structure
     const treeHTML = createTreeBuilderHTML(agencyId, workItemCode, existingDeliverables);
     container.innerHTML = treeHTML;
-
-    console.log('[MVP-054] Tree HTML inserted, Alpine.js should initialize now');
 
     // Initialize Alpine.js component if not already initialized
     // Alpine.js will auto-initialize when the HTML is rendered
@@ -33,12 +24,10 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
     // This avoids HTML escaping issues with complex JSON in attributes
     window.__tempDeliverables = deliverables || [];
 
-    console.log('[MVP-054] createTreeBuilderHTML: deliverables count=', deliverables?.length || 0);
-
     return `
         <div class="deliverable-tree-builder" 
              x-data="deliverableTree()"
-             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null; console.log('[MVP-054] Alpine initialized with', nodes.length, 'nodes')">
+             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null;">
             <!-- Toolbar -->
             <div class="level mb-4">
                 <div class="level-left">

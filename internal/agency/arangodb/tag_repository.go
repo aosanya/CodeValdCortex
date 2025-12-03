@@ -99,7 +99,7 @@ func (r *TagRepository) GetByAgencyAndName(ctx context.Context, agencyID, name s
 	var tag models.AgencyTag
 	_, err = collection.ReadDocument(ctx, key, &tag)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to read tag: %w", err)
@@ -151,7 +151,7 @@ func (r *TagRepository) Delete(ctx context.Context, agencyID, name string, agenc
 
 	_, err = collection.RemoveDocument(ctx, key)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("tag not found: %s", name)
 		}
 		return fmt.Errorf("failed to delete tag: %w", err)
