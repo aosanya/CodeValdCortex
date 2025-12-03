@@ -32,7 +32,7 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
     return `
         <div class="deliverable-tree-builder" 
              x-data="deliverableTree()"
-             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null; if (window.__deliverableTreeOnSave) { onSave = window.__deliverableTreeOnSave; console.log('Deliverable tree onSave callback set:', typeof onSave); } else { console.warn('No deliverable tree onSave callback found'); }">
+             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null; if (window.__deliverableTreeOnSave) { onSave = window.__deliverableTreeOnSave; }">
             <!-- Toolbar -->
             <div class="level mb-4">
                 <div class="level-left">
@@ -340,7 +340,6 @@ window.getDeliverablesStructuredData = function () {
     if (treeContainer && treeContainer._x_dataStack && treeContainer._x_dataStack.length > 0) {
         const alpineData = treeContainer._x_dataStack[0];
         if (alpineData && alpineData.nodes) {
-            console.log('Got deliverables from Alpine.js:', alpineData.nodes);
             return alpineData.nodes;
         }
     }
@@ -350,7 +349,6 @@ window.getDeliverablesStructuredData = function () {
     if (hiddenInput && hiddenInput.value) {
         try {
             const data = JSON.parse(hiddenInput.value);
-            console.log('Got deliverables from hidden input:', data);
             return data;
         } catch (error) {
             console.error('Failed to parse deliverables structured data:', error);

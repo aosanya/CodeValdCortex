@@ -211,16 +211,10 @@ window.PropertiesPanel = {
      * Handle button clicks
      */
     _handleButtonClick: function (action) {
-        console.log('Button clicked! Action:', action);
-
-        if (!this._currentConfig) {
-            console.error('No current config!');
-            return;
-        }
+        if (!this._currentConfig) return;
 
         switch (action) {
             case 'save':
-                console.log('Save action triggered. onSave exists?', typeof this._currentConfig.onSave);
                 if (this._currentConfig.onSave) {
                     this._currentConfig.onSave();
                 }
@@ -244,9 +238,7 @@ window.PropertiesPanel = {
                     this._currentConfig.onAction(action);
                 }
         }
-    },
-
-    /**
+    },    /**
      * Escape HTML to prevent XSS
      */
     _escapeHtml: function (text) {
@@ -329,8 +321,6 @@ window.PropertiesPanel = {
                 }
             ],
             onUpdate: (field, value) => {
-                console.log(`Updating work item field: ${field} =`, value);
-
                 // Get the current work item from the editor
                 const titleInput = document.getElementById('work-item-title');
                 const descInput = document.getElementById('work-item-description');
@@ -351,7 +341,6 @@ window.PropertiesPanel = {
                 }
             },
             onRemoveTag: (field, tag) => {
-                console.log('Removing tag:', tag);
                 if (window.WorkItems && window.WorkItems.removeTag) {
                     window.WorkItems.removeTag(tag);
                 }
@@ -434,8 +423,6 @@ window.PropertiesPanel = {
                 }
             ],
             onUpdate: (field, value) => {
-                console.log(`Updating deliverable node field: ${field} =`, value);
-
                 // Get the Alpine.js tree component
                 const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
                 if (treeContainer && treeContainer._x_dataStack && treeContainer._x_dataStack[0]) {
@@ -446,7 +433,6 @@ window.PropertiesPanel = {
                 }
             },
             onSave: async () => {
-                console.log('Properties Panel Save - Starting for node:', node.id);
 
                 // Show saving status
                 window.showNotification('Saving...', 'info');
@@ -456,13 +442,9 @@ window.PropertiesPanel = {
                 if (treeContainer && treeContainer._x_dataStack && treeContainer._x_dataStack[0]) {
                     const alpineData = treeContainer._x_dataStack[0];
 
-                    console.log('Tree component found. Current nodes:', alpineData.nodes);
-                    console.log('Save callback exists?', typeof alpineData.onSave === 'function');
-
                     // Call the save function passed to deliverable tree
                     if (alpineData.onSave && typeof alpineData.onSave === 'function') {
                         try {
-                            console.log('Calling onSave callback...');
                             await alpineData.onSave();
                             window.showNotification('Saved successfully', 'success');
                         } catch (error) {
@@ -497,8 +479,6 @@ window.PropertiesPanel = {
      * Update a deliverable node field (legacy)
      */
     updateDeliverableNodeField: function (nodeId, field, value) {
-        console.log(`Updating deliverable node field: ${field} =`, value);
-
         // Get the Alpine.js tree component
         const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
         if (treeContainer && treeContainer._x_dataStack && treeContainer._x_dataStack[0]) {
@@ -544,8 +524,6 @@ window.PropertiesPanel = {
      * Save deliverable node (legacy)
      */
     saveDeliverableNode: async function (nodeId) {
-        console.log('Saving deliverable node (legacy):', nodeId);
-
         // Show saving status
         window.showNotification('Saving...', 'info');
 
@@ -585,8 +563,6 @@ window.PropertiesPanel = {
      * Update a work item field
      */
     updateWorkItemField: function (field, value) {
-        console.log(`Updating work item field: ${field} =`, value);
-
         // Get the current work item from the editor
         const titleInput = document.getElementById('work-item-title');
         const descInput = document.getElementById('work-item-description');
@@ -611,7 +587,6 @@ window.PropertiesPanel = {
      * Remove a tag from work item
      */
     removeTag: function (tag) {
-        console.log('Removing tag:', tag);
         // This would integrate with the work items module
         if (window.WorkItems && window.WorkItems.removeTag) {
             window.WorkItems.removeTag(tag);

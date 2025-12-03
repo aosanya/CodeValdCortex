@@ -251,7 +251,14 @@ window.saveWorkItemFromEditor = async function () {
         }
 
         window.showNotification('Work item saved successfully', 'success');
-        window.cancelWorkItemEdit();
+
+        // If this was an add operation, switch to edit mode with the saved work item
+        if (workItemEditorState.mode === 'add') {
+            workItemEditorState.mode = 'edit';
+            workItemEditorState.workItemKey = savedWorkItem._key || savedWorkItem.key;
+        }
+
+        // Refresh the work items list in the background
         window.loadWorkItems();
     } catch (error) {
         console.error('Error saving work item:', error);

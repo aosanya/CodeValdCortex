@@ -67,7 +67,6 @@ function deliverableTree() {
 
                 // Don't regenerate the properties panel - it's already showing this node
                 // and regenerating would lose event handlers and user state
-                console.log('Field updated:', field, '=', value);
             }
         },
 

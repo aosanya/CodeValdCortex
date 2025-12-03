@@ -72,7 +72,6 @@ window.showWorkItemEditor = async function (mode, workItemKey = null) {
         // Initialize empty tree builder with save callback
         const agencyId = window.getCurrentAgencyId();
         if (typeof window.initDeliverableTreeBuilder === 'function') {
-            console.log('Initializing deliverable tree with save callback:', typeof window.saveWorkItemFromEditor);
             window.initDeliverableTreeBuilder(agencyId, '', [], window.saveWorkItemFromEditor);
         }
     } else if (mode === 'edit') {
@@ -143,7 +142,6 @@ function populateWorkItemForm(workItem) {
     const agencyId = window.getCurrentAgencyId();
     const deliverables = workItem.deliverables_structured || [];
     if (typeof window.initDeliverableTreeBuilder === 'function') {
-        console.log('Initializing deliverable tree for edit with save callback:', typeof window.saveWorkItemFromEditor);
         window.initDeliverableTreeBuilder(agencyId, workItem.code || '', deliverables, window.saveWorkItemFromEditor);
     } else {
         console.warn('initDeliverableTreeBuilder function not found!');
@@ -174,8 +172,6 @@ function clearWorkItemForm() {
 
 // Save work item from editor
 window.saveWorkItemFromEditor = async function () {
-    console.log('=== Starting saveWorkItemFromEditor ===');
-
     // Get form values
     const code = document.getElementById('work-item-code-editor')?.value.trim();
     const title = document.getElementById('work-item-title-editor')?.value.trim();
@@ -188,7 +184,6 @@ window.saveWorkItemFromEditor = async function () {
     // Tree builder mode (only mode now)
     if (typeof window.getDeliverablesStructuredData === 'function') {
         deliverablesStructured = window.getDeliverablesStructuredData();
-        console.log('Retrieved deliverables from tree:', deliverablesStructured);
     } else {
         console.warn('getDeliverablesStructuredData function not found');
     }
@@ -232,27 +227,28 @@ window.saveWorkItemFromEditor = async function () {
         tags
     };
 
-    console.log('Work item data to save:', data);
-
     // Save the work item using specification API
     try {
         const agencyId = window.getCurrentAgencyId();
 
         let savedWorkItem;
         if (workItemEditorState.mode === 'add') {
-            console.log('Adding new work item...');
             savedWorkItem = await window.specificationAPI.addWorkItem(data);
         } else {
-            console.log('Updating existing work item:', workItemEditorState.workItemKey);
             savedWorkItem = await window.specificationAPI.updateWorkItem(workItemEditorState.workItemKey, data);
         }
-
-        console.log('Work item saved successfully:', savedWorkItem);
 
         // No need to save goal links separately - they're part of the work item now
 
         window.showNotification('Work item saved successfully', 'success');
-        cancelWorkItemEdit();
+
+        // If this was an add operation, switch to edit mode with the saved work item
+        if (workItemEditorState.mode === 'add') {
+            workItemEditorState.mode = 'edit';
+            workItemEditorState.workItemKey = savedWorkItem._key || savedWorkItem.key;
+        }
+
+        // Refresh the work items list in the background
         loadWorkItems();
     } catch (error) {
         console.error('Error saving work item:', error);
