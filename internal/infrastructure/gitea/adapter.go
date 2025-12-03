@@ -632,7 +632,7 @@ func (a *APIClientAdapter) convertRepositoryToWork(repo *gitea.Repository) *work
 
 // convertLabelsToIDs converts label names to IDs (placeholder - needs actual label lookup)
 // In a real implementation, this would query Gitea API to get label IDs by name
-func convertLabelsToIDs(labels []string) []int64 {
+func convertLabelsToIDs(_labels []string) []int64 {
 	// TODO: Implement actual label name -> ID conversion
 	// For now, return empty slice (labels will be added by name in real implementation)
 	return []int64{}
