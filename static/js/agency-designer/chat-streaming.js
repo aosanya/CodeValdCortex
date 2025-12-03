@@ -269,12 +269,6 @@ async function handleStreamingChatResponse(endpoint, formData, chatMessages, age
     // Create streaming content area
     messageBubble.innerHTML = `
         <div class="streaming-content">
-            <div class="is-flex is-align-items-center mb-2">
-                <span class="icon has-text-info mr-2">
-                    <i class="fas fa-brain fa-pulse"></i>
-                </span>
-                <strong>AI is processing...</strong>
-            </div>
             <div class="streaming-text" style="white-space: pre-wrap; font-family: inherit;"></div>
         </div>
     `;
@@ -325,6 +319,14 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
     let buffer = '';
     let currentEvent = '';
     let finalResult = null;
+    // Buffer for accumulating JSON-like output separately from visible streaming text
+    let jsonBuffer = '';
+    // Progress tag state machine
+    let isAccumulatingProgress = false;
+    let progressMessageBuffer = '';
+    let progressTagCount = 0;
+    // Buffer for accumulating partial chunks (to handle tags split across chunks)
+    let chunkBuffer = '';
 
     try {
         while (true) {
@@ -345,9 +347,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
 
             for (const line of lines) {
                 if (!line.trim()) {
-                    // Empty line - don't reset event immediately, just log
-                    if (currentEvent) {
-                    }
                     continue; // Keep currentEvent for next data line
                 }
 
@@ -362,8 +361,147 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                     }
 
                     if (currentEvent === 'chunk') {
-                        // Display streaming text
-                        streamingText.textContent += data;
+                        // Get the progress token from the global context
+                        const progressToken = window.currentProgressToken;
+
+                        if (!progressToken) {
+                            // No progress token set, just accumulate normally
+                            const looksLikeJson = /"name"|"description"|"prompt_instructions"|"suggested_children"|^\s*\{/.test(data);
+                            if (looksLikeJson || jsonBuffer) {
+                                streamingText.style.display = 'none';
+                                jsonBuffer += data;
+                            } else {
+                                streamingText.style.display = '';
+                                streamingText.textContent += data;
+                            }
+                            autoScrollIfNearBottom(chatMessages);
+                            continue;
+                        }
+
+                        // Add chunk to buffer (tags may be split across chunks)
+                        chunkBuffer += data;
+
+                        // State machine for progress tag detection
+                        const openTag = `<${progressToken}>`;
+                        const closeTag = `</${progressToken}>`;
+                        let remainingData = chunkBuffer;
+
+                        while (remainingData.length > 0) {
+                            if (isAccumulatingProgress) {
+                                // We're inside a progress tag, look for closing tag
+                                const closeIndex = remainingData.indexOf(closeTag);
+
+                                if (closeIndex !== -1) {
+                                    // Found closing tag - complete the progress message
+                                    progressMessageBuffer += remainingData.substring(0, closeIndex);
+
+                                    // Clean and format the progress message
+                                    let progressMessage = progressMessageBuffer.trim()
+                                        .replace(/([a-z])([A-Z])/g, '$1 $2')  // Add spaces between camelCase
+                                        .replace(/([a-z])([a-z])([A-Z])/g, '$1$2 $3')
+                                        .replace(/([a-z]{2,})([A-Z][a-z])/g, '$1 $2');
+
+                                    if (progressMessage) {
+                                        progressTagCount++;
+                                        console.log('[PROGRESS] Tag #' + progressTagCount + ':', progressMessage);
+
+                                        // Create progress bubble
+                                        const progressBubble = document.createElement('div');
+                                        progressBubble.className = 'message ai-message mb-2 progress-bubble';
+                                        progressBubble.dataset.progressId = `progress-${Date.now()}-${progressTagCount}`;
+                                        progressBubble.innerHTML = `
+                                            <div class="message-content">
+                                                <div class="message-bubble">
+                                                    <span class="tag is-info is-light">
+                                                        <i class="fas fa-circle-notch fa-spin mr-1"></i> ${escapeHtml(progressMessage)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        `;
+                                        chatMessages.insertBefore(progressBubble, messageBubble.closest('.ai-message'));
+                                        autoScrollIfNearBottom(chatMessages);
+                                    }
+
+                                    // Reset state and continue with remaining data after closing tag
+                                    isAccumulatingProgress = false;
+                                    progressMessageBuffer = '';
+                                    remainingData = remainingData.substring(closeIndex + closeTag.length);
+                                    // Clear chunkBuffer - we've processed up to the closing tag
+                                    chunkBuffer = remainingData;
+                                } else {
+                                    // No closing tag yet
+                                    // Check if we might have a partial closing tag at the end
+                                    const maxTagLength = closeTag.length;
+                                    if (remainingData.length > maxTagLength) {
+                                        // Accumulate data except for last maxTagLength characters (might be partial tag)
+                                        progressMessageBuffer += remainingData.substring(0, remainingData.length - maxTagLength);
+                                        // Keep last maxTagLength chars in buffer (might be partial closing tag)
+                                        chunkBuffer = remainingData.substring(remainingData.length - maxTagLength);
+                                    } else {
+                                        // Buffer is shorter than max tag length, keep everything for next chunk
+                                        chunkBuffer = remainingData;
+                                    }
+                                    remainingData = '';
+                                }
+                            } else {
+                                // We're not in a progress tag, look for opening tag
+                                const openIndex = remainingData.indexOf(openTag);
+
+                                if (openIndex !== -1) {
+                                    console.log('[PROGRESS] Found opening tag at index:', openIndex, 'in chunk:', remainingData.substring(0, 100));
+                                    // Found opening tag - process data before it, then start accumulating
+                                    const beforeTag = remainingData.substring(0, openIndex);
+
+                                    if (beforeTag) {
+                                        // Process the data before the tag
+                                        const cleaned = beforeTag.replace(/```(?:json)?/gi, '').replace(/\s+/g, ' ');
+                                        if (cleaned.trim()) {
+                                            const looksLikeJson = /"name"|"description"|"prompt_instructions"|"suggested_children"|^\s*\{/.test(cleaned);
+                                            if (looksLikeJson || jsonBuffer) {
+                                                streamingText.style.display = 'none';
+                                                jsonBuffer += cleaned;
+                                            } else {
+                                                streamingText.style.display = '';
+                                                streamingText.textContent += cleaned;
+                                            }
+                                        }
+                                    }
+
+                                    // Start accumulating progress message
+                                    isAccumulatingProgress = true;
+                                    progressMessageBuffer = '';
+                                    remainingData = remainingData.substring(openIndex + openTag.length);
+                                    // Clear chunkBuffer - we've processed up to the opening tag
+                                    chunkBuffer = remainingData;
+                                } else {
+                                    // No opening tag found yet
+                                    // Check if we might have a partial tag at the end
+                                    const maxTagLength = openTag.length;
+                                    if (remainingData.length > maxTagLength) {
+                                        // Process data except for last maxTagLength characters (might be partial tag)
+                                        const safeData = remainingData.substring(0, remainingData.length - maxTagLength);
+                                        const cleaned = safeData.replace(/```(?:json)?/gi, '').replace(/\s+/g, ' ');
+                                        if (cleaned.trim()) {
+                                            const looksLikeJson = /"name"|"description"|"prompt_instructions"|"suggested_children"|^\s*\{/.test(cleaned);
+                                            if (looksLikeJson || jsonBuffer) {
+                                                streamingText.style.display = 'none';
+                                                jsonBuffer += cleaned;
+                                            } else {
+                                                streamingText.style.display = '';
+                                                streamingText.textContent += cleaned;
+                                            }
+                                        }
+                                        // Keep last maxTagLength chars in buffer (might be partial tag)
+                                        chunkBuffer = remainingData.substring(remainingData.length - maxTagLength);
+                                    } else {
+                                        // Buffer is shorter than max tag length, keep everything
+                                        chunkBuffer = remainingData;
+                                    }
+                                    remainingData = '';
+                                }
+                            }
+                        }
+
                         // Auto-scroll if user is near bottom
                         autoScrollIfNearBottom(chatMessages);
                     } else if (currentEvent === 'complete') {
@@ -371,11 +509,21 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                         try {
                             finalResult = JSON.parse(data);
                         } catch (e) {
+                            console.debug('[MVP-054] failed to parse complete event JSON:', e.message);
                         }
                     } else if (currentEvent === 'error') {
                     } else if (currentEvent === 'start') {
                     }
                 }
+            }
+        }
+
+        // If we accumulated a jsonBuffer, try to parse it as the final result
+        if (!finalResult && jsonBuffer) {
+            try {
+                finalResult = JSON.parse(jsonBuffer);
+            } catch (e) {
+                console.debug('[MVP-054] failed to parse jsonBuffer into JSON:', e.message);
             }
         }
 
@@ -430,16 +578,18 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                 }
             }
 
-            // Show if changes were made
-            if (finalResult.was_changed && finalResult.changed_sections) {
-                const sections = finalResult.changed_sections.join(', ');
-                messageBubble.innerHTML = `
-                    <p><strong>${message}</strong></p>
-                    <p class="has-text-grey-light mt-2"><small>✓ Updated: ${sections}</small></p>
-                `;
-            } else {
-                messageBubble.innerHTML = `<p>${message}</p>`;
-            }
+            // Show the message and keep JSON hidden for AI enhancement detector
+            // The JSON buffer or streaming text may contain the full JSON that needs to be detected
+            messageBubble.innerHTML = `
+                <p>${message}</p>
+                <div class="json-data" style="display: none;">
+                    \`\`\`json
+                    ${jsonBuffer || ''}
+                    \`\`\`
+                </div>
+            `;
+
+            console.log('[MVP-054] Final result displayed, JSON kept in hidden div for enhancement detector');
 
             // Auto-scroll to show final message
             autoScrollIfNearBottom(chatMessages);

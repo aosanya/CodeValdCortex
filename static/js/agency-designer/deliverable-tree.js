@@ -37,8 +37,23 @@ function deliverableTree() {
         init() {
             // Watch for selectedNodeId changes and update properties panel
             this.$watch('selectedNodeId', (newNodeId) => {
+                // TODO: Remove debug prints for MVP-054 after issue is resolved
+                console.log('[MVP-054] deliverableTree: selectedNodeId changed:', {
+                    newNodeId,
+                    hasPropertiesPanel: !!window.PropertiesPanel,
+                    hasShowMethod: !!(window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties)
+                });
+
                 if (newNodeId && window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties) {
                     const node = this.findNodeById(newNodeId);
+
+                    // TODO: Remove debug prints for MVP-054 after issue is resolved
+                    console.log('[MVP-054] deliverableTree: node found for properties:', {
+                        nodeId: node ? node.id : null,
+                        nodeName: node ? node.name : null,
+                        nodeType: node ? node.type : null
+                    });
+
                     if (node) {
                         window.PropertiesPanel.showDeliverableNodeProperties(node);
                     }

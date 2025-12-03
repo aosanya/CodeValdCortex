@@ -7,6 +7,9 @@ window.PropertiesPanel = {
     // Store current configuration
     _currentConfig: null,
 
+    // Store node being enhanced for AI workflow
+    _nodeBeingEnhanced: null,
+
     /**
      * Show properties in the panel with custom configuration
      * @param {Object} config - Configuration object
@@ -211,6 +214,9 @@ window.PropertiesPanel = {
      * Handle button clicks
      */
     _handleButtonClick: function (action) {
+        // TODO: Remove debug prints for MVP-054 after issue is resolved
+        console.log('[MVP-054] _handleButtonClick called:', { action, hasConfig: !!this._currentConfig });
+
         if (!this._currentConfig) return;
 
         switch (action) {
@@ -220,9 +226,14 @@ window.PropertiesPanel = {
                 }
                 break;
             case 'ai-enhance':
-                if (this._currentConfig.onAIEnhance) {
-                    this._currentConfig.onAIEnhance();
-                }
+                // TODO: Remove debug prints for MVP-054 after issue is resolved
+                console.log('[MVP-054] AI Enhance button clicked:', {
+                    hasCallback: !!this._currentConfig.onAIEnhance,
+                    configData: this._currentConfig.data
+                });
+
+                // Use chat workflow for AI enhance
+                this._sendAIEnhanceToChat();
                 break;
             case 'delete':
                 if (this._currentConfig.onDelete) {
@@ -357,6 +368,14 @@ window.PropertiesPanel = {
      * Show deliverable node properties in the properties panel
      */
     showDeliverableNodeProperties: function (node) {
+        // TODO: Remove debug prints for MVP-054 after issue is resolved
+        console.log('[MVP-054] showDeliverableNodeProperties called:', {
+            nodeId: node.id,
+            nodeName: node.name,
+            nodeType: node.type,
+            hasPromptInstructions: !!node.prompt_instructions
+        });
+
         const fields = [
             {
                 key: 'name',
@@ -401,6 +420,15 @@ window.PropertiesPanel = {
                 help: 'Full path in the deliverables tree'
             }
         );
+
+        // TODO: Remove debug prints for MVP-054 after issue is resolved
+        console.log('[MVP-054] showDeliverableNodeProperties - config prepared:', {
+            title: `Deliverable: ${node.name}${node.type === 'file' ? (node.file_extension || '') : ''}`,
+            fieldsCount: fields.length,
+            buttonsCount: 4,
+            hasOnAIEnhance: false,  // Not implemented yet
+            nodeData: node
+        });
 
         this.showProperties({
             title: `Deliverable: ${node.name}${node.type === 'file' ? (node.file_extension || '') : ''}`,
@@ -602,6 +630,230 @@ window.PropertiesPanel = {
         if (window.WorkItems && window.WorkItems.removeTag) {
             window.WorkItems.removeTag(tag);
         }
+    },
+
+    /**
+     * Send AI enhance request through chat workflow
+     */
+    _sendAIEnhanceToChat: function () {
+        if (!this._currentConfig || !this._currentConfig.data) {
+            console.warn('[MVP-054] No data available for AI enhance');
+            return;
+        }
+
+        const node = this._currentConfig.data;
+
+        // Store the node being enhanced so we can update it when AI responds
+        this._nodeBeingEnhanced = node;
+
+        // Generate unique progress token for this request (timestamp + random)
+        const progressToken = `PROG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Store token so chat-streaming can use it to parse progress tags
+        this._currentProgressToken = progressToken;
+
+        // Also store globally for chat-streaming.js to access
+        window.currentProgressToken = progressToken;
+
+        console.log('[MVP-054] Generated progress token:', progressToken);
+
+        // TODO: Remove debug prints for MVP-054 after issue is resolved
+        console.log('[MVP-054] _sendAIEnhanceToChat called:', {
+            nodeId: node.id,
+            nodeName: node.name,
+            nodeType: node.type
+        });
+
+        // Build enhancement message based on node data
+        let enhanceMessage = `DELIVERABLE ENHANCEMENT REQUEST\n\n`;
+        enhanceMessage += `Please enhance this deliverable node and return the result as JSON.\n\n`;
+        enhanceMessage += `**Current Node:**\n`;
+        enhanceMessage += `- Name: ${node.name}\n`;
+        enhanceMessage += `- Type: ${node.type}\n`;
+
+        if (node.description) {
+            enhanceMessage += `- Description: ${node.description}\n`;
+        }
+
+        if (node.prompt_instructions) {
+            enhanceMessage += `- Prompt Instructions: ${node.prompt_instructions}\n`;
+        }
+
+        enhanceMessage += `\n**Enhancement Tasks:**\n`;
+
+        if (node.type === 'folder') {
+            enhanceMessage += `1. Improve the description to be clear and actionable\n`;
+            enhanceMessage += `2. Enhance the prompt instructions for AI generation\n`;
+            enhanceMessage += `3. Suggest logical child nodes (files/subfolders) if needed\n\n`;
+            enhanceMessage += `**IMPORTANT:** Return your response as valid JSON with these fields:\n`;
+            enhanceMessage += `- name (string): Enhanced or original name\n`;
+            enhanceMessage += `- description (string): Clear description\n`;
+            enhanceMessage += `- prompt_instructions (string): Comprehensive AI instructions\n`;
+            enhanceMessage += `- suggested_children (array): List of child nodes with name, description, type, file_extension, prompt_instructions, order\n`;
+            enhanceMessage += `- enhancement_explanation (string): What was improved\n`;
+            enhanceMessage += `- was_changed (boolean): Whether changes were made\n\n`;
+            enhanceMessage += `Include progress tags using this EXACT format: <${progressToken}>message</${progressToken}> as you work. Return ONLY the JSON object, wrapped in \`\`\`json code fence.`;
+        } else {
+            enhanceMessage += `1. Improve the description to be clear and actionable\n`;
+            enhanceMessage += `2. Enhance the prompt instructions for AI generation\n`;
+            enhanceMessage += `3. Suggest any improvements to make this deliverable more effective\n\n`;
+            enhanceMessage += `**IMPORTANT:** Return your response as valid JSON with these fields:\n`;
+            enhanceMessage += `- name (string): Enhanced or original name\n`;
+            enhanceMessage += `- description (string): Clear description\n`;
+            enhanceMessage += `- prompt_instructions (string): Comprehensive AI instructions\n`;
+            enhanceMessage += `- suggested_children (array): Empty for files\n`;
+            enhanceMessage += `- enhancement_explanation (string): What was improved\n`;
+            enhanceMessage += `- was_changed (boolean): Whether changes were made\n\n`;
+            enhanceMessage += `Include progress tags using this EXACT format: <${progressToken}>message</${progressToken}> as you work. Return ONLY the JSON object, wrapped in \`\`\`json code fence.`;
+        }
+
+        // Show status in status bar
+        if (window.showNotification) {
+            window.showNotification('AI request: Enhancing deliverable node...', 'info');
+        }
+
+        // Switch to chat tab
+        this.switchToChat();
+
+        // Send message through chat
+        const userInput = document.getElementById('user-input');
+        const chatForm = userInput ? userInput.closest('form') : null;
+
+        if (!userInput || !chatForm) {
+            console.error('[MVP-054] Chat input not found');
+            if (window.showNotification) {
+                window.showNotification('Chat interface not available', 'error');
+            }
+            return;
+        }
+
+        // Set the message in the input
+        userInput.value = enhanceMessage;
+
+        // Trigger the form submission
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        chatForm.dispatchEvent(submitEvent);
+
+        // TODO: Remove debug prints for MVP-054 after issue is resolved
+        console.log('[MVP-054] AI enhance message sent to chat:', enhanceMessage);
+
+        // Show status indicator
+        const statusBar = document.querySelector('.status-notification');
+        if (statusBar) {
+            statusBar.textContent = 'AI Processing...';
+            statusBar.classList.add('is-info');
+            statusBar.classList.remove('is-hidden');
+
+            // Hide after streaming completes (listen for streaming done event)
+            setTimeout(() => {
+                statusBar.classList.add('is-hidden');
+            }, 30000); // Hide after 30 seconds max
+        }
+    },
+
+    /**
+     * Apply AI enhancement suggestions to the current node
+     * @param {Object} enhancement - The enhancement object from AI response
+     */
+    applyAIEnhancement: function (enhancement) {
+        if (!this._nodeBeingEnhanced) {
+            console.warn('[MVP-054] No node being enhanced');
+            window.showNotification('No node to enhance', 'warning');
+            return;
+        }
+
+        const node = this._nodeBeingEnhanced;
+
+        // TODO: Remove debug prints for MVP-054 after issue is resolved
+        console.log('[MVP-054] Applying AI enhancement:', {
+            nodeId: node.id,
+            enhancement: enhancement
+        });
+
+        // Get the Alpine.js tree component
+        const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
+        if (!treeContainer || !treeContainer._x_dataStack || !treeContainer._x_dataStack[0]) {
+            console.error('[MVP-054] Tree component not found');
+            window.showNotification('Could not find deliverable tree', 'error');
+            return;
+        }
+
+        const alpineData = treeContainer._x_dataStack[0];
+
+        // Update node fields
+        if (enhancement.name && enhancement.name !== node.name) {
+            if (alpineData.updateNodeField) {
+                alpineData.updateNodeField(node.id, 'name', enhancement.name);
+            }
+        }
+
+        if (enhancement.description) {
+            if (alpineData.updateNodeField) {
+                alpineData.updateNodeField(node.id, 'description', enhancement.description);
+            }
+        }
+
+        if (enhancement.prompt_instructions) {
+            if (alpineData.updateNodeField) {
+                alpineData.updateNodeField(node.id, 'prompt_instructions', enhancement.prompt_instructions);
+            }
+        }
+
+        // Add suggested children if this is a folder and children were suggested
+        if (node.type === 'folder' && enhancement.suggested_children && enhancement.suggested_children.length > 0) {
+            console.log('[MVP-054] Adding suggested children:', enhancement.suggested_children);
+
+            enhancement.suggested_children.forEach((child, index) => {
+                if (alpineData.addChildNode) {
+                    alpineData.addChildNode(node.id, {
+                        type: child.type,
+                        name: child.name,
+                        description: child.description || '',
+                        prompt_instructions: child.prompt_instructions || '',
+                        file_extension: child.file_extension || '.md',
+                        order: child.order || index
+                    });
+                }
+            });
+        }
+
+        // Save the tree
+        if (alpineData.onSave && typeof alpineData.onSave === 'function') {
+            alpineData.onSave().then(() => {
+                window.showNotification('AI enhancements applied successfully!', 'success');
+
+                // Force tree to re-render by triggering Alpine reactivity
+                if (alpineData.computeAllPaths) {
+                    alpineData.computeAllPaths();
+                }
+
+                // Trigger a manual re-render of the tree
+                const treeContainer = document.getElementById('tree-nodes-container');
+                if (treeContainer && alpineData.renderTree) {
+                    treeContainer.innerHTML = alpineData.renderTree();
+                }
+
+                // Switch back to properties tab to show updated node
+                const chatPanel = document.querySelector('.chat-panel');
+                if (chatPanel && chatPanel._x_dataStack && chatPanel._x_dataStack[0]) {
+                    chatPanel._x_dataStack[0].activeTab = 'properties';
+                }
+
+                // Refresh properties panel with updated node
+                const updatedNode = alpineData.findNodeById(node.id);
+                if (updatedNode) {
+                    this.showDeliverableNodeProperties(updatedNode);
+                }
+            }).catch(error => {
+                console.error('[MVP-054] Error saving enhancements:', error);
+                window.showNotification('Failed to save enhancements', 'error');
+            });
+        } else {
+            window.showNotification('Enhancement applied (save manually)', 'warning');
+        }
+
+        // Clear the node being enhanced
+        this._nodeBeingEnhanced = null;
     },
 
     /**
