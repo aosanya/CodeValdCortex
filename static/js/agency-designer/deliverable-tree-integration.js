@@ -38,7 +38,7 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
     return `
         <div class="deliverable-tree-builder" 
              x-data="deliverableTree()"
-             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); window.__tempDeliverables = null; console.log('[MVP-054] Alpine initialized with', nodes.length, 'nodes')">
+             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null; console.log('[MVP-054] Alpine initialized with', nodes.length, 'nodes')">
             <!-- Toolbar -->
             <div class="level mb-4">
                 <div class="level-left">
@@ -102,7 +102,7 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
             <!-- Main content: Tree and Detail View -->
             <div class="columns">
                 <!-- Tree Column -->
-                <div class="column" :class="selectedNodeId ? 'is-8' : 'is-12'">
+                <div class="column is-12">
                     <div class="deliverable-tree-container" 
                          id="deliverable-tree-root"
                          x-init="if (window.__tempDeliverables && window.__tempDeliverables.length > 0) { nodes = window.__tempDeliverables; computeAllPaths(); }">

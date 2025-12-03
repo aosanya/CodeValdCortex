@@ -20,6 +20,13 @@ function deliverableTree() {
             if (data && data.deliverables && Array.isArray(data.deliverables)) {
                 this.nodes = JSON.parse(JSON.stringify(data.deliverables));
                 this.computeAllPaths();
+
+                // Expand root nodes by default
+                this.nodes.forEach(node => {
+                    if (node.type === 'folder') {
+                        this.expandedNodes[node.id] = true;
+                    }
+                });
             }
         },
 
@@ -158,7 +165,6 @@ function deliverableTree() {
                             <div class="level-item">
                                 <div x-show="!isEditing('${nodeId}')" class="node-name">
                                     <span>${node.name}${node.type === 'file' ? node.file_extension : ''}</span>
-                                    ${node.description ? `<span class="has-text-grey is-size-7 ml-2">- ${node.description}</span>` : ''}
                                 </div>
                                 <div x-show="isEditing('${nodeId}')" class="field is-grouped">
                                     <p class="control">
@@ -261,19 +267,6 @@ function deliverableTree() {
                             </div>
                         </div>
                     </div>
-                    
-                    ${node.prompt_instructions ? `
-                        <div x-show="!isEditing('${nodeId}')" class="node-prompt-preview ml-4 mb-2">
-                            <div class="message is-small is-light">
-                                <div class="message-body py-2 px-3 is-size-7">
-                                    <span class="icon is-small has-text-grey-light">
-                                        <i class="fas fa-quote-left"></i>
-                                    </span>
-                                    <span>${node.prompt_instructions.substring(0, 150)}${node.prompt_instructions.length > 150 ? '...' : ''}</span>
-                                </div>
-                            </div>
-                        </div>
-                    ` : ''}
                     
                     ${node.type === 'folder' && hasChildren ? `
                         <div x-show="isExpanded('${nodeId}')" class="node-children">

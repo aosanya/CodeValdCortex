@@ -198,10 +198,7 @@ window.PropertiesPanel = {
                 </div>
 
                 <div class="field">
-                    <label class="label">
-                        AI Prompt Instructions
-                        ${node.prompt_instructions ? '<span class="tag is-success is-light ml-2"><i class="fas fa-check"></i> Set</span>' : ''}
-                    </label>
+                    <label class="label">AI Prompt Instructions</label>
                     <div class="control">
                         <textarea 
                             class="textarea" 
@@ -224,36 +221,6 @@ window.PropertiesPanel = {
                     </div>
                     <p class="help">Full path in the deliverables tree</p>
                 </div>
-
-                <div class="field">
-                    <label class="label">Type</label>
-                    <div class="control">
-                        <span class="tag ${node.type === 'folder' ? 'is-info' : 'is-primary'}">
-                            <span class="icon">
-                                <i class="fas fa-${node.type === 'folder' ? 'folder' : 'file'}"></i>
-                            </span>
-                            <span>${node.type === 'folder' ? 'Folder' : 'File'}</span>
-                        </span>
-                    </div>
-                </div>
-
-                ${node.type === 'folder' && node.children && node.children.length > 0 ? `
-                <div class="field">
-                    <label class="label">Children (${node.children.length})</label>
-                    <div class="tags">
-                        ${node.children.map(child => `
-                            <span class="tag ${child.type === 'folder' ? 'is-info is-light' : 'is-primary is-light'}" 
-                                  style="cursor: pointer;"
-                                  onclick="window.PropertiesPanel.selectDeliverableNode('${child.id}')">
-                                <span class="icon is-small">
-                                    <i class="fas fa-${child.type === 'folder' ? 'folder' : 'file'}"></i>
-                                </span>
-                                <span>${child.name}${child.type === 'file' ? (child.file_extension || '') : ''}</span>
-                            </span>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
 
                 <hr>
 
