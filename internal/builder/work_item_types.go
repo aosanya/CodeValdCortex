@@ -97,8 +97,16 @@ type RefineWorkItemsResponse struct {
 	RefinedWorkItems   []RefinedWorkItemResult       `json:"refined_work_items"`   // Work items that were refined
 	GeneratedWorkItems []GenerateWorkItemResponse    `json:"generated_work_items"` // Newly generated work items
 	ConsolidatedData   *ConsolidateWorkItemsResponse `json:"consolidated_data"`    // Consolidation results if applicable
+	UnprocessedItems   []UnprocessedWorkItem         `json:"unprocessed_items"`    // Items not processed due to time limit
 	Explanation        string                        `json:"explanation"`          // What was done and why
 	NoActionNeeded     bool                          `json:"no_action_needed"`     // True if work items are already optimal
+}
+
+// UnprocessedWorkItem represents a work item that wasn't processed due to time constraints
+type UnprocessedWorkItem struct {
+	OriginalKey string `json:"original_key"`
+	Title       string `json:"title"`
+	Reason      string `json:"reason"` // Why it wasn't processed (e.g., "time limit reached")
 }
 
 // RefinedWorkItemResult represents a single refined work item

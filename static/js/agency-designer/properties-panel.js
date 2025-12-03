@@ -219,6 +219,11 @@ window.PropertiesPanel = {
                     this._currentConfig.onSave();
                 }
                 break;
+            case 'ai-enhance':
+                if (this._currentConfig.onAIEnhance) {
+                    this._currentConfig.onAIEnhance();
+                }
+                break;
             case 'delete':
                 if (this._currentConfig.onDelete) {
                     if (confirm('Are you sure you want to delete this item?')) {
@@ -409,6 +414,12 @@ window.PropertiesPanel = {
                     label: 'Save',
                     icon: 'save',
                     class: 'is-primary'
+                },
+                {
+                    action: 'ai-enhance',
+                    label: 'AI Enhance',
+                    icon: 'sparkles',
+                    class: 'is-info'
                 },
                 {
                     action: 'delete',

@@ -1,0 +1,86 @@
+Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.
+
+IMPORTANT: Only consolidate work items when it truly adds value. If work items are already well-defined and distinct, keep them separate.
+
+Evaluate if consolidation is needed:
+
+1. **Assess consolidation value**:
+   - Check for duplicate or near-duplicate work items
+   - Look for items with significant scope overlap
+   - Identify items that are really subtasks of a larger item
+   - Determine if items can be combined without losing clarity
+   - **If items are distinct and well-scoped, DO NOT force consolidation**
+
+2. **When consolidation IS beneficial**:
+   - Merge duplicate or overlapping work items
+   - Combine related tasks when appropriate
+   - Ensure each consolidated item remains actionable
+   - Preserve all deliverables and requirements
+   - Maintain clear acceptance criteria
+
+3. **When consolidation is NOT beneficial**:
+   - Return empty arrays for consolidated_work_items and removed_work_items
+   - Provide explanation that work items are already well-defined
+   - Don't force consolidation just to reduce count
+
+4. **Maintain work quality**:
+   - Each work item should be SMART and actionable
+   - Avoid creating overly broad or vague items
+   - Balance scope and achievability
+   - Support clear sprint planning
+
+5. **Track merges accurately** (only when consolidating):
+   - Record ALL original work item keys that were merged in "merged_from_keys"
+   - List ALL work item keys to DELETE in "removed_work_items"
+   - Provide clear explanations of consolidation decisions
+
+Focus on practical project management. Do not force consolidation.
+
+Respond ONLY with valid JSON (no markdown, no explanations outside JSON) in this exact format:
+
+If consolidation is NOT beneficial:
+{
+  "consolidated_work_items": [],
+  "removed_work_items": [],
+  "summary": "No consolidation needed - work items are already distinct and well-scoped",
+  "explanation": "Each work item addresses a specific deliverable and should remain independent"
+}
+
+If consolidation IS beneficial:
+{
+  "consolidated_work_items": [
+    {
+      "title": "Clear, actionable title",
+      "description": "Detailed description of what needs to be done",
+      "deliverables_structured": [
+        {
+          "id": "unique-uuid",
+          "name": "deliverables",
+          "description": "Project deliverables",
+          "type": "folder",
+          "prompt_instructions": "All consolidated outputs",
+          "children": [
+            {
+              "id": "unique-uuid-2",
+              "name": "merged_output",
+              "description": "Consolidated deliverable",
+              "type": "file",
+              "file_extension": ".md",
+              "prompt_instructions": "Combined requirements from merged work items",
+              "order": 1
+            }
+          ],
+          "order": 1
+        }
+      ],
+      "goal_keys": ["goal_key1", "goal_key2"],
+      "suggested_code": "SHORT-CODE",
+      "suggested_tags": ["tag1", "tag2"],
+      "merged_from_keys": ["original_key1", "original_key2"],
+      "explanation": "Brief explanation of what was consolidated and why"
+    }
+  ],
+  "removed_work_items": ["original_key1", "original_key2"],
+  "summary": "Consolidated X work items into Y more focused items",
+  "explanation": "Overall consolidation strategy and benefits"
+}
