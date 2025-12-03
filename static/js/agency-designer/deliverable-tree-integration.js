@@ -3,7 +3,7 @@
 // Updated: 2025-12-02 - Removed simple text mode, tree builder only
 
 // Initialize deliverable tree builder for work item editor
-window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = []) {
+window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = [], onSave = null) {
     const container = document.getElementById('deliverable-tree-container');
     if (!container) {
         console.error('Deliverable tree container not found');
@@ -13,6 +13,11 @@ window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDe
     // Create the tree builder HTML structure
     const treeHTML = createTreeBuilderHTML(agencyId, workItemCode, existingDeliverables);
     container.innerHTML = treeHTML;
+
+    // Store the save callback globally so Alpine can access it
+    if (onSave && typeof onSave === 'function') {
+        window.__deliverableTreeOnSave = onSave;
+    }
 
     // Initialize Alpine.js component if not already initialized
     // Alpine.js will auto-initialize when the HTML is rendered
@@ -27,7 +32,7 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
     return `
         <div class="deliverable-tree-builder" 
              x-data="deliverableTree()"
-             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null;">
+             x-init="nodes = window.__tempDeliverables || []; computeAllPaths(); nodes.forEach(n => { if (n.type === 'folder') expandedNodes[n.id] = true; }); window.__tempDeliverables = null; if (window.__deliverableTreeOnSave) { onSave = window.__deliverableTreeOnSave; console.log('Deliverable tree onSave callback set:', typeof onSave); } else { console.warn('No deliverable tree onSave callback found'); }">
             <!-- Toolbar -->
             <div class="level mb-4">
                 <div class="level-left">

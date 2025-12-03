@@ -82,3 +82,22 @@
         animation: slide-out 300ms ease-in;
     }
 }
+
+/* Global button font weight - lighter for better legibility */
+.button {
+    font-weight: 400 !important;
+
+    &.is-primary,
+    &.is-danger,
+    &.is-info,
+    &.is-success,
+    &.is-warning,
+    &.is-link {
+        font-weight: 400 !important;
+    }
+}
+
+/* Dark theme button adjustments */
+.dark .button {
+    font-weight: 400 !important;
+}

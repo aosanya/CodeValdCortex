@@ -12,6 +12,7 @@ function deliverableTree() {
         expandedNodes: {}, // Track expanded state of all nodes
         editingNodeId: null, // Track which node is currently being edited
         selectedNodeId: null, // Track which node is selected for detail view
+        onSave: null, // Callback function for saving (set via x-init)
 
         /**
          * Initialize the tree with existing deliverables
@@ -64,10 +65,9 @@ function deliverableTree() {
                     this.computeAllPaths();
                 }
 
-                // Notify Properties Panel of the change
-                if (window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties) {
-                    window.PropertiesPanel.showDeliverableNodeProperties(node);
-                }
+                // Don't regenerate the properties panel - it's already showing this node
+                // and regenerating would lose event handlers and user state
+                console.log('Field updated:', field, '=', value);
             }
         },
 

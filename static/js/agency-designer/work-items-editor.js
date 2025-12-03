@@ -72,10 +72,10 @@ window.showWorkItemEditor = async function (mode, workItemKey = null) {
 
     if (mode === 'add') {
         clearWorkItemForm();
-        // Initialize empty tree builder
+        // Initialize empty tree builder with save callback
         const agencyId = window.getCurrentAgencyId();
         if (typeof window.initDeliverableTreeBuilder === 'function') {
-            window.initDeliverableTreeBuilder(agencyId, '', []);
+            window.initDeliverableTreeBuilder(agencyId, '', [], window.saveWorkItemFromEditor);
         }
     } else if (mode === 'edit') {
         await loadWorkItemData(workItemKey);
@@ -152,7 +152,7 @@ function populateWorkItemForm(workItem) {
     const agencyId = window.getCurrentAgencyId();
     const deliverables = workItem.deliverables_structured || [];
     if (typeof window.initDeliverableTreeBuilder === 'function') {
-        window.initDeliverableTreeBuilder(agencyId, workItem.code || '', deliverables);
+        window.initDeliverableTreeBuilder(agencyId, workItem.code || '', deliverables, window.saveWorkItemFromEditor);
     } else {
         console.warn('initDeliverableTreeBuilder function not found!');
     }
