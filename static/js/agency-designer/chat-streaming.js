@@ -405,7 +405,14 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                                         progressTagCount++;
                                         console.log('[PROGRESS] Tag #' + progressTagCount + ':', progressMessage);
 
-                                        // Create progress bubble
+                                        // Remove spinning icon from previous progress bubble
+                                        const previousBubbles = chatMessages.querySelectorAll('.progress-bubble .fa-circle-notch');
+                                        previousBubbles.forEach(icon => {
+                                            icon.classList.remove('fa-circle-notch', 'fa-spin');
+                                            icon.classList.add('fa-check-circle');
+                                        });
+
+                                        // Create progress bubble with spinning icon (will be the latest)
                                         const progressBubble = document.createElement('div');
                                         progressBubble.className = 'message ai-message mb-2 progress-bubble';
                                         progressBubble.dataset.progressId = `progress-${Date.now()}-${progressTagCount}`;

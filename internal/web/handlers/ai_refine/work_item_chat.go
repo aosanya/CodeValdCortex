@@ -34,8 +34,9 @@ func (h *Handler) ProcessWorkItemsChatRequestStreaming(c *gin.Context) {
 	}
 
 	req, ok := dynamicReq.(struct {
-		UserMessage  string   `json:"user_message"`
-		WorkItemKeys []string `json:"work_item_keys"`
+		UserMessage  string                   `json:"user_message"`
+		WorkItemKeys []string                 `json:"work_item_keys"`
+		Contexts     []map[string]interface{} `json:"contexts,omitempty"` // Optional contexts
 	})
 	if !ok {
 		h.logger.Error("Failed to cast dynamic_request to expected type")
@@ -54,7 +55,54 @@ func (h *Handler) ProcessWorkItemsChatRequestStreaming(c *gin.Context) {
 		"agency_id":      agencyID,
 		"user_message":   userMessage,
 		"work_item_keys": req.WorkItemKeys,
+		"contexts_count": len(req.Contexts),
 	}).Info("Processing streaming chat-based work item request")
+
+	// Check if this is a deliverable enhancement request by examining contexts
+	var deliverableContext map[string]interface{}
+	for i, ctx := range req.Contexts {
+		h.logger.WithFields(logrus.Fields{
+			"context_index": i,
+			"context_type":  ctx["type"],
+			"context_code":  ctx["code"],
+		}).Info("🔍 Examining context")
+
+		if ctxType, ok := ctx["type"].(string); ok && ctxType == "Deliverable Node" {
+			h.logger.WithFields(logrus.Fields{
+				"type":     ctx["type"],
+				"code":     ctx["code"],
+				"nodeName": ctx["nodeName"],
+				"nodeType": ctx["nodeType"],
+			}).Info("✅ DELIVERABLE NODE FOUND IN CONTEXTS!")
+			deliverableContext = ctx
+			break
+		}
+	}
+
+	if deliverableContext != nil {
+		h.logger.WithFields(logrus.Fields{
+			"nodeName": deliverableContext["nodeName"],
+			"nodeType": deliverableContext["nodeType"],
+			"code":     deliverableContext["code"],
+		}).Info("🔀 Detected deliverable enhancement request from context, routing to deliverable handler")
+		
+		// Extract metadata from the context object
+		metadata := make(map[string]interface{})
+		if nodeName, ok := deliverableContext["nodeName"].(string); ok {
+			metadata["nodeName"] = nodeName
+		}
+		if nodeType, ok := deliverableContext["nodeType"].(string); ok {
+			metadata["nodeType"] = nodeType
+		}
+		if nodeId, ok := deliverableContext["nodeId"].(string); ok {
+			metadata["nodeId"] = nodeId
+		}
+
+		h.ProcessDeliverableEnhancementStreaming(c, agencyID, userMessage, metadata)
+		return
+	}
+
+	h.logger.Info("ℹ️ No deliverable context found - proceeding with normal work items processing")
 
 	// Fetch agency and specification
 	ag, spec, err := h.fetchAgencyAndSpec(c, agencyID)

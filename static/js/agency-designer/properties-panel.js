@@ -712,6 +712,21 @@ window.PropertiesPanel = {
             window.showNotification('AI request: Enhancing deliverable node...', 'info');
         }
 
+        // Add deliverable enhancement context
+        if (window.ContextManager && window.ContextManager.ContextType) {
+            window.ContextManager.createContext(
+                window.ContextManager.ContextType.DELIVERABLE_NODE,
+                `DELIV-${node.id}`,
+                `Deliverable Enhancement: ${node.name} (${node.type})`,
+                {
+                    nodeId: node.id,
+                    nodeName: node.name,
+                    nodeType: node.type,
+                    isEnhancementRequest: true
+                }
+            );
+        }
+
         // Switch to chat tab
         this.switchToChat();
 

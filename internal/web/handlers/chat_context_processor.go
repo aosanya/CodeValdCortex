@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"regexp"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -158,13 +161,37 @@ func (h *ChatHandler) performWorkItemsProcessing(c *gin.Context, agencyID, userM
 		"agencyID", agencyID,
 		"conversationID", conversationID)
 
+	// Parse contexts from the userMessage if present
+	contexts := parseContextsFromMessage(userMessage, h.logger)
+
+	h.logger.WithFields(map[string]interface{}{
+		"contexts_count": len(contexts),
+		"contexts":       contexts,
+	}).Info("🔍 Parsed contexts from message")
+
+	// Check if we have a Deliverable Node context
+	for _, ctx := range contexts {
+		if ctxType, ok := ctx["type"].(string); ok {
+			if ctxType == "Deliverable Node" {
+				h.logger.WithFields(map[string]interface{}{
+					"type":     ctx["type"],
+					"code":     ctx["code"],
+					"nodeName": ctx["nodeName"],
+					"nodeType": ctx["nodeType"],
+				}).Info("🎯 DELIVERABLE NODE CONTEXT DETECTED - This should route to deliverable handler!")
+			}
+		}
+	}
+
 	// Set the user request in a dynamic request structure for work items chat processing
 	dynamicReq := struct {
-		UserMessage  string   `json:"user_message"`
-		WorkItemKeys []string `json:"work_item_keys"`
+		UserMessage  string                   `json:"user_message"`
+		WorkItemKeys []string                 `json:"work_item_keys"`
+		Contexts     []map[string]interface{} `json:"contexts,omitempty"`
 	}{
 		UserMessage:  userMessage,
 		WorkItemKeys: []string{}, // Empty means process all work items based on message context
+		Contexts:     contexts,   // Parsed contexts from message
 	}
 
 	// Store the request in the context so ProcessWorkItemsChatRequestStreaming can access it
@@ -410,4 +437,94 @@ func (h *ChatHandler) handleContextSpecificProcessing(c *gin.Context, agencyID, 
 	// Context not recognized or not handled
 	h.logger.Info("⚠️  Context not recognized or not handled - falling through to normal chat", "context", context)
 	return false, nil
+}
+
+// parseContextsFromMessage extracts context objects from the formatted message text
+// Looks for the **Context:** section and parses individual context entries
+func parseContextsFromMessage(message string, logger interface{}) []map[string]interface{} {
+	var contexts []map[string]interface{}
+
+	// Look for the **Context:** section
+	lines := strings.Split(message, "\n")
+	inContextSection := false
+	currentContext := make(map[string]interface{})
+	currentContextType := ""
+
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		// Start of context section
+		if strings.HasPrefix(trimmed, "**Context:**") {
+			inContextSection = true
+			continue
+		}
+
+		// If we're in the context section
+		if inContextSection {
+			// Check if it's a context entry line: "1. **Work Item** [WI-TAB]:" or "2. **Deliverable Node** [DELIV-...]:"
+			re := regexp.MustCompile(`^(\d+)\.\s+\*\*(.+?)\*\*\s+\[(.+?)\]:`)
+			matches := re.FindStringSubmatch(trimmed)
+
+			if len(matches) == 4 {
+				// Save previous context if exists
+				if currentContextType != "" && len(currentContext) > 0 {
+					contexts = append(contexts, currentContext)
+				}
+
+				// Start new context
+				currentContextType = matches[2] // e.g., "Work Item" or "Deliverable Node"
+				currentContext = make(map[string]interface{})
+				currentContext["type"] = currentContextType
+				currentContext["code"] = matches[3] // e.g., "WI-TAB" or "DELIV-node-..."
+				continue
+			}
+
+			// Parse content lines within a context entry (they are indented)
+			if currentContextType != "" && strings.HasPrefix(line, "   ") {
+				contentLine := strings.TrimSpace(line)
+
+				// Check for "Deliverable Enhancement: name (type)" pattern
+				if strings.Contains(contentLine, "Deliverable Enhancement:") {
+					parts := strings.SplitN(contentLine, "Deliverable Enhancement:", 2)
+					if len(parts) == 2 {
+						rest := strings.TrimSpace(parts[1])
+						// Extract name and type from "name (type)" format
+						if idx := strings.LastIndex(rest, "("); idx != -1 {
+							nodeName := strings.TrimSpace(rest[:idx])
+							nodeTypeWithParen := rest[idx:]
+							nodeType := strings.Trim(nodeTypeWithParen, "()")
+
+							currentContext["nodeName"] = nodeName
+							currentContext["nodeType"] = nodeType
+							currentContext["isEnhancementRequest"] = true
+						}
+					}
+				} else {
+					// Regular content line
+					if content, ok := currentContext["content"].(string); ok {
+						currentContext["content"] = content + "\n" + contentLine
+					} else {
+						currentContext["content"] = contentLine
+					}
+				}
+			}
+
+			// Check if we've reached the end of the context section (empty line or next section)
+			if trimmed == "" && i > 0 {
+				// Empty line might signal end of contexts
+				if currentContextType != "" && len(currentContext) > 0 {
+					contexts = append(contexts, currentContext)
+					currentContextType = ""
+					currentContext = make(map[string]interface{})
+				}
+			}
+		}
+	}
+
+	// Save the last context if exists
+	if currentContextType != "" && len(currentContext) > 0 {
+		contexts = append(contexts, currentContext)
+	}
+
+	return contexts
 }

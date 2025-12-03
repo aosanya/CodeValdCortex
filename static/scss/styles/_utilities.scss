@@ -5,6 +5,16 @@
    UTILITY CLASSES
    =================================== */
 
+/* Body base font size - central reference point */
+body {
+    font-size: $font-size-base;
+}
+
+/* Progress bubble tag sizing - uses body font size */
+.progress-bubble .tag {
+    font-size: $font-size-base;
+}
+
 /* Darker orange color for stop actions */
 .has-text-orange {
     color: #d97706 !important;
