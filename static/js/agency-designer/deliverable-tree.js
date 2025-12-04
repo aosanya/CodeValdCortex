@@ -18,8 +18,16 @@ function deliverableTree() {
          * Initialize the tree with existing deliverables
          */
         initTree(data) {
+            console.log('[DeliverableTree] initTree called with:', data);
+
             if (data && data.deliverables && Array.isArray(data.deliverables)) {
                 this.nodes = JSON.parse(JSON.stringify(data.deliverables));
+
+                console.log('[DeliverableTree] Loaded nodes:', this.nodes.length);
+
+                // Fix any nodes with missing or empty IDs (defensive - backend should handle this)
+                this.fixMissingIds(this.nodes);
+
                 this.computeAllPaths();
 
                 // Expand root nodes by default
@@ -28,6 +36,26 @@ function deliverableTree() {
                         this.expandedNodes[node.id] = true;
                     }
                 });
+
+                console.log('[DeliverableTree] Tree initialized successfully');
+            } else {
+                console.log('[DeliverableTree] No deliverables to load');
+            }
+        },
+
+        /**
+         * Fix nodes with missing or empty IDs recursively
+         */
+        fixMissingIds(nodes) {
+            for (const node of nodes) {
+                if (!node.id || node.id.trim() === '') {
+                    node.id = this.generateId();
+                    console.warn(`Fixed missing ID for node: ${node.name}, assigned ID: ${node.id}`);
+                }
+
+                if (node.children && Array.isArray(node.children)) {
+                    this.fixMissingIds(node.children);
+                }
             }
         },
 
@@ -451,6 +479,16 @@ function deliverableTree() {
                 return;
             }
 
+            // Clear selection if we're deleting the selected node
+            if (this.selectedNodeId === nodeId) {
+                this.selectedNodeId = null;
+
+                // Clear properties panel
+                if (window.PropertiesPanel && window.PropertiesPanel.clear) {
+                    window.PropertiesPanel.clear();
+                }
+            }
+
             // Try to find and remove from root
             const rootIndex = this.nodes.findIndex(n => n.id === nodeId);
             if (rootIndex !== -1) {
@@ -721,7 +759,7 @@ function deliverableTree() {
         validate() {
             this.validationErrors = [];
 
-            // Check for duplicate IDs
+            // Check for duplicate IDs (don't auto-fix - backend handles this)
             const ids = new Set();
             this.checkDuplicateIds(this.nodes, ids);
 
@@ -736,10 +774,14 @@ function deliverableTree() {
          */
         checkDuplicateIds(nodes, ids) {
             for (const node of nodes) {
-                if (ids.has(node.id)) {
-                    this.validationErrors.push(`Duplicate ID found: ${node.id}`);
+                // Check for empty or missing IDs
+                if (!node.id || node.id.trim() === '') {
+                    this.validationErrors.push(`Node "${node.name || 'Unknown'}" has empty or missing ID`);
+                } else if (ids.has(node.id)) {
+                    this.validationErrors.push(`Duplicate ID found: ${node.id} (node: "${node.name || 'Unknown'}")`);
+                } else {
+                    ids.add(node.id);
                 }
-                ids.add(node.id);
 
                 if (node.children && Array.isArray(node.children)) {
                     this.checkDuplicateIds(node.children, ids);
@@ -912,6 +954,14 @@ function deliverableTree() {
                 }
             }
             return false;
+        },
+
+        /**
+         * Get nodes as JSON string
+         * Backend will ensure all nodes have IDs when saving
+         */
+        getSerializedNodes() {
+            return JSON.stringify(this.nodes);
         }
     };
 }

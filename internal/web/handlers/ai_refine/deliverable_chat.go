@@ -1,8 +1,13 @@
 package ai_refine
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -96,12 +101,28 @@ func (h *Handler) ProcessDeliverableEnhancementStreaming(c *gin.Context, agencyI
 
 	h.logger.WithField("total_chunks", chunkCount).Info("✅ Streaming completed")
 
-	// TODO: Parse the JSON response from fullResponse and save the enhanced deliverable
-	// For now, just log that we received the response
-	h.logger.WithFields(logrus.Fields{
-		"response_length": len(fullResponse),
-		"node_name":       nodeName,
-	}).Warn("⚠️  Deliverable enhancement JSON received but NOT YET SAVED - feature under construction")
+	// Parse the JSON response from the AI
+	enhancementJSON, err := extractJSONFromResponse(fullResponse)
+	if err != nil {
+		h.logger.WithError(err).Warn("⚠️  Failed to extract JSON from AI response")
+		// Continue without saving - still show the response to user
+	} else {
+		// Parse the enhancement data
+		var enhancement DeliverableEnhancement
+		if err := json.Unmarshal([]byte(enhancementJSON), &enhancement); err != nil {
+			h.logger.WithError(err).Error("❌ Failed to parse enhancement JSON")
+		} else {
+			// Save the enhancement to the database
+			if err := h.saveDeliverableEnhancement(c.Request.Context(), agencyID, nodeName, &enhancement, metadata); err != nil {
+				h.logger.WithError(err).Error("❌ Failed to save deliverable enhancement")
+			} else {
+				h.logger.WithFields(logrus.Fields{
+					"node_name":   nodeName,
+					"was_changed": enhancement.WasChanged,
+				}).Info("✅ Deliverable enhancement saved successfully")
+			}
+		}
+	}
 
 	// Format message for conversation
 	chatMessage := fmt.Sprintf("✨ **Deliverable Enhanced**: %s\n\nEnhanced deliverable structure returned as JSON.", nodeName)
@@ -123,4 +144,128 @@ func (h *Handler) ProcessDeliverableEnhancementStreaming(c *gin.Context, agencyI
 	c.Writer.Flush()
 
 	h.logger.Info("✅ Streaming deliverable enhancement completed")
+}
+
+// DeliverableEnhancement represents the AI's enhancement response
+type DeliverableEnhancement struct {
+	Name                   string                   `json:"name"`
+	Description            string                   `json:"description"`
+	PromptInstructions     string                   `json:"prompt_instructions"`
+	SuggestedChildren      []models.DeliverableNode `json:"suggested_children"`
+	EnhancementExplanation string                   `json:"enhancement_explanation"`
+	WasChanged             bool                     `json:"was_changed"`
+}
+
+// extractJSONFromResponse extracts JSON from a code fence in the AI response
+func extractJSONFromResponse(response string) (string, error) {
+	// Look for ```json ... ``` code fence
+	re := regexp.MustCompile("```json\\s*\\n([\\s\\S]*?)\\n```")
+	matches := re.FindStringSubmatch(response)
+
+	if len(matches) < 2 {
+		return "", fmt.Errorf("no JSON code fence found in response")
+	}
+
+	return strings.TrimSpace(matches[1]), nil
+}
+
+// saveDeliverableEnhancement saves the enhanced deliverable to the database
+func (h *Handler) saveDeliverableEnhancement(ctx context.Context, agencyID, nodeName string, enhancement *DeliverableEnhancement, metadata map[string]interface{}) error {
+	// Get the agency and specification using the existing helper
+	// We need a gin.Context for fetchAgencyAndSpec, but we only have context.Context
+	// So we'll use the agency service directly
+	spec, err := h.agencyService.GetSpecification(ctx, agencyID)
+	if err != nil {
+		return fmt.Errorf("failed to get specification: %w", err)
+	}
+
+	if spec == nil {
+		return fmt.Errorf("agency specification not found")
+	}
+
+	// Find the work item that contains this deliverable
+	// We need to search through all work items' DeliverablesStructured trees
+	var targetWorkItem *models.WorkItem
+	var targetNode *models.DeliverableNode
+
+	for i := range spec.WorkItems {
+		workItem := &spec.WorkItems[i]
+
+		// Search in the deliverables tree
+		for j := range workItem.DeliverablesStructured {
+			node := findNodeByName(&workItem.DeliverablesStructured[j], nodeName)
+			if node != nil {
+				targetWorkItem = workItem
+				targetNode = node
+				break
+			}
+		}
+
+		if targetNode != nil {
+			break
+		}
+	}
+
+	if targetWorkItem == nil || targetNode == nil {
+		return fmt.Errorf("deliverable node '%s' not found in any work item", nodeName)
+	}
+
+	h.logger.WithFields(logrus.Fields{
+		"work_item_code": targetWorkItem.Code,
+		"node_name":      nodeName,
+	}).Info("🎯 Found deliverable node in work item")
+
+	// Update the node with the enhancement
+	if enhancement.WasChanged {
+		targetNode.Name = enhancement.Name
+		targetNode.Description = enhancement.Description
+		targetNode.PromptInstructions = enhancement.PromptInstructions
+
+		// Update or add children if suggested
+		if len(enhancement.SuggestedChildren) > 0 {
+			targetNode.Children = enhancement.SuggestedChildren
+			// Ensure all new children have IDs
+			for i := range targetNode.Children {
+				targetNode.Children[i].EnsureAllIDs()
+			}
+		}
+
+		// Recompute paths for the entire tree
+		for i := range targetWorkItem.DeliverablesStructured {
+			targetWorkItem.DeliverablesStructured[i].ComputeAllPaths("")
+		}
+
+		h.logger.WithFields(logrus.Fields{
+			"updated_name":       enhancement.Name,
+			"children_count":     len(targetNode.Children),
+			"suggested_children": len(enhancement.SuggestedChildren),
+		}).Info("📝 Updated deliverable node")
+	}
+
+	// Save the updated work item back to the database
+	updatedWorkItems := make([]models.WorkItem, len(spec.WorkItems))
+	copy(updatedWorkItems, spec.WorkItems)
+
+	_, err = h.agencyService.UpdateSpecificationWorkItems(ctx, agencyID, updatedWorkItems, "deliverable-enhancement")
+	if err != nil {
+		return fmt.Errorf("failed to save updated work items: %w", err)
+	}
+
+	h.logger.Info("💾 Saved updated work items to database")
+	return nil
+}
+
+// findNodeByName recursively searches for a node by name in the deliverable tree
+func findNodeByName(node *models.DeliverableNode, name string) *models.DeliverableNode {
+	if node.Name == name {
+		return node
+	}
+
+	for i := range node.Children {
+		if found := findNodeByName(&node.Children[i], name); found != nil {
+			return found
+		}
+	}
+
+	return nil
 }

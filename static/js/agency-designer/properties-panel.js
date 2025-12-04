@@ -818,34 +818,108 @@ window.PropertiesPanel = {
         if (node.type === 'folder' && enhancement.suggested_children && enhancement.suggested_children.length > 0) {
             console.log('[MVP-054] Adding suggested children:', enhancement.suggested_children);
 
-            enhancement.suggested_children.forEach((child, index) => {
-                if (alpineData.addChildNode) {
-                    alpineData.addChildNode(node.id, {
-                        type: child.type,
-                        name: child.name,
-                        description: child.description || '',
-                        prompt_instructions: child.prompt_instructions || '',
-                        file_extension: child.file_extension || '.md',
-                        order: child.order || index
-                    });
+            // Find the parent node in the tree
+            const parentNode = alpineData.findNodeById(node.id);
+            if (parentNode) {
+                if (!parentNode.children) {
+                    parentNode.children = [];
                 }
-            });
+
+                enhancement.suggested_children.forEach((child, index) => {
+                    // Generate a unique ID for the child
+                    const childId = 'node-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9) + '-' + index;
+
+                    const newChild = {
+                        id: childId,
+                        name: child.name || 'New Item',
+                        description: child.description || '',
+                        type: child.type || 'file',
+                        prompt_instructions: child.prompt_instructions || '',
+                        file_extension: child.type === 'file' ? (child.file_extension || '.md') : '',
+                        children: child.type === 'folder' ? [] : undefined,
+                        order: child.order !== undefined ? child.order : index
+                    };
+
+                    parentNode.children.push(newChild);
+                });
+
+                // Recompute paths and validate
+                if (alpineData.computeAllPaths) {
+                    alpineData.computeAllPaths();
+                }
+                if (alpineData.validate) {
+                    alpineData.validate();
+                }
+            }
         }
 
         // Save the tree
         if (alpineData.onSave && typeof alpineData.onSave === 'function') {
-            alpineData.onSave().then(() => {
+            console.log('[MVP-054] Starting save after AI enhancement');
+            alpineData.onSave().then(async () => {
+                console.log('[MVP-054] Save completed, now reloading tree');
                 window.showNotification('AI enhancements applied successfully!', 'success');
 
-                // Force tree to re-render by triggering Alpine reactivity
-                if (alpineData.computeAllPaths) {
-                    alpineData.computeAllPaths();
-                }
+                // Reload the work item from server to get the fresh data with all enhancements
+                // This ensures the tree shows the newly added children
+                const agencyId = window.getCurrentAgencyId();
+                const workItemCode = this._currentWorkItemCode || '';
 
-                // Trigger a manual re-render of the tree
-                const treeContainer = document.getElementById('tree-nodes-container');
-                if (treeContainer && alpineData.renderTree) {
-                    treeContainer.innerHTML = alpineData.renderTree();
+                console.log('[MVP-054] Reload params:', { agencyId, workItemCode, hasAPI: !!window.specificationAPI });
+
+                if (agencyId && workItemCode) {
+                    try {
+                        // Fetch fresh work item data from server
+                        console.log('[MVP-054] Fetching work items from server...');
+                        const workItems = await window.specificationAPI.getWorkItems();
+                        console.log('[MVP-054] Fetched work items:', workItems.length);
+
+                        // Work items are stored with 'code' field, so we search by code
+                        const workItem = workItems.find(wi => wi.code === workItemCode);
+                        console.log('[MVP-054] Found work item:', !!workItem, workItem?.code, 'Children count:', workItem?.deliverables_structured?.length);
+
+                        if (workItem && workItem.deliverables_structured) {
+                            console.log('[MVP-054] Deliverables count:', workItem.deliverables_structured.length);
+
+                            // Reinitialize the tree with fresh data from server
+                            if (typeof window.initDeliverableTreeBuilder === 'function') {
+                                console.log('[MVP-054] Reloading tree with fresh data from server');
+                                window.initDeliverableTreeBuilder(
+                                    agencyId,
+                                    workItemCode,
+                                    workItem.deliverables_structured,
+                                    alpineData.onSave
+                                );
+
+                                // Expand the parent node to show new children
+                                setTimeout(() => {
+                                    const treeData = window.Alpine ? window.Alpine.$data(document.querySelector('[x-data*="deliverableTree"]')) : null;
+                                    console.log('[MVP-054] Tree data after reload:', !!treeData);
+                                    if (treeData && node.type === 'folder' && enhancement.suggested_children && enhancement.suggested_children.length > 0) {
+                                        console.log('[MVP-054] Expanding parent node:', node.id);
+                                        treeData.expandedNodes[node.id] = true;
+                                        // Force reactivity
+                                        treeData.nodes = [...treeData.nodes];
+                                    }
+                                }, 100);
+                            } else {
+                                console.error('[MVP-054] initDeliverableTreeBuilder function not found!');
+                            }
+                        } else {
+                            console.warn('[MVP-054] Work item not found or has no deliverables');
+                        }
+                    } catch (error) {
+                        console.error('[MVP-054] Error reloading work item:', error);
+                        // Fallback to local update if server reload fails
+                        if (alpineData.computeAllPaths) {
+                            alpineData.computeAllPaths();
+                        }
+                        if (alpineData.nodes) {
+                            alpineData.nodes = [...alpineData.nodes];
+                        }
+                    }
+                } else {
+                    console.warn('[MVP-054] Missing agencyId or workItemCode for reload');
                 }
 
                 // Switch back to properties tab to show updated node
@@ -855,10 +929,15 @@ window.PropertiesPanel = {
                 }
 
                 // Refresh properties panel with updated node
-                const updatedNode = alpineData.findNodeById(node.id);
-                if (updatedNode) {
-                    this.showDeliverableNodeProperties(updatedNode);
-                }
+                setTimeout(() => {
+                    const treeData = window.Alpine ? window.Alpine.$data(document.querySelector('[x-data*="deliverableTree"]')) : null;
+                    if (treeData) {
+                        const updatedNode = treeData.findNodeById(node.id);
+                        if (updatedNode) {
+                            this.showDeliverableNodeProperties(updatedNode);
+                        }
+                    }
+                }, 200);
             }).catch(error => {
                 console.error('[MVP-054] Error saving enhancements:', error);
                 window.showNotification('Failed to save enhancements', 'error');

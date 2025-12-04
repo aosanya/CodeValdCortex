@@ -1,5 +1,12 @@
 package models
 
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"time"
+)
+
 // DeliverableNode represents a hierarchical deliverable structure (folder or file)
 // with associated prompt instructions and nested children.
 type DeliverableNode struct {
@@ -146,4 +153,46 @@ func (d *DeliverableNode) FindNodeByID(id string) *DeliverableNode {
 	}
 
 	return nil
+}
+
+// GenerateID creates a unique ID for a deliverable node
+// Format: node-{timestamp}-{random}
+func GenerateID() string {
+	// Get current timestamp in milliseconds
+	timestamp := time.Now().UnixMilli()
+
+	// Generate 4 random bytes
+	randomBytes := make([]byte, 4)
+	if _, err := rand.Read(randomBytes); err != nil {
+		// Fallback to timestamp-based ID if random fails
+		return fmt.Sprintf("node-%d", timestamp)
+	}
+
+	// Convert to hex string
+	randomStr := hex.EncodeToString(randomBytes)
+
+	return fmt.Sprintf("node-%d-%s", timestamp, randomStr)
+}
+
+// EnsureID ensures this node has a valid ID, generating one if needed
+func (d *DeliverableNode) EnsureID() {
+	if d.ID == "" {
+		d.ID = GenerateID()
+	}
+}
+
+// EnsureAllIDs recursively ensures all nodes in the tree have valid IDs
+func (d *DeliverableNode) EnsureAllIDs() {
+	d.EnsureID()
+
+	for i := range d.Children {
+		d.Children[i].EnsureAllIDs()
+	}
+}
+
+// EnsureAllIDsInTree ensures all nodes in a slice have valid IDs
+func EnsureAllIDsInTree(nodes []DeliverableNode) {
+	for i := range nodes {
+		nodes[i].EnsureAllIDs()
+	}
 }

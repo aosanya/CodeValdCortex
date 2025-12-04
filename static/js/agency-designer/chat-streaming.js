@@ -566,7 +566,37 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
 
             // Refresh work items list if work items were changed
             if (finalResult.was_changed && context === 'work-items') {
-                if (window.loadWorkItems) {
+                // Check if this was a deliverable enhancement (has suggested_children or prompt_instructions)
+                const isDeliverableEnhancement = finalResult.suggested_children !== undefined ||
+                    finalResult.prompt_instructions !== undefined;
+
+                if (isDeliverableEnhancement) {
+                    console.log('[MVP-054] Deliverable enhancement detected, reloading work item editor...');
+
+                    // Get the work item key from editor state
+                    const workItemKey = window.workItemEditorState?.workItemKey;
+
+                    if (workItemKey && window.loadWorkItemData) {
+                        console.log('[MVP-054] Reloading work item:', workItemKey);
+
+                        window.loadWorkItemData(workItemKey)
+                            .then(() => {
+                                console.log('[MVP-054] Work item reloaded successfully');
+                                if (window.showNotification) {
+                                    window.showNotification('Deliverable tree updated', 'success');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('[MVP-054] Failed to reload work item:', error);
+                            });
+                    } else {
+                        console.warn('[MVP-054] Cannot reload - missing dependencies:', {
+                            workItemKey: !!workItemKey,
+                            loadWorkItemData: !!window.loadWorkItemData
+                        });
+                    }
+                } else if (window.loadWorkItems) {
+                    // Regular work items list update (not deliverable enhancement)
                     window.loadWorkItems();
                 }
             }

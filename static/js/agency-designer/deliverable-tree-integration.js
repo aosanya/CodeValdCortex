@@ -1,18 +1,35 @@
+// @ts-nocheck
 // Deliverable Tree Integration for Work Items
 // Handles integration between deliverable tree builder and work item editor
 // Updated: 2025-12-02 - Removed simple text mode, tree builder only
 
 // Initialize deliverable tree builder for work item editor
 window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = [], onSave = null) {
+    console.log('[initDeliverableTreeBuilder] Called with:', {
+        agencyId,
+        workItemCode,
+        deliverablesCount: existingDeliverables?.length || 0,
+        deliverables: existingDeliverables
+    });
+
     const container = document.getElementById('deliverable-tree-container');
     if (!container) {
-        console.error('Deliverable tree container not found');
+        console.error('[initDeliverableTreeBuilder] Deliverable tree container not found!');
         return;
+    }
+
+    console.log('[initDeliverableTreeBuilder] Container found, creating HTML...');
+
+    // Store work item code in PropertiesPanel for later use during AI enhancement
+    if (window.PropertiesPanel && workItemCode) {
+        window.PropertiesPanel._currentWorkItemCode = workItemCode;
     }
 
     // Create the tree builder HTML structure
     const treeHTML = createTreeBuilderHTML(agencyId, workItemCode, existingDeliverables);
+    console.log('[initDeliverableTreeBuilder] HTML created, length:', treeHTML.length);
     container.innerHTML = treeHTML;
+    console.log('[initDeliverableTreeBuilder] HTML injected into container');
 
     // Store the save callback globally so Alpine can access it
     if (onSave && typeof onSave === 'function') {
@@ -292,7 +309,7 @@ function createTreeBuilderHTML(agencyId, workItemCode, deliverables) {
             <input 
                 type="hidden" 
                 name="deliverables_structured"
-                :value="JSON.stringify(nodes)"
+                :value="getSerializedNodes()"
                 id="deliverables-structured-data"/>
 
             <!-- Validation summary -->

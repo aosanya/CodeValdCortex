@@ -40,6 +40,9 @@ var (
 
 	// ErrEmptyName indicates the deliverable name is empty
 	ErrEmptyName = errors.New("deliverable name cannot be empty")
+
+	// ErrEmptyID indicates the deliverable ID is missing
+	ErrEmptyID = errors.New("deliverable ID cannot be empty")
 )
 
 // Valid file name pattern (alphanumeric, hyphens, underscores, spaces, periods)
@@ -177,6 +180,11 @@ func (v *DeliverableValidator) validateType(node *models.DeliverableNode) error 
 
 // checkDuplicateIDs recursively checks for duplicate IDs in the tree
 func (v *DeliverableValidator) checkDuplicateIDs(node *models.DeliverableNode, ids map[string]bool) error {
+	// Check for empty ID first
+	if node.ID == "" {
+		return fmt.Errorf("%w: node '%s' (this should not happen - IDs should be generated before validation)", ErrEmptyID, node.Name)
+	}
+
 	if ids[node.ID] {
 		return fmt.Errorf("%w: ID '%s'", ErrDuplicateID, node.ID)
 	}

@@ -85,7 +85,7 @@ func (h *Handler) ProcessWorkItemsChatRequestStreaming(c *gin.Context) {
 			"nodeType": deliverableContext["nodeType"],
 			"code":     deliverableContext["code"],
 		}).Info("🔀 Detected deliverable enhancement request from context, routing to deliverable handler")
-		
+
 		// Extract metadata from the context object
 		metadata := make(map[string]interface{})
 		if nodeName, ok := deliverableContext["nodeName"].(string); ok {

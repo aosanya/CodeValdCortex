@@ -157,22 +157,33 @@ function monitorChatForEnhancements() {
                     }
 
                     aiMessages.forEach((aiMessage) => {
-                        // Try multiple selectors for message content
-                        const messageContent = aiMessage.querySelector('.message-text') ||
-                            aiMessage.querySelector('.message-content') ||
-                            aiMessage.querySelector('.content') ||
-                            aiMessage;
+                        // First try to find hidden JSON data div (added by chat-streaming.js)
+                        const jsonDataDiv = aiMessage.querySelector('.json-data');
+                        let messageText = '';
 
-                        if (messageContent) {
-                            const messageText = messageContent.textContent || messageContent.innerText;
-                            console.log('[MVP-054] Checking message text (first 100 chars):', messageText.substring(0, 100));
+                        if (jsonDataDiv) {
+                            messageText = jsonDataDiv.textContent || jsonDataDiv.innerText;
+                            console.log('[MVP-054] Found .json-data div, text length:', messageText.length);
+                        } else {
+                            // Fallback to full message content
+                            const messageContent = aiMessage.querySelector('.message-text') ||
+                                aiMessage.querySelector('.message-content') ||
+                                aiMessage.querySelector('.content') ||
+                                aiMessage;
+                            messageText = messageContent.textContent || messageContent.innerText;
+                            console.log('[MVP-054] No .json-data div, using message content, text length:', messageText.length);
+                        }
+
+                        if (messageText) {
+                            console.log('[MVP-054] Checking message text (first 200 chars):', messageText.substring(0, 200));
 
                             const enhancement = parseEnhancementJSON(messageText);
 
                             if (enhancement) {
                                 console.log('[MVP-054] Enhancement JSON found!', {
                                     hasNodeBeingEnhanced: !!window.PropertiesPanel._nodeBeingEnhanced,
-                                    enhancement: enhancement
+                                    nodeId: window.PropertiesPanel._nodeBeingEnhanced?.id,
+                                    enhancementKeys: Object.keys(enhancement)
                                 });
 
                                 if (window.PropertiesPanel._nodeBeingEnhanced) {

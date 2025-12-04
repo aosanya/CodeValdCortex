@@ -65,6 +65,13 @@ func (s *SpecificationService) UpdateWorkItems(ctx context.Context, agencyID str
 		"updated_by":      updatedBy,
 	}).Info("UpdateWorkItems service called")
 
+	// Ensure all deliverable nodes have IDs before saving
+	for i := range workItems {
+		if len(workItems[i].DeliverablesStructured) > 0 {
+			models.EnsureAllIDsInTree(workItems[i].DeliverablesStructured)
+		}
+	}
+
 	result, err := s.repo.PatchSpecificationSection(ctx, agencyID, "work_items", workItems, updatedBy)
 	if err != nil {
 		s.logger.WithError(err).Error("PatchSpecificationSection failed for work items")
