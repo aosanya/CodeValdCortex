@@ -239,32 +239,48 @@ window.deleteSelectedWorkflows = async function () {
 }
 
 // Duplicate workflow
-window.duplicateWorkflow = function (workflowId) {
+window.duplicateWorkflow = async function (workflowKey) {
     const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
         window.showNotification('Unable to determine current agency', 'error');
         return;
     }
 
-    fetch(`/api/v1/workflows/${workflowId}/duplicate`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to duplicate workflow');
-            }
-            return response.json();
-        })
-        .then(() => {
-            window.showNotification('Workflow duplicated successfully', 'success');
-            loadWorkflows();
-        })
-        .catch(error => {
-            window.showNotification('Error duplicating workflow', 'error');
+    try {
+        // Get current specification
+        const spec = await window.specificationAPI.getSpecification();
+        const allWorkflows = spec.workflows || [];
+
+        // Find the workflow to duplicate
+        const original = allWorkflows.find(wf => {
+            const id = wf._key || wf.key;
+            return id === workflowKey;
         });
+
+        if (!original) {
+            window.showNotification('Workflow not found', 'error');
+            return;
+        }
+
+        // Create duplicate workflow data
+        const duplicateData = {
+            name: original.name + ' (Copy)',
+            description: original.description,
+            version: original.version || '1.0.0',
+            nodes: original.nodes || [],
+            edges: original.edges || [],
+            variables: original.variables || {}
+        };
+
+        // Add the duplicate workflow using the specification API
+        await window.specificationAPI.addWorkflow(duplicateData);
+
+        window.showNotification('Workflow duplicated successfully', 'success');
+        loadWorkflows();
+    } catch (error) {
+        console.error('Error duplicating workflow:', error);
+        window.showNotification('Error duplicating workflow', 'error');
+    }
 }
 
 // Filter workflows based on search input
