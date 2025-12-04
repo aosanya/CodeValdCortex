@@ -120,7 +120,7 @@ func (g *gitOps) WriteTree(ctx context.Context, repoID string, entries []models.
 		return "", fmt.Errorf("failed to store tree: %w", err)
 	}
 
-		return sha, nil
+	return sha, nil
 }
 
 // GetTree retrieves tree structure
@@ -205,7 +205,7 @@ func (g *gitOps) Commit(ctx context.Context, repoID, treeSHA string, parents []s
 		return "", fmt.Errorf("failed to store commit: %w", err)
 	}
 
-		return sha, nil
+	return sha, nil
 }
 
 // GetCommit retrieves commit object
@@ -246,7 +246,7 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 			return fmt.Errorf("failed to create ref: %w", err)
 		}
 
-				return nil
+		return nil
 	}
 
 	// Update existing ref
@@ -255,7 +255,7 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 		return fmt.Errorf("failed to update ref: %w", err)
 	}
 
-		return nil
+	return nil
 }
 
 // GetRef retrieves a Git reference

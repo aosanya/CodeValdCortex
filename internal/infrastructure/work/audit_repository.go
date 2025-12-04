@@ -97,7 +97,6 @@ func (r *ArangoSyncAuditRepository) Create(ctx context.Context, record *SyncAudi
 	// Set the Key from metadata
 	record.Key = meta.Key
 
-
 	return nil
 }
 

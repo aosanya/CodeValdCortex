@@ -44,7 +44,6 @@ func (s *DefaultSyncService) HandleAgentEvent(ctx context.Context, event *SyncEv
 		return fmt.Errorf("event missing agent_id")
 	}
 
-
 	// Get agent-issue link
 	link, err := s.linkRepo.GetByAgentID(ctx, event.AgentID)
 	if err != nil {
@@ -341,7 +340,6 @@ func (s *DefaultSyncService) PostComment(ctx context.Context, link *AgentIssueLi
 	if err := s.linkRepo.UpdateLastSync(ctx, link.AgentID, template, commentID); err != nil {
 		log.WithError(err).Warn("Failed to update link sync metadata")
 	}
-
 
 	return nil
 }

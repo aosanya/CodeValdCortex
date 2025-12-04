@@ -18,12 +18,8 @@ function deliverableTree() {
          * Initialize the tree with existing deliverables
          */
         initTree(data) {
-            console.log('[DeliverableTree] initTree called with:', data);
-
             if (data && data.deliverables && Array.isArray(data.deliverables)) {
                 this.nodes = JSON.parse(JSON.stringify(data.deliverables));
-
-                console.log('[DeliverableTree] Loaded nodes:', this.nodes.length);
 
                 // Fix any nodes with missing or empty IDs (defensive - backend should handle this)
                 this.fixMissingIds(this.nodes);
@@ -36,10 +32,6 @@ function deliverableTree() {
                         this.expandedNodes[node.id] = true;
                     }
                 });
-
-                console.log('[DeliverableTree] Tree initialized successfully');
-            } else {
-                console.log('[DeliverableTree] No deliverables to load');
             }
         },
 
