@@ -283,6 +283,16 @@ func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 	agencyID := c.Param("id")
 	workflowKey := c.Param("workflowId") // This is actually the workflow key, not ID
 
+	// Get agency
+	agency, err := h.agencyRepo.GetByID(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency")
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Agency not found",
+		})
+		return
+	}
+
 	// Get agency specification to access workflows
 	spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
@@ -331,6 +341,6 @@ func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 	}
 
 	// Render designer page
-	component := agency_designer.WorkflowDesigner(agencyID, workflow)
+	component := agency_designer.WorkflowDesigner(agency, workflow)
 	component.Render(c.Request.Context(), c.Writer)
 }

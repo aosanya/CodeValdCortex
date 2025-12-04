@@ -37,8 +37,11 @@ window.workflowDesigner = function () {
          * Initialize the designer
          */
         async init() {
+            console.log('[WF-DESIGNER] 🚀 Initializing workflow designer component');
+
             // Get workflow data from data attributes
             const container = this.$el;
+            console.log('[WF-DESIGNER] 📦 Container element:', container);
 
             this.agencyID = container.dataset.agencyId;
             this.workflowID = container.dataset.workflowId;
@@ -47,18 +50,33 @@ window.workflowDesigner = function () {
             this.workflowDescription = container.dataset.workflowDescription;
             this.workflowVersion = container.dataset.workflowVersion;
 
+            console.log('[WF-DESIGNER] 📋 Workflow metadata:', {
+                agencyID: this.agencyID,
+                workflowID: this.workflowID,
+                workflowKey: this.workflowKey,
+                workflowName: this.workflowName
+            });
+
             // Parse workflow steps if available
             try {
                 const stepsData = container.dataset.workflowSteps;
                 if (stepsData && stepsData !== 'null') {
                     this.workflowSteps = JSON.parse(stepsData) || [];
+                    console.log('[WF-DESIGNER] ✅ Parsed workflow steps:', this.workflowSteps.length, 'steps');
                 }
             } catch (e) {
+                console.error('[WF-DESIGNER] ❌ Failed to parse workflow steps:', e);
                 this.workflowSteps = [];
             }
 
+            // Check PropertiesPanel availability
+            console.log('[WF-DESIGNER] 🪟 PropertiesPanel available:', !!window.PropertiesPanel);
+            console.log('[WF-DESIGNER] 🛠️ PropertiesPanel methods:', window.PropertiesPanel ? Object.keys(window.PropertiesPanel) : 'N/A');
+
             // Load available work items from specification API
             await this.loadWorkItems();
+
+            console.log('[WF-DESIGNER] ✅ Initialization complete');
         },
 
         /**
@@ -621,7 +639,7 @@ window.workflowDesigner = function () {
             const step = this.workflowSteps.find(s => s.id === stepId);
             console.log('📌 Found step:', step);
             console.log('🪟 PropertiesPanel available:', !!window.PropertiesPanel);
-            
+
             if (step && window.PropertiesPanel) {
                 console.log('✅ Opening step properties');
                 this.openStepProperties(step);
@@ -686,13 +704,13 @@ window.workflowDesigner = function () {
                         help: 'Optional: Detailed description of the step'
                     },
 
-                    // Work Item Autonomy Levels
+                    // Info: Work items in this step
                     {
-                        key: 'work_items_autonomy',
-                        label: 'Work Item Autonomy Levels',
-                        type: 'custom',
-                        html: this._renderWorkItemAutonomyEditor(step, stepCopy),
-                        help: 'Set autonomy level for each work item in this step'
+                        key: 'work_items_info',
+                        label: 'Work Items in This Step',
+                        type: 'info',
+                        value: step.items.map(item => item.work_item_title || item.work_item_name || 'Untitled').join(', '),
+                        help: 'Click individual work items to edit their autonomy levels'
                     },
 
                     // Parallel Execution (only if multiple items)

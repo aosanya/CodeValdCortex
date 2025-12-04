@@ -53,3 +53,32 @@ $z-index-dropdown: 10;
 $z-index-sticky: 20;
 $z-index-modal: 30;
 $z-index-navbar: 50;
+
+// Bulma-compatible CSS custom properties
+// Export as CSS variables for runtime use
+:root {
+    // Typography sizes (Bulma-compatible naming, aligned with font-size variables)
+    --bulma-size-small: #{$font-size-sm}; // 0.85rem
+    --bulma-size-normal: #{$font-size-base}; // 0.9rem (body font size)
+    --bulma-size-medium: #{$font-size-md}; // 0.95rem
+    --bulma-size-large: #{$font-size-lg}; // 1rem
+
+    // Font weights (Bulma-compatible naming)
+    --bulma-weight-light: 300;
+    --bulma-weight-normal: 400;
+    --bulma-weight-medium: 500;
+    --bulma-weight-semibold: 600;
+    --bulma-weight-bold: 700;
+
+    // Text colors (Bulma defaults)
+    --bulma-text: hsl(0, 0%, 29%);
+    --bulma-text-strong: hsl(0, 0%, 21%);
+    --bulma-text-light: hsl(0, 0%, 48%);
+
+    // Spacing scale
+    --spacing-xs: #{$spacing-xs};
+    --spacing-sm: #{$spacing-sm};
+    --spacing-md: #{$spacing-md};
+    --spacing-lg: #{$spacing-lg};
+    --spacing-xl: #{$spacing-xl};
+}

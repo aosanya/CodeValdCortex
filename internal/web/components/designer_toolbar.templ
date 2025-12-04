@@ -1,0 +1,136 @@
+package components
+
+// DesignerToolbarButton represents a button in the designer toolbar
+type DesignerToolbarButton struct {
+	Label         string
+	Icon          string
+	OnClick       string
+	IsPrimary     bool
+	IsInfo        bool
+	IsLight       bool
+	AlpineClick   string // For Alpine.js @click binding (e.g., "saveWorkflow()")
+	AlpineDisabled string // For Alpine.js :disabled binding (e.g., "saving")
+	AlpineText    string // For Alpine.js x-text binding (e.g., "saving ? 'Saving...' : 'Save'")
+	ID            string
+	Title         string
+}
+
+// DesignerToolbar renders a consistent toolbar header for designer pages
+// leftItems: Content for the left side (back button, title, etc.)
+// rightButtons: Action buttons for the right side
+templ DesignerToolbar(title string, titleIcon string, backURL string, backLabel string, rightButtons []DesignerToolbarButton) {
+	<div class="designer-toolbar">
+		<div class="level is-mobile mb-0">
+			<div class="level-left">
+				if backURL != "" {
+					<div class="level-item">
+						<a href={ templ.SafeURL(backURL) } class="button is-small">
+							<span class="icon"><i class="fas fa-arrow-left"></i></span>
+							<span>{ backLabel }</span>
+						</a>
+					</div>
+				}
+				<div class="level-item">
+					<h1 class="title is-5 mb-0">
+						if titleIcon != "" {
+							<span class="icon is-small mr-2">
+								<i class={ "fas fa-" + titleIcon }></i>
+							</span>
+						}
+						<span>{ title }</span>
+					</h1>
+				</div>
+			</div>
+			<div class="level-right">
+				for _, btn := range rightButtons {
+					<div class="level-item">
+						<button
+							if btn.ID != "" {
+								id={ btn.ID }
+							}
+							if btn.Title != "" {
+								title={ btn.Title }
+							}
+							class={
+								"button is-small",
+								templ.KV("is-primary", btn.IsPrimary),
+								templ.KV("is-info", btn.IsInfo),
+								templ.KV("is-light", btn.IsLight),
+							}
+							if btn.OnClick != "" {
+								onclick={ btn.OnClick }
+							}
+							if btn.AlpineClick != "" {
+								@click={ btn.AlpineClick }
+							}
+							if btn.AlpineAttrs != "" {
+								{ btn.AlpineAttrs }
+							}
+						>
+							if btn.Icon != "" {
+								<span class="icon"><i class={ "fas fa-" + btn.Icon }></i></span>
+							}
+							<span>{ btn.Label }</span>
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// AgencyDesignerHeader renders the header for the agency designer with dark background
+templ AgencyDesignerHeader(rightButtons []DesignerToolbarButton, statusTag string) {
+	<div class="agency-designer-header">
+		<div class="level mb-0">
+			<div class="level-left">
+				<div class="level-item">
+					<h3 class="title is-5 has-text-white mb-0">
+						<span class="icon is-small mr-2">
+							<i class="fas fa-pencil-ruler"></i>
+						</span>
+						<span>Agency Designer</span>
+					</h3>
+				</div>
+			</div>
+			<div class="level-right">
+				for _, btn := range rightButtons {
+					<div class="level-item">
+						<button
+							if btn.ID != "" {
+								id={ btn.ID }
+							}
+							if btn.Title != "" {
+								title={ btn.Title }
+							}
+							class={
+								"button is-small",
+								templ.KV("is-primary", btn.IsPrimary),
+								templ.KV("is-info", btn.IsInfo),
+								templ.KV("is-light", btn.IsLight),
+							}
+							if btn.OnClick != "" {
+								onclick={ btn.OnClick }
+							}
+						>
+							if btn.Icon != "" {
+								<span class="icon is-small"><i class={ "fas fa-" + btn.Icon }></i></span>
+							}
+							<span>{ btn.Label }</span>
+						</button>
+					</div>
+				}
+				if statusTag != "" {
+					<div class="level-item">
+						<span class="tag is-medium is-light">
+							<span class="icon is-small">
+								<i class="fas fa-question-circle"></i>
+							</span>
+							<span>{ statusTag }</span>
+						</span>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+}

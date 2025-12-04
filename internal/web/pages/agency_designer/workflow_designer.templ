@@ -2,73 +2,67 @@ package agency_designer
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 // WorkflowDesigner renders the simplified vertical column workflow designer
-templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Workflow Designer - { wf.Name }</title>
-			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"/>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-			<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
-			<!-- Alpine.js with Collapse plugin -->
-			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<!-- Specification API for work items -->
-			<script src="/static/js/agency-designer/specification-api.js"></script>
-			<!-- Properties Panel Component (must load before workflow-designer.js) -->
-			<script src="/static/js/agency-designer/properties-panel.js"></script>
-			<!-- Utilities (must load before workflow-designer.js) -->
-			<script src="/static/js/agency-designer/utils.js"></script>
-			<!-- Workflow Designer -->
-			<script src="/static/js/workflow-designer.js"></script>
-		</head>
-		<body>
-			<div
-				class="designer-container"
-				x-data="workflowDesigner()"
-				data-agency-id={ agencyID }
-				data-workflow-id={ wf.ID }
-				data-workflow-key={ wf.Key }
-				data-workflow-name={ wf.Name }
-				data-workflow-description={ wf.Description }
-				data-workflow-version={ wf.Version }
-				data-workflow-steps={ templ.JSONString(wf.Steps) }
-			>
-				<!-- Toolbar -->
-				<div class="designer-toolbar">
-					<div class="level is-mobile">
-						<div class="level-left">
-							<div class="level-item">
-								<a href={ templ.SafeURL("/agencies/" + agencyID + "/designer#workflows") } class="button is-small">
-									<span class="icon"><i class="fas fa-arrow-left"></i></span>
-									<span>Back to Workflows</span>
-								</a>
-							</div>
-							<div class="level-item">
-								<h1 class="title is-5 mb-0">{ wf.Name }</h1>
-							</div>
+templ WorkflowDesigner(currentAgency *models.Agency, wf *models.Workflow) {
+	@components.LayoutWithAgency("Workflow Designer - " + wf.Name, currentAgency) {
+		// Workflow Designer Specific CSS
+		<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
+		<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
+		
+		// Alpine.js with Collapse plugin
+		<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		
+		// Workflow Designer JavaScript
+		<script src="/static/js/agency-designer/specification-api.js"></script>
+		<script src="/static/js/agency-designer/properties-panel.js"></script>
+		<script src="/static/js/agency-designer/utils.js"></script>
+		<script src="/static/js/workflow-designer.js"></script>
+		
+		<div
+			class="designer-container"
+			x-data="workflowDesigner()"
+			data-agency-id={ currentAgency.ID }
+			data-workflow-id={ wf.ID }
+			data-workflow-key={ wf.Key }
+			data-workflow-name={ wf.Name }
+			data-workflow-description={ wf.Description }
+			data-workflow-version={ wf.Version }
+			data-workflow-steps={ templ.JSONString(wf.Steps) }
+		>
+			<!-- Toolbar -->
+			<div class="designer-toolbar">
+				<div class="level is-mobile">
+					<div class="level-left">
+						<div class="level-item">
+							<a href={ templ.SafeURL("/agencies/" + currentAgency.ID + "/designer#workflows") } class="button is-small">
+								<span class="icon"><i class="fas fa-arrow-left"></i></span>
+								<span>Back to Workflows</span>
+							</a>
 						</div>
-						<div class="level-right">
-							<div class="level-item">
-								<button @click="saveWorkflow()" class="button is-primary is-small" :disabled="saving">
-									<span class="icon"><i class="fas fa-save"></i></span>
-									<span x-text="saving ? 'Saving...' : 'Save'">Save</span>
-								</button>
-							</div>
-							<div class="level-item">
-								<button @click="exportWorkflow()" class="button is-light is-small">
-									<span class="icon"><i class="fas fa-download"></i></span>
-									<span>Export</span>
-								</button>
-							</div>
+						<div class="level-item">
+							<h1 class="title is-5 mb-0">{ wf.Name }</h1>
+						</div>
+					</div>
+					<div class="level-right">
+						<div class="level-item">
+							<button @click="saveWorkflow()" class="button is-primary is-small" :disabled="saving">
+								<span class="icon"><i class="fas fa-save"></i></span>
+								<span x-text="saving ? 'Saving...' : 'Save'">Save</span>
+							</button>
+						</div>
+						<div class="level-item">
+							<button @click="exportWorkflow()" class="button is-light is-small">
+								<span class="icon"><i class="fas fa-download"></i></span>
+								<span>Export</span>
+							</button>
 						</div>
 					</div>
 				</div>
+			</div>
 				<!-- Main Content Area -->
 				<div class="designer-content columns is-gapless">
 					<!-- Left Panel: Available Work Items -->
@@ -456,7 +450,32 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 						</div>
 					</div>
 				</div>
-			</div>
-		</body>
-	</html>
+				<!-- Status Bar -->
+				<div class="vscode-status-bar">
+					<div class="status-bar-left">
+						<div class="status-item">
+							<span class="icon is-small"><i class="fas fa-sitemap"></i></span>
+							<span class="status-text" x-text="`${workflowSteps.length} step${workflowSteps.length !== 1 ? 's' : ''}`">0 steps</span>
+						</div>
+						<div class="status-item">
+							<span class="icon is-small"><i class="fas fa-tasks"></i></span>
+							<span class="status-text" x-text="`${workflowSteps.reduce((sum, s) => sum + s.items.length, 0)} work item${workflowSteps.reduce((sum, s) => sum + s.items.length, 0) !== 1 ? 's' : ''}`">0 work items</span>
+						</div>
+						<div class="status-item" x-show="saving" x-cloak>
+							<span class="icon is-small has-text-warning"><i class="fas fa-sync fa-spin"></i></span>
+							<span class="status-text">Saving...</span>
+						</div>
+					</div>
+					<div class="status-bar-right">
+						<div class="status-item">
+							<span class="icon is-small"><i class="fas fa-code-branch"></i></span>
+							<span class="status-text" x-text="`v${workflowVersion || '1.0.0'}`">v1.0.0</span>
+						</div>
+						<div class="status-item">
+							<span class="status-text">{ currentAgency.Name }</span>
+						</div>
+					</div>
+				</div>
+		</div>
+	}
 }

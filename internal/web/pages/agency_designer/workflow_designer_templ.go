@@ -10,10 +10,11 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
 )
 
 // WorkflowDesigner renders the simplified vertical column workflow designer
-func WorkflowDesigner(agencyID string, wf *models.Workflow) templ.Component {
+func WorkflowDesigner(currentAgency *models.Agency, wf *models.Workflow) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -34,137 +35,155 @@ func WorkflowDesigner(agencyID string, wf *models.Workflow) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Workflow Designer - ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 14, Col: 39}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css\"><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css\"><link rel=\"stylesheet\" href=\"/static/css/workflow-designer.css\"><!-- Alpine.js with Collapse plugin --><script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js\"></script><script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script><!-- Specification API for work items --><script src=\"/static/js/agency-designer/specification-api.js\"></script><!-- Properties Panel Component (must load before workflow-designer.js) --><script src=\"/static/js/agency-designer/properties-panel.js\"></script><!-- Utilities (must load before workflow-designer.js) --><script src=\"/static/js/agency-designer/utils.js\"></script><!-- Workflow Designer --><script src=\"/static/js/workflow-designer.js\"></script></head><body><div class=\"designer-container\" x-data=\"workflowDesigner()\" data-agency-id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(agencyID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 34, Col: 29}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" data-workflow-id=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(wf.ID)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 35, Col: 28}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-workflow-key=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Key)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 36, Col: 30}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-workflow-name=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 37, Col: 32}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" data-workflow-description=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Description)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 38, Col: 46}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" data-workflow-version=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Version)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 39, Col: 38}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" data-workflow-steps=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(wf.Steps))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 40, Col: 52}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><!-- Toolbar --><div class=\"designer-toolbar\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><a href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var10 templ.SafeURL
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/agencies/" + agencyID + "/designer#workflows"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 47, Col: 80}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" class=\"button is-small\"><span class=\"icon\"><i class=\"fas fa-arrow-left\"></i></span> <span>Back to Workflows</span></a></div><div class=\"level-item\"><h1 class=\"title is-5 mb-0\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Name)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 53, Col: 45}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</h1></div></div><div class=\"level-right\"><div class=\"level-item\"><button @click=\"saveWorkflow()\" class=\"button is-primary is-small\" :disabled=\"saving\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span x-text=\"saving ? 'Saving...' : 'Save'\">Save</span></button></div><div class=\"level-item\"><button @click=\"exportWorkflow()\" class=\"button is-light is-small\"><span class=\"icon\"><i class=\"fas fa-download\"></i></span> <span>Export</span></button></div></div></div></div><!-- Main Content Area --><div class=\"designer-content columns is-gapless\"><!-- Left Panel: Available Work Items --><div class=\"column is-3 work-items-panel\"><div class=\"panel\"><p class=\"panel-heading\">Available Work Items</p><!-- Search Bar --><div class=\"panel-block\"><p class=\"control has-icons-left\"><input class=\"input is-small\" type=\"text\" placeholder=\"Search work items...\" x-model=\"searchQuery\" @input=\"filterWorkItems()\"> <span class=\"icon is-small is-left\"><i class=\"fas fa-search\"></i></span></p></div><!-- Results Count --><div class=\"panel-block\" x-show=\"searchQuery\" x-cloak><span class=\"tag is-info is-light\"><span x-text=\"`Showing ${filteredWorkItems.length} of ${availableWorkItems.length} items`\"></span></span></div><!-- Work Items List --><div class=\"work-items-list\"><template x-for=\"(item, index) in filteredWorkItems\" :key=\"index\"><div class=\"work-item-card\" x-data=\"{ expanded: false }\"><div class=\"card\" draggable=\"true\" @dragstart=\"handleDragStart($event, item)\" @dragend=\"handleDragEnd($event)\"><div class=\"card-content py-2 px-3 p-2 m-1\"><div class=\"is-flex is-justify-content-space-between is-align-items-center\"><p class=\"has-text-weight-semibold is-size-6 mb-0\" x-text=\"item.title\"></p><button class=\"button is-small is-ghost\" @click.stop=\"expanded = !expanded\" :title=\"expanded ? 'Hide description' : 'Show description'\"><span class=\"icon is-small\"><i class=\"fas\" :class=\"expanded ? 'fa-chevron-up' : 'fa-chevron-down'\"></i></span></button></div><div x-show=\"expanded\" x-collapse><p class=\"is-size-6 has-text-grey mt-2\" x-text=\"item.description\"></p></div></div></div></div></template><!-- No Results Message --><div class=\"panel-block\" x-show=\"filteredWorkItems.length === 0\" x-cloak><p class=\"has-text-grey\">No work items found</p></div></div></div></div><!-- Center: Workflow Canvas --><div class=\"column is-6 workflow-canvas\"><div class=\"canvas-content\"><!-- START Marker --><div class=\"workflow-marker start-marker\"><div class=\"marker-content\"><span class=\"icon is-medium\"><i class=\"fas fa-play-circle\"></i></span> <span class=\"has-text-weight-bold\">START</span></div></div><!-- Workflow Steps or Empty State --><template x-if=\"workflowSteps.length === 0\"><div class=\"empty-state-drop-zone\" @dragover.prevent=\"handleDragOver($event, null)\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, null, 'empty')\" :class=\"{ 'is-active': dragOverTarget === 'empty' }\"><div class=\"empty-state-content\"><span class=\"icon is-large has-text-grey-light\"><i class=\"fas fa-hand-pointer fa-3x\"></i></span><p class=\"title is-5 has-text-grey-light mt-4\">Drop items here to build workflow</p><p class=\"subtitle is-6 has-text-grey-light\">Drag work items from the left panel</p></div></div></template><!-- Workflow Steps --><template x-if=\"workflowSteps.length > 0\"><div class=\"workflow-steps-container\"><template x-for=\"(step, stepIndex) in workflowSteps\" :key=\"step.id\"><div class=\"workflow-step-wrapper\"><!-- Flow Arrow + Drop Zone Above Step --><div class=\"flow-connector\"><div class=\"flow-arrow\"><div class=\"arrow-line\"></div><div class=\"arrow-head\">▼</div></div><div class=\"drop-zone horizontal-drop-zone\" @dragover.prevent=\"handleDragOver($event, { type: 'before', stepIndex })\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, stepIndex, 'before')\" :class=\"{ 'is-active': dragOverTarget?.type === 'before' && dragOverTarget?.stepIndex === stepIndex }\"></div></div><!-- Step Items --><div class=\"workflow-step\" :class=\"{ 'is-parallel': step.items.length > 1 }\"><!-- Step Header: Order, Name, Autonomy, Routes --><div class=\"step-header box has-background-light mb-2\" @click=\"selectStep(step.id)\" style=\"cursor: pointer; padding: 0.75rem 1rem;\"><div class=\"level is-mobile mb-0\"><div class=\"level-left\"><div class=\"level-item\"><!-- Order Number --><span class=\"tag is-medium is-dark mr-2\"><strong x-text=\"step.order\"></strong></span><!-- Step Name (or fallback) --><span class=\"is-size-6 has-text-weight-semibold\" x-text=\"step.name || 'Step ' + step.order\"></span></div></div><div class=\"level-right\"><div class=\"level-item\"><!-- Work Item Count --><span class=\"tag is-info is-light mr-2\" :title=\"`${step.items.length} work item(s)`\"><span class=\"icon is-small\"><i class=\"fas fa-tasks\"></i></span> <span x-text=\"step.items.length\"></span></span><!-- Autonomy Level Badge (aggregated from work items) --><span :class=\"getStepAutonomyBadgeClass(step)\" :title=\"'Autonomy Levels: ' + getStepAutonomyDisplay(step)\" class=\"mr-2\"><strong x-text=\"getStepAutonomyDisplay(step)\"></strong></span><!-- Route Indicator (if routes defined) --><span x-show=\"hasRoutes(step)\" class=\"tag is-link is-light\" :title=\"`${getRouteCount(step)} route(s) configured`\"><span class=\"icon is-small\"><i class=\"fas fa-route\"></i></span> <span x-text=\"getRouteCount(step)\"></span></span></div></div></div></div><template x-if=\"step.items.length === 1\"><!-- Single Item (Sequential) --><div class=\"step-item-container\" @dragover.prevent=\"handleItemDragOver($event, stepIndex)\" @dragleave=\"handleItemDragLeave($event)\"><!-- Side Drop Zones --><div class=\"drop-zone left-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'left')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }\"></div><div class=\"step-item\" draggable=\"true\" @dragstart=\"handleStepDragStart($event, stepIndex, 0)\" @dragend=\"handleDragEnd($event)\" @click.stop=\"selectWorkItem(step.id, step.items[0].id)\" style=\"cursor: pointer;\"><div class=\"card\"><header class=\"card-header\" style=\"position: relative;\"><button class=\"card-header-icon\" @click.stop=\"toggleStepItemDescription(step.id, step.items[0].work_item_id)\" :title=\"step.items[0].showDescription ? 'Hide description' : 'Show description'\" x-show=\"step.items[0].description\"><span class=\"icon is-small\" :class=\"{ 'is-rotated': step.items[0].showDescription }\"><i class=\"fas fa-chevron-down\"></i></span></button><div class=\"card-header-title py-3\" style=\"padding-right: 3rem;\"><span class=\"is-size-6\" x-text=\"step.items[0].work_item_title\"></span></div><button class=\"delete is-small\" @click.stop=\"removeItemFromStep(stepIndex, 0)\" title=\"Remove from workflow\" style=\"position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;\"></button></header><div class=\"card-content py-2 px-3\" x-show=\"step.items[0].showDescription\" x-cloak><p class=\"is-size-7 has-text-grey\" x-text=\"step.items[0].description\"></p></div></div></div><div class=\"drop-zone right-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'right')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }\"></div></div></template><template x-if=\"step.items.length > 1\"><!-- Multiple Items (Parallel) --><div class=\"step-item-container\" @dragover.prevent=\"handleItemDragOver($event, stepIndex)\" @dragleave=\"handleItemDragLeave($event)\"><!-- Side Drop Zones for Parallel --><div class=\"drop-zone left-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'left')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }\"></div><div class=\"parallel-items-container\"><div class=\"parallel-label\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-code-branch\"></i></span> <span>Parallel Execution</span></span></div><div class=\"parallel-items\"><template x-for=\"(item, itemIndex) in step.items\" :key=\"item.id\"><div class=\"step-item parallel-item\" draggable=\"true\" @dragstart=\"handleStepDragStart($event, stepIndex, itemIndex)\" @dragend=\"handleDragEnd($event)\" @click.stop=\"selectWorkItem(step.id, item.id)\" style=\"cursor: pointer;\"><div class=\"card\"><header class=\"card-header\" style=\"position: relative;\"><button class=\"card-header-icon\" @click.stop=\"toggleStepItemDescription(step.id, item.work_item_id)\" :title=\"item.showDescription ? 'Hide description' : 'Show description'\" x-show=\"item.description\"><span class=\"icon is-small\" :class=\"{ 'is-rotated': item.showDescription }\"><i class=\"fas fa-chevron-down\"></i></span></button><div class=\"card-header-title py-3\" style=\"padding-right: 3rem;\"><span class=\"is-size-6\" x-text=\"item.work_item_title\"></span></div><button class=\"delete is-small\" @click.stop=\"removeItemFromStep(stepIndex, itemIndex)\" title=\"Remove from workflow\" style=\"position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;\"></button></header><div class=\"card-content py-2 px-3\" x-show=\"item.showDescription\" x-cloak><p class=\"is-size-7 has-text-grey\" x-text=\"item.description\"></p></div></div></div></template><!-- Add parallel item drop zone --><div class=\"parallel-add-zone\" @dragover.prevent=\"handleDragOver($event, { type: 'parallel', stepIndex })\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, stepIndex, 'parallel')\" :class=\"{ 'is-active': dragOverTarget?.type === 'parallel' && dragOverTarget?.stepIndex === stepIndex }\"><div class=\"drop-zone\"></div></div></div></div><!-- Right Side Drop Zone for Parallel --><div class=\"drop-zone right-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'right')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }\"></div></div></template></div></div></template><!-- Final Flow Arrow + Drop Zone After Last Step --><div class=\"flow-connector\"><div class=\"flow-arrow\"><div class=\"arrow-line\"></div><div class=\"arrow-head\">▼</div></div><div class=\"drop-zone horizontal-drop-zone\" @dragover.prevent=\"handleDragOver($event, { type: 'after' })\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, workflowSteps.length, 'after')\" :class=\"{ 'is-active': dragOverTarget?.type === 'after' }\"><div class=\"drop-zone-indicator\"></div></div></div></div></template><!-- Route Legend (for future Phase 4 implementation) --><div class=\"box mt-5\" style=\"background: #f0f8ff; border: 2px solid #e3f2fd;\"><h4 class=\"title is-6 mb-3\"><span class=\"icon-text\"><span class=\"icon has-text-info\"><i class=\"fas fa-route\"></i></span> <span>Route Legend (Coming Soon)</span></span></h4><div class=\"content is-small\"><p class=\"mb-2\"><strong>Conditional routing will be displayed with colored arrows:</strong></p><div class=\"tags\"><span class=\"tag is-success is-light\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Success</span></span> <span class=\"tag is-danger is-light\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Failure/Error</span></span> <span class=\"tag is-warning is-light\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Retry/Skip</span></span> <span class=\"tag is-info is-light\" style=\"border: 2px dashed #3273dc; background: white;\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Human Decision</span></span></div><p class=\"has-text-grey is-size-7 mt-2\"><i class=\"fas fa-info-circle\"></i> Visual route arrows will be added in Phase 4</p></div></div><!-- END Marker --><div class=\"workflow-marker end-marker\"><div class=\"marker-content\"><span class=\"icon is-medium\"><i class=\"fas fa-flag-checkered\"></i></span> <span class=\"has-text-weight-bold\">END</span></div></div></div></div><!-- Right Panel: Properties --><div class=\"column is-3 properties-panel\" style=\"background: #f9f9f9; border-left: 1px solid #e5e5e5; overflow-y: auto;\"><div id=\"properties-panel-content\" class=\"p-3\"><div class=\"box has-text-centered has-text-grey-light\"><p class=\"icon is-large\"><i class=\"fas fa-mouse-pointer fa-2x\"></i></p><p class=\"mt-3\">Click a step to view properties</p></div></div></div></div></div></body></html>")
+		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, " <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/workflow-designer.css\"> <script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js\"></script> <script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script>  <script src=\"/static/js/agency-designer/specification-api.js\"></script> <script src=\"/static/js/agency-designer/properties-panel.js\"></script> <script src=\"/static/js/agency-designer/utils.js\"></script> <script src=\"/static/js/workflow-designer.js\"></script> <div class=\"designer-container\" x-data=\"workflowDesigner()\" data-agency-id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.ID)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 28, Col: 36}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" data-workflow-id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(wf.ID)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 29, Col: 27}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" data-workflow-key=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Key)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 30, Col: 29}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" data-workflow-name=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 31, Col: 31}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" data-workflow-description=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Description)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 32, Col: 45}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" data-workflow-version=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Version)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 33, Col: 37}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" data-workflow-steps=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(wf.Steps))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 34, Col: 51}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><!-- Toolbar --><div class=\"designer-toolbar\"><div class=\"level is-mobile\"><div class=\"level-left\"><div class=\"level-item\"><a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var10 templ.SafeURL
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/agencies/" + currentAgency.ID + "/designer#workflows"))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 41, Col: 87}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"button is-small\"><span class=\"icon\"><i class=\"fas fa-arrow-left\"></i></span> <span>Back to Workflows</span></a></div><div class=\"level-item\"><h1 class=\"title is-5 mb-0\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 47, Col: 44}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</h1></div></div><div class=\"level-right\"><div class=\"level-item\"><button @click=\"saveWorkflow()\" class=\"button is-primary is-small\" :disabled=\"saving\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span x-text=\"saving ? 'Saving...' : 'Save'\">Save</span></button></div><div class=\"level-item\"><button @click=\"exportWorkflow()\" class=\"button is-light is-small\"><span class=\"icon\"><i class=\"fas fa-download\"></i></span> <span>Export</span></button></div></div></div></div><!-- Main Content Area --><div class=\"designer-content columns is-gapless\"><!-- Left Panel: Available Work Items --><div class=\"column is-3 work-items-panel\"><div class=\"panel\"><p class=\"panel-heading\">Available Work Items</p><!-- Search Bar --><div class=\"panel-block\"><p class=\"control has-icons-left\"><input class=\"input is-small\" type=\"text\" placeholder=\"Search work items...\" x-model=\"searchQuery\" @input=\"filterWorkItems()\"> <span class=\"icon is-small is-left\"><i class=\"fas fa-search\"></i></span></p></div><!-- Results Count --><div class=\"panel-block\" x-show=\"searchQuery\" x-cloak><span class=\"tag is-info is-light\"><span x-text=\"`Showing ${filteredWorkItems.length} of ${availableWorkItems.length} items`\"></span></span></div><!-- Work Items List --><div class=\"work-items-list\"><template x-for=\"(item, index) in filteredWorkItems\" :key=\"index\"><div class=\"work-item-card\" x-data=\"{ expanded: false }\"><div class=\"card\" draggable=\"true\" @dragstart=\"handleDragStart($event, item)\" @dragend=\"handleDragEnd($event)\"><div class=\"card-content py-2 px-3 p-2 m-1\"><div class=\"is-flex is-justify-content-space-between is-align-items-center\"><p class=\"has-text-weight-semibold is-size-6 mb-0\" x-text=\"item.title\"></p><button class=\"button is-small is-ghost\" @click.stop=\"expanded = !expanded\" :title=\"expanded ? 'Hide description' : 'Show description'\"><span class=\"icon is-small\"><i class=\"fas\" :class=\"expanded ? 'fa-chevron-up' : 'fa-chevron-down'\"></i></span></button></div><div x-show=\"expanded\" x-collapse><p class=\"is-size-6 has-text-grey mt-2\" x-text=\"item.description\"></p></div></div></div></div></template><!-- No Results Message --><div class=\"panel-block\" x-show=\"filteredWorkItems.length === 0\" x-cloak><p class=\"has-text-grey\">No work items found</p></div></div></div></div><!-- Center: Workflow Canvas --><div class=\"column is-6 workflow-canvas\"><div class=\"canvas-content\"><!-- START Marker --><div class=\"workflow-marker start-marker\"><div class=\"marker-content\"><span class=\"icon is-medium\"><i class=\"fas fa-play-circle\"></i></span> <span class=\"has-text-weight-bold\">START</span></div></div><!-- Workflow Steps or Empty State --><template x-if=\"workflowSteps.length === 0\"><div class=\"empty-state-drop-zone\" @dragover.prevent=\"handleDragOver($event, null)\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, null, 'empty')\" :class=\"{ 'is-active': dragOverTarget === 'empty' }\"><div class=\"empty-state-content\"><span class=\"icon is-large has-text-grey-light\"><i class=\"fas fa-hand-pointer fa-3x\"></i></span><p class=\"title is-5 has-text-grey-light mt-4\">Drop items here to build workflow</p><p class=\"subtitle is-6 has-text-grey-light\">Drag work items from the left panel</p></div></div></template><!-- Workflow Steps --><template x-if=\"workflowSteps.length > 0\"><div class=\"workflow-steps-container\"><template x-for=\"(step, stepIndex) in workflowSteps\" :key=\"step.id\"><div class=\"workflow-step-wrapper\"><!-- Flow Arrow + Drop Zone Above Step --><div class=\"flow-connector\"><div class=\"flow-arrow\"><div class=\"arrow-line\"></div><div class=\"arrow-head\">▼</div></div><div class=\"drop-zone horizontal-drop-zone\" @dragover.prevent=\"handleDragOver($event, { type: 'before', stepIndex })\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, stepIndex, 'before')\" :class=\"{ 'is-active': dragOverTarget?.type === 'before' && dragOverTarget?.stepIndex === stepIndex }\"></div></div><!-- Step Items --><div class=\"workflow-step\" :class=\"{ 'is-parallel': step.items.length > 1 }\"><!-- Step Header: Order, Name, Autonomy, Routes --><div class=\"step-header box has-background-light mb-2\" @click=\"selectStep(step.id)\" style=\"cursor: pointer; padding: 0.75rem 1rem;\"><div class=\"level is-mobile mb-0\"><div class=\"level-left\"><div class=\"level-item\"><!-- Order Number --><span class=\"tag is-medium is-dark mr-2\"><strong x-text=\"step.order\"></strong></span><!-- Step Name (or fallback) --><span class=\"is-size-6 has-text-weight-semibold\" x-text=\"step.name || 'Step ' + step.order\"></span></div></div><div class=\"level-right\"><div class=\"level-item\"><!-- Work Item Count --><span class=\"tag is-info is-light mr-2\" :title=\"`${step.items.length} work item(s)`\"><span class=\"icon is-small\"><i class=\"fas fa-tasks\"></i></span> <span x-text=\"step.items.length\"></span></span><!-- Autonomy Level Badge (aggregated from work items) --><span :class=\"getStepAutonomyBadgeClass(step)\" :title=\"'Autonomy Levels: ' + getStepAutonomyDisplay(step)\" class=\"mr-2\"><strong x-text=\"getStepAutonomyDisplay(step)\"></strong></span><!-- Route Indicator (if routes defined) --><span x-show=\"hasRoutes(step)\" class=\"tag is-link is-light\" :title=\"`${getRouteCount(step)} route(s) configured`\"><span class=\"icon is-small\"><i class=\"fas fa-route\"></i></span> <span x-text=\"getRouteCount(step)\"></span></span></div></div></div></div><template x-if=\"step.items.length === 1\"><!-- Single Item (Sequential) --><div class=\"step-item-container\" @dragover.prevent=\"handleItemDragOver($event, stepIndex)\" @dragleave=\"handleItemDragLeave($event)\"><!-- Side Drop Zones --><div class=\"drop-zone left-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'left')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }\"></div><div class=\"step-item\" draggable=\"true\" @dragstart=\"handleStepDragStart($event, stepIndex, 0)\" @dragend=\"handleDragEnd($event)\" @click.stop=\"selectWorkItem(step.id, step.items[0].id)\" style=\"cursor: pointer;\"><div class=\"card\"><header class=\"card-header\" style=\"position: relative;\"><button class=\"card-header-icon\" @click.stop=\"toggleStepItemDescription(step.id, step.items[0].work_item_id)\" :title=\"step.items[0].showDescription ? 'Hide description' : 'Show description'\" x-show=\"step.items[0].description\"><span class=\"icon is-small\" :class=\"{ 'is-rotated': step.items[0].showDescription }\"><i class=\"fas fa-chevron-down\"></i></span></button><div class=\"card-header-title py-3\" style=\"padding-right: 3rem;\"><span class=\"is-size-6\" x-text=\"step.items[0].work_item_title\"></span></div><button class=\"delete is-small\" @click.stop=\"removeItemFromStep(stepIndex, 0)\" title=\"Remove from workflow\" style=\"position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;\"></button></header><div class=\"card-content py-2 px-3\" x-show=\"step.items[0].showDescription\" x-cloak><p class=\"is-size-7 has-text-grey\" x-text=\"step.items[0].description\"></p></div></div></div><div class=\"drop-zone right-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'right')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }\"></div></div></template><template x-if=\"step.items.length > 1\"><!-- Multiple Items (Parallel) --><div class=\"step-item-container\" @dragover.prevent=\"handleItemDragOver($event, stepIndex)\" @dragleave=\"handleItemDragLeave($event)\"><!-- Side Drop Zones for Parallel --><div class=\"drop-zone left-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'left')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }\"></div><div class=\"parallel-items-container\"><div class=\"parallel-label\"><span class=\"tag is-info is-light\"><span class=\"icon is-small\"><i class=\"fas fa-code-branch\"></i></span> <span>Parallel Execution</span></span></div><div class=\"parallel-items\"><template x-for=\"(item, itemIndex) in step.items\" :key=\"item.id\"><div class=\"step-item parallel-item\" draggable=\"true\" @dragstart=\"handleStepDragStart($event, stepIndex, itemIndex)\" @dragend=\"handleDragEnd($event)\" @click.stop=\"selectWorkItem(step.id, item.id)\" style=\"cursor: pointer;\"><div class=\"card\"><header class=\"card-header\" style=\"position: relative;\"><button class=\"card-header-icon\" @click.stop=\"toggleStepItemDescription(step.id, item.work_item_id)\" :title=\"item.showDescription ? 'Hide description' : 'Show description'\" x-show=\"item.description\"><span class=\"icon is-small\" :class=\"{ 'is-rotated': item.showDescription }\"><i class=\"fas fa-chevron-down\"></i></span></button><div class=\"card-header-title py-3\" style=\"padding-right: 3rem;\"><span class=\"is-size-6\" x-text=\"item.work_item_title\"></span></div><button class=\"delete is-small\" @click.stop=\"removeItemFromStep(stepIndex, itemIndex)\" title=\"Remove from workflow\" style=\"position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;\"></button></header><div class=\"card-content py-2 px-3\" x-show=\"item.showDescription\" x-cloak><p class=\"is-size-7 has-text-grey\" x-text=\"item.description\"></p></div></div></div></template><!-- Add parallel item drop zone --><div class=\"parallel-add-zone\" @dragover.prevent=\"handleDragOver($event, { type: 'parallel', stepIndex })\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, stepIndex, 'parallel')\" :class=\"{ 'is-active': dragOverTarget?.type === 'parallel' && dragOverTarget?.stepIndex === stepIndex }\"><div class=\"drop-zone\"></div></div></div></div><!-- Right Side Drop Zone for Parallel --><div class=\"drop-zone right-drop-zone\" @drop.stop=\"handleDrop($event, stepIndex, 'right')\" :class=\"{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }\"></div></div></template></div></div></template><!-- Final Flow Arrow + Drop Zone After Last Step --><div class=\"flow-connector\"><div class=\"flow-arrow\"><div class=\"arrow-line\"></div><div class=\"arrow-head\">▼</div></div><div class=\"drop-zone horizontal-drop-zone\" @dragover.prevent=\"handleDragOver($event, { type: 'after' })\" @dragleave=\"handleDragLeave($event)\" @drop=\"handleDrop($event, workflowSteps.length, 'after')\" :class=\"{ 'is-active': dragOverTarget?.type === 'after' }\"><div class=\"drop-zone-indicator\"></div></div></div></div></template><!-- Route Legend (for future Phase 4 implementation) --><div class=\"box mt-5\" style=\"background: #f0f8ff; border: 2px solid #e3f2fd;\"><h4 class=\"title is-6 mb-3\"><span class=\"icon-text\"><span class=\"icon has-text-info\"><i class=\"fas fa-route\"></i></span> <span>Route Legend (Coming Soon)</span></span></h4><div class=\"content is-small\"><p class=\"mb-2\"><strong>Conditional routing will be displayed with colored arrows:</strong></p><div class=\"tags\"><span class=\"tag is-success is-light\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Success</span></span> <span class=\"tag is-danger is-light\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Failure/Error</span></span> <span class=\"tag is-warning is-light\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Retry/Skip</span></span> <span class=\"tag is-info is-light\" style=\"border: 2px dashed #3273dc; background: white;\"><span class=\"icon\"><i class=\"fas fa-arrow-right\"></i></span> <span>Human Decision</span></span></div><p class=\"has-text-grey is-size-7 mt-2\"><i class=\"fas fa-info-circle\"></i> Visual route arrows will be added in Phase 4</p></div></div><!-- END Marker --><div class=\"workflow-marker end-marker\"><div class=\"marker-content\"><span class=\"icon is-medium\"><i class=\"fas fa-flag-checkered\"></i></span> <span class=\"has-text-weight-bold\">END</span></div></div></div></div><!-- Right Panel: Properties --><div class=\"column is-3 properties-panel\" style=\"background: #f9f9f9; border-left: 1px solid #e5e5e5; overflow-y: auto;\"><div id=\"properties-panel-content\" class=\"p-3\"><div class=\"box has-text-centered has-text-grey-light\"><p class=\"icon is-large\"><i class=\"fas fa-mouse-pointer fa-2x\"></i></p><p class=\"mt-3\">Click a step to view properties</p></div></div></div></div><!-- Status Bar --><div class=\"vscode-status-bar\"><div class=\"status-bar-left\"><div class=\"status-item\"><span class=\"icon is-small\"><i class=\"fas fa-sitemap\"></i></span> <span class=\"status-text\" x-text=\"`${workflowSteps.length} step${workflowSteps.length !== 1 ? 's' : ''}`\">0 steps</span></div><div class=\"status-item\"><span class=\"icon is-small\"><i class=\"fas fa-tasks\"></i></span> <span class=\"status-text\" x-text=\"`${workflowSteps.reduce((sum, s) => sum + s.items.length, 0)} work item${workflowSteps.reduce((sum, s) => sum + s.items.length, 0) !== 1 ? 's' : ''}`\">0 work items</span></div><div class=\"status-item\" x-show=\"saving\" x-cloak><span class=\"icon is-small has-text-warning\"><i class=\"fas fa-sync fa-spin\"></i></span> <span class=\"status-text\">Saving...</span></div></div><div class=\"status-bar-right\"><div class=\"status-item\"><span class=\"icon is-small\"><i class=\"fas fa-code-branch\"></i></span> <span class=\"status-text\" x-text=\"`v${workflowVersion || '1.0.0'}`\">v1.0.0</span></div><div class=\"status-item\"><span class=\"status-text\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.Name)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/agency_designer/workflow_designer.templ`, Line: 475, Col: 53}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</span></div></div></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = components.LayoutWithAgency("Workflow Designer - "+wf.Name, currentAgency).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

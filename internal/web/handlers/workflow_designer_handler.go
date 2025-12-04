@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
@@ -12,13 +13,15 @@ import (
 // WorkflowDesignerHandler handles visual workflow designer pages
 type WorkflowDesignerHandler struct {
 	workflowService *workflow.Service
+	agencyRepo      agency.Repository
 	logger          *logrus.Logger
 }
 
 // NewWorkflowDesignerHandler creates a new workflow designer web handler
-func NewWorkflowDesignerHandler(workflowService *workflow.Service, logger *logrus.Logger) *WorkflowDesignerHandler {
+func NewWorkflowDesignerHandler(workflowService *workflow.Service, agencyRepo agency.Repository, logger *logrus.Logger) *WorkflowDesignerHandler {
 	return &WorkflowDesignerHandler{
 		workflowService: workflowService,
+		agencyRepo:      agencyRepo,
 		logger:          logger,
 	}
 }
@@ -27,6 +30,16 @@ func NewWorkflowDesignerHandler(workflowService *workflow.Service, logger *logru
 func (h *WorkflowDesignerHandler) ShowDesigner(c *gin.Context) {
 	agencyID := c.Param("id")
 	workflowID := c.Param("workflowId")
+
+	// Get agency from repository
+	agency, err := h.agencyRepo.GetByID(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency")
+		c.HTML(http.StatusNotFound, "error.html", gin.H{
+			"error": "Agency not found",
+		})
+		return
+	}
 
 	// Get workflow from service
 	wf, err := h.workflowService.GetWorkflow(c.Request.Context(), workflowID)
@@ -48,6 +61,6 @@ func (h *WorkflowDesignerHandler) ShowDesigner(c *gin.Context) {
 	}
 
 	// Render designer page
-	component := agency_designer.WorkflowDesigner(agencyID, wf)
+	component := agency_designer.WorkflowDesigner(agency, wf)
 	component.Render(c.Request.Context(), c.Writer)
 }
