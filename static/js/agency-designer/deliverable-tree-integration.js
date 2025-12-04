@@ -5,20 +5,11 @@
 
 // Initialize deliverable tree builder for work item editor
 window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDeliverables = [], onSave = null) {
-    console.log('[initDeliverableTreeBuilder] Called with:', {
-        agencyId,
-        workItemCode,
-        deliverablesCount: existingDeliverables?.length || 0,
-        deliverables: existingDeliverables
-    });
-
     const container = document.getElementById('deliverable-tree-container');
     if (!container) {
         console.error('[initDeliverableTreeBuilder] Deliverable tree container not found!');
         return;
     }
-
-    console.log('[initDeliverableTreeBuilder] Container found, creating HTML...');
 
     // Store work item code in PropertiesPanel for later use during AI enhancement
     if (window.PropertiesPanel && workItemCode) {
@@ -27,9 +18,7 @@ window.initDeliverableTreeBuilder = function (agencyId, workItemCode, existingDe
 
     // Create the tree builder HTML structure
     const treeHTML = createTreeBuilderHTML(agencyId, workItemCode, existingDeliverables);
-    console.log('[initDeliverableTreeBuilder] HTML created, length:', treeHTML.length);
     container.innerHTML = treeHTML;
-    console.log('[initDeliverableTreeBuilder] HTML injected into container');
 
     // Store the save callback globally so Alpine can access it
     if (onSave && typeof onSave === 'function') {

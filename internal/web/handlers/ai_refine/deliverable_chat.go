@@ -113,7 +113,7 @@ func (h *Handler) ProcessDeliverableEnhancementStreaming(c *gin.Context, agencyI
 			h.logger.WithError(err).Error("❌ Failed to parse enhancement JSON")
 		} else {
 			// Save the enhancement to the database
-			if err := h.saveDeliverableEnhancement(c.Request.Context(), agencyID, nodeName, &enhancement, metadata); err != nil {
+			if err := h.saveDeliverableEnhancement(c.Request.Context(), agencyID, nodeName, &enhancement); err != nil {
 				h.logger.WithError(err).Error("❌ Failed to save deliverable enhancement")
 			} else {
 				h.logger.WithFields(logrus.Fields{
@@ -170,7 +170,7 @@ func extractJSONFromResponse(response string) (string, error) {
 }
 
 // saveDeliverableEnhancement saves the enhanced deliverable to the database
-func (h *Handler) saveDeliverableEnhancement(ctx context.Context, agencyID, nodeName string, enhancement *DeliverableEnhancement, metadata map[string]interface{}) error {
+func (h *Handler) saveDeliverableEnhancement(ctx context.Context, agencyID, nodeName string, enhancement *DeliverableEnhancement) error {
 	// Get the agency and specification using the existing helper
 	// We need a gin.Context for fetchAgencyAndSpec, but we only have context.Context
 	// So we'll use the agency service directly
