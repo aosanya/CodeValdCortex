@@ -605,7 +605,7 @@ window.workflowDesigner = function () {
                 iconColor: 'info',
                 data: stepCopy,
                 autoSwitchTab: false, // Don't auto-switch tabs (no chat panel in workflow designer)
-                
+
                 // Track field changes
                 onUpdate: (field, value) => {
                     stepCopy[field] = value;
@@ -653,9 +653,20 @@ window.workflowDesigner = function () {
                             { value: 'first', label: 'First (immediate)' }
                         ],
                         help: 'How to proceed when multiple work items complete'
-                    }] : [])
+                    }] : []),
+
+                    // Conditional Routing
+                    {
+                        key: 'routes_info',
+                        label: 'Conditional Routes',
+                        type: 'info',
+                        value: this.getRouteCount(step) > 0
+                            ? `${this.getRouteCount(step)} route(s) configured`
+                            : 'No routes configured - will proceed to next step by default',
+                        help: 'Define where workflow goes based on step completion status (Phase 4 - Coming soon)'
+                    }
                 ],
-                
+
                 // Save handler
                 onSave: () => {
                     this.saveStepProperties(step, stepCopy);
