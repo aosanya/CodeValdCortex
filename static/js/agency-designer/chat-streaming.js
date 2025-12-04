@@ -592,6 +592,14 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
             if (finalResult.was_changed && context === 'work-items') {
                 console.log('[MVP-054] Work items changed, reloading work item editor...');
 
+                // Store currently selected node ID before reload
+                const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
+                let selectedNodeIdBeforeReload = null;
+                if (treeContainer?._x_dataStack?.[0]?.selectedNodeId) {
+                    selectedNodeIdBeforeReload = treeContainer._x_dataStack[0].selectedNodeId;
+                    console.log('[MVP-054] Storing selected node before reload:', selectedNodeIdBeforeReload);
+                }
+
                 // Get the work item key from editor state
                 const workItemKey = window.workItemEditorState?.workItemKey;
 
@@ -601,6 +609,30 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                     window.loadWorkItemData(workItemKey)
                         .then(() => {
                             console.log('[MVP-054] Work item reloaded successfully');
+
+                            // Restore selected node and expand to it
+                            if (selectedNodeIdBeforeReload) {
+                                setTimeout(() => {
+                                    const newTreeContainer = document.querySelector('[x-data*="deliverableTree"]');
+                                    if (newTreeContainer?._x_dataStack?.[0]) {
+                                        const alpineData = newTreeContainer._x_dataStack[0];
+                                        const node = alpineData.findNodeById(selectedNodeIdBeforeReload);
+
+                                        if (node) {
+                                            console.log('[MVP-054] Restoring selection to node:', node.name);
+
+                                            // Expand all parent folders
+                                            alpineData.expandToNode(selectedNodeIdBeforeReload);
+
+                                            // Re-select the node
+                                            alpineData.selectedNodeId = selectedNodeIdBeforeReload;
+                                        } else {
+                                            console.log('[MVP-054] Previously selected node not found after reload');
+                                        }
+                                    }
+                                }, 100); // Small delay to ensure tree is fully rendered
+                            }
+
                             if (window.showNotification) {
                                 window.showNotification('Work item updated', 'success');
                             }

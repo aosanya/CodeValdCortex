@@ -857,6 +857,58 @@ function deliverableTree() {
         },
 
         /**
+         * Expand tree path to a specific node (expand all parent folders)
+         * @param {string} nodeId - ID of the node to expand to
+         */
+        expandToNode(nodeId) {
+            const node = this.findNodeById(nodeId);
+            if (!node) {
+                console.warn('[MVP-054] expandToNode: Node not found:', nodeId);
+                return;
+            }
+
+            // Find path from root to this node
+            const path = this.getNodePath(nodeId);
+            console.log('[MVP-054] Expanding path to node:', { nodeId, path });
+
+            // Expand all folders in the path
+            path.forEach(pathNodeId => {
+                const pathNode = this.findNodeById(pathNodeId);
+                if (pathNode && pathNode.type === 'folder') {
+                    this.expandedNodes[pathNodeId] = true;
+                }
+            });
+        },
+
+        /**
+         * Get path from root to a specific node (list of node IDs)
+         * @param {string} nodeId - ID of the target node
+         * @returns {string[]} Array of node IDs from root to target
+         */
+        getNodePath(nodeId) {
+            const path = [];
+
+            // Recursive function to find path
+            const findPath = (nodes, targetId, currentPath) => {
+                for (const node of nodes) {
+                    const newPath = [...currentPath, node.id];
+
+                    if (node.id === targetId) {
+                        return newPath;
+                    }
+
+                    if (node.children && Array.isArray(node.children)) {
+                        const found = findPath(node.children, targetId, newPath);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            return findPath(this.nodes, nodeId, []) || [];
+        },
+
+        /**
          * Count total nodes
          */
         countNodes(nodes) {
