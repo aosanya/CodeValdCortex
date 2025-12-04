@@ -56,7 +56,6 @@ func (s *service) ListDirectory(ctx context.Context, agencyDB, instanceID, path 
 	s.logger.WithFields(logrus.Fields{
 		"path":        path,
 		"instance_id": instanceID,
-	}).Debug("Listing directory")
 
 	// Get entries from index
 	entries, err := s.indexRepo.ListDirectory(ctx, agencyDB, instanceID, path)
@@ -68,7 +67,6 @@ func (s *service) ListDirectory(ctx context.Context, agencyDB, instanceID, path 
 		"path":        path,
 		"entry_count": len(entries),
 		"instance_id": instanceID,
-	}).Debug("Listed directory entries")
 
 	// Convert to DirectoryEntry
 	result := make([]*DirectoryEntry, 0, len(entries))
@@ -243,7 +241,6 @@ func (s *service) UpdateFile(ctx context.Context, agencyDB, instanceID, path, co
 
 	// If content unchanged (same SHA), skip commit
 	if blobSHA == index.BlobSHA {
-		s.logger.WithField("path", path).Debug("File content unchanged, skipping commit")
 		return nil
 	}
 
@@ -419,7 +416,6 @@ func (s *service) CreateDirectory(ctx context.Context, agencyDB, instanceID, pat
 	s.logger.WithFields(logrus.Fields{
 		"path":  path,
 		"error": err,
-	}).Debug("Directory does not exist, proceeding with creation")
 
 	// Create empty tree for directory
 	treeSHA, err := s.gitOps.WriteTree(ctx, instanceID, []models.TreeEntry{})

@@ -523,7 +523,7 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                                 lastProgressBubble.classList.add('fa-check-circle');
                             }
                         } catch (e) {
-                            console.debug('[MVP-054] failed to parse complete event JSON:', e.message);
+                            // Silently ignore parse errors
                         }
                     } else if (currentEvent === 'error') {
                     } else if (currentEvent === 'start') {
@@ -538,7 +538,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
         if (jsonBuffer) {
             try {
                 enhancementData = JSON.parse(jsonBuffer);
-                console.log('[MVP-054] Parsed jsonBuffer into enhancement data:', enhancementData);
 
                 // If we have enhancement data with deliverable fields, merge or prefer it over finalResult
                 if (enhancementData && (enhancementData.suggested_children !== undefined || enhancementData.prompt_instructions !== undefined)) {
@@ -546,15 +545,13 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                     if (finalResult) {
                         // Keep conversation_id and was_changed from finalResult, but add enhancement fields
                         finalResult = { ...finalResult, ...enhancementData };
-                        console.log('[MVP-054] Merged enhancement data with finalResult');
                     } else {
                         // No finalResult from complete event, use enhancement data directly
                         finalResult = enhancementData;
-                        console.log('[MVP-054] Using enhancement data as finalResult');
                     }
                 }
             } catch (e) {
-                console.debug('[MVP-054] failed to parse jsonBuffer into JSON:', e.message);
+                // Silently ignore parse errors
             }
         }
 
@@ -590,26 +587,19 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
 
             // Refresh work items list if work items were changed
             if (finalResult.was_changed && context === 'work-items') {
-                console.log('[MVP-054] Work items changed, reloading work item editor...');
-
                 // Store currently selected node ID before reload
                 const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
                 let selectedNodeIdBeforeReload = null;
                 if (treeContainer?._x_dataStack?.[0]?.selectedNodeId) {
                     selectedNodeIdBeforeReload = treeContainer._x_dataStack[0].selectedNodeId;
-                    console.log('[MVP-054] Storing selected node before reload:', selectedNodeIdBeforeReload);
                 }
 
                 // Get the work item key from editor state
                 const workItemKey = window.workItemEditorState?.workItemKey;
 
                 if (workItemKey && window.loadWorkItemData) {
-                    console.log('[MVP-054] Reloading work item:', workItemKey);
-
                     window.loadWorkItemData(workItemKey)
                         .then(() => {
-                            console.log('[MVP-054] Work item reloaded successfully');
-
                             // Restore selected node and expand to it
                             if (selectedNodeIdBeforeReload) {
                                 setTimeout(() => {
@@ -619,15 +609,11 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                                         const node = alpineData.findNodeById(selectedNodeIdBeforeReload);
 
                                         if (node) {
-                                            console.log('[MVP-054] Restoring selection to node:', node.name);
-
                                             // Expand all parent folders
                                             alpineData.expandToNode(selectedNodeIdBeforeReload);
 
                                             // Re-select the node
                                             alpineData.selectedNodeId = selectedNodeIdBeforeReload;
-                                        } else {
-                                            console.log('[MVP-054] Previously selected node not found after reload');
                                         }
                                     }
                                 }, 100); // Small delay to ensure tree is fully rendered
@@ -638,13 +624,8 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                             }
                         })
                         .catch(error => {
-                            console.error('[MVP-054] Failed to reload work item:', error);
+                            console.error('Failed to reload work item:', error);
                         });
-                } else {
-                    console.warn('[MVP-054] Cannot reload - missing dependencies:', {
-                        workItemKey: !!workItemKey,
-                        loadWorkItemData: !!window.loadWorkItemData
-                    });
                 }
             }
 
@@ -672,8 +653,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                     \`\`\`
                 </div>
             `;
-
-            console.log('[MVP-054] Final result displayed, JSON kept in hidden div for enhancement detector');
 
             // Auto-scroll to show final message
             autoScrollIfNearBottom(chatMessages);

@@ -413,7 +413,6 @@ func (b *WorkflowsBuilder) RefineWorkflowsStream(ctx context.Context, req *build
 				"chunk_number": chunkCount,
 				"chunk_bytes":  chunkBytes,
 				"total_bytes":  totalBytes,
-			}).Debug("Streaming workflow chunk received")
 		}
 
 		// Accumulate content for final parsing

@@ -149,7 +149,6 @@ func (h *Handler) ProcessWorkflowsChatRequestStreaming(c *gin.Context) {
 					"chunk_bytes":   chunkBytes,
 					"total_bytes":   totalChunkBytes,
 					"chunk_preview": truncateForLog(chunk, 50),
-				}).Debug("🔍 DEBUG: Forwarding workflow chunk to SSE")
 			}
 
 			c.SSEvent("chunk", chunk)

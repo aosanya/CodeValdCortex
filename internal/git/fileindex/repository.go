@@ -98,7 +98,6 @@ func (r *repository) IndexFile(ctx context.Context, agencyDB string, index *File
 			r.logger.WithFields(logrus.Fields{
 				"path":    index.Path,
 				"repo_id": index.RepoID,
-			}).Debug("Updated file index")
 		} else {
 			return fmt.Errorf("failed to create file index: %w", err)
 		}
@@ -106,7 +105,6 @@ func (r *repository) IndexFile(ctx context.Context, agencyDB string, index *File
 		r.logger.WithFields(logrus.Fields{
 			"path":    index.Path,
 			"repo_id": index.RepoID,
-		}).Debug("Created file index")
 	}
 
 	return nil
@@ -215,7 +213,6 @@ func (r *repository) DeleteByPath(ctx context.Context, agencyDB string, repoID, 
 	r.logger.WithFields(logrus.Fields{
 		"path":    path,
 		"repo_id": repoID,
-	}).Debug("Deleted file index")
 
 	return nil
 }

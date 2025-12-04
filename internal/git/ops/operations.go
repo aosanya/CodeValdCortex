@@ -78,7 +78,6 @@ func (g *gitOps) WriteBlob(ctx context.Context, repoID, content string) (string,
 		"sha":     sha,
 		"size":    len(content),
 		"repo_id": repoID,
-	}).Debug("Created blob")
 
 	return sha, nil
 }
@@ -130,7 +129,6 @@ func (g *gitOps) WriteTree(ctx context.Context, repoID string, entries []models.
 		"sha":     sha,
 		"entries": len(entries),
 		"repo_id": repoID,
-	}).Debug("Created tree")
 
 	return sha, nil
 }
@@ -223,7 +221,6 @@ func (g *gitOps) Commit(ctx context.Context, repoID, treeSHA string, parents []s
 		"parents": len(parents),
 		"author":  authorName,
 		"repo_id": repoID,
-	}).Debug("Created commit")
 
 	return sha, nil
 }
@@ -270,7 +267,6 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 			"ref":     refName,
 			"target":  commitSHA,
 			"repo_id": repoID,
-		}).Debug("Created ref")
 
 		return nil
 	}
@@ -285,7 +281,6 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 		"ref":     refName,
 		"target":  commitSHA,
 		"repo_id": repoID,
-	}).Debug("Updated ref")
 
 	return nil
 }

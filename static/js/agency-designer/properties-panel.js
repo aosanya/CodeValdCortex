@@ -214,9 +214,6 @@ window.PropertiesPanel = {
      * Handle button clicks
      */
     _handleButtonClick: function (action) {
-        // TODO: Remove debug prints for MVP-054 after issue is resolved
-        console.log('[MVP-054] _handleButtonClick called:', { action, hasConfig: !!this._currentConfig });
-
         if (!this._currentConfig) return;
 
         switch (action) {
@@ -226,12 +223,6 @@ window.PropertiesPanel = {
                 }
                 break;
             case 'ai-enhance':
-                // TODO: Remove debug prints for MVP-054 after issue is resolved
-                console.log('[MVP-054] AI Enhance button clicked:', {
-                    hasCallback: !!this._currentConfig.onAIEnhance,
-                    configData: this._currentConfig.data
-                });
-
                 // Use chat workflow for AI enhance
                 this._sendAIEnhanceToChat();
                 break;
@@ -368,14 +359,6 @@ window.PropertiesPanel = {
      * Show deliverable node properties in the properties panel
      */
     showDeliverableNodeProperties: function (node) {
-        // TODO: Remove debug prints for MVP-054 after issue is resolved
-        console.log('[MVP-054] showDeliverableNodeProperties called:', {
-            nodeId: node.id,
-            nodeName: node.name,
-            nodeType: node.type,
-            hasPromptInstructions: !!node.prompt_instructions
-        });
-
         const fields = [
             {
                 key: 'name',
@@ -420,15 +403,6 @@ window.PropertiesPanel = {
                 help: 'Full path in the deliverables tree'
             }
         );
-
-        // TODO: Remove debug prints for MVP-054 after issue is resolved
-        console.log('[MVP-054] showDeliverableNodeProperties - config prepared:', {
-            title: `Deliverable: ${node.name}${node.type === 'file' ? (node.file_extension || '') : ''}`,
-            fieldsCount: fields.length,
-            buttonsCount: 4,
-            hasOnAIEnhance: false,  // Not implemented yet
-            nodeData: node
-        });
 
         this.showProperties({
             title: `Deliverable: ${node.name}${node.type === 'file' ? (node.file_extension || '') : ''}`,
@@ -637,7 +611,6 @@ window.PropertiesPanel = {
      */
     _sendAIEnhanceToChat: function () {
         if (!this._currentConfig || !this._currentConfig.data) {
-            console.warn('[MVP-054] No data available for AI enhance');
             return;
         }
 
@@ -654,15 +627,6 @@ window.PropertiesPanel = {
 
         // Also store globally for chat-streaming.js to access
         window.currentProgressToken = progressToken;
-
-        console.log('[MVP-054] Generated progress token:', progressToken);
-
-        // TODO: Remove debug prints for MVP-054 after issue is resolved
-        console.log('[MVP-054] _sendAIEnhanceToChat called:', {
-            nodeId: node.id,
-            nodeName: node.name,
-            nodeType: node.type
-        });
 
         // Build enhancement message based on node data
         let enhanceMessage = `DELIVERABLE ENHANCEMENT REQUEST\n\n`;
@@ -735,7 +699,6 @@ window.PropertiesPanel = {
         const chatForm = userInput ? userInput.closest('form') : null;
 
         if (!userInput || !chatForm) {
-            console.error('[MVP-054] Chat input not found');
             if (window.showNotification) {
                 window.showNotification('Chat interface not available', 'error');
             }
@@ -749,8 +712,6 @@ window.PropertiesPanel = {
         const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
         chatForm.dispatchEvent(submitEvent);
 
-        // TODO: Remove debug prints for MVP-054 after issue is resolved
-        console.log('[MVP-054] AI enhance message sent to chat:', enhanceMessage);
 
         // Show status indicator
         const statusBar = document.querySelector('.status-notification');
@@ -772,23 +733,15 @@ window.PropertiesPanel = {
      */
     applyAIEnhancement: function (enhancement) {
         if (!this._nodeBeingEnhanced) {
-            console.warn('[MVP-054] No node being enhanced');
             window.showNotification('No node to enhance', 'warning');
             return;
         }
 
         const node = this._nodeBeingEnhanced;
 
-        // TODO: Remove debug prints for MVP-054 after issue is resolved
-        console.log('[MVP-054] Applying AI enhancement:', {
-            nodeId: node.id,
-            enhancement: enhancement
-        });
-
         // Get the Alpine.js tree component
         const treeContainer = document.querySelector('[x-data*="deliverableTree"]');
         if (!treeContainer || !treeContainer._x_dataStack || !treeContainer._x_dataStack[0]) {
-            console.error('[MVP-054] Tree component not found');
             window.showNotification('Could not find deliverable tree', 'error');
             return;
         }
@@ -816,7 +769,6 @@ window.PropertiesPanel = {
 
         // Add suggested children if this is a folder and children were suggested
         if (node.type === 'folder' && enhancement.suggested_children && enhancement.suggested_children.length > 0) {
-            console.log('[MVP-054] Adding suggested children:', enhancement.suggested_children);
 
             // Find the parent node in the tree
             const parentNode = alpineData.findNodeById(node.id);
@@ -855,9 +807,7 @@ window.PropertiesPanel = {
 
         // Save the tree
         if (alpineData.onSave && typeof alpineData.onSave === 'function') {
-            console.log('[MVP-054] Starting save after AI enhancement');
             alpineData.onSave().then(async () => {
-                console.log('[MVP-054] Save completed, now reloading tree');
                 window.showNotification('AI enhancements applied successfully!', 'success');
 
                 // Reload the work item from server to get the fresh data with all enhancements
@@ -865,25 +815,19 @@ window.PropertiesPanel = {
                 const agencyId = window.getCurrentAgencyId();
                 const workItemCode = this._currentWorkItemCode || '';
 
-                console.log('[MVP-054] Reload params:', { agencyId, workItemCode, hasAPI: !!window.specificationAPI });
 
                 if (agencyId && workItemCode) {
                     try {
                         // Fetch fresh work item data from server
-                        console.log('[MVP-054] Fetching work items from server...');
                         const workItems = await window.specificationAPI.getWorkItems();
-                        console.log('[MVP-054] Fetched work items:', workItems.length);
 
                         // Work items are stored with 'code' field, so we search by code
                         const workItem = workItems.find(wi => wi.code === workItemCode);
-                        console.log('[MVP-054] Found work item:', !!workItem, workItem?.code, 'Children count:', workItem?.deliverables_structured?.length);
 
                         if (workItem && workItem.deliverables_structured) {
-                            console.log('[MVP-054] Deliverables count:', workItem.deliverables_structured.length);
 
                             // Reinitialize the tree with fresh data from server
                             if (typeof window.initDeliverableTreeBuilder === 'function') {
-                                console.log('[MVP-054] Reloading tree with fresh data from server');
                                 window.initDeliverableTreeBuilder(
                                     agencyId,
                                     workItemCode,
@@ -894,22 +838,17 @@ window.PropertiesPanel = {
                                 // Expand the parent node to show new children
                                 setTimeout(() => {
                                     const treeData = window.Alpine ? window.Alpine.$data(document.querySelector('[x-data*="deliverableTree"]')) : null;
-                                    console.log('[MVP-054] Tree data after reload:', !!treeData);
                                     if (treeData && node.type === 'folder' && enhancement.suggested_children && enhancement.suggested_children.length > 0) {
-                                        console.log('[MVP-054] Expanding parent node:', node.id);
                                         treeData.expandedNodes[node.id] = true;
                                         // Force reactivity
                                         treeData.nodes = [...treeData.nodes];
                                     }
                                 }, 100);
                             } else {
-                                console.error('[MVP-054] initDeliverableTreeBuilder function not found!');
                             }
                         } else {
-                            console.warn('[MVP-054] Work item not found or has no deliverables');
                         }
                     } catch (error) {
-                        console.error('[MVP-054] Error reloading work item:', error);
                         // Fallback to local update if server reload fails
                         if (alpineData.computeAllPaths) {
                             alpineData.computeAllPaths();
@@ -919,7 +858,6 @@ window.PropertiesPanel = {
                         }
                     }
                 } else {
-                    console.warn('[MVP-054] Missing agencyId or workItemCode for reload');
                 }
 
                 // Switch back to properties tab to show updated node
@@ -939,7 +877,6 @@ window.PropertiesPanel = {
                     }
                 }, 200);
             }).catch(error => {
-                console.error('[MVP-054] Error saving enhancements:', error);
                 window.showNotification('Failed to save enhancements', 'error');
             });
         } else {

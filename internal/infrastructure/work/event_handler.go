@@ -31,7 +31,6 @@ func (h *SyncEventHandler) Handle(ctx context.Context, event *events.Event) erro
 	// Convert event to SyncEventPayload
 	payload, err := h.convertEventToPayload(event)
 	if err != nil {
-		log.WithError(err).WithField("event_type", event.Type).Debug("Skipping non-sync event")
 		return nil // Not an error - just not a sync event
 	}
 

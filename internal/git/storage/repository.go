@@ -96,7 +96,6 @@ func (r *repository) StoreObject(ctx context.Context, obj *models.GitObject) err
 	if err != nil {
 		// Check if it's a duplicate key error (which is expected for same content)
 		if driver.IsConflict(err) {
-			r.logger.WithField("sha", obj.Key).Debug("Git object already exists (idempotent)")
 			return nil // Not an error - object already stored
 		}
 		return fmt.Errorf("failed to create git object: %w", err)
@@ -106,7 +105,6 @@ func (r *repository) StoreObject(ctx context.Context, obj *models.GitObject) err
 		"sha":     obj.Key,
 		"type":    obj.Type,
 		"repo_id": obj.RepoID,
-	}).Debug("Stored Git object")
 
 	return nil
 }
@@ -171,7 +169,6 @@ func (r *repository) StoreRef(ctx context.Context, ref *models.GitRef) error {
 		"type":    ref.Type,
 		"target":  ref.Target,
 		"repo_id": ref.RepoID,
-	}).Debug("Stored Git ref")
 
 	return nil
 }
@@ -226,7 +223,6 @@ func (r *repository) UpdateRef(ctx context.Context, ref *models.GitRef) error {
 	r.logger.WithFields(logrus.Fields{
 		"ref":    ref.Key,
 		"target": ref.Target,
-	}).Debug("Updated Git ref")
 
 	return nil
 }

@@ -65,8 +65,6 @@ function deliverableTree() {
         init() {
             // Watch for selectedNodeId changes and update properties panel
             this.$watch('selectedNodeId', (newNodeId) => {
-                // TODO: Remove debug prints for MVP-054 after issue is resolved
-                console.log('[MVP-054] deliverableTree: selectedNodeId changed:', {
                     newNodeId,
                     hasPropertiesPanel: !!window.PropertiesPanel,
                     hasShowMethod: !!(window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties)
@@ -75,8 +73,6 @@ function deliverableTree() {
                 if (newNodeId && window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties) {
                     const node = this.findNodeById(newNodeId);
 
-                    // TODO: Remove debug prints for MVP-054 after issue is resolved
-                    console.log('[MVP-054] deliverableTree: node found for properties:', {
                         nodeId: node ? node.id : null,
                         nodeName: node ? node.name : null,
                         nodeType: node ? node.type : null
@@ -863,13 +859,11 @@ function deliverableTree() {
         expandToNode(nodeId) {
             const node = this.findNodeById(nodeId);
             if (!node) {
-                console.warn('[MVP-054] expandToNode: Node not found:', nodeId);
                 return;
             }
 
             // Find path from root to this node
             const path = this.getNodePath(nodeId);
-            console.log('[MVP-054] Expanding path to node:', { nodeId, path });
 
             // Expand all folders in the path
             path.forEach(pathNodeId => {

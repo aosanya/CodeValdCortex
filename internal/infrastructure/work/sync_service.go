@@ -44,11 +44,6 @@ func (s *DefaultSyncService) HandleAgentEvent(ctx context.Context, event *SyncEv
 		return fmt.Errorf("event missing agent_id")
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id":   event.AgentID,
-		"event_type": event.EventType,
-		"event_name": event.EventName,
-	}).Debug("Handling agent event for sync")
 
 	// Get agent-issue link
 	link, err := s.linkRepo.GetByAgentID(ctx, event.AgentID)
@@ -109,7 +104,6 @@ func (s *DefaultSyncService) handleLifecycleEvent(ctx context.Context, link *Age
 	case "agent.lifecycle.stopped":
 		return s.postAgentStopped(ctx, link, event)
 	default:
-		log.WithField("event_name", event.EventName).Debug("Unhandled lifecycle event")
 		return nil
 	}
 }
@@ -128,7 +122,6 @@ func (s *DefaultSyncService) handleRunEvent(ctx context.Context, link *AgentIssu
 	case "run.execution.failed":
 		return s.postTaskFailed(ctx, link, event)
 	default:
-		log.WithField("event_name", event.EventName).Debug("Unhandled run event")
 		return nil
 	}
 }
@@ -141,7 +134,6 @@ func (s *DefaultSyncService) handleProgressEvent(ctx context.Context, link *Agen
 	case "agent.milestone.complete":
 		return s.handleMilestoneComplete(ctx, link, event)
 	default:
-		log.WithField("event_name", event.EventName).Debug("Unhandled progress event")
 		return nil
 	}
 }
@@ -350,12 +342,6 @@ func (s *DefaultSyncService) PostComment(ctx context.Context, link *AgentIssueLi
 		log.WithError(err).Warn("Failed to update link sync metadata")
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id":   link.AgentID,
-		"issue_id":   link.IssueID,
-		"template":   template,
-		"comment_id": commentID,
-	}).Debug("Posted comment to issue")
 
 	return nil
 }

@@ -25,7 +25,6 @@ function parseEnhancementJSON(messageText) {
 
                 // Verify it looks like an enhancement response
                 if (parsed.prompt_instructions !== undefined || parsed.description !== undefined) {
-                    console.log('[MVP-054] Found enhancement JSON in AI response:', parsed);
                     return parsed;
                 }
             } catch (e) {
@@ -105,17 +104,14 @@ function monitorChatForEnhancements() {
     // Use MutationObserver to watch for new messages
     const chatMessages = document.getElementById('chat-messages');
     if (!chatMessages) {
-        console.log('[MVP-054] Chat messages container not found, will retry');
         return;
     }
 
-    console.log('[MVP-054] Starting AI enhancement detector');
 
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    console.log('[MVP-054] Mutation detected:', {
                         nodeName: node.nodeName,
                         className: node.className,
                         hasNodeBeingEnhanced: !!window.PropertiesPanel._nodeBeingEnhanced
@@ -138,7 +134,6 @@ function monitorChatForEnhancements() {
                         for (const selector of possibleSelectors) {
                             const found = Array.from(node.querySelectorAll(selector));
                             if (found.length > 0) {
-                                console.log('[MVP-054] Found messages with selector:', selector, found.length);
                                 aiMessages.push(...found);
                                 break;
                             }
@@ -152,7 +147,6 @@ function monitorChatForEnhancements() {
                         node.classList.contains('assistant-message') ||
                         node.getAttribute('data-role') === 'assistant'
                     )) {
-                        console.log('[MVP-054] Node itself is AI message');
                         aiMessages.push(node);
                     }
 
@@ -163,7 +157,6 @@ function monitorChatForEnhancements() {
 
                         if (jsonDataDiv) {
                             messageText = jsonDataDiv.textContent || jsonDataDiv.innerText;
-                            console.log('[MVP-054] Found .json-data div, text length:', messageText.length);
                         } else {
                             // Fallback to full message content
                             const messageContent = aiMessage.querySelector('.message-text') ||
@@ -171,29 +164,23 @@ function monitorChatForEnhancements() {
                                 aiMessage.querySelector('.content') ||
                                 aiMessage;
                             messageText = messageContent.textContent || messageContent.innerText;
-                            console.log('[MVP-054] No .json-data div, using message content, text length:', messageText.length);
                         }
 
                         if (messageText) {
-                            console.log('[MVP-054] Checking message text (first 200 chars):', messageText.substring(0, 200));
 
                             const enhancement = parseEnhancementJSON(messageText);
 
                             if (enhancement) {
-                                console.log('[MVP-054] Enhancement JSON found!', {
                                     hasNodeBeingEnhanced: !!window.PropertiesPanel._nodeBeingEnhanced,
                                     nodeId: window.PropertiesPanel._nodeBeingEnhanced?.id,
                                     enhancementKeys: Object.keys(enhancement)
                                 });
 
                                 if (window.PropertiesPanel._nodeBeingEnhanced) {
-                                    console.log('[MVP-054] Adding apply button to message');
                                     addApplyEnhancementButton(aiMessage, enhancement);
                                 } else {
-                                    console.warn('[MVP-054] Enhancement found but no node being enhanced');
                                 }
                             } else {
-                                console.log('[MVP-054] No enhancement JSON found in message');
                             }
                         }
                     });
@@ -207,7 +194,6 @@ function monitorChatForEnhancements() {
         subtree: true
     });
 
-    console.log('[MVP-054] AI enhancement detector active');
 }
 
 // Start monitoring when DOM is ready

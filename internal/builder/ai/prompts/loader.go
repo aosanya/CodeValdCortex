@@ -2,7 +2,6 @@ package prompts
 
 import (
 	_ "embed"
-	"log"
 )
 
 // Work Items System Prompts
@@ -38,10 +37,3 @@ var (
 var (
 // Placeholder for future workflow-specific prompts
 )
-
-// TODO: Remove debug prints for MVP-054 after issue is resolved
-func init() {
-	log.Printf("[MVP-054] Prompts loaded - DeliverablesNodeEnhancementSystem: %d bytes", len(DeliverablesNodeEnhancementSystem))
-	log.Printf("[MVP-054] Prompts loaded - WorkItemsDynamicSystem: %d bytes", len(WorkItemsDynamicSystem))
-	log.Printf("[MVP-054] Prompts loaded - WorkItemsRefinementSystem: %d bytes", len(WorkItemsRefinementSystem))
-}

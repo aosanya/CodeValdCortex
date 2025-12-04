@@ -184,10 +184,6 @@ func (r *ArangoAgentIssueLinkRepository) UpdateStatus(ctx context.Context, agent
 		return fmt.Errorf("failed to update link status: %w", err)
 	}
 
-	log.WithFields(log.Fields{
-		"agent_id": agentID,
-		"status":   status,
-	}).Debug("Agent-issue link status updated")
 
 	return nil
 }
