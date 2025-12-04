@@ -65,18 +65,8 @@ function deliverableTree() {
         init() {
             // Watch for selectedNodeId changes and update properties panel
             this.$watch('selectedNodeId', (newNodeId) => {
-                    newNodeId,
-                    hasPropertiesPanel: !!window.PropertiesPanel,
-                    hasShowMethod: !!(window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties)
-                });
-
                 if (newNodeId && window.PropertiesPanel && window.PropertiesPanel.showDeliverableNodeProperties) {
                     const node = this.findNodeById(newNodeId);
-
-                        nodeId: node ? node.id : null,
-                        nodeName: node ? node.name : null,
-                        nodeType: node ? node.type : null
-                    });
 
                     if (node) {
                         window.PropertiesPanel.showDeliverableNodeProperties(node);

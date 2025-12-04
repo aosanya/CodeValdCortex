@@ -101,11 +101,6 @@ func (r *repository) StoreObject(ctx context.Context, obj *models.GitObject) err
 		return fmt.Errorf("failed to create git object: %w", err)
 	}
 
-	r.logger.WithFields(logrus.Fields{
-		"sha":     obj.Key,
-		"type":    obj.Type,
-		"repo_id": obj.RepoID,
-
 	return nil
 }
 
@@ -163,13 +158,6 @@ func (r *repository) StoreRef(ctx context.Context, ref *models.GitRef) error {
 		return fmt.Errorf("failed to create ref: %w", err)
 	}
 
-	r.logger.WithFields(logrus.Fields{
-		"key":     ref.Key,
-		"name":    ref.Name,
-		"type":    ref.Type,
-		"target":  ref.Target,
-		"repo_id": ref.RepoID,
-
 	return nil
 }
 
@@ -219,10 +207,6 @@ func (r *repository) UpdateRef(ctx context.Context, ref *models.GitRef) error {
 	if err != nil {
 		return fmt.Errorf("failed to update ref: %w", err)
 	}
-
-	r.logger.WithFields(logrus.Fields{
-		"ref":    ref.Key,
-		"target": ref.Target,
 
 	return nil
 }

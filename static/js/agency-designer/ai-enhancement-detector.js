@@ -112,11 +112,6 @@ function monitorChatForEnhancements() {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                        nodeName: node.nodeName,
-                        className: node.className,
-                        hasNodeBeingEnhanced: !!window.PropertiesPanel._nodeBeingEnhanced
-                    });
-
                     // Check if this is an AI message - collect into array
                     let aiMessages = [];
 
@@ -167,20 +162,12 @@ function monitorChatForEnhancements() {
                         }
 
                         if (messageText) {
-
                             const enhancement = parseEnhancementJSON(messageText);
 
                             if (enhancement) {
-                                    hasNodeBeingEnhanced: !!window.PropertiesPanel._nodeBeingEnhanced,
-                                    nodeId: window.PropertiesPanel._nodeBeingEnhanced?.id,
-                                    enhancementKeys: Object.keys(enhancement)
-                                });
-
                                 if (window.PropertiesPanel._nodeBeingEnhanced) {
                                     addApplyEnhancementButton(aiMessage, enhancement);
-                                } else {
                                 }
-                            } else {
                             }
                         }
                     });
@@ -193,7 +180,6 @@ function monitorChatForEnhancements() {
         childList: true,
         subtree: true
     });
-
 }
 
 // Start monitoring when DOM is ready
