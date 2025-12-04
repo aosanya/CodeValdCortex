@@ -460,8 +460,8 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                                     const beforeTag = remainingData.substring(0, openIndex);
 
                                     if (beforeTag) {
-                                        // Process the data before the tag
-                                        const cleaned = beforeTag.replace(/```(?:json)?/gi, '').replace(/\s+/g, ' ');
+                                        // Process the data before the tag - only remove code fences, keep JSON structure
+                                        const cleaned = beforeTag.replace(/```(?:json)?/gi, '');
                                         if (cleaned.trim()) {
                                             const looksLikeJson = /"name"|"description"|"prompt_instructions"|"suggested_children"|^\s*\{/.test(cleaned);
                                             if (looksLikeJson || jsonBuffer) {
@@ -487,7 +487,7 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                                     if (remainingData.length > maxTagLength) {
                                         // Process data except for last maxTagLength characters (might be partial tag)
                                         const safeData = remainingData.substring(0, remainingData.length - maxTagLength);
-                                        const cleaned = safeData.replace(/```(?:json)?/gi, '').replace(/\s+/g, ' ');
+                                        const cleaned = safeData.replace(/```(?:json)?/gi, '');
                                         if (cleaned.trim()) {
                                             const looksLikeJson = /"name"|"description"|"prompt_instructions"|"suggested_children"|^\s*\{/.test(cleaned);
                                             if (looksLikeJson || jsonBuffer) {
@@ -525,10 +525,27 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
             }
         }
 
-        // If we accumulated a jsonBuffer, try to parse it as the final result
-        if (!finalResult && jsonBuffer) {
+        // If we accumulated a jsonBuffer, try to parse it as the enhancement data
+        // This may contain the actual deliverable enhancement JSON
+        let enhancementData = null;
+        if (jsonBuffer) {
             try {
-                finalResult = JSON.parse(jsonBuffer);
+                enhancementData = JSON.parse(jsonBuffer);
+                console.log('[MVP-054] Parsed jsonBuffer into enhancement data:', enhancementData);
+
+                // If we have enhancement data with deliverable fields, merge or prefer it over finalResult
+                if (enhancementData && (enhancementData.suggested_children !== undefined || enhancementData.prompt_instructions !== undefined)) {
+                    // This is the actual enhancement JSON - merge it with finalResult
+                    if (finalResult) {
+                        // Keep conversation_id and was_changed from finalResult, but add enhancement fields
+                        finalResult = { ...finalResult, ...enhancementData };
+                        console.log('[MVP-054] Merged enhancement data with finalResult');
+                    } else {
+                        // No finalResult from complete event, use enhancement data directly
+                        finalResult = enhancementData;
+                        console.log('[MVP-054] Using enhancement data as finalResult');
+                    }
+                }
             } catch (e) {
                 console.debug('[MVP-054] failed to parse jsonBuffer into JSON:', e.message);
             }
@@ -566,38 +583,29 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
 
             // Refresh work items list if work items were changed
             if (finalResult.was_changed && context === 'work-items') {
-                // Check if this was a deliverable enhancement (has suggested_children or prompt_instructions)
-                const isDeliverableEnhancement = finalResult.suggested_children !== undefined ||
-                    finalResult.prompt_instructions !== undefined;
+                console.log('[MVP-054] Work items changed, reloading work item editor...');
 
-                if (isDeliverableEnhancement) {
-                    console.log('[MVP-054] Deliverable enhancement detected, reloading work item editor...');
+                // Get the work item key from editor state
+                const workItemKey = window.workItemEditorState?.workItemKey;
 
-                    // Get the work item key from editor state
-                    const workItemKey = window.workItemEditorState?.workItemKey;
+                if (workItemKey && window.loadWorkItemData) {
+                    console.log('[MVP-054] Reloading work item:', workItemKey);
 
-                    if (workItemKey && window.loadWorkItemData) {
-                        console.log('[MVP-054] Reloading work item:', workItemKey);
-
-                        window.loadWorkItemData(workItemKey)
-                            .then(() => {
-                                console.log('[MVP-054] Work item reloaded successfully');
-                                if (window.showNotification) {
-                                    window.showNotification('Deliverable tree updated', 'success');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('[MVP-054] Failed to reload work item:', error);
-                            });
-                    } else {
-                        console.warn('[MVP-054] Cannot reload - missing dependencies:', {
-                            workItemKey: !!workItemKey,
-                            loadWorkItemData: !!window.loadWorkItemData
+                    window.loadWorkItemData(workItemKey)
+                        .then(() => {
+                            console.log('[MVP-054] Work item reloaded successfully');
+                            if (window.showNotification) {
+                                window.showNotification('Work item updated', 'success');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('[MVP-054] Failed to reload work item:', error);
                         });
-                    }
-                } else if (window.loadWorkItems) {
-                    // Regular work items list update (not deliverable enhancement)
-                    window.loadWorkItems();
+                } else {
+                    console.warn('[MVP-054] Cannot reload - missing dependencies:', {
+                        workItemKey: !!workItemKey,
+                        loadWorkItemData: !!window.loadWorkItemData
+                    });
                 }
             }
 

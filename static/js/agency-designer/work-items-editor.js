@@ -1,12 +1,15 @@
 // Work Items Editor
 // Handles work item editor UI, form management, and data persistence
 
-// Work item editor state management
-let workItemEditorState = {
+// Work item editor state management - exposed to window for chat streaming reload logic
+window.workItemEditorState = {
     mode: 'add', // 'add' or 'edit'
     workItemKey: null,
     originalData: {}
 };
+
+// Convenience alias for internal use
+const workItemEditorState = window.workItemEditorState;
 
 /**
  * Load goals for the checkbox list in editor
