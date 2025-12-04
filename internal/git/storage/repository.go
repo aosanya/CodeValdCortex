@@ -96,17 +96,10 @@ func (r *repository) StoreObject(ctx context.Context, obj *models.GitObject) err
 	if err != nil {
 		// Check if it's a duplicate key error (which is expected for same content)
 		if driver.IsConflict(err) {
-			r.logger.WithField("sha", obj.Key).Debug("Git object already exists (idempotent)")
 			return nil // Not an error - object already stored
 		}
 		return fmt.Errorf("failed to create git object: %w", err)
 	}
-
-	r.logger.WithFields(logrus.Fields{
-		"sha":     obj.Key,
-		"type":    obj.Type,
-		"repo_id": obj.RepoID,
-	}).Debug("Stored Git object")
 
 	return nil
 }
@@ -121,7 +114,7 @@ func (r *repository) GetObject(ctx context.Context, sha string) (*models.GitObje
 	var obj models.GitObject
 	_, err = collection.ReadDocument(ctx, sha, &obj)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("git object not found: %s", sha)
 		}
 		return nil, fmt.Errorf("failed to read git object: %w", err)
@@ -164,14 +157,6 @@ func (r *repository) StoreRef(ctx context.Context, ref *models.GitRef) error {
 	if err != nil {
 		return fmt.Errorf("failed to create ref: %w", err)
 	}
-
-	r.logger.WithFields(logrus.Fields{
-		"key":     ref.Key,
-		"name":    ref.Name,
-		"type":    ref.Type,
-		"target":  ref.Target,
-		"repo_id": ref.RepoID,
-	}).Debug("Stored Git ref")
 
 	return nil
 }
@@ -222,11 +207,6 @@ func (r *repository) UpdateRef(ctx context.Context, ref *models.GitRef) error {
 	if err != nil {
 		return fmt.Errorf("failed to update ref: %w", err)
 	}
-
-	r.logger.WithFields(logrus.Fields{
-		"ref":    ref.Key,
-		"target": ref.Target,
-	}).Debug("Updated Git ref")
 
 	return nil
 }
@@ -298,7 +278,7 @@ func (r *repository) GetRepository(ctx context.Context, instanceID string) (*mod
 	var repo models.Repository
 	_, err = collection.ReadDocument(ctx, instanceID, &repo)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("repository not found for instance: %s", instanceID)
 		}
 		return nil, fmt.Errorf("failed to read repository: %w", err)

@@ -407,15 +407,6 @@ func (b *WorkflowsBuilder) RefineWorkflowsStream(ctx context.Context, req *build
 		chunkBytes := len(chunk)
 		totalBytes += chunkBytes
 
-		// Log every 10 chunks
-		if chunkCount%10 == 0 {
-			b.logger.WithFields(logrus.Fields{
-				"chunk_number": chunkCount,
-				"chunk_bytes":  chunkBytes,
-				"total_bytes":  totalBytes,
-			}).Debug("Streaming workflow chunk received")
-		}
-
 		// Accumulate content for final parsing
 		contentBuilder.WriteString(chunk)
 

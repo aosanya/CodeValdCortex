@@ -368,12 +368,14 @@ func (h *AgencyHandler) UpdateWorkItems(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		h.logger.Errorf("Error binding JSON in UpdateWorkItems: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
 	}
 
 	spec, err := h.service.UpdateSpecificationWorkItems(c.Request.Context(), id, req.WorkItems, req.UpdatedBy)
 	if err != nil {
+		h.logger.Errorf("Error updating work items: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

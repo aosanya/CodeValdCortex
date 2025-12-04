@@ -15,7 +15,7 @@ func getBoolString(b bool) string {
 
 // ChatPanel renders the AI chat panel for the agency designer
 templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationContext) {
-	<aside class="chat-panel">
+	<aside class="chat-panel" x-data="{ activeTab: 'chat' }">
 		<header class="chat-header">
 			<div class="chat-header-content">
 				<span class="icon is-medium has-text-primary">
@@ -28,20 +28,64 @@ templ ChatPanel(currentAgency *models.Agency, conversation *ai.ConversationConte
 			</div>
 		</header>
 		
-		<div class="chat-messages-container" id="chat-messages">
-			if conversation != nil && len(conversation.Messages) > 0 {
-				@ChatMessages(conversation.Messages)
-			} else {
-				@WelcomeMessage(currentAgency.Name)
-		}
-	</div>
-	
-	<!-- Context Panel (between messages and input) -->
-	<div class="chat-context-section">
-		@ContextPanel()
-	</div>		<!-- Chat Input (Independent) -->
-		<div class="chat-input-container">
-			@ChatInput(currentAgency.ID, conversation)
+		<!-- Tabs -->
+		<div class="tabs is-fullwidth is-small">
+			<ul>
+				<li :class="activeTab === 'chat' ? 'is-active' : ''">
+					<a @click.prevent="activeTab = 'chat'">
+						<span class="icon is-small">
+							<i class="fas fa-comments"></i>
+						</span>
+						<span>Chat</span>
+					</a>
+				</li>
+				<li :class="activeTab === 'properties' ? 'is-active' : ''">
+					<a @click.prevent="activeTab = 'properties'">
+						<span class="icon is-small">
+							<i class="fas fa-sliders"></i>
+						</span>
+						<span>Properties</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+		
+		<!-- Chat Tab Content -->
+		<div x-show="activeTab === 'chat'" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+			<div class="chat-messages-container" id="chat-messages">
+				if conversation != nil && len(conversation.Messages) > 0 {
+					@ChatMessages(conversation.Messages)
+				} else {
+					@WelcomeMessage(currentAgency.Name)
+				}
+			</div>
+			
+			<!-- Context Panel (between messages and input) -->
+			<div class="chat-context-section">
+				@ContextPanel()
+			</div>
+			
+			<!-- Chat Input (Independent) -->
+			<div class="chat-input-container">
+				@ChatInput(currentAgency.ID, conversation)
+			</div>
+		</div>
+		
+		<!-- Properties Tab Content -->
+		<div x-show="activeTab === 'properties'" style="overflow-y: auto; flex: 1; padding: 1rem;">
+			<div id="properties-panel-content">
+				<!-- Properties will be dynamically loaded here when editing -->
+				<div class="notification is-light has-text-centered">
+					<p class="has-text-grey">
+						<span class="icon is-large">
+							<i class="fas fa-mouse-pointer fa-2x"></i>
+						</span>
+					</p>
+					<p class="has-text-grey mt-3">
+						Select an item to view its properties
+					</p>
+				</div>
+			</div>
 		</div>
 	</aside>
 }
@@ -61,12 +105,14 @@ templ WelcomeMessage(agencyName string) {
 // ChatMessages renders the conversation history
 templ ChatMessages(messages []ai.Message) {
 	for _, msg := range messages {
-		if msg.Role == "user" {
+		switch msg.Role {
+		case "user":
 			@UserMessage(msg)
-		} else if msg.Role == "assistant" {
+		case "assistant":
 			@AIMessage(msg)
+		default:
+			// Skip system messages and other types - they should not be displayed to users
 		}
-		// Skip system messages - they should not be displayed to users
 	}
 }
 

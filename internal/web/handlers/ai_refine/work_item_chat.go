@@ -34,8 +34,9 @@ func (h *Handler) ProcessWorkItemsChatRequestStreaming(c *gin.Context) {
 	}
 
 	req, ok := dynamicReq.(struct {
-		UserMessage  string   `json:"user_message"`
-		WorkItemKeys []string `json:"work_item_keys"`
+		UserMessage  string                   `json:"user_message"`
+		WorkItemKeys []string                 `json:"work_item_keys"`
+		Contexts     []map[string]interface{} `json:"contexts,omitempty"` // Optional contexts
 	})
 	if !ok {
 		h.logger.Error("Failed to cast dynamic_request to expected type")
@@ -54,7 +55,36 @@ func (h *Handler) ProcessWorkItemsChatRequestStreaming(c *gin.Context) {
 		"agency_id":      agencyID,
 		"user_message":   userMessage,
 		"work_item_keys": req.WorkItemKeys,
+		"contexts_count": len(req.Contexts),
 	}).Info("Processing streaming chat-based work item request")
+
+	// Check if this is a deliverable enhancement request by examining contexts
+	var deliverableContext map[string]interface{}
+	for _, ctx := range req.Contexts {
+		if ctxType, ok := ctx["type"].(string); ok && ctxType == "Deliverable Node" {
+			deliverableContext = ctx
+			break
+		}
+	}
+
+	if deliverableContext != nil {
+		// Extract metadata from the context object
+		metadata := make(map[string]interface{})
+		if nodeName, ok := deliverableContext["nodeName"].(string); ok {
+			metadata["nodeName"] = nodeName
+		}
+		if nodeType, ok := deliverableContext["nodeType"].(string); ok {
+			metadata["nodeType"] = nodeType
+		}
+		if nodeId, ok := deliverableContext["nodeId"].(string); ok {
+			metadata["nodeId"] = nodeId
+		}
+
+		h.ProcessDeliverableEnhancementStreaming(c, agencyID, userMessage, metadata)
+		return
+	}
+
+	h.logger.Info("ℹ️ No deliverable context found - proceeding with normal work items processing")
 
 	// Fetch agency and specification
 	ag, spec, err := h.fetchAgencyAndSpec(c, agencyID)
@@ -241,15 +271,15 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 				h.logger.WithFields(logrus.Fields{
 					"key":       workItem.Key,
 					"old_title": workItem.Title,
-					"new_title": refined.RefinedTitle,
+					"new_title": refined.Title,
 					"old_code":  workItem.Code,
 					"new_code":  refined.SuggestedCode,
 				}).Info("✏️ Refining work item")
 
 				updatedWorkItem := *workItem
-				updatedWorkItem.Title = refined.RefinedTitle
-				updatedWorkItem.Description = refined.RefinedDescription
-				updatedWorkItem.Deliverables = refined.RefinedDeliverables
+				updatedWorkItem.Title = refined.Title
+				updatedWorkItem.Description = refined.Description
+				updatedWorkItem.DeliverablesStructured = refined.DeliverablesStructured
 				if refined.SuggestedCode != "" {
 					updatedWorkItem.Code = refined.SuggestedCode
 				}
@@ -281,12 +311,12 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 			}).Info("🆕 Adding generated work item")
 
 			newWorkItem := models.WorkItem{
-				Code:         gwi.SuggestedCode,
-				Title:        gwi.Title,
-				Description:  gwi.Description,
-				Deliverables: gwi.Deliverables,
-				GoalKeys:     gwi.GoalKeys,
-				Tags:         gwi.SuggestedTags,
+				Code:                   gwi.SuggestedCode,
+				Title:                  gwi.Title,
+				Description:            gwi.Description,
+				DeliverablesStructured: gwi.DeliverablesStructured,
+				GoalKeys:               gwi.GoalKeys,
+				Tags:                   gwi.SuggestedTags,
 			}
 
 			updatedWorkItems = append(updatedWorkItems, newWorkItem)
@@ -326,12 +356,12 @@ func (h *Handler) applyAndSaveWorkItems(ctx context.Context, agencyID string, re
 				}).Info("🔄 Adding consolidated work item")
 
 				newWorkItem := models.WorkItem{
-					Code:         cwi.SuggestedCode,
-					Title:        cwi.Title,
-					Description:  cwi.Description,
-					Deliverables: cwi.Deliverables,
-					GoalKeys:     cwi.GoalKeys,
-					Tags:         cwi.SuggestedTags,
+					Code:                   cwi.SuggestedCode,
+					Title:                  cwi.Title,
+					Description:            cwi.Description,
+					DeliverablesStructured: cwi.DeliverablesStructured,
+					GoalKeys:               cwi.GoalKeys,
+					Tags:                   cwi.SuggestedTags,
 				}
 
 				updatedWorkItems = append(updatedWorkItems, newWorkItem)

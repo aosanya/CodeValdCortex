@@ -48,7 +48,6 @@ func (h *AIPolicyWebHandler) ShowPolicyWizard(c *gin.Context) {
 		// Convert models.Policy to policy.AIPolicy for the wizard
 		existingPolicy, err = convertModelPolicyToAIPolicy(spec.AIPolicy)
 		if err != nil {
-			h.logger.WithError(err).Debug("Failed to convert policy, will create new")
 			existingPolicy = nil
 		}
 	}
@@ -69,7 +68,6 @@ func (h *AIPolicyWebHandler) GetPolicy(c *gin.Context) {
 	// Get specification which contains the policy
 	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Debug("Failed to get specification")
 		c.JSON(http.StatusNotFound, gin.H{"error": "Specification not found"})
 		return
 	}
@@ -89,13 +87,11 @@ func (h *AIPolicyWebHandler) GetPolicySummary(c *gin.Context) {
 	// Get specification which contains the policy
 	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
-		h.logger.WithError(err).Debug("Failed to get specification")
 		c.JSON(http.StatusNotFound, gin.H{"error": "Specification not found"})
 		return
 	}
 
 	if spec.AIPolicy == nil {
-		h.logger.Debug("No policy configured yet")
 		c.JSON(http.StatusNotFound, gin.H{"error": "Policy not found"})
 		return
 	}

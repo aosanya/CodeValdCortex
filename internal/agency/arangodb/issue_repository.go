@@ -175,7 +175,7 @@ func (r *IssueRepository) GetByKey(ctx context.Context, agencyID, key string) (*
 
 	_, err := r.collection.ReadDocument(ctx, key, &issue)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("issue not found")
 		}
 		return nil, fmt.Errorf("failed to read issue: %w", err)

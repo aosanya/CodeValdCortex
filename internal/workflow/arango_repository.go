@@ -180,7 +180,7 @@ func (r *ArangoRepository) GetByID(ctx context.Context, id string) (*models.Work
 	var workflow models.Workflow
 	_, err = col.ReadDocument(ctx, id, &workflow)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("workflow not found: %s", id)
 		}
 		return nil, fmt.Errorf("failed to read workflow: %w", err)
@@ -240,7 +240,7 @@ func (r *ArangoRepository) Update(ctx context.Context, workflow *models.Workflow
 
 	_, err = col.UpdateDocument(ctx, workflow.ID, workflow)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("workflow not found: %s", workflow.ID)
 		}
 		return fmt.Errorf("failed to update workflow: %w", err)
@@ -263,7 +263,7 @@ func (r *ArangoRepository) Delete(ctx context.Context, id string) error {
 
 	_, err = col.RemoveDocument(ctx, id)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("workflow not found: %s", id)
 		}
 		return fmt.Errorf("failed to delete workflow: %w", err)

@@ -1,0 +1,83 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+/* ===================================
+   LAYOUT OVERRIDES - NAVBAR VISIBILITY
+   =================================== */
+
+/* Prevent horizontal scrolling but allow vertical */
+html,
+body {
+    overflow-x: hidden;
+    overflow-y: visible !important;
+    height: auto !important;
+}
+
+/* Ensure navbar is always visible on top */
+.navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 50 !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure section and container don't interfere with navbar */
+.section {
+    overflow: visible !important;
+
+    &:has(.vscode-designer-container) {
+        padding: 0 !important;
+    }
+}
+
+.container {
+    overflow: visible !important;
+
+    &:has(.vscode-designer-container) {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+}
+
+/* ===================================
+   MAIN CONTAINER - CSS GRID LAYOUT
+   =================================== */
+
+.vscode-designer-container {
+    height: calc(100vh - 52px);
+    /* Subtract navbar height (52px) */
+    background: var(--vscode-bg);
+    color: var(--vscode-text);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "main"
+        "status";
+    overflow: hidden;
+
+    /* Bulma Columns Override for Full Height */
+    .columns {
+        margin: 0;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .column {
+        padding: 0;
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/* Main Content Area */
+.vscode-main-content {
+    grid-area: main;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    height: 100%;
+}

@@ -1,0 +1,26 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+/* ===================================
+   AGENT STATUS COLORS
+   =================================== */
+
+.agent-status-idle {
+    background-color: #fbbf24;
+}
+
+.agent-status-running {
+    background-color: #22c55e;
+}
+
+.agent-status-paused {
+    background-color: #f97316;
+}
+
+.agent-status-stopped {
+    background-color: #ef4444;
+}
+
+.agent-status-error {
+    background-color: #dc2626;
+}

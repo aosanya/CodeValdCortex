@@ -1,0 +1,366 @@
+/* Theme System for CodeValdCortex */
+
+@use 'sass:map';
+@use 'variables' as *;
+@use 'mixins' as *;
+
+/* ===================================
+   THEME DEFINITIONS (SCSS Maps)
+   =================================== */
+
+// Define all theme colors in one place
+$themes: (
+    'default': (navbar-bg: #ffffff,
+        navbar-text: #363636,
+        primary: #3273dc,
+        primary-hover: #2366d1,
+        text: #4a4a4a,
+        text-light: #7a7a7a,
+        background: #ffffff,
+        background-secondary: #f5f5f5,
+        border: #dbdbdb,
+        shadow: rgba(10, 10, 10, 0.1),
+        card-bg: #ffffff,
+        success: #48c774,
+        warning: #ffdd57,
+        danger: #f14668,
+        info: #3298dc,
+        status-bar-bg: #007acc,
+        status-bar-border: #005a9e,
+        status-bar-text: #ffffff),
+    'midnight-coral': (navbar-bg: #1a1f36,
+        navbar-text: #ffffff,
+        primary: #FF6B6B,
+        primary-hover: #ff5252,
+        text: #2d3748,
+        text-light: #4a5568,
+        background: #f7fafc,
+        background-secondary: #edf2f7,
+        border: #e2e8f0,
+        shadow: rgba(0, 0, 0, 0.1),
+        card-bg: #ffffff,
+        success: #48bb78,
+        warning: #ed8936,
+        danger: #f56565,
+        info: #4299e1,
+        status-bar-bg: #FF6B6B,
+        status-bar-border: #ff5252,
+        status-bar-text: #ffffff),
+    'slate-purple': (navbar-bg: #0f172a,
+        navbar-text: #ffffff,
+        primary: #8b5cf6,
+        primary-hover: #7c3aed,
+        text: #1e293b,
+        text-light: #475569,
+        background: #f8fafc,
+        background-secondary: #f1f5f9,
+        border: #e0e7ff,
+        shadow: rgba(0, 0, 0, 0.1),
+        card-bg: #ffffff,
+        success: #22c55e,
+        warning: #f59e0b,
+        danger: #ef4444,
+        info: #3b82f6,
+        status-bar-bg: #8b5cf6,
+        status-bar-border: #7c3aed,
+        status-bar-text: #ffffff),
+    'charcoal-emerald': (navbar-bg: #1c1c1c,
+        navbar-text: #ffffff,
+        primary: #10b981,
+        primary-hover: #059669,
+        text: #1f2937,
+        text-light: #4b5563,
+        background: #f9fafb,
+        background-secondary: #f3f4f6,
+        border: #d1fae5,
+        shadow: rgba(0, 0, 0, 0.1),
+        card-bg: #ffffff,
+        success: #10b981,
+        warning: #f59e0b,
+        danger: #ef4444,
+        info: #06b6d4,
+        status-bar-bg: #10b981,
+        status-bar-border: #059669,
+        status-bar-text: #ffffff),
+    'navy-orange': (navbar-bg: #0a1929,
+        navbar-text: #ffffff,
+        primary: #f97316,
+        primary-hover: #ea580c,
+        text: #1e293b,
+        text-light: #475569,
+        background: #f8fafc,
+        background-secondary: #f1f5f9,
+        border: #ffedd5,
+        shadow: rgba(0, 0, 0, 0.1),
+        card-bg: #ffffff,
+        success: #22c55e,
+        warning: #f59e0b,
+        danger: #ef4444,
+        info: #0ea5e9,
+        status-bar-bg: #f97316,
+        status-bar-border: #ea580c,
+        status-bar-text: #ffffff),
+    'obsidian-cyan': (navbar-bg: #18181b,
+        navbar-text: #ffffff,
+        primary: #06b6d4,
+        primary-hover: #0891b2,
+        text: #27272a,
+        text-light: #52525b,
+        background: #fafafa,
+        background-secondary: #f4f4f5,
+        border: #cffafe,
+        shadow: rgba(0, 0, 0, 0.1),
+        card-bg: #ffffff,
+        success: #22c55e,
+        warning: #f59e0b,
+        danger: #ef4444,
+        info: #06b6d4,
+        status-bar-bg: #06b6d4,
+        status-bar-border: #0891b2,
+        status-bar-text: #ffffff),
+    'dark': (navbar-bg: #1e1e1e,
+        navbar-text: #ffffff,
+        primary: #4dabf7,
+        primary-hover: #339af0,
+        text: #e9ecef,
+        text-light: #adb5bd,
+        background: #121212,
+        background-secondary: #1e1e1e,
+        border: #333333,
+        shadow: rgba(0, 0, 0, 0.3),
+        card-bg: #1e1e1e,
+        success: #51cf66,
+        warning: #ffd43b,
+        danger: #ff6b6b,
+        info: #4dabf7,
+        status-bar-bg: #4dabf7,
+        status-bar-border: #339af0,
+        status-bar-text: #ffffff)
+);
+
+/* ===================================
+   GENERATE CSS CUSTOM PROPERTIES
+   =================================== */
+
+// Default theme (root)
+:root {
+    @each $property, $value in map.get($themes, 'default') {
+        --theme-#{$property}: #{$value};
+    }
+}
+
+// Generate theme-specific custom properties
+@each $theme-name, $theme-colors in $themes {
+    @if $theme-name !='default' {
+        [data-theme="#{$theme-name}"] {
+            @each $property, $value in $theme-colors {
+                --theme-#{$property}: #{$value};
+            }
+        }
+    }
+}
+
+/* ===================================
+   APPLY THEME VARIABLES TO ELEMENTS
+   =================================== */
+
+// Body
+body {
+    background-color: var(--theme-background);
+    color: var(--theme-text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// Navbar
+.navbar {
+    background-color: var(--theme-navbar-bg) !important;
+    border-bottom: 1px solid var(--theme-border);
+    box-shadow: 0 2px 4px var(--theme-shadow);
+
+    .navbar-item,
+    .navbar-link {
+        color: var(--theme-navbar-text) !important;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: var(--theme-navbar-text) !important;
+        }
+    }
+}
+
+// Navbar start items (main navigation)
+.navbar-start .navbar-item {
+    color: var(--theme-navbar-text) !important;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: var(--theme-navbar-text) !important;
+    }
+}
+
+// Navbar menu and brand
+.navbar-menu,
+.navbar-brand {
+    .navbar-item {
+        color: var(--theme-navbar-text) !important;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: var(--theme-navbar-text) !important;
+        }
+    }
+}
+
+// Buttons
+.button {
+    &.is-primary {
+        background-color: var(--theme-primary) !important;
+        border-color: var(--theme-primary) !important;
+
+        &:hover {
+            background-color: var(--theme-primary-hover) !important;
+            border-color: var(--theme-primary-hover) !important;
+        }
+    }
+
+    &.is-light {
+        background-color: var(--theme-background-secondary) !important;
+        border-color: var(--theme-border) !important;
+        color: var(--theme-text) !important;
+
+        &:hover {
+            background-color: var(--theme-border) !important;
+        }
+    }
+}
+
+// Cards
+.card {
+    background-color: var(--theme-card-bg) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: 0 2px 4px var(--theme-shadow) !important;
+}
+
+.card-header,
+.card-footer {
+    background-color: var(--theme-background-secondary) !important;
+    border-color: var(--theme-border) !important;
+}
+
+// Form elements
+.input,
+.textarea,
+.select select {
+    background-color: var(--theme-card-bg) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+
+    &:focus {
+        border-color: var(--theme-primary) !important;
+    }
+}
+
+// Modal
+.modal-card {
+    background-color: var(--theme-card-bg) !important;
+}
+
+.modal-card-head,
+.modal-card-foot {
+    background-color: var(--theme-background-secondary) !important;
+    border-color: var(--theme-border) !important;
+}
+
+// Tables
+.table {
+    background-color: var(--theme-card-bg) !important;
+    color: var(--theme-text) !important;
+
+    th {
+        background-color: var(--theme-background-secondary) !important;
+        color: var(--theme-text) !important;
+        border-color: var(--theme-border) !important;
+    }
+
+    td {
+        border-color: var(--theme-border) !important;
+    }
+
+    tr:hover {
+        background-color: var(--theme-background-secondary) !important;
+    }
+}
+
+// Tags
+.tag {
+    background-color: var(--theme-background-secondary) !important;
+    color: var(--theme-text) !important;
+
+    &.is-primary {
+        background-color: var(--theme-primary) !important;
+        color: white !important;
+    }
+}
+
+// Notifications
+.notification {
+    background-color: var(--theme-card-bg) !important;
+    color: var(--theme-text) !important;
+
+    // Override text color for colored notifications
+    &.is-info,
+    &.is-success,
+    &.is-warning,
+    &.is-danger,
+    &.is-primary {
+        color: white !important;
+    }
+
+    &.is-success {
+        background-color: #2d8659 !important; // Darker green
+    }
+
+    &.is-warning {
+        background-color: #d68b0d !important; // Darker orange
+        color: #ffffff !important;
+    }
+
+    &.is-danger {
+        background-color: #c53030 !important; // Darker red
+    }
+
+    &.is-info {
+        background-color: #2563a8 !important; // Darker blue
+    }
+}
+
+// Dropdown
+.navbar-dropdown {
+    background-color: var(--theme-card-bg) !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: 0 2px 8px var(--theme-shadow) !important;
+
+    .navbar-item {
+        color: var(--theme-text) !important;
+        background-color: transparent !important;
+
+        &:hover {
+            background-color: var(--theme-background-secondary) !important;
+            color: var(--theme-text) !important;
+        }
+
+        &.is-active {
+            background-color: var(--theme-primary) !important;
+            color: white !important;
+        }
+    }
+
+    a.navbar-item {
+        color: var(--theme-text) !important;
+
+        &:hover {
+            background-color: var(--theme-background-secondary) !important;
+            color: var(--theme-text) !important;
+        }
+    }
+}

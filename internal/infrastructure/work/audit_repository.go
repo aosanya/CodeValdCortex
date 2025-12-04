@@ -97,13 +97,6 @@ func (r *ArangoSyncAuditRepository) Create(ctx context.Context, record *SyncAudi
 	// Set the Key from metadata
 	record.Key = meta.Key
 
-	log.WithFields(log.Fields{
-		"agent_id":    record.AgentID,
-		"event_type":  record.EventType,
-		"sync_action": record.SyncAction,
-		"success":     record.Success,
-	}).Debug("Sync audit record created")
-
 	return nil
 }
 

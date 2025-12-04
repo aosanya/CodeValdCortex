@@ -93,6 +93,13 @@ dist/
 build/
 out/
 
+# Compiled CSS from SCSS (auto-generated, don't commit)
+static/css/*.css
+static/css/*.css.map
+!static/css/bulma.min.css
+!static/css/mapbox-gl.css
+!static/css/maplibre-gl.css
+
 # Database
 *.sqlite
 *.db

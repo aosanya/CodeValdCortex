@@ -1,0 +1,54 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+/* ===================================
+   HTMX LOADING & STATES
+   =================================== */
+
+/* HTMX Loading Indicator */
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request {
+    .htmx-indicator {
+        display: inline-block;
+    }
+
+    &.htmx-indicator {
+        display: inline-block;
+    }
+
+    #htmx-progress {
+        width: 80%;
+    }
+}
+
+/* Loading states */
+.htmx-swapping {
+    opacity: 0.5;
+    transition: opacity 200ms ease-in;
+}
+
+.htmx-settling {
+    opacity: 1;
+    transition: opacity 200ms ease-out;
+
+    #htmx-progress {
+        width: 100%;
+        opacity: 0;
+        transition: width 100ms ease, opacity 100ms ease 200ms;
+    }
+}
+
+/* HTMX Request progress bar */
+#htmx-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    transition: width 300ms ease;
+    z-index: 9999;
+}

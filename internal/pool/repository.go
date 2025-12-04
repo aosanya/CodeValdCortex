@@ -262,7 +262,7 @@ func (r *Repository) GetPool(ctx context.Context, poolID string) (*PoolDocument,
 	var doc PoolDocument
 	_, err := r.poolsCollection.ReadDocument(ctx, poolID, &doc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("pool not found: %s", poolID)
 		}
 		return nil, fmt.Errorf("failed to get pool: %w", err)
@@ -309,7 +309,7 @@ func (r *Repository) ListPools(ctx context.Context, status PoolStatus) ([]*PoolD
 func (r *Repository) DeletePool(ctx context.Context, poolID string) error {
 	// Delete pool document
 	_, err := r.poolsCollection.RemoveDocument(ctx, poolID)
-	if err != nil && !driver.IsNotFound(err) {
+	if err != nil && !driver.IsNotFoundGeneral(err) {
 		return fmt.Errorf("failed to delete pool: %w", err)
 	}
 
@@ -389,7 +389,7 @@ func (r *Repository) RemoveMembership(ctx context.Context, poolID, agentID strin
 	membershipKey := fmt.Sprintf("%s_%s", poolID, agentID)
 
 	_, err := r.membershipsCollection.RemoveDocument(ctx, membershipKey)
-	if err != nil && !driver.IsNotFound(err) {
+	if err != nil && !driver.IsNotFoundGeneral(err) {
 		return fmt.Errorf("failed to remove membership: %w", err)
 	}
 

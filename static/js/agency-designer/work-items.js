@@ -3,12 +3,7 @@
 
 // Uses global functions: getCurrentAgencyId, showNotification, scrollToBottom, loadEntityList, etc., specificationAPI
 
-// Work item editor state management
-let workItemEditorState = {
-    mode: 'add', // 'add' or 'edit'
-    workItemKey: null,
-    originalData: {}
-};
+// Work item editor state management is in work-items-editor.js (shared variable)
 
 // Load goals for the checkbox list
 async function loadGoalsForSelection() {
@@ -74,6 +69,11 @@ window.showWorkItemEditor = async function (mode, workItemKey = null) {
 
     if (mode === 'add') {
         clearWorkItemForm();
+        // Initialize empty tree builder with save callback
+        const agencyId = window.getCurrentAgencyId();
+        if (typeof window.initDeliverableTreeBuilder === 'function') {
+            window.initDeliverableTreeBuilder(agencyId, '', [], window.saveWorkItemFromEditor);
+        }
     } else if (mode === 'edit') {
         await loadWorkItemData(workItemKey);
     }
@@ -137,6 +137,21 @@ function populateWorkItemForm(workItem) {
         'work-item-tags-editor': workItem.tags ? workItem.tags.join(', ') : ''
     };
     populateForm(formData);
+
+    // Update the editor title to show the work item name
+    const editorTitle = document.getElementById('work-item-editor-title');
+    if (editorTitle && workItem.title) {
+        editorTitle.textContent = `Edit Work Item: ${workItem.title}`;
+    }
+
+    // Initialize tree builder with existing structured deliverables if available
+    const agencyId = window.getCurrentAgencyId();
+    const deliverables = workItem.deliverables_structured || [];
+    if (typeof window.initDeliverableTreeBuilder === 'function') {
+        window.initDeliverableTreeBuilder(agencyId, workItem.code || '', deliverables, window.saveWorkItemFromEditor);
+    } else {
+        console.warn('initDeliverableTreeBuilder function not found!');
+    }
 }
 
 // Clear work item form
@@ -167,10 +182,18 @@ window.saveWorkItemFromEditor = async function () {
     const code = document.getElementById('work-item-code-editor')?.value.trim();
     const title = document.getElementById('work-item-title-editor')?.value.trim();
     const description = document.getElementById('work-item-description-editor')?.value.trim();
-    const deliverables = document.getElementById('work-item-deliverables-editor')?.value
-        .split('\n')
-        .map(d => d.trim())
-        .filter(d => d.length > 0);
+
+    // Get deliverables from tree builder
+    let deliverables = [];
+    let deliverablesStructured = null;
+
+    // Tree builder mode (only mode now)
+    if (typeof window.getDeliverablesStructuredData === 'function') {
+        deliverablesStructured = window.getDeliverablesStructuredData();
+    } else {
+        console.warn('getDeliverablesStructuredData function not found');
+    }
+
     const tags = document.getElementById('work-item-tags-editor')?.value
         .split(',')
         .map(t => t.trim())
@@ -205,6 +228,7 @@ window.saveWorkItemFromEditor = async function () {
         title,
         description,
         deliverables,
+        deliverables_structured: deliverablesStructured,
         goal_keys: selectedGoals,
         tags
     };
@@ -223,9 +247,17 @@ window.saveWorkItemFromEditor = async function () {
         // No need to save goal links separately - they're part of the work item now
 
         window.showNotification('Work item saved successfully', 'success');
-        cancelWorkItemEdit();
+
+        // If this was an add operation, switch to edit mode with the saved work item
+        if (workItemEditorState.mode === 'add') {
+            workItemEditorState.mode = 'edit';
+            workItemEditorState.workItemKey = savedWorkItem._key || savedWorkItem.key;
+        }
+
+        // Refresh the work items list in the background
         loadWorkItems();
     } catch (error) {
+        console.error('Error saving work item:', error);
         window.showNotification('Error saving work item', 'error');
     }
 }
@@ -488,10 +520,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateWorkItemSelectionButtons();
 });
 
-// Make functions available globally
-window.loadWorkItems = loadWorkItems;
-window.showWorkItemEditor = showWorkItemEditor;
-window.saveWorkItemFromEditor = saveWorkItemFromEditor;
 window.cancelWorkItemEdit = cancelWorkItemEdit;
 window.deleteWorkItem = deleteWorkItem;
 window.filterWorkItems = filterWorkItems;

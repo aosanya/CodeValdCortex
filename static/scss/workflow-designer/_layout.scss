@@ -1,0 +1,78 @@
+// Workflow Designer - Layout Module
+// Main container layout and work items panel
+
+@use '../variables' as *;
+@use '../mixins' as *;
+
+/* Alpine.js cloak */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Main Container Layout */
+.designer-container {
+    @include flex-column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Content Area */
+.designer-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Work Items Panel */
+.work-items-panel {
+    background: $vscode-sidebar-bg;
+    border-right: 1px solid $vscode-border;
+    overflow-y: auto;
+    @include flex-column;
+}
+
+.work-items-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: $spacing-sm;
+}
+
+.work-item-card {
+    margin-bottom: $spacing-sm;
+    cursor: move;
+    transition: all $transition-fast;
+
+    .card {
+        border-left: 3px solid transparent;
+        transition: all $transition-fast;
+
+        &:hover {
+            border-left-color: $vscode-accent;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(2px);
+        }
+
+        &[draggable="true"]:active {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+    }
+
+    .button.is-ghost {
+        background: transparent;
+        border: none;
+        color: #7a7a7a;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: $vscode-accent;
+        }
+    }
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .work-items-panel {
+        width: 100%;
+        max-width: 250px;
+    }
+}

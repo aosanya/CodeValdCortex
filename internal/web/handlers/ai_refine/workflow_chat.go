@@ -149,7 +149,7 @@ func (h *Handler) ProcessWorkflowsChatRequestStreaming(c *gin.Context) {
 					"chunk_bytes":   chunkBytes,
 					"total_bytes":   totalChunkBytes,
 					"chunk_preview": truncateForLog(chunk, 50),
-				}).Debug("🔍 DEBUG: Forwarding workflow chunk to SSE")
+				}).Info("Streaming chunk")
 			}
 
 			c.SSEvent("chunk", chunk)
@@ -159,10 +159,6 @@ func (h *Handler) ProcessWorkflowsChatRequestStreaming(c *gin.Context) {
 	)
 
 	if err != nil {
-		h.logger.WithError(err).WithFields(logrus.Fields{
-			"total_chunks": chunkCount,
-			"total_bytes":  totalChunkBytes,
-		}).Error("❌ Streaming workflow refinement failed")
 		c.SSEvent("error", fmt.Sprintf(`{"error": "%s"}`, err.Error()))
 		return
 	}

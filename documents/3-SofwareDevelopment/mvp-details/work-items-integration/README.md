@@ -35,8 +35,9 @@ This domain covers **work tracking** and **document/code versioning** within Cod
 |-------|------|-------|--------|-------------|
 | **📚 Core Architecture** | [git-based-document-system.md](./git-based-document-system.md) | MVP-WI-005, MVP-PUB-007 | 📋 Planned | Complete Git implementation in ArangoDB with file explorer UX |
 | **🎯 Implementation Roadmap** | [implementation-guide.md](./implementation-guide.md) | MVP-WI-005 | 📋 Planned | 7-phase implementation plan with tasks and acceptance criteria |
-| **� Pull Requests** | [pull-requests.md](./pull-requests.md) | MVP-WI-005 | �📋 Planned | Internal PR workflow, review process, AI-assisted merging |
+| **🔀 Pull Requests** | [pull-requests.md](./pull-requests.md) | MVP-WI-005 | 📋 Planned | Internal PR workflow, review process, AI-assisted merging |
 | **📊 Work Item Schema** | [work-item-schema.md](./work-item-schema.md) | MVP-WI-005 | 🔄 Needs Update | Data models for issues, milestones, workflows (update for Git integration) |
+| **📦 Deliverables Structure** | [deliverables-structure-research.md](./deliverables-structure-research.md) | MVP-043 | ✅ Complete | Enhanced deliverable architecture with folder trees and AI prompt instructions |
 | **📋 Architectural Decisions** | [architecture/vcs-integration-decisions.md](./architecture/vcs-integration-decisions.md) | MVP-WI-005 | ✅ Complete | 15 decisions documenting evolution from external VCS to Git-in-ArangoDB |
 | **🔬 Research Sessions** | [research-sessions/](./research-sessions/) | MVP-WI-005 | ✅ Complete | Dated research session summaries |
 

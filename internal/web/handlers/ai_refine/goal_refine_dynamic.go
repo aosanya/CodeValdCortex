@@ -269,16 +269,16 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 				goalsModified = true
 			}
 
-			h.logger.WithFields(logrus.Fields{
-				"goals_modified":   goalsModified,
-				"final_goal_count": len(updatedGoals),
-			}).Info("🔍 DEBUG: Consolidation/removal complete")
 		}
 	}
 
 	// Save the updated goals list if modified
 	if goalsModified {
-		_, err = h.agencyService.UpdateSpecificationGoals(ctx, agencyID, updatedGoals, "ai-refine")
+		if _, err = h.agencyService.UpdateSpecificationGoals(ctx, agencyID, updatedGoals, "ai-refine"); err != nil {
+			h.logger.WithError(err).Error("Failed to update goals after refinement")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save goal updates"})
+			return
+		}
 	} else {
 		h.logger.Info("ℹ️ No goals modifications needed")
 	}

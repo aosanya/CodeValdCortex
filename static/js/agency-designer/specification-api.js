@@ -130,23 +130,29 @@ window.SpecificationAPI = class SpecificationAPI {
      */
     async updateWorkItems(workItems, updatedBy = 'user') {
         try {
+            const payload = {
+                work_items: workItems,
+                updated_by: updatedBy
+            };
+
             const response = await fetch(`${this.baseUrl}/work-items`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    work_items: workItems,
-                    updated_by: updatedBy
-                })
+                body: JSON.stringify(payload)
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error response:', response.status, errorText);
                 throw new Error(`Failed to update work items: ${response.status}`);
             }
 
-            return await response.json();
+            const result = await response.json();
+            return result;
         } catch (error) {
+            console.error('Error in updateWorkItems:', error);
             throw error;
         }
     }
@@ -339,6 +345,7 @@ window.SpecificationAPI = class SpecificationAPI {
         const workItemIndex = workItems.findIndex(wi => wi._key === workItemKey);
 
         if (workItemIndex === -1) {
+            console.error('Work item not found with key:', workItemKey);
             throw new Error(`Work item with key ${workItemKey} not found`);
         }
 

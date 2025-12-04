@@ -6,25 +6,25 @@ import (
 
 // RefineWorkItemRequest contains the context for refining a work item
 type RefineWorkItemRequest struct {
-	AgencyID          string             `json:"agency_id"`
-	CurrentWorkItem   *models.WorkItem   `json:"current_work_item"`
-	Title             string             `json:"title"`
-	Description       string             `json:"description"`
-	Deliverables      []string           `json:"deliverables"`
-	ExistingWorkItems []*models.WorkItem `json:"existing_work_items"`
-	Goals             []*models.Goal     `json:"goals"`
-	AgencyContext     *models.Agency     `json:"agency_context"`
+	AgencyID               string                   `json:"agency_id"`
+	CurrentWorkItem        *models.WorkItem         `json:"current_work_item"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	ExistingWorkItems      []*models.WorkItem       `json:"existing_work_items"`
+	Goals                  []*models.Goal           `json:"goals"`
+	AgencyContext          *models.Agency           `json:"agency_context"`
 }
 
 // RefineWorkItemResponse contains the AI-refined work item
 type RefineWorkItemResponse struct {
-	RefinedTitle        string   `json:"refined_title"`
-	RefinedDescription  string   `json:"refined_description"`
-	RefinedDeliverables []string `json:"refined_deliverables"`
-	GoalKeys            []string `json:"goal_keys"`
-	SuggestedTags       []string `json:"suggested_tags"`
-	WasChanged          bool     `json:"was_changed"`
-	Explanation         string   `json:"explanation"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	GoalKeys               []string                 `json:"goal_keys"`
+	SuggestedTags          []string                 `json:"suggested_tags"`
+	WasChanged             bool                     `json:"was_changed"`
+	Explanation            string                   `json:"explanation"`
 }
 
 // GenerateWorkItemRequest contains the context for generating a new work item
@@ -38,13 +38,13 @@ type GenerateWorkItemRequest struct {
 
 // GenerateWorkItemResponse contains the AI-generated work item
 type GenerateWorkItemResponse struct {
-	Title         string   `json:"title"`
-	Description   string   `json:"description"`
-	Deliverables  []string `json:"deliverables"`
-	GoalKeys      []string `json:"goal_keys"`
-	SuggestedCode string   `json:"suggested_code"`
-	SuggestedTags []string `json:"suggested_tags"`
-	Explanation   string   `json:"explanation"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	GoalKeys               []string                 `json:"goal_keys"`
+	SuggestedCode          string                   `json:"suggested_code"`
+	SuggestedTags          []string                 `json:"suggested_tags"`
+	Explanation            string                   `json:"explanation"`
 }
 
 // GenerateWorkItemsResponse contains multiple AI-generated work items
@@ -71,14 +71,14 @@ type ConsolidateWorkItemsResponse struct {
 
 // ConsolidatedWorkItem represents a work item after consolidation
 type ConsolidatedWorkItem struct {
-	Title            string   `json:"title"`
-	Description      string   `json:"description"`
-	Deliverables     []string `json:"deliverables"`
-	GoalKeys         []string `json:"goal_keys"`
-	SuggestedCode    string   `json:"suggested_code"`
-	SuggestedTags    []string `json:"suggested_tags"`
-	ConsolidatedFrom []string `json:"consolidated_from"` // Keys of original work items
-	Rationale        string   `json:"rationale"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	GoalKeys               []string                 `json:"goal_keys"`
+	SuggestedCode          string                   `json:"suggested_code"`
+	SuggestedTags          []string                 `json:"suggested_tags"`
+	ConsolidatedFrom       []string                 `json:"consolidated_from"` // Keys of original work items
+	Rationale              string                   `json:"rationale"`
 }
 
 // RefineWorkItemsRequest contains the context for dynamic work item processing
@@ -97,19 +97,27 @@ type RefineWorkItemsResponse struct {
 	RefinedWorkItems   []RefinedWorkItemResult       `json:"refined_work_items"`   // Work items that were refined
 	GeneratedWorkItems []GenerateWorkItemResponse    `json:"generated_work_items"` // Newly generated work items
 	ConsolidatedData   *ConsolidateWorkItemsResponse `json:"consolidated_data"`    // Consolidation results if applicable
+	UnprocessedItems   []UnprocessedWorkItem         `json:"unprocessed_items"`    // Items not processed due to time limit
 	Explanation        string                        `json:"explanation"`          // What was done and why
 	NoActionNeeded     bool                          `json:"no_action_needed"`     // True if work items are already optimal
 }
 
+// UnprocessedWorkItem represents a work item that wasn't processed due to time constraints
+type UnprocessedWorkItem struct {
+	OriginalKey string `json:"original_key"`
+	Title       string `json:"title"`
+	Reason      string `json:"reason"` // Why it wasn't processed (e.g., "time limit reached")
+}
+
 // RefinedWorkItemResult represents a single refined work item
 type RefinedWorkItemResult struct {
-	OriginalKey         string   `json:"original_key"`
-	RefinedTitle        string   `json:"refined_title"`
-	RefinedDescription  string   `json:"refined_description"`
-	RefinedDeliverables []string `json:"refined_deliverables"`
-	GoalKeys            []string `json:"goal_keys"`
-	SuggestedCode       string   `json:"suggested_code"` // Updated work item code
-	SuggestedTags       []string `json:"suggested_tags"`
-	WasChanged          bool     `json:"was_changed"`
-	Explanation         string   `json:"explanation"`
+	OriginalKey            string                   `json:"original_key"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	GoalKeys               []string                 `json:"goal_keys"`
+	SuggestedCode          string                   `json:"suggested_code"` // Updated work item code
+	SuggestedTags          []string                 `json:"suggested_tags"`
+	WasChanged             bool                     `json:"was_changed"`
+	Explanation            string                   `json:"explanation"`
 }

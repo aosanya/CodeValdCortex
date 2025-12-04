@@ -74,12 +74,6 @@ func (g *gitOps) WriteBlob(ctx context.Context, repoID, content string) (string,
 		return "", fmt.Errorf("failed to store blob: %w", err)
 	}
 
-	g.logger.WithFields(logrus.Fields{
-		"sha":     sha,
-		"size":    len(content),
-		"repo_id": repoID,
-	}).Debug("Created blob")
-
 	return sha, nil
 }
 
@@ -125,12 +119,6 @@ func (g *gitOps) WriteTree(ctx context.Context, repoID string, entries []models.
 	if err := g.storage.StoreObject(ctx, obj); err != nil {
 		return "", fmt.Errorf("failed to store tree: %w", err)
 	}
-
-	g.logger.WithFields(logrus.Fields{
-		"sha":     sha,
-		"entries": len(entries),
-		"repo_id": repoID,
-	}).Debug("Created tree")
 
 	return sha, nil
 }
@@ -217,14 +205,6 @@ func (g *gitOps) Commit(ctx context.Context, repoID, treeSHA string, parents []s
 		return "", fmt.Errorf("failed to store commit: %w", err)
 	}
 
-	g.logger.WithFields(logrus.Fields{
-		"sha":     sha,
-		"tree":    treeSHA,
-		"parents": len(parents),
-		"author":  authorName,
-		"repo_id": repoID,
-	}).Debug("Created commit")
-
 	return sha, nil
 }
 
@@ -266,12 +246,6 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 			return fmt.Errorf("failed to create ref: %w", err)
 		}
 
-		g.logger.WithFields(logrus.Fields{
-			"ref":     refName,
-			"target":  commitSHA,
-			"repo_id": repoID,
-		}).Debug("Created ref")
-
 		return nil
 	}
 
@@ -280,12 +254,6 @@ func (g *gitOps) UpdateRef(ctx context.Context, repoID, refName, commitSHA strin
 	if err := g.storage.UpdateRef(ctx, ref); err != nil {
 		return fmt.Errorf("failed to update ref: %w", err)
 	}
-
-	g.logger.WithFields(logrus.Fields{
-		"ref":     refName,
-		"target":  commitSHA,
-		"repo_id": repoID,
-	}).Debug("Updated ref")
 
 	return nil
 }

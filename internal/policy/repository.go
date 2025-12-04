@@ -116,7 +116,7 @@ func (r *ArangoRepository) Get(ctx context.Context, agencyID string) (*AIPolicy,
 	var policy AIPolicy
 	meta, err := r.policiesCol.ReadDocument(ctx, agencyID, &policy)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("policy not found for agency: %s", agencyID)
 		}
 		return nil, fmt.Errorf("failed to read policy: %w", err)
@@ -159,7 +159,7 @@ func (r *ArangoRepository) Delete(ctx context.Context, agencyID string) error {
 
 	_, err := r.policiesCol.RemoveDocument(ctx, agencyID)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("policy not found for agency: %s", agencyID)
 		}
 		return fmt.Errorf("failed to delete policy: %w", err)

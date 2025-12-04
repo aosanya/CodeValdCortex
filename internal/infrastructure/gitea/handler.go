@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// TODO THIS File may be redundant
 // Handler implements the Gitea webhook HTTP endpoint handlers
 type Handler struct {
 	validator  *Validator

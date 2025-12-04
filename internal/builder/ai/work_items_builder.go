@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
+	"github.com/aosanya/CodeValdCortex/internal/builder/ai/prompts"
 	"github.com/sirupsen/logrus"
 )
 
@@ -44,7 +46,7 @@ func (w *WorkItemsBuilder) RefineWorkItems(ctx context.Context, req *builder.Ref
 		Messages: []Message{
 			{
 				Role:    "system",
-				Content: dynamicWorkItemsSystemPrompt,
+				Content: SharedAgencyContext + "\n\n" + prompts.WorkItemsDynamicSystem,
 			},
 			{
 				Role:    "user",
@@ -95,7 +97,7 @@ func (w *WorkItemsBuilder) RefineWorkItemsStream(ctx context.Context, req *build
 		Messages: []Message{
 			{
 				Role:    "system",
-				Content: dynamicWorkItemsSystemPrompt,
+				Content: SharedAgencyContext + "\n\n" + prompts.WorkItemsDynamicSystem,
 			},
 			{
 				Role:    "user",
@@ -155,10 +157,12 @@ func (w *WorkItemsBuilder) buildDynamicWorkItemsPrompt(req *builder.RefineWorkIt
 			if item.Description != "" {
 				builder.WriteString(fmt.Sprintf("  Description: %s\n", item.Description))
 			}
-			if len(item.Deliverables) > 0 {
-				builder.WriteString("  Deliverables:\n")
-				for _, deliverable := range item.Deliverables {
-					builder.WriteString(fmt.Sprintf("    - %s\n", deliverable))
+			if len(item.DeliverablesStructured) > 0 {
+				deliverablesJSON, err := json.MarshalIndent(item.DeliverablesStructured, "  ", "  ")
+				if err == nil {
+					builder.WriteString("  Deliverables Structure (JSON):\n  ")
+					builder.WriteString(string(deliverablesJSON))
+					builder.WriteString("\n")
 				}
 			}
 			if len(item.Tags) > 0 {
@@ -175,13 +179,13 @@ func (w *WorkItemsBuilder) buildDynamicWorkItemsPrompt(req *builder.RefineWorkIt
 
 // aiWorkItemRefinementResponse represents the JSON structure returned by the AI
 type aiWorkItemRefinementResponse struct {
-	RefinedTitle        string   `json:"refined_title"`
-	RefinedDescription  string   `json:"refined_description"`
-	RefinedDeliverables []string `json:"refined_deliverables"`
-	GoalKeys            []string `json:"goal_keys"`
-	SuggestedTags       []string `json:"suggested_tags"`
-	Explanation         string   `json:"explanation"`
-	Changed             bool     `json:"changed"`
+	Title                  string                   `json:"title"`
+	Description            string                   `json:"description"`
+	DeliverablesStructured []models.DeliverableNode `json:"deliverables_structured,omitempty"` // Hierarchical tree
+	GoalKeys               []string                 `json:"goal_keys"`
+	SuggestedTags          []string                 `json:"suggested_tags"`
+	Explanation            string                   `json:"explanation"`
+	Changed                bool                     `json:"changed"`
 }
 
 // RefineWorkItem uses AI to refine a work item definition based on all available context
@@ -196,7 +200,7 @@ func (r *WorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.Refi
 		Messages: []Message{
 			{
 				Role:    "system",
-				Content: workItemRefinementSystemPrompt,
+				Content: prompts.WorkItemsRefinementSystem,
 			},
 			{
 				Role:    "user",
@@ -220,21 +224,21 @@ func (r *WorkItemsBuilder) RefineWorkItem(ctx context.Context, req *builder.Refi
 
 	// Convert to our response format
 	result := &builder.RefineWorkItemResponse{
-		RefinedTitle:        aiResponse.RefinedTitle,
-		RefinedDescription:  aiResponse.RefinedDescription,
-		RefinedDeliverables: aiResponse.RefinedDeliverables,
-		GoalKeys:            aiResponse.GoalKeys,
-		SuggestedTags:       aiResponse.SuggestedTags,
-		WasChanged:          aiResponse.Changed,
-		Explanation:         aiResponse.Explanation,
+		Title:                  aiResponse.Title,
+		Description:            aiResponse.Description,
+		DeliverablesStructured: aiResponse.DeliverablesStructured,
+		GoalKeys:               aiResponse.GoalKeys,
+		SuggestedTags:          aiResponse.SuggestedTags,
+		WasChanged:             aiResponse.Changed,
+		Explanation:            aiResponse.Explanation,
 	}
 
 	r.logger.WithFields(logrus.Fields{
 		"agency_id":    req.AgencyID,
 		"was_changed":  result.WasChanged,
-		"title":        len(result.RefinedTitle),
-		"description":  len(result.RefinedDescription),
-		"deliverables": len(result.RefinedDeliverables),
+		"title":        len(result.Title),
+		"description":  len(result.Description),
+		"deliverables": len(result.DeliverablesStructured),
 	}).Info("AI work item refinement completed")
 
 	return result, nil
@@ -252,7 +256,7 @@ func (r *WorkItemsBuilder) GenerateWorkItem(ctx context.Context, req *builder.Ge
 		Messages: []Message{
 			{
 				Role:    "system",
-				Content: workItemGenerationSystemPrompt,
+				Content: prompts.WorkItemsGenerationSingleSystem,
 			},
 			{
 				Role:    "user",
@@ -296,7 +300,7 @@ func (r *WorkItemsBuilder) GenerateWorkItems(ctx context.Context, req *builder.G
 		Messages: []Message{
 			{
 				Role:    "system",
-				Content: workItemsGenerationSystemPrompt,
+				Content: prompts.WorkItemsGenerationMultipleSystem,
 			},
 			{
 				Role:    "user",
@@ -377,7 +381,7 @@ func (r *WorkItemsBuilder) ConsolidateWorkItems(ctx context.Context, req *builde
 		Messages: []Message{
 			{
 				Role:    "system",
-				Content: workItemConsolidationSystemPrompt,
+				Content: prompts.WorkItemsConsolidationSystem,
 			},
 			{
 				Role:    "user",
@@ -423,232 +427,3 @@ func (r *WorkItemsBuilder) buildWorkItemConsolidationPrompt(_ *builder.Consolida
 
 	return builder.String()
 }
-
-// System prompts for work item operations
-const dynamicWorkItemsSystemPrompt = SharedAgencyContext + `
-
-Act as a strategic work item management AI. Modify work items based on user requests.
-
-CRITICAL: Work items are AGENT ACTIONS that appear on Kanban boards (To Do → In Progress → Done).
-They are NOT system implementation tasks or features to build.
-
-AGENT ACTION work items (✅): Operational tasks agents perform
-- "Review technical specification for API completeness"
-- "Execute unit test suite for authentication module"
-- "Deploy release v1.2.3 to staging environment"
-- "Analyze code coverage report and identify gaps"
-- "Process stakeholder feedback from requirements meeting"
-- "Validate gRPC service contract compliance"
-- "Generate weekly project status report"
-- "Scan codebase for security vulnerabilities"
-- "Monitor production system performance metrics"
-- "Respond to critical incident alert #1234"
-
-IMPLEMENTATION tasks (❌): System building (NOT work items)
-- "Build payment processing API"
-- "Create monitoring dashboard"
-- "Implement CI/CD pipeline"
-- "Design database schema"
-
-## Kanban-Ready Characteristics:
-- **Action verbs**: Review, Analyze, Execute, Test, Deploy, Monitor, Process, Validate, Generate, Scan, Track, Coordinate
-- **Specific scope**: Completable within a sprint
-- **Measurable completion**: Clear done criteria
-- **Agent-executable**: Autonomous or human-in-loop can perform
-
-## Actions:
-**remove** - Delete work items (return in consolidated_data.removed_work_items)
-**refine** - Improve existing work items to be more action-oriented
-**generate** - Create new agent action work items aligned with goals
-**consolidate** - Merge duplicate actions
-**enhance_all** - Refine all work items
-**no_action** - Already optimal
-
-## Response JSON:
-{
-  "action": "remove|refine|generate|consolidate|enhance_all|no_action",
-  "refined_work_items": [{"original_key": "key", "refined_title": "...", "refined_description": "...", "refined_deliverables": [...], "goal_keys": ["goal_key1", "goal_key2"], "suggested_code": "CODE", "suggested_tags": [...], "was_changed": true, "explanation": "Brief"}],
-  "generated_work_items": [{"title": "...", "description": "...", "deliverables": [...], "goal_keys": ["goal_key1", "goal_key2"], "suggested_code": "CODE", "suggested_tags": [...], "explanation": "Brief"}],
-  "consolidated_data": {"consolidated_work_items": [...], "removed_work_items": ["key1"], "summary": "Brief", "explanation": "Brief"},
-  "explanation": "Brief overall summary",
-  "no_action_needed": false
-}
-
-Guidelines:
-- Work items = AGENT ACTIONS (what agents DO), not system features (what we BUILD)
-- Start with action verbs: Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate
-- Be specific: "Review API spec document v2.1" not "Review documentation"
-- Kanban-ready: Small enough to track on board
-- Align with goals: Each work item should support at least one agency goal
-- **IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses
-- Use existing goal keys from the context when linking work items to goals
-- Keep explanations concise (1-2 sentences)
-- Codes: Short, memorable (2-4 uppercase letters)`
-
-const workItemRefinementSystemPrompt = `You are an expert project manager and technical architect helping to refine work items for software development.
-
-Your task is to refine work items to be:
-1. Clear and specific
-2. Actionable with well-defined deliverables
-3. Properly scoped (not too large or too small)
-4. Aligned with agency goals
-
-Return your response as a JSON object with this structure:
-{
-  "refined_title": "Clear, concise title",
-  "refined_description": "Detailed description of what needs to be done",
-  "refined_deliverables": ["Deliverable 1", "Deliverable 2"],
-  "goal_keys": ["goal_key1", "goal_key2"],
-  "suggested_tags": ["tag1", "tag2"],
-  "explanation": "Brief explanation of changes made",
-  "changed": true|false
-}
-
-Set "changed" to false if the work item is already well-defined and needs no improvements.
-**IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses.`
-
-const workItemGenerationSystemPrompt = `You are an expert project manager helping to create agent action work items.
-
-CRITICAL: Work items are AGENT ACTIONS for Kanban boards, NOT system features to build.
-
-Your task is to create a clear, actionable work item that:
-1. Describes a specific AGENT ACTION (Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate)
-2. Addresses the user's request with concrete operations
-3. Is Kanban-ready (clear completion criteria)
-4. Aligns with agency goals
-5. Is agent-executable (autonomous or human-in-loop can perform)
-
-Examples of GOOD work items:
-- "Review API specification v2.1 for completeness"
-- "Execute security scan on production codebase"
-- "Deploy hotfix v1.2.4 to production environment"
-- "Analyze error logs from last 24 hours"
-
-Examples of BAD work items (system features, not actions):
-- "Build user authentication system"
-- "Create reporting dashboard"
-
-Return your response as a JSON object with this structure:
-{
-  "title": "Action-oriented title starting with verb",
-  "description": "Detailed description of the agent action",
-  "deliverables": ["Specific output 1", "Specific output 2"],
-  "goal_keys": ["goal_key1", "goal_key2"],
-  "suggested_code": "SHORT-CODE",
-  "suggested_tags": ["tag1", "tag2"],
-  "explanation": "Brief explanation of the action"
-}
-
-Use short, memorable codes (2-4 uppercase letters).
-**IMPORTANT**: Always include goal_keys array with the keys of goals this work item addresses.`
-
-const workItemsGenerationSystemPrompt = `You are an expert project manager helping to break down goals into actionable work items.
-
-CRITICAL: Work items are AGENT ACTIONS for Kanban boards, NOT system implementation tasks.
-
-Your task is to generate 3-7 work items that:
-1. Are specific AGENT ACTIONS (Review, Execute, Deploy, Analyze, Process, Validate, Monitor, Generate)
-2. Help agents achieve the stated goals through concrete operations
-3. Are Kanban-ready (clear start/done states)
-4. Create a logical workflow sequence
-5. Are agent-executable (autonomous or human-in-loop can complete)
-
-Examples of GOOD work items:
-- "Review requirements document for technical feasibility"
-- "Execute integration test suite for gRPC services"
-- "Deploy application to staging environment"
-- "Analyze performance metrics and identify bottlenecks"
-- "Generate API documentation from code annotations"
-
-Examples of BAD work items (these are system features, not agent actions):
-- "Build authentication system"
-- "Create monitoring dashboard"
-- "Implement payment processing"
-
-Return your response as a JSON object with this structure:
-{
-  "work_items": [
-    {
-      "title": "Action-oriented title starting with verb (Review, Execute, Deploy, etc.)",
-      "description": "Detailed description of what the agent does",
-      "deliverables": ["Specific output 1", "Specific output 2"],
-      "goal_keys": ["goal_key1", "goal_key2"],
-      "suggested_code": "SHORT-CODE",
-      "suggested_tags": ["tag1", "tag2"],
-      "explanation": "How this action helps achieve goals"
-    }
-  ],
-  "explanation": "Overall workflow strategy and how these actions relate to goals"
-}
-
-Use short, memorable codes (2-4 uppercase letters) that are unique.
-**IMPORTANT**: Always include goal_keys array with the keys of goals each work item addresses.
-Link work items to the relevant goals from the agency context provided.`
-
-const workItemConsolidationSystemPrompt = `Act as an experienced project manager. Your task is to analyze work items and determine if consolidation is beneficial.
-
-IMPORTANT: Only consolidate work items when it truly adds value. If work items are already well-defined and distinct, keep them separate.
-
-Evaluate if consolidation is needed:
-
-1. **Assess consolidation value**:
-   - Check for duplicate or near-duplicate work items
-   - Look for items with significant scope overlap
-   - Identify items that are really subtasks of a larger item
-   - Determine if items can be combined without losing clarity
-   - **If items are distinct and well-scoped, DO NOT force consolidation**
-
-2. **When consolidation IS beneficial**:
-   - Merge duplicate or overlapping work items
-   - Combine related tasks when appropriate
-   - Ensure each consolidated item remains actionable
-   - Preserve all deliverables and requirements
-   - Maintain clear acceptance criteria
-
-3. **When consolidation is NOT beneficial**:
-   - Return empty arrays for consolidated_work_items and removed_work_items
-   - Provide explanation that work items are already well-defined
-   - Don't force consolidation just to reduce count
-
-4. **Maintain work quality**:
-   - Each work item should be SMART and actionable
-   - Avoid creating overly broad or vague items
-   - Balance scope and achievability
-   - Support clear sprint planning
-
-5. **Track merges accurately** (only when consolidating):
-   - Record ALL original work item keys that were merged in "merged_from_keys"
-   - List ALL work item keys to DELETE in "removed_work_items"
-   - Provide clear explanations of consolidation decisions
-
-Focus on practical project management. Do not force consolidation.
-
-Respond ONLY with valid JSON (no markdown, no explanations outside JSON) in this exact format:
-
-If consolidation is NOT beneficial:
-{
-  "consolidated_work_items": [],
-  "removed_work_items": [],
-  "summary": "No consolidation needed - work items are already distinct and well-scoped",
-  "explanation": "Each work item addresses a specific deliverable and should remain independent"
-}
-
-If consolidation IS beneficial:
-{
-  "consolidated_work_items": [
-    {
-      "title": "Clear, actionable title",
-      "description": "Detailed description of what needs to be done",
-      "deliverables": ["Deliverable 1", "Deliverable 2", "Deliverable 3"],
-      "goal_keys": ["goal_key1", "goal_key2"],
-      "suggested_code": "SHORT-CODE",
-      "suggested_tags": ["tag1", "tag2"],
-      "merged_from_keys": ["original_key1", "original_key2"],
-      "explanation": "Brief explanation of what was consolidated and why"
-    }
-  ],
-  "removed_work_items": ["original_key1", "original_key2"],
-  "summary": "Consolidated X work items into Y more focused items",
-  "explanation": "Overall consolidation strategy and benefits"
-}
-`

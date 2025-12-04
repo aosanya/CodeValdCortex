@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "checkJs": false,
+        "target": "ES6",
+        "module": "commonjs"
+    },
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*",
+        "static/js/agency-designer/deliverable-tree-integration.js"
+    ]
+}

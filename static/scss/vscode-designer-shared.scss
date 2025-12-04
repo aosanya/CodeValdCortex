@@ -1,0 +1,31 @@
+/* VS Code Designer Shared Styles */
+/* Used by: agency-designer, workbench, workflow-designer */
+/* CACHE BUST: v2025-11-28-001 */
+
+@use 'variables' as *;
+@use 'mixins' as *;
+
+/* Import modules */
+@use 'vscode-designer-shared/layout';
+@use 'vscode-designer-shared/sidebar';
+@use 'vscode-designer-shared/details';
+@use 'vscode-designer-shared/chat';
+@use 'vscode-designer-shared/scrollbar';
+@use 'vscode-designer-shared/responsive';
+
+/* ===================================
+   VS CODE THEME VARIABLES (CSS Custom Properties)
+   =================================== */
+
+:root {
+    --vscode-bg: #{$vscode-bg};
+    --vscode-sidebar-bg: #{$vscode-sidebar-bg};
+    --vscode-panel-bg: #{$vscode-panel-bg};
+    --vscode-border: #{$vscode-border};
+    --vscode-text: #{$vscode-text};
+    --vscode-text-muted: #{$vscode-text-muted};
+    --vscode-active: #{$vscode-active};
+    --vscode-hover: #{$vscode-hover};
+    --vscode-accent: #{$vscode-accent};
+    --vscode-accent-hover: #{$vscode-accent-hover};
+}

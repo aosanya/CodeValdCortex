@@ -48,23 +48,15 @@ func AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversat
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Agency Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><!-- Agency Designer JavaScript --> <script src=\"/static/js/agency-designer/utils.js\" defer></script> <script src=\"/static/js/agency-designer/specification-api.js\" defer></script> <script src=\"/static/js/agency-designer/crud-helpers.js\" defer></script> <script src=\"/static/js/agency-designer/ai-operations.js\" defer></script> <script src=\"/static/js/agency-designer/ai-streaming.js\" defer></script> <script src=\"/static/js/agency-designer/chat-streaming.js\" defer></script> <script src=\"/static/js/agency-designer/introduction.js\" defer></script> <script src=\"/static/js/agency-designer/overview.js\" defer></script> <script src=\"/static/js/agency-designer/goals.js\" defer></script> <script src=\"/static/js/agency-designer/work-items.js\" defer></script> <script src=\"/static/js/agency-designer/roles.js\" defer></script> <script src=\"/static/js/agency-designer/chat.js\" defer></script> <script src=\"/static/js/agency-designer/views.js\" defer></script> <script src=\"/static/js/agency-designer/workflows.js\" defer></script> <script src=\"/static/js/agency-designer/htmx.js\" defer></script> <script src=\"/static/js/agency-designer/context.js\" defer></script> <script src=\"/static/js/agency-designer/shared.js\" defer></script> <script src=\"/static/js/agency-designer/publish.js\" defer></script> <script src=\"/static/js/agency-designer/tags.js\" defer></script> <script src=\"/static/js/agency-designer.js?v=20251102-workitems\" defer></script> <script src=\"/static/js/agency-designer/main.js\" defer></script> <script src=\"/static/js/agency-designer/raci.js?v=20251103\" defer></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns --><div class=\"columns is-gapless vscode-main-content\"><!-- Left Column: Designer Panels --><div class=\"column is-two-thirds\"><!-- View Switcher and Publish Toolbar at Top --><div class=\"top-toolbar\"><div class=\"is-flex is-justify-content-space-between is-align-items-center\"><div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Agency Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><link rel=\"stylesheet\" href=\"/static/css/chat-panel-tabs.css\"><!-- Agency Designer JavaScript --> <script src=\"/static/js/agency-designer/utils.js\" defer></script> <script src=\"/static/js/agency-designer/specification-api.js\" defer></script> <script src=\"/static/js/agency-designer/crud-helpers.js\" defer></script> <script src=\"/static/js/agency-designer/ai-operations.js\" defer></script> <script src=\"/static/js/agency-designer/ai-streaming.js\" defer></script> <script src=\"/static/js/agency-designer/chat-streaming.js\" defer></script> <script src=\"/static/js/agency-designer/introduction.js\" defer></script> <script src=\"/static/js/agency-designer/overview.js\" defer></script> <script src=\"/static/js/agency-designer/goals.js\" defer></script> <script src=\"/static/js/agency-designer/deliverable-tree.js\" defer></script> <script src=\"/static/js/agency-designer/deliverable-tree-integration.js\" defer></script> <script src=\"/static/js/agency-designer/work-items-editor.js\" defer></script> <script src=\"/static/js/agency-designer/work-items-ai.js\" defer></script> <script src=\"/static/js/agency-designer/work-items.js\" defer></script> <script src=\"/static/js/agency-designer/properties-panel.js\" defer></script> <script src=\"/static/js/agency-designer/ai-enhancement-detector.js\" defer></script> <script src=\"/static/js/agency-designer/roles.js\" defer></script> <script src=\"/static/js/agency-designer/chat.js\" defer></script> <script src=\"/static/js/agency-designer/views.js\" defer></script> <script src=\"/static/js/agency-designer/workflows.js\" defer></script> <script src=\"/static/js/agency-designer/htmx.js\" defer></script> <script src=\"/static/js/agency-designer/context.js\" defer></script> <script src=\"/static/js/agency-designer/shared.js\" defer></script> <script src=\"/static/js/agency-designer/publish.js\" defer></script> <script src=\"/static/js/agency-designer/tags.js\" defer></script> <script src=\"/static/js/agency-designer.js?v=20251102-workitems\" defer></script> <script src=\"/static/js/agency-designer/main.js\" defer></script> <script src=\"/static/js/agency-designer/raci.js?v=20251103\" defer></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns --><div class=\"columns is-gapless vscode-main-content\"><!-- Left Column: Designer Panels --><div class=\"column is-two-thirds\"><!-- Agency Designer Header with Actions -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = ViewSwitcher().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = AgencyDesignerHeader(currentAgency).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = PublishToolbar(currentAgency).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div></div><div class=\"designer-panels\"><!-- Overview View --><div class=\"view-content is-active\" data-view-content=\"overview\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"designer-panels\"><!-- Overview View --><div class=\"view-content is-active\" data-view-content=\"overview\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,7 +64,7 @@ func AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversat
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><!-- Layout View --><div class=\"view-content\" data-view-content=\"layout\"><div class=\"layout-panel\"><h2>Layout Diagram - Coming Soon</h2></div></div></div></div><!-- Right Column: AI Chat (Always Visible) --><div class=\"column is-one-third\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div></div><!-- Right Column: AI Chat (Always Visible) --><div class=\"column is-one-third\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -80,7 +72,7 @@ func AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversat
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><!-- Status Bar at Bottom (VS Code style) -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><!-- Status Bar at Bottom (VS Code style) -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -88,7 +80,7 @@ func AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversat
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!-- Modals/Dialogs -->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Modals/Dialogs -->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -100,7 +92,7 @@ func AgencyDesignerPage(currentAgency *models.Agency, conversation *ai.Conversat
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -136,7 +128,7 @@ func ViewSwitcher() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"view-switcher\"><div class=\"view-tab is-active\" data-view=\"overview\"><span class=\"view-icon\">📊</span> <span class=\"view-label\">Overview</span></div><div class=\"view-tab\" data-view=\"layout\"><span class=\"view-icon\">🔗</span> <span class=\"view-label\">Layout</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"view-switcher\"><div class=\"view-tab is-active\" data-view=\"overview\"><span class=\"view-icon\">📊</span> <span class=\"view-label\">Overview</span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

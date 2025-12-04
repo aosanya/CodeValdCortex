@@ -217,7 +217,7 @@ func (r *Repository) GetTask(ctx context.Context, taskID string) (*Task, error) 
 	var task Task
 	_, err := r.tasks.ReadDocument(ctx, taskID, &task)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("task not found: %s", taskID)
 		}
 		return nil, fmt.Errorf("failed to get task: %w", err)
@@ -334,7 +334,7 @@ func (r *Repository) GetResult(ctx context.Context, taskID string) (*TaskResult,
 	var result TaskResult
 	_, err := r.results.ReadDocument(ctx, taskID, &result)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("result not found for task: %s", taskID)
 		}
 		return nil, fmt.Errorf("failed to get result: %w", err)
@@ -347,7 +347,7 @@ func (r *Repository) GetMetrics(ctx context.Context, agentID string) (*AgentTask
 	var metrics AgentTaskMetrics
 	_, err := r.metrics.ReadDocument(ctx, agentID, &metrics)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			// Return zero metrics for agents without any tasks
 			return &AgentTaskMetrics{
 				AgentID:     agentID,
@@ -366,7 +366,7 @@ func (r *Repository) UpdateMetrics(ctx context.Context, metrics *AgentTaskMetric
 	_, err := r.metrics.UpdateDocument(ctx, metrics.AgentID, metrics)
 	if err != nil {
 		// If document doesn't exist, create it
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			_, err = r.metrics.CreateDocument(ctx, metrics)
 			if err != nil {
 				return fmt.Errorf("failed to create metrics: %w", err)

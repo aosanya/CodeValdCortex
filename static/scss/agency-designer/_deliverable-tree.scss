@@ -1,0 +1,214 @@
+/**
+ * Deliverable Tree Builder Styles
+ * Hierarchical file/folder tree component for work item deliverables
+ */
+
+/* Universal input styling for tree nodes */
+.deliverable-tree-builder input.input,
+.deliverable-tree-container input.input {
+    font-size: 1rem;
+    height: 2.25em;
+}
+
+.deliverable-tree-builder {
+    background: transparent;
+    border: none;
+}
+
+.deliverable-tree-container {
+    background: white;
+    border-radius: 4px;
+    padding: 1rem;
+    min-height: 200px;
+}
+
+/* Make tree more compact */
+.tree-node .level-item {
+    margin-right: 0.1rem;
+
+    /* Reduced from 0.25rem to bring icon closer to chevron */
+}
+
+.tree-node .button.is-small {
+    padding: 0.25rem 0.5rem;
+}
+
+.tree-node {
+    padding: 0.25rem 0;
+    position: relative;
+    transition: all 0.2s ease;
+
+
+    &:hover {
+        background-color: #f5f5f5;
+    }
+
+    &.is-folder {
+        /* Folder nodes - show tree structure lines */
+        position: relative;
+        margin-left: 10px;
+
+        /* Vertical line for tree structure - positioned relative to the folder icon */
+        .node-row::before {
+            content: '';
+            position: absolute;
+            left: 44px;
+            /* 32px (chevron button) + 12px (icon position) */
+            top: -0.25rem;
+            /* Extend up to connect with parent */
+            bottom: -0.25rem;
+            /* Extend down to connect with children */
+            width: 1px;
+            background-color: #dbdbdb;
+            z-index: 0;
+        }
+
+        /* Horizontal connector line */
+        .node-row::after {
+            content: '';
+            position: absolute;
+            left: 44px;
+            top: 50%;
+            width: 16px;
+            /* Extend to the icon */
+            height: 1px;
+            background-color: #dbdbdb;
+            z-index: 0;
+        }
+
+        /* Hide vertical line extension for last child folder */
+        &:last-child .node-row::before {
+            bottom: 50%;
+        }
+
+        &:hover {
+
+            .node-row::before,
+            .node-row::after {
+                background-color: #3273dc;
+            }
+        }
+    }
+
+    &.is-file {
+        /* File nodes - no tree lines */
+        position: relative;
+        padding-left: 0 !important;
+        margin-left: 10px;
+    }
+
+    .node-row {
+        margin-bottom: 0;
+        position: relative;
+        border-bottom: 1px solid #f0f0f08b;
+    }
+
+    .node-name {
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .node-prompt-preview {
+        max-width: 600px;
+
+        .message-body {
+            background-color: #f8f9fa;
+            border-left: 3px solid #48c774;
+            font-style: italic;
+        }
+    }
+
+    .node-children {
+        margin-top: 0;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    .button.is-ghost {
+        background: none;
+        border: none;
+        color: #7a7a7a;
+
+        &:hover {
+            background-color: #e8e8e8;
+            color: #363636;
+        }
+    }
+}
+
+/* Depth-based indentation: use data-depth attribute set by JS */
+$tree-indent: 12px;
+
+@for $i from 0 through 10 {
+    .tree-node[data-depth="#{$i}"] {
+        padding-left: $i * $tree-indent;
+    }
+}
+
+.tree-nodes {
+    /* Container for all root nodes */
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Drag and drop styles (for future enhancement) */
+.tree-node.is-dragging {
+    opacity: 0.5;
+}
+
+.tree-node.is-drop-target {
+    border-left-color: #48c774;
+    background-color: #effaf3;
+}
+
+/* Validation error styles */
+.deliverable-tree-builder .notification.is-warning ul {
+    list-style: disc;
+    margin-left: 1.5rem;
+}
+
+/* Modal styles */
+.modal-card {
+    max-width: 800px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .tree-node {
+        font-size: 0.9rem;
+
+        .button.is-small {
+            font-size: 0.7rem;
+        }
+    }
+}
+
+/* Animation for expand/collapse */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        max-height: 1000px;
+    }
+
+    to {
+        opacity: 0;
+        max-height: 0;
+    }
+}
+
+.node-children {
+    animation: slideDown 0.3s ease;
+}

@@ -143,6 +143,10 @@ func (a *App) registerAPIRoutes(router *gin.Engine, aiRefineHandler interface{})
 			refineHandler := aiRefineHandler.(*ai_refine.Handler)
 
 			v1.POST("/agencies/:id/overview/refine", refineHandler.RefineIntroduction)
+
+			// Deliverable management endpoints
+			v1.POST("/agencies/:id/deliverables/move", refineHandler.MoveDeliverable)
+
 			if a.goalRefiner != nil {
 				// Main dynamic router - handles all goal operations through natural language prompts
 				v1.POST("/agencies/:id/goals/refine-dynamic", refineHandler.RefineGoals)

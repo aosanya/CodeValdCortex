@@ -175,7 +175,7 @@ func (r *Repository) Get(ctx context.Context, id string) (*agent.Agent, error) {
 	// Use ID as the document key
 	_, err := r.collection.ReadDocument(ctx, id, &doc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("agent not found: %s", id)
 		}
 		return nil, fmt.Errorf("failed to read agent document: %w", err)
@@ -191,7 +191,7 @@ func (r *Repository) Update(ctx context.Context, ag *agent.Agent) error {
 
 	_, err := r.collection.UpdateDocument(ctx, ag.ID, doc)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("agent not found: %s", ag.ID)
 		}
 		return fmt.Errorf("failed to update agent document: %w", err)
@@ -204,7 +204,7 @@ func (r *Repository) Update(ctx context.Context, ag *agent.Agent) error {
 func (r *Repository) Delete(ctx context.Context, id string) error {
 	_, err := r.collection.RemoveDocument(ctx, id)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("agent not found: %s", id)
 		}
 		return fmt.Errorf("failed to delete agent document: %w", err)

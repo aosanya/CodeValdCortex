@@ -1,0 +1,355 @@
+// Agency Designer - Layout Module
+// Top-level layout structures, view switching, and panel organization
+
+@use '../variables' as *;
+@use '../mixins' as *;
+
+/* ===================================
+   DESIGNER PANELS
+   =================================== */
+
+.designer-panels {
+    @include flex-column;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+}
+
+/* ===================================
+   TOP TOOLBAR
+   =================================== */
+
+.top-toolbar {
+    background: $vscode-sidebar-bg;
+    border-bottom: 1px solid $vscode-border;
+    padding: $spacing-sm $spacing-md;
+    flex-shrink: 0;
+
+    .is-flex {
+        padding: $spacing-sm $spacing-md;
+        background: $vscode-panel-bg;
+        border-bottom: 1px solid $vscode-border;
+    }
+}
+
+/* ===================================
+   VIEW SWITCHER
+   =================================== */
+
+.view-switcher {
+    display: flex;
+    gap: $spacing-sm;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.view-tab {
+    @include flex-center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all $transition-normal;
+    flex: 1;
+
+    &:hover {
+        background: $vscode-hover;
+    }
+
+    &.is-active {
+        border-bottom-color: $vscode-accent;
+        background: $vscode-active;
+
+        .view-label {
+            color: $vscode-accent;
+        }
+    }
+}
+
+.view-icon {
+    font-size: 1.25rem;
+}
+
+.view-label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $vscode-text;
+}
+
+/* ===================================
+   PHASE INDICATOR (LEGACY)
+   =================================== */
+
+.phases {
+    @include flex-center;
+    justify-content: space-around;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.phase-step {
+    @include flex-column;
+    align-items: center;
+    gap: $spacing-xs;
+    opacity: 0.4;
+    transition: all $transition-slow;
+
+    &.is-active {
+        opacity: 1;
+        transform: scale(1.1);
+
+        .phase-label {
+            color: $vscode-accent;
+        }
+    }
+
+    &.is-complete {
+        opacity: 0.7;
+    }
+}
+
+.phase-icon {
+    font-size: 1.5rem;
+}
+
+.phase-label {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: $vscode-text-muted;
+}
+
+/* ===================================
+   VIEW CONTENT CONTAINERS
+   =================================== */
+
+.view-content {
+    display: none;
+    @include flex-column;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    height: 100%;
+
+    &.is-active {
+        display: flex !important;
+    }
+
+    &[data-view-content="overview"],
+    &[data-view-content="agent-types"] {
+        &.is-active {
+            display: flex;
+        }
+    }
+}
+
+/* ===================================
+   OVERVIEW LAYOUT
+   =================================== */
+
+.overview-layout {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+.overview-panel,
+.layout-panel {
+    @include flex-center;
+    flex: 1;
+    background: $vscode-panel-bg;
+    color: $vscode-text-muted;
+}
+
+/* ===================================
+   SIDEBAR PANEL (LEFT)
+   =================================== */
+
+.sidebar-panel {
+    @include flex-column;
+    width: $sidebar-width;
+    background: $vscode-sidebar-bg;
+    border-right: 1px solid $vscode-border;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    @include panel-header;
+}
+
+.sidebar-title {
+    @include panel-title;
+}
+
+.sidebar-content {
+    @include flex-column;
+    @include custom-scrollbar;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.sidebar-footer {
+    padding: $spacing-sm;
+    border-top: 1px solid $vscode-border;
+    background: $vscode-sidebar-bg;
+    font-size: $font-size-sm;
+    color: $vscode-text-muted;
+}
+
+/* ===================================
+   AGENT TYPES LIST
+   =================================== */
+
+.agent-types-sidebar {
+    flex: 1;
+}
+
+.agent-type-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    @include hover-bg;
+
+    &.is-active {
+        @include active-state;
+    }
+}
+
+.agent-type-icon {
+    @include icon-container;
+    background: $vscode-accent;
+    color: white;
+    border-radius: $border-radius-sm;
+}
+
+.agent-type-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.agent-type-name {
+    @include truncate;
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: $vscode-text;
+}
+
+.agent-type-category {
+    @include truncate;
+    font-size: $font-size-sm;
+    color: $vscode-text-muted;
+}
+
+/* ===================================
+   FOOTER COUNTS
+   =================================== */
+
+.agent-count,
+.relationship-count {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-xs;
+}
+
+/* ===================================
+   EMPTY STATES
+   =================================== */
+
+.empty-sidebar {
+    @include flex-center;
+    flex: 1;
+    padding: $spacing-xl $spacing-md;
+    text-align: center;
+
+    p {
+        margin: 0;
+        color: $vscode-text-muted;
+    }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media screen and (max-width: 1200px) {
+    .sidebar-panel {
+        width: $sidebar-width-mobile;
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .sidebar-panel {
+        width: 100%;
+        height: 150px;
+        border-right: none;
+        border-bottom: 1px solid $vscode-border;
+    }
+}
+
+/* ===================================
+   AGENCY DESIGNER HEADER
+   (Matches Workbench Header Styling)
+   =================================== */
+
+.agency-designer-header {
+    background-color: #1f1f1f;
+    border-bottom: 1px solid #2b2b2b;
+    padding: 0.75rem 1.5rem;
+
+    .level {
+        margin-bottom: 0;
+    }
+
+    .title {
+        font-size: 1.25rem;
+        color: white;
+        margin-bottom: 0;
+    }
+
+    .tags {
+        font-size: 0.75rem;
+    }
+}
+
+/* ===================================
+   PANEL TABS STYLING
+   =================================== */
+
+.panel-tabs {
+    &.has-background {
+        background-color: #f5f5f5;
+        padding: 0.5rem 0.75rem;
+        margin: 0;
+        border-bottom: 1px solid #dbdbdb;
+
+        a {
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background-color: #ffffff;
+                color: #363636;
+            }
+
+            &.is-active {
+                background-color: #ffffff;
+                border-bottom-color: #3273dc;
+                color: #3273dc;
+                font-weight: 600;
+            }
+        }
+    }
+}

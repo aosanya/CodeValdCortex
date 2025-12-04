@@ -1,0 +1,80 @@
+/* VS Code Status Bar - Reusable Component */
+/* Note: Common navbar and status bar styles are in common-layout.css */
+
+@use 'variables' as *;
+@use 'mixins' as *;
+
+/* ===================================
+   STATUS BAR NOTIFICATIONS
+   =================================== */
+
+.status-notification {
+    color: white !important;
+
+    .status-text {
+        color: white !important;
+    }
+
+    // Icon colors for different notification types
+    &.has-text-success i {
+        color: #48c774 !important;
+    }
+
+    &.has-text-danger i {
+        color: #f14668 !important;
+    }
+
+    &.has-text-warning i {
+        color: #ffdd57 !important;
+    }
+
+    &.has-text-info i {
+        color: #3e8ed0 !important;
+    }
+}
+
+/* ===================================
+   STATUS ACTION BUTTONS
+   =================================== */
+
+.status-action-btn {
+    height: 18px;
+    font-size: 0.7rem;
+    padding: 0 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .icon {
+        margin-right: 0.25rem;
+    }
+}
+
+/* ===================================
+   PAGE LAYOUT WITH STATUS BAR
+   =================================== */
+
+.page-with-status-bar {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "main"
+        "status";
+    overflow: hidden;
+}
+
+.page-main-content {
+    grid-area: main;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.page-status-bar {
+    grid-area: status;
+}

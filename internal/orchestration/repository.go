@@ -96,7 +96,7 @@ func (r *Repository) GetWorkflow(ctx context.Context, workflowID string) (*Workf
 	var workflow Workflow
 	_, err := r.workflowsCollection.ReadDocument(ctx, workflowID, &workflow)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("workflow %s not found", workflowID)
 		}
 		return nil, fmt.Errorf("failed to get workflow: %w", err)
@@ -148,7 +148,7 @@ func (r *Repository) UpdateWorkflow(ctx context.Context, workflow *Workflow) err
 	// Update document
 	_, err := r.workflowsCollection.UpdateDocument(ctx, workflow.ID, workflow)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("workflow %s not found", workflow.ID)
 		}
 		return fmt.Errorf("failed to update workflow: %w", err)
@@ -163,7 +163,7 @@ func (r *Repository) DeleteWorkflow(ctx context.Context, workflowID string) erro
 
 	_, err := r.workflowsCollection.RemoveDocument(ctx, workflowID)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("workflow %s not found", workflowID)
 		}
 		return fmt.Errorf("failed to delete workflow: %w", err)
@@ -276,7 +276,7 @@ func (r *Repository) GetExecution(ctx context.Context, executionID string) (*Wor
 	var execution WorkflowExecution
 	_, err := r.executionsCollection.ReadDocument(ctx, executionID, &execution)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return nil, fmt.Errorf("execution %s not found", executionID)
 		}
 		return nil, fmt.Errorf("failed to get execution: %w", err)
@@ -291,7 +291,7 @@ func (r *Repository) UpdateExecution(ctx context.Context, execution *WorkflowExe
 	// Update document
 	_, err := r.executionsCollection.UpdateDocument(ctx, execution.ID, execution)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("execution %s not found", execution.ID)
 		}
 		return fmt.Errorf("failed to update execution: %w", err)
@@ -305,7 +305,7 @@ func (r *Repository) DeleteExecution(ctx context.Context, executionID string) er
 
 	_, err := r.executionsCollection.RemoveDocument(ctx, executionID)
 	if err != nil {
-		if driver.IsNotFound(err) {
+		if driver.IsNotFoundGeneral(err) {
 			return fmt.Errorf("execution %s not found", executionID)
 		}
 		return fmt.Errorf("failed to delete execution: %w", err)

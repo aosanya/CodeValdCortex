@@ -65,6 +65,7 @@ window.ContextType = {
     WORK_ITEM: 'Work Item',
     UNIT_OF_WORK: 'Unit of Work',
     AGENT_TYPE: 'Agent Type',
+    DELIVERABLE_NODE: 'Deliverable Node',
     GENERIC: 'Generic'
 };
 
