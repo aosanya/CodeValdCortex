@@ -53,20 +53,11 @@ func (s *service) ListDirectory(ctx context.Context, agencyDB, instanceID, path 
 		path = "/"
 	}
 
-	s.logger.WithFields(logrus.Fields{
-		"path":        path,
-		"instance_id": instanceID,
-
 	// Get entries from index
 	entries, err := s.indexRepo.ListDirectory(ctx, agencyDB, instanceID, path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list directory: %w", err)
 	}
-
-	s.logger.WithFields(logrus.Fields{
-		"path":        path,
-		"entry_count": len(entries),
-		"instance_id": instanceID,
 
 	// Convert to DirectoryEntry
 	result := make([]*DirectoryEntry, 0, len(entries))
@@ -413,9 +404,6 @@ func (s *service) CreateDirectory(ctx context.Context, agencyDB, instanceID, pat
 		}).Warn("Directory already exists in index")
 		return fmt.Errorf("directory already exists: %s", path)
 	}
-	s.logger.WithFields(logrus.Fields{
-		"path":  path,
-		"error": err,
 
 	// Create empty tree for directory
 	treeSHA, err := s.gitOps.WriteTree(ctx, instanceID, []models.TreeEntry{})
