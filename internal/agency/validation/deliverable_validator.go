@@ -43,6 +43,9 @@ var (
 
 	// ErrEmptyID indicates the deliverable ID is missing
 	ErrEmptyID = errors.New("deliverable ID cannot be empty")
+
+	// ErrDuplicateName indicates duplicate names exist in the same parent
+	ErrDuplicateName = errors.New("duplicate deliverable name in same parent")
 )
 
 // Valid file name pattern (alphanumeric, hyphens, underscores, spaces, periods)
@@ -74,6 +77,11 @@ func (v *DeliverableValidator) ValidateTree(nodes []models.DeliverableNode) erro
 		if err := v.checkDuplicateIDs(&node, ids); err != nil {
 			return err
 		}
+	}
+
+	// Check for duplicate names at root level
+	if err := v.checkDuplicateNames(nodes); err != nil {
+		return err
 	}
 
 	// Validate each root node
@@ -111,6 +119,11 @@ func (v *DeliverableValidator) ValidateNode(node *models.DeliverableNode, depth 
 	// Validate children count
 	if len(node.Children) > models.MaxChildrenPerNode {
 		return fmt.Errorf("%w: %d children exceeds maximum %d", ErrTooManyChildren, len(node.Children), models.MaxChildrenPerNode)
+	}
+
+	// Check for duplicate names among children
+	if err := v.checkDuplicateNames(node.Children); err != nil {
+		return err
 	}
 
 	// Recursively validate children
@@ -194,6 +207,23 @@ func (v *DeliverableValidator) checkDuplicateIDs(node *models.DeliverableNode, i
 		if err := v.checkDuplicateIDs(&node.Children[i], ids); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// checkDuplicateNames checks for duplicate names within the same parent node
+func (v *DeliverableValidator) checkDuplicateNames(nodes []models.DeliverableNode) error {
+	names := make(map[string]bool)
+
+	for _, node := range nodes {
+		// Normalize name for comparison (case-insensitive)
+		normalizedName := strings.ToLower(node.Name)
+
+		if names[normalizedName] {
+			return fmt.Errorf("%w: '%s' appears multiple times in the same parent", ErrDuplicateName, node.Name)
+		}
+		names[normalizedName] = true
 	}
 
 	return nil

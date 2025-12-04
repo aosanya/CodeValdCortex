@@ -16,22 +16,14 @@ import (
 // ProcessDeliverableEnhancementStreaming handles deliverable node enhancement requests with streaming
 // This directly streams the AI response back to the properties panel for deliverable node enhancement
 func (h *Handler) ProcessDeliverableEnhancementStreaming(c *gin.Context, agencyID string, userMessage string, metadata map[string]interface{}) {
-	h.logger.Info("📦 HANDLER CALLED: ProcessDeliverableEnhancementStreaming")
-
 	// Extract node information from metadata
 	nodeName, _ := metadata["nodeName"].(string)
-	nodeType, _ := metadata["nodeType"].(string)
 
 	if nodeName == "" {
 		h.logger.Error("Node name not provided in metadata")
 		c.SSEvent("error", `{"error": "Missing node information"}`)
 		return
 	}
-
-	h.logger.WithFields(logrus.Fields{
-		"node_name": nodeName,
-		"node_type": nodeType,
-	}).Info("🔍 Processing deliverable node enhancement request")
 
 	// Setup SSE
 	h.setupSSE(c)
@@ -221,13 +213,10 @@ func (h *Handler) saveDeliverableEnhancement(ctx context.Context, agencyID, node
 		targetNode.Description = enhancement.Description
 		targetNode.PromptInstructions = enhancement.PromptInstructions
 
-		// Update or add children if suggested
+		// Merge suggested children with existing ones to preserve IDs
 		if len(enhancement.SuggestedChildren) > 0 {
-			targetNode.Children = enhancement.SuggestedChildren
-			// Ensure all new children have IDs
-			for i := range targetNode.Children {
-				targetNode.Children[i].EnsureAllIDs()
-			}
+			mergedChildren := mergeDeliverableChildren(targetNode.Children, enhancement.SuggestedChildren)
+			targetNode.Children = mergedChildren
 		}
 
 		// Recompute paths for the entire tree
@@ -268,4 +257,49 @@ func findNodeByName(node *models.DeliverableNode, name string) *models.Deliverab
 	}
 
 	return nil
+}
+
+// mergeDeliverableChildren merges suggested children with existing ones, preserving existing IDs
+// This prevents duplicate nodes when AI enhancement returns new structures
+func mergeDeliverableChildren(existing []models.DeliverableNode, suggested []models.DeliverableNode) []models.DeliverableNode {
+	// Create a map of existing children by name (case-insensitive) for quick lookup
+	existingMap := make(map[string]*models.DeliverableNode)
+	for i := range existing {
+		existingMap[strings.ToLower(existing[i].Name)] = &existing[i]
+	}
+
+	// Merge: update existing nodes, add new ones
+	merged := make([]models.DeliverableNode, 0, len(suggested))
+
+	for i := range suggested {
+		suggestedNode := suggested[i]
+		nameLower := strings.ToLower(suggestedNode.Name)
+
+		if existingNode, found := existingMap[nameLower]; found {
+			// Node exists - preserve ID and update fields
+			existingNode.Name = suggestedNode.Name // Update to match AI's capitalization
+			existingNode.Description = suggestedNode.Description
+			existingNode.PromptInstructions = suggestedNode.PromptInstructions
+			existingNode.Type = suggestedNode.Type
+
+			// Recursively merge children
+			if len(suggestedNode.Children) > 0 {
+				existingNode.Children = mergeDeliverableChildren(existingNode.Children, suggestedNode.Children)
+			}
+
+			merged = append(merged, *existingNode)
+			delete(existingMap, nameLower) // Mark as processed
+		} else {
+			// New node - ensure it has an ID
+			suggestedNode.EnsureAllIDs()
+			merged = append(merged, suggestedNode)
+		}
+	}
+
+	// Optionally: keep existing nodes that weren't in suggestions (commented out - AI decides structure)
+	// for _, existingNode := range existingMap {
+	// 	merged = append(merged, *existingNode)
+	// }
+
+	return merged
 }

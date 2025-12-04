@@ -352,3 +352,152 @@ func isErrorType(err, target error) bool {
 	// Use errors.Is or check if the error wraps the target
 	return strings.Contains(err.Error(), target.Error())
 }
+
+func TestDeliverableValidator_DuplicateNames(t *testing.T) {
+	validator := NewDeliverableValidator()
+
+	tests := []struct {
+		name      string
+		nodes     []models.DeliverableNode
+		wantError bool
+		errorType error
+	}{
+		{
+			name: "no duplicates in root level",
+			nodes: []models.DeliverableNode{
+				{
+					ID:            "node-1",
+					Name:          "folder1",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+				},
+				{
+					ID:            "node-2",
+					Name:          "folder2",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+				},
+			},
+			wantError: false,
+		},
+		{
+			name: "duplicate names in root level - should fail",
+			nodes: []models.DeliverableNode{
+				{
+					ID:            "node-1",
+					Name:          "documentation",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+				},
+				{
+					ID:            "node-2",
+					Name:          "documentation",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+				},
+			},
+			wantError: true,
+			errorType: ErrDuplicateName,
+		},
+		{
+			name: "duplicate names case-insensitive - should fail",
+			nodes: []models.DeliverableNode{
+				{
+					ID:            "node-1",
+					Name:          "Documentation",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+				},
+				{
+					ID:            "node-2",
+					Name:          "documentation",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+				},
+			},
+			wantError: true,
+			errorType: ErrDuplicateName,
+		},
+		{
+			name: "duplicate names in children - should fail",
+			nodes: []models.DeliverableNode{
+				{
+					ID:            "node-1",
+					Name:          "parent",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+					Children: []models.DeliverableNode{
+						{
+							ID:            "child-1",
+							Name:          "file",
+							Type:          models.DeliverableTypeFile,
+							FileExtension: ".md",
+						},
+						{
+							ID:            "child-2",
+							Name:          "file",
+							Type:          models.DeliverableTypeFile,
+							FileExtension: ".md",
+						},
+					},
+				},
+			},
+			wantError: true,
+			errorType: ErrDuplicateName,
+		},
+		{
+			name: "same name in different parents - should pass",
+			nodes: []models.DeliverableNode{
+				{
+					ID:            "node-1",
+					Name:          "parent1",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+					Children: []models.DeliverableNode{
+						{
+							ID:            "child-1",
+							Name:          "file",
+							Type:          models.DeliverableTypeFile,
+							FileExtension: ".md",
+						},
+					},
+				},
+				{
+					ID:            "node-2",
+					Name:          "parent2",
+					Type:          models.DeliverableTypeFolder,
+					FileExtension: "",
+					Children: []models.DeliverableNode{
+						{
+							ID:            "child-2",
+							Name:          "file",
+							Type:          models.DeliverableTypeFile,
+							FileExtension: ".md",
+						},
+					},
+				},
+			},
+			wantError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validator.ValidateTree(tt.nodes)
+
+			if tt.wantError {
+				if err == nil {
+					t.Errorf("ValidateTree() expected error but got nil")
+					return
+				}
+				if tt.errorType != nil && !isErrorType(err, tt.errorType) {
+					t.Errorf("ValidateTree() error = %v, want error type %v", err, tt.errorType)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("ValidateTree() unexpected error = %v", err)
+				}
+			}
+		})
+	}
+}

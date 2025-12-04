@@ -434,3 +434,175 @@ window.executeMove = function (nodeId) {
         delete window.__moveAlpineData;
     }
 };
+
+// Handle move to work item modal
+window.addEventListener('show-move-to-work-item-modal', async function (event) {
+    const { nodeId, nodeName, nodeType } = event.detail;
+
+    // Get current work item code from PropertiesPanel
+    const currentWorkItemCode = window.PropertiesPanel?._currentWorkItemCode;
+    if (!currentWorkItemCode) {
+        console.error('Current work item code not found');
+        return;
+    }
+
+    // Fetch all work items from specification
+    try {
+        const spec = await window.specificationAPI.getSpecification();
+        const workItems = spec.work_items || [];
+
+        // Filter out current work item
+        const otherWorkItems = workItems.filter(wi => wi.code !== currentWorkItemCode);
+
+        if (otherWorkItems.length === 0) {
+            alert('No other work items available to move to.');
+            return;
+        }
+
+        showMoveToWorkItemModal(nodeId, nodeName, nodeType, currentWorkItemCode, otherWorkItems);
+    } catch (error) {
+        console.error('Failed to fetch work items:', error);
+        alert('Failed to load work items. Please try again.');
+    }
+});
+
+function showMoveToWorkItemModal(nodeId, nodeName, nodeType, currentWorkItemCode, workItems) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('move-to-work-item-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modalHTML = `
+        <div class="modal is-active" id="move-to-work-item-modal">
+            <div class="modal-background" onclick="document.getElementById('move-to-work-item-modal').remove()"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">
+                        <span class="icon-text">
+                            <span class="icon"><i class="fas fa-box-archive"></i></span>
+                            <span>Move "${nodeName}" to Work Item</span>
+                        </span>
+                    </p>
+                    <button class="delete" aria-label="close" onclick="document.getElementById('move-to-work-item-modal').remove()"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="notification is-info is-light mb-4">
+                        <p><strong>Current Location:</strong> ${currentWorkItemCode}</p>
+                        <p class="mt-2">This will move the ${nodeType} "<strong>${nodeName}</strong>" and all its contents to another work item.</p>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Select Target Work Item</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="target-work-item-select">
+                                    <option value="">-- Select Work Item --</option>
+                                    ${workItems.map(wi => `
+                                        <option value="${wi.code}">${wi.code}: ${wi.title}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        <p class="help">The deliverable will be moved to the root level of the selected work item</p>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" onclick="executeMoveToWorkItem('${nodeId}', '${nodeName}', '${currentWorkItemCode}')">
+                        <span class="icon"><i class="fas fa-arrows-up-down-left-right"></i></span>
+                        <span>Move</span>
+                    </button>
+                    <button class="button" onclick="document.getElementById('move-to-work-item-modal').remove()">Cancel</button>
+                </footer>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+window.executeMoveToWorkItem = async function (nodeId, nodeName, sourceWorkItemCode) {
+    const select = document.getElementById('target-work-item-select');
+    const targetWorkItemCode = select.value;
+
+    if (!targetWorkItemCode) {
+        alert('Please select a target work item');
+        return;
+    }
+
+    // Show loading state
+    const moveButton = document.querySelector('#move-to-work-item-modal .button.is-success');
+    const originalHTML = moveButton.innerHTML;
+    moveButton.disabled = true;
+    moveButton.innerHTML = '<span class="icon"><i class="fas fa-spinner fa-spin"></i></span><span>Moving...</span>';
+
+    try {
+        const agencyId = window.specificationAPI.agencyId;
+
+        // Call the move API
+        const response = await fetch(`/api/v1/agencies/${agencyId}/deliverables/move`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                source_work_item_code: sourceWorkItemCode,
+                target_work_item_code: targetWorkItemCode,
+                node_id: nodeId,
+                node_name: nodeName
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to move deliverable');
+        }
+
+        const result = await response.json();
+
+        // Close modal
+        document.getElementById('move-to-work-item-modal').remove();
+
+        // Show success message
+        const notification = document.createElement('div');
+        notification.className = 'notification is-success is-light';
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.innerHTML = `
+            <button class="delete" onclick="this.parentElement.remove()"></button>
+            <p><strong>Success!</strong></p>
+            <p>${result.message}</p>
+        `;
+        document.body.appendChild(notification);
+
+        // Auto-remove notification after 5 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+
+        // Reload the work item to reflect changes
+        if (window.WorkItemsModule && window.WorkItemsModule.loadWorkItems) {
+            await window.WorkItemsModule.loadWorkItems();
+        }
+
+    } catch (error) {
+        console.error('Failed to move deliverable:', error);
+
+        // Restore button state
+        moveButton.disabled = false;
+        moveButton.innerHTML = originalHTML;
+
+        // Show error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'notification is-danger is-light mt-4';
+        errorDiv.innerHTML = `
+            <button class="delete" onclick="this.parentElement.remove()"></button>
+            <p><strong>Error:</strong> ${error.message}</p>
+        `;
+
+        const modalBody = document.querySelector('#move-to-work-item-modal .modal-card-body');
+        modalBody.appendChild(errorDiv);
+    }
+};

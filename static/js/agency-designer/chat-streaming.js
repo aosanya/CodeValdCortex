@@ -403,7 +403,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
 
                                     if (progressMessage) {
                                         progressTagCount++;
-                                        console.log('[PROGRESS] Tag #' + progressTagCount + ':', progressMessage);
 
                                         // Remove spinning icon from previous progress bubble
                                         const previousBubbles = chatMessages.querySelectorAll('.progress-bubble .fa-circle-notch');
@@ -455,7 +454,6 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                                 const openIndex = remainingData.indexOf(openTag);
 
                                 if (openIndex !== -1) {
-                                    console.log('[PROGRESS] Found opening tag at index:', openIndex, 'in chunk:', remainingData.substring(0, 100));
                                     // Found opening tag - process data before it, then start accumulating
                                     const beforeTag = remainingData.substring(0, openIndex);
 

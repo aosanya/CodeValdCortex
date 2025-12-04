@@ -267,18 +267,30 @@ function deliverableTree() {
                                             <div class="dropdown-content">
                                                 ${depth > 0 ? `
                                                     <a class="dropdown-item" @click.prevent="moveNodeUp('${nodeId}')">
-                                                        <span class="icon-text">
-                                                            <span class="icon"><i class="fas fa-arrow-up"></i></span>
-                                                            <span>Move Up One Level</span>
-                                                        </span>
+                                                        <table style="width: 100%; border-spacing: 0;">
+                                                            <tr>
+                                                                <td style="width: 1.5rem; text-align: center;"><i class="fas fa-arrow-up"></i></td>
+                                                                <td>Move Up One Level</td>
+                                                            </tr>
+                                                        </table>
                                                     </a>
                                                     <hr class="dropdown-divider">
                                                 ` : ''}
                                                 <a class="dropdown-item" @click.prevent="window.dispatchEvent(new CustomEvent('show-move-to-folder-modal', { detail: { nodeId: '${nodeId}' } }))">
-                                                    <span class="icon-text">
-                                                        <span class="icon"><i class="fas fa-folder-arrow-up"></i></span>
-                                                        <span>Move to Folder...</span>
-                                                    </span>
+                                                    <table style="width: 100%; border-spacing: 0;">
+                                                        <tr>
+                                                            <td style="width: 1.5rem; text-align: center;"><i class="fas fa-folder-open"></i></td>
+                                                            <td>Move to Folder...</td>
+                                                        </tr>
+                                                    </table>
+                                                </a>
+                                                <a class="dropdown-item" @click.prevent="showMoveToWorkItemModal('${nodeId}')">
+                                                    <table style="width: 100%; border-spacing: 0;">
+                                                        <tr>
+                                                            <td style="width: 1.5rem; text-align: center;"><i class="fas fa-box-archive"></i></td>
+                                                            <td>Move to Work Item...</td>
+                                                        </tr>
+                                                    </table>
                                                 </a>
                                             </div>
                                         </div>
@@ -330,6 +342,12 @@ function deliverableTree() {
                 node.name = newName;
                 this.computeAllPaths();
                 this.validate();
+
+                // Update properties panel if this node is currently selected
+                if (this.selectedNodeId === nodeId && window.PropertiesPanel) {
+                    // Re-render the entire properties panel with updated node data
+                    window.PropertiesPanel.showDeliverableNodeProperties(node);
+                }
             }
         },
 
@@ -998,6 +1016,26 @@ function deliverableTree() {
          */
         getSerializedNodes() {
             return JSON.stringify(this.nodes);
+        },
+
+        /**
+         * Show modal to move node to another work item
+         */
+        showMoveToWorkItemModal(nodeId) {
+            const node = this.findNodeById(nodeId);
+            if (!node) {
+                console.error('Node not found:', nodeId);
+                return;
+            }
+
+            // Dispatch event to show the modal
+            window.dispatchEvent(new CustomEvent('show-move-to-work-item-modal', {
+                detail: {
+                    nodeId: nodeId,
+                    nodeName: node.name,
+                    nodeType: node.type
+                }
+            }));
         }
     };
 }

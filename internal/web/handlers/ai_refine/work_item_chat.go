@@ -60,32 +60,14 @@ func (h *Handler) ProcessWorkItemsChatRequestStreaming(c *gin.Context) {
 
 	// Check if this is a deliverable enhancement request by examining contexts
 	var deliverableContext map[string]interface{}
-	for i, ctx := range req.Contexts {
-		h.logger.WithFields(logrus.Fields{
-			"context_index": i,
-			"context_type":  ctx["type"],
-			"context_code":  ctx["code"],
-		}).Info("🔍 Examining context")
-
+	for _, ctx := range req.Contexts {
 		if ctxType, ok := ctx["type"].(string); ok && ctxType == "Deliverable Node" {
-			h.logger.WithFields(logrus.Fields{
-				"type":     ctx["type"],
-				"code":     ctx["code"],
-				"nodeName": ctx["nodeName"],
-				"nodeType": ctx["nodeType"],
-			}).Info("✅ DELIVERABLE NODE FOUND IN CONTEXTS!")
 			deliverableContext = ctx
 			break
 		}
 	}
 
 	if deliverableContext != nil {
-		h.logger.WithFields(logrus.Fields{
-			"nodeName": deliverableContext["nodeName"],
-			"nodeType": deliverableContext["nodeType"],
-			"code":     deliverableContext["code"],
-		}).Info("🔀 Detected deliverable enhancement request from context, routing to deliverable handler")
-
 		// Extract metadata from the context object
 		metadata := make(map[string]interface{})
 		if nodeName, ok := deliverableContext["nodeName"].(string); ok {
