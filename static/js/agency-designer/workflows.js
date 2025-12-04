@@ -89,27 +89,37 @@ function clearWorkflowForm() {
     // Reset to defaults
     document.getElementById('workflow-version-editor').value = '1.0.0';
 
+    // Clear any validation errors
+    if (window.formValidation) {
+        window.formValidation.clearAllErrors('workflow-editor-card');
+    }
+
     workflowEditorState.originalData = {};
 }
 
 // Save workflow from editor
 window.saveWorkflowFromEditor = function () {
-    // Get form values
+    console.log('[MVP-054] 🔵 saveWorkflowFromEditor CALLED');
+
+    // Define fields to validate
+    const fields = [
+        { id: 'workflow-name-editor', name: 'Workflow Name', required: true },
+        { id: 'workflow-description-editor', name: 'Description', required: true }
+    ];
+
+    // Validate all fields using form validation utility
+    if (!window.formValidation.validateFields(fields)) {
+        console.log('[MVP-054] ⚠️ Validation failed');
+        window.showNotification('Please fix validation errors before saving', 'warning');
+        return;
+    }
+
+    console.log('[MVP-054] ✅ Validation passed, preparing data');
+
+    // Get form values (already validated)
     const name = document.getElementById('workflow-name-editor').value.trim();
     const description = document.getElementById('workflow-description-editor').value.trim();
     const version = document.getElementById('workflow-version-editor').value.trim();
-    // status field removed from model
-
-    // Validate required fields
-    if (!name) {
-        window.showNotification('Please provide a workflow name', 'error');
-        return;
-    }
-
-    if (!description) {
-        window.showNotification('Please provide a workflow description', 'error');
-        return;
-    }
 
     const data = {
         name,
@@ -120,7 +130,15 @@ window.saveWorkflowFromEditor = function () {
         variables: workflowEditorState.originalData?.variables || {}
     };
 
+    console.log('[MVP-054] 📦 Data to save:', data);
+    console.log('[MVP-054] 🔄 Calling saveEntity...');
+
     window.saveEntity('workflows', workflowEditorState.mode, workflowEditorState.workflowId, data, 'save-workflow-btn', () => {
+        console.log('[MVP-054] ✅ Save callback executing');
+
+        // Clear validation errors on successful save
+        window.formValidation.clearAllErrors('workflow-editor-card');
+
         cancelWorkflowEdit();
         loadWorkflows();
     });

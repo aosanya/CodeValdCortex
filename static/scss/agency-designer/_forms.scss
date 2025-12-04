@@ -20,6 +20,13 @@
     font-size: $font-size-xs !important;
 }
 
+// Validation error messages - maintain consistent size
+.help.is-danger {
+    font-size: $font-size-xs !important;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
 // Make all inputs and textareas smaller
 .input,
 .textarea,
