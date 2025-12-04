@@ -498,37 +498,46 @@ templ WorkflowDesigner(agency *models.Agency, workflow *models.Workflow) {
 
 ## Implementation Phases
 
-### Phase 1: Data Model (1-2 days)
-- Update Step struct in `workflow.go`
-- Add HumanRoute struct
-- Database migration
-- API endpoint updates
+### Phase 1: Data Model (1-2 days) ✅ **COMPLETE**
+- ✅ Update Step struct in `workflow.go`
+- ✅ Add HumanRoute struct
+- ✅ Database migration (backward compatible)
+- ✅ API endpoint updates (auto-default L0)
+- **Commit**: `45a325c` - Enhanced Step data model with autonomy levels
 
-### Phase 2: Step Cards (2-3 days)
-- Add name/description fields
-- Implement autonomy badges
-- Add route count indicator
-- Hover tooltips
+### Phase 2: Step Cards (2-3 days) ✅ **COMPLETE**
+- ✅ Add name/description fields
+- ✅ Implement autonomy badges (color-coded L0-L4)
+- ✅ Add route count indicator
+- ✅ Hover tooltips (via title attributes)
+- ✅ Click-to-select functionality
+- **Commit**: `f44fbac` - Step card UI with autonomy badges
 
-### Phase 3: Properties Panel (3-4 days)
-- Configure step properties fields
-- Implement route table editor
-- Add validation rules
-- Wire up save handlers
+### Phase 3: Properties Panel (3-4 days) ✅ **COMPLETE**
+- ✅ Configure step properties fields
+- ✅ Implement save/cancel handlers
+- ✅ Add validation rules
+- ✅ Wire up properties panel to step selection
+- ✅ 3-column layout (work items | canvas | properties)
+- **Commit**: `cb17268` - Properties panel integration
 
-### Phase 4: Visual Routes (3-4 days)
-- SVG arrow rendering
-- Color coding implementation
-- Route labels/tooltips
-- Legend component
+### Phase 4: Visual Routes (3-4 days) 🔄 **IN PROGRESS**
+- ✅ Route legend component (foundation)
+- ✅ Properties panel route info field
+- ⏳ SVG arrow rendering between steps
+- ⏳ Color coding implementation (green/red/yellow/blue)
+- ⏳ Route labels/tooltips
+- ⏳ Route editing UI (table-based)
+- **Commit**: `9b4a3f5` - Route legend and properties preview
 
-### Phase 5: Testing & Polish (2-3 days)
+### Phase 5: Testing & Polish (2-3 days) ⏸️ **NOT STARTED**
 - Unit tests
 - Integration tests
 - Bug fixes
 - Documentation
 
-**Total Estimate**: 11-16 days
+**Total Estimate**: 11-16 days  
+**Actual Progress**: 4 commits, ~60% complete (Phases 1-3 + Phase 4 foundation)
 
 ---
 
