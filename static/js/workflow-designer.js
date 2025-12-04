@@ -321,13 +321,20 @@ window.workflowDesigner = function () {
             const newStep = {
                 id: this.generateID(),
                 order: position,
+                name: '', // Empty by default, user can set via properties panel
+                description: '',
+                autonomy_level: 'L0', // Default to manual
                 items: items.map(item => ({
                     id: this.generateID(),
                     work_item_id: item.key || item._key,
                     work_item_title: item.title,
                     description: item.description || '',
                     showDescription: false
-                }))
+                })),
+                routes: {}, // Empty routes map
+                aggregation: '', // No aggregation by default
+                requires_human_decision: false,
+                available_routes: []
             };
 
             // Insert at position
@@ -522,6 +529,70 @@ window.workflowDesigner = function () {
          */
         generateID() {
             return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        },
+
+        // ===== Autonomy Level & Route Helpers =====
+
+        /**
+         * Get Bulma CSS class for autonomy badge
+         */
+        getAutonomyBadgeClass(level) {
+            const classes = {
+                'L0': 'is-light',      // Gray - Manual
+                'L1': 'is-info',       // Blue - Assisted
+                'L2': 'is-warning',    // Yellow - Conditional
+                'L3': 'is-warning',    // Orange - High Auto (same as warning)
+                'L4': 'is-success'     // Green - Full Auto
+            };
+            return `tag ${classes[level] || 'is-light'}`;
+        },
+
+        /**
+         * Get autonomy level label
+         */
+        getAutonomyLabel(level) {
+            const labels = {
+                'L0': 'Manual',
+                'L1': 'Assisted',
+                'L2': 'Conditional',
+                'L3': 'High Auto',
+                'L4': 'Full Auto'
+            };
+            return labels[level] || 'Unknown';
+        },
+
+        /**
+         * Get route count for a step
+         */
+        getRouteCount(step) {
+            if (!step.routes) return 0;
+            return Object.keys(step.routes).length;
+        },
+
+        /**
+         * Check if step has routes defined
+         */
+        hasRoutes(step) {
+            return this.getRouteCount(step) > 0;
+        },
+
+        /**
+         * Select a step and open properties panel
+         */
+        selectStep(stepId) {
+            const step = this.workflowSteps.find(s => s.id === stepId);
+            if (step && window.PropertiesPanel) {
+                this.openStepProperties(step);
+            }
+        },
+
+        /**
+         * Open properties panel for a step
+         */
+        openStepProperties(step) {
+            // Will be implemented in Phase 3
+            console.log('Opening properties for step:', step);
+            // TODO: Call window.PropertiesPanel.showProperties() with step config
         }
     };
 };

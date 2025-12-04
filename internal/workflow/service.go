@@ -25,6 +25,9 @@ func NewService(repo Repository, logger *logrus.Logger) *Service {
 
 // CreateWorkflow creates a new workflow with validation
 func (s *Service) CreateWorkflow(ctx context.Context, workflow *models.Workflow) error {
+	// Ensure default autonomy level for all steps
+	s.ensureDefaultAutonomyLevels(workflow)
+	
 	// Validate workflow
 	if err := s.ValidateWorkflow(workflow); err != nil {
 		return fmt.Errorf("validation failed: %w", err)
@@ -50,6 +53,9 @@ func (s *Service) GetWorkflowsByAgency(ctx context.Context, agencyID string) ([]
 
 // UpdateWorkflow updates an existing workflow with validation
 func (s *Service) UpdateWorkflow(ctx context.Context, workflow *models.Workflow) error {
+	// Ensure default autonomy level for all steps
+	s.ensureDefaultAutonomyLevels(workflow)
+	
 	// Validate workflow
 	if err := s.ValidateWorkflow(workflow); err != nil {
 		return fmt.Errorf("validation failed: %w", err)
@@ -61,6 +67,15 @@ func (s *Service) UpdateWorkflow(ctx context.Context, workflow *models.Workflow)
 	}
 
 	return nil
+}
+
+// ensureDefaultAutonomyLevels sets default autonomy level (L0) for steps that don't have one
+func (s *Service) ensureDefaultAutonomyLevels(workflow *models.Workflow) {
+	for i := range workflow.Steps {
+		if workflow.Steps[i].AutonomyLevel == "" {
+			workflow.Steps[i].AutonomyLevel = "L0" // Default to manual
+		}
+	}
 }
 
 // DeleteWorkflow deletes a workflow (soft delete)
