@@ -59,7 +59,7 @@ func OverviewContent(currentAgency *models.Agency, conversation *ai.Conversation
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"content-work-items\" class=\"overview-content-section\" style=\"display: none;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div id=\"content-work-items\" class=\"overview-content-section m-0 p-0\" style=\"display: none;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
