@@ -138,6 +138,12 @@ function populateWorkItemForm(workItem) {
     };
     populateForm(formData);
 
+    // Update the editor title to show the work item name
+    const editorTitle = document.getElementById('work-item-editor-title');
+    if (editorTitle && workItem.title) {
+        editorTitle.textContent = `Edit Work Item: ${workItem.title}`;
+    }
+
     // Initialize tree builder with existing structured deliverables if available
     const agencyId = window.getCurrentAgencyId();
     const deliverables = workItem.deliverables_structured || [];
