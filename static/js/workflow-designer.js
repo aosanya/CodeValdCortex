@@ -657,13 +657,11 @@ window.workflowDesigner = function () {
 
                     // Conditional Routing
                     {
-                        key: 'routes_info',
+                        key: 'routes_editor',
                         label: 'Conditional Routes',
-                        type: 'info',
-                        value: this.getRouteCount(step) > 0
-                            ? `${this.getRouteCount(step)} route(s) configured`
-                            : 'No routes configured - will proceed to next step by default',
-                        help: 'Define where workflow goes based on step completion status (Phase 4 - Coming soon)'
+                        type: 'custom',
+                        html: this._renderRouteEditor(step, stepCopy),
+                        help: 'Define where workflow goes based on step completion status'
                     }
                 ],
 
@@ -730,6 +728,233 @@ window.workflowDesigner = function () {
             if (panel) {
                 panel.innerHTML = '<div class="box has-text-centered has-text-grey-light"><p>Select a step to view properties</p></div>';
             }
+        },
+
+        /**
+         * Render route editor HTML for properties panel
+         */
+        _renderRouteEditor(step, stepCopy) {
+            const routes = step.routes || {};
+            const routeEntries = Object.entries(routes);
+            const availableSteps = this.workflowSteps.filter(s => s.id !== step.id);
+
+            let html = `
+                <div class="route-editor">
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-striped is-size-7">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Target Step</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="route-table-body">`;
+
+            // Render existing routes
+            routeEntries.forEach(([status, targetStepId], index) => {
+                const targetStep = this.workflowSteps.find(s => s.id === targetStepId);
+                html += this._renderRouteRow(index, status, targetStepId, targetStep, availableSteps);
+            });
+
+            // Empty state
+            if (routeEntries.length === 0) {
+                html += `
+                    <tr id="empty-routes-message">
+                        <td colspan="3" class="has-text-centered has-text-grey-light">
+                            <em>No routes defined. Will proceed to next step by default.</em>
+                        </td>
+                    </tr>`;
+            }
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                    <button 
+                        type="button" 
+                        class="button is-small is-info is-light"
+                        onclick="window.workflowDesignerInstance.addRouteRow()"
+                    >
+                        <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                        <span>Add Route</span>
+                    </button>
+                </div>
+            `;
+
+            // Store reference to stepCopy for route editing
+            this._currentStepCopy = stepCopy;
+
+            return html;
+        },
+
+        /**
+         * Render a single route row
+         */
+        _renderRouteRow(index, status, targetStepId, targetStep, availableSteps) {
+            return `
+                <tr data-route-index="${index}">
+                    <td>
+                        <div class="select is-small is-fullwidth">
+                            <select onchange="window.workflowDesignerInstance.updateRoute(${index}, 'status', this.value)">
+                                <option value="">Select status...</option>
+                                <option value="success" ${status === 'success' ? 'selected' : ''}>Success</option>
+                                <option value="failure" ${status === 'failure' ? 'selected' : ''}>Failure</option>
+                                <option value="error" ${status === 'error' ? 'selected' : ''}>Error</option>
+                                <option value="retry" ${status === 'retry' ? 'selected' : ''}>Retry</option>
+                                <option value="skip" ${status === 'skip' ? 'selected' : ''}>Skip</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="select is-small is-fullwidth">
+                            <select onchange="window.workflowDesignerInstance.updateRoute(${index}, 'target', this.value)">
+                                <option value="">Select target step...</option>
+                                ${availableSteps.map(s => `
+                                    <option value="${s.id}" ${s.id === targetStepId ? 'selected' : ''}>
+                                        Step ${s.order}: ${s.name || 'Unnamed'}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </td>
+                    <td style="width: 40px;">
+                        <button 
+                            type="button"
+                            class="delete is-small" 
+                            onclick="window.workflowDesignerInstance.removeRoute(${index})"
+                            title="Remove route"
+                        ></button>
+                    </td>
+                </tr>
+            `;
+        },
+
+        /**
+         * Add a new route row
+         */
+        addRouteRow() {
+            const tbody = document.getElementById('route-table-body');
+            if (!tbody) return;
+
+            // Remove empty message if present
+            const emptyMsg = document.getElementById('empty-routes-message');
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+
+            // Get available steps
+            const currentStep = this._currentStepCopy;
+            const availableSteps = this.workflowSteps.filter(s => s.id !== currentStep.id);
+
+            // Add new row
+            const index = tbody.children.length;
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-route-index', index);
+            tr.innerHTML = this._renderRouteRow(index, '', '', null, availableSteps).replace(/<\/?tr[^>]*>/g, '');
+            tbody.appendChild(tr);
+        },
+
+        /**
+         * Update a route
+         */
+        updateRoute(index, field, value) {
+            if (!this._currentStepCopy) return;
+
+            const tbody = document.getElementById('route-table-body');
+            if (!tbody) return;
+
+            const row = tbody.children[index];
+            if (!row) return;
+
+            // Get current route data from row
+            const statusSelect = row.querySelector('select');
+            const targetSelect = row.querySelectorAll('select')[1];
+
+            let status = statusSelect.value;
+            let targetStepId = targetSelect.value;
+
+            // Update based on field
+            if (field === 'status') {
+                status = value;
+            } else if (field === 'target') {
+                targetStepId = value;
+            }
+
+            // Initialize routes if needed
+            if (!this._currentStepCopy.routes) {
+                this._currentStepCopy.routes = {};
+            }
+
+            // Validate: both status and target must be selected
+            if (status && targetStepId) {
+                // Remove old status key if changing status
+                if (field === 'status') {
+                    const oldStatus = Object.keys(this._currentStepCopy.routes).find((key, idx) => {
+                        return Array.from(tbody.children).indexOf(row) === Object.keys(this._currentStepCopy.routes).indexOf(key);
+                    });
+                    if (oldStatus && oldStatus !== status) {
+                        delete this._currentStepCopy.routes[oldStatus];
+                    }
+                }
+
+                // Set new route
+                this._currentStepCopy.routes[status] = targetStepId;
+            }
+        },
+
+        /**
+         * Remove a route
+         */
+        removeRoute(index) {
+            if (!this._currentStepCopy) return;
+
+            const tbody = document.getElementById('route-table-body');
+            if (!tbody) return;
+
+            const row = tbody.children[index];
+            if (!row) return;
+
+            // Get status from row
+            const statusSelect = row.querySelector('select');
+            const status = statusSelect.value;
+
+            // Remove from stepCopy routes
+            if (this._currentStepCopy.routes && status) {
+                delete this._currentStepCopy.routes[status];
+            }
+
+            // Remove row
+            row.remove();
+
+            // Re-index remaining rows
+            Array.from(tbody.children).forEach((r, i) => {
+                r.setAttribute('data-route-index', i);
+            });
+
+            // Show empty message if no routes
+            if (tbody.children.length === 0) {
+                const tr = document.createElement('tr');
+                tr.id = 'empty-routes-message';
+                tr.innerHTML = `
+                    <td colspan="3" class="has-text-centered has-text-grey-light">
+                        <em>No routes defined. Will proceed to next step by default.</em>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
         }
     };
 };
+
+// Store global instance reference for inline event handlers
+let workflowDesignerInstance = null;
+document.addEventListener('alpine:init', () => {
+    // Capture instance when Alpine initializes
+    setTimeout(() => {
+        const container = document.querySelector('[x-data="workflowDesigner()"]');
+        if (container && container._x_dataStack && container._x_dataStack[0]) {
+            window.workflowDesignerInstance = container._x_dataStack[0];
+        }
+    }, 100);
+});

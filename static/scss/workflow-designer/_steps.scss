@@ -160,6 +160,38 @@
     }
 }
 
+/* Route Editor in Properties Panel */
+.route-editor {
+    .table-container {
+        margin-bottom: $spacing-sm;
+    }
+
+    table {
+        background: white;
+        
+        th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #7a7a7a;
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        .select {
+            select {
+                font-size: 0.75rem;
+            }
+        }
+
+        .delete {
+            margin: 0;
+        }
+    }
+}
+
 /* Responsive */
 @media screen and (max-width: 768px) {
     .parallel-items {
