@@ -32,24 +32,24 @@ type Steps []Step
 // Step represents a single step in the workflow
 // Execution type is implicit: 1 item = sequential, 2+ items = parallel
 type Step struct {
-	ID          string     `json:"id" binding:"required"`
-	Order       int        `json:"order" binding:"required"`
-	Name        string     `json:"name,omitempty"`
-	Description string     `json:"description,omitempty"`
-	
+	ID          string `json:"id" binding:"required"`
+	Order       int    `json:"order" binding:"required"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+
 	// Autonomy control (L0-L4)
 	AutonomyLevel string `json:"autonomy_level" binding:"required,oneof=L0 L1 L2 L3 L4"`
-	
+
 	Items []StepItem `json:"items" binding:"required,min=1"` // 1 item = sequential, 2+ = parallel
-	
+
 	// Conditional routing
-	Routes       map[string]string `json:"routes,omitempty"`        // status -> target step ID
+	Routes       map[string]string `json:"routes,omitempty"` // status -> target step ID
 	Aggregation  string            `json:"aggregation,omitempty" binding:"omitempty,oneof=any all majority first"`
 	DefaultRoute string            `json:"default_route,omitempty"` // Fallback if no route matches
-	
+
 	// Human-directed routing
-	RequiresHumanDecision bool          `json:"requires_human_decision,omitempty"`
-	AvailableRoutes       []HumanRoute  `json:"available_routes,omitempty"`
+	RequiresHumanDecision bool         `json:"requires_human_decision,omitempty"`
+	AvailableRoutes       []HumanRoute `json:"available_routes,omitempty"`
 }
 
 // StepItem represents a work item within a step

@@ -590,9 +590,135 @@ window.workflowDesigner = function () {
          * Open properties panel for a step
          */
         openStepProperties(step) {
-            // Will be implemented in Phase 3
-            console.log('Opening properties for step:', step);
-            // TODO: Call window.PropertiesPanel.showProperties() with step config
+            if (!window.PropertiesPanel) {
+                console.error('PropertiesPanel not available');
+                return;
+            }
+
+            // Create a copy to track changes
+            const stepCopy = { ...step };
+
+            // Build step properties configuration
+            const config = {
+                title: `Step ${step.order} Properties`,
+                icon: 'cog',
+                iconColor: 'info',
+                data: stepCopy,
+                autoSwitchTab: false, // Don't auto-switch tabs (no chat panel in workflow designer)
+                
+                // Track field changes
+                onUpdate: (field, value) => {
+                    stepCopy[field] = value;
+                },
+
+                fields: [
+                    // Basic Information
+                    {
+                        key: 'name',
+                        label: 'Step Name',
+                        type: 'text',
+                        placeholder: 'e.g., Review Documentation',
+                        help: 'Optional: Give this step a descriptive name'
+                    },
+                    {
+                        key: 'description',
+                        label: 'Description',
+                        type: 'textarea',
+                        placeholder: 'Describe what happens in this step...',
+                        help: 'Optional: Detailed description of the step'
+                    },
+                    {
+                        key: 'autonomy_level',
+                        label: 'Autonomy Level',
+                        type: 'select',
+                        options: [
+                            { value: 'L0', label: 'L0 - Manual (Human executes)' },
+                            { value: 'L1', label: 'L1 - Assisted (AI suggests, human approves)' },
+                            { value: 'L2', label: 'L2 - Conditional (AI autonomous within constraints)' },
+                            { value: 'L3', label: 'L3 - High Automation (AI handles most scenarios)' },
+                            { value: 'L4', label: 'L4 - Full Autonomy (AI fully independent)' }
+                        ],
+                        help: 'Controls how much autonomy AI agents have in this step'
+                    },
+                    // Parallel Execution (only if multiple items)
+                    ...(step.items && step.items.length > 1 ? [{
+                        key: 'aggregation',
+                        label: 'Aggregation Rule',
+                        type: 'select',
+                        options: [
+                            { value: '', label: 'None (sequential)' },
+                            { value: 'any', label: 'Any (first completion)' },
+                            { value: 'all', label: 'All (wait for all)' },
+                            { value: 'majority', label: 'Majority (>50%)' },
+                            { value: 'first', label: 'First (immediate)' }
+                        ],
+                        help: 'How to proceed when multiple work items complete'
+                    }] : [])
+                ],
+                
+                // Save handler
+                onSave: () => {
+                    this.saveStepProperties(step, stepCopy);
+                },
+
+                buttons: [
+                    {
+                        label: 'Save',
+                        class: 'is-primary',
+                        icon: 'save',
+                        action: 'save'
+                    },
+                    {
+                        label: 'Cancel',
+                        class: 'is-light',
+                        icon: 'times',
+                        action: () => this.closePropertiesPanel()
+                    }
+                ]
+            };
+
+            window.PropertiesPanel.showProperties(config);
+        },
+
+        /**
+         * Save step properties from panel
+         */
+        saveStepProperties(originalStep, updatedData) {
+            // Update step in workflow
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === originalStep.id);
+            if (stepIndex !== -1) {
+                // Merge updated properties (preserve items array and other data)
+                this.workflowSteps[stepIndex] = {
+                    ...this.workflowSteps[stepIndex],
+                    name: updatedData.name || '',
+                    description: updatedData.description || '',
+                    autonomy_level: updatedData.autonomy_level || 'L0',
+                    aggregation: updatedData.aggregation || ''
+                };
+
+                // Save workflow
+                this.saveWorkflow();
+
+                // Show success notification
+                if (window.showNotification) {
+                    window.showNotification('Step properties saved successfully', 'success');
+                } else {
+                    console.log('Step properties saved');
+                }
+
+                // Close panel
+                this.closePropertiesPanel();
+            }
+        },
+
+        /**
+         * Close properties panel
+         */
+        closePropertiesPanel() {
+            const panel = document.getElementById('properties-panel-content');
+            if (panel) {
+                panel.innerHTML = '<div class="box has-text-centered has-text-grey-light"><p>Select a step to view properties</p></div>';
+            }
         }
     };
 };

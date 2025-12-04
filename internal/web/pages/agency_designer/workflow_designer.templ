@@ -133,7 +133,7 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 						</div>
 					</div>
 					<!-- Center: Workflow Canvas -->
-					<div class="column workflow-canvas">
+					<div class="column is-6 workflow-canvas">
 						<div class="canvas-content">
 							<!-- START Marker -->
 							<div class="workflow-marker start-marker">
@@ -399,8 +399,23 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 							</div>
 						</div>
 					</div>
+					<!-- Right Panel: Properties -->
+					<div class="column is-3 properties-panel" style="background: #f9f9f9; border-left: 1px solid #e5e5e5; overflow-y: auto;">
+						<div id="properties-panel-content" class="p-3">
+							<div class="box has-text-centered has-text-grey-light">
+								<p class="icon is-large">
+									<i class="fas fa-mouse-pointer fa-2x"></i>
+								</p>
+								<p class="mt-3">Click a step to view properties</p>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
+			<!-- Load Properties Panel Component -->
+			<script src="/static/js/agency-designer/properties-panel.js"></script>
+			<!-- Load showNotification utility -->
+			<script src="/static/js/agency-designer/utils.js"></script>
 		</body>
 	</html>
 }

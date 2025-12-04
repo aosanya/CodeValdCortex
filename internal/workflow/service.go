@@ -27,7 +27,7 @@ func NewService(repo Repository, logger *logrus.Logger) *Service {
 func (s *Service) CreateWorkflow(ctx context.Context, workflow *models.Workflow) error {
 	// Ensure default autonomy level for all steps
 	s.ensureDefaultAutonomyLevels(workflow)
-	
+
 	// Validate workflow
 	if err := s.ValidateWorkflow(workflow); err != nil {
 		return fmt.Errorf("validation failed: %w", err)
@@ -55,7 +55,7 @@ func (s *Service) GetWorkflowsByAgency(ctx context.Context, agencyID string) ([]
 func (s *Service) UpdateWorkflow(ctx context.Context, workflow *models.Workflow) error {
 	// Ensure default autonomy level for all steps
 	s.ensureDefaultAutonomyLevels(workflow)
-	
+
 	// Validate workflow
 	if err := s.ValidateWorkflow(workflow); err != nil {
 		return fmt.Errorf("validation failed: %w", err)
