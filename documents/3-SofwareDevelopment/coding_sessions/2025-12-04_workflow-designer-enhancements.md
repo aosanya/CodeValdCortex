@@ -2,7 +2,7 @@
 
 **Date**: December 4, 2025  
 **Branch**: `feature/MVP-workflow-designer-enhancements`  
-**Status**: In Progress (60% complete)  
+**Status**: Near Complete (90% complete)  
 **Related Research**: `/documents/3-SofwareDevelopment/research/workflow-designer/`  
 **Implementation Plan**: `/documents/3-SofwareDevelopment/mvp-details/workflow-designer-enhancements.md`
 
@@ -185,7 +185,9 @@ saveStepProperties(originalStep, updatedData) {
 
 ---
 
-### Phase 4: Visual Routes Foundation ✅ (Commit: `9b4a3f5`)
+### Phase 4: Visual Routes ✅ (Commits: `9b4a3f5`, `e51b1ad`)
+
+**Route Legend** (`workflow_designer.templ`):
 
 **Route Legend** (`workflow_designer.templ`):
 ```html

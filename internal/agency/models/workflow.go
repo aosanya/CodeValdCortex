@@ -37,9 +37,6 @@ type Step struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
 
-	// Autonomy control (L0-L4)
-	AutonomyLevel string `json:"autonomy_level" binding:"required,oneof=L0 L1 L2 L3 L4"`
-
 	Items []StepItem `json:"items" binding:"required,min=1"` // 1 item = sequential, 2+ = parallel
 
 	// Conditional routing
@@ -58,6 +55,9 @@ type StepItem struct {
 	WorkItemID   string `json:"work_item_id" binding:"required"`   // Work item document ID
 	WorkItemKey  string `json:"work_item_key" binding:"required"`  // ArangoDB _key reference
 	WorkItemName string `json:"work_item_name" binding:"required"` // Denormalized for display
+
+	// Autonomy control (L0-L4) - at work item level
+	AutonomyLevel string `json:"autonomy_level" binding:"required,oneof=L0 L1 L2 L3 L4"`
 }
 
 // HumanRoute represents a predefined route option for human decision points

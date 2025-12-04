@@ -323,13 +323,13 @@ window.workflowDesigner = function () {
                 order: position,
                 name: '', // Empty by default, user can set via properties panel
                 description: '',
-                autonomy_level: 'L0', // Default to manual
                 items: items.map(item => ({
                     id: this.generateID(),
                     work_item_id: item.key || item._key,
                     work_item_title: item.title,
                     description: item.description || '',
-                    showDescription: false
+                    showDescription: false,
+                    autonomy_level: 'L0' // Default autonomy level for work item
                 })),
                 routes: {}, // Empty routes map
                 aggregation: '', // No aggregation by default
@@ -356,7 +356,8 @@ window.workflowDesigner = function () {
                 work_item_id: item.key || item._key,
                 work_item_title: item.title,
                 description: item.description || '',
-                showDescription: false
+                showDescription: false,
+                autonomy_level: 'L0' // Default autonomy level for work item
             };
 
             // Add to items array (left = prepend, right/add = append)
@@ -577,12 +578,69 @@ window.workflowDesigner = function () {
         },
 
         /**
+         * Get autonomy levels for all work items in a step
+         * Returns array of unique autonomy levels
+         */
+        getStepAutonomyLevels(step) {
+            if (!step.items || step.items.length === 0) return [];
+
+            const levels = step.items
+                .map(item => item.autonomy_level || 'L0')
+                .filter((level, index, self) => self.indexOf(level) === index); // unique
+
+            return levels.sort(); // Sort L0, L1, L2, L3, L4
+        },
+
+        /**
+         * Get display text for step autonomy (shows all unique levels)
+         */
+        getStepAutonomyDisplay(step) {
+            const levels = this.getStepAutonomyLevels(step);
+            if (levels.length === 0) return 'L0';
+            if (levels.length === 1) return levels[0];
+            return levels.join(', '); // e.g., "L0, L2"
+        },
+
+        /**
+         * Get CSS class for step autonomy badge (uses highest level)
+         */
+        getStepAutonomyBadgeClass(step) {
+            const levels = this.getStepAutonomyLevels(step);
+            if (levels.length === 0) return 'tag is-light';
+
+            // Use highest autonomy level for color
+            const highest = levels[levels.length - 1];
+            return this.getAutonomyBadgeClass(highest);
+        },
+
+        /**
          * Select a step and open properties panel
          */
         selectStep(stepId) {
+            console.log('🔍 selectStep called:', stepId);
             const step = this.workflowSteps.find(s => s.id === stepId);
+            console.log('📌 Found step:', step);
+            console.log('🪟 PropertiesPanel available:', !!window.PropertiesPanel);
+            
             if (step && window.PropertiesPanel) {
+                console.log('✅ Opening step properties');
                 this.openStepProperties(step);
+            } else {
+                if (!step) console.error('❌ Step not found:', stepId);
+                if (!window.PropertiesPanel) console.error('❌ PropertiesPanel not available');
+            }
+        },
+
+        /**
+         * Select a work item and open properties panel
+         */
+        selectWorkItem(stepId, itemId) {
+            const step = this.workflowSteps.find(s => s.id === stepId);
+            if (!step) return;
+
+            const item = step.items.find(i => i.id === itemId);
+            if (item && window.PropertiesPanel) {
+                this.openWorkItemProperties(step, item);
             }
         },
 
@@ -627,19 +685,16 @@ window.workflowDesigner = function () {
                         placeholder: 'Describe what happens in this step...',
                         help: 'Optional: Detailed description of the step'
                     },
+
+                    // Work Item Autonomy Levels
                     {
-                        key: 'autonomy_level',
-                        label: 'Autonomy Level',
-                        type: 'select',
-                        options: [
-                            { value: 'L0', label: 'L0 - Manual (Human executes)' },
-                            { value: 'L1', label: 'L1 - Assisted (AI suggests, human approves)' },
-                            { value: 'L2', label: 'L2 - Conditional (AI autonomous within constraints)' },
-                            { value: 'L3', label: 'L3 - High Automation (AI handles most scenarios)' },
-                            { value: 'L4', label: 'L4 - Full Autonomy (AI fully independent)' }
-                        ],
-                        help: 'Controls how much autonomy AI agents have in this step'
+                        key: 'work_items_autonomy',
+                        label: 'Work Item Autonomy Levels',
+                        type: 'custom',
+                        html: this._renderWorkItemAutonomyEditor(step, stepCopy),
+                        help: 'Set autonomy level for each work item in this step'
                     },
+
                     // Parallel Execution (only if multiple items)
                     ...(step.items && step.items.length > 1 ? [{
                         key: 'aggregation',
@@ -726,8 +781,126 @@ window.workflowDesigner = function () {
         closePropertiesPanel() {
             const panel = document.getElementById('properties-panel-content');
             if (panel) {
-                panel.innerHTML = '<div class="box has-text-centered has-text-grey-light"><p>Select a step to view properties</p></div>';
+                panel.innerHTML = '<div class="box has-text-centered has-text-grey-light"><p>Click a step or work item to view properties</p></div>';
             }
+        },
+
+        /**
+         * Open properties panel for a work item
+         */
+        openWorkItemProperties(step, item) {
+            if (!window.PropertiesPanel) {
+                console.error('PropertiesPanel not available');
+                return;
+            }
+
+            // Create a copy to track changes
+            const itemCopy = { ...item };
+
+            // Build work item properties configuration
+            const config = {
+                title: `Work Item: ${item.work_item_title || item.work_item_name}`,
+                icon: 'tasks',
+                iconColor: 'primary',
+                data: itemCopy,
+                autoSwitchTab: false,
+
+                // Track field changes
+                onUpdate: (field, value) => {
+                    itemCopy[field] = value;
+                },
+
+                fields: [
+                    // Work Item Info (read-only)
+                    {
+                        key: 'work_item_name',
+                        label: 'Work Item',
+                        type: 'static',
+                        help: 'Work item from specification (read-only)'
+                    },
+                    {
+                        key: 'description',
+                        label: 'Description',
+                        type: 'static',
+                        help: 'Work item description from specification'
+                    },
+
+                    // Autonomy Level (editable)
+                    {
+                        key: 'autonomy_level',
+                        label: 'Autonomy Level',
+                        type: 'select',
+                        options: [
+                            { value: 'L0', label: 'L0 - Manual (Human executes)' },
+                            { value: 'L1', label: 'L1 - Assisted (AI suggests, human approves)' },
+                            { value: 'L2', label: 'L2 - Conditional (AI autonomous within constraints)' },
+                            { value: 'L3', label: 'L3 - High Automation (AI handles most scenarios)' },
+                            { value: 'L4', label: 'L4 - Full Autonomy (AI fully independent)' }
+                        ],
+                        help: 'Controls how much autonomy AI agents have for this specific work item'
+                    },
+
+                    // Step Context Info
+                    {
+                        key: 'step_context',
+                        label: 'Step Context',
+                        type: 'info',
+                        value: `Part of: Step ${step.order} - ${step.name || 'Unnamed Step'}`,
+                        help: 'This work item belongs to the step shown above'
+                    }
+                ],
+
+                // Save handler
+                onSave: () => {
+                    this.saveWorkItemProperties(step, item, itemCopy);
+                },
+
+                buttons: [
+                    {
+                        label: 'Save',
+                        class: 'is-primary',
+                        icon: 'save',
+                        action: 'save'
+                    },
+                    {
+                        label: 'Cancel',
+                        class: 'is-light',
+                        icon: 'times',
+                        action: () => this.closePropertiesPanel()
+                    }
+                ]
+            };
+
+            window.PropertiesPanel.showProperties(config);
+        },
+
+        /**
+         * Save work item properties from panel
+         */
+        saveWorkItemProperties(step, originalItem, updatedData) {
+            // Find the step in workflow
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            if (stepIndex === -1) return;
+
+            // Find the item in the step
+            const itemIndex = this.workflowSteps[stepIndex].items.findIndex(i => i.id === originalItem.id);
+            if (itemIndex === -1) return;
+
+            // Update the work item's autonomy level
+            this.workflowSteps[stepIndex].items[itemIndex].autonomy_level = updatedData.autonomy_level || 'L0';
+
+            // Save workflow
+            this.saveWorkflow();
+
+            // Show success notification
+            if (window.showNotification) {
+                window.showNotification('Work item autonomy level updated successfully', 'success');
+            } else {
+                console.log('Work item autonomy level saved');
+            }
+
+            // Close panel
+            this.closePropertiesPanel();
         },
 
         /**

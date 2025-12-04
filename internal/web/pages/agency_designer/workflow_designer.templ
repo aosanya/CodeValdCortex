@@ -20,6 +20,10 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 			<!-- Specification API for work items -->
 			<script src="/static/js/agency-designer/specification-api.js"></script>
+			<!-- Properties Panel Component (must load before workflow-designer.js) -->
+			<script src="/static/js/agency-designer/properties-panel.js"></script>
+			<!-- Utilities (must load before workflow-designer.js) -->
+			<script src="/static/js/agency-designer/utils.js"></script>
 			<!-- Workflow Designer -->
 			<script src="/static/js/workflow-designer.js"></script>
 		</head>
@@ -212,13 +216,13 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																	</span>
 																	<span x-text="step.items.length"></span>
 																</span>
-																<!-- Autonomy Level Badge -->
+																<!-- Autonomy Level Badge (aggregated from work items) -->
 																<span 
-																	:class="getAutonomyBadgeClass(step.autonomy_level)"
-																	:title="'Autonomy: ' + getAutonomyLabel(step.autonomy_level)"
+																	:class="getStepAutonomyBadgeClass(step)"
+																	:title="'Autonomy Levels: ' + getStepAutonomyDisplay(step)"
 																	class="mr-2"
 																>
-																	<strong x-text="step.autonomy_level || 'L0'"></strong>
+																	<strong x-text="getStepAutonomyDisplay(step)"></strong>
 																</span>
 																<!-- Route Indicator (if routes defined) -->
 																<span 
@@ -254,6 +258,8 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															draggable="true"
 															@dragstart="handleStepDragStart($event, stepIndex, 0)"
 															@dragend="handleDragEnd($event)"
+															@click.stop="selectWorkItem(step.id, step.items[0].id)"
+															style="cursor: pointer;"
 														>
 															<div class="card">
 																<header class="card-header" style="position: relative;">
@@ -318,6 +324,8 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																	draggable="true"
 																	@dragstart="handleStepDragStart($event, stepIndex, itemIndex)"
 																	@dragend="handleDragEnd($event)"
+																	@click.stop="selectWorkItem(step.id, item.id)"
+																	style="cursor: pointer;"
 																>
 																	<div class="card">
 																		<header class="card-header" style="position: relative;">
@@ -449,10 +457,6 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 					</div>
 				</div>
 			</div>
-			<!-- Load Properties Panel Component -->
-			<script src="/static/js/agency-designer/properties-panel.js"></script>
-			<!-- Load showNotification utility -->
-			<script src="/static/js/agency-designer/utils.js"></script>
 		</body>
 	</html>
 }

@@ -69,11 +69,13 @@ func (s *Service) UpdateWorkflow(ctx context.Context, workflow *models.Workflow)
 	return nil
 }
 
-// ensureDefaultAutonomyLevels sets default autonomy level (L0) for steps that don't have one
+// ensureDefaultAutonomyLevels sets default autonomy level (L0) for work items that don't have one
 func (s *Service) ensureDefaultAutonomyLevels(workflow *models.Workflow) {
 	for i := range workflow.Steps {
-		if workflow.Steps[i].AutonomyLevel == "" {
-			workflow.Steps[i].AutonomyLevel = "L0" // Default to manual
+		for j := range workflow.Steps[i].Items {
+			if workflow.Steps[i].Items[j].AutonomyLevel == "" {
+				workflow.Steps[i].Items[j].AutonomyLevel = "L0" // Default to manual
+			}
 		}
 	}
 }
