@@ -515,6 +515,13 @@ async function processStreamingResponse(response, messageBubble, streamingText, 
                         // Parse final result
                         try {
                             finalResult = JSON.parse(data);
+
+                            // Convert last progress bubble's spinning icon to checkmark
+                            const lastProgressBubble = chatMessages.querySelector('.progress-bubble:last-of-type .fa-circle-notch');
+                            if (lastProgressBubble) {
+                                lastProgressBubble.classList.remove('fa-circle-notch', 'fa-spin');
+                                lastProgressBubble.classList.add('fa-check-circle');
+                            }
                         } catch (e) {
                             console.debug('[MVP-054] failed to parse complete event JSON:', e.message);
                         }
