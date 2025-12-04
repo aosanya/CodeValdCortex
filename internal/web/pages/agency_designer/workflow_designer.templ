@@ -183,6 +183,59 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 											</div>
 											<!-- Step Items -->
 											<div class="workflow-step" :class="{ 'is-parallel': step.items.length > 1 }">
+												<!-- Step Header: Order, Name, Autonomy, Routes -->
+												<div 
+													class="step-header box has-background-light mb-2"
+													@click="selectStep(step.id)"
+													style="cursor: pointer; padding: 0.75rem 1rem;"
+												>
+													<div class="level is-mobile mb-0">
+														<div class="level-left">
+															<div class="level-item">
+																<!-- Order Number -->
+																<span class="tag is-medium is-dark mr-2">
+																	<strong x-text="step.order"></strong>
+																</span>
+																<!-- Step Name (or fallback) -->
+																<span 
+																	class="is-size-6 has-text-weight-semibold"
+																	x-text="step.name || 'Step ' + step.order"
+																></span>
+															</div>
+														</div>
+														<div class="level-right">
+															<div class="level-item">
+																<!-- Work Item Count -->
+																<span class="tag is-info is-light mr-2" :title="`${step.items.length} work item(s)`">
+																	<span class="icon is-small">
+																		<i class="fas fa-tasks"></i>
+																	</span>
+																	<span x-text="step.items.length"></span>
+																</span>
+																<!-- Autonomy Level Badge -->
+																<span 
+																	:class="getAutonomyBadgeClass(step.autonomy_level)"
+																	:title="'Autonomy: ' + getAutonomyLabel(step.autonomy_level)"
+																	class="mr-2"
+																>
+																	<strong x-text="step.autonomy_level || 'L0'"></strong>
+																</span>
+																<!-- Route Indicator (if routes defined) -->
+																<span 
+																	x-show="hasRoutes(step)"
+																	class="tag is-link is-light"
+																	:title="`${getRouteCount(step)} route(s) configured`"
+																>
+																	<span class="icon is-small">
+																		<i class="fas fa-route"></i>
+																	</span>
+																	<span x-text="getRouteCount(step)"></span>
+																</span>
+															</div>
+														</div>
+													</div>
+												</div>
+												
 												<template x-if="step.items.length === 1">
 													<!-- Single Item (Sequential) -->
 													<div

@@ -27,6 +27,32 @@
     }
 }
 
+/* Step Header - Order, Name, Autonomy, Routes */
+.step-header {
+    cursor: pointer;
+    transition: all $transition-fast ease;
+    border: 2px solid transparent;
+
+    &:hover {
+        border-color: $vscode-accent;
+        background-color: rgba(50, 115, 220, 0.05) !important;
+        box-shadow: 0 2px 8px rgba(50, 115, 220, 0.15);
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    .level {
+        margin-bottom: 0;
+    }
+
+    // Compact spacing for badges
+    .tag {
+        margin-bottom: 0;
+    }
+}
+
 /* Step Item Container (for side drop zones) */
 .step-item-container {
     position: relative;
