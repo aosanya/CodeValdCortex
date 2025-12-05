@@ -20,7 +20,7 @@
     width: 100%;
     max-width: 800px;
     @include flex-column;
-    align-items: center;
+    // Remove align-items: center to allow drop zones to expand full width
 }
 
 /* Workflow Markers (START/END) */
@@ -86,7 +86,7 @@
     justify-content: center;
 }
 
-/* Flow Arrow - Stretches vertically */
+/* Flow Arrow - Stretches vertically BEHIND drop zone */
 .flow-arrow {
     position: absolute;
     top: 0;
@@ -96,8 +96,8 @@
     height: 100%;
     @include flex-column;
     align-items: center;
-    z-index: 1;
-    pointer-events: none;
+    z-index: 1; // BEHIND drop zones
+    pointer-events: none; // Don't block drop zones
 
     .arrow-line {
         width: 100%;
@@ -117,5 +117,63 @@
         margin-top: -8px;
         opacity: 0.8;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    // Route type variants
+    &.route-success {
+        .arrow-line {
+            background: linear-gradient(to bottom,
+                    transparent 0%,
+                    #48c774 20%,
+                    #48c774 80%,
+                    transparent 100%);
+        }
+
+        .arrow-head {
+            color: #48c774;
+        }
+    }
+
+    &.route-failure {
+        .arrow-line {
+            background: linear-gradient(to bottom,
+                    transparent 0%,
+                    #f14668 20%,
+                    #f14668 80%,
+                    transparent 100%);
+        }
+
+        .arrow-head {
+            color: #f14668;
+        }
+    }
+
+    &.route-retry {
+        .arrow-line {
+            background: linear-gradient(to bottom,
+                    transparent 0%,
+                    #ffdd57 20%,
+                    #ffdd57 80%,
+                    transparent 100%);
+        }
+
+        .arrow-head {
+            color: #ffdd57;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+        }
+    }
+
+    &.route-human {
+        .arrow-line {
+            background: linear-gradient(to bottom,
+                    transparent 0%,
+                    #3298dc 20%,
+                    #3298dc 80%,
+                    transparent 100%);
+        }
+
+        .arrow-head {
+            color: #3298dc;
+        }
     }
 }

@@ -37,68 +37,93 @@ window.workflowDesigner = function () {
          * Initialize the designer
          */
         async init() {
-            console.log('[WF-DESIGNER] 🚀 Initializing workflow designer component');
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🚀 Initializing workflow designer component');
+            console.log('[MVP-WF-DESIGNER] 🆔 Component instance ID:', Math.random().toString(36).substr(2, 9));
+            window.__workflowDesignerInstance = this; // Store reference for debugging
 
             // Get workflow data from data attributes
             const container = this.$el;
-            console.log('[WF-DESIGNER] 📦 Container element:', container);
+            console.log('[MVP-WF-DESIGNER] 📦 Container element:', container);
 
             this.agencyID = container.dataset.agencyId;
             this.workflowID = container.dataset.workflowId;
             this.workflowKey = container.dataset.workflowKey;
             this.workflowName = container.dataset.workflowName;
             this.workflowDescription = container.dataset.workflowDescription;
-            this.workflowVersion = container.dataset.workflowVersion;
 
-            console.log('[WF-DESIGNER] 📋 Workflow metadata:', {
+            console.log('[MVP-WF-DESIGNER] 🔧 Initial state:', {
                 agencyID: this.agencyID,
                 workflowID: this.workflowID,
                 workflowKey: this.workflowKey,
                 workflowName: this.workflowName
             });
+            this.workflowVersion = container.dataset.workflowVersion;
+
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 📋 Workflow metadata loaded:', {
+                agencyID: this.agencyID,
+                workflowID: this.workflowID,
+                workflowKey: this.workflowKey,
+                workflowName: this.workflowName,
+                workflowVersion: this.workflowVersion
+            });
 
             // Parse workflow steps if available
             try {
                 const stepsData = container.dataset.workflowSteps;
+                console.log('[MVP-WF-DESIGNER] 📊 Steps data from container:', stepsData ? `${stepsData.length} chars` : 'null');
                 if (stepsData && stepsData !== 'null') {
                     this.workflowSteps = JSON.parse(stepsData) || [];
-                    console.log('[WF-DESIGNER] ✅ Parsed workflow steps:', this.workflowSteps.length, 'steps');
+                    console.log('[MVP-WF-DESIGNER] ✅ Parsed workflow steps:', {
+                        count: this.workflowSteps.length,
+                        steps: this.workflowSteps
+                    });
                 }
             } catch (e) {
-                console.error('[WF-DESIGNER] ❌ Failed to parse workflow steps:', e);
+                console.error('[MVP-WF-DESIGNER] ❌ Failed to parse workflow steps:', e);
                 this.workflowSteps = [];
             }
 
             // Check PropertiesPanel availability
-            console.log('[WF-DESIGNER] 🪟 PropertiesPanel available:', !!window.PropertiesPanel);
-            console.log('[WF-DESIGNER] 🛠️ PropertiesPanel methods:', window.PropertiesPanel ? Object.keys(window.PropertiesPanel) : 'N/A');
+            console.log('[MVP-WF-DESIGNER] 🪟 PropertiesPanel available:', !!window.PropertiesPanel);
+            console.log('[MVP-WF-DESIGNER] 🛠️ PropertiesPanel methods:', window.PropertiesPanel ? Object.keys(window.PropertiesPanel) : 'N/A');
 
             // Load available work items from specification API
             await this.loadWorkItems();
 
-            console.log('[WF-DESIGNER] ✅ Initialization complete');
+            console.log('[MVP-WF-DESIGNER] ✅ Initialization complete');
         },
 
         /**
          * Load available work items from specification
          */
         async loadWorkItems() {
-            console.log('[WF-DESIGNER] 📚 Loading work items...');
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 📚 Loading work items for agency:', this.agencyID);
             try {
                 // Use existing specification API
                 if (typeof window.specificationAPI !== 'undefined') {
                     // Set the agency ID on the API instance
                     window.specificationAPI.agencyId = this.agencyID;
 
-                    console.log('[WF-DESIGNER] 🔍 Fetching specification for agency:', this.agencyID);
+                    // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+                    console.log('[MVP-WF-DESIGNER] 🔍 Fetching specification for agency:', this.agencyID);
                     const spec = await window.specificationAPI.getSpecification();
-                    console.log('[WF-DESIGNER] 📦 Specification received:', spec);
+                    console.log('[MVP-WF-DESIGNER] 📦 Specification received:', {
+                        hasWorkItems: !!(spec.work_items),
+                        workItemsCount: spec.work_items?.length || 0,
+                        hasWorkflows: !!(spec.workflows),
+                        workflowsCount: spec.workflows?.length || 0
+                    });
 
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
 
-                    console.log('[WF-DESIGNER] ✅ Loaded', this.availableWorkItems.length, 'work items');
-                    console.log('[WF-DESIGNER] 📋 Work items:', this.availableWorkItems);
+                    console.log('[MVP-WF-DESIGNER] ✅ Loaded work items:', {
+                        count: this.availableWorkItems.length,
+                        sample: this.availableWorkItems.slice(0, 3).map(wi => ({ key: wi._key || wi.key, title: wi.title }))
+                    });
 
                     // Load all workflows for specification updates
                     // Normalize workflows to ensure they have a 'key' property
@@ -110,13 +135,13 @@ window.workflowDesigner = function () {
                     // Enrich existing workflow steps with work item details
                     this.enrichWorkflowSteps();
                 } else {
-                    console.error('[WF-DESIGNER] ❌ specificationAPI not available');
+                    console.error('[MVP-WF-DESIGNER] ❌ specificationAPI not available');
                     this.availableWorkItems = [];
                     this.filteredWorkItems = [];
                     this.allWorkflows = [];
                 }
             } catch (error) {
-                console.error('[WF-DESIGNER] ❌ Error loading work items:', error);
+                console.error('[MVP-WF-DESIGNER] ❌ Error loading work items:', error);
                 this.availableWorkItems = [];
                 this.filteredWorkItems = [];
                 this.allWorkflows = [];
@@ -127,7 +152,14 @@ window.workflowDesigner = function () {
          * Enrich workflow steps with work item details
          */
         enrichWorkflowSteps() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔄 Enriching workflow steps:', {
+                stepsCount: this.workflowSteps.length,
+                workItemsAvailable: this.availableWorkItems.length
+            });
+
             if (!this.availableWorkItems || this.availableWorkItems.length === 0) {
+                console.log('[MVP-WF-DESIGNER] ⚠️ No work items available for enrichment');
                 return;
             }
 
@@ -186,8 +218,12 @@ window.workflowDesigner = function () {
          */
         filterWorkItems() {
             const query = this.searchQuery.toLowerCase().trim();
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔍 Filtering work items with query:', query);
+
             if (!query) {
                 this.filteredWorkItems = [...this.availableWorkItems];
+                console.log('[MVP-WF-DESIGNER] 📋 No filter, showing all:', this.filteredWorkItems.length, 'items');
                 return;
             }
 
@@ -196,13 +232,21 @@ window.workflowDesigner = function () {
                 const description = (item.description || '').toLowerCase();
                 return title.includes(query) || description.includes(query);
             });
+
+            console.log('[MVP-WF-DESIGNER] ✅ Filtered results:', this.filteredWorkItems.length, 'items');
         },
 
         /**
          * Handle drag start from work items panel
          */
         handleDragStart(event, item) {
-            console.log('[WF-DESIGNER] 🏁 handleDragStart called:', { item, event });
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🏁 Drag started:', {
+                itemKey: item._key || item.key,
+                itemTitle: item.title,
+                eventType: event.type
+            });
+
             this.isDragging = true;
             this.draggedItem = item;
             this.draggedFromStep = null; // Not from workflow
@@ -214,7 +258,12 @@ window.workflowDesigner = function () {
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', JSON.stringify(item));
             event.target.classList.add('is-dragging');
-            console.log('[WF-DESIGNER] ✅ Dragging item:', this.draggedItem);
+
+            console.log('[MVP-WF-DESIGNER] ✅ Drag state set:', {
+                isDragging: this.isDragging,
+                draggedItem: this.draggedItem,
+                windowStored: !!window.__workflowDraggedItem
+            });
         },
 
         /**
@@ -260,6 +309,8 @@ window.workflowDesigner = function () {
          * Handle drag over drop zone
          */
         handleDragOver(event, target) {
+            // TODO: Remove debug print for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🎯 DRAGOVER EVENT FIRED!', { target, mouseX: event.clientX, mouseY: event.clientY });
             event.preventDefault();
             this.dragOverTarget = target;
         },
@@ -309,16 +360,27 @@ window.workflowDesigner = function () {
             const draggedItem = window.__workflowDraggedItem || this.draggedItem;
             const draggedFromStep = window.__workflowDraggedFromStep || this.draggedFromStep;
 
-            console.log('[WF-DESIGNER] 🎯 handleDrop called:', { position, dropType, draggedItem, draggedFromStep });
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🎯 Drop detected:', {
+                position,
+                dropType,
+                hasItem: !!draggedItem,
+                itemKey: draggedItem?._key || draggedItem?.key,
+                fromStep: draggedFromStep,
+                windowStored: !!window.__workflowDraggedItem
+            });
 
             if (!draggedItem) {
-                console.warn('[WF-DESIGNER] ⚠️ No dragged item');
+                console.warn('[MVP-WF-DESIGNER] ⚠️ No dragged item found - drop cancelled');
                 return;
             }
 
             // Remove from original position if dragging from workflow
             if (draggedFromStep !== null) {
-                console.log('[WF-DESIGNER] 🔄 Moving from existing step:', draggedFromStep);
+                console.log('[MVP-WF-DESIGNER] 🔄 Moving from existing step:', {
+                    stepIndex: draggedFromStep.stepIndex,
+                    itemIndex: draggedFromStep.itemIndex
+                });
                 this.removeItemFromStep(
                     draggedFromStep.stepIndex,
                     draggedFromStep.itemIndex,
@@ -327,36 +389,36 @@ window.workflowDesigner = function () {
             }
 
             // Add to new position based on drop type
-            console.log('[WF-DESIGNER] 📦 Drop type:', dropType);
+            console.log('[MVP-WF-DESIGNER] 📦 Processing drop type:', dropType);
             switch (dropType) {
                 case 'empty':
                     // First item in empty workflow
-                    console.log('[WF-DESIGNER] ➕ Adding to empty workflow');
+                    console.log('[MVP-WF-DESIGNER] ➕ Adding to empty workflow at position 0');
                     this.addStepAt(0, [draggedItem]);
                     break;
 
                 case 'before':
                     // Insert new step before position
-                    console.log('[WF-DESIGNER] ⬆️ Inserting before position:', position);
+                    console.log('[MVP-WF-DESIGNER] ⬆️ Inserting BEFORE step at position:', position);
                     this.addStepAt(position, [draggedItem]);
                     break;
 
                 case 'after':
                     // Insert new step after last position
-                    console.log('[WF-DESIGNER] ⬇️ Inserting after position:', position);
+                    console.log('[MVP-WF-DESIGNER] ⬇️ Inserting AFTER step at position:', position);
                     this.addStepAt(position, [draggedItem]);
                     break;
 
                 case 'left':
                 case 'right':
                     // Add as parallel item
-                    console.log('[WF-DESIGNER] ↔️ Adding as parallel item:', dropType);
+                    console.log('[MVP-WF-DESIGNER] ↔️ Adding as parallel item:', dropType, 'to step:', position);
                     this.addParallelItem(position, draggedItem, dropType);
                     break;
 
                 case 'parallel':
                     // Add to existing parallel execution
-                    console.log('[WF-DESIGNER] 🔀 Adding to parallel execution');
+                    console.log('[MVP-WF-DESIGNER] 🔀 Adding to parallel execution at step:', position);
                     this.addParallelItem(position, draggedItem, 'add');
                     break;
             }
@@ -371,7 +433,9 @@ window.workflowDesigner = function () {
             window.__workflowDraggedFromStep = null;
 
             // Save workflow
-            console.log('[WF-DESIGNER] 💾 Saving workflow');
+            console.log('[MVP-WF-DESIGNER] 💾 Triggering workflow save');
+            console.log('[MVP-WF-DESIGNER] 🔍 Final workflowSteps.length after drop:', this.workflowSteps.length);
+            console.log('[MVP-WF-DESIGNER] 📋 Final workflowSteps array:', JSON.stringify(this.workflowSteps, null, 2));
             this.saveWorkflow();
         },
 
@@ -379,7 +443,14 @@ window.workflowDesigner = function () {
          * Add a new step at specified position
          */
         addStepAt(position, items) {
-            console.log('[WF-DESIGNER] 📍 addStepAt called:', { position, items });
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 📍 Creating new step:', {
+                position,
+                itemsCount: items.length,
+                items: items.map(i => ({ key: i._key || i.key, title: i.title }))
+            });
+            console.log('[MVP-WF-DESIGNER] 🆔 Instance check - this === window.__workflowDesignerInstance:', this === window.__workflowDesignerInstance);
+            console.log('[MVP-WF-DESIGNER] 📊 Current workflowSteps.length BEFORE insert:', this.workflowSteps.length);
 
             const newStep = {
                 id: this.generateID(),
@@ -397,7 +468,11 @@ window.workflowDesigner = function () {
                         showDescription: false,
                         autonomy_level: item.autonomy_level || 'L0' // Default autonomy level for work item
                     };
-                    console.log('[WF-DESIGNER] ✨ Created item:', newItem);
+                    console.log('[MVP-WF-DESIGNER] ✨ Created work item in step:', {
+                        id: newItem.id,
+                        work_item_key: newItem.work_item_key,
+                        work_item_title: newItem.work_item_title
+                    });
                     return newItem;
                 }),
                 routes: {}, // Empty routes map
@@ -406,24 +481,48 @@ window.workflowDesigner = function () {
                 available_routes: []
             };
 
-            console.log('[WF-DESIGNER] ✅ Created new step:', newStep);
+            console.log('[MVP-WF-DESIGNER] ✅ Created new step:', {
+                id: newStep.id,
+                order: newStep.order,
+                itemsCount: newStep.items.length
+            });
 
             // Insert at position
             this.workflowSteps.splice(position, 0, newStep);
+            console.log('[MVP-WF-DESIGNER] 📊 Workflow steps count after insert:', this.workflowSteps.length);
+            console.log('[MVP-WF-DESIGNER] 📋 Workflow steps array:', this.workflowSteps);
+            console.log('[MVP-WF-DESIGNER] 🔍 First step in array:', this.workflowSteps[0]);
+
+            // Force Alpine.js reactivity by reassigning the array
+            // This ensures x-if re-evaluates
+            this.workflowSteps = [...this.workflowSteps];
+            console.log('[MVP-WF-DESIGNER] 🔄 Forced array reassignment for reactivity');
 
             // Reorder all steps
             this.reorderSteps();
+
+            // Force Alpine.js reactivity update
+            console.log('[MVP-WF-DESIGNER] 🔄 Forcing Alpine.js reactivity...');
+            this.$nextTick(() => {
+                console.log('[MVP-WF-DESIGNER] ✅ Alpine.js nextTick completed, steps should be visible');
+            });
         },
 
         /**
          * Add parallel item to existing step
          */
         addParallelItem(stepIndex, item, side) {
-            console.log('[WF-DESIGNER] 🔀 addParallelItem called:', { stepIndex, item, side });
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔀 Adding parallel item:', {
+                stepIndex,
+                side,
+                itemKey: item._key || item.key,
+                itemTitle: item.title
+            });
 
             const step = this.workflowSteps[stepIndex];
             if (!step) {
-                console.error('[WF-DESIGNER] ❌ Step not found at index:', stepIndex);
+                console.error('[MVP-WF-DESIGNER] ❌ Step not found at index:', stepIndex);
                 return;
             }
 
@@ -464,6 +563,8 @@ window.workflowDesigner = function () {
             // If step is now empty, remove the step
             if (step.items.length === 0) {
                 this.workflowSteps.splice(stepIndex, 1);
+                // Force reactivity
+                this.workflowSteps = [...this.workflowSteps];
                 this.reorderSteps();
             }
 
@@ -476,18 +577,25 @@ window.workflowDesigner = function () {
          * Reorder steps to have sequential order values
          */
         reorderSteps() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔄 Reordering steps, count:', this.workflowSteps.length);
             this.workflowSteps.forEach((step, index) => {
                 step.order = index;
             });
+            console.log('[MVP-WF-DESIGNER] ✅ Steps reordered');
         },
 
         /**
          * Save workflow to backend (via specification workflows endpoint)
          */
         async saveWorkflow() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Save requested - debouncing...');
+
             // Debounce: Cancel previous save timer and set a new one
             if (this.saveTimeout) {
                 clearTimeout(this.saveTimeout);
+                console.log('[MVP-WF-DESIGNER] ⏱️ Cancelled previous save timeout');
             }
 
             this.saveTimeout = setTimeout(async () => {
@@ -499,8 +607,12 @@ window.workflowDesigner = function () {
          * Perform the actual save operation
          */
         async _performSave() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Performing save operation...');
+
             // Prevent multiple simultaneous saves
             if (this.saving) {
+                console.log('[MVP-WF-DESIGNER] ⚠️ Save already in progress, skipping');
                 return;
             }
 
@@ -512,12 +624,21 @@ window.workflowDesigner = function () {
                     throw new Error('Missing required workflow key or agency ID');
                 }
 
+                console.log('[MVP-WF-DESIGNER] 🔍 Workflow data to save:', {
+                    workflowKey: this.workflowKey,
+                    agencyID: this.agencyID,
+                    stepsCount: this.workflowSteps.length,
+                    allWorkflowsCount: this.allWorkflows.length
+                });
+
                 // Find and update the current workflow in the allWorkflows array
                 const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
+                console.log('[MVP-WF-DESIGNER] 📊 Workflow index in array:', workflowIndex);
 
                 if (workflowIndex >= 0) {
                     // Update existing workflow - preserve the key explicitly!
                     const existingKey = this.allWorkflows[workflowIndex].key;
+                    console.log('[MVP-WF-DESIGNER] ✏️ Updating existing workflow at index:', workflowIndex);
                     this.allWorkflows[workflowIndex] = {
                         ...this.allWorkflows[workflowIndex],
                         key: existingKey,  // Explicitly preserve the key
@@ -528,6 +649,7 @@ window.workflowDesigner = function () {
                     };
                 } else {
                     // Workflow not found in allWorkflows, add it
+                    console.log('[MVP-WF-DESIGNER] ➕ Adding new workflow to array');
                     this.allWorkflows.push({
                         key: this.workflowKey,
                         agency_id: this.agencyID,
@@ -539,15 +661,18 @@ window.workflowDesigner = function () {
                 }
 
                 // Filter out workflows with empty keys and remove duplicates
+                console.log('[MVP-WF-DESIGNER] 🧹 Filtering workflows before save...');
                 const workflowsToSave = this.allWorkflows.filter((workflow, index, arr) => {
                     // Remove workflows with no key
                     if (!workflow.key || workflow.key.trim() === '') {
+                        console.log('[MVP-WF-DESIGNER] ⚠️ Filtering out workflow with empty key');
                         return false;
                     }
 
                     // Remove duplicates by key (keep first occurrence)
                     const firstIndex = arr.findIndex(w => w.key === workflow.key);
                     if (firstIndex !== index) {
+                        console.log('[MVP-WF-DESIGNER] ⚠️ Filtering out duplicate workflow:', workflow.key);
                         return false;
                     }
 
@@ -836,18 +961,32 @@ window.workflowDesigner = function () {
          * Delete step from properties panel
          */
         deleteStepFromProperties(step) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🗑️ Delete step requested:', {
+                stepId: step.id,
+                stepOrder: step.order,
+                itemsCount: step.items?.length || 0
+            });
+
             if (!confirm(`Are you sure you want to delete Step ${step.order}? This will remove all work items in this step.`)) {
+                console.log('[MVP-WF-DESIGNER] ❌ Delete cancelled by user');
                 return;
             }
 
             const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            console.log('[MVP-WF-DESIGNER] 📊 Step index to delete:', stepIndex);
+
             if (stepIndex !== -1) {
                 this.workflowSteps.splice(stepIndex, 1);
+                // Force reactivity
+                this.workflowSteps = [...this.workflowSteps];
+                console.log('[MVP-WF-DESIGNER] ✅ Step deleted, remaining steps:', this.workflowSteps.length);
 
                 // Reorder remaining steps
                 this.workflowSteps.forEach((s, idx) => {
                     s.order = idx + 1;
                 });
+                console.log('[MVP-WF-DESIGNER] 🔄 Steps reordered');
 
                 this.saveWorkflow();
                 this.closePropertiesPanel();
@@ -862,6 +1001,12 @@ window.workflowDesigner = function () {
          * Save step properties from panel
          */
         saveStepProperties(originalStep, updatedData) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Saving step properties:', {
+                stepId: originalStep.id,
+                updatedData
+            });
+
             // Update step in workflow
             const stepIndex = this.workflowSteps.findIndex(s => s.id === originalStep.id);
             if (stepIndex !== -1) {
@@ -873,6 +1018,8 @@ window.workflowDesigner = function () {
                     autonomy_level: updatedData.autonomy_level || 'L0',
                     aggregation: updatedData.aggregation || ''
                 };
+
+                console.log('[MVP-WF-DESIGNER] ✅ Step properties updated');
 
                 // Save workflow
                 this.saveWorkflow();
@@ -893,6 +1040,7 @@ window.workflowDesigner = function () {
          * Close properties panel
          */
         closePropertiesPanel() {
+            console.log('[MVP-WF-DESIGNER] 🚪 Closing properties panel');
             const panel = document.getElementById('properties-panel-content');
             if (panel) {
                 panel.innerHTML = '<div class="box has-text-centered has-text-grey-light"><p>Click a step or work item to view properties</p></div>';
@@ -998,19 +1146,36 @@ window.workflowDesigner = function () {
          * Delete work item from properties panel
          */
         deleteWorkItemFromProperties(step, item) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🗑️ Delete work item requested:', {
+                stepId: step.id,
+                stepOrder: step.order,
+                itemId: item.id,
+                itemTitle: item.work_item_title || item.work_item_name
+            });
+
             if (!confirm(`Remove "${item.work_item_title || item.work_item_name}" from this step?`)) {
+                console.log('[MVP-WF-DESIGNER] ❌ Delete cancelled by user');
                 return;
             }
 
             const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            console.log('[MVP-WF-DESIGNER] 📊 Step index:', stepIndex);
+
             if (stepIndex !== -1) {
                 const itemIndex = this.workflowSteps[stepIndex].items.findIndex(i => i.id === item.id);
+                console.log('[MVP-WF-DESIGNER] 📊 Item index in step:', itemIndex);
+
                 if (itemIndex !== -1) {
                     this.workflowSteps[stepIndex].items.splice(itemIndex, 1);
+                    console.log('[MVP-WF-DESIGNER] ✅ Work item deleted, remaining items in step:', this.workflowSteps[stepIndex].items.length);
 
                     // If step is now empty, remove the step
                     if (this.workflowSteps[stepIndex].items.length === 0) {
+                        console.log('[MVP-WF-DESIGNER] 🗑️ Step is now empty, deleting step');
                         this.workflowSteps.splice(stepIndex, 1);
+                        // Force reactivity
+                        this.workflowSteps = [...this.workflowSteps];
 
                         // Reorder remaining steps
                         this.workflowSteps.forEach((s, idx) => {
@@ -1036,16 +1201,30 @@ window.workflowDesigner = function () {
          * Save work item properties from panel
          */
         saveWorkItemProperties(step, originalItem, updatedData) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Saving work item properties:', {
+                stepId: step.id,
+                itemId: originalItem.id,
+                updatedData
+            });
+
             // Find the step in workflow
             const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
-            if (stepIndex === -1) return;
+            if (stepIndex === -1) {
+                console.error('[MVP-WF-DESIGNER] ❌ Step not found');
+                return;
+            }
 
             // Find the item in the step
             const itemIndex = this.workflowSteps[stepIndex].items.findIndex(i => i.id === originalItem.id);
-            if (itemIndex === -1) return;
+            if (itemIndex === -1) {
+                console.error('[MVP-WF-DESIGNER] ❌ Item not found in step');
+                return;
+            }
 
             // Update the work item's autonomy level
             this.workflowSteps[stepIndex].items[itemIndex].autonomy_level = updatedData.autonomy_level || 'L0';
+            console.log('[MVP-WF-DESIGNER] ✅ Work item autonomy level updated to:', updatedData.autonomy_level);
 
             // Save workflow
             this.saveWorkflow();

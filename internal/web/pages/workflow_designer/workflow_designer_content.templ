@@ -84,27 +84,27 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 									<span class="has-text-weight-bold">START</span>
 								</div>
 							</div>
-							<!-- Workflow Steps or Empty State -->
-							<template x-if="workflowSteps.length === 0">
-								<div
-									class="empty-state-drop-zone"
-									@dragover.prevent="handleDragOver($event, null)"
-									@dragleave="handleDragLeave($event)"
-									@drop="handleDrop($event, null, 'empty')"
-									:class="{ 'is-active': dragOverTarget === 'empty' }"
-								>
-									<div class="empty-state-content">
-										<span class="icon is-large has-text-grey-light">
-											<i class="fas fa-hand-pointer fa-3x"></i>
-										</span>
-										<p class="title is-5 has-text-grey-light mt-4">Drop items here to build workflow</p>
-										<p class="subtitle is-6 has-text-grey-light">Drag work items from the left panel</p>
-									</div>
-								</div>
-							</template>
-							<!-- Workflow Steps -->
-							<template x-if="workflowSteps.length > 0">
-								<div class="workflow-steps-container">
+
+						<!-- Empty State (show when no steps) -->
+						<div
+							x-show="workflowSteps.length === 0"
+							class="empty-state-drop-zone"
+							@dragover.prevent="handleDragOver($event, null)"
+							@dragleave="handleDragLeave($event)"
+							@drop="handleDrop($event, null, 'empty')"
+							:class="{ 'is-active': dragOverTarget === 'empty' }"
+						>
+							<div class="empty-state-content">
+								<span class="icon is-large has-text-grey-light">
+									<i class="fas fa-hand-pointer fa-3x"></i>
+								</span>
+								<p class="title is-5 has-text-grey-light mt-4">Drop items here to build workflow</p>
+								<p class="subtitle is-6 has-text-grey-light">Drag work items from the left panel</p>
+							</div>
+						</div>
+						
+						<!-- Workflow Steps (show when steps exist) -->
+						<div x-show="workflowSteps.length > 0" class="workflow-steps-container">
 									<template x-for="(step, stepIndex) in workflowSteps" :key="step.id">
 										<div class="workflow-step-wrapper">
 											<!-- Flow Arrow + Drop Zone Above Step -->
@@ -113,13 +113,17 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 													<div class="arrow-line"></div>
 													<div class="arrow-head">▼</div>
 												</div>
+											<div class="horizontal-drop-zone">
 												<div
-													class="drop-zone horizontal-drop-zone"
+													class="drop-zone"
 													@dragover.prevent="handleDragOver($event, { type: 'before', stepIndex })"
 													@dragleave="handleDragLeave($event)"
 													@drop="handleDrop($event, stepIndex, 'before')"
 													:class="{ 'is-active': dragOverTarget?.type === 'before' && dragOverTarget?.stepIndex === stepIndex }"
-												></div>
+													>
+													<div class="drop-zone__inner">⊕ Drop here to insert step</div>
+												</div>
+											</div>
 											</div>
 											<!-- Step Items -->
 											<div class="workflow-step" :class="{ 'is-parallel': step.items.length > 1 }">
@@ -188,7 +192,9 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 															class="drop-zone left-drop-zone"
 															@drop.stop="handleDrop($event, stepIndex, 'left')"
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }"
-														></div>
+														>
+															<div class="drop-zone__inner">⊕</div>
+														</div>
 														<div
 															class="step-item"
 															draggable="true"
@@ -228,7 +234,9 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 															class="drop-zone right-drop-zone"
 															@drop.stop="handleDrop($event, stepIndex, 'right')"
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }"
-														></div>
+															>
+																<div class="drop-zone__inner">⊕</div>
+															</div>
 													</div>
 											</template>
 											<template x-if="step.items.length > 1">
@@ -299,7 +307,9 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 																@drop="handleDrop($event, stepIndex, 'parallel')"
 																:class="{ 'is-active': dragOverTarget?.type === 'parallel' && dragOverTarget?.stepIndex === stepIndex }"
 															>
-																<div class="drop-zone"></div>
+																<div class="drop-zone">
+																	<div class="drop-zone__inner">⊕ Add parallel item</div>
+																</div>
 															</div>
 														</div>
 													</div>
@@ -314,60 +324,25 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 										</div>
 									</div>
 									</template>
-									<!-- Final Flow Arrow + Drop Zone After Last Step -->
-									<div class="flow-connector">
-										<div class="flow-arrow">
-											<div class="arrow-line"></div>
-											<div class="arrow-head">▼</div>
-										</div>
-										<div
-											class="drop-zone horizontal-drop-zone"
-											@dragover.prevent="handleDragOver($event, { type: 'after' })"
-											@dragleave="handleDragLeave($event)"
-											@drop="handleDrop($event, workflowSteps.length, 'after')"
-											:class="{ 'is-active': dragOverTarget?.type === 'after' }"
-										>
-											<div class="drop-zone-indicator"></div>
-										</div>
-									</div>
+							<!-- Final Flow Arrow + Drop Zone After Last Step -->
+							<div class="flow-connector">
+								<div class="flow-arrow">
+									<div class="arrow-line"></div>
+									<div class="arrow-head">▼</div>
 								</div>
-							</template>
-							
-							<!-- Route Legend (for future Phase 4 implementation) -->
-							<div class="box mt-5" style="background: #f0f8ff; border: 2px solid #e3f2fd;">
-								<h4 class="title is-6 mb-3">
-									<span class="icon-text">
-										<span class="icon has-text-info">
-											<i class="fas fa-route"></i>
-										</span>
-										<span>Route Legend (Coming Soon)</span>
-									</span>
-								</h4>
-								<div class="content is-small">
-									<p class="mb-2"><strong>Conditional routing will be displayed with colored arrows:</strong></p>
-									<div class="tags">
-										<span class="tag is-success is-light">
-											<span class="icon"><i class="fas fa-arrow-right"></i></span>
-											<span>Success</span>
-										</span>
-										<span class="tag is-danger is-light">
-											<span class="icon"><i class="fas fa-arrow-right"></i></span>
-											<span>Failure/Error</span>
-										</span>
-										<span class="tag is-warning is-light">
-											<span class="icon"><i class="fas fa-arrow-right"></i></span>
-											<span>Retry/Skip</span>
-										</span>
-										<span class="tag is-info is-light" style="border: 2px dashed #3273dc; background: white;">
-											<span class="icon"><i class="fas fa-arrow-right"></i></span>
-											<span>Human Decision</span>
-										</span>
-									</div>
-									<p class="has-text-grey is-size-7 mt-2">
-										<i class="fas fa-info-circle"></i> Visual route arrows will be added in Phase 4
-									</p>
+								<div class="horizontal-drop-zone">
+									<div
+										class="drop-zone"
+										@dragover.prevent="handleDragOver($event, { type: 'after' })"
+										@dragleave="handleDragLeave($event)"
+										@drop="handleDrop($event, workflowSteps.length, 'after')"
+										:class="{ 'is-active': dragOverTarget?.type === 'after' }"
+										>
+											<div class="drop-zone__inner">⊕ Drop after last step</div>
+										</div>
 								</div>
 							</div>
+						</div>
 							
 							<!-- END Marker -->
 							<div class="workflow-marker end-marker">

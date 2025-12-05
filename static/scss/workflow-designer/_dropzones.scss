@@ -6,78 +6,121 @@
 
 /* Drop Zones - Unified class for all drop zones */
 .drop-zone {
-    width: 50px;
-    height: 50px;
-    border: 4px dashed $vscode-accent;
-    border-radius: 12px;
+    width: 100%;
+    min-width: 200px;
+    height: 60px;
+    min-height: 60px;
+    border: 2px dashed rgba(50, 115, 220, 0.4); // More visible border
+    border-radius: 8px;
     transition: all $transition-normal ease;
-    background: rgba(50, 115, 220, 0.2);
+    background: rgba(50, 115, 220, 0.05); // Slight background tint
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(50, 115, 220, 0.3);
-    z-index: 10;
+    opacity: 0.85; // More visible
+    cursor: copy;
 
     &::before {
-        content: "+";
-        font-size: 1.5rem;
-        color: $vscode-accent;
-        font-weight: bold;
-        transition: all $transition-normal ease;
+        content: "";
+        display: none; // Hide text by default
     }
 
     /* Hover and active states */
     &:hover {
-        border-color: #2366d1;
-        border-width: 5px;
-        border-style: solid;
-        background: rgba(50, 115, 220, 0.35);
-        box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
-        transform: scale(1.05);
+        border-color: rgba(50, 115, 220, 0.7);
+        border-width: 2px;
+        border-style: dashed;
+        background: rgba(50, 115, 220, 0.12);
+        opacity: 1;
 
         &::before {
-            color: #2366d1;
-            font-size: 2rem;
+            display: none;
         }
     }
 
     &.is-active {
-        border-color: #2366d1;
-        border-width: 5px;
+        border-color: #3273dc;
+        border-width: 3px;
         border-style: solid;
-        background: rgba(50, 115, 220, 0.35);
-        box-shadow: 0 4px 16px rgba(50, 115, 220, 0.5);
+        background: rgba(50, 115, 220, 0.18);
+        opacity: 1;
+        box-shadow: 0 2px 8px rgba(50, 115, 220, 0.25);
 
         &::before {
-            color: #2366d1;
-            font-size: 2rem;
+            display: none;
         }
     }
 }
 
-/* Horizontal drop zones (between steps) - container is full width, but box is 50x50 */
+/* Horizontal drop zones (between steps) - container is full width */
 .horizontal-drop-zone {
     width: 100%;
-    padding: $spacing-lg 0;
+    min-height: 80px;
+    padding: $spacing-sm 0;
     display: flex;
     justify-content: center;
+    align-items: center;
     position: relative;
+    z-index: 10; // Above flow arrow
 }
 
 /* Override for the actual drop zone inside horizontal container */
 .flow-connector .drop-zone {
-    width: 50px;
+    width: 100%;
+    max-width: 600px;
     height: 50px;
-    margin-left: 100px;
-    /* Offset to the right */
+    min-height: 50px;
+    background: transparent; // Transparent by default
 }
 
 /* Side drop zones positioning */
 .left-drop-zone {
     margin-right: $spacing-md;
+    width: 60px;
+    min-width: 60px;
+    height: 100px;
+    min-height: 100px;
+    background: rgba(50, 115, 220, 0.04); // Slight background
+    border-color: rgba(50, 115, 220, 0.3); // More visible
 }
 
 .right-drop-zone {
     margin-left: $spacing-md;
+    width: 60px;
+    min-width: 60px;
+    height: 100px;
+    min-height: 100px;
+    background: rgba(50, 115, 220, 0.04); // Slight background
+    border-color: rgba(50, 115, 220, 0.3); // More visible
+}
+
+/* Drop zone inner content - text/icons */
+.drop-zone__inner {
+    font-size: 0.8rem;
+    color: rgba(50, 115, 220, 0.6);
+    font-weight: 500;
+    transition: all $transition-normal ease;
+    opacity: 0.7; // More visible
+    pointer-events: none; // Don't interfere with drop events
+
+    .drop-zone:hover &,
+    .drop-zone.is-active & {
+        opacity: 1;
+        color: #3273dc;
+        font-size: 0.9rem;
+    }
+}
+
+/* Parallel add zone - less prominent */
+.parallel-add-zone {
+    min-height: 50px;
+    padding: $spacing-sm;
+
+    .drop-zone {
+        height: 45px;
+        min-height: 45px;
+        border-color: rgba(50, 115, 220, 0.3);
+        background: rgba(50, 115, 220, 0.04);
+    }
 }

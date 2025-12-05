@@ -47,14 +47,14 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Workflow Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><link rel=\"stylesheet\" href=\"/static/css/chat-panel-tabs.css\"><link rel=\"stylesheet\" href=\"/static/css/workflow-designer.css\"><!-- Alpine.js with Collapse plugin --> <script defer src=\"https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js\"></script> <script defer src=\"https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js\"></script> <!-- Workflow Designer JavaScript --> <script src=\"/static/js/agency-designer/specification-api.js\"></script> <script src=\"/static/js/agency-designer/properties-panel.js\"></script> <script src=\"/static/js/agency-designer/utils.js\"></script> <script src=\"/static/js/workflow-designer.js\"></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns (matching agency designer structure) --><div class=\"columns is-gapless vscode-main-content\" x-data=\"workflowDesigner()\" data-agency-id=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Workflow Designer Specific CSS --> <link rel=\"stylesheet\" href=\"/static/css/vscode-status-bar.css?v=20251030-themed\"><link rel=\"stylesheet\" href=\"/static/css/agency-designer.css?v=20251031-context\"><link rel=\"stylesheet\" href=\"/static/css/chat-panel-tabs.css\"><link rel=\"stylesheet\" href=\"/static/css/workflow-designer.css\"><!-- Workflow Designer JavaScript --> <script src=\"/static/js/agency-designer/specification-api.js\"></script> <script src=\"/static/js/agency-designer/properties-panel.js\"></script> <script src=\"/static/js/agency-designer/utils.js\"></script> <script src=\"/static/js/workflow-designer.js\"></script> <div class=\"vscode-designer-container\"><!-- Main Content Area with Columns (matching agency designer structure) --><div class=\"columns is-gapless vscode-main-content\" x-data=\"workflowDesigner()\" data-agency-id=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(currentAgency.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 31, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 27, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -67,7 +67,7 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(wf.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 32, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 28, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -80,7 +80,7 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Key)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 33, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 29, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -93,7 +93,7 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 34, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 30, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -106,7 +106,7 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 35, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 31, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -119,7 +119,7 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(wf.Version)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 36, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 32, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -132,7 +132,7 @@ func WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) tem
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(wf.Steps))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 37, Col: 52}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/pages/workflow_designer/workflow_designer.templ`, Line: 33, Col: 52}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {

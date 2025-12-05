@@ -1,0 +1,49 @@
+package workflow
+
+// DropZone renders a drop zone for workflow designer
+templ DropZone(dropType string, position string, stepIndex int) {
+	if dropType == "horizontal" {
+		<div class="horizontal-drop-zone">
+			<div
+				class="drop-zone"
+				@dragover.prevent={ "handleDragOver($event, { type: '" + position + "', stepIndex: " + string(stepIndex) + " })" }
+				@dragleave="handleDragLeave($event)"
+				@drop={ "handleDrop($event, " + string(stepIndex) + ", '" + position + "')" }
+				:class={ "{ 'is-active': dragOverTarget?.type === '" + position + "' && dragOverTarget?.stepIndex === " + string(stepIndex) + " }" }
+			></div>
+		</div>
+	} else if dropType == "side-left" {
+		<div
+			class="drop-zone left-drop-zone"
+			@drop.stop={ "handleDrop($event, " + string(stepIndex) + ", 'left')" }
+			:class={ "{ 'is-active': sideDropTarget?.stepIndex === " + string(stepIndex) + " && sideDropTarget?.side === 'left' }" }
+		></div>
+	} else if dropType == "side-right" {
+		<div
+			class="drop-zone right-drop-zone"
+			@drop.stop={ "handleDrop($event, " + string(stepIndex) + ", 'right')" }
+			:class={ "{ 'is-active': sideDropTarget?.stepIndex === " + string(stepIndex) + " && sideDropTarget?.side === 'right' }" }
+		></div>
+	} else if dropType == "parallel" {
+		<div
+			class="parallel-add-zone"
+			@dragover.prevent={ "handleDragOver($event, { type: 'parallel', stepIndex: " + string(stepIndex) + " })" }
+			@dragleave="handleDragLeave($event)"
+			@drop={ "handleDrop($event, " + string(stepIndex) + ", 'parallel')" }
+			:class={ "{ 'is-active': dragOverTarget?.type === 'parallel' && dragOverTarget?.stepIndex === " + string(stepIndex) + " }" }
+		>
+			<div class="drop-zone"></div>
+		</div>
+	}
+}
+
+// FlowConnector renders the arrow and drop zone between workflow steps
+templ FlowConnector(position string, stepIndex int) {
+	<div class="flow-connector">
+		<div class="flow-arrow">
+			<div class="arrow-line"></div>
+			<div class="arrow-head">▼</div>
+		</div>
+		@DropZone("horizontal", position, stepIndex)
+	</div>
+}

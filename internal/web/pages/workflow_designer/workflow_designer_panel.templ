@@ -38,6 +38,14 @@ templ WorkflowChatPanel(currentAgency *models.Agency, wf *models.Workflow) {
 						<span>Info</span>
 					</a>
 				</li>
+				<li :class="activeTab === 'legend' ? 'is-active' : ''">
+					<a @click.prevent="activeTab = 'legend'">
+						<span class="icon is-small">
+							<i class="fas fa-map-signs"></i>
+						</span>
+						<span>Legend</span>
+					</a>
+				</li>
 			</ul>
 		</div>
 		
@@ -81,6 +89,103 @@ templ WorkflowChatPanel(currentAgency *models.Agency, wf *models.Workflow) {
 					<label class="label is-small">Work Items</label>
 					<p class="is-size-7" x-text="`${workflowSteps.reduce((sum, s) => sum + s.items.length, 0)} work item(s)`">0 work items</p>
 				</div>
+			</div>
+		</div>
+		
+		<!-- Legend Tab Content -->
+		<div x-show="activeTab === 'legend'" style="overflow-y: auto; flex: 1; padding: 1rem;">
+			<div class="content">
+				<h4 class="title is-6">
+					<span class="icon-text">
+						<span class="icon has-text-info">
+							<i class="fas fa-info-circle"></i>
+						</span>
+						<span>Route Legend</span>
+					</span>
+				</h4>
+				
+				<p class="is-size-7 mb-4 has-text-grey">
+					Workflow steps can be connected with different route types to represent conditional logic.
+				</p>
+				
+				<div class="box has-background-light p-3 mb-3">
+					<div class="level is-mobile mb-2">
+						<div class="level-left">
+							<span class="icon-text">
+								<span class="icon has-text-success">
+									<i class="fas fa-arrow-down fa-lg"></i>
+								</span>
+								<span class="is-size-7"><strong>Success</strong></span>
+							</span>
+						</div>
+					</div>
+					<p class="is-size-7 has-text-grey pl-4">
+						Normal flow when step completes successfully
+					</p>
+					<div style="width: 4px; height: 40px; margin: 8px auto; background: linear-gradient(to bottom, transparent, #48c774, transparent); border-radius: 2px;"></div>
+				</div>
+				
+				<div class="box has-background-light p-3 mb-3">
+					<div class="level is-mobile mb-2">
+						<div class="level-left">
+							<span class="icon-text">
+								<span class="icon has-text-danger">
+									<i class="fas fa-arrow-down fa-lg"></i>
+								</span>
+								<span class="is-size-7"><strong>Failure/Error</strong></span>
+							</span>
+						</div>
+					</div>
+					<p class="is-size-7 has-text-grey pl-4">
+						Alternative path when step encounters an error
+					</p>
+					<div style="width: 4px; height: 40px; margin: 8px auto; background: linear-gradient(to bottom, transparent, #f14668, transparent); border-radius: 2px;"></div>
+				</div>
+				
+				<div class="box has-background-light p-3 mb-3">
+					<div class="level is-mobile mb-2">
+						<div class="level-left">
+							<span class="icon-text">
+								<span class="icon has-text-warning">
+									<i class="fas fa-arrow-down fa-lg"></i>
+								</span>
+								<span class="is-size-7"><strong>Retry/Skip</strong></span>
+							</span>
+						</div>
+					</div>
+					<p class="is-size-7 has-text-grey pl-4">
+						Loop back or skip steps based on conditions
+					</p>
+					<div style="width: 4px; height: 40px; margin: 8px auto; background: linear-gradient(to bottom, transparent, #ffdd57, transparent); border-radius: 2px;"></div>
+				</div>
+				
+				<div class="box has-background-light p-3 mb-3">
+					<div class="level is-mobile mb-2">
+						<div class="level-left">
+							<span class="icon-text">
+								<span class="icon has-text-info">
+									<i class="fas fa-arrow-down fa-lg"></i>
+								</span>
+								<span class="is-size-7"><strong>Human Decision</strong></span>
+							</span>
+						</div>
+					</div>
+					<p class="is-size-7 has-text-grey pl-4">
+						Routing determined by human approval or choice
+					</p>
+					<div style="width: 4px; height: 40px; margin: 8px auto; background: linear-gradient(to bottom, transparent, #3298dc, transparent); border-radius: 2px;"></div>
+				</div>
+				
+				<article class="message is-info is-small mt-4">
+					<div class="message-body">
+						<p class="is-size-7">
+							<span class="icon">
+								<i class="fas fa-lightbulb"></i>
+							</span>
+							Route colors are available for workflow arrows. Future updates will add conditional routing logic and branch visualization.
+						</p>
+					</div>
+				</article>
 			</div>
 		</div>
 	</aside>
