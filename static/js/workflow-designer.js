@@ -83,16 +83,22 @@ window.workflowDesigner = function () {
          * Load available work items from specification
          */
         async loadWorkItems() {
+            console.log('[WF-DESIGNER] 📚 Loading work items...');
             try {
                 // Use existing specification API
                 if (typeof window.specificationAPI !== 'undefined') {
                     // Set the agency ID on the API instance
                     window.specificationAPI.agencyId = this.agencyID;
 
+                    console.log('[WF-DESIGNER] 🔍 Fetching specification for agency:', this.agencyID);
                     const spec = await window.specificationAPI.getSpecification();
+                    console.log('[WF-DESIGNER] 📦 Specification received:', spec);
 
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
+
+                    console.log('[WF-DESIGNER] ✅ Loaded', this.availableWorkItems.length, 'work items');
+                    console.log('[WF-DESIGNER] 📋 Work items:', this.availableWorkItems);
 
                     // Load all workflows for specification updates
                     // Normalize workflows to ensure they have a 'key' property
@@ -104,11 +110,13 @@ window.workflowDesigner = function () {
                     // Enrich existing workflow steps with work item details
                     this.enrichWorkflowSteps();
                 } else {
+                    console.error('[WF-DESIGNER] ❌ specificationAPI not available');
                     this.availableWorkItems = [];
                     this.filteredWorkItems = [];
                     this.allWorkflows = [];
                 }
             } catch (error) {
+                console.error('[WF-DESIGNER] ❌ Error loading work items:', error);
                 this.availableWorkItems = [];
                 this.filteredWorkItems = [];
                 this.allWorkflows = [];
@@ -194,12 +202,19 @@ window.workflowDesigner = function () {
          * Handle drag start from work items panel
          */
         handleDragStart(event, item) {
+            console.log('[WF-DESIGNER] 🏁 handleDragStart called:', { item, event });
             this.isDragging = true;
             this.draggedItem = item;
             this.draggedFromStep = null; // Not from workflow
+
+            // Store in window for cross-instance access (Alpine.js may create multiple instances)
+            window.__workflowDraggedItem = item;
+            window.__workflowDraggedFromStep = null;
+
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', JSON.stringify(item));
             event.target.classList.add('is-dragging');
+            console.log('[WF-DESIGNER] ✅ Dragging item:', this.draggedItem);
         },
 
         /**
@@ -215,6 +230,11 @@ window.workflowDesigner = function () {
             this.isDragging = true;
             this.draggedItem = item;
             this.draggedFromStep = { stepIndex, itemIndex };
+
+            // Store in window for cross-instance access
+            window.__workflowDraggedItem = item;
+            window.__workflowDraggedFromStep = { stepIndex, itemIndex };
+
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', JSON.stringify(item));
             event.target.classList.add('is-dragging');
@@ -230,6 +250,10 @@ window.workflowDesigner = function () {
             this.dragOverTarget = null;
             this.sideDropTarget = null;
             event.target.classList.remove('is-dragging');
+
+            // Clean up window storage
+            window.__workflowDraggedItem = null;
+            window.__workflowDraggedFromStep = null;
         },
 
         /**
@@ -281,54 +305,73 @@ window.workflowDesigner = function () {
             event.preventDefault();
             event.stopPropagation();
 
-            if (!this.draggedItem) return;
+            // Get dragged item from window storage (handles cross-instance drops)
+            const draggedItem = window.__workflowDraggedItem || this.draggedItem;
+            const draggedFromStep = window.__workflowDraggedFromStep || this.draggedFromStep;
+
+            console.log('[WF-DESIGNER] 🎯 handleDrop called:', { position, dropType, draggedItem, draggedFromStep });
+
+            if (!draggedItem) {
+                console.warn('[WF-DESIGNER] ⚠️ No dragged item');
+                return;
+            }
 
             // Remove from original position if dragging from workflow
-            if (this.draggedFromStep !== null) {
+            if (draggedFromStep !== null) {
+                console.log('[WF-DESIGNER] 🔄 Moving from existing step:', draggedFromStep);
                 this.removeItemFromStep(
-                    this.draggedFromStep.stepIndex,
-                    this.draggedFromStep.itemIndex,
+                    draggedFromStep.stepIndex,
+                    draggedFromStep.itemIndex,
                     false // Don't save yet
                 );
             }
 
             // Add to new position based on drop type
+            console.log('[WF-DESIGNER] 📦 Drop type:', dropType);
             switch (dropType) {
                 case 'empty':
                     // First item in empty workflow
-                    this.addStepAt(0, [this.draggedItem]);
+                    console.log('[WF-DESIGNER] ➕ Adding to empty workflow');
+                    this.addStepAt(0, [draggedItem]);
                     break;
 
                 case 'before':
                     // Insert new step before position
-                    this.addStepAt(position, [this.draggedItem]);
+                    console.log('[WF-DESIGNER] ⬆️ Inserting before position:', position);
+                    this.addStepAt(position, [draggedItem]);
                     break;
 
                 case 'after':
                     // Insert new step after last position
-                    this.addStepAt(position, [this.draggedItem]);
+                    console.log('[WF-DESIGNER] ⬇️ Inserting after position:', position);
+                    this.addStepAt(position, [draggedItem]);
                     break;
 
                 case 'left':
                 case 'right':
                     // Add as parallel item
-                    this.addParallelItem(position, this.draggedItem, dropType);
+                    console.log('[WF-DESIGNER] ↔️ Adding as parallel item:', dropType);
+                    this.addParallelItem(position, draggedItem, dropType);
                     break;
 
                 case 'parallel':
                     // Add to existing parallel execution
-                    this.addParallelItem(position, this.draggedItem, 'add');
+                    console.log('[WF-DESIGNER] 🔀 Adding to parallel execution');
+                    this.addParallelItem(position, draggedItem, 'add');
                     break;
             }
 
-            // Clear drag state
+            // Clear drag state (both instance and window)
             this.isDragging = false;
             this.draggedItem = null;
             this.draggedFromStep = null;
             this.dragOverTarget = null;
             this.sideDropTarget = null;
+            window.__workflowDraggedItem = null;
+            window.__workflowDraggedFromStep = null;
 
             // Save workflow
+            console.log('[WF-DESIGNER] 💾 Saving workflow');
             this.saveWorkflow();
         },
 
@@ -336,24 +379,34 @@ window.workflowDesigner = function () {
          * Add a new step at specified position
          */
         addStepAt(position, items) {
+            console.log('[WF-DESIGNER] 📍 addStepAt called:', { position, items });
+
             const newStep = {
                 id: this.generateID(),
                 order: position,
                 name: '', // Empty by default, user can set via properties panel
                 description: '',
-                items: items.map(item => ({
-                    id: this.generateID(),
-                    work_item_id: item.key || item._key,
-                    work_item_title: item.title,
-                    description: item.description || '',
-                    showDescription: false,
-                    autonomy_level: 'L0' // Default autonomy level for work item
-                })),
+                items: items.map(item => {
+                    const newItem = {
+                        id: this.generateID(),
+                        work_item_id: item.key || item._key || item.work_item_id,
+                        work_item_key: item.key || item._key || '',
+                        work_item_name: item.name || item.title || '',
+                        work_item_title: item.title || item.name || '',
+                        description: item.description || '',
+                        showDescription: false,
+                        autonomy_level: item.autonomy_level || 'L0' // Default autonomy level for work item
+                    };
+                    console.log('[WF-DESIGNER] ✨ Created item:', newItem);
+                    return newItem;
+                }),
                 routes: {}, // Empty routes map
                 aggregation: '', // No aggregation by default
                 requires_human_decision: false,
                 available_routes: []
             };
+
+            console.log('[WF-DESIGNER] ✅ Created new step:', newStep);
 
             // Insert at position
             this.workflowSteps.splice(position, 0, newStep);
@@ -366,17 +419,26 @@ window.workflowDesigner = function () {
          * Add parallel item to existing step
          */
         addParallelItem(stepIndex, item, side) {
+            console.log('[WF-DESIGNER] 🔀 addParallelItem called:', { stepIndex, item, side });
+
             const step = this.workflowSteps[stepIndex];
-            if (!step) return;
+            if (!step) {
+                console.error('[WF-DESIGNER] ❌ Step not found at index:', stepIndex);
+                return;
+            }
 
             const newItem = {
                 id: this.generateID(),
-                work_item_id: item.key || item._key,
-                work_item_title: item.title,
+                work_item_id: item.key || item._key || item.work_item_id,
+                work_item_key: item.key || item._key || '',
+                work_item_name: item.name || item.title || '',
+                work_item_title: item.title || item.name || '',
                 description: item.description || '',
                 showDescription: false,
-                autonomy_level: 'L0' // Default autonomy level for work item
+                autonomy_level: item.autonomy_level || 'L0' // Default autonomy level for work item
             };
+
+            console.log('[WF-DESIGNER] ✨ Created parallel item:', newItem);
 
             // Add to items array (left = prepend, right/add = append)
             if (side === 'left') {
@@ -385,6 +447,8 @@ window.workflowDesigner = function () {
                 // 'right' or 'add' both append to the end
                 step.items.push(newItem);
             }
+
+            console.log('[WF-DESIGNER] ✅ Step now has', step.items.length, 'items');
         },
 
         /**
@@ -751,6 +815,12 @@ window.workflowDesigner = function () {
                         action: 'save'
                     },
                     {
+                        label: 'Delete Step',
+                        class: 'is-danger',
+                        icon: 'trash',
+                        action: () => this.deleteStepFromProperties(step)
+                    },
+                    {
                         label: 'Cancel',
                         class: 'is-light',
                         icon: 'times',
@@ -760,6 +830,32 @@ window.workflowDesigner = function () {
             };
 
             window.PropertiesPanel.showProperties(config);
+        },
+
+        /**
+         * Delete step from properties panel
+         */
+        deleteStepFromProperties(step) {
+            if (!confirm(`Are you sure you want to delete Step ${step.order}? This will remove all work items in this step.`)) {
+                return;
+            }
+
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            if (stepIndex !== -1) {
+                this.workflowSteps.splice(stepIndex, 1);
+
+                // Reorder remaining steps
+                this.workflowSteps.forEach((s, idx) => {
+                    s.order = idx + 1;
+                });
+
+                this.saveWorkflow();
+                this.closePropertiesPanel();
+
+                if (window.showNotification) {
+                    window.showNotification('Step deleted successfully', 'success');
+                }
+            }
         },
 
         /**
@@ -881,6 +977,12 @@ window.workflowDesigner = function () {
                         action: 'save'
                     },
                     {
+                        label: 'Remove from Step',
+                        class: 'is-danger',
+                        icon: 'trash',
+                        action: () => this.deleteWorkItemFromProperties(step, originalItem)
+                    },
+                    {
                         label: 'Cancel',
                         class: 'is-light',
                         icon: 'times',
@@ -890,6 +992,44 @@ window.workflowDesigner = function () {
             };
 
             window.PropertiesPanel.showProperties(config);
+        },
+
+        /**
+         * Delete work item from properties panel
+         */
+        deleteWorkItemFromProperties(step, item) {
+            if (!confirm(`Remove "${item.work_item_title || item.work_item_name}" from this step?`)) {
+                return;
+            }
+
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            if (stepIndex !== -1) {
+                const itemIndex = this.workflowSteps[stepIndex].items.findIndex(i => i.id === item.id);
+                if (itemIndex !== -1) {
+                    this.workflowSteps[stepIndex].items.splice(itemIndex, 1);
+
+                    // If step is now empty, remove the step
+                    if (this.workflowSteps[stepIndex].items.length === 0) {
+                        this.workflowSteps.splice(stepIndex, 1);
+
+                        // Reorder remaining steps
+                        this.workflowSteps.forEach((s, idx) => {
+                            s.order = idx + 1;
+                        });
+
+                        if (window.showNotification) {
+                            window.showNotification('Work item removed and empty step deleted', 'success');
+                        }
+                    } else {
+                        if (window.showNotification) {
+                            window.showNotification('Work item removed from step', 'success');
+                        }
+                    }
+
+                    this.saveWorkflow();
+                    this.closePropertiesPanel();
+                }
+            }
         },
 
         /**
