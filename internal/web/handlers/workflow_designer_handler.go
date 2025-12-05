@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/aosanya/CodeValdCortex/internal/agency"
-	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages/workflow_designer"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -61,6 +61,6 @@ func (h *WorkflowDesignerHandler) ShowDesigner(c *gin.Context) {
 	}
 
 	// Render designer page
-	component := agency_designer.WorkflowDesigner(agency, wf)
+	component := workflow_designer.WorkflowDesignerPage(agency, wf)
 	component.Render(c.Request.Context(), c.Writer)
 }

@@ -1,0 +1,87 @@
+package workflow_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
+
+// WorkflowChatPanel renders the chat/properties panel for workflow designer
+templ WorkflowChatPanel(currentAgency *models.Agency, wf *models.Workflow) {
+	<aside class="chat-panel" x-data="{ activeTab: 'properties' }">
+		<header class="chat-header">
+			<div class="chat-header-content">
+				<span class="icon is-medium has-text-primary">
+					<i class="fas fa-project-diagram"></i>
+				</span>
+				<div>
+					<h3 class="chat-title">Workflow</h3>
+					<p class="chat-subtitle">{ wf.Name }</p>
+				</div>
+			</div>
+		</header>
+		
+		<!-- Tabs -->
+		<div class="tabs is-fullwidth is-small">
+			<ul>
+				<li :class="activeTab === 'properties' ? 'is-active' : ''">
+					<a @click.prevent="activeTab = 'properties'">
+						<span class="icon is-small">
+							<i class="fas fa-sliders"></i>
+						</span>
+						<span>Properties</span>
+					</a>
+				</li>
+				<li :class="activeTab === 'info' ? 'is-active' : ''">
+					<a @click.prevent="activeTab = 'info'">
+						<span class="icon is-small">
+							<i class="fas fa-info-circle"></i>
+						</span>
+						<span>Info</span>
+					</a>
+				</li>
+			</ul>
+		</div>
+		
+		<!-- Properties Tab Content -->
+		<div x-show="activeTab === 'properties'" style="overflow-y: auto; flex: 1; padding: 1rem;">
+			<div id="properties-panel-content">
+				<div class="notification is-light has-text-centered">
+					<p class="has-text-grey">
+						<span class="icon is-large">
+							<i class="fas fa-mouse-pointer fa-2x"></i>
+						</span>
+					</p>
+					<p class="has-text-grey mt-3">
+						Click a step or work item to view properties
+					</p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Info Tab Content -->
+		<div x-show="activeTab === 'info'" style="overflow-y: auto; flex: 1; padding: 1rem;">
+			<div class="content">
+				<h4 class="title is-6">Workflow Information</h4>
+				<div class="field">
+					<label class="label is-small">Name</label>
+					<p class="is-size-7">{ wf.Name }</p>
+				</div>
+				<div class="field">
+					<label class="label is-small">Description</label>
+					<p class="is-size-7">{ wf.Description }</p>
+				</div>
+				<div class="field">
+					<label class="label is-small">Version</label>
+					<p class="is-size-7">{ wf.Version }</p>
+				</div>
+				<div class="field">
+					<label class="label is-small">Steps</label>
+					<p class="is-size-7" x-text="`${workflowSteps.length} step(s)`">0 steps</p>
+				</div>
+				<div class="field">
+					<label class="label is-small">Work Items</label>
+					<p class="is-size-7" x-text="`${workflowSteps.reduce((sum, s) => sum + s.items.length, 0)} work item(s)`">0 work items</p>
+				</div>
+			</div>
+		</div>
+	</aside>
+}

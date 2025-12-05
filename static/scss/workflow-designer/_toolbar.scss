@@ -10,4 +10,27 @@
     border-bottom: 1px solid $vscode-border;
     padding: $spacing-md $spacing-lg;
     flex-shrink: 0;
+
+    .level {
+        margin-bottom: 0;
+        align-items: center;
+
+        .title {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .level-item {
+            align-items: center;
+        }
+    }
+
+    // Ensure buttons are properly sized
+    .button {
+        height: auto;
+
+        .icon {
+            margin-right: 0.25rem;
+        }
+    }
 }

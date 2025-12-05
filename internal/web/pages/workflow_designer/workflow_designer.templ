@@ -1,0 +1,54 @@
+package workflow_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/web/components"
+)
+
+// WorkflowDesignerPage renders the workflow designer interface with VS Code-like layout
+templ WorkflowDesignerPage(currentAgency *models.Agency, wf *models.Workflow) {
+	@components.LayoutWithAgency("Workflow Designer - " + wf.Name, currentAgency) {
+		<!-- Workflow Designer Specific CSS -->
+		<link rel="stylesheet" href="/static/css/vscode-status-bar.css?v=20251030-themed"/>
+		<link rel="stylesheet" href="/static/css/agency-designer.css?v=20251031-context"/>
+		<link rel="stylesheet" href="/static/css/chat-panel-tabs.css"/>
+		<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
+		
+		<!-- Alpine.js with Collapse plugin -->
+		<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		
+		<!-- Workflow Designer JavaScript -->
+		<script src="/static/js/agency-designer/specification-api.js"></script>
+		<script src="/static/js/agency-designer/properties-panel.js"></script>
+		<script src="/static/js/agency-designer/utils.js"></script>
+		<script src="/static/js/workflow-designer.js"></script>
+		
+		<div class="vscode-designer-container">
+			<!-- Main Content Area with Columns (matching agency designer structure) -->
+			<div class="columns is-gapless vscode-main-content"
+				x-data="workflowDesigner()"
+				data-agency-id={ currentAgency.ID }
+				data-workflow-id={ wf.ID }
+				data-workflow-key={ wf.Key }
+				data-workflow-name={ wf.Name }
+				data-workflow-description={ wf.Description }
+				data-workflow-version={ wf.Version }
+				data-workflow-steps={ templ.JSONString(wf.Steps) }
+			>
+				<!-- Full Width Column: Workflow Designer -->
+				<div class="column">
+					<!-- Workflow Designer Header with Actions -->
+					@WorkflowDesignerHeader(currentAgency, wf)
+					<div class="designer-panels">
+						<!-- Workflow Content -->
+						@WorkflowContent(currentAgency, wf)
+					</div>
+				</div>
+			</div>
+			
+			<!-- Status Bar at Bottom (VS Code style) -->
+			@WorkflowStatusBar(currentAgency, wf)
+		</div>
+	}
+}
