@@ -96,6 +96,18 @@ Follow the **mandatory task startup process** for project tasks:
    ```
    - Use exact format: `feature/MVP-XXX_description`
    - Description should be lowercase with underscores
+   - **🚨 MULTI-REPO WORKSPACE**: Create dev branch in EACH repository:
+     ```bash
+     # For CodeValdCortex
+     cd /workspaces/CodeValdCortex
+     git checkout -b feature/MVP-XXX_description
+     
+     # For CodeValdFortex
+     cd /workspaces/CodeValdFortex
+     git checkout -b feature/MVP-XXX_description
+     ```
+   - Keep branches synchronized across repos when working on integrated features
+   - All repos must be on dev branch before starting implementation
 
 4. **Read project guidelines**
    - Review `.github/instructions/rules.instructions.md`
@@ -120,7 +132,9 @@ Before starting implementation:
   - [ ] All files comply with limits (README <300, topic files <500)
   - [ ] File names use topics (webhooks.md) NOT task IDs (MVP-001.md)
 - [ ] Read domain documentation file (e.g., `work-items-integration/`) and located task section
-- [ ] Feature branch created: `feature/MVP-XXX_description`
+- [ ] Feature branch created in ALL workspace repos: `feature/MVP-XXX_description`
+  - [ ] CodeValdCortex: `feature/MVP-XXX_description` created
+  - [ ] CodeValdFortex: `feature/MVP-XXX_description` created
 - [ ] Reviewed code quality standards in rules.instructions.md
 - [ ] Todo list created with implementation steps
 - [ ] Understand acceptance criteria and validation requirements
