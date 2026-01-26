@@ -48,6 +48,17 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
+## P1: React Frontend API Support (PREREQUISITE FOR REACT MIGRATION)
+
+*REST API infrastructure to support the new React SPA frontend (CodeValdFortex)*
+
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-RM-002 | Backend API Infrastructure | Create `/api/v1` package structure in Go backend, implement CORS middleware, request logger, standardized response/error formatting, health endpoint | 📋 Not Started | P1 | Medium | Go, Gin Framework, REST API | None | TBD |
+| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | 📋 Not Started | P1 | Medium | Go, Gin, ArangoDB | MVP-RM-002 | TBD |
+
+---
+
 ## P0: Agency Designer - Core Features (CRITICAL)
 
 *Foundation for agency configuration and design*
