@@ -8,9 +8,16 @@ import (
 templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 				<div class="designer-content columns is-gapless">
 					<!-- Left Panel: Available Work Items -->
-					<div class="column is-3 work-items-panel">
-						<div class="panel">
-							<p class="panel-heading">Available Work Items</p>
+					<aside class="column is-3 sidebar-panel work-items-panel">
+						<header class="sidebar-header">
+							<h3 class="sidebar-title">
+								<span class="icon">
+									<i class="fas fa-clipboard-list"></i>
+								</span>
+								<span>Available Work Items</span>
+							</h3>
+						</header>
+						<div class="sidebar-content">
 							<!-- Search Bar -->
 							<div class="panel-block">
 								<p class="control has-icons-left">
@@ -36,32 +43,20 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 							<div class="work-items-list">
 								<template x-for="(item, index) in filteredWorkItems" :key="index">
 									<div 
-										class="work-item-card"
-										x-data="{ expanded: false }"
+										class="overview-nav-item work-item-card"
+										draggable="true"
+										@dragstart="handleDragStart($event, item)"
+										@dragend="handleDragEnd($event)"
+										@click="showAvailableWorkItemInfo(item)"
+										style="cursor: grab;"
+										:class="{ 'is-active': selectedAvailableWorkItem?.id === item.id }"
 									>
-										<div 
-											class="card"
-											draggable="true"
-											@dragstart="handleDragStart($event, item)"
-											@dragend="handleDragEnd($event)"
-										>
-											<div class="card-content py-2 px-3 p-2 m-1">
-												<div class="is-flex is-justify-content-space-between is-align-items-center">
-													<p class="has-text-weight-semibold is-size-6 mb-0" x-text="item.title"></p>
-													<button 
-														class="button is-small is-ghost"
-														@click.stop="expanded = !expanded"
-														:title="expanded ? 'Hide description' : 'Show description'"
-													>
-														<span class="icon is-small">
-															<i class="fas" :class="expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-														</span>
-													</button>
-												</div>
-												<div x-show="expanded" x-collapse>
-													<p class="is-size-6 has-text-grey mt-2" x-text="item.description"></p>
-												</div>
-											</div>
+										<div class="nav-icon">
+											<i class="fas fa-tasks"></i>
+										</div>
+										<div class="nav-info">
+											<div class="nav-name has-text-weight-semibold" x-text="item.title"></div>
+											<div class="nav-description is-size-7 has-text-grey" x-text="item.description.substring(0, 60) + '...'"></div>
 										</div>
 									</div>
 								</template>
@@ -71,7 +66,7 @@ templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 								</div>
 							</div>
 						</div>
-					</div>
+					</aside>
 					<!-- Center: Workflow Canvas -->
 					<div class="column is-6 workflow-canvas">
 						<div class="canvas-content">

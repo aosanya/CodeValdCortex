@@ -21,6 +21,7 @@ window.workflowDesigner = function () {
         availableWorkItems: [],
         filteredWorkItems: [],
         searchQuery: '',
+        selectedAvailableWorkItem: null,
 
         // Drag state
         isDragging: false,
@@ -849,6 +850,54 @@ window.workflowDesigner = function () {
             if (item && window.PropertiesPanel) {
                 this.openWorkItemProperties(step, item);
             }
+        },
+
+        /**
+         * Show available work item info in properties panel
+         */
+        showAvailableWorkItemInfo(workItem) {
+            if (!window.PropertiesPanel) {
+                console.error('PropertiesPanel not available');
+                return;
+            }
+
+            // Track selected work item for highlighting
+            this.selectedAvailableWorkItem = workItem;
+
+            // Build properties configuration for available work item
+            const config = {
+                title: workItem.title || 'Work Item',
+                icon: 'tasks',
+                iconColor: 'info',
+                data: workItem,
+                autoSwitchTab: false,
+
+                fields: [
+                    {
+                        key: 'title',
+                        label: 'Title',
+                        type: 'static',
+                        help: 'Work item title from specification'
+                    },
+                    {
+                        key: 'description',
+                        label: 'Description',
+                        type: 'static',
+                        help: 'Full description of this work item'
+                    },
+                    {
+                        key: 'info_drag',
+                        label: 'Usage',
+                        type: 'info',
+                        value: '📌 Drag this work item onto the workflow canvas to add it to your workflow',
+                        help: 'This work item is available to be added to the workflow'
+                    }
+                ],
+
+                buttons: []
+            };
+
+            window.PropertiesPanel.open(config);
         },
 
         /**
