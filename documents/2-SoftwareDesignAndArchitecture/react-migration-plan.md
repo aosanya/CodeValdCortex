@@ -40,7 +40,7 @@ This document outlines the complete migration strategy from the current Templ+HT
 │  │   │   └── workflow/        (Business logic)            │
 │  │   └── config.yaml                                       │
 │  │                                                          │
-│  └── codevaldfortex/            (React Frontend - SPA)       │
+│  └── CodeValdFortex/          (React Frontend - SPA)       │
 │      ├── src/                                              │
 │      │   ├── features/        (Redux slices by domain)    │
 │      │   ├── components/      (React components)          │
@@ -52,7 +52,7 @@ This document outlines the complete migration strategy from the current Templ+HT
 
 Runtime Architecture:
 ┌──────────────┐          HTTP          ┌──────────────┐
-│  CodeValdFortex│ ◄──────────────────────►│ CodeValdCortex│
+│ CodeValdFortex│ ◄─────────────────────►│ CodeValdCortex│
 │  (React SPA) │      REST API          │  (Go Backend) │
 │  Port: 5173  │  /api/v1/agencies      │  Port: 8080   │
 │              │  /api/v1/work-items    │               │
@@ -292,7 +292,7 @@ DELETE /api/v1/agencies/{agencyID}/work-items/{workItemID}
 ### Directory Layout
 
 ```
-/workspaces/codevaldfortex/
+/workspaces/covaldfortex/
 ├── public/
 │   └── favicon.ico
 ├── src/
@@ -684,7 +684,7 @@ make run
 
 **Terminal 2 - React Frontend:**
 ```bash
-cd /workspaces/codevaldfortex
+cd /workspaces/CodeValdFortex
 npm run dev
 # Runs on http://localhost:5173
 ```
@@ -774,7 +774,7 @@ VITE_APP_NAME=CodeValdFortex
 
 **CodeValdFortex Production Build:**
 ```bash
-cd /workspaces/codevaldfortex
+cd /workspaces/CodeValdFortex
 npm run build
 # Outputs to dist/ directory
 # Contains optimized JS, CSS, HTML
@@ -786,7 +786,7 @@ npm run build
 vercel deploy dist/
 
 # Option 2: Self-hosted Nginx
-rsync -avz dist/ server:/var/www/codevaldfortex/
+rsync -avz dist/ server:/var/www/CodeValdFortex/
 ```
 
 ---
@@ -796,7 +796,7 @@ rsync -avz dist/ server:/var/www/codevaldfortex/
 ### Phase 1: Foundation (Weeks 1-2)
 
 **Week 1 - Setup & Infrastructure**
-- [ ] Create CodeValdFortex repository in `/workspaces/codevaldfortex/`
+- [ ] Create CodeValdFortex repository in `/workspaces/CodeValdFortex/`
 - [ ] Initialize Vite + React + TypeScript project
 - [ ] Install dependencies (Redux Toolkit, Bulma, Axios, React Router)
 - [ ] Set up Bulma CSS with custom theming
