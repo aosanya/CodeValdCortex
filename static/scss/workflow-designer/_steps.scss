@@ -27,6 +27,32 @@
     }
 }
 
+/* Step Header - Order, Name, Autonomy, Routes */
+.step-header {
+    cursor: pointer;
+    transition: all $transition-fast ease;
+    border: 2px solid transparent;
+
+    &:hover {
+        border-color: $vscode-accent;
+        background-color: rgba(50, 115, 220, 0.05) !important;
+        box-shadow: 0 2px 8px rgba(50, 115, 220, 0.15);
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
+
+    .level {
+        margin-bottom: 0;
+    }
+
+    // Compact spacing for badges
+    .tag {
+        margin-bottom: 0;
+    }
+}
+
 /* Step Item Container (for side drop zones) */
 .step-item-container {
     position: relative;
@@ -131,6 +157,38 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+}
+
+/* Route Editor in Properties Panel */
+.route-editor {
+    .table-container {
+        margin-bottom: $spacing-sm;
+    }
+
+    table {
+        background: white;
+
+        th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #7a7a7a;
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        .select {
+            select {
+                font-size: 0.75rem;
+            }
+        }
+
+        .delete {
+            margin: 0;
+        }
     }
 }
 

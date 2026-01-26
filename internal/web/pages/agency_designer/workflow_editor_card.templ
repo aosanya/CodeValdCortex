@@ -1,5 +1,7 @@
 package agency_designer
 
+import "github.com/aosanya/CodeValdCortex/internal/web/components/forms"
+
 // WorkflowEditorCard renders the workflow editor card component
 templ WorkflowEditorCard() {
 <!-- Workflow Editor Card (Hidden by default) -->
@@ -18,51 +20,41 @@ title="Cancel">
 </header>
 <div class="card-content">
 <!-- Name Field -->
-<div class="field">
-<label class="label">Workflow Name</label>
-<div class="control">
-<input 
-class="input"
-type="text"
-id="workflow-name-editor"
-placeholder="e.g., User Onboarding Process"
-maxlength="200">
-</div>
-<p class="help">A clear, descriptive name for this workflow.</p>
-</div>
+@forms.TextField(forms.TextFieldConfig{
+	ID:          "workflow-name-editor",
+	Label:       "Workflow Name",
+	HelpText:    "A clear, descriptive name for this workflow.",
+	Placeholder: "e.g., User Onboarding Process",
+	MaxLength:   200,
+	Required:    true,
+})
 
 <!-- Description Field -->
-<div class="field">
-<label class="label">Description</label>
-<div class="control">
-<textarea 
-class="textarea"
-id="workflow-description-editor"
-placeholder="Describe the workflow purpose and what it accomplishes..."
-rows="6"
-style="font-family: monospace; font-size: 14px;"></textarea>
-</div>
-<p class="help">Explain what this workflow does and when it should be used.</p>
-</div>
+@forms.TextAreaField(forms.TextAreaFieldConfig{
+	ID:          "workflow-description-editor",
+	Label:       "Description",
+	HelpText:    "Explain what this workflow does and when it should be used.",
+	Placeholder: "Describe the workflow purpose and what it accomplishes...",
+	Rows:        6,
+	Style:       "font-family: monospace; font-size: 14px;",
+	Required:    true,
+})
 
 <!-- Version Field -->
-<div class="field">
-<label class="label">Version</label>
-<div class="control">
-<input 
-class="input"
-type="text"
-id="workflow-version-editor"
-placeholder="e.g., 1.0.0"
-value="1.0.0"
-maxlength="20">
-</div>
-<p class="help">Semantic version number (major.minor.patch).</p>
-</div>
+@forms.TextField(forms.TextFieldConfig{
+	ID:          "workflow-version-editor",
+	Label:       "Version",
+	HelpText:    "Semantic version number (major.minor.patch).",
+	Placeholder: "e.g., 1.0.0",
+	Value:       "1.0.0",
+	MaxLength:   20,
+	Required:    false,
+})
 </div>
 <footer class="card-footer">
 <div class="card-footer-item">
 <button 
+id="save-workflow-btn"
 class="button is-small is-primary"
 onclick="saveWorkflowFromEditor()">
 <span class="icon"><i class="fas fa-save"></i></span>

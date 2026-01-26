@@ -1,0 +1,122 @@
+package workflow_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
+
+// WorkflowDesignerCanvas renders the workflow canvas with work items list and canvas area
+templ WorkflowDesignerCanvas(currentAgency *models.Agency, wf *models.Workflow) {
+	<div class="designer-content-inner columns is-gapless">
+		<!-- Left Panel: Available Work Items -->
+		<div class="column is-3 work-items-panel">
+			<div class="panel">
+				<p class="panel-heading">Available Work Items</p>
+				<!-- Search Bar -->
+				<div class="panel-block">
+					<p class="control has-icons-left">
+						<input
+							class="input is-small"
+							type="text"
+							placeholder="Search work items..."
+							x-model="searchQuery"
+							@input="filterWorkItems()"
+						/>
+						<span class="icon is-small is-left">
+							<i class="fas fa-search"></i>
+						</span>
+					</p>
+				</div>
+				<!-- Results Count -->
+				<div class="panel-block" x-show="searchQuery" x-cloak>
+					<span class="tag is-info is-light">
+						<span x-text="`Showing ${filteredWorkItems.length} of ${availableWorkItems.length} items`"></span>
+					</span>
+				</div>
+				<!-- Work Items List -->
+				<div class="work-items-list">
+					<template x-for="(item, index) in filteredWorkItems" :key="index">
+						<div 
+							class="work-item-card"
+							x-data="{ expanded: false }"
+						>
+							<div 
+								class="card"
+								draggable="true"
+								@dragstart="handleDragStart($event, item)"
+								@dragend="handleDragEnd($event)"
+							>
+								<div class="card-content py-2 px-3 p-2 m-1">
+									<div class="is-flex is-justify-content-space-between is-align-items-center">
+										<p class="has-text-weight-semibold is-size-6 mb-0" x-text="item.title"></p>
+										<button 
+											class="button is-small is-ghost"
+											@click.stop="expanded = !expanded"
+											:title="expanded ? 'Hide description' : 'Show description'"
+										>
+											<span class="icon is-small">
+												<i class="fas" :class="expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+											</span>
+										</button>
+									</div>
+									<div x-show="expanded" x-collapse>
+										<p class="is-size-6 has-text-grey mt-2" x-text="item.description"></p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</template>
+					<!-- No Results Message -->
+					<div class="panel-block" x-show="filteredWorkItems.length === 0" x-cloak>
+						<p class="has-text-grey">No work items found</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Center: Workflow Canvas -->
+		<div class="column is-6 workflow-canvas">
+			<div class="canvas-content">
+				<!-- START Marker -->
+				<div class="workflow-marker start-marker">
+					<div class="marker-content">
+						<span class="icon is-medium">
+							<i class="fas fa-play-circle"></i>
+						</span>
+						<span class="has-text-weight-bold">START</span>
+					</div>
+				</div>
+				<!-- Workflow Steps or Empty State -->
+				<template x-if="workflowSteps.length === 0">
+					<div
+						class="empty-state-drop-zone"
+						@dragover.prevent="handleDragOver($event, null)"
+						@dragleave="handleDragLeave($event)"
+						@drop="handleDrop($event, null, 'empty')"
+						:class="{ 'is-active': dragOverTarget === 'empty' }"
+					>
+						<div class="empty-state-content">
+							<span class="icon is-large has-text-grey-light">
+								<i class="fas fa-hand-pointer fa-3x"></i>
+							</span>
+							<p class="title is-5 has-text-grey-light mt-4">Drop items here to build workflow</p>
+							<p class="subtitle is-6 has-text-grey-light">Drag work items from the left panel</p>
+						</div>
+					</div>
+				</template>
+				<!-- Workflow Steps -->
+				<template x-else>
+					@WorkflowStepsContainer()
+				</template>
+				
+				<!-- END Marker -->
+				<div class="workflow-marker end-marker">
+					<div class="marker-content">
+						<span class="icon is-medium">
+							<i class="fas fa-flag-checkered"></i>
+						</span>
+						<span class="has-text-weight-bold">END</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+}

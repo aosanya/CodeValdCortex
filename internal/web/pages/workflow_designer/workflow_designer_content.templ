@@ -1,76 +1,23 @@
-package agency_designer
+package workflow_designer
 
 import (
-	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
-// WorkflowDesigner renders the simplified vertical column workflow designer
-templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Workflow Designer - { wf.Name }</title>
-			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"/>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-			<link rel="stylesheet" href="/static/css/workflow-designer.css"/>
-			<!-- Alpine.js with Collapse plugin -->
-			<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<!-- Specification API for work items -->
-			<script src="/static/js/agency-designer/specification-api.js"></script>
-			<!-- Workflow Designer -->
-			<script src="/static/js/workflow-designer.js"></script>
-		</head>
-		<body>
-			<div
-				class="designer-container"
-				x-data="workflowDesigner()"
-				data-agency-id={ agencyID }
-				data-workflow-id={ wf.ID }
-				data-workflow-key={ wf.Key }
-				data-workflow-name={ wf.Name }
-				data-workflow-description={ wf.Description }
-				data-workflow-version={ wf.Version }
-				data-workflow-steps={ templ.JSONString(wf.Steps) }
-			>
-				<!-- Toolbar -->
-				<div class="designer-toolbar">
-					<div class="level is-mobile">
-						<div class="level-left">
-							<div class="level-item">
-								<a href={ templ.SafeURL("/agencies/" + agencyID + "/designer") } class="button is-small">
-									<span class="icon"><i class="fas fa-arrow-left"></i></span>
-									<span>Back to Workflows</span>
-								</a>
-							</div>
-							<div class="level-item">
-								<h1 class="title is-5 mb-0">{ wf.Name }</h1>
-							</div>
-						</div>
-						<div class="level-right">
-							<div class="level-item">
-								<button @click="saveWorkflow()" class="button is-primary is-small" :disabled="saving">
-									<span class="icon"><i class="fas fa-save"></i></span>
-									<span x-text="saving ? 'Saving...' : 'Save'">Save</span>
-								</button>
-							</div>
-							<div class="level-item">
-								<button @click="exportWorkflow()" class="button is-light is-small">
-									<span class="icon"><i class="fas fa-download"></i></span>
-									<span>Export</span>
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- Main Content Area -->
+// WorkflowContent renders the main workflow canvas with work items panel and workflow steps
+templ WorkflowContent(currentAgency *models.Agency, wf *models.Workflow) {
 				<div class="designer-content columns is-gapless">
 					<!-- Left Panel: Available Work Items -->
-					<div class="column is-3 work-items-panel">
-						<div class="panel">
-							<p class="panel-heading">Available Work Items</p>
+					<aside class="column is-3 sidebar-panel work-items-panel">
+						<header class="sidebar-header">
+							<h3 class="sidebar-title">
+								<span class="icon">
+									<i class="fas fa-clipboard-list"></i>
+								</span>
+								<span>Available Work Items</span>
+							</h3>
+						</header>
+						<div class="sidebar-content">
 							<!-- Search Bar -->
 							<div class="panel-block">
 								<p class="control has-icons-left">
@@ -96,32 +43,20 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 							<div class="work-items-list">
 								<template x-for="(item, index) in filteredWorkItems" :key="index">
 									<div 
-										class="work-item-card"
-										x-data="{ expanded: false }"
+										class="overview-nav-item work-item-card"
+										draggable="true"
+										@dragstart="handleDragStart($event, item)"
+										@dragend="handleDragEnd($event)"
+										@click="showAvailableWorkItemInfo(item)"
+										style="cursor: grab;"
+										:class="{ 'is-active': selectedAvailableWorkItem?.id === item.id }"
 									>
-										<div 
-											class="card"
-											draggable="true"
-											@dragstart="handleDragStart($event, item)"
-											@dragend="handleDragEnd($event)"
-										>
-											<div class="card-content py-2 px-3 p-2 m-1">
-												<div class="is-flex is-justify-content-space-between is-align-items-center">
-													<p class="has-text-weight-semibold is-size-6 mb-0" x-text="item.title"></p>
-													<button 
-														class="button is-small is-ghost"
-														@click.stop="expanded = !expanded"
-														:title="expanded ? 'Hide description' : 'Show description'"
-													>
-														<span class="icon is-small">
-															<i class="fas" :class="expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-														</span>
-													</button>
-												</div>
-												<div x-show="expanded" x-collapse>
-													<p class="is-size-6 has-text-grey mt-2" x-text="item.description"></p>
-												</div>
-											</div>
+										<div class="nav-icon">
+											<i class="fas fa-tasks"></i>
+										</div>
+										<div class="nav-info">
+											<div class="nav-name has-text-weight-semibold" x-text="item.title"></div>
+											<div class="nav-description is-size-7 has-text-grey" x-text="item.description.substring(0, 60) + '...'"></div>
 										</div>
 									</div>
 								</template>
@@ -131,9 +66,9 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 								</div>
 							</div>
 						</div>
-					</div>
+					</aside>
 					<!-- Center: Workflow Canvas -->
-					<div class="column workflow-canvas">
+					<div class="column is-6 workflow-canvas">
 						<div class="canvas-content">
 							<!-- START Marker -->
 							<div class="workflow-marker start-marker">
@@ -144,27 +79,27 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 									<span class="has-text-weight-bold">START</span>
 								</div>
 							</div>
-							<!-- Workflow Steps or Empty State -->
-							<template x-if="workflowSteps.length === 0">
-								<div
-									class="empty-state-drop-zone"
-									@dragover.prevent="handleDragOver($event, null)"
-									@dragleave="handleDragLeave($event)"
-									@drop="handleDrop($event, null, 'empty')"
-									:class="{ 'is-active': dragOverTarget === 'empty' }"
-								>
-									<div class="empty-state-content">
-										<span class="icon is-large has-text-grey-light">
-											<i class="fas fa-hand-pointer fa-3x"></i>
-										</span>
-										<p class="title is-5 has-text-grey-light mt-4">Drop items here to build workflow</p>
-										<p class="subtitle is-6 has-text-grey-light">Drag work items from the left panel</p>
-									</div>
-								</div>
-							</template>
-							<!-- Workflow Steps -->
-							<template x-if="workflowSteps.length > 0">
-								<div class="workflow-steps-container">
+
+						<!-- Empty State (show when no steps) -->
+						<div
+							x-show="workflowSteps.length === 0"
+							class="empty-state-drop-zone"
+							@dragover.prevent="handleDragOver($event, null)"
+							@dragleave="handleDragLeave($event)"
+							@drop="handleDrop($event, null, 'empty')"
+							:class="{ 'is-active': dragOverTarget === 'empty' }"
+						>
+							<div class="empty-state-content">
+								<span class="icon is-large has-text-grey-light">
+									<i class="fas fa-hand-pointer fa-3x"></i>
+								</span>
+								<p class="title is-5 has-text-grey-light mt-4">Drop items here to build workflow</p>
+								<p class="subtitle is-6 has-text-grey-light">Drag work items from the left panel</p>
+							</div>
+						</div>
+						
+						<!-- Workflow Steps (show when steps exist) -->
+						<div x-show="workflowSteps.length > 0" class="workflow-steps-container">
 									<template x-for="(step, stepIndex) in workflowSteps" :key="step.id">
 										<div class="workflow-step-wrapper">
 											<!-- Flow Arrow + Drop Zone Above Step -->
@@ -173,17 +108,74 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 													<div class="arrow-line"></div>
 													<div class="arrow-head">▼</div>
 												</div>
+											<div class="horizontal-drop-zone">
 												<div
-													class="drop-zone horizontal-drop-zone"
+													class="drop-zone"
 													@dragover.prevent="handleDragOver($event, { type: 'before', stepIndex })"
 													@dragleave="handleDragLeave($event)"
 													@drop="handleDrop($event, stepIndex, 'before')"
 													:class="{ 'is-active': dragOverTarget?.type === 'before' && dragOverTarget?.stepIndex === stepIndex }"
-												></div>
+													>
+													<div class="drop-zone__inner">⊕ Drop here to insert step</div>
+												</div>
+											</div>
 											</div>
 											<!-- Step Items -->
 											<div class="workflow-step" :class="{ 'is-parallel': step.items.length > 1 }">
-												<template x-if="step.items.length === 1">
+												<!-- Step Header: Order, Name, Autonomy, Routes -->
+												<div 
+													class="step-header box has-background-light mb-2"
+													@click="selectStep(step.id)"
+													style="cursor: pointer; padding: 0.75rem 1rem;"
+												>
+													<div class="level is-mobile mb-0">
+														<div class="level-left">
+															<div class="level-item">
+																<!-- Order Number -->
+																<span class="tag is-medium is-dark mr-2">
+																	<strong x-text="step.order"></strong>
+																</span>
+																<!-- Step Name (or fallback) -->
+																<span 
+																	class="is-size-6 has-text-weight-semibold"
+																	x-text="step.name || 'Step ' + step.order"
+																></span>
+															</div>
+														</div>
+														<div class="level-right">
+															<div class="level-item">
+																<!-- Work Item Count -->
+																<span class="tag is-info is-light mr-2" :title="`${step.items.length} work item(s)`">
+																	<span class="icon is-small">
+																		<i class="fas fa-tasks"></i>
+																	</span>
+																	<span x-text="step.items.length"></span>
+																</span>
+																<!-- Autonomy Level Badge (aggregated from work items) -->
+																<span 
+																	:class="getStepAutonomyBadgeClass(step)"
+																	:title="'Autonomy Levels: ' + getStepAutonomyDisplay(step)"
+																	class="mr-2"
+																>
+																	<strong x-text="getStepAutonomyDisplay(step)"></strong>
+																</span>
+																<!-- Route Indicator (if routes defined) -->
+																<span 
+																	x-show="hasRoutes(step)"
+																	class="tag is-link is-light"
+																	:title="`${getRouteCount(step)} route(s) configured`"
+																>
+																	<span class="icon is-small">
+																		<i class="fas fa-route"></i>
+																	</span>
+																	<span x-text="getRouteCount(step)"></span>
+																</span>
+															</div>
+														</div>
+													</div>
+												</div>
+												
+												<template x-if="step.items && step.items.length === 1 && step.items[0]">
 													<!-- Single Item (Sequential) -->
 													<div
 														class="step-item-container"
@@ -195,12 +187,16 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															class="drop-zone left-drop-zone"
 															@drop.stop="handleDrop($event, stepIndex, 'left')"
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'left' }"
-														></div>
+														>
+															<div class="drop-zone__inner">⊕</div>
+														</div>
 														<div
 															class="step-item"
 															draggable="true"
 															@dragstart="handleStepDragStart($event, stepIndex, 0)"
 															@dragend="handleDragEnd($event)"
+															@click.stop="selectWorkItem(step.id, step.items[0].id)"
+															style="cursor: pointer;"
 														>
 															<div class="card">
 																<header class="card-header" style="position: relative;">
@@ -215,7 +211,7 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																		</span>
 																	</button>
 																	<div class="card-header-title py-3" style="padding-right: 3rem;">
-																		<span class="is-size-6" x-text="step.items[0].work_item_title"></span>
+																		<span class="is-size-6" x-text="step.items[0].work_item_title || step.items[0].work_item_name || 'Untitled'"></span>
 																	</div>
 																	<button
 																		class="delete is-small"
@@ -225,7 +221,7 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																	></button>
 																</header>
 																<div class="card-content py-2 px-3" x-show="step.items[0].showDescription" x-cloak>
-																	<p class="is-size-7 has-text-grey" x-text="step.items[0].description"></p>
+																	<p class="is-size-7 has-text-grey" x-text="step.items[0].description || ''"></p>
 																</div>
 															</div>
 														</div>
@@ -233,7 +229,9 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 															class="drop-zone right-drop-zone"
 															@drop.stop="handleDrop($event, stepIndex, 'right')"
 															:class="{ 'is-active': sideDropTarget?.stepIndex === stepIndex && sideDropTarget?.side === 'right' }"
-														></div>
+															>
+																<div class="drop-zone__inner">⊕</div>
+															</div>
 													</div>
 											</template>
 											<template x-if="step.items.length > 1">
@@ -265,6 +263,8 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																	draggable="true"
 																	@dragstart="handleStepDragStart($event, stepIndex, itemIndex)"
 																	@dragend="handleDragEnd($event)"
+																	@click.stop="selectWorkItem(step.id, item.id)"
+																	style="cursor: pointer;"
 																>
 																	<div class="card">
 																		<header class="card-header" style="position: relative;">
@@ -302,7 +302,9 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 																@drop="handleDrop($event, stepIndex, 'parallel')"
 																:class="{ 'is-active': dragOverTarget?.type === 'parallel' && dragOverTarget?.stepIndex === stepIndex }"
 															>
-																<div class="drop-zone"></div>
+																<div class="drop-zone">
+																	<div class="drop-zone__inner">⊕ Add parallel item</div>
+																</div>
 															</div>
 														</div>
 													</div>
@@ -317,24 +319,26 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 										</div>
 									</div>
 									</template>
-									<!-- Final Flow Arrow + Drop Zone After Last Step -->
-									<div class="flow-connector">
-										<div class="flow-arrow">
-											<div class="arrow-line"></div>
-											<div class="arrow-head">▼</div>
-										</div>
-										<div
-											class="drop-zone horizontal-drop-zone"
-											@dragover.prevent="handleDragOver($event, { type: 'after' })"
-											@dragleave="handleDragLeave($event)"
-											@drop="handleDrop($event, workflowSteps.length, 'after')"
-											:class="{ 'is-active': dragOverTarget?.type === 'after' }"
-										>
-											<div class="drop-zone-indicator"></div>
-										</div>
-									</div>
+							<!-- Final Flow Arrow + Drop Zone After Last Step -->
+							<div class="flow-connector">
+								<div class="flow-arrow">
+									<div class="arrow-line"></div>
+									<div class="arrow-head">▼</div>
 								</div>
-							</template>
+								<div class="horizontal-drop-zone">
+									<div
+										class="drop-zone"
+										@dragover.prevent="handleDragOver($event, { type: 'after' })"
+										@dragleave="handleDragLeave($event)"
+										@drop="handleDrop($event, workflowSteps.length, 'after')"
+										:class="{ 'is-active': dragOverTarget?.type === 'after' }"
+										>
+											<div class="drop-zone__inner">⊕ Drop after last step</div>
+										</div>
+								</div>
+							</div>
+						</div>
+							
 							<!-- END Marker -->
 							<div class="workflow-marker end-marker">
 								<div class="marker-content">
@@ -343,11 +347,19 @@ templ WorkflowDesigner(agencyID string, wf *models.Workflow) {
 									</span>
 									<span class="has-text-weight-bold">END</span>
 								</div>
-							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Right Panel: Properties -->
+				<div class="column is-3 properties-panel" style="background: #f9f9f9; border-left: 1px solid #e5e5e5; overflow-y: auto;">
+					<div id="properties-panel-content" class="p-3">
+						<div class="box has-text-centered has-text-grey-light">
+							<p class="icon is-large">
+								<i class="fas fa-mouse-pointer fa-2x"></i>
+							</p>
+							<p class="mt-3">Click a step to view properties</p>
 						</div>
 					</div>
 				</div>
 			</div>
-		</body>
-	</html>
 }

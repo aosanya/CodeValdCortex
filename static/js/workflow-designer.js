@@ -21,6 +21,7 @@ window.workflowDesigner = function () {
         availableWorkItems: [],
         filteredWorkItems: [],
         searchQuery: '',
+        selectedAvailableWorkItem: null,
 
         // Drag state
         isDragging: false,
@@ -37,44 +38,93 @@ window.workflowDesigner = function () {
          * Initialize the designer
          */
         async init() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🚀 Initializing workflow designer component');
+            console.log('[MVP-WF-DESIGNER] 🆔 Component instance ID:', Math.random().toString(36).substr(2, 9));
+            window.__workflowDesignerInstance = this; // Store reference for debugging
+
             // Get workflow data from data attributes
             const container = this.$el;
+            console.log('[MVP-WF-DESIGNER] 📦 Container element:', container);
 
             this.agencyID = container.dataset.agencyId;
             this.workflowID = container.dataset.workflowId;
             this.workflowKey = container.dataset.workflowKey;
             this.workflowName = container.dataset.workflowName;
             this.workflowDescription = container.dataset.workflowDescription;
+
+            console.log('[MVP-WF-DESIGNER] 🔧 Initial state:', {
+                agencyID: this.agencyID,
+                workflowID: this.workflowID,
+                workflowKey: this.workflowKey,
+                workflowName: this.workflowName
+            });
             this.workflowVersion = container.dataset.workflowVersion;
+
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 📋 Workflow metadata loaded:', {
+                agencyID: this.agencyID,
+                workflowID: this.workflowID,
+                workflowKey: this.workflowKey,
+                workflowName: this.workflowName,
+                workflowVersion: this.workflowVersion
+            });
 
             // Parse workflow steps if available
             try {
                 const stepsData = container.dataset.workflowSteps;
+                console.log('[MVP-WF-DESIGNER] 📊 Steps data from container:', stepsData ? `${stepsData.length} chars` : 'null');
                 if (stepsData && stepsData !== 'null') {
                     this.workflowSteps = JSON.parse(stepsData) || [];
+                    console.log('[MVP-WF-DESIGNER] ✅ Parsed workflow steps:', {
+                        count: this.workflowSteps.length,
+                        steps: this.workflowSteps
+                    });
                 }
             } catch (e) {
+                console.error('[MVP-WF-DESIGNER] ❌ Failed to parse workflow steps:', e);
                 this.workflowSteps = [];
             }
 
+            // Check PropertiesPanel availability
+            console.log('[MVP-WF-DESIGNER] 🪟 PropertiesPanel available:', !!window.PropertiesPanel);
+            console.log('[MVP-WF-DESIGNER] 🛠️ PropertiesPanel methods:', window.PropertiesPanel ? Object.keys(window.PropertiesPanel) : 'N/A');
+
             // Load available work items from specification API
             await this.loadWorkItems();
+
+            console.log('[MVP-WF-DESIGNER] ✅ Initialization complete');
         },
 
         /**
          * Load available work items from specification
          */
         async loadWorkItems() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 📚 Loading work items for agency:', this.agencyID);
             try {
                 // Use existing specification API
                 if (typeof window.specificationAPI !== 'undefined') {
                     // Set the agency ID on the API instance
                     window.specificationAPI.agencyId = this.agencyID;
 
+                    // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+                    console.log('[MVP-WF-DESIGNER] 🔍 Fetching specification for agency:', this.agencyID);
                     const spec = await window.specificationAPI.getSpecification();
+                    console.log('[MVP-WF-DESIGNER] 📦 Specification received:', {
+                        hasWorkItems: !!(spec.work_items),
+                        workItemsCount: spec.work_items?.length || 0,
+                        hasWorkflows: !!(spec.workflows),
+                        workflowsCount: spec.workflows?.length || 0
+                    });
 
                     this.availableWorkItems = spec.work_items || [];
                     this.filteredWorkItems = [...this.availableWorkItems];
+
+                    console.log('[MVP-WF-DESIGNER] ✅ Loaded work items:', {
+                        count: this.availableWorkItems.length,
+                        sample: this.availableWorkItems.slice(0, 3).map(wi => ({ key: wi._key || wi.key, title: wi.title }))
+                    });
 
                     // Load all workflows for specification updates
                     // Normalize workflows to ensure they have a 'key' property
@@ -86,11 +136,13 @@ window.workflowDesigner = function () {
                     // Enrich existing workflow steps with work item details
                     this.enrichWorkflowSteps();
                 } else {
+                    console.error('[MVP-WF-DESIGNER] ❌ specificationAPI not available');
                     this.availableWorkItems = [];
                     this.filteredWorkItems = [];
                     this.allWorkflows = [];
                 }
             } catch (error) {
+                console.error('[MVP-WF-DESIGNER] ❌ Error loading work items:', error);
                 this.availableWorkItems = [];
                 this.filteredWorkItems = [];
                 this.allWorkflows = [];
@@ -101,7 +153,14 @@ window.workflowDesigner = function () {
          * Enrich workflow steps with work item details
          */
         enrichWorkflowSteps() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔄 Enriching workflow steps:', {
+                stepsCount: this.workflowSteps.length,
+                workItemsAvailable: this.availableWorkItems.length
+            });
+
             if (!this.availableWorkItems || this.availableWorkItems.length === 0) {
+                console.log('[MVP-WF-DESIGNER] ⚠️ No work items available for enrichment');
                 return;
             }
 
@@ -160,8 +219,12 @@ window.workflowDesigner = function () {
          */
         filterWorkItems() {
             const query = this.searchQuery.toLowerCase().trim();
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔍 Filtering work items with query:', query);
+
             if (!query) {
                 this.filteredWorkItems = [...this.availableWorkItems];
+                console.log('[MVP-WF-DESIGNER] 📋 No filter, showing all:', this.filteredWorkItems.length, 'items');
                 return;
             }
 
@@ -170,18 +233,38 @@ window.workflowDesigner = function () {
                 const description = (item.description || '').toLowerCase();
                 return title.includes(query) || description.includes(query);
             });
+
+            console.log('[MVP-WF-DESIGNER] ✅ Filtered results:', this.filteredWorkItems.length, 'items');
         },
 
         /**
          * Handle drag start from work items panel
          */
         handleDragStart(event, item) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🏁 Drag started:', {
+                itemKey: item._key || item.key,
+                itemTitle: item.title,
+                eventType: event.type
+            });
+
             this.isDragging = true;
             this.draggedItem = item;
             this.draggedFromStep = null; // Not from workflow
+
+            // Store in window for cross-instance access (Alpine.js may create multiple instances)
+            window.__workflowDraggedItem = item;
+            window.__workflowDraggedFromStep = null;
+
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', JSON.stringify(item));
             event.target.classList.add('is-dragging');
+
+            console.log('[MVP-WF-DESIGNER] ✅ Drag state set:', {
+                isDragging: this.isDragging,
+                draggedItem: this.draggedItem,
+                windowStored: !!window.__workflowDraggedItem
+            });
         },
 
         /**
@@ -197,6 +280,11 @@ window.workflowDesigner = function () {
             this.isDragging = true;
             this.draggedItem = item;
             this.draggedFromStep = { stepIndex, itemIndex };
+
+            // Store in window for cross-instance access
+            window.__workflowDraggedItem = item;
+            window.__workflowDraggedFromStep = { stepIndex, itemIndex };
+
             event.dataTransfer.effectAllowed = 'move';
             event.dataTransfer.setData('text/plain', JSON.stringify(item));
             event.target.classList.add('is-dragging');
@@ -212,12 +300,18 @@ window.workflowDesigner = function () {
             this.dragOverTarget = null;
             this.sideDropTarget = null;
             event.target.classList.remove('is-dragging');
+
+            // Clean up window storage
+            window.__workflowDraggedItem = null;
+            window.__workflowDraggedFromStep = null;
         },
 
         /**
          * Handle drag over drop zone
          */
         handleDragOver(event, target) {
+            // TODO: Remove debug print for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🎯 DRAGOVER EVENT FIRED!', { target, mouseX: event.clientX, mouseY: event.clientY });
             event.preventDefault();
             this.dragOverTarget = target;
         },
@@ -263,54 +357,86 @@ window.workflowDesigner = function () {
             event.preventDefault();
             event.stopPropagation();
 
-            if (!this.draggedItem) return;
+            // Get dragged item from window storage (handles cross-instance drops)
+            const draggedItem = window.__workflowDraggedItem || this.draggedItem;
+            const draggedFromStep = window.__workflowDraggedFromStep || this.draggedFromStep;
+
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🎯 Drop detected:', {
+                position,
+                dropType,
+                hasItem: !!draggedItem,
+                itemKey: draggedItem?._key || draggedItem?.key,
+                fromStep: draggedFromStep,
+                windowStored: !!window.__workflowDraggedItem
+            });
+
+            if (!draggedItem) {
+                console.warn('[MVP-WF-DESIGNER] ⚠️ No dragged item found - drop cancelled');
+                return;
+            }
 
             // Remove from original position if dragging from workflow
-            if (this.draggedFromStep !== null) {
+            if (draggedFromStep !== null) {
+                console.log('[MVP-WF-DESIGNER] 🔄 Moving from existing step:', {
+                    stepIndex: draggedFromStep.stepIndex,
+                    itemIndex: draggedFromStep.itemIndex
+                });
                 this.removeItemFromStep(
-                    this.draggedFromStep.stepIndex,
-                    this.draggedFromStep.itemIndex,
+                    draggedFromStep.stepIndex,
+                    draggedFromStep.itemIndex,
                     false // Don't save yet
                 );
             }
 
             // Add to new position based on drop type
+            console.log('[MVP-WF-DESIGNER] 📦 Processing drop type:', dropType);
             switch (dropType) {
                 case 'empty':
                     // First item in empty workflow
-                    this.addStepAt(0, [this.draggedItem]);
+                    console.log('[MVP-WF-DESIGNER] ➕ Adding to empty workflow at position 0');
+                    this.addStepAt(0, [draggedItem]);
                     break;
 
                 case 'before':
                     // Insert new step before position
-                    this.addStepAt(position, [this.draggedItem]);
+                    console.log('[MVP-WF-DESIGNER] ⬆️ Inserting BEFORE step at position:', position);
+                    this.addStepAt(position, [draggedItem]);
                     break;
 
                 case 'after':
                     // Insert new step after last position
-                    this.addStepAt(position, [this.draggedItem]);
+                    console.log('[MVP-WF-DESIGNER] ⬇️ Inserting AFTER step at position:', position);
+                    this.addStepAt(position, [draggedItem]);
                     break;
 
                 case 'left':
                 case 'right':
                     // Add as parallel item
-                    this.addParallelItem(position, this.draggedItem, dropType);
+                    console.log('[MVP-WF-DESIGNER] ↔️ Adding as parallel item:', dropType, 'to step:', position);
+                    this.addParallelItem(position, draggedItem, dropType);
                     break;
 
                 case 'parallel':
                     // Add to existing parallel execution
-                    this.addParallelItem(position, this.draggedItem, 'add');
+                    console.log('[MVP-WF-DESIGNER] 🔀 Adding to parallel execution at step:', position);
+                    this.addParallelItem(position, draggedItem, 'add');
                     break;
             }
 
-            // Clear drag state
+            // Clear drag state (both instance and window)
             this.isDragging = false;
             this.draggedItem = null;
             this.draggedFromStep = null;
             this.dragOverTarget = null;
             this.sideDropTarget = null;
+            window.__workflowDraggedItem = null;
+            window.__workflowDraggedFromStep = null;
 
             // Save workflow
+            console.log('[MVP-WF-DESIGNER] 💾 Triggering workflow save');
+            console.log('[MVP-WF-DESIGNER] 🔍 Final workflowSteps.length after drop:', this.workflowSteps.length);
+            console.log('[MVP-WF-DESIGNER] 📋 Final workflowSteps array:', JSON.stringify(this.workflowSteps, null, 2));
             this.saveWorkflow();
         },
 
@@ -318,39 +444,101 @@ window.workflowDesigner = function () {
          * Add a new step at specified position
          */
         addStepAt(position, items) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 📍 Creating new step:', {
+                position,
+                itemsCount: items.length,
+                items: items.map(i => ({ key: i._key || i.key, title: i.title }))
+            });
+            console.log('[MVP-WF-DESIGNER] 🆔 Instance check - this === window.__workflowDesignerInstance:', this === window.__workflowDesignerInstance);
+            console.log('[MVP-WF-DESIGNER] 📊 Current workflowSteps.length BEFORE insert:', this.workflowSteps.length);
+
             const newStep = {
                 id: this.generateID(),
                 order: position,
-                items: items.map(item => ({
-                    id: this.generateID(),
-                    work_item_id: item.key || item._key,
-                    work_item_title: item.title,
-                    description: item.description || '',
-                    showDescription: false
-                }))
+                name: '', // Empty by default, user can set via properties panel
+                description: '',
+                items: items.map(item => {
+                    const newItem = {
+                        id: this.generateID(),
+                        work_item_id: item.key || item._key || item.work_item_id,
+                        work_item_key: item.key || item._key || '',
+                        work_item_name: item.name || item.title || '',
+                        work_item_title: item.title || item.name || '',
+                        description: item.description || '',
+                        showDescription: false,
+                        autonomy_level: item.autonomy_level || 'L0' // Default autonomy level for work item
+                    };
+                    console.log('[MVP-WF-DESIGNER] ✨ Created work item in step:', {
+                        id: newItem.id,
+                        work_item_key: newItem.work_item_key,
+                        work_item_title: newItem.work_item_title
+                    });
+                    return newItem;
+                }),
+                routes: {}, // Empty routes map
+                aggregation: '', // No aggregation by default
+                requires_human_decision: false,
+                available_routes: []
             };
+
+            console.log('[MVP-WF-DESIGNER] ✅ Created new step:', {
+                id: newStep.id,
+                order: newStep.order,
+                itemsCount: newStep.items.length
+            });
 
             // Insert at position
             this.workflowSteps.splice(position, 0, newStep);
+            console.log('[MVP-WF-DESIGNER] 📊 Workflow steps count after insert:', this.workflowSteps.length);
+            console.log('[MVP-WF-DESIGNER] 📋 Workflow steps array:', this.workflowSteps);
+            console.log('[MVP-WF-DESIGNER] 🔍 First step in array:', this.workflowSteps[0]);
+
+            // Force Alpine.js reactivity by reassigning the array
+            // This ensures x-if re-evaluates
+            this.workflowSteps = [...this.workflowSteps];
+            console.log('[MVP-WF-DESIGNER] 🔄 Forced array reassignment for reactivity');
 
             // Reorder all steps
             this.reorderSteps();
+
+            // Force Alpine.js reactivity update
+            console.log('[MVP-WF-DESIGNER] 🔄 Forcing Alpine.js reactivity...');
+            this.$nextTick(() => {
+                console.log('[MVP-WF-DESIGNER] ✅ Alpine.js nextTick completed, steps should be visible');
+            });
         },
 
         /**
          * Add parallel item to existing step
          */
         addParallelItem(stepIndex, item, side) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔀 Adding parallel item:', {
+                stepIndex,
+                side,
+                itemKey: item._key || item.key,
+                itemTitle: item.title
+            });
+
             const step = this.workflowSteps[stepIndex];
-            if (!step) return;
+            if (!step) {
+                console.error('[MVP-WF-DESIGNER] ❌ Step not found at index:', stepIndex);
+                return;
+            }
 
             const newItem = {
                 id: this.generateID(),
-                work_item_id: item.key || item._key,
-                work_item_title: item.title,
+                work_item_id: item.key || item._key || item.work_item_id,
+                work_item_key: item.key || item._key || '',
+                work_item_name: item.name || item.title || '',
+                work_item_title: item.title || item.name || '',
                 description: item.description || '',
-                showDescription: false
+                showDescription: false,
+                autonomy_level: item.autonomy_level || 'L0' // Default autonomy level for work item
             };
+
+            console.log('[WF-DESIGNER] ✨ Created parallel item:', newItem);
 
             // Add to items array (left = prepend, right/add = append)
             if (side === 'left') {
@@ -359,6 +547,8 @@ window.workflowDesigner = function () {
                 // 'right' or 'add' both append to the end
                 step.items.push(newItem);
             }
+
+            console.log('[WF-DESIGNER] ✅ Step now has', step.items.length, 'items');
         },
 
         /**
@@ -374,6 +564,8 @@ window.workflowDesigner = function () {
             // If step is now empty, remove the step
             if (step.items.length === 0) {
                 this.workflowSteps.splice(stepIndex, 1);
+                // Force reactivity
+                this.workflowSteps = [...this.workflowSteps];
                 this.reorderSteps();
             }
 
@@ -386,18 +578,25 @@ window.workflowDesigner = function () {
          * Reorder steps to have sequential order values
          */
         reorderSteps() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🔄 Reordering steps, count:', this.workflowSteps.length);
             this.workflowSteps.forEach((step, index) => {
                 step.order = index;
             });
+            console.log('[MVP-WF-DESIGNER] ✅ Steps reordered');
         },
 
         /**
          * Save workflow to backend (via specification workflows endpoint)
          */
         async saveWorkflow() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Save requested - debouncing...');
+
             // Debounce: Cancel previous save timer and set a new one
             if (this.saveTimeout) {
                 clearTimeout(this.saveTimeout);
+                console.log('[MVP-WF-DESIGNER] ⏱️ Cancelled previous save timeout');
             }
 
             this.saveTimeout = setTimeout(async () => {
@@ -409,8 +608,12 @@ window.workflowDesigner = function () {
          * Perform the actual save operation
          */
         async _performSave() {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Performing save operation...');
+
             // Prevent multiple simultaneous saves
             if (this.saving) {
+                console.log('[MVP-WF-DESIGNER] ⚠️ Save already in progress, skipping');
                 return;
             }
 
@@ -422,12 +625,21 @@ window.workflowDesigner = function () {
                     throw new Error('Missing required workflow key or agency ID');
                 }
 
+                console.log('[MVP-WF-DESIGNER] 🔍 Workflow data to save:', {
+                    workflowKey: this.workflowKey,
+                    agencyID: this.agencyID,
+                    stepsCount: this.workflowSteps.length,
+                    allWorkflowsCount: this.allWorkflows.length
+                });
+
                 // Find and update the current workflow in the allWorkflows array
                 const workflowIndex = this.allWorkflows.findIndex(wf => wf.key === this.workflowKey);
+                console.log('[MVP-WF-DESIGNER] 📊 Workflow index in array:', workflowIndex);
 
                 if (workflowIndex >= 0) {
                     // Update existing workflow - preserve the key explicitly!
                     const existingKey = this.allWorkflows[workflowIndex].key;
+                    console.log('[MVP-WF-DESIGNER] ✏️ Updating existing workflow at index:', workflowIndex);
                     this.allWorkflows[workflowIndex] = {
                         ...this.allWorkflows[workflowIndex],
                         key: existingKey,  // Explicitly preserve the key
@@ -438,6 +650,7 @@ window.workflowDesigner = function () {
                     };
                 } else {
                     // Workflow not found in allWorkflows, add it
+                    console.log('[MVP-WF-DESIGNER] ➕ Adding new workflow to array');
                     this.allWorkflows.push({
                         key: this.workflowKey,
                         agency_id: this.agencyID,
@@ -449,15 +662,18 @@ window.workflowDesigner = function () {
                 }
 
                 // Filter out workflows with empty keys and remove duplicates
+                console.log('[MVP-WF-DESIGNER] 🧹 Filtering workflows before save...');
                 const workflowsToSave = this.allWorkflows.filter((workflow, index, arr) => {
                     // Remove workflows with no key
                     if (!workflow.key || workflow.key.trim() === '') {
+                        console.log('[MVP-WF-DESIGNER] ⚠️ Filtering out workflow with empty key');
                         return false;
                     }
 
                     // Remove duplicates by key (keep first occurrence)
                     const firstIndex = arr.findIndex(w => w.key === workflow.key);
                     if (firstIndex !== index) {
+                        console.log('[MVP-WF-DESIGNER] ⚠️ Filtering out duplicate workflow:', workflow.key);
                         return false;
                     }
 
@@ -522,6 +738,782 @@ window.workflowDesigner = function () {
          */
         generateID() {
             return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        },
+
+        // ===== Autonomy Level & Route Helpers =====
+
+        /**
+         * Get Bulma CSS class for autonomy badge
+         */
+        getAutonomyBadgeClass(level) {
+            const classes = {
+                'L0': 'is-light',      // Gray - Manual
+                'L1': 'is-info',       // Blue - Assisted
+                'L2': 'is-warning',    // Yellow - Conditional
+                'L3': 'is-warning',    // Orange - High Auto (same as warning)
+                'L4': 'is-success'     // Green - Full Auto
+            };
+            return `tag ${classes[level] || 'is-light'}`;
+        },
+
+        /**
+         * Get autonomy level label
+         */
+        getAutonomyLabel(level) {
+            const labels = {
+                'L0': 'Manual',
+                'L1': 'Assisted',
+                'L2': 'Conditional',
+                'L3': 'High Auto',
+                'L4': 'Full Auto'
+            };
+            return labels[level] || 'Unknown';
+        },
+
+        /**
+         * Get route count for a step
+         */
+        getRouteCount(step) {
+            if (!step.routes) return 0;
+            return Object.keys(step.routes).length;
+        },
+
+        /**
+         * Check if step has routes defined
+         */
+        hasRoutes(step) {
+            return this.getRouteCount(step) > 0;
+        },
+
+        /**
+         * Get autonomy levels for all work items in a step
+         * Returns array of unique autonomy levels
+         */
+        getStepAutonomyLevels(step) {
+            if (!step.items || step.items.length === 0) return [];
+
+            const levels = step.items
+                .map(item => item.autonomy_level || 'L0')
+                .filter((level, index, self) => self.indexOf(level) === index); // unique
+
+            return levels.sort(); // Sort L0, L1, L2, L3, L4
+        },
+
+        /**
+         * Get display text for step autonomy (shows all unique levels)
+         */
+        getStepAutonomyDisplay(step) {
+            const levels = this.getStepAutonomyLevels(step);
+            if (levels.length === 0) return 'L0';
+            if (levels.length === 1) return levels[0];
+            return levels.join(', '); // e.g., "L0, L2"
+        },
+
+        /**
+         * Get CSS class for step autonomy badge (uses highest level)
+         */
+        getStepAutonomyBadgeClass(step) {
+            const levels = this.getStepAutonomyLevels(step);
+            if (levels.length === 0) return 'tag is-light';
+
+            // Use highest autonomy level for color
+            const highest = levels[levels.length - 1];
+            return this.getAutonomyBadgeClass(highest);
+        },
+
+        /**
+         * Select a step and open properties panel
+         */
+        selectStep(stepId) {
+            console.log('🔍 selectStep called:', stepId);
+            const step = this.workflowSteps.find(s => s.id === stepId);
+            console.log('📌 Found step:', step);
+            console.log('🪟 PropertiesPanel available:', !!window.PropertiesPanel);
+
+            if (step && window.PropertiesPanel) {
+                console.log('✅ Opening step properties');
+                this.openStepProperties(step);
+            } else {
+                if (!step) console.error('❌ Step not found:', stepId);
+                if (!window.PropertiesPanel) console.error('❌ PropertiesPanel not available');
+            }
+        },
+
+        /**
+         * Select a work item and open properties panel
+         */
+        selectWorkItem(stepId, itemId) {
+            const step = this.workflowSteps.find(s => s.id === stepId);
+            if (!step) return;
+
+            const item = step.items.find(i => i.id === itemId);
+            if (item && window.PropertiesPanel) {
+                this.openWorkItemProperties(step, item);
+            }
+        },
+
+        /**
+         * Show available work item info in properties panel
+         */
+        showAvailableWorkItemInfo(workItem) {
+            if (!window.PropertiesPanel) {
+                console.error('PropertiesPanel not available');
+                return;
+            }
+
+            // Track selected work item for highlighting
+            this.selectedAvailableWorkItem = workItem;
+
+            // Build properties configuration for available work item
+            const config = {
+                title: workItem.title || 'Work Item',
+                icon: 'tasks',
+                iconColor: 'info',
+                data: workItem,
+                autoSwitchTab: false,
+
+                fields: [
+                    {
+                        key: 'title',
+                        label: 'Title',
+                        type: 'static',
+                        help: 'Work item title from specification'
+                    },
+                    {
+                        key: 'description',
+                        label: 'Description',
+                        type: 'static',
+                        help: 'Full description of this work item'
+                    },
+                    {
+                        key: 'info_drag',
+                        label: 'Usage',
+                        type: 'info',
+                        value: '📌 Drag this work item onto the workflow canvas to add it to your workflow',
+                        help: 'This work item is available to be added to the workflow'
+                    }
+                ],
+
+                buttons: []
+            };
+
+            window.PropertiesPanel.open(config);
+        },
+
+        /**
+         * Open properties panel for a step
+         */
+        openStepProperties(step) {
+            if (!window.PropertiesPanel) {
+                console.error('PropertiesPanel not available');
+                return;
+            }
+
+            // Create a copy to track changes
+            const stepCopy = { ...step };
+
+            // Build step properties configuration
+            const config = {
+                title: `Step ${step.order} Properties`,
+                icon: 'cog',
+                iconColor: 'info',
+                data: stepCopy,
+                autoSwitchTab: false, // Don't auto-switch tabs (no chat panel in workflow designer)
+
+                // Track field changes
+                onUpdate: (field, value) => {
+                    stepCopy[field] = value;
+                },
+
+                fields: [
+                    // Basic Information
+                    {
+                        key: 'name',
+                        label: 'Step Name',
+                        type: 'text',
+                        placeholder: 'e.g., Review Documentation',
+                        help: 'Optional: Give this step a descriptive name'
+                    },
+                    {
+                        key: 'description',
+                        label: 'Description',
+                        type: 'textarea',
+                        placeholder: 'Describe what happens in this step...',
+                        help: 'Optional: Detailed description of the step'
+                    },
+
+                    // Info: Work items in this step
+                    {
+                        key: 'work_items_info',
+                        label: 'Work Items in This Step',
+                        type: 'info',
+                        value: step.items.map(item => item.work_item_title || item.work_item_name || 'Untitled').join(', '),
+                        help: 'Click individual work items to edit their autonomy levels'
+                    },
+
+                    // Parallel Execution (only if multiple items)
+                    ...(step.items && step.items.length > 1 ? [{
+                        key: 'aggregation',
+                        label: 'Aggregation Rule',
+                        type: 'select',
+                        options: [
+                            { value: '', label: 'None (sequential)' },
+                            { value: 'any', label: 'Any (first completion)' },
+                            { value: 'all', label: 'All (wait for all)' },
+                            { value: 'majority', label: 'Majority (>50%)' },
+                            { value: 'first', label: 'First (immediate)' }
+                        ],
+                        help: 'How to proceed when multiple work items complete'
+                    }] : []),
+
+                    // Conditional Routing
+                    {
+                        key: 'routes_editor',
+                        label: 'Conditional Routes',
+                        type: 'custom',
+                        html: this._renderRouteEditor(step, stepCopy),
+                        help: 'Define where workflow goes based on step completion status'
+                    }
+                ],
+
+                // Save handler
+                onSave: () => {
+                    this.saveStepProperties(step, stepCopy);
+                },
+
+                buttons: [
+                    {
+                        label: 'Save',
+                        class: 'is-primary',
+                        icon: 'save',
+                        action: 'save'
+                    },
+                    {
+                        label: 'Delete Step',
+                        class: 'is-danger',
+                        icon: 'trash',
+                        action: () => this.deleteStepFromProperties(step)
+                    },
+                    {
+                        label: 'Cancel',
+                        class: 'is-light',
+                        icon: 'times',
+                        action: () => this.closePropertiesPanel()
+                    }
+                ]
+            };
+
+            window.PropertiesPanel.showProperties(config);
+        },
+
+        /**
+         * Delete step from properties panel
+         */
+        deleteStepFromProperties(step) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🗑️ Delete step requested:', {
+                stepId: step.id,
+                stepOrder: step.order,
+                itemsCount: step.items?.length || 0
+            });
+
+            if (!confirm(`Are you sure you want to delete Step ${step.order}? This will remove all work items in this step.`)) {
+                console.log('[MVP-WF-DESIGNER] ❌ Delete cancelled by user');
+                return;
+            }
+
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            console.log('[MVP-WF-DESIGNER] 📊 Step index to delete:', stepIndex);
+
+            if (stepIndex !== -1) {
+                this.workflowSteps.splice(stepIndex, 1);
+                // Force reactivity
+                this.workflowSteps = [...this.workflowSteps];
+                console.log('[MVP-WF-DESIGNER] ✅ Step deleted, remaining steps:', this.workflowSteps.length);
+
+                // Reorder remaining steps
+                this.workflowSteps.forEach((s, idx) => {
+                    s.order = idx + 1;
+                });
+                console.log('[MVP-WF-DESIGNER] 🔄 Steps reordered');
+
+                this.saveWorkflow();
+                this.closePropertiesPanel();
+
+                if (window.showNotification) {
+                    window.showNotification('Step deleted successfully', 'success');
+                }
+            }
+        },
+
+        /**
+         * Save step properties from panel
+         */
+        saveStepProperties(originalStep, updatedData) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Saving step properties:', {
+                stepId: originalStep.id,
+                updatedData
+            });
+
+            // Update step in workflow
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === originalStep.id);
+            if (stepIndex !== -1) {
+                // Merge updated properties (preserve items array and other data)
+                this.workflowSteps[stepIndex] = {
+                    ...this.workflowSteps[stepIndex],
+                    name: updatedData.name || '',
+                    description: updatedData.description || '',
+                    autonomy_level: updatedData.autonomy_level || 'L0',
+                    aggregation: updatedData.aggregation || ''
+                };
+
+                console.log('[MVP-WF-DESIGNER] ✅ Step properties updated');
+
+                // Save workflow
+                this.saveWorkflow();
+
+                // Show success notification
+                if (window.showNotification) {
+                    window.showNotification('Step properties saved successfully', 'success');
+                } else {
+                    console.log('Step properties saved');
+                }
+
+                // Close panel
+                this.closePropertiesPanel();
+            }
+        },
+
+        /**
+         * Close properties panel
+         */
+        closePropertiesPanel() {
+            console.log('[MVP-WF-DESIGNER] 🚪 Closing properties panel');
+            const panel = document.getElementById('properties-panel-content');
+            if (panel) {
+                panel.innerHTML = '<div class="box has-text-centered has-text-grey-light"><p>Click a step or work item to view properties</p></div>';
+            }
+        },
+
+        /**
+         * Open properties panel for a work item
+         */
+        openWorkItemProperties(step, item) {
+            if (!window.PropertiesPanel) {
+                console.error('PropertiesPanel not available');
+                return;
+            }
+
+            // Create a copy to track changes
+            const itemCopy = { ...item };
+
+            // Build work item properties configuration
+            const config = {
+                title: `Work Item: ${item.work_item_title || item.work_item_name}`,
+                icon: 'tasks',
+                iconColor: 'primary',
+                data: itemCopy,
+                autoSwitchTab: false,
+
+                // Track field changes
+                onUpdate: (field, value) => {
+                    itemCopy[field] = value;
+                },
+
+                fields: [
+                    // Work Item Info (read-only)
+                    {
+                        key: 'work_item_name',
+                        label: 'Work Item',
+                        type: 'static',
+                        help: 'Work item from specification (read-only)'
+                    },
+                    {
+                        key: 'description',
+                        label: 'Description',
+                        type: 'static',
+                        help: 'Work item description from specification'
+                    },
+
+                    // Autonomy Level (editable)
+                    {
+                        key: 'autonomy_level',
+                        label: 'Autonomy Level',
+                        type: 'select',
+                        options: [
+                            { value: 'L0', label: 'L0 - Manual (Human executes)' },
+                            { value: 'L1', label: 'L1 - Assisted (AI suggests, human approves)' },
+                            { value: 'L2', label: 'L2 - Conditional (AI autonomous within constraints)' },
+                            { value: 'L3', label: 'L3 - High Automation (AI handles most scenarios)' },
+                            { value: 'L4', label: 'L4 - Full Autonomy (AI fully independent)' }
+                        ],
+                        help: 'Controls how much autonomy AI agents have for this specific work item'
+                    },
+
+                    // Step Context Info
+                    {
+                        key: 'step_context',
+                        label: 'Step Context',
+                        type: 'info',
+                        value: `Part of: Step ${step.order} - ${step.name || 'Unnamed Step'}`,
+                        help: 'This work item belongs to the step shown above'
+                    }
+                ],
+
+                // Save handler
+                onSave: () => {
+                    this.saveWorkItemProperties(step, item, itemCopy);
+                },
+
+                buttons: [
+                    {
+                        label: 'Save',
+                        class: 'is-primary',
+                        icon: 'save',
+                        action: 'save'
+                    },
+                    {
+                        label: 'Remove from Step',
+                        class: 'is-danger',
+                        icon: 'trash',
+                        action: () => this.deleteWorkItemFromProperties(step, originalItem)
+                    },
+                    {
+                        label: 'Cancel',
+                        class: 'is-light',
+                        icon: 'times',
+                        action: () => this.closePropertiesPanel()
+                    }
+                ]
+            };
+
+            window.PropertiesPanel.showProperties(config);
+        },
+
+        /**
+         * Delete work item from properties panel
+         */
+        deleteWorkItemFromProperties(step, item) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 🗑️ Delete work item requested:', {
+                stepId: step.id,
+                stepOrder: step.order,
+                itemId: item.id,
+                itemTitle: item.work_item_title || item.work_item_name
+            });
+
+            if (!confirm(`Remove "${item.work_item_title || item.work_item_name}" from this step?`)) {
+                console.log('[MVP-WF-DESIGNER] ❌ Delete cancelled by user');
+                return;
+            }
+
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            console.log('[MVP-WF-DESIGNER] 📊 Step index:', stepIndex);
+
+            if (stepIndex !== -1) {
+                const itemIndex = this.workflowSteps[stepIndex].items.findIndex(i => i.id === item.id);
+                console.log('[MVP-WF-DESIGNER] 📊 Item index in step:', itemIndex);
+
+                if (itemIndex !== -1) {
+                    this.workflowSteps[stepIndex].items.splice(itemIndex, 1);
+                    console.log('[MVP-WF-DESIGNER] ✅ Work item deleted, remaining items in step:', this.workflowSteps[stepIndex].items.length);
+
+                    // If step is now empty, remove the step
+                    if (this.workflowSteps[stepIndex].items.length === 0) {
+                        console.log('[MVP-WF-DESIGNER] 🗑️ Step is now empty, deleting step');
+                        this.workflowSteps.splice(stepIndex, 1);
+                        // Force reactivity
+                        this.workflowSteps = [...this.workflowSteps];
+
+                        // Reorder remaining steps
+                        this.workflowSteps.forEach((s, idx) => {
+                            s.order = idx + 1;
+                        });
+
+                        if (window.showNotification) {
+                            window.showNotification('Work item removed and empty step deleted', 'success');
+                        }
+                    } else {
+                        if (window.showNotification) {
+                            window.showNotification('Work item removed from step', 'success');
+                        }
+                    }
+
+                    this.saveWorkflow();
+                    this.closePropertiesPanel();
+                }
+            }
+        },
+
+        /**
+         * Save work item properties from panel
+         */
+        saveWorkItemProperties(step, originalItem, updatedData) {
+            // TODO: Remove debug prints for MVP-workflow-designer-enhancements after issue is resolved
+            console.log('[MVP-WF-DESIGNER] 💾 Saving work item properties:', {
+                stepId: step.id,
+                itemId: originalItem.id,
+                updatedData
+            });
+
+            // Find the step in workflow
+            const stepIndex = this.workflowSteps.findIndex(s => s.id === step.id);
+            if (stepIndex === -1) {
+                console.error('[MVP-WF-DESIGNER] ❌ Step not found');
+                return;
+            }
+
+            // Find the item in the step
+            const itemIndex = this.workflowSteps[stepIndex].items.findIndex(i => i.id === originalItem.id);
+            if (itemIndex === -1) {
+                console.error('[MVP-WF-DESIGNER] ❌ Item not found in step');
+                return;
+            }
+
+            // Update the work item's autonomy level
+            this.workflowSteps[stepIndex].items[itemIndex].autonomy_level = updatedData.autonomy_level || 'L0';
+            console.log('[MVP-WF-DESIGNER] ✅ Work item autonomy level updated to:', updatedData.autonomy_level);
+
+            // Save workflow
+            this.saveWorkflow();
+
+            // Show success notification
+            if (window.showNotification) {
+                window.showNotification('Work item autonomy level updated successfully', 'success');
+            } else {
+                console.log('Work item autonomy level saved');
+            }
+
+            // Close panel
+            this.closePropertiesPanel();
+        },
+
+        /**
+         * Render route editor HTML for properties panel
+         */
+        _renderRouteEditor(step, stepCopy) {
+            const routes = step.routes || {};
+            const routeEntries = Object.entries(routes);
+            const availableSteps = this.workflowSteps.filter(s => s.id !== step.id);
+
+            let html = `
+                <div class="route-editor">
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-striped is-size-7">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Target Step</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="route-table-body">`;
+
+            // Render existing routes
+            routeEntries.forEach(([status, targetStepId], index) => {
+                const targetStep = this.workflowSteps.find(s => s.id === targetStepId);
+                html += this._renderRouteRow(index, status, targetStepId, targetStep, availableSteps);
+            });
+
+            // Empty state
+            if (routeEntries.length === 0) {
+                html += `
+                    <tr id="empty-routes-message">
+                        <td colspan="3" class="has-text-centered has-text-grey-light">
+                            <em>No routes defined. Will proceed to next step by default.</em>
+                        </td>
+                    </tr>`;
+            }
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                    <button 
+                        type="button" 
+                        class="button is-small is-info is-light"
+                        onclick="window.workflowDesignerInstance.addRouteRow()"
+                    >
+                        <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                        <span>Add Route</span>
+                    </button>
+                </div>
+            `;
+
+            // Store reference to stepCopy for route editing
+            this._currentStepCopy = stepCopy;
+
+            return html;
+        },
+
+        /**
+         * Render a single route row
+         */
+        _renderRouteRow(index, status, targetStepId, targetStep, availableSteps) {
+            return `
+                <tr data-route-index="${index}">
+                    <td>
+                        <div class="select is-small is-fullwidth">
+                            <select onchange="window.workflowDesignerInstance.updateRoute(${index}, 'status', this.value)">
+                                <option value="">Select status...</option>
+                                <option value="success" ${status === 'success' ? 'selected' : ''}>Success</option>
+                                <option value="failure" ${status === 'failure' ? 'selected' : ''}>Failure</option>
+                                <option value="error" ${status === 'error' ? 'selected' : ''}>Error</option>
+                                <option value="retry" ${status === 'retry' ? 'selected' : ''}>Retry</option>
+                                <option value="skip" ${status === 'skip' ? 'selected' : ''}>Skip</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="select is-small is-fullwidth">
+                            <select onchange="window.workflowDesignerInstance.updateRoute(${index}, 'target', this.value)">
+                                <option value="">Select target step...</option>
+                                ${availableSteps.map(s => `
+                                    <option value="${s.id}" ${s.id === targetStepId ? 'selected' : ''}>
+                                        Step ${s.order}: ${s.name || 'Unnamed'}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </td>
+                    <td style="width: 40px;">
+                        <button 
+                            type="button"
+                            class="delete is-small" 
+                            onclick="window.workflowDesignerInstance.removeRoute(${index})"
+                            title="Remove route"
+                        ></button>
+                    </td>
+                </tr>
+            `;
+        },
+
+        /**
+         * Add a new route row
+         */
+        addRouteRow() {
+            const tbody = document.getElementById('route-table-body');
+            if (!tbody) return;
+
+            // Remove empty message if present
+            const emptyMsg = document.getElementById('empty-routes-message');
+            if (emptyMsg) {
+                emptyMsg.remove();
+            }
+
+            // Get available steps
+            const currentStep = this._currentStepCopy;
+            const availableSteps = this.workflowSteps.filter(s => s.id !== currentStep.id);
+
+            // Add new row
+            const index = tbody.children.length;
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-route-index', index);
+            tr.innerHTML = this._renderRouteRow(index, '', '', null, availableSteps).replace(/<\/?tr[^>]*>/g, '');
+            tbody.appendChild(tr);
+        },
+
+        /**
+         * Update a route
+         */
+        updateRoute(index, field, value) {
+            if (!this._currentStepCopy) return;
+
+            const tbody = document.getElementById('route-table-body');
+            if (!tbody) return;
+
+            const row = tbody.children[index];
+            if (!row) return;
+
+            // Get current route data from row
+            const statusSelect = row.querySelector('select');
+            const targetSelect = row.querySelectorAll('select')[1];
+
+            let status = statusSelect.value;
+            let targetStepId = targetSelect.value;
+
+            // Update based on field
+            if (field === 'status') {
+                status = value;
+            } else if (field === 'target') {
+                targetStepId = value;
+            }
+
+            // Initialize routes if needed
+            if (!this._currentStepCopy.routes) {
+                this._currentStepCopy.routes = {};
+            }
+
+            // Validate: both status and target must be selected
+            if (status && targetStepId) {
+                // Remove old status key if changing status
+                if (field === 'status') {
+                    const oldStatus = Object.keys(this._currentStepCopy.routes).find((key, idx) => {
+                        return Array.from(tbody.children).indexOf(row) === Object.keys(this._currentStepCopy.routes).indexOf(key);
+                    });
+                    if (oldStatus && oldStatus !== status) {
+                        delete this._currentStepCopy.routes[oldStatus];
+                    }
+                }
+
+                // Set new route
+                this._currentStepCopy.routes[status] = targetStepId;
+            }
+        },
+
+        /**
+         * Remove a route
+         */
+        removeRoute(index) {
+            if (!this._currentStepCopy) return;
+
+            const tbody = document.getElementById('route-table-body');
+            if (!tbody) return;
+
+            const row = tbody.children[index];
+            if (!row) return;
+
+            // Get status from row
+            const statusSelect = row.querySelector('select');
+            const status = statusSelect.value;
+
+            // Remove from stepCopy routes
+            if (this._currentStepCopy.routes && status) {
+                delete this._currentStepCopy.routes[status];
+            }
+
+            // Remove row
+            row.remove();
+
+            // Re-index remaining rows
+            Array.from(tbody.children).forEach((r, i) => {
+                r.setAttribute('data-route-index', i);
+            });
+
+            // Show empty message if no routes
+            if (tbody.children.length === 0) {
+                const tr = document.createElement('tr');
+                tr.id = 'empty-routes-message';
+                tr.innerHTML = `
+                    <td colspan="3" class="has-text-centered has-text-grey-light">
+                        <em>No routes defined. Will proceed to next step by default.</em>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
         }
     };
 };
+
+// Store global instance reference for inline event handlers
+let workflowDesignerInstance = null;
+document.addEventListener('alpine:init', () => {
+    // Capture instance when Alpine initializes
+    setTimeout(() => {
+        const container = document.querySelector('[x-data="workflowDesigner()"]');
+        if (container && container._x_dataStack && container._x_dataStack[0]) {
+            window.workflowDesignerInstance = container._x_dataStack[0];
+        }
+    }, 100);
+});

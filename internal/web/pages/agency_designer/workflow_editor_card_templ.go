@@ -8,6 +8,8 @@ package agency_designer
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/aosanya/CodeValdCortex/internal/web/components/forms"
+
 // WorkflowEditorCard renders the workflow editor card component
 func WorkflowEditorCard() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -30,7 +32,54 @@ func WorkflowEditorCard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Workflow Editor Card (Hidden by default) --><div class=\"card mb-4 is-hidden\" id=\"workflow-editor-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-sitemap\"></i></span> <span id=\"workflow-editor-title\">Add New Workflow</span></p><button class=\"card-header-icon button is-small is-text\" onclick=\"cancelWorkflowEdit()\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><!-- Name Field --><div class=\"field\"><label class=\"label\">Workflow Name</label><div class=\"control\"><input class=\"input\" type=\"text\" id=\"workflow-name-editor\" placeholder=\"e.g., User Onboarding Process\" maxlength=\"200\"></div><p class=\"help\">A clear, descriptive name for this workflow.</p></div><!-- Description Field --><div class=\"field\"><label class=\"label\">Description</label><div class=\"control\"><textarea class=\"textarea\" id=\"workflow-description-editor\" placeholder=\"Describe the workflow purpose and what it accomplishes...\" rows=\"6\" style=\"font-family: monospace; font-size: 14px;\"></textarea></div><p class=\"help\">Explain what this workflow does and when it should be used.</p></div><!-- Version Field --><div class=\"field\"><label class=\"label\">Version</label><div class=\"control\"><input class=\"input\" type=\"text\" id=\"workflow-version-editor\" placeholder=\"e.g., 1.0.0\" value=\"1.0.0\" maxlength=\"20\"></div><p class=\"help\">Semantic version number (major.minor.patch).</p></div></div><footer class=\"card-footer\"><div class=\"card-footer-item\"><button class=\"button is-small is-primary\" onclick=\"saveWorkflowFromEditor()\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button></div><div class=\"card-footer-item\"><button class=\"button is-small\" onclick=\"cancelWorkflowEdit()\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></button></div></footer></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Workflow Editor Card (Hidden by default) --><div class=\"card mb-4 is-hidden\" id=\"workflow-editor-card\"><header class=\"card-header\"><p class=\"card-header-title\"><span class=\"icon\"><i class=\"fas fa-sitemap\"></i></span> <span id=\"workflow-editor-title\">Add New Workflow</span></p><button class=\"card-header-icon button is-small is-text\" onclick=\"cancelWorkflowEdit()\" title=\"Cancel\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span></button></header><div class=\"card-content\"><!-- Name Field -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = forms.TextField(forms.TextFieldConfig{
+			ID:          "workflow-name-editor",
+			Label:       "Workflow Name",
+			HelpText:    "A clear, descriptive name for this workflow.",
+			Placeholder: "e.g., User Onboarding Process",
+			MaxLength:   200,
+			Required:    true,
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<!-- Description Field -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = forms.TextAreaField(forms.TextAreaFieldConfig{
+			ID:          "workflow-description-editor",
+			Label:       "Description",
+			HelpText:    "Explain what this workflow does and when it should be used.",
+			Placeholder: "Describe the workflow purpose and what it accomplishes...",
+			Rows:        6,
+			Style:       "font-family: monospace; font-size: 14px;",
+			Required:    true,
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<!-- Version Field -->")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = forms.TextField(forms.TextFieldConfig{
+			ID:          "workflow-version-editor",
+			Label:       "Version",
+			HelpText:    "Semantic version number (major.minor.patch).",
+			Placeholder: "e.g., 1.0.0",
+			Value:       "1.0.0",
+			MaxLength:   20,
+			Required:    false,
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><footer class=\"card-footer\"><div class=\"card-footer-item\"><button id=\"save-workflow-btn\" class=\"button is-small is-primary\" onclick=\"saveWorkflowFromEditor()\"><span class=\"icon\"><i class=\"fas fa-save\"></i></span> <span>Save</span></button></div><div class=\"card-footer-item\"><button class=\"button is-small\" onclick=\"cancelWorkflowEdit()\"><span class=\"icon\"><i class=\"fas fa-times\"></i></span> <span>Cancel</span></button></div></footer></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

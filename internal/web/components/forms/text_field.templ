@@ -1,0 +1,87 @@
+package forms
+
+// TextFieldConfig defines configuration for a text input form field with validation
+type TextFieldConfig struct {
+	// Field Identification
+	ID   string // HTML id attribute (required)
+	Name string // HTML name attribute (optional, defaults to ID)
+
+	// Label and Help
+	Label    string // Field label text (required)
+	HelpText string // Help text below field (optional)
+
+	// Input Properties
+	Placeholder string // Placeholder text (optional)
+	MaxLength   int    // Maximum character length (optional)
+	Value       string // Initial value (optional)
+	Type        string // Input type: "text", "email", "url", "tel", etc. (default: "text")
+
+	// Validation
+	Required bool // Is field required?
+
+	// Styling
+	Classes string // Additional CSS classes for input (optional)
+
+	// Accessibility
+	AriaLabel string // ARIA label override (optional, defaults to Label)
+}
+
+// TextField renders a validated text input form field component
+templ TextField(config TextFieldConfig) {
+	<div class="field">
+		<!-- Label -->
+		<label class="label" for={ config.ID }>
+			{ config.Label }
+			if config.Required {
+				<span class="has-text-danger" title="Required field">*</span>
+			}
+		</label>
+		
+		<!-- Input Control -->
+		<div class="control">
+			<input
+				class={ "input", config.Classes }
+				type={ getInputType(config.Type) }
+				id={ config.ID }
+				name={ templ.EscapeString(getFieldName(config.ID, config.Name)) }
+				if config.Placeholder != "" {
+					placeholder={ config.Placeholder }
+				}
+				if config.MaxLength > 0 {
+					maxlength={ templ.EscapeString(intToString(config.MaxLength)) }
+				}
+				if config.Value != "" {
+					value={ config.Value }
+				}
+				if config.Required {
+					aria-required="true"
+				}
+				aria-describedby={ getAriaDescribedBy(config.ID, config.HelpText) }
+				if config.AriaLabel != "" {
+					aria-label={ config.AriaLabel }
+				}
+			/>
+		</div>
+		
+		<!-- Help Text -->
+		if config.HelpText != "" {
+			<p class="help" id={ config.ID + "-help" }>
+				{ config.HelpText }
+			</p>
+		}
+		
+		<!-- Error Message (hidden by default, shown via JavaScript) -->
+		<p class="help is-danger is-hidden" id={ config.ID + "-error" } role="alert">
+			<!-- Error message will be injected here by JavaScript -->
+		</p>
+	</div>
+}
+
+// Helper function for TextField
+
+func getInputType(inputType string) string {
+	if inputType != "" {
+		return inputType
+	}
+	return "text" // default
+}

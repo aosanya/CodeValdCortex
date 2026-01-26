@@ -1,0 +1,40 @@
+package workflow
+
+// WorkItemCard renders a draggable work item card in a workflow step
+templ WorkItemCard(stepID string, item map[string]interface{}, stepIndex int, itemIndex int, isParallel bool) {
+	<div
+		class={ "step-item", templ.KV("parallel-item", isParallel) }
+		draggable="true"
+		@dragstart={ "handleStepDragStart($event, " + string(stepIndex) + ", " + string(itemIndex) + ")" }
+		@dragend="handleDragEnd($event)"
+		@click.stop={ "selectWorkItem('" + stepID + "', step.items[" + string(itemIndex) + "].id)" }
+		style="cursor: pointer;"
+	>
+		<div class="card">
+			<header class="card-header" style="position: relative;">
+				<button
+					class="card-header-icon"
+					@click.stop={ "toggleStepItemDescription('" + stepID + "', step.items[" + string(itemIndex) + "].work_item_id)" }
+					:title={ "step.items[" + string(itemIndex) + "].showDescription ? 'Hide description' : 'Show description'" }
+					x-show={ "step.items[" + string(itemIndex) + "].description" }
+				>
+					<span class="icon is-small" :class={ "{ 'is-rotated': step.items[" + string(itemIndex) + "].showDescription }" }>
+						<i class="fas fa-chevron-down"></i>
+					</span>
+				</button>
+				<div class="card-header-title py-3" style="padding-right: 3rem;">
+					<span class="is-size-6" x-text={ "step.items[" + string(itemIndex) + "].work_item_title || step.items[" + string(itemIndex) + "].work_item_name || 'Untitled'" }></span>
+				</div>
+				<button
+					class="delete is-small"
+					@click.stop={ "removeItemFromStep(" + string(stepIndex) + ", " + string(itemIndex) + ")" }
+					title="Remove from workflow"
+					style="position: absolute; top: 0.75rem; right: 0.5rem; z-index: 1;"
+				></button>
+			</header>
+			<div class="card-content py-2 px-3" x-show={ "step.items[" + string(itemIndex) + "].showDescription" } x-cloak>
+				<p class="is-size-7 has-text-grey" x-text={ "step.items[" + string(itemIndex) + "].description || ''" }></p>
+			</div>
+		</div>
+	</div>
+}

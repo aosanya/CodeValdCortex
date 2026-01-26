@@ -89,27 +89,37 @@ function clearWorkflowForm() {
     // Reset to defaults
     document.getElementById('workflow-version-editor').value = '1.0.0';
 
+    // Clear any validation errors
+    if (window.formValidation) {
+        window.formValidation.clearAllErrors('workflow-editor-card');
+    }
+
     workflowEditorState.originalData = {};
 }
 
 // Save workflow from editor
 window.saveWorkflowFromEditor = function () {
-    // Get form values
+    console.log('[MVP-054] 🔵 saveWorkflowFromEditor CALLED');
+
+    // Define fields to validate
+    const fields = [
+        { id: 'workflow-name-editor', name: 'Workflow Name', required: true },
+        { id: 'workflow-description-editor', name: 'Description', required: true }
+    ];
+
+    // Validate all fields using form validation utility
+    if (!window.formValidation.validateFields(fields)) {
+        console.log('[MVP-054] ⚠️ Validation failed');
+        window.showNotification('Please fix validation errors before saving', 'warning');
+        return;
+    }
+
+    console.log('[MVP-054] ✅ Validation passed, preparing data');
+
+    // Get form values (already validated)
     const name = document.getElementById('workflow-name-editor').value.trim();
     const description = document.getElementById('workflow-description-editor').value.trim();
     const version = document.getElementById('workflow-version-editor').value.trim();
-    // status field removed from model
-
-    // Validate required fields
-    if (!name) {
-        window.showNotification('Please provide a workflow name', 'error');
-        return;
-    }
-
-    if (!description) {
-        window.showNotification('Please provide a workflow description', 'error');
-        return;
-    }
 
     const data = {
         name,
@@ -120,7 +130,15 @@ window.saveWorkflowFromEditor = function () {
         variables: workflowEditorState.originalData?.variables || {}
     };
 
+    console.log('[MVP-054] 📦 Data to save:', data);
+    console.log('[MVP-054] 🔄 Calling saveEntity...');
+
     window.saveEntity('workflows', workflowEditorState.mode, workflowEditorState.workflowId, data, 'save-workflow-btn', () => {
+        console.log('[MVP-054] ✅ Save callback executing');
+
+        // Clear validation errors on successful save
+        window.formValidation.clearAllErrors('workflow-editor-card');
+
         cancelWorkflowEdit();
         loadWorkflows();
     });
@@ -221,32 +239,48 @@ window.deleteSelectedWorkflows = async function () {
 }
 
 // Duplicate workflow
-window.duplicateWorkflow = function (workflowId) {
+window.duplicateWorkflow = async function (workflowKey) {
     const agencyId = window.getCurrentAgencyId();
     if (!agencyId) {
         window.showNotification('Unable to determine current agency', 'error');
         return;
     }
 
-    fetch(`/api/v1/workflows/${workflowId}/duplicate`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to duplicate workflow');
-            }
-            return response.json();
-        })
-        .then(() => {
-            window.showNotification('Workflow duplicated successfully', 'success');
-            loadWorkflows();
-        })
-        .catch(error => {
-            window.showNotification('Error duplicating workflow', 'error');
+    try {
+        // Get current specification
+        const spec = await window.specificationAPI.getSpecification();
+        const allWorkflows = spec.workflows || [];
+
+        // Find the workflow to duplicate
+        const original = allWorkflows.find(wf => {
+            const id = wf._key || wf.key;
+            return id === workflowKey;
         });
+
+        if (!original) {
+            window.showNotification('Workflow not found', 'error');
+            return;
+        }
+
+        // Create duplicate workflow data
+        const duplicateData = {
+            name: original.name + ' (Copy)',
+            description: original.description,
+            version: original.version || '1.0.0',
+            nodes: original.nodes || [],
+            edges: original.edges || [],
+            variables: original.variables || {}
+        };
+
+        // Add the duplicate workflow using the specification API
+        await window.specificationAPI.addWorkflow(duplicateData);
+
+        window.showNotification('Workflow duplicated successfully', 'success');
+        loadWorkflows();
+    } catch (error) {
+        console.error('Error duplicating workflow:', error);
+        window.showNotification('Error duplicating workflow', 'error');
+    }
 }
 
 // Filter workflows based on search input

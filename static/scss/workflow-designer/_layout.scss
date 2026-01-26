@@ -11,14 +11,23 @@
 
 /* Main Container Layout */
 .designer-container {
-    @include flex-column;
     height: 100vh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+        "toolbar"
+        "content"
+        "status";
     overflow: hidden;
+}
+
+.designer-toolbar {
+    grid-area: toolbar;
 }
 
 /* Content Area */
 .designer-content {
-    flex: 1;
+    grid-area: content;
     overflow: hidden;
 }
 

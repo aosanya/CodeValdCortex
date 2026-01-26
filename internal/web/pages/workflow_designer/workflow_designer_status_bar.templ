@@ -1,0 +1,34 @@
+package workflow_designer
+
+import (
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+)
+
+// WorkflowStatusBar renders the status bar for workflow designer
+templ WorkflowStatusBar(currentAgency *models.Agency, wf *models.Workflow) {
+	<div class="vscode-status-bar">
+		<div class="status-bar-left">
+			<div class="status-item">
+				<span class="icon is-small"><i class="fas fa-sitemap"></i></span>
+				<span class="status-text" x-text="`${workflowSteps.length} step${workflowSteps.length !== 1 ? 's' : ''}`">0 steps</span>
+			</div>
+			<div class="status-item">
+				<span class="icon is-small"><i class="fas fa-tasks"></i></span>
+				<span class="status-text" x-text="`${workflowSteps.reduce((sum, s) => sum + s.items.length, 0)} work item${workflowSteps.reduce((sum, s) => sum + s.items.length, 0) !== 1 ? 's' : ''}`">0 work items</span>
+			</div>
+			<div class="status-item" x-show="saving" x-cloak>
+				<span class="icon is-small has-text-warning"><i class="fas fa-sync fa-spin"></i></span>
+				<span class="status-text">Saving...</span>
+			</div>
+		</div>
+		<div class="status-bar-right">
+			<div class="status-item">
+				<span class="icon is-small"><i class="fas fa-code-branch"></i></span>
+				<span class="status-text" x-text="`v${workflowVersion || '1.0.0'}`">v1.0.0</span>
+			</div>
+			<div class="status-item">
+				<span class="status-text">{ currentAgency.Name }</span>
+			</div>
+		</div>
+	</div>
+}

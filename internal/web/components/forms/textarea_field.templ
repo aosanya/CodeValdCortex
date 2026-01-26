@@ -1,0 +1,106 @@
+package forms
+
+// TextAreaFieldConfig defines configuration for a textarea form field with validation
+type TextAreaFieldConfig struct {
+	// Field Identification
+	ID   string // HTML id attribute (required)
+	Name string // HTML name attribute (optional, defaults to ID)
+
+	// Label and Help
+	Label    string // Field label text (required)
+	HelpText string // Help text below field (optional)
+
+	// Input Properties
+	Placeholder string // Placeholder text (optional)
+	Rows        int    // Number of visible rows (default: 6)
+	MaxLength   int    // Maximum character length (optional)
+	Value       string // Initial value (optional)
+
+	// Validation
+	Required bool // Is field required?
+
+	// Styling
+	Classes string // Additional CSS classes for textarea (optional)
+	Style   string // Inline styles for textarea (optional)
+
+	// Accessibility
+	AriaLabel string // ARIA label override (optional, defaults to Label)
+}
+
+// TextAreaField renders a validated textarea form field component
+templ TextAreaField(config TextAreaFieldConfig) {
+	<div class="field">
+		<!-- Label -->
+		<label class="label" for={ config.ID }>
+			{ config.Label }
+			if config.Required {
+				<span class="has-text-danger" title="Required field">*</span>
+			}
+		</label>
+		
+		<!-- Input Control -->
+		<div class="control">
+			<textarea
+				class={ "textarea", config.Classes }
+				id={ config.ID }
+				name={ templ.EscapeString(getFieldName(config.ID, config.Name)) }
+				if config.Placeholder != "" {
+					placeholder={ config.Placeholder }
+				}
+				if config.MaxLength > 0 {
+					maxlength={ templ.EscapeString(intToString(config.MaxLength)) }
+				}
+				rows={ templ.EscapeString(getRows(config.Rows)) }
+				if config.Required {
+					aria-required="true"
+				}
+				aria-describedby={ getAriaDescribedBy(config.ID, config.HelpText) }
+				if config.AriaLabel != "" {
+					aria-label={ config.AriaLabel }
+				}
+				if config.Style != "" {
+					style={ config.Style }
+				}
+			>{ config.Value }</textarea>
+		</div>
+		
+		<!-- Help Text -->
+		if config.HelpText != "" {
+			<p class="help" id={ config.ID + "-help" }>
+				{ config.HelpText }
+			</p>
+		}
+		
+		<!-- Error Message (hidden by default, shown via JavaScript) -->
+		<p class="help is-danger is-hidden" id={ config.ID + "-error" } role="alert">
+			<!-- Error message will be injected here by JavaScript -->
+		</p>
+	</div>
+}
+
+// Helper functions for TextAreaField
+
+func getFieldName(id, name string) string {
+	if name != "" {
+		return name
+	}
+	return id
+}
+
+func getRows(rows int) string {
+	if rows > 0 {
+		return intToString(rows)
+	}
+	return "6" // default
+}
+
+func intToString(i int) string {
+	return string(rune('0' + i))
+}
+
+func getAriaDescribedBy(id, helpText string) string {
+	if helpText != "" {
+		return id + "-help " + id + "-error"
+	}
+	return id + "-error"
+}

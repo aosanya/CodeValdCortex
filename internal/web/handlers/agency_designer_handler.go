@@ -8,6 +8,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages"
 	"github.com/aosanya/CodeValdCortex/internal/web/pages/agency_designer"
+	"github.com/aosanya/CodeValdCortex/internal/web/pages/workflow_designer"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -283,6 +284,16 @@ func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 	agencyID := c.Param("id")
 	workflowKey := c.Param("workflowId") // This is actually the workflow key, not ID
 
+	// Get agency
+	agency, err := h.agencyRepo.GetByID(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithError(err).Error("Failed to get agency")
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Agency not found",
+		})
+		return
+	}
+
 	// Get agency specification to access workflows
 	spec, err := h.agencyRepo.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
@@ -331,6 +342,6 @@ func (h *AgencyDesignerWebHandler) ShowWorkflowDesigner(c *gin.Context) {
 	}
 
 	// Render designer page
-	component := agency_designer.WorkflowDesigner(agencyID, workflow)
+	component := workflow_designer.WorkflowDesignerPage(agency, workflow)
 	component.Render(c.Request.Context(), c.Writer)
 }

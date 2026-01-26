@@ -26,8 +26,11 @@ window.getCurrentAgencyId = function () {
 
 // Show notification message in status bar
 window.showNotification = function (message, type = 'info') {
+    console.log('[MVP-054] 📢 showNotification called:', { message, type });
+
     // Wait for DOM to be ready if needed
     if (document.readyState === 'loading') {
+        console.log('[MVP-054] ⏳ DOM not ready, deferring notification');
         document.addEventListener('DOMContentLoaded', () => {
             window.showNotification(message, type);
         });
@@ -36,8 +39,10 @@ window.showNotification = function (message, type = 'info') {
 
     // Find the status bar right section
     const statusBarRight = document.querySelector('.vscode-status-bar .status-bar-right');
+    console.log('[MVP-054] 🔍 Status bar right element:', statusBarRight);
 
     if (!statusBarRight) {
+        console.log('[MVP-054] ⚠️ Status bar not found, using fallback notification');
 
         // Fallback to old notification method if status bar not found
         const notification = document.createElement('div');
@@ -56,9 +61,13 @@ window.showNotification = function (message, type = 'info') {
         return;
     }
 
+    console.log('[MVP-054] ✅ Status bar found, adding notification');
+    console.log('[MVP-054] ✅ Status bar found, adding notification');
+
     // Clear any existing notification in status bar
     const existingNotification = statusBarRight.querySelector('.status-notification');
     if (existingNotification) {
+        console.log('[MVP-054] 🗑️ Removing existing notification');
         existingNotification.remove();
     }
 
@@ -71,6 +80,7 @@ window.showNotification = function (message, type = 'info') {
     };
 
     const config = typeConfig[type] || typeConfig['info'];
+    console.log('[MVP-054] 🎨 Using config:', config);
 
     // Create status bar notification
     const statusNotification = document.createElement('span');
@@ -80,15 +90,20 @@ window.showNotification = function (message, type = 'info') {
         <span class="status-text">${message}</span>
     `;
 
+    console.log('[MVP-054] 📝 Created notification element:', statusNotification);
+
     // Add to status bar
     statusBarRight.appendChild(statusNotification);
+    console.log('[MVP-054] ✅ Notification added to status bar');
 
     // Auto-remove after 5 seconds with fade out
     setTimeout(() => {
         if (statusNotification.parentElement) {
+            console.log('[MVP-054] ⏱️ Fading out notification');
             statusNotification.style.opacity = '0';
             statusNotification.style.transition = 'opacity 0.3s ease-out';
             setTimeout(() => {
+                console.log('[MVP-054] 🗑️ Removing notification');
                 statusNotification.remove();
             }, 300);
         }

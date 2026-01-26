@@ -1,0 +1,17 @@
+package workflow
+
+// WorkflowMarker renders START or END markers for the workflow canvas
+templ WorkflowMarker(markerType string) {
+	<div class={ "workflow-marker", markerType + "-marker" }>
+		<div class="marker-content">
+			<span class="icon is-medium">
+				if markerType == "start" {
+					<i class="fas fa-play-circle"></i>
+				} else {
+					<i class="fas fa-flag-checkered"></i>
+				}
+			</span>
+			<span class="has-text-weight-bold">{ templ.Upper(markerType) }</span>
+		</div>
+	</div>
+}
