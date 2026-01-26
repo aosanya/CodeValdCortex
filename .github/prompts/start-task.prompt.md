@@ -91,23 +91,26 @@ Follow the **mandatory task startup process** for project tasks:
    - Understand how this task fits into the broader domain strategy
 
 3. **Create feature branch**
-   ```bash
-   git checkout -b feature/MVP-XXX_description
-   ```
+   - **🚨 ALWAYS branch from `dev`, NOT `main`**
    - Use exact format: `feature/MVP-XXX_description`
    - Description should be lowercase with underscores
-   - **🚨 MULTI-REPO WORKSPACE**: Create dev branch in EACH repository:
+   - **🚨 MULTI-REPO WORKSPACE**: Create feature branch in EACH repository from `dev`:
      ```bash
      # For CodeValdCortex
      cd /workspaces/CodeValdCortex
+     git checkout dev
+     git pull origin dev  # Ensure latest dev changes
      git checkout -b feature/MVP-XXX_description
      
      # For CodeValdFortex
      cd /workspaces/CodeValdFortex
+     git checkout dev
+     git pull origin dev  # Ensure latest dev changes
      git checkout -b feature/MVP-XXX_description
      ```
    - Keep branches synchronized across repos when working on integrated features
-   - All repos must be on dev branch before starting implementation
+   - All repos must be on feature branch before starting implementation
+   - **Branch hierarchy**: `main` (stable) ← `dev` (integration) ← `feature/MVP-XXX` (your work)
 
 4. **Read project guidelines**
    - Review `.github/instructions/rules.instructions.md`
@@ -234,18 +237,51 @@ README.md contains domain overview and task index:
 
 ## Git Workflow
 
+**Branch Strategy:**
+- `main` - Stable production branch (merge from `dev` periodically)
+- `dev` - Active development integration branch (merge feature branches here)
+- `feature/MVP-XXX` - Individual task branches (created from `dev`)
+
 ```bash
-# Start new task
-git checkout main
-git pull  # Ensure latest changes
+# Start new task - Create feature branches from dev in ALL repos
+# CodeValdCortex
+cd /workspaces/CodeValdCortex
+git checkout dev
+git pull origin dev  # Ensure latest dev changes
 git checkout -b feature/MVP-XXX_description
 
-# Regular development commits
+# CodeValdFortex
+cd /workspaces/CodeValdFortex
+git checkout dev
+git pull origin dev  # Ensure latest dev changes
+git checkout -b feature/MVP-XXX_description
+
+# Regular development commits (in appropriate repo)
 git add .
 git commit -m "Descriptive message"
 
-# Continue until complete, then use "Complete Branch" prompt
+# When task complete - merge to dev (use "Complete Branch" prompt)
+# Feature branches merge to dev, not main
+git checkout dev
+git merge feature/MVP-XXX_description --no-ff
+git push origin dev
+
+# Periodically: dev → main (for releases/milestones)
+# This is done separately, not per task
+git checkout main
+git merge dev --no-ff
+git push origin main
 ```
+
+**Multi-Repo Notes:**
+- Create feature branches with same name in both repos for consistency
+- **ALWAYS branch from `dev`**, never from `main`
+- Commit changes to the appropriate repository based on what you're modifying
+- Frontend changes → CodeValdFortex
+- Backend changes → CodeValdCortex
+- Keep branches synchronized if task spans both repositories
+- Merge completed features to `dev` branch
+- `dev` → `main` merges happen at milestones (not per task)
 
 ## Success Criteria
 - ✅ Next priority task identified with all dependencies met
