@@ -17,7 +17,7 @@ func RegisterWorkItemsRoutes(rg *gin.RouterGroup, db driver.Database, logger *lo
 
 	workItemHandler := handlers.NewWorkItemsHandler(workItemRepo, logger)
 
-	workItems := rg.Group("/agencies/:agencyID/work-items")
+	workItems := rg.Group("/agencies/:id/work-items")
 	{
 		workItems.GET("", workItemHandler.ListWorkItems)
 		workItems.POST("", workItemHandler.CreateWorkItem)

@@ -8,6 +8,8 @@ package workflow
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "strings"
+
 // WorkflowMarker renders START or END markers for the workflow canvas
 func WorkflowMarker(markerType string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -68,9 +70,9 @@ func WorkflowMarker(markerType string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(templ.Upper(markerType))
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strings.ToUpper(markerType))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/workflow/workflow_marker.templ`, Line: 14, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/components/workflow/workflow_marker.templ`, Line: 16, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

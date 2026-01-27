@@ -26,9 +26,9 @@ func NewWorkItemsHandler(repo *arangodb.WorkItemRepository, logger *logrus.Logge
 	}
 }
 
-// ListWorkItems handles GET /api/v1/agencies/:agencyID/work-items
+// ListWorkItems handles GET /api/v1/agencies/:id/work-items
 func (h *WorkItemsHandler) ListWorkItems(c *gin.Context) {
-	agencyID := c.Param("agencyID")
+	agencyID := c.Param("id")
 
 	// Parse query parameters for filtering
 	filters := make(map[string]interface{})
@@ -89,9 +89,9 @@ func (h *WorkItemsHandler) ListWorkItems(c *gin.Context) {
 	api.SuccessResponse(c, response)
 }
 
-// GetWorkItem handles GET /api/v1/agencies/:agencyID/work-items/:workItemID
+// GetWorkItem handles GET /api/v1/agencies/:id/work-items/:workItemID
 func (h *WorkItemsHandler) GetWorkItem(c *gin.Context) {
-	agencyID := c.Param("agencyID")
+	agencyID := c.Param("id")
 	workItemID := c.Param("workItemID")
 
 	item, err := h.repo.GetWorkItem(c.Request.Context(), agencyID, workItemID)
@@ -107,9 +107,9 @@ func (h *WorkItemsHandler) GetWorkItem(c *gin.Context) {
 	api.SuccessResponse(c, item)
 }
 
-// CreateWorkItem handles POST /api/v1/agencies/:agencyID/work-items
+// CreateWorkItem handles POST /api/v1/agencies/:id/work-items
 func (h *WorkItemsHandler) CreateWorkItem(c *gin.Context) {
-	agencyID := c.Param("agencyID")
+	agencyID := c.Param("id")
 
 	var req models.CreateWorkItemRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -160,9 +160,9 @@ func (h *WorkItemsHandler) CreateWorkItem(c *gin.Context) {
 	})
 }
 
-// UpdateWorkItem handles PUT /api/v1/agencies/:agencyID/work-items/:workItemID
+// UpdateWorkItem handles PUT /api/v1/agencies/:id/work-items/:workItemID
 func (h *WorkItemsHandler) UpdateWorkItem(c *gin.Context) {
-	agencyID := c.Param("agencyID")
+	agencyID := c.Param("id")
 	workItemID := c.Param("workItemID")
 
 	var req models.UpdateWorkItemRequest
@@ -208,9 +208,9 @@ func (h *WorkItemsHandler) UpdateWorkItem(c *gin.Context) {
 	api.SuccessResponse(c, updated)
 }
 
-// DeleteWorkItem handles DELETE /api/v1/agencies/:agencyID/work-items/:workItemID
+// DeleteWorkItem handles DELETE /api/v1/agencies/:id/work-items/:workItemID
 func (h *WorkItemsHandler) DeleteWorkItem(c *gin.Context) {
-	agencyID := c.Param("agencyID")
+	agencyID := c.Param("id")
 	workItemID := c.Param("workItemID")
 
 	err := h.repo.DeleteWorkItem(c.Request.Context(), agencyID, workItemID)
