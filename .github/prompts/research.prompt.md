@@ -150,7 +150,7 @@ When starting a research session:
 
 #### User Experience
 **For UI-heavy features**
-- What UI components are involved?
+- What React components are involved?
 - What is the user workflow?
 - What feedback mechanisms exist?
 - What accessibility considerations apply?
@@ -456,7 +456,7 @@ AI: 🔍 **Pre-Research: File Size Check**
     1. Split instance-management.md into:
        - data-models.md (models, database schema)
        - instance-lifecycle.md (service layer, state management)
-       - instance-ui.md (templates, JavaScript, handlers)
+       - instance-ui.md (React components, API handlers)
        - instance-dashboard.md (dashboard components)
     
     2. Split state-machine.md into:
@@ -474,8 +474,8 @@ AI: 🔍 **Pre-Research: File Size Check**
     Quick scan shows:
     - Data models documented in data-models.md
     - Service layer in instance-lifecycle.md
-    - UI components in instance-ui.md
-    - Dashboard in instance-dashboard.md
+    - React components in instance-ui.md
+    - Dashboard components in instance-dashboard.md
     
     Starting with most critical aspect:
     

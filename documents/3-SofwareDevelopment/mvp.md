@@ -54,8 +54,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-RM-002 | Backend API Infrastructure | Create `/api/v1` package structure in Go backend, implement CORS middleware, request logger, standardized response/error formatting, health endpoint | 📋 Not Started | P1 | Medium | Go, Gin Framework, REST API | None | TBD |
-| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | 📋 Not Started | P1 | Medium | Go, Gin, ArangoDB | MVP-RM-002 | TBD |
+| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | 📋 Not Started | P1 | Medium | Go, Gin, ArangoDB | ~~MVP-RM-002~~ ✅ | [react-migration/MVP-RM-003_work_items_api.md](mvp-details/react-migration/MVP-RM-003_work_items_api.md) |
 
 ---
 
@@ -224,10 +223,8 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-RM-001 | CodeValdFortex Project Setup | Initialize Vite + React + TypeScript project in `/workspaces/CodeValdFortex/`. Install dependencies (Redux Toolkit, Bulma, Axios, React Router), configure build tools, establish project structure | 📋 Not Started | P1 | Low | Frontend Dev, TypeScript, Build Tools | None | [react-migration/MVP-RM-001_project_setup.md](mvp-details/react-migration/MVP-RM-001_project_setup.md) |
-| MVP-RM-002 | Backend API Infrastructure | Create `/api/v1` package structure in Go backend, implement CORS middleware, request logger, standardized response/error formatting, health endpoint | 📋 Not Started | P1 | Medium | Go, Gin Framework, REST API | None | [react-migration/MVP-RM-002_backend_api.md](mvp-details/react-migration/MVP-RM-002_backend_api.md) |
-| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | 📋 Not Started | P1 | Medium | Go, Gin, ArangoDB | MVP-RM-002 | [react-migration/MVP-RM-003_work_items_api.md](mvp-details/react-migration/MVP-RM-003_work_items_api.md) |
-| MVP-RM-004 | Work Items Redux Store | Create Redux slice with async thunks for fetching, creating, updating, deleting work items. Implement filtering, pagination state, error handling | 📋 Not Started | P1 | Medium | React, Redux Toolkit, TypeScript | MVP-RM-001, MVP-RM-003 | [react-migration/](mvp-details/react-migration/) |
+| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | 📋 Not Started | P1 | Medium | Go, Gin, ArangoDB | ~~MVP-RM-002~~ ✅ | [react-migration/MVP-RM-003_work_items_api.md](mvp-details/react-migration/MVP-RM-003_work_items_api.md) |
+| MVP-RM-004 | Work Items Redux Store | Create Redux slice with async thunks for fetching, creating, updating, deleting work items. Implement filtering, pagination state, error handling | 📋 Not Started | P1 | Medium | React, Redux Toolkit, TypeScript | ~~MVP-RM-001~~ ✅, MVP-RM-003 | [react-migration/](mvp-details/react-migration/) |
 | MVP-RM-005 | Work Items UI Components | Build React components using Bulma CSS: WorkItemList, WorkItemCard, WorkItemForm, WorkItemFilters. Implement CRUD operations, form validation, loading states | 📋 Not Started | P1 | High | React, TypeScript, Bulma CSS | MVP-RM-004 | [react-migration/](mvp-details/react-migration/) |
 | MVP-RM-006 | Testing Suite | Write unit tests (Vitest), component tests (React Testing Library), integration tests for work items feature. Achieve >80% coverage | 📋 Not Started | P1 | Medium | Vitest, React Testing Library, Go testing | MVP-RM-005 | [react-migration/](mvp-details/react-migration/) |
 | MVP-RM-007 | Deployment Pipeline | Set up staging/production environments, CI/CD pipeline (GitHub Actions), Docker containerization, monitoring, rollback procedures | 📋 Not Started | P1 | Medium | Docker, CI/CD, Nginx | MVP-RM-006 | [react-migration/](mvp-details/react-migration/) |

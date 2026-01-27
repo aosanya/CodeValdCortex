@@ -1,0 +1,615 @@
+{
+    "info": {
+        "_postman_id": "work-items-003",
+        "name": "CodeValdCortex - Work Items (Issues)",
+        "description": "Work item (issue) management endpoints with pagination, filtering, and assignment operations (MVP-WI-008, MVP-RM-003)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "List Issues with Pagination",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Origin",
+                        "value": "http://localhost:5173",
+                        "type": "text",
+                        "description": "For CORS testing"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues?limit=10&offset=0&status=open&assignee=",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues"
+                    ],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "10",
+                            "description": "Number of items per page (MVP-RM-003)"
+                        },
+                        {
+                            "key": "offset",
+                            "value": "0",
+                            "description": "Number of items to skip (MVP-RM-003)"
+                        },
+                        {
+                            "key": "status",
+                            "value": "open",
+                            "description": "Filter by status (open, in-progress, completed, etc.)"
+                        },
+                        {
+                            "key": "assignee",
+                            "value": "",
+                            "description": "Filter by assignee agent key"
+                        }
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "List all issues for an instance with pagination and filtering support (MVP-RM-003)"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"CORS headers present\", function () {",
+                            "    pm.response.to.have.header(\"Access-Control-Allow-Origin\");",
+                            "});",
+                            "",
+                            "pm.test(\"Response has pagination metadata\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('pagination');",
+                            "    pm.expect(jsonData.pagination).to.have.property('total');",
+                            "    pm.expect(jsonData.pagination).to.have.property('limit');",
+                            "    pm.expect(jsonData.pagination).to.have.property('offset');",
+                            "    pm.expect(jsonData.pagination).to.have.property('hasMore');",
+                            "});",
+                            "",
+                            "pm.test(\"Response has data array\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('data');",
+                            "    pm.expect(jsonData.data).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Get Single Issue",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Get detailed information about a specific issue"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Issue has required fields\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.expect(jsonData).to.have.property('title');",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Create Issue",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"New Issue Title\",\n  \"description\": \"Detailed description of the issue\",\n  \"priority\": \"high\",\n  \"labels\": [\"bug\", \"frontend\"],\n  \"metadata\": {\n    \"source\": \"manual\",\n    \"reporter\": \"user@example.com\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Create a new issue/work item for the instance"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test(\"Issue created successfully\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.environment.set('issue_id', jsonData.id);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Update Issue (PUT)",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"title\": \"Updated Issue Title\",\n  \"description\": \"Updated description\",\n  \"priority\": \"medium\",\n  \"status\": \"in-progress\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Update an issue with full replacement (PUT)"
+            },
+            "response": []
+        },
+        {
+            "name": "Update Issue (PATCH)",
+            "request": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"status\": \"completed\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Partial update of an issue (PATCH)"
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Issue",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Delete an issue"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 204 or 200\", function () {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Assign Issue to Agent",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"agentKey\": \"agent-001\",\n  \"notes\": \"Assigned based on expertise\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id/assign",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id",
+                        "assign"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Assign an issue to a specific agent"
+            },
+            "response": []
+        },
+        {
+            "name": "Claim Issue (Agent Self-Assignment)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"agentKey\": \"agent-002\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id/claim",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id",
+                        "claim"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Agent claims an issue for self-assignment"
+            },
+            "response": []
+        },
+        {
+            "name": "Progress Issue (Update Status)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"status\": \"in-progress\",\n  \"comment\": \"Started working on this issue\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/issues/:issue_id/progress",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "issues",
+                        ":issue_id",
+                        "progress"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        },
+                        {
+                            "key": "issue_id",
+                            "value": "{{issue_id}}"
+                        }
+                    ]
+                },
+                "description": "Update issue progress/status with optional comment"
+            },
+            "response": []
+        },
+        {
+            "name": "Show Workbench (UI)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/workbench",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "workbench"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Get workbench UI view with all issues organized"
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "agency_id",
+            "value": "UC-INFRA-001",
+            "type": "string"
+        },
+        {
+            "key": "instance_id",
+            "value": "",
+            "type": "string",
+            "description": "Set this after creating an instance"
+        },
+        {
+            "key": "issue_id",
+            "value": "",
+            "type": "string",
+            "description": "Set this after creating an issue"
+        }
+    ]
+}

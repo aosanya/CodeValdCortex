@@ -1,5 +1,7 @@
 package workflow
 
+import "strings"
+
 // WorkflowMarker renders START or END markers for the workflow canvas
 templ WorkflowMarker(markerType string) {
 	<div class={ "workflow-marker", markerType + "-marker" }>
@@ -11,7 +13,7 @@ templ WorkflowMarker(markerType string) {
 					<i class="fas fa-flag-checkered"></i>
 				}
 			</span>
-			<span class="has-text-weight-bold">{ templ.Upper(markerType) }</span>
+			<span class="has-text-weight-bold">{ strings.ToUpper(markerType) }</span>
 		</div>
 	</div>
 }

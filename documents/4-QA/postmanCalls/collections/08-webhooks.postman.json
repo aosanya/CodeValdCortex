@@ -1,0 +1,277 @@
+{
+    "info": {
+        "_postman_id": "webhooks-008",
+        "name": "CodeValdCortex - Webhooks",
+        "description": "Gitea webhook integration endpoints for work item synchronization and pull request automation",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Issue Webhook",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "X-Gitea-Event",
+                        "value": "issues",
+                        "type": "text",
+                        "description": "Gitea event type header"
+                    },
+                    {
+                        "key": "X-Gitea-Signature",
+                        "value": "sha256=signature_here",
+                        "type": "text",
+                        "description": "Webhook signature for verification"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"action\": \"opened\",\n  \"number\": 123,\n  \"issue\": {\n    \"id\": 456,\n    \"number\": 123,\n    \"title\": \"Bug: Application crashes on startup\",\n    \"body\": \"Detailed description of the issue...\",\n    \"state\": \"open\",\n    \"labels\": [\n      {\n        \"id\": 1,\n        \"name\": \"bug\"\n      },\n      {\n        \"id\": 2,\n        \"name\": \"priority:high\"\n      }\n    ],\n    \"assignee\": {\n      \"id\": 789,\n      \"login\": \"developer1\",\n      \"email\": \"developer1@example.com\"\n    },\n    \"created_at\": \"2026-01-26T10:00:00Z\",\n    \"updated_at\": \"2026-01-26T10:00:00Z\"\n  },\n  \"repository\": {\n    \"id\": 1,\n    \"name\": \"project-repo\",\n    \"full_name\": \"organization/project-repo\",\n    \"owner\": {\n      \"login\": \"organization\"\n    }\n  },\n  \"sender\": {\n    \"id\": 999,\n    \"login\": \"user1\",\n    \"email\": \"user1@example.com\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/work/issues",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "work",
+                        "issues"
+                    ]
+                },
+                "description": "Gitea webhook endpoint for issue events (created, updated, closed, reopened, assigned, etc.)"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 or 202\", function () {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([200, 202]);",
+                            "});",
+                            "",
+                            "pm.test(\"Webhook processed successfully\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "    pm.expect(jsonData.status).to.be.oneOf(['processed', 'queued']);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Issue Webhook - Updated",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "X-Gitea-Event",
+                        "value": "issues",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"action\": \"edited\",\n  \"number\": 123,\n  \"issue\": {\n    \"id\": 456,\n    \"number\": 123,\n    \"title\": \"Bug: Application crashes on startup [UPDATED]\",\n    \"body\": \"Updated description with more details...\",\n    \"state\": \"open\",\n    \"labels\": [\n      {\n        \"name\": \"bug\"\n      }\n    ]\n  },\n  \"repository\": {\n    \"name\": \"project-repo\",\n    \"full_name\": \"organization/project-repo\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/work/issues",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "work",
+                        "issues"
+                    ]
+                },
+                "description": "Webhook for issue update events"
+            },
+            "response": []
+        },
+        {
+            "name": "Issue Webhook - Closed",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "X-Gitea-Event",
+                        "value": "issues",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"action\": \"closed\",\n  \"number\": 123,\n  \"issue\": {\n    \"id\": 456,\n    \"number\": 123,\n    \"title\": \"Bug: Application crashes on startup\",\n    \"state\": \"closed\",\n    \"closed_at\": \"2026-01-26T12:00:00Z\"\n  },\n  \"repository\": {\n    \"name\": \"project-repo\",\n    \"full_name\": \"organization/project-repo\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/work/issues",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "work",
+                        "issues"
+                    ]
+                },
+                "description": "Webhook for issue close events"
+            },
+            "response": []
+        },
+        {
+            "name": "Pull Request Webhook",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "X-Gitea-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    },
+                    {
+                        "key": "X-Gitea-Signature",
+                        "value": "sha256=signature_here",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"action\": \"opened\",\n  \"number\": 42,\n  \"pull_request\": {\n    \"id\": 789,\n    \"number\": 42,\n    \"title\": \"Feature: Add user authentication\",\n    \"body\": \"Implements OAuth2 authentication\",\n    \"state\": \"open\",\n    \"head\": {\n      \"ref\": \"feature/auth\",\n      \"sha\": \"abc123def456\"\n    },\n    \"base\": {\n      \"ref\": \"main\",\n      \"sha\": \"xyz789uvw012\"\n    },\n    \"user\": {\n      \"id\": 999,\n      \"login\": \"developer1\"\n    },\n    \"created_at\": \"2026-01-26T10:30:00Z\",\n    \"updated_at\": \"2026-01-26T10:30:00Z\"\n  },\n  \"repository\": {\n    \"id\": 1,\n    \"name\": \"project-repo\",\n    \"full_name\": \"organization/project-repo\"\n  },\n  \"sender\": {\n    \"id\": 999,\n    \"login\": \"developer1\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/work/pull-requests",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "work",
+                        "pull-requests"
+                    ]
+                },
+                "description": "Gitea webhook endpoint for pull request events (opened, closed, synchronized, etc.)"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 or 202\", function () {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([200, 202]);",
+                            "});",
+                            "",
+                            "pm.test(\"PR webhook processed\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Pull Request Webhook - Merged",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    },
+                    {
+                        "key": "X-Gitea-Event",
+                        "value": "pull_request",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"action\": \"closed\",\n  \"number\": 42,\n  \"pull_request\": {\n    \"id\": 789,\n    \"number\": 42,\n    \"title\": \"Feature: Add user authentication\",\n    \"state\": \"closed\",\n    \"merged\": true,\n    \"merged_at\": \"2026-01-26T14:00:00Z\",\n    \"merge_commit_sha\": \"merged123abc456\"\n  },\n  \"repository\": {\n    \"name\": \"project-repo\",\n    \"full_name\": \"organization/project-repo\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/work/pull-requests",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "work",
+                        "pull-requests"
+                    ]
+                },
+                "description": "Webhook for merged pull request events"
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "webhook_secret",
+            "value": "your-webhook-secret",
+            "type": "string",
+            "description": "Gitea webhook secret for signature verification"
+        }
+    ]
+}

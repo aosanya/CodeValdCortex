@@ -1,0 +1,572 @@
+{
+    "info": {
+        "_postman_id": "agencies-specs-002b",
+        "name": "CodeValdCortex - Agency Specifications & Roles",
+        "description": "Agency specification management (introduction, goals, work items, workflows, roles, RACI matrix) and role CRUD operations",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Specifications",
+            "description": "Unified specification management endpoints",
+            "item": [
+                {
+                    "name": "Get Specification",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/specification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "specification"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Get complete agency specification including introduction, goals, work items, workflows, roles, and RACI matrix"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Full Specification",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"introduction\": {},\n  \"goals\": {},\n  \"workItems\": {},\n  \"workflows\": {},\n  \"roles\": {},\n  \"raciMatrix\": {}\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/specification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "specification"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Update the complete agency specification"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Introduction",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"overview\": \"Updated overview\",\n  \"purpose\": \"Updated purpose\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/specification/introduction",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "specification",
+                                "introduction"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Update only the introduction section"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Goals",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"goal-1\": {\n    \"title\": \"Primary Goal\",\n    \"description\": \"Description\"\n  }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/specification/goals",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "specification",
+                                "goals"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Update the goals section"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Roles",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"role-1\": {\n    \"name\": \"Role Name\",\n    \"description\": \"Description\"\n  }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/specification/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "specification",
+                                "roles"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Update the roles section"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update RACI Matrix Section",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"mapping-1\": {\n    \"deliverable\": \"Deliverable Name\",\n    \"responsible\": [],\n    \"accountable\": []\n  }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/specification/raci-matrix",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "specification",
+                                "raci-matrix"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Update the RACI matrix section"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "RACI Matrix",
+            "description": "RACI Matrix CRUD operations",
+            "item": [
+                {
+                    "name": "Get RACI Matrix",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/raci-matrix",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "raci-matrix"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Get the complete RACI matrix for an agency"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Save RACI Matrix",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"deliverables\": [\n    {\n      \"name\": \"Deliverable 1\",\n      \"responsible\": [\"role-1\"],\n      \"accountable\": [\"role-2\"]\n    }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/raci-matrix",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "raci-matrix"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Save or update the complete RACI matrix"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Roles CRUD",
+            "description": "Agency roles management",
+            "item": [
+                {
+                    "name": "Get Agency Roles",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "roles"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Get all roles for an agency"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Agency Roles HTML",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/roles/html",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "roles",
+                                "html"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Get roles as HTML for rendering in UI"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Agency Role",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"key\": \"project-manager\",\n  \"name\": \"Project Manager\",\n  \"description\": \"Manages overall project execution\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "roles"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Create a new role for the agency"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Agency Role",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/roles/:key",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "roles",
+                                ":key"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                },
+                                {
+                                    "key": "key",
+                                    "value": "project-manager"
+                                }
+                            ]
+                        },
+                        "description": "Get a specific role by its key"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Agency Role",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Role Name\",\n  \"description\": \"Updated description\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/roles/:key",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "roles",
+                                ":key"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                },
+                                {
+                                    "key": "key",
+                                    "value": "project-manager"
+                                }
+                            ]
+                        },
+                        "description": "Update an existing role"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Agency Role",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/roles/:key",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "roles",
+                                ":key"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                },
+                                {
+                                    "key": "key",
+                                    "value": "project-manager"
+                                }
+                            ]
+                        },
+                        "description": "Delete a role from the agency"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "agency_id",
+            "value": "UC-INFRA-001",
+            "type": "string"
+        }
+    ]
+}

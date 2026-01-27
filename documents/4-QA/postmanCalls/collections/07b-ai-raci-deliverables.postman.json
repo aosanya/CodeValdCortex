@@ -1,0 +1,476 @@
+{
+    "info": {
+        "_postman_id": "ai-raci-deliverables-007b",
+        "name": "CodeValdCortex - AI Services (RACI & Deliverables)",
+        "description": "AI-powered refinement for RACI matrix and deliverables management",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Refine RACI Dynamically",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"prompt\": \"Ensure RACI matrix has clear responsibility assignments\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/raci/refine-dynamic",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "raci",
+                        "refine-dynamic"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Main dynamic router for RACI matrix operations"
+            },
+            "response": []
+        },
+        {
+            "name": "Refine Specific RACI Entry",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"prompt\": \"Clarify accountability for this task\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/raci/refine-specific",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "raci",
+                        "refine-specific"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Refine a specific RACI entry"
+            },
+            "response": []
+        },
+        {
+            "name": "Generate RACI Entry",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"prompt\": \"Create RACI assignments for code review process\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/raci/generate",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "raci",
+                        "generate"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Generate new RACI entries using AI"
+            },
+            "response": []
+        },
+        {
+            "name": "Consolidate RACI",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"prompt\": \"Merge duplicate RACI responsibilities\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/raci/consolidate",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "raci",
+                        "consolidate"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Consolidate overlapping RACI entries"
+            },
+            "response": []
+        },
+        {
+            "name": "Enhance All RACI",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"prompt\": \"Add consultation and information flows to RACI matrix\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/raci/enhance-all",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "raci",
+                        "enhance-all"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Enhance all RACI entries with additional details"
+            },
+            "response": []
+        },
+        {
+            "name": "List Deliverables",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/deliverables",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "deliverables"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Retrieve all deliverables for an agency"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Single Deliverable",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/deliverables/:deliverableKey",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "deliverables",
+                        ":deliverableKey"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "deliverableKey",
+                            "value": "deliverable-1"
+                        }
+                    ]
+                },
+                "description": "Get a specific deliverable by key"
+            },
+            "response": []
+        },
+        {
+            "name": "Create Deliverable",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"key\": \"api-documentation\",\n  \"name\": \"API Documentation\",\n  \"description\": \"Complete REST API documentation with examples\",\n  \"dueDate\": \"2024-12-31\",\n  \"status\": \"in_progress\",\n  \"assignedTo\": [\"tech-lead\"],\n  \"dependencies\": [\"api-implementation\"]\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/deliverables",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "deliverables"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Create a new deliverable"
+            },
+            "response": []
+        },
+        {
+            "name": "Update Deliverable",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"status\": \"completed\",\n  \"completedDate\": \"2024-12-15\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/deliverables/:deliverableKey",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "deliverables",
+                        ":deliverableKey"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "deliverableKey",
+                            "value": "api-documentation"
+                        }
+                    ]
+                },
+                "description": "Update an existing deliverable"
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Deliverable",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/deliverables/:deliverableKey",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "deliverables",
+                        ":deliverableKey"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "deliverableKey",
+                            "value": "api-documentation"
+                        }
+                    ]
+                },
+                "description": "Delete a deliverable"
+            },
+            "response": []
+        },
+        {
+            "name": "Refine Deliverable (AI)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"prompt\": \"Add acceptance criteria and success metrics\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/deliverables/:deliverableKey/refine",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "deliverables",
+                        ":deliverableKey",
+                        "refine"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "deliverableKey",
+                            "value": "api-documentation"
+                        }
+                    ]
+                },
+                "description": "Use AI to refine a deliverable"
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "agency_id",
+            "value": "UC-INFRA-001",
+            "type": "string"
+        }
+    ]
+}

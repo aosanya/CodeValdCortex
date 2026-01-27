@@ -1,0 +1,154 @@
+{
+    "id": "UC-EXAMPLE-001",
+    "name": "Example Agency",
+    "description": "A sample agency demonstrating complete configuration",
+    "database": "uc_example_001",
+    "specification": {
+        "introduction": {
+            "overview": "This agency manages automated data processing workflows for a municipal water distribution network.",
+            "purpose": "Optimize water distribution, reduce waste, and ensure quality compliance through AI-driven monitoring and decision-making.",
+            "scope": "Covers sensor data collection, quality analysis, distribution optimization, and anomaly detection across 500+ network nodes.",
+            "objectives": [
+                "Reduce water waste by 15%",
+                "Achieve 99.9% quality compliance",
+                "Detect anomalies within 5 minutes"
+            ]
+        },
+        "goals": {
+            "goal-1": {
+                "key": "goal-1",
+                "title": "Real-time Water Quality Monitoring",
+                "description": "Continuously monitor water quality parameters across all distribution nodes",
+                "priority": "high",
+                "success_criteria": [
+                    "Monitor 500+ nodes with <1 minute latency",
+                    "99.9% sensor uptime",
+                    "Zero missed critical alerts"
+                ],
+                "timeline": "Q1 2026"
+            },
+            "goal-2": {
+                "key": "goal-2",
+                "title": "Optimize Distribution Efficiency",
+                "description": "Minimize water waste through intelligent flow management",
+                "priority": "high",
+                "success_criteria": [
+                    "15% reduction in water waste",
+                    "10% improvement in pressure optimization",
+                    "Automated flow adjustments within 2 minutes"
+                ],
+                "timeline": "Q2 2026"
+            }
+        },
+        "workItems": {
+            "wi-1": {
+                "key": "wi-1",
+                "title": "Deploy Sensor Network",
+                "description": "Install and configure IoT sensors at all distribution nodes",
+                "goal": "goal-1",
+                "status": "in-progress",
+                "priority": "high",
+                "assignee": "infrastructure-specialist"
+            }
+        },
+        "workflows": {
+            "wf-1": {
+                "key": "wf-1",
+                "name": "Anomaly Detection Pipeline",
+                "description": "Automated pipeline for detecting water quality anomalies",
+                "trigger": "sensor_data_received",
+                "steps": [
+                    {
+                        "id": "step-1",
+                        "name": "Validate Sensor Data",
+                        "type": "validation"
+                    },
+                    {
+                        "id": "step-2",
+                        "name": "Analyze Quality Metrics",
+                        "type": "ai_analysis"
+                    },
+                    {
+                        "id": "step-3",
+                        "name": "Alert on Anomalies",
+                        "type": "notification"
+                    }
+                ]
+            }
+        },
+        "roles": {
+            "role-1": {
+                "key": "role-1",
+                "name": "Data Engineer",
+                "description": "Manages data pipelines and sensor integrations",
+                "responsibilities": [
+                    "Design and maintain data ingestion pipelines",
+                    "Monitor sensor health and connectivity",
+                    "Optimize data storage and retrieval"
+                ],
+                "skills": [
+                    "Python",
+                    "Apache Kafka",
+                    "Time-series databases"
+                ]
+            },
+            "role-2": {
+                "key": "role-2",
+                "name": "Quality Analyst",
+                "description": "Monitors water quality metrics and compliance",
+                "responsibilities": [
+                    "Review quality reports",
+                    "Investigate anomalies",
+                    "Ensure regulatory compliance"
+                ],
+                "skills": [
+                    "Water quality standards",
+                    "Statistical analysis",
+                    "Regulatory frameworks"
+                ]
+            }
+        },
+        "raciMatrix": {
+            "deliverable-1": {
+                "key": "deliverable-1",
+                "deliverable": "Sensor Data Pipeline",
+                "goal": "goal-1",
+                "responsible": [
+                    "role-1"
+                ],
+                "accountable": [
+                    "role-1"
+                ],
+                "consulted": [
+                    "role-2"
+                ],
+                "informed": []
+            },
+            "deliverable-2": {
+                "key": "deliverable-2",
+                "deliverable": "Quality Compliance Report",
+                "goal": "goal-1",
+                "responsible": [
+                    "role-2"
+                ],
+                "accountable": [
+                    "role-2"
+                ],
+                "consulted": [
+                    "role-1"
+                ],
+                "informed": []
+            }
+        }
+    },
+    "metadata": {
+        "created_at": "2026-01-26T10:00:00Z",
+        "updated_at": "2026-01-26T10:00:00Z",
+        "version": "1.0.0",
+        "tags": [
+            "water-infrastructure",
+            "iot",
+            "quality-monitoring"
+        ]
+    }
+}
