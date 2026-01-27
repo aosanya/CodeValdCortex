@@ -167,6 +167,11 @@ func getRequestID(c *gin.Context) string {
 	return uuid.New().String()
 }
 
+// GetRequestID is the public version of getRequestID for use in other packages
+func GetRequestID(c *gin.Context) string {
+	return getRequestID(c)
+}
+
 // Pagination parameters from query
 type PaginationParams struct {
 	Page    int `form:"page" binding:"min=1"`
