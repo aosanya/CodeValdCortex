@@ -1,0 +1,631 @@
+{
+    "info": {
+        "_postman_id": "tags-publications-005",
+        "name": "CodeValdCortex - Tags & Publications",
+        "description": "Tag management and publication lifecycle endpoints (MVP-PUB-003, MVP-PUB-004)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Tags",
+            "description": "Tag creation, listing, and restoration",
+            "item": [
+                {
+                    "name": "Create Tag",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"v1.0.0\",\n  \"description\": \"First production release\",\n  \"metadata\": {\n    \"release_notes\": \"Initial stable version\"\n  }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/tags",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "tags"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Create a new tag (snapshot) of the current agency state"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Tag created successfully\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "    pm.environment.set('tag_name', jsonData.name);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "List Tags",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/tags",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "tags"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "List all tags for an agency"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Tag Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/tags/:name",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "tags",
+                                ":name"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "{{tag_name}}"
+                                }
+                            ]
+                        },
+                        "description": "Get detailed information about a specific tag"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Tag",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/tags/:name",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "tags",
+                                ":name"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "{{tag_name}}"
+                                }
+                            ]
+                        },
+                        "description": "Delete a tag (does not affect running instances)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Restore from Tag",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/tags/:name/restore",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "tags",
+                                ":name",
+                                "restore"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                },
+                                {
+                                    "key": "name",
+                                    "value": "{{tag_name}}"
+                                }
+                            ]
+                        },
+                        "description": "Restore agency state from a tag (rollback)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Compare Tags",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/tags/:tag1/compare/:tag2",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "tags",
+                                ":tag1",
+                                "compare",
+                                ":tag2"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "tag1",
+                                    "value": "v1.0.0"
+                                },
+                                {
+                                    "key": "tag2",
+                                    "value": "v1.1.0"
+                                }
+                            ]
+                        },
+                        "description": "Compare differences between two tags"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Publications",
+            "description": "Publication and activation lifecycle",
+            "item": [
+                {
+                    "name": "Validate for Publish",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/validate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "validate"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Validate agency configuration before publishing (MVP-PUB-003)"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Validation result present\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('valid');",
+                                    "    if (!jsonData.valid) {",
+                                    "        pm.expect(jsonData).to.have.property('errors');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Publish Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"version\": \"v1.0.0\",\n  \"releaseNotes\": \"First production release\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/publish",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "publish"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Publish agency as a versioned release (MVP-PUB-003)"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Publication created\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('publication_id');",
+                                    "    pm.environment.set('publication_id', jsonData.publication_id);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Publication History",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/publications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "publications"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Get publication history for an agency"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Activate Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/activate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "activate"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Activate an agency for production use"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Deactivate Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/deactivate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "deactivate"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Deactivate an agency (stop accepting new work)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Activate Publication",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/publications/:id/activate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "publications",
+                                ":id",
+                                "activate"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{publication_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Activate a specific publication version"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Lifecycle",
+            "description": "Agency lifecycle operations (MVP-PUB-004)",
+            "item": [
+                {
+                    "name": "Pause Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/lifecycle/pause",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "lifecycle",
+                                "pause"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Pause agency operations temporarily"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resume Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/lifecycle/resume",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "lifecycle",
+                                "resume"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Resume paused agency operations"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Drain Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/lifecycle/drain",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "lifecycle",
+                                "drain"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Drain agency (complete existing work, reject new work)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Stop Agency",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/agencies/:id/lifecycle/stop",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "agencies",
+                                ":id",
+                                "lifecycle",
+                                "stop"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{agency_id}}"
+                                }
+                            ]
+                        },
+                        "description": "Stop agency immediately"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "agency_id",
+            "value": "UC-INFRA-001",
+            "type": "string"
+        },
+        {
+            "key": "tag_name",
+            "value": "v1.0.0",
+            "type": "string"
+        },
+        {
+            "key": "publication_id",
+            "value": "",
+            "type": "string",
+            "description": "Set after publishing"
+        }
+    ]
+}

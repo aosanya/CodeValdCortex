@@ -1,0 +1,196 @@
+{
+    "name": "Water Quality Anomaly Detection Pipeline",
+    "description": "Automated workflow for processing sensor data and detecting water quality anomalies in real-time",
+    "version": "1.0.0",
+    "enabled": true,
+    "triggers": [
+        {
+            "type": "event",
+            "event": "sensor_data_received",
+            "source": "iot_gateway",
+            "filter": {
+                "sensor_type": [
+                    "ph",
+                    "turbidity",
+                    "chlorine",
+                    "temperature"
+                ]
+            }
+        },
+        {
+            "type": "schedule",
+            "cron": "*/5 * * * *",
+            "description": "Run batch analysis every 5 minutes"
+        }
+    ],
+    "steps": [
+        {
+            "id": "step-1",
+            "name": "Validate Sensor Data",
+            "type": "validation",
+            "config": {
+                "schema": "sensor_data_v1",
+                "reject_invalid": true,
+                "log_validation_errors": true
+            },
+            "on_success": "step-2",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-2",
+            "name": "Enrich with Metadata",
+            "type": "transformation",
+            "config": {
+                "add_fields": {
+                    "location_name": "lookup:sensor_locations",
+                    "sensor_type_description": "lookup:sensor_types",
+                    "baseline_range": "lookup:quality_baselines"
+                }
+            },
+            "on_success": "step-3",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-3",
+            "name": "Run Anomaly Detection Model",
+            "type": "ai_analysis",
+            "config": {
+                "model": "water_quality_anomaly_detector_v2",
+                "endpoint": "http://ml-service:8080/predict",
+                "timeout_seconds": 30,
+                "batch_size": 100
+            },
+            "on_success": "step-4",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-4",
+            "name": "Evaluate Anomaly Severity",
+            "type": "decision",
+            "config": {
+                "conditions": [
+                    {
+                        "if": "anomaly_score > 0.9",
+                        "then": "step-5-critical"
+                    },
+                    {
+                        "if": "anomaly_score > 0.7",
+                        "then": "step-5-warning"
+                    },
+                    {
+                        "else": "step-6-store"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "step-5-critical",
+            "name": "Send Critical Alert",
+            "type": "notification",
+            "config": {
+                "channels": [
+                    "pagerduty",
+                    "email",
+                    "sms"
+                ],
+                "recipients": [
+                    "quality-analyst-oncall",
+                    "operations-manager"
+                ],
+                "template": "critical_water_quality_alert",
+                "priority": "critical"
+            },
+            "on_success": "step-6-store",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-5-warning",
+            "name": "Send Warning Alert",
+            "type": "notification",
+            "config": {
+                "channels": [
+                    "email",
+                    "slack"
+                ],
+                "recipients": [
+                    "quality-analyst-team"
+                ],
+                "template": "water_quality_warning",
+                "priority": "medium"
+            },
+            "on_success": "step-6-store",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-6-store",
+            "name": "Store Results",
+            "type": "storage",
+            "config": {
+                "database": "time_series_db",
+                "collection": "water_quality_analysis",
+                "retention_days": 730,
+                "index_fields": [
+                    "timestamp",
+                    "sensor_id",
+                    "anomaly_score"
+                ]
+            },
+            "on_success": "step-7",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-7",
+            "name": "Update Dashboard Metrics",
+            "type": "metric_update",
+            "config": {
+                "dashboard": "water_quality_monitoring",
+                "metrics": [
+                    "total_sensors_processed",
+                    "anomalies_detected",
+                    "average_processing_time"
+                ]
+            },
+            "on_success": "workflow-complete",
+            "on_failure": "step-error"
+        },
+        {
+            "id": "step-error",
+            "name": "Handle Error",
+            "type": "error_handler",
+            "config": {
+                "log_error": true,
+                "notify_channels": [
+                    "slack"
+                ],
+                "retry_policy": {
+                    "max_retries": 3,
+                    "backoff_seconds": 60
+                }
+            },
+            "on_success": "workflow-failed",
+            "on_failure": "workflow-failed"
+        }
+    ],
+    "error_handling": {
+        "default_action": "step-error",
+        "max_execution_time_minutes": 15,
+        "on_timeout": "step-error"
+    },
+    "monitoring": {
+        "track_execution_time": true,
+        "track_step_duration": true,
+        "alert_on_failure": true,
+        "sla_seconds": 300
+    },
+    "metadata": {
+        "owner": "data-engineering-team",
+        "created_at": "2026-01-20T10:00:00Z",
+        "updated_at": "2026-01-26T09:00:00Z",
+        "tags": [
+            "water-quality",
+            "anomaly-detection",
+            "real-time"
+        ],
+        "documentation_url": "https://docs.example.com/workflows/water-quality-anomaly"
+    }
+}

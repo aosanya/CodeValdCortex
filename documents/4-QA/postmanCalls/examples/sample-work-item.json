@@ -1,0 +1,55 @@
+{
+    "title": "Implement Real-time Anomaly Detection",
+    "description": "Develop and deploy ML model for detecting water quality anomalies in real-time sensor data.\n\n## Requirements\n- Process data from 500+ sensors\n- Detection latency < 5 minutes\n- False positive rate < 2%\n\n## Acceptance Criteria\n- [ ] Model achieves 98% accuracy on test data\n- [ ] Integration with sensor data pipeline complete\n- [ ] Alert system configured and tested\n- [ ] Performance benchmarks met\n\n## Technical Notes\n- Use time-series anomaly detection algorithms\n- Consider seasonal patterns in water usage\n- Integrate with existing Kafka streaming infrastructure",
+    "priority": "high",
+    "status": "open",
+    "labels": [
+        "ml",
+        "anomaly-detection",
+        "priority:high",
+        "goal:goal-1"
+    ],
+    "assignee": null,
+    "estimated_hours": 80,
+    "due_date": "2026-02-28",
+    "goal": "goal-1",
+    "workflow": "wf-1",
+    "metadata": {
+        "source": "manual",
+        "created_by": "project-manager",
+        "epic": "water-quality-monitoring",
+        "story_points": 13
+    },
+    "attachments": [],
+    "related_issues": [],
+    "subtasks": [
+        {
+            "title": "Research anomaly detection algorithms",
+            "status": "completed"
+        },
+        {
+            "title": "Collect and label training data",
+            "status": "in-progress"
+        },
+        {
+            "title": "Train and validate model",
+            "status": "not-started"
+        },
+        {
+            "title": "Deploy to production pipeline",
+            "status": "not-started"
+        }
+    ],
+    "comments": [
+        {
+            "author": "data-engineer",
+            "timestamp": "2026-01-25T14:30:00Z",
+            "text": "Started collecting historical sensor data for training. We have 6 months of data available."
+        },
+        {
+            "author": "quality-analyst",
+            "timestamp": "2026-01-25T16:00:00Z",
+            "text": "Please ensure the model can detect pH anomalies, as these are critical for compliance."
+        }
+    ]
+}

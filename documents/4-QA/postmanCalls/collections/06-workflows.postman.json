@@ -1,0 +1,413 @@
+{
+    "info": {
+        "_postman_id": "workflows-006",
+        "name": "CodeValdCortex - Workflows",
+        "description": "Workflow CRUD operations, validation, and duplication endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create Workflow",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Data Processing Workflow\",\n  \"description\": \"Process incoming data through validation and storage\",\n  \"steps\": [\n    {\n      \"id\": \"step-1\",\n      \"name\": \"Validate Input\",\n      \"type\": \"validation\",\n      \"config\": {}\n    },\n    {\n      \"id\": \"step-2\",\n      \"name\": \"Store Data\",\n      \"type\": \"storage\",\n      \"config\": {}\n    }\n  ],\n  \"triggers\": [\n    {\n      \"type\": \"webhook\",\n      \"config\": {}\n    }\n  ]\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/workflows",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "workflows"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Create a new workflow for an agency"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test(\"Workflow created successfully\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.environment.set('workflow_id', jsonData.id);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Get Workflows (JSON)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/workflows",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "workflows"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Get all workflows for an agency (JSON format)"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response is array\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Get Workflows (HTML)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/workflows/html",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "workflows",
+                        "html"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "Get workflows as HTML for UI rendering"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Workflow by ID",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/workflows/:id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "workflows",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{workflow_id}}"
+                        }
+                    ]
+                },
+                "description": "Get a specific workflow by its ID"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Workflow has expected properties\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.expect(jsonData).to.have.property('name');",
+                            "    pm.expect(jsonData).to.have.property('steps');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Update Workflow",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Updated Workflow Name\",\n  \"description\": \"Updated description\",\n  \"steps\": [\n    {\n      \"id\": \"step-1\",\n      \"name\": \"Updated Step\",\n      \"type\": \"validation\",\n      \"config\": {}\n    }\n  ]\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/workflows/:id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "workflows",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{workflow_id}}"
+                        }
+                    ]
+                },
+                "description": "Update an existing workflow"
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Workflow",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/workflows/:id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "workflows",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{workflow_id}}"
+                        }
+                    ]
+                },
+                "description": "Delete a workflow"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 204 or 200\", function () {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Duplicate Workflow",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"newName\": \"Copy of Data Processing Workflow\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/workflows/:id/duplicate",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "workflows",
+                        ":id",
+                        "duplicate"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{workflow_id}}"
+                        }
+                    ]
+                },
+                "description": "Create a duplicate of an existing workflow"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test(\"Duplicated workflow created\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('id');",
+                            "    pm.expect(jsonData.id).to.not.eql(pm.environment.get('workflow_id'));",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Validate Workflow",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Test Workflow\",\n  \"description\": \"Testing validation\",\n  \"steps\": [\n    {\n      \"id\": \"step-1\",\n      \"name\": \"Test Step\",\n      \"type\": \"validation\",\n      \"config\": {}\n    }\n  ]\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/workflows/validate",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "workflows",
+                        "validate"
+                    ]
+                },
+                "description": "Validate a workflow configuration before creating or updating"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Validation result present\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('valid');",
+                            "    if (!jsonData.valid) {",
+                            "        pm.expect(jsonData).to.have.property('errors');",
+                            "    }",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "agency_id",
+            "value": "UC-INFRA-001",
+            "type": "string"
+        },
+        {
+            "key": "workflow_id",
+            "value": "",
+            "type": "string",
+            "description": "Set after creating a workflow"
+        }
+    ]
+}

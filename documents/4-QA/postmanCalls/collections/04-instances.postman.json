@@ -1,0 +1,482 @@
+{
+    "info": {
+        "_postman_id": "instances-004",
+        "name": "CodeValdCortex - Instances",
+        "description": "Instance lifecycle management endpoints (MVP-PUB-007) - start, stop, restart, health checks",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Start Instance from Tag",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Production Instance\",\n  \"config\": {\n    \"environment\": \"production\",\n    \"replicas\": 1\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/tags/:name/instances",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "tags",
+                        ":name",
+                        "instances"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "name",
+                            "value": "{{tag_name}}",
+                            "description": "Tag name to create instance from (e.g., v1.0.0)"
+                        }
+                    ]
+                },
+                "description": "Start a new instance from a published tag"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test(\"Instance created successfully\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('instance_id');",
+                            "    pm.environment.set('instance_id', jsonData.instance_id);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "List Agency Instances",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        }
+                    ]
+                },
+                "description": "List all instances for an agency"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response is array\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.be.an('array');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "List Instances by Tag",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/tags/:name/instances",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "tags",
+                        ":name",
+                        "instances"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "name",
+                            "value": "{{tag_name}}"
+                        }
+                    ]
+                },
+                "description": "List all instances created from a specific tag"
+            },
+            "response": []
+        },
+        {
+            "name": "Get Instance Details",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Get detailed information about a specific instance"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Instance has status\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Get Instance Health",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/health",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "health"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Check health status of a running instance"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Health status present\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('healthy');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Get Instance Agents",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/agents",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "agents"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Get list of agents running in this instance"
+            },
+            "response": []
+        },
+        {
+            "name": "Stop Instance",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/stop",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "stop"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Stop a running instance gracefully"
+            },
+            "response": []
+        },
+        {
+            "name": "Restart Instance",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/restart",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "restart"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Restart an instance (stop and start)"
+            },
+            "response": []
+        },
+        {
+            "name": "Delete Instance",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Delete an instance permanently"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 204 or 200\", function () {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Accept Job (Instance)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"jobId\": \"job-123\",\n  \"jobType\": \"data-processing\",\n  \"payload\": {\n    \"data\": \"example\"\n  }\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/v1/agencies/:id/instances/:instance_id/accept-job",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "agencies",
+                        ":id",
+                        "instances",
+                        ":instance_id",
+                        "accept-job"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "{{agency_id}}"
+                        },
+                        {
+                            "key": "instance_id",
+                            "value": "{{instance_id}}"
+                        }
+                    ]
+                },
+                "description": "Submit a job for the instance to process"
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        },
+        {
+            "key": "agency_id",
+            "value": "UC-INFRA-001",
+            "type": "string"
+        },
+        {
+            "key": "tag_name",
+            "value": "v1.0.0",
+            "type": "string"
+        },
+        {
+            "key": "instance_id",
+            "value": "",
+            "type": "string",
+            "description": "Set after creating an instance"
+        }
+    ]
+}

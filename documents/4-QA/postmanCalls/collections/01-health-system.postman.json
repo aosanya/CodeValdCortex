@@ -1,0 +1,171 @@
+{
+    "info": {
+        "_postman_id": "health-system-001",
+        "name": "CodeValdCortex - Health & System",
+        "description": "Health checks, status endpoints, and CORS testing for CodeValdCortex API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/health",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                },
+                "description": "Basic health check endpoint returning application health status, timestamp, and version."
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response has status property\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "    pm.expect(jsonData.status).to.eql('healthy');",
+                            "});",
+                            "",
+                            "pm.test(\"Response has timestamp\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('timestamp');",
+                            "});",
+                            "",
+                            "pm.test(\"Response has version\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('version');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "API Status",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "status"
+                    ]
+                },
+                "description": "API version 1 status endpoint showing application name and running status."
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response has app_name\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('app_name');",
+                            "});",
+                            "",
+                            "pm.test(\"Status is running\", function () {",
+                            "    var jsonData = pm.response.json();",
+                            "    pm.expect(jsonData).to.have.property('status');",
+                            "    pm.expect(jsonData.status).to.eql('running');",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "CORS Preflight Check",
+            "request": {
+                "method": "OPTIONS",
+                "header": [
+                    {
+                        "key": "Origin",
+                        "value": "http://localhost:5173",
+                        "type": "text",
+                        "description": "Origin header for CORS testing"
+                    },
+                    {
+                        "key": "Access-Control-Request-Method",
+                        "value": "GET",
+                        "type": "text",
+                        "description": "Requested HTTP method"
+                    },
+                    {
+                        "key": "Access-Control-Request-Headers",
+                        "value": "Content-Type",
+                        "type": "text",
+                        "description": "Requested headers"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "status"
+                    ]
+                },
+                "description": "OPTIONS request to test CORS preflight handling (MVP-RM-002)"
+            },
+            "response": [],
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 204 or 200\", function () {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                            "});",
+                            "",
+                            "pm.test(\"CORS headers present\", function () {",
+                            "    pm.response.to.have.header(\"Access-Control-Allow-Origin\");",
+                            "    pm.response.to.have.header(\"Access-Control-Allow-Methods\");",
+                            "    pm.response.to.have.header(\"Access-Control-Allow-Headers\");",
+                            "});",
+                            "",
+                            "pm.test(\"Origin header matches localhost:5173\", function () {",
+                            "    var allowOrigin = pm.response.headers.get(\"Access-Control-Allow-Origin\");",
+                            "    pm.expect(allowOrigin).to.include(\"localhost:5173\");",
+                            "});"
+                        ],
+                        "type": "text/javascript"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8082",
+            "type": "string"
+        }
+    ]
+}
