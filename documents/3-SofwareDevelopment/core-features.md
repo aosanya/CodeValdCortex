@@ -1673,11 +1673,8 @@ func (am *AuthenticationManager) Authenticate(ctx context.Context, token string)
 
     am.audit.LogSuccessfulAuthentication(ctx, principal)
 
-    return principal, nil```
-
+    return principal, nil
 }
-
-    ticker := time.NewTicker(30 * time.Second)This comprehensive core features implementation will establish Mathematris as a leading educational technology platform that demonstrates measurable learning outcomes through intelligent, adaptive, and inclusive design.
 
 func (am *AuthenticationManager) Authorize(ctx context.Context, principal *Principal, resource string, action string) error {
 
