@@ -240,6 +240,59 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
+## P2: UI Migration & Cleanup (FUTURE)
+
+*Remove Templ/HTMX UI code after Flutter frontend (CodeValdFortex) reaches production. Transform Cortex into pure REST API backend.*
+
+**Prerequisites**: 
+- CodeValdFortex must reach production with feature parity
+- All UI features must be validated in Flutter app
+- API contracts must be stable and documented
+
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-CLEANUP-001 | Remove Agency Selection UI | Remove Templ templates/HTMX from MVP-022 (Agency Selection Homepage). Keep REST API endpoints: GET /api/v1/agencies (listing), GET /api/v1/agencies/:id/status | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-101 in production | - |
+| MVP-CLEANUP-002 | Remove Create Agency UI | Remove Templ templates/HTMX from MVP-024 (Create Agency Form). Keep POST /api/v1/agencies endpoint with JSON body | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-102 in production | - |
+| MVP-CLEANUP-003 | Remove Introduction UI | Remove Templ templates from MVP-025 (AI Agency Designer introduction section). Keep AI generation API endpoints, text processing logic | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-104 in production | - |
+| MVP-CLEANUP-004 | Remove Goals UI | Remove Templ templates/HTMX from MVP-029 (Goals Module). Keep CRUD API endpoints (GET/POST/PUT/DELETE /api/v1/agencies/:id/goals), AI generation endpoints | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-105 in production | - |
+| MVP-CLEANUP-005 | Remove Work Items UI | Remove Templ templates from MVP-030/043/054. Keep Work Items CRUD API, deliverables tree API, AI generation endpoints. Preserve business logic in service layer | 📋 Not Started | P2 | Medium | Go, Refactoring | Fortex MVP-FL-106 in production | - |
+| MVP-CLEANUP-006 | Remove Roles UI | Remove Templ templates/HTMX from MVP-044 (Roles UI Module). Keep Roles CRUD API, autonomy level validation, tags system, AI generation endpoints | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-107 in production | - |
+| MVP-CLEANUP-007 | Remove RACI Matrix UI | Remove Templ templates from MVP-045 (RACI Matrix UI Editor). Keep RACI assignment API endpoints (GET/POST /api/v1/agencies/:id/raci), grid data serialization | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-108 in production | - |
+| MVP-CLEANUP-008 | Remove Workflows UI | Remove Templ templates/Alpine.js from MVP-051/052 (Workflow Visual Designer). Keep Workflow CRUD API, visual designer state API (nodes/connections), validation logic | 📋 Not Started | P2 | Medium | Go, Refactoring | Fortex MVP-FL-109 in production | - |
+| MVP-CLEANUP-009 | Remove AI Policy UI | Remove Templ templates from MVP-048 (AI Policy Layer). Keep Policy CRUD API, validation endpoints, compliance framework logic | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-110 in production | - |
+| MVP-CLEANUP-010 | Remove Publishing UI | Remove Templ templates/HTMX from MVP-PUB-005 (Publishing UI). Keep Publishing API endpoints (POST /api/v1/agencies/:id/validate, /publish, /activate, /tags). Preserve state machine logic | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-112-115 in production | - |
+| MVP-CLEANUP-011 | Remove Instance Management UI | Remove Templ templates from MVP-PUB-007 (Instance Management). Keep Instance API endpoints (POST/GET/DELETE /api/v1/agencies/:id/instances, lifecycle controls). Preserve multi-database orchestration | 📋 Not Started | P2 | Medium | Go, Refactoring | Fortex MVP-FL-117-119 in production | - |
+| MVP-CLEANUP-012 | Remove Kanban/Workbench UI | Remove Templ templates/HTMX from MVP-WI-008 (Workbench Kanban). Keep Issue CRUD API, board state API, workflow integration. Preserve issue lifecycle logic | 📋 Not Started | P2 | Medium | Go, Refactoring | Fortex MVP-FL-120-121 in production | - |
+| MVP-CLEANUP-013 | Remove File Explorer UI | Remove Templ templates from MVP-WI-006 (File Explorer). Keep File/folder CRUD API endpoints (GET/POST/PUT/DELETE /api/v1/files), Git operations API | 📋 Not Started | P2 | Low | Go, Refactoring | Fortex MVP-FL-122-123 in production | - |
+| MVP-CLEANUP-014 | API Documentation & Cleanup | Generate OpenAPI/Swagger specifications for all remaining REST endpoints. Remove unused handler functions, cleanup routing, remove static file serving (CSS/JS), update documentation to reflect API-only architecture | 📋 Not Started | P2 | Medium | Go, OpenAPI, Documentation | All cleanup tasks complete | - |
+
+**Cleanup Scope**:
+- ❌ Remove: All Templ templates (`*.templ` files)
+- ❌ Remove: HTMX attributes and JavaScript
+- ❌ Remove: Alpine.js components
+- ❌ Remove: Static CSS/SCSS files for UI
+- ❌ Remove: Frontend JavaScript files
+- ❌ Remove: HTML rendering handlers
+- ✅ Keep: All REST API endpoints
+- ✅ Keep: Go service layer (business logic)
+- ✅ Keep: ArangoDB repositories
+- ✅ Keep: WebSocket/SSE for real-time updates
+- ✅ Keep: AI integration logic
+- ✅ Keep: State machines and validators
+
+**Post-Cleanup Architecture**:
+- Pure REST API backend (Gin framework)
+- JSON-only request/response (no HTML rendering)
+- OpenAPI documented endpoints
+- WebSocket/SSE for real-time features
+- Improved performance (no template compilation)
+- Smaller binary size
+- Simplified deployment (no static assets)
+
+**Total P2 Cleanup**: 14 tasks
+
+---
+
 ## Bugs and Issues
 
 ### Resolved Bugs
@@ -291,10 +344,11 @@ The following tasks are no longer applicable due to architectural changes:
 ### P2 (Important - Quality & Enhancement)
 - **Security**: 4 tasks (MVP-026 through MVP-028, MVP-041)
 - **Compliance Agents**: 3 tasks (MVP-051, MVP-052-CMP, MVP-053)
+- **UI Migration & Cleanup**: 14 tasks (MVP-CLEANUP-001 through MVP-CLEANUP-014)
 
-**Total P2**: 7 tasks
+**Total P2**: 21 tasks
 
-**Grand Total Active Tasks**: 47 tasks
+**Grand Total Active Tasks**: 61 tasks
 
 ---
 
