@@ -29,6 +29,9 @@ type Config struct {
 	// AI configuration
 	AI AIConfig `mapstructure:"ai"`
 
+	// Authentication configuration
+	Auth AuthConfig `mapstructure:"auth"`
+
 	// Work tracking integration configuration
 	WorkTracking WorkTrackingConfig `mapstructure:"work_tracking"`
 }
@@ -79,6 +82,11 @@ type AIConfig struct {
 	Temperature float32 `mapstructure:"temperature"` // Default temperature
 	MaxTokens   int     `mapstructure:"max_tokens"`  // Default max tokens
 	Timeout     int     `mapstructure:"timeout"`     // Request timeout in seconds
+}
+
+// AuthConfig holds authentication configuration
+type AuthConfig struct {
+	JWTSecret string `mapstructure:"jwt_secret"` // Secret key for JWT signing
 }
 
 // WorkTrackingConfig holds work tracking integration configuration (Gitea, GitHub, etc.)

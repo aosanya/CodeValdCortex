@@ -5,6 +5,7 @@ import (
 	"time"
 
 	v1routes "github.com/aosanya/CodeValdCortex/internal/app/routes/v1"
+	"github.com/aosanya/CodeValdCortex/internal/auth"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/web/handlers/ai_refine"
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,13 @@ func (a *App) registerAPIRoutes(router *gin.Engine, aiRefineHandler interface{})
 	// Future: Add v2 package for breaking changes
 	apiV1 := router.Group("/api/v1")
 	{
+		// Authentication endpoints (MVP-AUTH-003) - Public routes
+		if a.authService != nil {
+			authHandler := auth.NewHandler(a.authService, a.logger)
+			authHandler.RegisterRoutes(apiV1)
+			a.logger.Info("Authentication endpoints registered")
+		}
+
 		// Agency endpoints - Core CRUD always available
 		v1routes.RegisterAgencyRoutes(apiV1, a.agencyService, a.logger)
 

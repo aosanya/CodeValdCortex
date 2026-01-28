@@ -178,15 +178,38 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P2: Security & Authentication (IMPORTANT)
+## P0: Authentication & User Management (CRITICAL - FRONTEND PREREQUISITE)
 
-*Production security requirements*
+*Core authentication endpoints required by Flutter frontend (CodeValdFortex)*
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-026 | Basic User Authentication | Implement user registration, login, and session management | 📋 Not Started | P2 | Medium | Backend Dev, Security | MVP-014 | - |
-| MVP-027 | Security Implementation | Add input validation, HTTPS, and basic security headers | 📋 Not Started | P2 | Medium | Security, Backend Dev | MVP-026 | - |
-| MVP-028 | Access Control System | Implement role-based access control for agent operations | 📋 Not Started | P2 | Low | Backend Dev, Security | MVP-027 | - |
+| MVP-AUTH-001 | User Model & Repository | Create User model with fields (id, name, email, password_hash, created_at, updated_at), implement ArangoDB repository with CRUD operations, password hashing (bcrypt), email validation | 📋 Not Started | P0 | Low | Go, ArangoDB, Security | None | - |
+| MVP-AUTH-002 | JWT Token Service | Implement JWT token generation/validation service with access tokens (15min expiry), refresh tokens (7 day expiry), token storage in secure storage, token revocation support | 📋 Not Started | P0 | Medium | Go, JWT, Security | MVP-AUTH-001 | - |
+| MVP-AUTH-003 | Authentication Endpoints | Implement REST API endpoints: POST /api/v1/auth/register (user registration with email/password), POST /api/v1/auth/login (email/password login returning JWT tokens), POST /api/v1/auth/refresh (refresh access token), POST /api/v1/auth/logout (token revocation), GET /api/v1/auth/me (get current user profile) | 📋 Not Started | P0 | Medium | Go, Gin, REST API | MVP-AUTH-002 | - |
+| MVP-AUTH-004 | Authentication Middleware | Replace placeholder AuthMiddleware with real JWT validation, extract user context from token, attach user_id to Gin context, handle token expiry/invalid tokens with proper 401 responses | 📋 Not Started | P0 | Medium | Go, Gin, Middleware | MVP-AUTH-003 | - |
+| MVP-AUTH-005 | Protected Routes Integration | Apply authentication middleware to protected routes, update handlers to use real user context (replace "system" with actual user_id from context), add permission checks for agency/instance operations | 📋 Not Started | P0 | Low | Go, Backend Dev | MVP-AUTH-004 | - |
+
+**Frontend Integration**: CodeValdFortex Flutter app (MVP-FL-009, MVP-FL-010, MVP-FL-011) depends on these endpoints
+
+**API Endpoints Summary**:
+- `POST /api/v1/auth/register` - Create new user account
+- `POST /api/v1/auth/login` - Login with email/password, returns JWT tokens
+- `POST /api/v1/auth/refresh` - Refresh access token using refresh token
+- `POST /api/v1/auth/logout` - Invalidate tokens
+- `GET /api/v1/auth/me` - Get current authenticated user info
+
+---
+
+## P2: Security & Authentication (IMPORTANT)
+
+*Advanced security features and hardening*
+
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-026 | Password Reset & Email Verification | Implement forgot password flow, email verification on registration, password reset tokens, email service integration | 📋 Not Started | P2 | Medium | Backend Dev, Email, Security | MVP-AUTH-005 | - |
+| MVP-027 | Security Implementation | Add input validation, HTTPS enforcement, security headers (CORS, CSP, HSTS), rate limiting on auth endpoints, brute force protection | 📋 Not Started | P2 | Medium | Security, Backend Dev | MVP-026 | - |
+| MVP-028 | Access Control System | Implement role-based access control (RBAC) for agent operations, permission matrix, admin/user/viewer roles, resource-level permissions | 📋 Not Started | P2 | Low | Backend Dev, Security | MVP-027 | - |
 | MVP-041 | Multi-tenancy Hardening | Add advanced isolation (dedicated nodes, encryption), data residency controls, and compliance reporting | 📋 Not Started | P2 | Medium | Go, Security, Compliance | MVP-040 | [MVP-041.md](mvp-details/MVP-041.md) |
 
 ---
@@ -325,12 +348,13 @@ The following tasks are no longer applicable due to architectural changes:
 ## Task Summary by Priority
 
 ### P0 (Blocking - Must Complete First)
+- **Authentication & User Management**: 5 tasks (MVP-AUTH-001 through MVP-AUTH-005)
 - **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
 - **Work Items & Document Management**: 5 tasks (MVP-WI-007 through MVP-WI-010, ~~MVP-030~~ ✅)
 - **Work Item Definitions**: 2 tasks (MVP-031, MVP-032)
 - **A2A Protocol**: 6 foundational tasks (MVP-A2A-000 through MVP-A2A-004, MVP-A2A-006)
 
-**Total P0**: 18 tasks
+**Total P0**: 23 tasks
 
 ### P1 (Critical - Core Features)
 - **Git AI Features**: 1 task (MVP-WI-011 - AI-Assisted Conflict Resolution)
@@ -342,13 +366,13 @@ The following tasks are no longer applicable due to architectural changes:
 **Total P1**: 21 tasks
 
 ### P2 (Important - Quality & Enhancement)
-- **Security**: 4 tasks (MVP-026 through MVP-028, MVP-041)
+- **Advanced Security**: 4 tasks (MVP-026 through MVP-028, MVP-041)
 - **Compliance Agents**: 3 tasks (MVP-051, MVP-052-CMP, MVP-053)
 - **UI Migration & Cleanup**: 14 tasks (MVP-CLEANUP-001 through MVP-CLEANUP-014)
 
 **Total P2**: 21 tasks
 
-**Grand Total Active Tasks**: 61 tasks
+**Grand Total Active Tasks**: 66 tasks
 
 ---
 

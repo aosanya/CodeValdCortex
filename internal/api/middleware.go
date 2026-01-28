@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -132,11 +133,54 @@ func RateLimitMiddleware() gin.HandlerFunc {
 	}
 }
 
-// AuthMiddleware handles authentication (placeholder for future implementation)
-func AuthMiddleware() gin.HandlerFunc {
+// AuthMiddleware handles JWT authentication
+func AuthMiddleware(authService interface {
+	ValidateAccessToken(string) (*struct {
+		UserID string
+		Email  string
+		Name   string
+		Exp    int64
+		Iat    int64
+	}, error)
+}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO: Implement authentication
-		// For now, just pass through
+		// Get Authorization header
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(401, gin.H{
+				"error": "Authorization header required",
+			})
+			c.Abort()
+			return
+		}
+
+		// Check Bearer token format
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			c.JSON(401, gin.H{
+				"error": "Invalid authorization header format",
+			})
+			c.Abort()
+			return
+		}
+
+		tokenString := parts[1]
+
+		// Validate token
+		claims, err := authService.ValidateAccessToken(tokenString)
+		if err != nil {
+			c.JSON(401, gin.H{
+				"error": "Invalid or expired token",
+			})
+			c.Abort()
+			return
+		}
+
+		// Set user context
+		c.Set("user_id", claims.UserID)
+		c.Set("user_email", claims.Email)
+		c.Set("user_name", claims.Name)
+
 		c.Next()
 	}
 }
