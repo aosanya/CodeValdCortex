@@ -6,12 +6,12 @@ import (
 
 // User represents a user account in the system
 type User struct {
-	Key          string    `json:"_key,omitempty" arangodb:"_key,omitempty"`
-	ID           string    `json:"_id,omitempty" arangodb:"_id,omitempty"`
-	Rev          string    `json:"_rev,omitempty" arangodb:"_rev,omitempty"`
+	Key          string    `json:"_key,omitempty"`
+	ID           string    `json:"_id,omitempty"`
+	Rev          string    `json:"_rev,omitempty"`
 	Email        string    `json:"email" binding:"required,email"`
 	Name         string    `json:"name" binding:"required"`
-	PasswordHash string    `json:"-"` // Never expose password hash in JSON
+	PasswordHash string    `json:"password_hash,omitempty"` // Store in DB, but omitempty so responses can omit
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	IsActive     bool      `json:"is_active"`
@@ -41,9 +41,9 @@ func (u *User) ToResponse() UserResponse {
 
 // RefreshToken represents a refresh token for JWT token rotation
 type RefreshToken struct {
-	Key       string     `json:"_key,omitempty" arangodb:"_key,omitempty"`
-	ID        string     `json:"_id,omitempty" arangodb:"_id,omitempty"`
-	Rev       string     `json:"_rev,omitempty" arangodb:"_rev,omitempty"`
+	Key       string     `json:"_key,omitempty"`
+	ID        string     `json:"_id,omitempty"`
+	Rev       string     `json:"_rev,omitempty"`
 	UserID    string     `json:"user_id" binding:"required"`
 	Token     string     `json:"token" binding:"required"` // Hashed refresh token
 	ExpiresAt time.Time  `json:"expires_at"`

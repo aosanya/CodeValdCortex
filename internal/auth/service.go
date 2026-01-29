@@ -63,18 +63,27 @@ func (s *Service) Login(ctx context.Context, req *LoginRequest) (*AuthResponse, 
 	// Get user by email
 	user, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
+		fmt.Printf("DEBUG: GetUserByEmail failed: %v\n", err)
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
+	fmt.Printf("DEBUG: User found - Email: %s, PasswordHash length: %d, IsActive: %v\n",
+		user.Email, len(user.PasswordHash), user.IsActive)
+
 	// Check if user is active
 	if !user.IsActive {
+		fmt.Printf("DEBUG: User is not active\n")
 		return nil, fmt.Errorf("account is disabled")
 	}
 
 	// Verify password
+	fmt.Printf("DEBUG: Comparing password, input length: %d\n", len(req.Password))
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		fmt.Printf("DEBUG: Password comparison failed: %v\n", err)
 		return nil, fmt.Errorf("invalid credentials")
 	}
+
+	fmt.Printf("DEBUG: Login successful!\n")
 
 	// Generate tokens
 	accessToken, err := s.generateAccessToken(user)

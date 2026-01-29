@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/arangodb/go-driver"
@@ -137,8 +138,18 @@ func (r *Repository) GetUserByID(ctx context.Context, id string) (*User, error) 
 		return nil, fmt.Errorf("failed to get users collection: %w", err)
 	}
 
+	// Extract key from ID (e.g., "users/123" -> "123")
+	// If id is already just the key, use it as-is
+	key := id
+	if strings.Contains(id, "/") {
+		parts := strings.Split(id, "/")
+		if len(parts) == 2 {
+			key = parts[1]
+		}
+	}
+
 	var user User
-	if _, err := collection.ReadDocument(ctx, id, &user); err != nil {
+	if _, err := collection.ReadDocument(ctx, key, &user); err != nil {
 		if driver.IsNotFound(err) {
 			return nil, fmt.Errorf("user not found")
 		}

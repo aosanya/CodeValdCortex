@@ -10,15 +10,17 @@ import (
 
 // Handler handles authentication HTTP requests
 type Handler struct {
-	service *Service
-	logger  *logrus.Logger
+	service    *Service
+	middleware *Middleware
+	logger     *logrus.Logger
 }
 
 // NewHandler creates a new auth handler
 func NewHandler(service *Service, logger *logrus.Logger) *Handler {
 	return &Handler{
-		service: service,
-		logger:  logger,
+		service:    service,
+		middleware: NewMiddleware(service, logger),
+		logger:     logger,
 	}
 }
 
@@ -179,10 +181,13 @@ func (h *Handler) Me(c *gin.Context) {
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 	auth := rg.Group("/auth")
 	{
+		// Public routes
 		auth.POST("/register", h.Register)
 		auth.POST("/login", h.Login)
 		auth.POST("/refresh", h.Refresh)
 		auth.POST("/logout", h.Logout)
-		auth.GET("/me", h.Me) // This should use AuthMiddleware when registered
+
+		// Protected routes (require authentication)
+		auth.GET("/me", h.middleware.RequireAuth(), h.Me)
 	}
 }
