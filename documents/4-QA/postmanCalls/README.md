@@ -8,6 +8,7 @@ All collections are organized in the `collections/` directory:
 
 | Collection | Description | Key Features |
 |-----------|-------------|--------------|
+| [00-authentication.postman.json](collections/00-authentication.postman.json) | Authentication & User Management | JWT dual-token auth, user registration/login, token refresh, logout (MVP-AUTH-001 to MVP-AUTH-004) |
 | [01-health-system.postman.json](collections/01-health-system.postman.json) | Health checks and system status | Basic health endpoints, CORS testing |
 | [02-agencies.postman.json](collections/02-agencies.postman.json) | Agency CRUD and specifications | Full specification management, roles, RACI matrix |
 | [03-work-items.postman.json](collections/03-work-items.postman.json) | Work item/issue management | Pagination (MVP-RM-003), filtering, assignment operations |
