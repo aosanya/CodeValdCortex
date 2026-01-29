@@ -402,26 +402,26 @@ func (a *App) setupServer() error {
 	// Middleware
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	
+
 	// CORS middleware for frontend integration
 	router.Use(func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
 		if origin == "" {
 			origin = "*"
 		}
-		
+
 		c.Header("Access-Control-Allow-Origin", origin)
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Client-Platform, X-Client-Version")
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Header("Access-Control-Max-Age", "86400")
-		
+
 		// Handle preflight requests
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
 		}
-		
+
 		c.Next()
 	})
 
