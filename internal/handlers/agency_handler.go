@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/builder"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -96,20 +98,34 @@ func (h *AgencyHandler) verifyAgencyOwnership(c *gin.Context, agencyID string) b
 func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 	var req models.CreateAgencyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
+		log.Printf("[MVP-FL-102] Invalid request body: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid request body",
+			"message": "Please check your input and try again",
+			"details": err.Error(),
+		})
 		return
 	}
 
-	// Sanitize ID - ensure it has the "agency_" prefix and remove hyphens from UUID part
-	if !strings.HasPrefix(req.ID, "agency_") {
-		// If no prefix, add it
-		req.ID = "agency_" + strings.ReplaceAll(req.ID, "-", "")
+	log.Printf("[MVP-FL-102] Creating agency: Name=%s, Category=%s", req.Name, req.Category)
+
+	// Generate ID if not provided (backend-generated UUID)
+	if req.ID == "" {
+		req.ID = h.generateAgencyID()
+		log.Printf("[MVP-FL-102] Generated agency ID: %s", req.ID)
 	} else {
-		// If prefix exists, just remove hyphens from the UUID part
-		parts := strings.SplitN(req.ID, "_", 2)
-		if len(parts) == 2 {
-			req.ID = parts[0] + "_" + strings.ReplaceAll(parts[1], "-", "")
+		// Sanitize ID - ensure it has the "agency_" prefix and remove hyphens from UUID part
+		if !strings.HasPrefix(req.ID, "agency_") {
+			// If no prefix, add it
+			req.ID = "agency_" + strings.ReplaceAll(req.ID, "-", "")
+		} else {
+			// If prefix exists, just remove hyphens from the UUID part
+			parts := strings.SplitN(req.ID, "_", 2)
+			if len(parts) == 2 {
+				req.ID = parts[0] + "_" + strings.ReplaceAll(parts[1], "-", "")
+			}
 		}
+		log.Printf("[MVP-FL-102] Sanitized agency ID: %s", req.ID)
 	}
 
 	// Set default icon based on category if not provided
@@ -138,9 +154,15 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 	// Get user ID from authentication context (MVP-AUTH-005)
 	userID := c.GetString("user_id")
 	if userID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		log.Printf("[MVP-FL-102] User not authenticated")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error":   "Authentication required",
+			"message": "Please sign in to create an agency",
+		})
 		return
 	}
+
+	log.Printf("[MVP-FL-102] User authenticated: %s", userID)
 
 	newAgency := &models.Agency{
 		ID:          req.ID,
@@ -156,11 +178,19 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		CreatedBy: userID,
 	}
 
+	log.Printf("[MVP-FL-102] Calling service.CreateAgency with agency: %+v", newAgency)
+
 	if err := h.service.CreateAgency(c.Request.Context(), newAgency); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		log.Printf("[MVP-FL-102] Failed to create agency: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to create agency",
+			"message": "An error occurred while creating the agency. Please try again.",
+			"details": err.Error(),
+		})
 		return
 	}
 
+	log.Printf("[MVP-FL-102] Agency created successfully: %s", newAgency.ID)
 	c.JSON(http.StatusCreated, newAgency)
 }
 
@@ -624,4 +654,10 @@ func (h *AgencyHandler) SaveRACIMatrix(c *gin.Context) {
 		"message":     "RACI matrix saved successfully",
 		"raci_matrix": spec.RACIMatrix,
 	})
+}
+
+// generateAgencyID generates a new agency ID with proper UUID format
+// Returns "agency_" followed by a UUID v4 without hyphens (32 hex characters)
+func (h *AgencyHandler) generateAgencyID() string {
+	return "agency_" + strings.ReplaceAll(uuid.New().String(), "-", "")
 }

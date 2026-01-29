@@ -120,7 +120,7 @@ type AgencyStatistics struct {
 
 // CreateAgencyRequest is the request body for creating a new agency
 type CreateAgencyRequest struct {
-	ID          string         `json:"id" binding:"required"`
+	ID          string         `json:"id"` // Optional - will be generated if not provided
 	Name        string         `json:"name" binding:"required"`
 	DisplayName string         `json:"display_name" binding:"required"`
 	Description string         `json:"description"`

@@ -53,7 +53,7 @@ build-all: ## Build for all platforms
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o bin/$(BINARY_NAME)-windows-amd64.exe ./cmd
 
 .PHONY: run
-run: css ## Build and run the application 
+run: kill css ## Build and run the application 
 	@echo "Generating templates..."
 	templ generate
 	@echo "Building $(BINARY_NAME)..."
@@ -66,7 +66,7 @@ run: css ## Build and run the application
 .PHONY: kill
 kill: ## Stop any running instances
 	@echo "Stopping any running instances..."
-	@pkill -f "./bin/codevaldcortex" || true
+	-@pkill -9 -f "bin/codevaldcortex" 2>/dev/null || true
 	@sleep 1
 
 .PHONY: run-dev
