@@ -70,12 +70,35 @@ Update these variables in your Postman environment:
 
 ### Agencies (02)
 - **Purpose**: Manage agency lifecycle and specifications
+- **Key Features**:
+  - **Backend-Generated IDs**: Agency IDs are automatically generated using UUID v4 format (`agency_[32 hex chars]`)
+  - **Valid Categories**: infrastructure, agriculture, logistics, transportation, healthcare, education, finance, retail, energy, other
 - **Endpoints**: 25+ endpoints covering:
-  - Agency CRUD operations
+  - Agency CRUD operations (no ID required in POST - backend generates)
   - Unified specification management (introduction, goals, work items, workflows, roles, RACI)
   - Individual section updates
   - Role management
   - Statistics
+
+**Example Create Request**:
+```json
+{
+  "name": "water-distribution-network",
+  "display_name": "Water Distribution Network",
+  "description": "IoT-enabled water distribution monitoring and optimization",
+  "category": "infrastructure"
+}
+```
+
+**Response includes generated ID**:
+```json
+{
+  "id": "agency_550e8400e29b41d4a716446655440000",
+  "name": "water-distribution-network",
+  ...
+}
+```
+
 
 ### Work Items (03)
 - **Purpose**: Issue/work item management with pagination

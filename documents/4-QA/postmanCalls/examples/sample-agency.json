@@ -1,7 +1,9 @@
 {
-    "id": "UC-EXAMPLE-001",
+    "id": "agency_550e8400e29b41d4a716446655440000",
     "name": "Example Agency",
-    "description": "A sample agency demonstrating complete configuration",
+    "display_name": "Example Water Distribution Agency",
+    "description": "A sample agency demonstrating complete configuration for water distribution network management",
+    "category": "infrastructure",
     "database": "uc_example_001",
     "specification": {
         "introduction": {
