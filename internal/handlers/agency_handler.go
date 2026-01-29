@@ -57,6 +57,41 @@ func (h *AgencyHandler) RegisterRoutes(router *gin.RouterGroup) {
 	}
 }
 
+// verifyAgencyOwnership checks if the authenticated user owns the specified agency
+// Returns true if user is owner, false otherwise. Sends appropriate error response.
+func (h *AgencyHandler) verifyAgencyOwnership(c *gin.Context, agencyID string) bool {
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return false
+	}
+
+	// Get the agency to check ownership
+	ag, err := h.service.GetAgency(c.Request.Context(), agencyID)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id": agencyID,
+			"user_id":   userID,
+			"error":     err.Error(),
+		}).Error("Failed to get agency for ownership verification")
+		c.JSON(http.StatusNotFound, gin.H{"error": "Agency not found"})
+		return false
+	}
+
+	// Check if user is the creator/owner
+	if ag.CreatedBy != userID {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id": agencyID,
+			"user_id":   userID,
+			"owner_id":  ag.CreatedBy,
+		}).Warn("User attempted to access agency they don't own")
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to access this agency"})
+		return false
+	}
+
+	return true
+}
+
 // CreateAgency handles POST /api/v1/agencies
 func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 	var req models.CreateAgencyRequest
@@ -100,6 +135,13 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		}
 	}
 
+	// Get user ID from authentication context (MVP-AUTH-005)
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	newAgency := &models.Agency{
 		ID:          req.ID,
 		Name:        req.Name,
@@ -111,7 +153,7 @@ func (h *AgencyHandler) CreateAgency(c *gin.Context) {
 		// Database field will be set by service with proper prefix
 		Metadata:  metadata,
 		Settings:  settings,
-		CreatedBy: "system", // TODO: Get from auth context
+		CreatedBy: userID,
 	}
 
 	if err := h.service.CreateAgency(c.Request.Context(), newAgency); err != nil {
@@ -153,6 +195,11 @@ func getCategoryIcon(category string) string {
 func (h *AgencyHandler) GetAgency(c *gin.Context) {
 	id := c.Param("id")
 
+	// Verify user owns this agency (MVP-AUTH-005)
+	if !h.verifyAgencyOwnership(c, id) {
+		return // verifyAgencyOwnership sends appropriate error response
+	}
+
 	agency, err := h.service.GetAgency(c.Request.Context(), id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Agency not found"})
@@ -164,6 +211,13 @@ func (h *AgencyHandler) GetAgency(c *gin.Context) {
 
 // ListAgencies handles GET /api/v1/agencies
 func (h *AgencyHandler) ListAgencies(c *gin.Context) {
+	// Get user ID from authentication context (MVP-AUTH-005)
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	// Parse query parameters
 	filters := models.AgencyFilters{
 		Category: c.Query("category"),
@@ -191,12 +245,25 @@ func (h *AgencyHandler) ListAgencies(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, agencies)
+	// Filter agencies to only include those created by the authenticated user (MVP-AUTH-005)
+	userAgencies := make([]*models.Agency, 0)
+	for _, agency := range agencies {
+		if agency.CreatedBy == userID {
+			userAgencies = append(userAgencies, agency)
+		}
+	}
+
+	c.JSON(http.StatusOK, userAgencies)
 }
 
 // UpdateAgency handles PUT /api/v1/agencies/:id
 func (h *AgencyHandler) UpdateAgency(c *gin.Context) {
 	id := c.Param("id")
+
+	// Verify user owns this agency (MVP-AUTH-005)
+	if !h.verifyAgencyOwnership(c, id) {
+		return // verifyAgencyOwnership sends appropriate error response
+	}
 
 	var req models.UpdateAgencyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -224,6 +291,11 @@ func (h *AgencyHandler) UpdateAgency(c *gin.Context) {
 // DeleteAgency handles DELETE /api/v1/agencies/:id
 func (h *AgencyHandler) DeleteAgency(c *gin.Context) {
 	id := c.Param("id")
+
+	// Verify user owns this agency (MVP-AUTH-005)
+	if !h.verifyAgencyOwnership(c, id) {
+		return // verifyAgencyOwnership sends appropriate error response
+	}
 
 	if err := h.service.DeleteAgency(c.Request.Context(), id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -526,15 +598,19 @@ func (h *AgencyHandler) SaveRACIMatrix(c *gin.Context) {
 		}
 	}
 
+	// Get user ID from authentication context (MVP-AUTH-005)
+	updatedBy := c.GetString("user_id")
+	if updatedBy == "" {
+		updatedBy = req.UpdatedBy // Fallback to request body if context unavailable
+	}
+	if updatedBy == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
 	raciMatrix := &models.RACIMatrix{
 		AgencyID:    id,
 		Assignments: allAssignments,
-	}
-
-	// Use default user if not provided
-	updatedBy := req.UpdatedBy
-	if updatedBy == "" {
-		updatedBy = "system"
 	}
 
 	spec, err := h.service.UpdateSpecificationRACIMatrix(c.Request.Context(), id, raciMatrix, updatedBy)
