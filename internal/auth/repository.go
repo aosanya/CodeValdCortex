@@ -107,11 +107,6 @@ func (r *Repository) CreateUser(ctx context.Context, user *User) error {
 
 // GetUserByEmail retrieves a user by email
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	collection, err := r.db.Collection(ctx, UsersCollection)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get users collection: %w", err)
-	}
-
 	query := "FOR u IN @@collection FILTER u.email == @email LIMIT 1 RETURN u"
 	bindVars := map[string]interface{}{
 		"@collection": UsersCollection,

@@ -3,18 +3,21 @@ module github.com/aosanya/CodeValdCortex
 go 1.24.0
 
 require (
+	code.gitea.io/sdk/gitea v0.22.1
 	github.com/a-h/templ v0.3.960
 	github.com/arangodb/go-driver v1.6.7
 	github.com/gin-gonic/gin v1.9.1
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.11.1
+	golang.org/x/crypto v0.41.0
+	golang.org/x/time v0.14.0
 )
 
 require (
-	code.gitea.io/sdk/gitea v0.22.1 // indirect
 	github.com/42wim/httpsig v1.2.3 // indirect
 	github.com/arangodb/go-velocypack v0.0.0-20200318135517-5af53c29c67e // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
@@ -52,11 +55,9 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
-	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

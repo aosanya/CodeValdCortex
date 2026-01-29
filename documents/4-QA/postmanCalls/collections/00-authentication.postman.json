@@ -1,566 +1,636 @@
 {
-  "info": {
-    "_postman_id": "auth-endpoints-mvp-auth",
-    "name": "CodeValdCortex - Authentication & User Management",
-    "description": "Authentication endpoints for user registration, login, token management, and user profile access.\n\n**Implemented Tasks:**\n- MVP-AUTH-001: User Model & Repository\n- MVP-AUTH-002: JWT Token Service (dual-token: access 15min, refresh 7 days)\n- MVP-AUTH-003: Authentication Endpoints\n- MVP-AUTH-004: Authentication Middleware\n\n**Security:**\n- JWT tokens with HMAC-SHA256 signing\n- Bcrypt password hashing (cost factor 12)\n- Refresh tokens stored as SHA-256 hashes\n- Access tokens short-lived (15 minutes)\n- Refresh tokens long-lived (7 days)\n\n**Base URL:** http://localhost:8080",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "1. User Registration",
-      "item": [
+    "info": {
+        "_postman_id": "auth-endpoints-mvp-auth",
+        "name": "CodeValdCortex - Authentication & User Management",
+        "description": "Authentication endpoints for user registration, login, token management, and user profile access.\n\n**Implemented Tasks:**\n- MVP-AUTH-001: User Model & Repository\n- MVP-AUTH-002: JWT Token Service (dual-token: access 15min, refresh 7 days)\n- MVP-AUTH-003: Authentication Endpoints\n- MVP-AUTH-004: Authentication Middleware\n\n**Security:**\n- JWT tokens with HMAC-SHA256 signing\n- Bcrypt password hashing (cost factor 12)\n- Refresh tokens stored as SHA-256 hashes\n- Access tokens short-lived (15 minutes)\n- Refresh tokens long-lived (7 days)\n\n**Base URL:** http://localhost:8080",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
         {
-          "name": "Register New User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"name\": \"John Doe\",\n  \"password\": \"SecurePass123!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            "name": "1. User Registration",
+            "item": [
+                {
+                    "name": "Register New User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"name\": \"John Doe\",\n  \"password\": \"SecurePass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Create a new user account.\n\n**Validation:**\n- Email must be valid format\n- Name required (2-100 characters)\n- Password minimum 8 characters\n\n**Response:** Returns user info (no tokens - must login separately)"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 201 Created\", function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has user object\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('user');",
+                                    "    pm.expect(jsonData.user).to.have.property('id');",
+                                    "    pm.expect(jsonData.user).to.have.property('email');",
+                                    "    pm.expect(jsonData.user).to.have.property('name');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Password hash not exposed\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.user).to.not.have.property('password');",
+                                    "    pm.expect(jsonData.user).to.not.have.property('password_hash');",
+                                    "});",
+                                    "",
+                                    "// Save user email for login test",
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"test_user_email\", jsonData.user.email);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Register Duplicate Email (Error)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"name\": \"Another User\",\n  \"password\": \"DifferentPass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Attempt to register with existing email (should fail with 409 Conflict)."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 409 Conflict\", function () {",
+                                    "    pm.response.to.have.status(409);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error message about duplicate email\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('already exists');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
                 }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "register"]
-            },
-            "description": "Create a new user account.\n\n**Validation:**\n- Email must be valid format\n- Name required (2-100 characters)\n- Password minimum 8 characters\n\n**Response:** Returns user info (no tokens - must login separately)"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 201 Created\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "pm.test(\"Response has user object\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('user');",
-                  "    pm.expect(jsonData.user).to.have.property('id');",
-                  "    pm.expect(jsonData.user).to.have.property('email');",
-                  "    pm.expect(jsonData.user).to.have.property('name');",
-                  "});",
-                  "",
-                  "pm.test(\"Password hash not exposed\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData.user).to.not.have.property('password');",
-                  "    pm.expect(jsonData.user).to.not.have.property('password_hash');",
-                  "});",
-                  "",
-                  "// Save user email for login test",
-                  "if (pm.response.code === 201) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.environment.set(\"test_user_email\", jsonData.user.email);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            ],
+            "description": "User registration endpoints (POST /api/v1/auth/register)"
         },
         {
-          "name": "Register Duplicate Email (Error)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"name\": \"Another User\",\n  \"password\": \"DifferentPass123!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            "name": "2. Login & Token Generation",
+            "item": [
+                {
+                    "name": "Login with Email/Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Authenticate user and receive JWT tokens.\n\n**Returns:**\n- access_token: Short-lived (15 min) JWT for API calls\n- refresh_token: Long-lived (7 days) for refreshing access\n- token_type: \"Bearer\"\n- expires_in: Seconds until access token expires (900)\n- user: User profile information"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has auth tokens\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('access_token');",
+                                    "    pm.expect(jsonData).to.have.property('refresh_token');",
+                                    "    pm.expect(jsonData).to.have.property('token_type');",
+                                    "    pm.expect(jsonData).to.have.property('expires_in');",
+                                    "    pm.expect(jsonData.token_type).to.eql('Bearer');",
+                                    "    pm.expect(jsonData.expires_in).to.eql(900);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has user info\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('user');",
+                                    "    pm.expect(jsonData.user).to.have.property('id');",
+                                    "    pm.expect(jsonData.user).to.have.property('email');",
+                                    "});",
+                                    "",
+                                    "// Save tokens for subsequent requests",
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                                    "    pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
+                                    "    pm.environment.set(\"user_id\", jsonData.user.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Login with Invalid Credentials (Error)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"WrongPassword123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Attempt login with incorrect password (should return 401 Unauthorized)."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Generic error message\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.eql('Invalid credentials');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
                 }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/register",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "register"]
-            },
-            "description": "Attempt to register with existing email (should fail with 409 Conflict)."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 409 Conflict\", function () {",
-                  "    pm.response.to.have.status(409);",
-                  "});",
-                  "",
-                  "pm.test(\"Error message about duplicate email\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('error');",
-                  "    pm.expect(jsonData.error).to.include('already exists');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        }
-      ],
-      "description": "User registration endpoints (POST /api/v1/auth/register)"
-    },
-    {
-      "name": "2. Login & Token Generation",
-      "item": [
-        {
-          "name": "Login with Email/Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
-            },
-            "description": "Authenticate user and receive JWT tokens.\n\n**Returns:**\n- access_token: Short-lived (15 min) JWT for API calls\n- refresh_token: Long-lived (7 days) for refreshing access\n- token_type: \"Bearer\"\n- expires_in: Seconds until access token expires (900)\n- user: User profile information"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200 OK\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response has auth tokens\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('access_token');",
-                  "    pm.expect(jsonData).to.have.property('refresh_token');",
-                  "    pm.expect(jsonData).to.have.property('token_type');",
-                  "    pm.expect(jsonData).to.have.property('expires_in');",
-                  "    pm.expect(jsonData.token_type).to.eql('Bearer');",
-                  "    pm.expect(jsonData.expires_in).to.eql(900);",
-                  "});",
-                  "",
-                  "pm.test(\"Response has user info\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('user');",
-                  "    pm.expect(jsonData.user).to.have.property('id');",
-                  "    pm.expect(jsonData.user).to.have.property('email');",
-                  "});",
-                  "",
-                  "// Save tokens for subsequent requests",
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
-                  "    pm.environment.set(\"refresh_token\", jsonData.refresh_token);",
-                  "    pm.environment.set(\"user_id\", jsonData.user.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "description": "Login endpoints (POST /api/v1/auth/login)"
         },
         {
-          "name": "Login with Invalid Credentials (Error)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"WrongPassword123!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            "name": "3. Token Refresh",
+            "item": [
+                {
+                    "name": "Refresh Access Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Obtain a new access token using refresh token.\n\n**Use Case:** When access token expires (after 15 minutes), use refresh token to get new access token without re-login.\n\n**Returns:** New access token + same refresh token"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has new access token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('access_token');",
+                                    "    pm.expect(jsonData).to.have.property('refresh_token');",
+                                    "    pm.expect(jsonData.access_token).to.not.eql('');",
+                                    "});",
+                                    "",
+                                    "// Update access token",
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"access_token\", jsonData.access_token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Refresh with Invalid Token (Error)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refresh_token\": \"invalid-token-string\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Attempt to refresh with invalid refresh token (should return 401)."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error about invalid token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('Invalid or expired');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
                 }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "login"]
-            },
-            "description": "Attempt login with incorrect password (should return 401 Unauthorized)."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});",
-                  "",
-                  "pm.test(\"Generic error message\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('error');",
-                  "    pm.expect(jsonData.error).to.eql('Invalid credentials');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        }
-      ],
-      "description": "Login endpoints (POST /api/v1/auth/login)"
-    },
-    {
-      "name": "3. Token Refresh",
-      "item": [
-        {
-          "name": "Refresh Access Token",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/refresh",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "refresh"]
-            },
-            "description": "Obtain a new access token using refresh token.\n\n**Use Case:** When access token expires (after 15 minutes), use refresh token to get new access token without re-login.\n\n**Returns:** New access token + same refresh token"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200 OK\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response has new access token\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('access_token');",
-                  "    pm.expect(jsonData).to.have.property('refresh_token');",
-                  "    pm.expect(jsonData.access_token).to.not.eql('');",
-                  "});",
-                  "",
-                  "// Update access token",
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.environment.set(\"access_token\", jsonData.access_token);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "description": "Token refresh endpoints (POST /api/v1/auth/refresh)"
         },
         {
-          "name": "Refresh with Invalid Token (Error)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"invalid-token-string\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
+            "name": "4. Current User Info",
+            "item": [
+                {
+                    "name": "Get Current User (Authenticated)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text",
+                                "description": "JWT access token from login"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get current authenticated user's profile information.\n\n**Requires:** Valid access token in Authorization header\n\n**Returns:** User profile (id, email, name, timestamps)"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has user profile\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('email');",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "    pm.expect(jsonData).to.have.property('created_at');",
+                                    "    pm.expect(jsonData).to.have.property('is_active');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Password hash not exposed\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.not.have.property('password');",
+                                    "    pm.expect(jsonData).to.not.have.property('password_hash');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get User Without Token (Error)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Attempt to access protected endpoint without authentication (should return 401)."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error about missing authorization\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('Authorization header required');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get User With Invalid Token (Error)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalid-jwt-token",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Attempt to access with malformed JWT token (should return 401)."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Error about invalid token\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('error');",
+                                    "    pm.expect(jsonData.error).to.include('Invalid or expired token');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
                 }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/refresh",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "refresh"]
-            },
-            "description": "Attempt to refresh with invalid refresh token (should return 401)."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});",
-                  "",
-                  "pm.test(\"Error about invalid token\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('error');",
-                  "    pm.expect(jsonData.error).to.include('Invalid or expired');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        }
-      ],
-      "description": "Token refresh endpoints (POST /api/v1/auth/refresh)"
-    },
-    {
-      "name": "4. Current User Info",
-      "item": [
-        {
-          "name": "Get Current User (Authenticated)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}",
-                "type": "text",
-                "description": "JWT access token from login"
-              }
             ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "me"]
-            },
-            "description": "Get current authenticated user's profile information.\n\n**Requires:** Valid access token in Authorization header\n\n**Returns:** User profile (id, email, name, timestamps)"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200 OK\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Response has user profile\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('id');",
-                  "    pm.expect(jsonData).to.have.property('email');",
-                  "    pm.expect(jsonData).to.have.property('name');",
-                  "    pm.expect(jsonData).to.have.property('created_at');",
-                  "    pm.expect(jsonData).to.have.property('is_active');",
-                  "});",
-                  "",
-                  "pm.test(\"Password hash not exposed\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.not.have.property('password');",
-                  "    pm.expect(jsonData).to.not.have.property('password_hash');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "description": "Get current user endpoints (GET /api/v1/auth/me) - Protected route"
         },
         {
-          "name": "Get User Without Token (Error)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "me"]
-            },
-            "description": "Attempt to access protected endpoint without authentication (should return 401)."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});",
-                  "",
-                  "pm.test(\"Error about missing authorization\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('error');",
-                  "    pm.expect(jsonData.error).to.include('Authorization header required');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "name": "5. Logout",
+            "item": [
+                {
+                    "name": "Logout (Revoke Refresh Token)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout user by revoking refresh token.\n\n**Effect:** Refresh token marked as revoked in database, cannot be used for future token refreshes.\n\n**Note:** Access token remains valid until expiry (15 minutes)."
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200 OK\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Success message\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('message');",
+                                    "    pm.expect(jsonData.message).to.include('Logged out successfully');",
+                                    "});",
+                                    "",
+                                    "// Clear tokens from environment",
+                                    "pm.environment.unset(\"access_token\");",
+                                    "pm.environment.unset(\"refresh_token\");"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "description": "Logout endpoints (POST /api/v1/auth/logout)"
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
         },
         {
-          "name": "Get User With Invalid Token (Error)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer invalid-jwt-token",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/me",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "me"]
-            },
-            "description": "Attempt to access with malformed JWT token (should return 401)."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
-                  "    pm.response.to.have.status(401);",
-                  "});",
-                  "",
-                  "pm.test(\"Error about invalid token\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('error');",
-                  "    pm.expect(jsonData.error).to.include('Invalid or expired token');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
-        }
-      ],
-      "description": "Get current user endpoints (GET /api/v1/auth/me) - Protected route"
-    },
-    {
-      "name": "5. Logout",
-      "item": [
+            "key": "access_token",
+            "value": "",
+            "type": "string",
+            "description": "JWT access token (15 min expiry) - auto-set from login"
+        },
         {
-          "name": "Logout (Revoke Refresh Token)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/auth/logout",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "auth", "logout"]
-            },
-            "description": "Logout user by revoking refresh token.\n\n**Effect:** Refresh token marked as revoked in database, cannot be used for future token refreshes.\n\n**Note:** Access token remains valid until expiry (15 minutes)."
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code is 200 OK\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test(\"Success message\", function () {",
-                  "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('message');",
-                  "    pm.expect(jsonData.message).to.include('Logged out successfully');",
-                  "});",
-                  "",
-                  "// Clear tokens from environment",
-                  "pm.environment.unset(\"access_token\");",
-                  "pm.environment.unset(\"refresh_token\");"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ]
+            "key": "refresh_token",
+            "value": "",
+            "type": "string",
+            "description": "Refresh token (7 day expiry) - auto-set from login"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string",
+            "description": "Current user ID - auto-set from login"
+        },
+        {
+            "key": "test_user_email",
+            "value": "john.doe@example.com",
+            "type": "string",
+            "description": "Test user email for registration/login"
         }
-      ],
-      "description": "Logout endpoints (POST /api/v1/auth/logout)"
-    }
-  ],
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "access_token",
-      "value": "",
-      "type": "string",
-      "description": "JWT access token (15 min expiry) - auto-set from login"
-    },
-    {
-      "key": "refresh_token",
-      "value": "",
-      "type": "string",
-      "description": "Refresh token (7 day expiry) - auto-set from login"
-    },
-    {
-      "key": "user_id",
-      "value": "",
-      "type": "string",
-      "description": "Current user ID - auto-set from login"
-    },
-    {
-      "key": "test_user_email",
-      "value": "john.doe@example.com",
-      "type": "string",
-      "description": "Test user email for registration/login"
-    }
-  ]
+    ]
 }
