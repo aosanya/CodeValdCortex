@@ -184,11 +184,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-AUTH-001 | User Model & Repository | Create User model with fields (id, name, email, password_hash, created_at, updated_at), implement ArangoDB repository with CRUD operations, password hashing (bcrypt), email validation | 📋 Not Started | P0 | Low | Go, ArangoDB, Security | None | - |
-| MVP-AUTH-002 | JWT Token Service | Implement JWT token generation/validation service with access tokens (15min expiry), refresh tokens (7 day expiry), token storage in secure storage, token revocation support | 📋 Not Started | P0 | Medium | Go, JWT, Security | MVP-AUTH-001 | - |
-| MVP-AUTH-003 | Authentication Endpoints | Implement REST API endpoints: POST /api/v1/auth/register (user registration with email/password), POST /api/v1/auth/login (email/password login returning JWT tokens), POST /api/v1/auth/refresh (refresh access token), POST /api/v1/auth/logout (token revocation), GET /api/v1/auth/me (get current user profile) | 📋 Not Started | P0 | Medium | Go, Gin, REST API | MVP-AUTH-002 | - |
-| MVP-AUTH-004 | Authentication Middleware | Replace placeholder AuthMiddleware with real JWT validation, extract user context from token, attach user_id to Gin context, handle token expiry/invalid tokens with proper 401 responses | 📋 Not Started | P0 | Medium | Go, Gin, Middleware | MVP-AUTH-003 | - |
-| MVP-AUTH-005 | Protected Routes Integration | Apply authentication middleware to protected routes, update handlers to use real user context (replace "system" with actual user_id from context), add permission checks for agency/instance operations | 📋 Not Started | P0 | Low | Go, Backend Dev | MVP-AUTH-004 | - |
+| MVP-AUTH-005 | Protected Routes Integration | Apply authentication middleware to protected routes, update handlers to use real user context (replace "system" with actual user_id from context), add permission checks for agency/instance operations | 📋 Not Started | P0 | Low | Go, Backend Dev | ~~MVP-AUTH-004~~ ✅ | [authentication.md](mvp-details/authentication.md) |
 
 **Frontend Integration**: CodeValdFortex Flutter app (MVP-FL-009, MVP-FL-010, MVP-FL-011) depends on these endpoints
 
