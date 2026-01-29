@@ -32,6 +32,10 @@ ai:
   max_tokens: 4096       # Maximum tokens in response
   timeout: 60            # Request timeout in seconds
 
+# Authentication configuration (MVP-AUTH-001 through MVP-AUTH-005)
+auth:
+  jwt_secret: "change-this-secret-in-production-use-env-var"  # Secret key for JWT signing (use environment variable)
+
 # Work Tracking Integration (MVP-WI-001, MVP-WI-002)
 work_tracking:
   provider: "gitea"          # Work tracking provider: gitea, github, gitlab, jira (empty = disabled)

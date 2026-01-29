@@ -14,6 +14,7 @@ import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/arangodb"
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
 	"github.com/aosanya/CodeValdCortex/internal/agency/validation"
+	"github.com/aosanya/CodeValdCortex/internal/auth"
 	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/aosanya/CodeValdCortex/internal/communication"
 	"github.com/aosanya/CodeValdCortex/internal/config"
@@ -39,6 +40,7 @@ type App struct {
 	logger              *logrus.Logger
 	dbClient            *database.ArangoClient
 	registry            *registry.Repository
+	authService         *auth.Service
 	agencyService       agency.Service
 	agencyRepository    agency.Repository
 	tagService          *services.TagService
@@ -121,6 +123,24 @@ func New(cfg *config.Config) *App {
 	agencyDBInit := agency.NewDatabaseInitializer(dbClient.Client(), logger)
 	agencyService := services.NewWithDBInit(agencyRepo, agencyValidator, agencyDBInit, logger)
 	logger.Info("Agency management service initialized successfully")
+
+	// Initialize authentication service (MVP-AUTH-001, MVP-AUTH-002)
+	logger.Info("Initializing authentication service")
+	var authService *auth.Service
+	{
+		authRepo, err := auth.NewRepository(dbClient.Database())
+		if err != nil {
+			logger.WithError(err).Warn("Failed to initialize auth repository")
+		} else {
+			jwtSecret := cfg.Auth.JWTSecret
+			if jwtSecret == "" {
+				logger.Warn("JWT secret not configured, using default (INSECURE for production)")
+				jwtSecret = "default-secret-change-in-production"
+			}
+			authService = auth.NewService(authRepo, jwtSecret)
+			logger.Info("Authentication service initialized successfully")
+		}
+	}
 
 	// Initialize tag service
 	logger.Info("Initializing tag service")
@@ -286,6 +306,7 @@ func New(cfg *config.Config) *App {
 		logger:              logger,
 		dbClient:            dbClient,
 		registry:            reg,
+		authService:         authService,
 		agencyService:       agencyService,
 		agencyRepository:    agencyRepo,
 		tagService:          &tagService,
