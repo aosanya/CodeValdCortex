@@ -2,8 +2,18 @@
     "info": {
         "_postman_id": "agencies-specs-002b",
         "name": "CodeValdCortex - Agency Specifications & Roles",
-        "description": "Agency specification management (introduction, goals, work items, workflows, roles, RACI matrix) and role CRUD operations",
+        "description": "Agency specification management (introduction, goals, work items, workflows, roles, RACI matrix) and role CRUD operations.\n\n**Authentication Required:** All endpoints require Bearer token authentication (MVP-AUTH-005).\n\n**Prerequisites:**\n1. Register user via 00-authentication collection\n2. Login to get access token\n3. Set {{access_token}} variable in environment\n\n**Security:**\n- All routes protected by auth middleware\n- Users can only access their own agencies",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
     },
     "item": [
         {

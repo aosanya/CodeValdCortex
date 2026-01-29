@@ -2,8 +2,18 @@
     "info": {
         "_postman_id": "ai-goals-roles-007a",
         "name": "CodeValdCortex - AI Services (Goals & Roles)",
-        "description": "AI-powered refinement for goals and roles - generate, refine, consolidate operations",
+        "description": "AI-powered refinement for goals and roles - generate, refine, consolidate operations.\n\n**Authentication Required:** All endpoints require Bearer token authentication (MVP-AUTH-005).\n\n**Prerequisites:**\n1. Register user via 00-authentication collection\n2. Login to get access token\n3. Set {{access_token}} variable in environment\n\n**Security:**\n- All routes protected by auth middleware\n- Agency-scoped access control",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
     },
     "item": [
         {
