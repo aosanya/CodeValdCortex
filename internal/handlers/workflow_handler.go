@@ -40,8 +40,13 @@ func (h *WorkflowHandler) CreateWorkflow(c *gin.Context) {
 	// Set agency ID from URL
 	req.AgencyID = agencyID
 
-	// TODO: Get user from context/session
-	req.CreatedBy = "system"
+	// Get user ID from authentication context (MVP-AUTH-005)
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+	req.CreatedBy = userID
 
 	if err := h.service.CreateWorkflow(c.Request.Context(), &req); err != nil {
 		h.logger.WithError(err).Error("Failed to create workflow")

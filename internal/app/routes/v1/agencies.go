@@ -2,45 +2,51 @@ package v1
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/auth"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 // RegisterAgencyRoutes registers all agency-related endpoints
-func RegisterAgencyRoutes(rg *gin.RouterGroup, agencyService agency.Service, logger *logrus.Logger) {
+func RegisterAgencyRoutes(rg *gin.RouterGroup, agencyService agency.Service, authMiddleware *auth.Middleware, logger *logrus.Logger) {
 	agencyHandler := handlers.NewAgencyHandler(agencyService, logger)
 
-	// Core agency CRUD
-	rg.GET("/agencies", agencyHandler.ListAgencies)
-	rg.GET("/agencies/:id", agencyHandler.GetAgency)
-	rg.POST("/agencies", agencyHandler.CreateAgency)
-	rg.PUT("/agencies/:id", agencyHandler.UpdateAgency)
-	rg.DELETE("/agencies/:id", agencyHandler.DeleteAgency)
-	rg.GET("/agencies/active", agencyHandler.GetActiveAgency)
-	rg.GET("/agencies/:id/statistics", agencyHandler.GetAgencyStatistics)
+	// Protected agency routes - require authentication
+	protected := rg.Group("/agencies")
+	protected.Use(authMiddleware.RequireAuth())
+	{
+		// Core agency CRUD
+		protected.GET("", agencyHandler.ListAgencies)
+		protected.GET("/:id", agencyHandler.GetAgency)
+		protected.POST("", agencyHandler.CreateAgency)
+		protected.PUT("/:id", agencyHandler.UpdateAgency)
+		protected.DELETE("/:id", agencyHandler.DeleteAgency)
+		protected.GET("/active", agencyHandler.GetActiveAgency)
+		protected.GET("/:id/statistics", agencyHandler.GetAgencyStatistics)
 
-	// Unified Specification endpoints
-	rg.GET("/agencies/:id/specification", agencyHandler.GetSpecification)
-	rg.PUT("/agencies/:id/specification", agencyHandler.UpdateSpecification)
-	rg.PUT("/agencies/:id/specification/introduction", agencyHandler.UpdateIntroduction)
-	rg.PUT("/agencies/:id/specification/goals", agencyHandler.UpdateGoals)
-	rg.PUT("/agencies/:id/specification/work-items", agencyHandler.UpdateWorkItems)
-	rg.PUT("/agencies/:id/specification/workflows", agencyHandler.UpdateWorkflows)
-	rg.PUT("/agencies/:id/specification/roles", agencyHandler.UpdateRoles)
-	rg.PUT("/agencies/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
+		// Unified Specification endpoints
+		protected.GET("/:id/specification", agencyHandler.GetSpecification)
+		protected.PUT("/:id/specification", agencyHandler.UpdateSpecification)
+		protected.PUT("/:id/specification/introduction", agencyHandler.UpdateIntroduction)
+		protected.PUT("/:id/specification/goals", agencyHandler.UpdateGoals)
+		protected.PUT("/:id/specification/work-items", agencyHandler.UpdateWorkItems)
+		protected.PUT("/:id/specification/workflows", agencyHandler.UpdateWorkflows)
+		protected.PUT("/:id/specification/roles", agencyHandler.UpdateRoles)
+		protected.PUT("/:id/specification/raci-matrix", agencyHandler.UpdateRACIMatrixSection)
 
-	// RACI Matrix CRUD
-	rg.GET("/agencies/:id/raci-matrix", agencyHandler.GetRACIMatrix)
-	rg.POST("/agencies/:id/raci-matrix", agencyHandler.SaveRACIMatrix)
+		// RACI Matrix CRUD
+		protected.GET("/:id/raci-matrix", agencyHandler.GetRACIMatrix)
+		protected.POST("/:id/raci-matrix", agencyHandler.SaveRACIMatrix)
 
-	// Roles endpoints
-	rg.GET("/agencies/:id/roles", agencyHandler.GetAgencyRoles)
-	rg.GET("/agencies/:id/roles/html", agencyHandler.GetAgencyRolesHTML)
-	rg.POST("/agencies/:id/roles", agencyHandler.CreateAgencyRole)
-	rg.GET("/agencies/:id/roles/:key", agencyHandler.GetAgencyRole)
-	rg.PUT("/agencies/:id/roles/:key", agencyHandler.UpdateAgencyRole)
-	rg.DELETE("/agencies/:id/roles/:key", agencyHandler.DeleteAgencyRole)
+		// Roles endpoints
+		protected.GET("/:id/roles", agencyHandler.GetAgencyRoles)
+		protected.GET("/:id/roles/html", agencyHandler.GetAgencyRolesHTML)
+		protected.POST("/:id/roles", agencyHandler.CreateAgencyRole)
+		protected.GET("/:id/roles/:key", agencyHandler.GetAgencyRole)
+		protected.PUT("/:id/roles/:key", agencyHandler.UpdateAgencyRole)
+		protected.DELETE("/:id/roles/:key", agencyHandler.DeleteAgencyRole)
+	}
 
-	logger.Info("Agency endpoints registered")
+	logger.Info("Agency endpoints registered (protected)")
 }

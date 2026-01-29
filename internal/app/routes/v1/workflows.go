@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency"
+	"github.com/aosanya/CodeValdCortex/internal/auth"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	"github.com/aosanya/CodeValdCortex/internal/workflow"
 	"github.com/gin-gonic/gin"
@@ -9,17 +10,28 @@ import (
 )
 
 // RegisterWorkflowRoutes registers workflow management endpoints
-func RegisterWorkflowRoutes(rg *gin.RouterGroup, workflowService *workflow.Service, agencyService agency.Service, logger *logrus.Logger) {
+func RegisterWorkflowRoutes(rg *gin.RouterGroup, workflowService *workflow.Service, agencyService agency.Service, authMiddleware *auth.Middleware, logger *logrus.Logger) {
 	workflowHandler := handlers.NewWorkflowHandler(workflowService, agencyService, logger)
 
-	rg.POST("/agencies/:id/workflows", workflowHandler.CreateWorkflow)
-	rg.GET("/agencies/:id/workflows", workflowHandler.GetWorkflows)
-	rg.GET("/agencies/:id/workflows/html", workflowHandler.GetWorkflowsHTML)
-	rg.GET("/workflows/:id", workflowHandler.GetWorkflow)
-	rg.PUT("/workflows/:id", workflowHandler.UpdateWorkflow)
-	rg.DELETE("/workflows/:id", workflowHandler.DeleteWorkflow)
-	rg.POST("/workflows/:id/duplicate", workflowHandler.DuplicateWorkflow)
-	rg.POST("/workflows/validate", workflowHandler.ValidateWorkflow)
+	// Protected workflow routes - require authentication
+	protected := rg.Group("/agencies/:id/workflows")
+	protected.Use(authMiddleware.RequireAuth())
+	{
+		protected.POST("", workflowHandler.CreateWorkflow)
+		protected.GET("", workflowHandler.GetWorkflows)
+		protected.GET("/html", workflowHandler.GetWorkflowsHTML)
+	}
 
-	logger.Info("Workflow endpoints registered")
+	// Protected workflow operations - require authentication
+	workflowsProtected := rg.Group("/workflows")
+	workflowsProtected.Use(authMiddleware.RequireAuth())
+	{
+		workflowsProtected.GET("/:id", workflowHandler.GetWorkflow)
+		workflowsProtected.PUT("/:id", workflowHandler.UpdateWorkflow)
+		workflowsProtected.DELETE("/:id", workflowHandler.DeleteWorkflow)
+		workflowsProtected.POST("/:id/duplicate", workflowHandler.DuplicateWorkflow)
+		workflowsProtected.POST("/validate", workflowHandler.ValidateWorkflow)
+	}
+
+	logger.Info("Workflow endpoints registered (protected)")
 }

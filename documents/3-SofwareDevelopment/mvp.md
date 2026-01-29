@@ -184,7 +184,7 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-AUTH-005 | Protected Routes Integration | Apply authentication middleware to protected routes, update handlers to use real user context (replace "system" with actual user_id from context), add permission checks for agency/instance operations | 📋 Not Started | P0 | Low | Go, Backend Dev | ~~MVP-AUTH-004~~ ✅ | [authentication.md](mvp-details/authentication.md) |
+| MVP-AUTH-005 | Protected Routes Integration | Apply authentication middleware to protected routes, update handlers to use real user context (replace "system" with actual user_id from context), add permission checks for agency/instance operations | ~~✅ Complete~~ | P0 | Low | Go, Backend Dev | ~~MVP-AUTH-004~~ ✅ | [authentication.md](mvp-details/authentication.md) |
 
 **Frontend Integration**: CodeValdFortex Flutter app (MVP-FL-009, MVP-FL-010, MVP-FL-011) depends on these endpoints
 

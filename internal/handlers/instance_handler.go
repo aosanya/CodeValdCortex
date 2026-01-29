@@ -38,15 +38,16 @@ func (h *InstanceHandler) StartInstance(c *gin.Context) {
 		return
 	}
 
-	// Set created_by from context if available
+	// Set created_by from authentication context (MVP-AUTH-005)
 	if req.Metadata == nil {
 		req.Metadata = make(map[string]interface{})
 	}
-	if userID, exists := c.Get("user_id"); exists {
-		req.Metadata["created_by"] = fmt.Sprintf("%v", userID)
-	} else {
-		req.Metadata["created_by"] = "system"
+	userID := c.GetString("user_id")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
 	}
+	req.Metadata["created_by"] = userID
 
 	// Start the instance
 	instance, err := h.instanceService.StartInstance(c.Request.Context(), agencyID, tagName, &req)

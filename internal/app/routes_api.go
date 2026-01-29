@@ -30,47 +30,55 @@ func (a *App) registerAPIRoutes(router *gin.Engine, aiRefineHandler interface{})
 	apiV1 := router.Group("/api/v1")
 	{
 		// Authentication endpoints (MVP-AUTH-003) - Public routes
+		var authMiddleware *auth.Middleware
 		if a.authService != nil {
 			authHandler := auth.NewHandler(a.authService, a.logger)
 			authHandler.RegisterRoutes(apiV1)
+			
+			// Create auth middleware for protected routes (MVP-AUTH-005)
+			authMiddleware = auth.NewMiddleware(a.authService, a.logger)
 			a.logger.Info("Authentication endpoints registered")
 		}
 
-		// Agency endpoints - Core CRUD always available
-		v1routes.RegisterAgencyRoutes(apiV1, a.agencyService, a.logger)
-
-		// Tag endpoints (if tag service is available)
-		if a.tagService != nil {
-			v1routes.RegisterTagRoutes(apiV1, *a.tagService, a.logger)
+		// Agency endpoints - Core CRUD (protected)
+		if authMiddleware != nil {
+			v1routes.RegisterAgencyRoutes(apiV1, a.agencyService, authMiddleware, a.logger)
 		}
 
-		// Instance endpoints (MVP-PUB-007)
-		if a.instanceService != nil {
-			v1routes.RegisterInstanceRoutes(apiV1, a.instanceService, a.logger)
+		// Tag endpoints (protected)
+		if a.tagService != nil && authMiddleware != nil {
+			v1routes.RegisterTagRoutes(apiV1, *a.tagService, authMiddleware, a.logger)
 		}
 
-		// Workbench and issue management endpoints (MVP-WI-008)
-		if a.workbenchService != nil && a.issueService != nil && a.instanceService != nil {
-			v1routes.RegisterWorkbenchRoutes(apiV1, a.issueService, a.workbenchService, a.instanceService, a.agencyService, a.logger)
+		// Instance endpoints (protected)
+		if a.instanceService != nil && authMiddleware != nil {
+			v1routes.RegisterInstanceRoutes(apiV1, a.instanceService, authMiddleware, a.logger)
 		}
 
-		// Publication and activation endpoints (MVP-PUB-003, MVP-PUB-004)
-		if a.publicationService != nil || a.activationService != nil {
-			v1routes.RegisterPublicationRoutes(apiV1, a.publicationService, a.activationService, a.logger)
+		// Workbench and issue management endpoints (protected)
+		if a.workbenchService != nil && a.issueService != nil && a.instanceService != nil && authMiddleware != nil {
+			v1routes.RegisterWorkbenchRoutes(apiV1, a.issueService, a.workbenchService, a.instanceService, a.agencyService, authMiddleware, a.logger)
 		}
 
-		// Workflow endpoints
-		if a.workflowService != nil {
-			v1routes.RegisterWorkflowRoutes(apiV1, a.workflowService, a.agencyService, a.logger)
+		// Publication and activation endpoints (protected)
+		if (a.publicationService != nil || a.activationService != nil) && authMiddleware != nil {
+			v1routes.RegisterPublicationRoutes(apiV1, a.publicationService, a.activationService, authMiddleware, a.logger)
 		}
 
-		// Work Items REST API (MVP-RM-003)
-		if err := v1routes.RegisterWorkItemsRoutes(apiV1, a.dbClient.Database(), a.logger); err != nil {
-			a.logger.WithError(err).Warn("Failed to register work items REST API endpoints")
+		// Workflow endpoints (protected)
+		if a.workflowService != nil && authMiddleware != nil {
+			v1routes.RegisterWorkflowRoutes(apiV1, a.workflowService, a.agencyService, authMiddleware, a.logger)
 		}
 
-		// AI Refine and Builder endpoints (if AI services are available)
-		if aiRefineHandler != nil {
+		// Work Items REST API (protected)
+		if authMiddleware != nil {
+			if err := v1routes.RegisterWorkItemsRoutes(apiV1, a.dbClient.Database(), authMiddleware, a.logger); err != nil {
+				a.logger.WithError(err).Warn("Failed to register work items REST API endpoints")
+			}
+		}
+
+		// AI Refine and Builder endpoints (protected)
+		if aiRefineHandler != nil && authMiddleware != nil {
 			v1routes.RegisterAIRefineRoutes(
 				apiV1,
 				aiRefineHandler.(*ai_refine.Handler),
@@ -79,18 +87,22 @@ func (a *App) registerAPIRoutes(router *gin.Engine, aiRefineHandler interface{})
 				a.roleBuilder,
 				a.raciBuilder,
 				a.workflowBuilder,
+				authMiddleware,
 				a.logger,
 			)
 		}
 
-		// AI Agency Designer endpoints (if available)
-		if a.aiDesignerService != nil {
+		// AI Agency Designer endpoints (protected - requires own handler registration)
+		if a.aiDesignerService != nil && authMiddleware != nil {
 			aiDesignerHandler := ai.NewAgencyDesignerHandler(a.aiDesignerService, a.logger)
-			aiDesignerHandler.RegisterRoutes(apiV1)
-			a.logger.Info("AI Agency Designer endpoints registered")
+			// Apply auth middleware to designer routes
+			protected := apiV1.Group("")
+			protected.Use(authMiddleware.RequireAuth())
+			aiDesignerHandler.RegisterRoutes(protected)
+			a.logger.Info("AI Agency Designer endpoints registered (protected)")
 		}
 
-		// Webhook endpoints for work item integration (if available)
+		// Webhook endpoints for work item integration (public - called by external systems)
 		if a.webhookHandler != nil {
 			v1routes.RegisterWebhookRoutes(apiV1, a.webhookHandler, a.logger)
 		}

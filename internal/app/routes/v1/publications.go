@@ -2,32 +2,45 @@ package v1
 
 import (
 	"github.com/aosanya/CodeValdCortex/internal/agency/services"
+	"github.com/aosanya/CodeValdCortex/internal/auth"
 	"github.com/aosanya/CodeValdCortex/internal/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 // RegisterPublicationRoutes registers publication and activation endpoints
-func RegisterPublicationRoutes(rg *gin.RouterGroup, publicationService services.PublicationService, activationService services.ActivationService, logger *logrus.Logger) {
-	// Publication endpoints
+func RegisterPublicationRoutes(rg *gin.RouterGroup, publicationService services.PublicationService, activationService services.ActivationService, authMiddleware *auth.Middleware, logger *logrus.Logger) {
+	// Publication endpoints - require authentication
 	if publicationService != nil {
 		pubHandler := handlers.NewPublicationHandler(publicationService, logger)
-		rg.POST("/agencies/:id/validate", pubHandler.ValidateForPublish)
-		rg.POST("/agencies/:id/publish", pubHandler.Publish)
-		rg.POST("/agencies/:id/activate", pubHandler.Activate)
-		rg.POST("/agencies/:id/deactivate", pubHandler.Deactivate)
-		rg.GET("/agencies/:id/publications", pubHandler.GetPublicationHistory)
-		rg.POST("/publications/:id/activate", pubHandler.ActivatePublication)
-		logger.Info("Publication endpoints registered")
+		protected := rg.Group("/agencies/:id")
+		protected.Use(authMiddleware.RequireAuth())
+		{
+			protected.POST("/validate", pubHandler.ValidateForPublish)
+			protected.POST("/publish", pubHandler.Publish)
+			protected.POST("/activate", pubHandler.Activate)
+			protected.POST("/deactivate", pubHandler.Deactivate)
+			protected.GET("/publications", pubHandler.GetPublicationHistory)
+		}
+		pubProtected := rg.Group("/publications")
+		pubProtected.Use(authMiddleware.RequireAuth())
+		{
+			pubProtected.POST("/:id/activate", pubHandler.ActivatePublication)
+		}
+		logger.Info("Publication endpoints registered (protected)")
 	}
 
-	// Activation/Lifecycle endpoints
+	// Activation/Lifecycle endpoints - require authentication
 	if activationService != nil {
 		activationHandler := handlers.NewActivationHandler(activationService, logger)
-		rg.POST("/agencies/:id/lifecycle/pause", activationHandler.PauseAgency)
-		rg.POST("/agencies/:id/lifecycle/resume", activationHandler.ResumeAgency)
-		rg.POST("/agencies/:id/lifecycle/drain", activationHandler.DrainAgency)
-		rg.POST("/agencies/:id/lifecycle/stop", activationHandler.StopAgency)
-		logger.Info("Activation lifecycle endpoints registered")
+		lifecycleProtected := rg.Group("/agencies/:id/lifecycle")
+		lifecycleProtected.Use(authMiddleware.RequireAuth())
+		{
+			lifecycleProtected.POST("/pause", activationHandler.PauseAgency)
+			lifecycleProtected.POST("/resume", activationHandler.ResumeAgency)
+			lifecycleProtected.POST("/drain", activationHandler.DrainAgency)
+			lifecycleProtected.POST("/stop", activationHandler.StopAgency)
+		}
+		logger.Info("Activation lifecycle endpoints registered (protected)")
 	}
 }
