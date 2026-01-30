@@ -5,21 +5,24 @@ import (
 
 	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 	"github.com/aosanya/CodeValdCortex/internal/agency/service"
+	"github.com/aosanya/CodeValdCortex/internal/builder/ai"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 // IntroductionHandler handles introduction-related HTTP requests
 type IntroductionHandler struct {
-	service *service.IntroductionService
-	logger  *logrus.Logger
+	service   *service.IntroductionService
+	aiBuilder *ai.FlexibleIntroductionBuilder
+	logger    *logrus.Logger
 }
 
 // NewIntroductionHandler creates a new introduction handler
-func NewIntroductionHandler(service *service.IntroductionService, logger *logrus.Logger) *IntroductionHandler {
+func NewIntroductionHandler(service *service.IntroductionService, aiBuilder *ai.FlexibleIntroductionBuilder, logger *logrus.Logger) *IntroductionHandler {
 	return &IntroductionHandler{
-		service: service,
-		logger:  logger,
+		service:   service,
+		aiBuilder: aiBuilder,
+		logger:    logger,
 	}
 }
 
@@ -307,9 +310,10 @@ func (h *IntroductionHandler) ListTemplates(c *gin.Context) {
 
 // GenerateIntroductionRequest represents the request body for AI generation
 type GenerateIntroductionRequest struct {
-	AgencyID string   `json:"agency_id" binding:"required"`
-	Keywords []string `json:"keywords" binding:"required"`
-	Template string   `json:"template"`
+	AgencyID      string                 `json:"agency_id" binding:"required"`
+	Keywords      []string               `json:"keywords" binding:"required"`
+	Template      string                 `json:"template"`
+	AgencyContext map[string]interface{} `json:"agency_context"`
 }
 
 // GenerateIntroduction handles POST /api/v1/introduction/ai/generate
@@ -323,26 +327,59 @@ func (h *IntroductionHandler) GenerateIntroduction(c *gin.Context) {
 		return
 	}
 
-	// TODO: Implement AI generation in Phase 4
-	// For now, return a placeholder response
-	h.logger.WithFields(logrus.Fields{
-		"agency_id": req.AgencyID,
-		"keywords":  req.Keywords,
-		"template":  req.Template,
-	}).Info("AI generation requested (not yet implemented)")
+	// Default to genesis template if not specified
+	if req.Template == "" {
+		req.Template = "genesis"
+	}
 
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"message": "AI generation will be implemented in Phase 4",
-		"request": req,
+	// Build AI request
+	aiReq := &ai.GenerateIntroductionRequest{
+		AgencyID:      req.AgencyID,
+		Template:      req.Template,
+		Keywords:      req.Keywords,
+		AgencyContext: req.AgencyContext,
+	}
+
+	// Generate using AI
+	aiResp, err := h.aiBuilder.GenerateFromKeywords(c.Request.Context(), aiReq)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id": req.AgencyID,
+			"error":     err.Error(),
+		}).Error("Failed to generate introduction")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create the introduction in the database
+	if err := h.service.Create(c.Request.Context(), aiResp.Introduction); err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id": req.AgencyID,
+			"error":     err.Error(),
+		}).Error("Failed to save generated introduction")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.logger.WithFields(logrus.Fields{
+		"agency_id":  req.AgencyID,
+		"confidence": aiResp.Confidence,
+	}).Info("Successfully generated and saved introduction")
+
+	c.JSON(http.StatusCreated, gin.H{
+		"introduction": aiResp.Introduction,
+		"confidence":   aiResp.Confidence,
+		"explanation":  aiResp.Explanation,
 	})
 }
 
 // RefineSectionRequest represents the request body for AI section refinement
 type RefineSectionRequest struct {
-	AgencyID   string                     `json:"agency_id" binding:"required"`
-	SectionID  string                     `json:"section_id" binding:"required"`
-	Section    models.IntroductionSection `json:"section" binding:"required"`
-	Refinement string                     `json:"refinement" binding:"required"`
+	AgencyID       string                     `json:"agency_id" binding:"required"`
+	SectionID      string                     `json:"section_id" binding:"required"`
+	Section        models.IntroductionSection `json:"section" binding:"required"`
+	RefinementText string                     `json:"refinement_text" binding:"required"`
+	AgencyContext  map[string]interface{}     `json:"agency_context"`
 }
 
 // RefineSection handles POST /api/v1/introduction/ai/refine-section
@@ -356,16 +393,50 @@ func (h *IntroductionHandler) RefineSection(c *gin.Context) {
 		return
 	}
 
-	// TODO: Implement AI refinement in Phase 4
-	// For now, return a placeholder response
+	// Build AI request
+	aiReq := &ai.RefineSectionRequest{
+		AgencyID:       req.AgencyID,
+		Section:        &req.Section,
+		RefinementText: req.RefinementText,
+		AgencyContext:  req.AgencyContext,
+	}
+
+	// Refine using AI
+	aiResp, err := h.aiBuilder.RefineSection(c.Request.Context(), aiReq)
+	if err != nil {
+		h.logger.WithFields(logrus.Fields{
+			"agency_id":  req.AgencyID,
+			"section_id": req.SectionID,
+			"error":      err.Error(),
+		}).Error("Failed to refine section")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update the section in the database if it changed
+	if aiResp.Changed {
+		if err := h.service.UpdateSection(c.Request.Context(), req.AgencyID, req.SectionID, aiResp.Section); err != nil {
+			h.logger.WithFields(logrus.Fields{
+				"agency_id":  req.AgencyID,
+				"section_id": req.SectionID,
+				"error":      err.Error(),
+			}).Error("Failed to save refined section")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
 	h.logger.WithFields(logrus.Fields{
 		"agency_id":  req.AgencyID,
 		"section_id": req.SectionID,
-		"refinement": req.Refinement,
-	}).Info("AI refinement requested (not yet implemented)")
+		"changed":    aiResp.Changed,
+		"confidence": aiResp.Confidence,
+	}).Info("Successfully refined section")
 
-	c.JSON(http.StatusNotImplemented, gin.H{
-		"message": "AI refinement will be implemented in Phase 4",
-		"request": req,
+	c.JSON(http.StatusOK, gin.H{
+		"section":     aiResp.Section,
+		"changed":     aiResp.Changed,
+		"explanation": aiResp.Explanation,
+		"confidence":  aiResp.Confidence,
 	})
 }
