@@ -1,0 +1,498 @@
+[
+  {
+    "id": "WF-001",
+    "title": "Agency Creation Workflow",
+    "content": {
+      "status": "Active",
+      "version": "1.0.0",
+      "description": "End-to-end workflow for creating a new agency from keywords to deployed specification",
+      "states": [
+        {
+          "id": "state_001",
+          "title": "Research Requirements",
+          "content": {
+            "work_item": "WI-001",
+            "role": "R-001"
+          }
+        },
+        {
+          "id": "state_002",
+          "title": "Generate Introduction",
+          "content": {
+            "work_item": "WI-002",
+            "role": "R-002"
+          }
+        },
+        {
+          "id": "state_003",
+          "title": "Generate Goals",
+          "content": {
+            "work_item": "WI-003",
+            "role": "R-002"
+          }
+        },
+        {
+          "id": "state_004",
+          "title": "Decompose Work Items",
+          "content": {
+            "work_item": "WI-004",
+            "role": "R-003"
+          }
+        },
+        {
+          "id": "state_005",
+          "title": "Define Roles",
+          "content": {
+            "work_item": "WI-005",
+            "role": "R-004"
+          }
+        },
+        {
+          "id": "state_006",
+          "title": "Validate Completeness",
+          "content": {
+            "work_item": "WI-007",
+            "role": "R-005"
+          }
+        },
+        {
+          "id": "state_007",
+          "title": "Validate Consistency",
+          "content": {
+            "work_item": "WI-008",
+            "branch_condition": "If validation fails, route to Fix Issues",
+            "role": "R-005"
+          }
+        },
+        {
+          "id": "state_008",
+          "title": "Review Session",
+          "content": {
+            "work_item": "WI-010",
+            "branch_condition": "If not approved, route to Refine (WI-011)",
+            "role": "R-001"
+          }
+        },
+        {
+          "id": "state_009",
+          "title": "Generate Artifacts",
+          "content": {
+            "work_item": "WI-014",
+            "role": "R-002"
+          }
+        },
+        {
+          "id": "state_010",
+          "title": "Deploy Agency",
+          "content": {
+            "work_item": "WI-015",
+            "role": "R-005"
+          }
+        },
+        {
+          "id": "state_011",
+          "title": "Generate Documentation",
+          "content": {
+            "work_item": "WI-016",
+            "role": "R-002"
+          }
+        }
+      ],
+      "variables": {
+        "agency_id": "string",
+        "agency_name": "string",
+        "category": "string",
+        "user_id": "string",
+        "requirements": "object",
+        "specification": "object",
+        "validation_results": "object",
+        "review_feedback": "object",
+        "artifacts": "array",
+        "deployment_status": "string"
+      },
+      "success_criteria": [
+        {
+          "id": "success_001",
+          "title": "Specification Generated",
+          "content": "All specification sections generated"
+        },
+        {
+          "id": "success_002",
+          "title": "Validations Passed",
+          "content": "All validations pass"
+        },
+        {
+          "id": "success_003",
+          "title": "Human Approval",
+          "content": "Human approval obtained"
+        },
+        {
+          "id": "success_004",
+          "title": "Deployment Success",
+          "content": "Agency deployed successfully"
+        },
+        {
+          "id": "success_005",
+          "title": "Time Efficiency",
+          "content": "Total time < 8 hours"
+        }
+      ],
+      "error_handling": [
+        {
+          "id": "error_001",
+          "title": "Validation Fails",
+          "content": "Route to Fix Issues → Re-run validation"
+        },
+        {
+          "id": "error_002",
+          "title": "User Rejects Section",
+          "content": "Route to Refine → Regenerate section → Re-validate"
+        },
+        {
+          "id": "error_003",
+          "title": "Deployment Fails",
+          "content": "Alert human → Manual intervention required"
+        },
+        {
+          "id": "error_004",
+          "title": "AI Service Timeout",
+          "content": "Retry up to 3 times → Escalate to human"
+        }
+      ]
+    }
+  },
+  {
+    "id": "WF-002",
+    "title": "Refinement Workflow",
+    "content": {
+      "status": "Active",
+      "version": "1.0.0",
+      "description": "Iterative refinement of specific specification sections without full regeneration",
+      "trigger": "From WI-010 or WI-011",
+      "states": [
+        {
+          "id": "state_ref_001",
+          "title": "Identify Section to Refine",
+          "content": {}
+        },
+        {
+          "id": "state_ref_002",
+          "title": "Get Current Section Content",
+          "content": {}
+        },
+        {
+          "id": "state_ref_003",
+          "title": "Gather Refinement Instructions",
+          "content": {}
+        },
+        {
+          "id": "state_ref_004",
+          "title": "Generate New Section Content",
+          "content": {
+            "branch_by_section": {
+              "introduction": "Call IntroductionBuilder",
+              "goals": "Call GoalsBuilder",
+              "work_items": "Call WorkItemsBuilder",
+              "roles": "Call RolesBuilder"
+            }
+          }
+        },
+        {
+          "id": "state_ref_005",
+          "title": "Validate New Content",
+          "content": {
+            "branch_condition": "If invalid, show errors and loop to adjust instructions"
+          }
+        },
+        {
+          "id": "state_ref_006",
+          "title": "Present to User for Approval",
+          "content": {
+            "branch_condition": "If not approved, loop to adjust instructions"
+          }
+        },
+        {
+          "id": "state_ref_007",
+          "title": "Update Specification",
+          "content": {}
+        },
+        {
+          "id": "state_ref_008",
+          "title": "Log Change",
+          "content": {}
+        }
+      ],
+      "variables": {
+        "agency_id": "string",
+        "section_type": "string (introduction|goals|work_items|roles)",
+        "current_content": "object",
+        "refinement_instructions": "string",
+        "new_content": "object",
+        "validation_results": "object",
+        "approved": "boolean",
+        "change_log_entry": "object"
+      },
+      "success_criteria": [
+        {
+          "id": "success_ref_001",
+          "title": "Section Regenerated",
+          "content": "Section regenerated according to instructions"
+        },
+        {
+          "id": "success_ref_002",
+          "title": "Validation Passed",
+          "content": "Validation passes"
+        },
+        {
+          "id": "success_ref_003",
+          "title": "User Approved",
+          "content": "User approves new content"
+        },
+        {
+          "id": "success_ref_004",
+          "title": "Change Logged",
+          "content": "Change logged"
+        },
+        {
+          "id": "success_ref_005",
+          "title": "Time Efficiency",
+          "content": "Total time < 30 minutes per iteration"
+        }
+      ]
+    }
+  },
+  {
+    "id": "WF-003",
+    "title": "Validation Workflow",
+    "content": {
+      "status": "Active",
+      "version": "1.0.0",
+      "description": "Comprehensive quality assurance workflow run after generation or refinement",
+      "states": [
+        {
+          "id": "state_val_001",
+          "title": "Load Specification",
+          "content": {}
+        },
+        {
+          "id": "state_val_002",
+          "title": "Validate Completeness",
+          "content": {
+            "work_item": "WI-007",
+            "branch_condition": "If fails, collect errors",
+            "role": "R-005"
+          }
+        },
+        {
+          "id": "state_val_003",
+          "title": "Validate Consistency",
+          "content": {
+            "work_item": "WI-008",
+            "branch_condition": "If fails, collect errors",
+            "role": "R-005"
+          }
+        },
+        {
+          "id": "state_val_004",
+          "title": "Generate Validation Report",
+          "content": {}
+        },
+        {
+          "id": "state_val_005",
+          "title": "Determine Outcome",
+          "content": {}
+        }
+      ],
+      "validation_rules": {
+        "completeness_checks": [
+          {
+            "id": "check_comp_001",
+            "title": "Introduction Exists",
+            "content": "Introduction section exists and has all subsections"
+          },
+          {
+            "id": "check_comp_002",
+            "title": "Minimum Goals",
+            "content": "At least 5 goals defined"
+          },
+          {
+            "id": "check_comp_003",
+            "title": "Minimum Work Items",
+            "content": "At least 8 work items defined"
+          },
+          {
+            "id": "check_comp_004",
+            "title": "Minimum Roles",
+            "content": "At least 3 roles defined"
+          }
+        ],
+        "consistency_checks": [
+          {
+            "id": "check_cons_001",
+            "title": "Valid Goal References",
+            "content": "All work items reference valid goals (goal_keys resolve)"
+          },
+          {
+            "id": "check_cons_002",
+            "title": "Valid Role References",
+            "content": "All role codes referenced in work items exist in roles catalog"
+          },
+          {
+            "id": "check_cons_003",
+            "title": "No Circular Dependencies",
+            "content": "No circular dependencies in work items"
+          },
+          {
+            "id": "check_cons_004",
+            "title": "No Orphaned Goals",
+            "content": "All goals referenced by at least one work item"
+          },
+          {
+            "id": "check_cons_005",
+            "title": "Naming Conventions",
+            "content": "Naming conventions followed (IDs, codes)"
+          }
+        ]
+      },
+      "report_format": {
+        "timestamp": "ISO 8601 datetime",
+        "agency_id": "string",
+        "overall_status": "passed|failed",
+        "completeness": {
+          "passed": "boolean",
+          "errors": "array",
+          "warnings": "array"
+        },
+        "consistency": {
+          "passed": "boolean",
+          "errors": "array",
+          "warnings": "array"
+        },
+        "summary": {
+          "total_errors": "number",
+          "total_warnings": "number",
+          "sections_validated": "number",
+          "validation_duration_ms": "number"
+        }
+      }
+    }
+  },
+  {
+    "id": "workflow_integration",
+    "title": "Workflow Integration",
+    "content": {
+      "interactions": [
+        {
+          "id": "interaction_001",
+          "title": "Primary Flow",
+          "content": "Agency Creation (WF-001) calls Validation Workflow (WF-003) at multiple checkpoints and branches to Refinement Workflow (WF-002) when user requests changes"
+        },
+        {
+          "id": "interaction_002",
+          "title": "Refinement Flow",
+          "content": "Refinement (WF-002) triggered from Agency Creation or standalone, always calls Validation Workflow after regeneration, can loop multiple times until approved"
+        },
+        {
+          "id": "interaction_003",
+          "title": "Quality Gate",
+          "content": "Validation (WF-003) called by both Agency Creation and Refinement, blocks progression if critical errors found, returns detailed error reports for fixes"
+        }
+      ],
+      "state_persistence": {
+        "purpose": [
+          "Resume after interruption",
+          "Audit trail",
+          "Debugging"
+        ],
+        "storage_location": "agency_{id}/workflows/",
+        "files": [
+          "creation-workflow-{run_id}.json",
+          "refinement-workflow-{run_id}.json",
+          "validation-results-{timestamp}.json"
+        ]
+      }
+    }
+  },
+  {
+    "id": "workflow_metrics",
+    "title": "Workflow Metrics",
+    "content": {
+      "target_performance": [
+        {
+          "id": "perf_001",
+          "title": "Agency Creation",
+          "content": {
+            "target_duration": "4-6 hours",
+            "success_rate_target": "90% (on first attempt)"
+          }
+        },
+        {
+          "id": "perf_002",
+          "title": "Refinement",
+          "content": {
+            "target_duration": "15-30 min",
+            "success_rate_target": "95% (user satisfied)"
+          }
+        },
+        {
+          "id": "perf_003",
+          "title": "Validation",
+          "content": {
+            "target_duration": "< 5 min",
+            "success_rate_target": "100% (no false positives)"
+          }
+        }
+      ],
+      "monitored_metrics": [
+        {
+          "id": "metric_001",
+          "title": "Time in Each State",
+          "content": "Identify bottlenecks"
+        },
+        {
+          "id": "metric_002",
+          "title": "Validation Failure Rate",
+          "content": "Improve AI generation quality"
+        },
+        {
+          "id": "metric_003",
+          "title": "Refinement Cycles",
+          "content": "Measure until approval"
+        },
+        {
+          "id": "metric_004",
+          "title": "Human Intervention Points",
+          "content": "Reduce where possible"
+        },
+        {
+          "id": "metric_005",
+          "title": "Error Patterns",
+          "content": "Common validation failures"
+        }
+      ]
+    }
+  },
+  {
+    "id": "future_enhancements",
+    "title": "Future Workflow Enhancements",
+    "content": {
+      "planned": [
+        {
+          "id": "future_001",
+          "title": "WF-004: Template Application Workflow",
+          "content": "Apply pre-built template, customize template parameters, faster than full generation"
+        },
+        {
+          "id": "future_002",
+          "title": "WF-005: Batch Agency Creation Workflow",
+          "content": "Create multiple similar agencies, shared requirements gathering, parallel generation"
+        },
+        {
+          "id": "future_003",
+          "title": "WF-006: Agency Migration Workflow",
+          "content": "Import legacy agency definition, convert to new format, validate and deploy"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,242 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://codevaldcortex.io/schemas/database-init.json",
+    "title": "Database Initialization Script",
+    "description": "ArangoDB database initialization for a new agency",
+    "type": "object",
+    "required": [
+        "agency_id",
+        "database_name",
+        "collections",
+        "generated_at"
+    ],
+    "properties": {
+        "agency_id": {
+            "type": "string",
+            "pattern": "^agency_[a-f0-9]{32}$",
+            "description": "Agency identifier (also used as database name)"
+        },
+        "database_name": {
+            "type": "string",
+            "pattern": "^agency_[a-f0-9]{32}$",
+            "description": "Database name (must match agency_id)"
+        },
+        "collections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "type"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "pattern": "^[a-z][a-z0-9_]*$",
+                        "description": "Collection name (lowercase, alphanumeric + underscore)"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "document",
+                            "edge"
+                        ],
+                        "description": "Collection type"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Purpose of the collection"
+                    },
+                    "indexes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "type",
+                                "fields"
+                            ],
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "persistent",
+                                        "hash",
+                                        "skiplist",
+                                        "fulltext",
+                                        "geo"
+                                    ],
+                                    "description": "Index type"
+                                },
+                                "fields": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "minItems": 1,
+                                    "description": "Fields to index"
+                                },
+                                "unique": {
+                                    "type": "boolean",
+                                    "default": false
+                                },
+                                "sparse": {
+                                    "type": "boolean",
+                                    "default": false
+                                }
+                            }
+                        }
+                    },
+                    "schema": {
+                        "type": "object",
+                        "description": "JSON schema for collection validation (optional)"
+                    }
+                }
+            }
+        },
+        "initialization_aql": {
+            "type": "string",
+            "description": "AQL script to run after collection creation (optional)"
+        },
+        "seed_data": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "collection",
+                    "documents"
+                ],
+                "properties": {
+                    "collection": {
+                        "type": "string",
+                        "description": "Collection name"
+                    },
+                    "documents": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "description": "Documents to insert"
+                    }
+                }
+            },
+            "description": "Optional seed data for collections"
+        },
+        "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this script was generated"
+        },
+        "generated_by": {
+            "type": "string",
+            "default": "genesis-agency",
+            "description": "Genesis Agency identifier"
+        }
+    },
+    "examples": [
+        {
+            "agency_id": "agency_a1b2c3d4e5f6789012345678901234ab",
+            "database_name": "agency_a1b2c3d4e5f6789012345678901234ab",
+            "collections": [
+                {
+                    "name": "specifications",
+                    "type": "document",
+                    "description": "Agency specification document",
+                    "indexes": [
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "agency_id"
+                            ],
+                            "unique": true
+                        }
+                    ]
+                },
+                {
+                    "name": "agents",
+                    "type": "document",
+                    "description": "Agent instances",
+                    "indexes": [
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "role_code"
+                            ]
+                        },
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "status"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "work_issues",
+                    "type": "document",
+                    "description": "Runtime work issues",
+                    "indexes": [
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "work_item_id"
+                            ]
+                        },
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "workflow_state"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "agent_messages",
+                    "type": "document",
+                    "description": "Inter-agent communication",
+                    "indexes": [
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "from_agent_id"
+                            ]
+                        },
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "to_agent_id"
+                            ]
+                        },
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "timestamp"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "events",
+                    "type": "document",
+                    "description": "Agency events",
+                    "indexes": [
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "event_type"
+                            ]
+                        },
+                        {
+                            "type": "persistent",
+                            "fields": [
+                                "timestamp"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "generated_at": "2026-01-30T10:00:00Z",
+            "generated_by": "genesis-agency"
+        }
+    ]
+}

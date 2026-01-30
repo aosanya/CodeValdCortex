@@ -1,0 +1,459 @@
+{
+  "roles": {
+    "title": "Role Specifications",
+    "content": [
+      {
+        "id": "role_001",
+        "title": "R-001: Requirements Analyst",
+        "content": {
+          "code": "requirements-analyst",
+          "autonomy_level": "L2",
+          "autonomy_description": "Conditional Autonomy",
+          "capability_tags": [
+            "research",
+            "qa",
+            "analysis",
+            "documentation"
+          ],
+          "description": "Conducts structured research sessions with domain experts using the research prompt framework. Asks targeted questions to extract business requirements, stakeholder needs, and domain constraints.",
+          "token_budget": 8000,
+          "token_budget_unit": "tokens/conversation",
+          "primary_llm": "GPT-4 or Claude Sonnet",
+          "deliverables": [
+            {
+              "id": "deliv_001_001",
+              "title": "Requirements Document",
+              "content": "Complete requirements with Q&A transcript"
+            },
+            {
+              "id": "deliv_001_002",
+              "title": "Gap Analysis Report",
+              "content": "Identified gaps and inconsistencies"
+            },
+            {
+              "id": "deliv_001_003",
+              "title": "Stakeholder Identification",
+              "content": "Identified stakeholders and processes"
+            },
+            {
+              "id": "deliv_001_004",
+              "title": "Domain Vocabulary",
+              "content": "Domain-specific vocabulary and terminology"
+            },
+            {
+              "id": "deliv_001_005",
+              "title": "Success Criteria",
+              "content": "Success criteria definitions"
+            }
+          ],
+          "communication_patterns": {
+            "receives_from": [
+              {
+                "id": "comm_001_in_001",
+                "title": "User (Domain Expert)",
+                "content": "Domain knowledge and business requirements"
+              }
+            ],
+            "sends_to": [
+              {
+                "id": "comm_001_out_001",
+                "title": "Specification Designer",
+                "content": "Requirements synthesis"
+              }
+            ],
+            "collaborates_with": [
+              {
+                "id": "comm_001_collab_001",
+                "title": "Quality Validator",
+                "content": "Gap resolution and completeness validation"
+              }
+            ]
+          },
+          "autonomy_boundaries": {
+            "autonomous": [
+              {
+                "id": "auto_001_001",
+                "title": "Question Generation",
+                "content": "Asking questions and tracking conversation state"
+              }
+            ],
+            "requires_approval": [
+              {
+                "id": "approve_001_001",
+                "title": "Session Completion",
+                "content": "Concluding research session and marking requirements complete"
+              }
+            ]
+          },
+          "work_items": [
+            "WI-001",
+            "WI-010",
+            "WI-013"
+          ]
+        }
+      },
+      {
+        "id": "role_002",
+        "title": "R-002: Specification Designer",
+        "content": {
+          "code": "specification-designer",
+          "autonomy_level": "L1",
+          "autonomy_description": "Assisted Autonomy",
+          "capability_tags": [
+            "design",
+            "generation",
+            "ai",
+            "synthesis"
+          ],
+          "description": "Transforms requirements into structured agency specifications including introduction, goals, and overall architecture. Leverages AI builder services to generate cohesive agency designs.",
+          "token_budget": 12000,
+          "token_budget_unit": "tokens/generation",
+          "primary_llm": "GPT-4",
+          "deliverables": [
+            {
+              "id": "deliv_002_001",
+              "title": "Agency Introduction",
+              "content": "Complete introduction in markdown format"
+            },
+            {
+              "id": "deliv_002_002",
+              "title": "Goals Catalog",
+              "content": "Structured JSON goals catalog"
+            },
+            {
+              "id": "deliv_002_003",
+              "title": "Architecture Overview",
+              "content": "High-level architecture description"
+            },
+            {
+              "id": "deliv_002_004",
+              "title": "Artifact Coordination Plan",
+              "content": "Plan for coordinating all specification artifacts"
+            }
+          ],
+          "communication_patterns": {
+            "receives_from": [
+              {
+                "id": "comm_002_in_001",
+                "title": "Requirements Analyst",
+                "content": "Requirements document"
+              }
+            ],
+            "sends_to": [
+              {
+                "id": "comm_002_out_001",
+                "title": "Work Item Architect",
+                "content": "Design specification"
+              },
+              {
+                "id": "comm_002_out_002",
+                "title": "Role Engineer",
+                "content": "Design specification"
+              }
+            ],
+            "uses_services": [
+              {
+                "id": "comm_002_svc_001",
+                "title": "IntroductionBuilder",
+                "content": "AI service for generating introductions"
+              },
+              {
+                "id": "comm_002_svc_002",
+                "title": "GoalsBuilder",
+                "content": "AI service for generating goals"
+              }
+            ]
+          },
+          "autonomy_boundaries": {
+            "autonomous": [
+              {
+                "id": "auto_002_001",
+                "title": "Content Generation",
+                "content": "Drafting content and calling AI services"
+              }
+            ],
+            "requires_approval": [
+              {
+                "id": "approve_002_001",
+                "title": "Publication",
+                "content": "Publishing introduction and finalizing goals catalog"
+              }
+            ]
+          },
+          "work_items": [
+            "WI-002",
+            "WI-003",
+            "WI-011",
+            "WI-012",
+            "WI-014",
+            "WI-016"
+          ]
+        }
+      },
+      {
+        "id": "role_003",
+        "title": "R-003: Work Item Architect",
+        "content": {
+          "code": "work-item-architect",
+          "autonomy_level": "L2",
+          "autonomy_description": "Conditional Autonomy",
+          "capability_tags": [
+            "decomposition",
+            "planning",
+            "deliverables",
+            "dependencies"
+          ],
+          "description": "Breaks down agency goals into actionable work items with clear deliverables, dependencies, and acceptance criteria. Designs deliverable trees with proper structure.",
+          "token_budget": 10000,
+          "token_budget_unit": "tokens/generation",
+          "primary_llm": "GPT-4",
+          "deliverables": [
+            {
+              "id": "deliv_003_001",
+              "title": "Work Items Catalog",
+              "content": "Comprehensive JSON work items catalog"
+            },
+            {
+              "id": "deliv_003_002",
+              "title": "Deliverable Tree Structures",
+              "content": "Hierarchical deliverable structures"
+            },
+            {
+              "id": "deliv_003_003",
+              "title": "Dependency Graphs",
+              "content": "Visual and structured dependency graphs"
+            },
+            {
+              "id": "deliv_003_004",
+              "title": "Workflow Assignments",
+              "content": "Work item to workflow mappings"
+            },
+            {
+              "id": "deliv_003_005",
+              "title": "Traceability Matrix",
+              "content": "Goal to work items traceability matrix"
+            }
+          ],
+          "communication_patterns": {
+            "receives_from": [
+              {
+                "id": "comm_003_in_001",
+                "title": "Specification Designer",
+                "content": "Goals and architecture"
+              }
+            ],
+            "sends_to": [
+              {
+                "id": "comm_003_out_001",
+                "title": "Role Engineer",
+                "content": "Work item catalog"
+              }
+            ],
+            "uses_services": [
+              {
+                "id": "comm_003_svc_001",
+                "title": "WorkItemsBuilder",
+                "content": "AI service for generating work items"
+              }
+            ]
+          },
+          "autonomy_boundaries": {
+            "autonomous": [
+              {
+                "id": "auto_003_001",
+                "title": "Work Item Generation",
+                "content": "Generating work items and defining deliverables"
+              }
+            ],
+            "requires_approval": [
+              {
+                "id": "approve_003_001",
+                "title": "Finalization",
+                "content": "Finalizing work item list and dependency graph"
+              }
+            ]
+          },
+          "work_items": [
+            "WI-004"
+          ]
+        }
+      },
+      {
+        "id": "role_004",
+        "title": "R-004: Role Engineer",
+        "content": {
+          "code": "role-engineer",
+          "autonomy_level": "L2",
+          "autonomy_description": "Conditional Autonomy",
+          "capability_tags": [
+            "roles",
+            "capabilities",
+            "autonomy-design",
+            "raci"
+          ],
+          "description": "Defines agent roles with capabilities, autonomy levels, token budgets, and communication patterns. Generates RACI matrix mapping roles to work items.",
+          "token_budget": 10000,
+          "token_budget_unit": "tokens/generation",
+          "primary_llm": "GPT-4",
+          "deliverables": [
+            {
+              "id": "deliv_004_001",
+              "title": "Roles Catalog",
+              "content": "Comprehensive JSON roles catalog"
+            },
+            {
+              "id": "deliv_004_002",
+              "title": "RACI Matrix",
+              "content": "Complete RACI matrix in JSON format"
+            },
+            {
+              "id": "deliv_004_003",
+              "title": "Role-to-Work-Item Mapping",
+              "content": "Mapping of roles to work items"
+            },
+            {
+              "id": "deliv_004_004",
+              "title": "Communication Matrix",
+              "content": "Inter-role communication patterns"
+            },
+            {
+              "id": "deliv_004_005",
+              "title": "Capability Inventory",
+              "content": "Inventory of all role capabilities"
+            }
+          ],
+          "communication_patterns": {
+            "receives_from": [
+              {
+                "id": "comm_004_in_001",
+                "title": "Work Item Architect",
+                "content": "Work items catalog"
+              }
+            ],
+            "sends_to": [
+              {
+                "id": "comm_004_out_001",
+                "title": "Quality Validator",
+                "content": "Roles and RACI matrix"
+              }
+            ],
+            "uses_services": [
+              {
+                "id": "comm_004_svc_001",
+                "title": "RolesBuilder",
+                "content": "AI service for generating roles"
+              }
+            ]
+          },
+          "autonomy_boundaries": {
+            "autonomous": [
+              {
+                "id": "auto_004_001",
+                "title": "Role and RACI Generation",
+                "content": "Generating roles and creating RACI matrix"
+              }
+            ],
+            "requires_approval": [
+              {
+                "id": "approve_004_001",
+                "title": "Finalization",
+                "content": "Finalizing role definitions and autonomy level assignments"
+              }
+            ]
+          },
+          "work_items": [
+            "WI-005"
+          ]
+        }
+      },
+      {
+        "id": "role_005",
+        "title": "R-005: Quality Validator",
+        "content": {
+          "code": "quality-validator",
+          "autonomy_level": "L3",
+          "autonomy_description": "High Autonomy",
+          "capability_tags": [
+            "validation",
+            "consistency",
+            "completeness",
+            "qa"
+          ],
+          "description": "Validates generated specifications for completeness, consistency, and compliance with platform standards. Runs automated checks and flags issues for human review.",
+          "token_budget": 6000,
+          "token_budget_unit": "tokens/validation",
+          "primary_llm": "GPT-3.5 Turbo",
+          "deliverables": [
+            {
+              "id": "deliv_005_001",
+              "title": "Validation Report",
+              "content": "Comprehensive JSON validation report"
+            },
+            {
+              "id": "deliv_005_002",
+              "title": "Error Listings",
+              "content": "Error listings with severity levels"
+            },
+            {
+              "id": "deliv_005_003",
+              "title": "Consistency Check Results",
+              "content": "Results of consistency checks"
+            },
+            {
+              "id": "deliv_005_004",
+              "title": "Completeness Assessment",
+              "content": "Assessment of specification completeness"
+            },
+            {
+              "id": "deliv_005_005",
+              "title": "Fix Recommendations",
+              "content": "Recommendations for addressing issues"
+            }
+          ],
+          "communication_patterns": {
+            "receives_from": [
+              {
+                "id": "comm_005_in_001",
+                "title": "All Roles",
+                "content": "Specification artifacts"
+              }
+            ],
+            "sends_to": [
+              {
+                "id": "comm_005_out_001",
+                "title": "Human Reviewer",
+                "content": "Validation report"
+              },
+              {
+                "id": "comm_005_out_002",
+                "title": "Originating Role",
+                "content": "Error details for fixes"
+              }
+            ]
+          },
+          "autonomy_boundaries": {
+            "fully_autonomous": [
+              {
+                "id": "auto_005_001",
+                "title": "Validation Execution",
+                "content": "Running validation checks and generating reports"
+              }
+            ],
+            "notifies_human": [
+              {
+                "id": "notify_005_001",
+                "title": "Critical Issues",
+                "content": "Critical errors and blocking issues"
+              }
+            ]
+          },
+          "work_items": [
+            "WI-007",
+            "WI-008",
+            "WI-015"
+          ]
+        }
+      }
+    ]
+  }
+}

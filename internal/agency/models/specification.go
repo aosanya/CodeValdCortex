@@ -48,12 +48,12 @@ type AgencySpecification struct {
 type SpecificationUpdateRequest struct {
 	Introduction *map[string]string `json:"introduction,omitempty"`
 	Goals        *[]Goal            `json:"goals,omitempty"`
-	WorkItems    *[]WorkItem `json:"work_items,omitempty"`
-	Roles        *[]Role     `json:"roles,omitempty"`
-	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
-	Workflows    *[]Workflow `json:"workflows,omitempty"`
-	AIPolicy     *Policy     `json:"ai_policy,omitempty"`
-	UpdatedBy    string      `json:"updated_by,omitempty"`
+	WorkItems    *[]WorkItem        `json:"work_items,omitempty"`
+	Roles        *[]Role            `json:"roles,omitempty"`
+	RACIMatrix   *RACIMatrix        `json:"raci_matrix,omitempty"`
+	Workflows    *[]Workflow        `json:"workflows,omitempty"`
+	AIPolicy     *Policy            `json:"ai_policy,omitempty"`
+	UpdatedBy    string             `json:"updated_by,omitempty"`
 }
 
 // SpecificationPatchRequest represents a partial update to specific sections
@@ -73,11 +73,11 @@ type GetSpecificationResponse struct {
 type CreateSpecificationRequest struct {
 	Introduction map[string]string `json:"introduction"`
 	Goals        []Goal            `json:"goals,omitempty"`
-	WorkItems    []WorkItem  `json:"work_items,omitempty"`
-	Roles        []Role      `json:"roles,omitempty"`
-	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
-	Workflows    []Workflow  `json:"workflows,omitempty"`
-	AIPolicy     *Policy     `json:"ai_policy,omitempty"`
+	WorkItems    []WorkItem        `json:"work_items,omitempty"`
+	Roles        []Role            `json:"roles,omitempty"`
+	RACIMatrix   *RACIMatrix       `json:"raci_matrix,omitempty"`
+	Workflows    []Workflow        `json:"workflows,omitempty"`
+	AIPolicy     *Policy           `json:"ai_policy,omitempty"`
 }
 
 // NewAgencySpecification creates a new specification with default values
