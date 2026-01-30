@@ -43,10 +43,10 @@ type GenerateIntroductionResponse struct {
 
 // RefineSectionRequest represents a request to refine a specific section
 type RefineSectionRequest struct {
-	AgencyID         string                       `json:"agency_id"`
-	Section          *models.IntroductionSection  `json:"section"`
-	RefinementText   string                       `json:"refinement_text"`
-	AgencyContext    map[string]interface{}       `json:"agency_context"`
+	AgencyID       string                      `json:"agency_id"`
+	Section        *models.IntroductionSection `json:"section"`
+	RefinementText string                      `json:"refinement_text"`
+	AgencyContext  map[string]interface{}      `json:"agency_context"`
 }
 
 // RefineSectionResponse represents the AI response for section refinement
@@ -133,9 +133,9 @@ func (b *FlexibleIntroductionBuilder) GenerateFromKeywords(ctx context.Context, 
 	}
 
 	b.logger.WithFields(logrus.Fields{
-		"agency_id":       req.AgencyID,
-		"sections_count":  len(intro.Sections),
-		"confidence":      confidence,
+		"agency_id":      req.AgencyID,
+		"sections_count": len(intro.Sections),
+		"confidence":     confidence,
 	}).Info("Successfully generated introduction")
 
 	return &GenerateIntroductionResponse{
@@ -148,8 +148,8 @@ func (b *FlexibleIntroductionBuilder) GenerateFromKeywords(ctx context.Context, 
 // RefineSection refines a specific section based on user input
 func (b *FlexibleIntroductionBuilder) RefineSection(ctx context.Context, req *RefineSectionRequest) (*RefineSectionResponse, error) {
 	b.logger.WithFields(logrus.Fields{
-		"agency_id":   req.AgencyID,
-		"section_id":  req.Section.ID,
+		"agency_id":    req.AgencyID,
+		"section_id":   req.Section.ID,
 		"section_type": req.Section.Type,
 	}).Info("Starting AI section refinement")
 
@@ -205,10 +205,10 @@ func (b *FlexibleIntroductionBuilder) RefineSection(ctx context.Context, req *Re
 	}
 
 	b.logger.WithFields(logrus.Fields{
-		"agency_id":   req.AgencyID,
-		"section_id":  req.Section.ID,
-		"changed":     changed,
-		"confidence":  confidence,
+		"agency_id":  req.AgencyID,
+		"section_id": req.Section.ID,
+		"changed":    changed,
+		"confidence": confidence,
 	}).Info("Successfully refined section")
 
 	return &RefineSectionResponse{
