@@ -1,0 +1,186 @@
+{
+    "intro_001": {
+        "title": "Problem Statement",
+        "content": "How do we efficiently create well-designed multi-agent agencies? Currently, creating a new agency in the CodeValdCortex platform requires: (1) Manual specification writing - Documenting introduction, goals, work items, roles; (2) Database setup - Creating agency-specific databases and collections; (3) Configuration generation - Writing JSON/YAML configuration files; (4) Workflow design - Defining how work flows through the agency; (5) RACI matrix construction - Mapping responsibilities across roles. This process is time-consuming (hours to days per agency), error-prone (inconsistent specifications), knowledge-intensive (requires deep platform understanding), and not scalable (can't quickly prototype agency designs)."
+    },
+    "intro_002": {
+        "title": "Solution Approach",
+        "content": "The Genesis Agency is a meta-agency—an agency whose work items are building other agencies. It is a self-contained agency with its own agents (Specification Designer, Requirements Analyst, etc.), follows standard agency workflows, and produces concrete deliverables (agency artifacts). The collaborative design process involves: human provides domain knowledge through keywords/documents, AI agents conduct structured research, iterative refinement through Q&A dialogue, and human reviews and approves specifications. It generates complete artifacts including agency specification (introduction, goals, work items, roles), database initialization scripts, workflow definitions, RACI matrix, and deployment manifests. Quality assurance is built-in with validation checks, consistency across all agency components, best practices enforced through templates, and human-in-the-loop verification points."
+    },
+    "intro_003": {
+        "title": "Scope",
+        "content": {
+            "in_scope": [
+                {
+                    "id": "scope_in_001",
+                    "title": "Agency Specification Generation",
+                    "content": "Introduction, goals, work items, roles, RACI matrix, workflows"
+                },
+                {
+                    "id": "scope_in_002",
+                    "title": "Research-Driven Design",
+                    "content": "Keyword-based exploration, document analysis (RFPs, SOWs, specs), structured Q&A sessions"
+                },
+                {
+                    "id": "scope_in_003",
+                    "title": "Gap Identification and Resolution",
+                    "content": "Iterative refinement cycles"
+                },
+                {
+                    "id": "scope_in_004",
+                    "title": "Artifact Generation",
+                    "content": "JSON/YAML specifications, database initialization scripts, ArangoDB collection schemas"
+                },
+                {
+                    "id": "scope_in_005",
+                    "title": "Deployment Artifacts",
+                    "content": "Deployment manifests and documentation templates"
+                },
+                {
+                    "id": "scope_in_006",
+                    "title": "Human-AI Collaboration",
+                    "content": "Interactive Q&A, review/approval workflows, refinement requests"
+                },
+                {
+                    "id": "scope_in_007",
+                    "title": "Knowledge Capture",
+                    "content": "Expert knowledge capture and formalization"
+                }
+            ],
+            "out_of_scope": [
+                {
+                    "id": "scope_out_001",
+                    "title": "Runtime Agency Management",
+                    "content": "Activating/deactivating agencies - handled by Agency Management System"
+                },
+                {
+                    "id": "scope_out_002",
+                    "title": "Agent Lifecycle",
+                    "content": "Agent spawning and lifecycle - handled by Orchestration"
+                },
+                {
+                    "id": "scope_out_003",
+                    "title": "Monitoring and Metrics",
+                    "content": "Handled by Monitoring system"
+                },
+                {
+                    "id": "scope_out_004",
+                    "title": "Custom Agent Code",
+                    "content": "Custom agent implementation code generation"
+                },
+                {
+                    "id": "scope_out_005",
+                    "title": "API Implementation",
+                    "content": "API endpoint implementations"
+                },
+                {
+                    "id": "scope_out_006",
+                    "title": "Database Optimization",
+                    "content": "Database query optimization"
+                },
+                {
+                    "id": "scope_out_007",
+                    "title": "Infrastructure Provisioning",
+                    "content": "Server deployment, network configuration, security policy setup"
+                }
+            ]
+        }
+    },
+    "intro_004": {
+        "title": "Context",
+        "content": "CodeValdCortex is a multi-agent platform where agencies are collections of autonomous agents (AI and human) that collaborate to achieve goals. Key platform concepts include: Agency (organizational unit with goals, roles, and workflows), Agent (autonomous entity with specific capabilities), Work Item (actionable task progressing through workflows), Role (definition of agent capabilities and autonomy level L0-L4), Workflow (state machine defining work item progression), and RACI Matrix (maps roles to responsibilities). Currently deployed agencies include Water Distribution Network (UC-INFRA-001), Warehouse Management (UC-WMS-001), Financial Risk Analysis (UC-FRA-001), and Smart Logistics Platform (UC-LOG-001). Each was manually designed requiring significant effort. The technology stack includes Go backend (Gin framework), ArangoDB (graph database), AI Integration (OpenAI GPT-4, Anthropic Claude), Frontend (Templ templates, Alpine.js, Bulma CSS), and custom multi-agent orchestration. The Genesis Agency leverages the Research Prompt Framework (.github/prompts/research.prompt.md) which provides one-question-at-a-time exploration, explicit path selection (DEEPER/NOTE/NEXT/REVIEW), gap tracking system, periodic progress reviews, and red flag identification for inconsistencies."
+    },
+    "intro_005": {
+        "title": "Success Criteria",
+        "content": [
+            {
+                "id": "success_001",
+                "title": "Speed",
+                "content": "Agency specification can be generated in 1-2 hours instead of days"
+            },
+            {
+                "id": "success_002",
+                "title": "Quality",
+                "content": "Generated agencies pass all validation checks first time"
+            },
+            {
+                "id": "success_003",
+                "title": "Consistency",
+                "content": "All agencies follow same structural patterns"
+            },
+            {
+                "id": "success_004",
+                "title": "Completeness",
+                "content": "No missing sections in generated specifications"
+            },
+            {
+                "id": "success_005",
+                "title": "Usability",
+                "content": "Non-technical domain experts can drive the process"
+            },
+            {
+                "id": "success_006",
+                "title": "Iteration",
+                "content": "Easy to refine and regenerate sections"
+            },
+            {
+                "id": "success_007",
+                "title": "Reusability",
+                "content": "Common patterns can be templated for similar agencies"
+            }
+        ]
+    },
+    "intro_006": {
+        "title": "Stakeholders",
+        "content": [
+            {
+                "id": "stakeholder_001",
+                "title": "Platform Administrators",
+                "content": {
+                    "role": "Primary User",
+                    "interest": "Creating new agency types for the platform"
+                }
+            },
+            {
+                "id": "stakeholder_002",
+                "title": "Solution Architects",
+                "content": {
+                    "role": "Primary User",
+                    "interest": "Designing agencies for specific business domains"
+                }
+            },
+            {
+                "id": "stakeholder_003",
+                "title": "Domain Experts",
+                "content": {
+                    "role": "Primary User",
+                    "interest": "Providing knowledge to shape agency specifications"
+                }
+            },
+            {
+                "id": "stakeholder_004",
+                "title": "AI Researchers",
+                "content": {
+                    "role": "Secondary User",
+                    "interest": "Experimenting with multi-agent architectures"
+                }
+            },
+            {
+                "id": "stakeholder_005",
+                "title": "Business Analysts",
+                "content": {
+                    "role": "Secondary User",
+                    "interest": "Translating requirements into agency designs"
+                }
+            },
+            {
+                "id": "stakeholder_006",
+                "title": "Developers",
+                "content": {
+                    "role": "Secondary User",
+                    "interest": "Understanding agency structure for customization"
+                }
+            }
+        ]
+    }
+}

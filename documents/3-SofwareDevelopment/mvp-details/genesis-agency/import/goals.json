@@ -1,0 +1,199 @@
+[
+    {
+        "id": "G-001",
+        "title": "Accelerate Agency Creation",
+        "type": "Efficiency",
+        "priority": "P0",
+        "status": "active",
+        "description": "Reduce the time required to create a complete agency specification from days to hours through AI-assisted design and automated artifact generation.",
+        "rationale": "Manual agency creation is currently a bottleneck for platform growth. Enabling rapid prototyping and deployment of new agencies accelerates solution delivery.",
+        "success_metrics": [
+            "Agency specification generated in < 2 hours (vs. 2-3 days manual)",
+            "90% reduction in specification errors",
+            "5+ agencies created per week (vs. 1 per month currently)"
+        ],
+        "related_work_items": [
+            "WI-001",
+            "WI-002",
+            "WI-003",
+            "WI-004"
+        ]
+    },
+    {
+        "id": "G-002",
+        "title": "Ensure Specification Quality",
+        "type": "Quality",
+        "priority": "P0",
+        "status": "active",
+        "description": "Generate agency specifications that are complete, consistent, and compliant with platform standards on first generation.",
+        "rationale": "Poor quality specifications lead to runtime issues, require rework, and undermine trust in the Genesis Agency.",
+        "success_metrics": [
+            "100% of generated specifications pass validation checks",
+            "Zero missing required fields (introduction, goals, roles, work items)",
+            "RACI matrix completeness: all work items covered",
+            "Consistency checks: role references valid, goal-to-work-item traceability"
+        ],
+        "related_work_items": [
+            "WI-007",
+            "WI-008",
+            "WI-009"
+        ]
+    },
+    {
+        "id": "G-003",
+        "title": "Enable Domain Expert Collaboration",
+        "type": "Innovation",
+        "priority": "P1",
+        "status": "active",
+        "description": "Allow non-technical domain experts to drive agency design through natural language dialogue, removing technical barriers.",
+        "rationale": "Domain expertise resides with business stakeholders, not platform engineers. Democratizing agency creation unlocks this knowledge.",
+        "success_metrics": [
+            "Domain experts complete agency design without developer assistance",
+            "80% user satisfaction score in usability testing",
+            "Average 10 questions to reach publishable specification",
+            "Users can answer questions without needing technical documentation"
+        ],
+        "related_work_items": [
+            "WI-002",
+            "WI-010",
+            "WI-011"
+        ]
+    },
+    {
+        "id": "G-004",
+        "title": "Capture Organizational Knowledge",
+        "type": "Innovation",
+        "priority": "P1",
+        "status": "active",
+        "description": "Extract and formalize agency design patterns from successful deployments, creating reusable templates and best practices.",
+        "rationale": "Similar agencies share structural patterns (e.g., all logistics agencies need receiving/storage/shipping). Capturing these accelerates future designs.",
+        "success_metrics": [
+            "Library of 10+ agency templates by domain",
+            "Pattern reuse in 60% of new agency designs",
+            "Template-based agencies require 50% fewer questions",
+            "Knowledge base updated after each successful deployment"
+        ],
+        "related_work_items": [
+            "WI-012",
+            "WI-013"
+        ]
+    },
+    {
+        "id": "G-005",
+        "title": "Generate Complete Deployment Artifacts",
+        "type": "Efficiency",
+        "priority": "P0",
+        "status": "active",
+        "description": "Produce all artifacts needed to deploy a new agency: specifications, database schemas, configuration files, and deployment manifests.",
+        "rationale": "Incomplete artifact generation still requires manual work. True automation means zero post-generation editing required.",
+        "success_metrics": [
+            "100% of required artifacts generated automatically",
+            "Artifacts deployable without manual modification",
+            "Database initialization scripts execute successfully first time",
+            "Workflow JSON files load without validation errors"
+        ],
+        "related_work_items": [
+            "WI-005",
+            "WI-006",
+            "WI-014"
+        ]
+    },
+    {
+        "id": "G-006",
+        "title": "Support Iterative Refinement",
+        "type": "Quality",
+        "priority": "P1",
+        "status": "active",
+        "description": "Enable users to review, critique, and refine any part of the generated specification through conversational interaction.",
+        "rationale": "First-pass generation won't be perfect. Users need easy ways to request changes without starting over.",
+        "success_metrics": [
+            "Users can refine individual sections without regenerating entire spec",
+            "Refinement requests processed in < 30 seconds",
+            "90% of refinement requests result in acceptable output",
+            "Change history tracked for audit and rollback"
+        ],
+        "related_work_items": [
+            "WI-010",
+            "WI-011",
+            "WI-015"
+        ]
+    },
+    {
+        "id": "G-007",
+        "title": "Maintain Agency Consistency",
+        "type": "Quality",
+        "priority": "P1",
+        "status": "active",
+        "description": "Ensure all generated agency components align with each other and follow platform conventions consistently.",
+        "rationale": "Inconsistent specifications cause runtime errors (e.g., RACI matrix references non-existent roles, work items link to non-existent goals).",
+        "success_metrics": [
+            "Zero cross-reference errors in generated specs",
+            "All role names match across sections",
+            "Goal-to-work-item traceability 100% complete",
+            "Naming conventions followed (IDs, codes, titles)"
+        ],
+        "related_work_items": [
+            "WI-007",
+            "WI-008",
+            "WI-009"
+        ]
+    },
+    {
+        "id": "G-008",
+        "title": "Document Design Decisions",
+        "type": "Quality",
+        "priority": "P2",
+        "status": "active",
+        "description": "Capture rationale for key design decisions made during agency creation for future reference and learning.",
+        "rationale": "Understanding why design choices were made helps with future modifications and knowledge transfer.",
+        "success_metrics": [
+            "Design rationale documented for major decisions",
+            "Traceability from requirements to design choices",
+            "Decision log exportable for documentation",
+            "Rationale included in generated artifacts"
+        ],
+        "related_work_items": [
+            "WI-013",
+            "WI-016"
+        ]
+    },
+    {
+        "id": "G-009",
+        "title": "Scale to Multiple Agency Types",
+        "type": "Scalability",
+        "priority": "P2",
+        "status": "active",
+        "description": "Support creation of agencies across diverse domains (infrastructure, healthcare, logistics, finance, etc.) without domain-specific customization.",
+        "rationale": "Platform value grows with agency diversity. Genesis Agency must be domain-agnostic.",
+        "success_metrics": [
+            "Successful agency generation in 5+ different domains",
+            "No domain-specific code changes required",
+            "Template library covers 80% of common patterns",
+            "Cross-domain knowledge transfer demonstrated"
+        ],
+        "related_work_items": [
+            "WI-012",
+            "WI-013"
+        ]
+    },
+    {
+        "id": "G-010",
+        "title": "Integrate with Platform Lifecycle",
+        "type": "Integration",
+        "priority": "P1",
+        "status": "active",
+        "description": "Seamlessly integrate with existing agency management, publishing, and activation workflows.",
+        "rationale": "Genesis Agency output must feed directly into the platform's agency lifecycle (draft → published → activated).",
+        "success_metrics": [
+            "Generated agencies transition to 'draft' state automatically",
+            "Publishing workflow validates Genesis Agency output",
+            "Activation succeeds without manual intervention",
+            "Existing tools (Agency Designer, Workflow Designer) work with generated specs"
+        ],
+        "related_work_items": [
+            "WI-005",
+            "WI-006",
+            "WI-014"
+        ]
+    }
+]

@@ -1,0 +1,1083 @@
+[
+  {
+    "id": "WI-001",
+    "title": "Conduct Requirements Research Session",
+    "content": {
+      "goals": [
+        "G-001",
+        "G-003"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "research",
+        "requirements",
+        "interactive",
+        "analysis"
+      ],
+      "description": "Execute a structured research session with domain experts using the research prompt framework to extract business requirements, processes, stakeholders, and constraints.",
+      "deliverables": [
+        {
+          "id": "deliv_wi001_001",
+          "title": "requirements/",
+          "content": {
+            "type": "folder",
+            "children": [
+              {
+                "id": "deliv_wi001_002",
+                "title": "research-transcript.md",
+                "content": "Q&A conversation log"
+              },
+              {
+                "id": "deliv_wi001_003",
+                "title": "requirements-summary.md",
+                "content": "Synthesized requirements"
+              },
+              {
+                "id": "deliv_wi001_004",
+                "title": "stakeholders.md",
+                "content": "Identified stakeholders"
+              },
+              {
+                "id": "deliv_wi001_005",
+                "title": "processes.md",
+                "content": "Key business processes"
+              },
+              {
+                "id": "deliv_wi001_006",
+                "title": "constraints.md",
+                "content": "Technical/business constraints"
+              },
+              {
+                "id": "deliv_wi001_007",
+                "title": "gap-analysis.md",
+                "content": "Identified knowledge gaps"
+              }
+            ]
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi001_001",
+          "title": "Question Coverage",
+          "content": "All critical question categories explored (Architecture, Data, Business Logic)"
+        },
+        {
+          "id": "ac_wi001_002",
+          "title": "Gap Documentation",
+          "content": "Gaps documented with severity levels"
+        },
+        {
+          "id": "ac_wi001_003",
+          "title": "Stakeholder Identification",
+          "content": "Stakeholder roles clearly identified"
+        },
+        {
+          "id": "ac_wi001_004",
+          "title": "Success Criteria",
+          "content": "Success criteria defined"
+        },
+        {
+          "id": "ac_wi001_005",
+          "title": "User Confirmation",
+          "content": "User confirms sufficient understanding"
+        }
+      ],
+      "estimated_effort": "1-2 hours",
+      "dependencies": [],
+      "tools": [
+        "Research Prompt Framework"
+      ]
+    }
+  },
+  {
+    "id": "WI-002",
+    "title": "Generate Agency Introduction",
+    "content": {
+      "goals": [
+        "G-002",
+        "G-005"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "specification",
+        "generation",
+        "ai-assisted",
+        "introduction"
+      ],
+      "description": "Generate a comprehensive agency introduction including problem statement, solution approach, scope, context, and success criteria based on gathered requirements.",
+      "deliverables": [
+        {
+          "id": "deliv_wi002_001",
+          "title": "introduction.md",
+          "content": {
+            "type": "file",
+            "sections": [
+              "Problem Statement",
+              "Solution Approach",
+              "Scope (In Scope / Out of Scope)",
+              "Context & Background",
+              "Success Criteria",
+              "Stakeholders"
+            ]
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi002_001",
+          "title": "Section Completeness",
+          "content": "All required sections present"
+        },
+        {
+          "id": "ac_wi002_002",
+          "title": "Problem Clarity",
+          "content": "Clear problem articulation"
+        },
+        {
+          "id": "ac_wi002_003",
+          "title": "Scope Boundaries",
+          "content": "Explicit scope boundaries"
+        },
+        {
+          "id": "ac_wi002_004",
+          "title": "Measurable Criteria",
+          "content": "Measurable success criteria"
+        },
+        {
+          "id": "ac_wi002_005",
+          "title": "Requirements Reference",
+          "content": "References requirements document"
+        }
+      ],
+      "estimated_effort": "30 minutes",
+      "dependencies": [
+        "WI-001"
+      ],
+      "tools": [
+        "IntroductionBuilder AI service"
+      ]
+    }
+  },
+  {
+    "id": "WI-003",
+    "title": "Generate Goals Catalog",
+    "content": {
+      "goals": [
+        "G-002",
+        "G-005",
+        "G-007"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "specification",
+        "goals",
+        "generation",
+        "ai-assisted",
+        "smart-goals"
+      ],
+      "description": "Transform requirements into structured SMART goals categorized by type (Efficiency, Quality, Innovation, Scalability, Integration).",
+      "deliverables": [
+        {
+          "id": "deliv_wi003_001",
+          "title": "goals.json",
+          "content": {
+            "type": "file",
+            "structure": "Array of goal objects with id, title, type, priority, description, rationale, success_metrics, related_work_items"
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi003_001",
+          "title": "SMART Compliance",
+          "content": "Goals follow SMART criteria (Specific, Measurable, Achievable, Relevant, Time-bound)"
+        },
+        {
+          "id": "ac_wi003_002",
+          "title": "Minimum Count",
+          "content": "At least 5 goals defined"
+        },
+        {
+          "id": "ac_wi003_003",
+          "title": "Requirement Coverage",
+          "content": "Goals cover all requirement areas"
+        },
+        {
+          "id": "ac_wi003_004",
+          "title": "Quantified Metrics",
+          "content": "Success metrics quantified"
+        },
+        {
+          "id": "ac_wi003_005",
+          "title": "Dependencies Documented",
+          "content": "Goal dependencies documented"
+        }
+      ],
+      "estimated_effort": "45 minutes",
+      "dependencies": [
+        "WI-001",
+        "WI-002"
+      ],
+      "tools": [
+        "GoalsBuilder AI service"
+      ]
+    }
+  },
+  {
+    "id": "WI-004",
+    "title": "Decompose Work Items",
+    "content": {
+      "goals": [
+        "G-001",
+        "G-005",
+        "G-007"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "specification",
+        "decomposition",
+        "planning",
+        "work-items",
+        "ai-assisted"
+      ],
+      "description": "Break down goals into actionable work items with clear deliverables, dependencies, and acceptance criteria. Design deliverable tree structures.",
+      "deliverables": [
+        {
+          "id": "deliv_wi004_001",
+          "title": "work-items.json",
+          "content": {
+            "type": "file",
+            "structure": "Array of work item objects with id, title, goal_keys, description, deliverables_structured, dependencies, acceptance_criteria, estimated_effort"
+          }
+        },
+        {
+          "id": "deliv_wi004_002",
+          "title": "deliverable-trees.json",
+          "content": "Visual representation of deliverable hierarchies"
+        },
+        {
+          "id": "deliv_wi004_003",
+          "title": "dependency-graph.json",
+          "content": "Work item dependency relationships"
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi004_001",
+          "title": "Goal Traceability",
+          "content": "All goals traced to at least one work item"
+        },
+        {
+          "id": "ac_wi004_002",
+          "title": "Deliverable Structure",
+          "content": "Deliverables structured hierarchically (folders/files)"
+        },
+        {
+          "id": "ac_wi004_003",
+          "title": "Dependency Identification",
+          "content": "Dependencies identify blocking relationships"
+        },
+        {
+          "id": "ac_wi004_004",
+          "title": "Testable Criteria",
+          "content": "Acceptance criteria testable"
+        },
+        {
+          "id": "ac_wi004_005",
+          "title": "Effort Estimation",
+          "content": "Effort estimates provided"
+        }
+      ],
+      "estimated_effort": "1 hour",
+      "dependencies": [
+        "WI-003"
+      ],
+      "tools": [
+        "WorkItemsBuilder AI service"
+      ]
+    }
+  },
+  {
+    "id": "WI-005",
+    "title": "Define Agent Roles",
+    "content": {
+      "goals": [
+        "G-002",
+        "G-005",
+        "G-007"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "specification",
+        "roles",
+        "design",
+        "ai-assisted",
+        "autonomy"
+      ],
+      "description": "Design agent roles with capabilities, autonomy levels (L0-L4), token budgets, and required skills based on work items that need to be performed.",
+      "deliverables": [
+        {
+          "id": "deliv_wi005_001",
+          "title": "roles.json",
+          "content": {
+            "type": "file",
+            "structure": "Array of role objects with code, name, description, tags, autonomy_level, capabilities, required_skills, token_budget, llm_model, communication_patterns"
+          }
+        },
+        {
+          "id": "deliv_wi005_002",
+          "title": "role-mapping.json",
+          "content": "Map of which roles handle which work items"
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi005_001",
+          "title": "Minimum Roles",
+          "content": "At least 3 roles defined"
+        },
+        {
+          "id": "ac_wi005_002",
+          "title": "Autonomy Justification",
+          "content": "Autonomy levels justified based on task risk"
+        },
+        {
+          "id": "ac_wi005_003",
+          "title": "Token Budgets",
+          "content": "Token budgets appropriate for complexity"
+        },
+        {
+          "id": "ac_wi005_004",
+          "title": "Work Item Coverage",
+          "content": "All work items covered by at least one role"
+        },
+        {
+          "id": "ac_wi005_005",
+          "title": "Communication Documentation",
+          "content": "Communication patterns documented"
+        }
+      ],
+      "estimated_effort": "45 minutes",
+      "dependencies": [
+        "WI-004"
+      ],
+      "tools": [
+        "RolesBuilder AI service"
+      ]
+    }
+  },
+  {
+    "id": "WI-006",
+    "title": "Generate RACI Matrix",
+    "content": {
+      "goals": [
+        "G-002",
+        "G-005",
+        "G-007"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "specification",
+        "raci",
+        "responsibilities",
+        "generation"
+      ],
+      "description": "Create RACI (Responsible, Accountable, Consulted, Informed) matrix mapping roles to work item activities, ensuring clear responsibility assignments.",
+      "deliverables": [
+        {
+          "id": "deliv_wi006_001",
+          "title": "raci-matrix.json",
+          "content": {
+            "type": "file",
+            "structure": "Activities array and assignments array mapping activity_id, role_code, responsibility_type"
+          }
+        },
+        {
+          "id": "deliv_wi006_002",
+          "title": "raci-validation.json",
+          "content": "Validation results (coverage, conflicts)"
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi006_001",
+          "title": "Activities Defined",
+          "content": "All work items have activities defined"
+        },
+        {
+          "id": "ac_wi006_002",
+          "title": "Responsible Assignment",
+          "content": "Each activity has exactly one Responsible role"
+        },
+        {
+          "id": "ac_wi006_003",
+          "title": "Accountable Assignment",
+          "content": "Each activity has exactly one Accountable role"
+        },
+        {
+          "id": "ac_wi006_004",
+          "title": "No Conflicts",
+          "content": "No RACI conflicts (e.g., same role R and A for same activity)"
+        },
+        {
+          "id": "ac_wi006_005",
+          "title": "Complete Coverage",
+          "content": "100% activity coverage"
+        }
+      ],
+      "estimated_effort": "30 minutes",
+      "dependencies": [
+        "WI-005"
+      ],
+      "tools": [
+        "Custom RACI generator"
+      ]
+    }
+  },
+  {
+    "id": "WI-007",
+    "title": "Validate Specification Completeness",
+    "content": {
+      "goals": [
+        "G-002",
+        "G-007"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "validation",
+        "quality",
+        "automated",
+        "completeness"
+      ],
+      "description": "Run automated checks to ensure all required specification sections are present and properly structured.",
+      "deliverables": [
+        {
+          "id": "deliv_wi007_001",
+          "title": "validation-report.json",
+          "content": {
+            "type": "file",
+            "structure": "Completeness metrics, errors array, warnings array with section, severity, message"
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi007_001",
+          "title": "Section Validation",
+          "content": "All required sections validated"
+        },
+        {
+          "id": "ac_wi007_002",
+          "title": "Schema Compliance",
+          "content": "Schema compliance checked"
+        },
+        {
+          "id": "ac_wi007_003",
+          "title": "Missing Fields",
+          "content": "Missing fields identified"
+        },
+        {
+          "id": "ac_wi007_004",
+          "title": "Severity Levels",
+          "content": "Severity levels assigned (critical, warning, info)"
+        },
+        {
+          "id": "ac_wi007_005",
+          "title": "Actionable Messages",
+          "content": "Actionable error messages"
+        }
+      ],
+      "estimated_effort": "15 minutes",
+      "dependencies": [
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ],
+      "tools": [
+        "JSON schema validator",
+        "Custom completeness checker"
+      ]
+    }
+  },
+  {
+    "id": "WI-008",
+    "title": "Validate Cross-Reference Consistency",
+    "content": {
+      "goals": [
+        "G-002",
+        "G-007"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "validation",
+        "consistency",
+        "automated",
+        "cross-reference"
+      ],
+      "description": "Verify that all cross-references between specification components are valid (e.g., work items reference valid goals and roles).",
+      "deliverables": [
+        {
+          "id": "deliv_wi008_001",
+          "title": "consistency-report.json",
+          "content": {
+            "type": "file",
+            "structure": "Goal references, role references, work item references validation, dependency cycles, orphans"
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi008_001",
+          "title": "Goal References",
+          "content": "All goal references resolve"
+        },
+        {
+          "id": "ac_wi008_002",
+          "title": "Role Validity",
+          "content": "All role codes valid and assigned to work items"
+        },
+        {
+          "id": "ac_wi008_003",
+          "title": "No Cycles",
+          "content": "No circular dependencies in work items"
+        },
+        {
+          "id": "ac_wi008_004",
+          "title": "No Orphans",
+          "content": "No orphaned entities (unreferenced goals/roles)"
+        },
+        {
+          "id": "ac_wi008_005",
+          "title": "Naming Conventions",
+          "content": "Naming conventions followed"
+        }
+      ],
+      "estimated_effort": "15 minutes",
+      "dependencies": [
+        "WI-007"
+      ],
+      "tools": [
+        "Graph analysis",
+        "Reference validator"
+      ]
+    }
+  },
+  {
+    "id": "WI-010",
+    "title": "Conduct Review Session",
+    "content": {
+      "goals": [
+        "G-003",
+        "G-006"
+      ],
+      "status": "Active",
+      "priority": "P1",
+      "tags": [
+        "review",
+        "collaboration",
+        "interactive",
+        "feedback"
+      ],
+      "description": "Present generated specification to user for review, gather feedback, and identify sections needing refinement.",
+      "deliverables": [
+        {
+          "id": "deliv_wi010_001",
+          "title": "review-feedback.md",
+          "content": {
+            "type": "file",
+            "sections": [
+              "Approved Sections",
+              "Requested Changes (by section)",
+              "Clarification Questions",
+              "Overall Assessment"
+            ]
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi010_001",
+          "title": "All Sections Reviewed",
+          "content": "All specification sections reviewed"
+        },
+        {
+          "id": "ac_wi010_002",
+          "title": "Specific Feedback",
+          "content": "Feedback documented with specificity"
+        },
+        {
+          "id": "ac_wi010_003",
+          "title": "Prioritized Changes",
+          "content": "Changes prioritized (critical, nice-to-have)"
+        },
+        {
+          "id": "ac_wi010_004",
+          "title": "Satisfaction Rating",
+          "content": "User satisfaction rating collected"
+        }
+      ],
+      "estimated_effort": "30-60 minutes",
+      "dependencies": [
+        "WI-008"
+      ],
+      "tools": []
+    }
+  },
+  {
+    "id": "WI-011",
+    "title": "Refine Specification Sections",
+    "content": {
+      "goals": [
+        "G-006"
+      ],
+      "status": "Active",
+      "priority": "P1",
+      "tags": [
+        "refinement",
+        "iteration",
+        "review",
+        "ai-assisted"
+      ],
+      "description": "Regenerate or manually edit specific specification sections based on review feedback without regenerating entire specification.",
+      "deliverables": [
+        {
+          "id": "deliv_wi011_001",
+          "title": "Updated section files",
+          "content": "Varies by feedback"
+        },
+        {
+          "id": "deliv_wi011_002",
+          "title": "change-log.md",
+          "content": "What changed, why, who requested"
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi011_001",
+          "title": "Changes Implemented",
+          "content": "Requested changes implemented"
+        },
+        {
+          "id": "ac_wi011_002",
+          "title": "Change Log",
+          "content": "Change log maintained"
+        },
+        {
+          "id": "ac_wi011_003",
+          "title": "Re-validation",
+          "content": "Re-validation passes"
+        },
+        {
+          "id": "ac_wi011_004",
+          "title": "User Approval",
+          "content": "User approves changes"
+        }
+      ],
+      "estimated_effort": "15-45 minutes per section",
+      "dependencies": [
+        "WI-010"
+      ],
+      "tools": [
+        "Appropriate AI builder service for section type"
+      ]
+    }
+  },
+  {
+    "id": "WI-012",
+    "title": "Generate Agency Template",
+    "content": {
+      "goals": [
+        "G-004",
+        "G-009"
+      ],
+      "status": "Planned",
+      "priority": "P2",
+      "tags": [
+        "template",
+        "knowledge",
+        "patterns",
+        "reusability"
+      ],
+      "description": "Extract reusable pattern from successfully deployed agency and create template for similar future agencies.",
+      "deliverables": [
+        {
+          "id": "deliv_wi012_001",
+          "title": "templates/{category}-agency-template.json",
+          "content": {
+            "type": "file",
+            "structure": "Name, category, description, typical_goals, common_roles, standard_work_items, raci_patterns"
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi012_001",
+          "title": "Pattern Capture",
+          "content": "Template captures structural patterns"
+        },
+        {
+          "id": "ac_wi012_002",
+          "title": "Parameterization",
+          "content": "Parameterized for customization"
+        },
+        {
+          "id": "ac_wi012_003",
+          "title": "Usage Documentation",
+          "content": "Documentation explains when to use"
+        },
+        {
+          "id": "ac_wi012_004",
+          "title": "Pattern Validation",
+          "content": "At least 3 agencies fit pattern"
+        }
+      ],
+      "estimated_effort": "2 hours",
+      "dependencies": [],
+      "tools": []
+    }
+  },
+  {
+    "id": "WI-013",
+    "title": "Update Knowledge Base",
+    "content": {
+      "goals": [
+        "G-004",
+        "G-008"
+      ],
+      "status": "Planned",
+      "priority": "P2",
+      "tags": [
+        "knowledge",
+        "documentation",
+        "patterns",
+        "lessons-learned"
+      ],
+      "description": "Document design decisions, patterns, and lessons learned from agency creation session in central knowledge base.",
+      "deliverables": [
+        {
+          "id": "deliv_wi013_001",
+          "title": "knowledge-base/",
+          "content": {
+            "type": "folder",
+            "children": [
+              {
+                "id": "deliv_wi013_002",
+                "title": "design-patterns/{domain}.md",
+                "content": "Domain-specific patterns"
+              },
+              {
+                "id": "deliv_wi013_003",
+                "title": "common-pitfalls.md",
+                "content": "Common pitfalls and how to avoid them"
+              },
+              {
+                "id": "deliv_wi013_004",
+                "title": "best-practices.md",
+                "content": "Best practices for agency design"
+              },
+              {
+                "id": "deliv_wi013_005",
+                "title": "decision-rationale/{agency-id}.md",
+                "content": "Design decision rationale"
+              }
+            ]
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi013_001",
+          "title": "Decision Documentation",
+          "content": "Key decisions documented with rationale"
+        },
+        {
+          "id": "ac_wi013_002",
+          "title": "Generalized Patterns",
+          "content": "Patterns generalized beyond specific agency"
+        },
+        {
+          "id": "ac_wi013_003",
+          "title": "Searchable",
+          "content": "Searchable and indexed"
+        },
+        {
+          "id": "ac_wi013_004",
+          "title": "Referenced",
+          "content": "Referenced in future sessions"
+        }
+      ],
+      "estimated_effort": "30 minutes",
+      "dependencies": [
+        "WI-010"
+      ],
+      "tools": []
+    }
+  },
+  {
+    "id": "WI-014",
+    "title": "Generate Deployment Artifacts",
+    "content": {
+      "goals": [
+        "G-005",
+        "G-010"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "deployment",
+        "artifacts",
+        "generation",
+        "automated"
+      ],
+      "description": "Generate all artifacts needed to deploy the new agency: database schemas, configuration files, deployment manifests.",
+      "deliverables": [
+        {
+          "id": "deliv_wi014_001",
+          "title": "artifacts/",
+          "content": {
+            "type": "folder",
+            "children": [
+              {
+                "id": "deliv_wi014_002",
+                "title": "agency-specification.json",
+                "content": "Complete spec for platform"
+              },
+              {
+                "id": "deliv_wi014_003",
+                "title": "database-init.aql",
+                "content": "ArangoDB initialization"
+              },
+              {
+                "id": "deliv_wi014_004",
+                "title": "collections-schema.json",
+                "content": "Collection definitions"
+              },
+              {
+                "id": "deliv_wi014_005",
+                "title": "deployment-manifest.yaml",
+                "content": "Deployment configuration"
+              },
+              {
+                "id": "deliv_wi014_006",
+                "title": "README.md",
+                "content": "Deployment instructions"
+              }
+            ]
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi014_001",
+          "title": "All Files Generated",
+          "content": "All required files generated"
+        },
+        {
+          "id": "ac_wi014_002",
+          "title": "Syntax Validation",
+          "content": "Syntax validation passes"
+        },
+        {
+          "id": "ac_wi014_003",
+          "title": "Deployable",
+          "content": "Files deployable without modification"
+        },
+        {
+          "id": "ac_wi014_004",
+          "title": "Clear Instructions",
+          "content": "README provides clear instructions"
+        }
+      ],
+      "estimated_effort": "20 minutes",
+      "dependencies": [
+        "WI-008"
+      ],
+      "tools": [
+        "Template rendering engine"
+      ]
+    }
+  },
+  {
+    "id": "WI-015",
+    "title": "Deploy Agency to Platform",
+    "content": {
+      "goals": [
+        "G-010"
+      ],
+      "status": "Active",
+      "priority": "P0",
+      "tags": [
+        "deployment",
+        "automated",
+        "platform-integration"
+      ],
+      "description": "Create agency record in platform database, initialize agency-specific database, and set up initial specification.",
+      "deliverables": [
+        {
+          "id": "deliv_wi015_001",
+          "title": "Agency record",
+          "content": "Created in platform"
+        },
+        {
+          "id": "deliv_wi015_002",
+          "title": "Agency database",
+          "content": "Initialized"
+        },
+        {
+          "id": "deliv_wi015_003",
+          "title": "Initial specification",
+          "content": "Uploaded"
+        },
+        {
+          "id": "deliv_wi015_004",
+          "title": "Status",
+          "content": "Set to draft"
+        },
+        {
+          "id": "deliv_wi015_005",
+          "title": "deployment-log.json",
+          "content": "Deployment log"
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi015_001",
+          "title": "API Access",
+          "content": "Agency accessible via API"
+        },
+        {
+          "id": "ac_wi015_002",
+          "title": "Database Collections",
+          "content": "Database contains standard collections"
+        },
+        {
+          "id": "ac_wi015_003",
+          "title": "Specification Retrieval",
+          "content": "Specification retrievable"
+        },
+        {
+          "id": "ac_wi015_004",
+          "title": "UI Visibility",
+          "content": "Agency appears in agency selection UI"
+        }
+      ],
+      "estimated_effort": "10 minutes",
+      "dependencies": [
+        "WI-014"
+      ],
+      "tools": [
+        "Agency Management Service",
+        "Database Initializer"
+      ]
+    }
+  },
+  {
+    "id": "WI-016",
+    "title": "Generate Documentation Package",
+    "content": {
+      "goals": [
+        "G-008"
+      ],
+      "status": "Planned",
+      "priority": "P2",
+      "tags": [
+        "documentation",
+        "generation",
+        "diagrams"
+      ],
+      "description": "Create comprehensive documentation package for the newly created agency including architecture diagrams, setup instructions, and usage guides.",
+      "deliverables": [
+        {
+          "id": "deliv_wi016_001",
+          "title": "documentation/",
+          "content": {
+            "type": "folder",
+            "children": [
+              {
+                "id": "deliv_wi016_002",
+                "title": "architecture-overview.md",
+                "content": "Architecture overview"
+              },
+              {
+                "id": "deliv_wi016_003",
+                "title": "setup-guide.md",
+                "content": "Setup guide"
+              },
+              {
+                "id": "deliv_wi016_004",
+                "title": "user-guide.md",
+                "content": "User guide"
+              },
+              {
+                "id": "deliv_wi016_005",
+                "title": "api-reference.md",
+                "content": "API reference"
+              },
+              {
+                "id": "deliv_wi016_006",
+                "title": "diagrams/",
+                "content": {
+                  "type": "folder",
+                  "children": [
+                    {
+                      "id": "deliv_wi016_007",
+                      "title": "architecture.png",
+                      "content": "Architecture diagram"
+                    },
+                    {
+                      "id": "deliv_wi016_008",
+                      "title": "workflow.png",
+                      "content": "Workflow diagram"
+                    },
+                    {
+                      "id": "deliv_wi016_009",
+                      "title": "data-model.png",
+                      "content": "Data model diagram"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "acceptance_criteria": [
+        {
+          "id": "ac_wi016_001",
+          "title": "Standard Sections",
+          "content": "All standard sections included"
+        },
+        {
+          "id": "ac_wi016_002",
+          "title": "Diagrams Generated",
+          "content": "Diagrams generated from specification"
+        },
+        {
+          "id": "ac_wi016_003",
+          "title": "Clear Instructions",
+          "content": "Instructions tested for clarity"
+        },
+        {
+          "id": "ac_wi016_004",
+          "title": "Examples Provided",
+          "content": "Examples provided"
+        }
+      ],
+      "estimated_effort": "1 hour",
+      "dependencies": [
+        "WI-015"
+      ],
+      "tools": []
+    }
+  }
+]

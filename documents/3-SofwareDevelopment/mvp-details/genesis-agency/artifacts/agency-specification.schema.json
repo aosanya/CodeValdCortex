@@ -1,0 +1,674 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://codevaldcortex.io/schemas/agency-specification.json",
+    "title": "Agency Specification",
+    "description": "Complete specification for a CodeValdCortex multi-agent agency",
+    "type": "object",
+    "required": [
+        "agency_id",
+        "name",
+        "category",
+        "introduction",
+        "goals",
+        "work_items",
+        "roles",
+        "raci_matrix",
+        "workflows",
+        "metadata"
+    ],
+    "properties": {
+        "agency_id": {
+            "type": "string",
+            "pattern": "^agency_[a-f0-9]{32}$",
+            "description": "Unique agency identifier with 'agency_' prefix and 32-char hex UUID"
+        },
+        "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100,
+            "description": "Human-readable agency name"
+        },
+        "display_name": {
+            "type": "string",
+            "description": "Display name with optional emoji icon"
+        },
+        "category": {
+            "type": "string",
+            "enum": [
+                "infrastructure",
+                "logistics",
+                "healthcare",
+                "finance",
+                "agriculture",
+                "transportation",
+                "energy",
+                "water",
+                "education",
+                "manufacturing",
+                "retail",
+                "other"
+            ],
+            "description": "Agency category/domain"
+        },
+        "introduction": {
+            "type": "object",
+            "required": [
+                "problem_statement",
+                "solution_approach",
+                "scope",
+                "success_criteria"
+            ],
+            "properties": {
+                "problem_statement": {
+                    "type": "string",
+                    "minLength": 100,
+                    "description": "Detailed description of the problem being solved"
+                },
+                "solution_approach": {
+                    "type": "string",
+                    "minLength": 100,
+                    "description": "How the agency solves the problem"
+                },
+                "scope": {
+                    "type": "object",
+                    "required": [
+                        "in_scope",
+                        "out_of_scope"
+                    ],
+                    "properties": {
+                        "in_scope": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "minItems": 3,
+                            "description": "What the agency handles"
+                        },
+                        "out_of_scope": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "minItems": 1,
+                            "description": "What the agency does NOT handle"
+                        }
+                    }
+                },
+                "context": {
+                    "type": "string",
+                    "description": "Background information and context"
+                },
+                "success_criteria": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 3,
+                    "description": "Measurable criteria for agency success"
+                },
+                "stakeholders": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "role": {
+                                "type": "string"
+                            },
+                            "interest": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "description": "Key stakeholders and their interests"
+                }
+            }
+        },
+        "goals": {
+            "type": "array",
+            "minItems": 5,
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "priority",
+                    "description",
+                    "success_metrics"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "pattern": "^G-\\d{3}$",
+                        "description": "Goal ID (e.g., G-001)"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 100,
+                        "description": "Concise goal title"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "Efficiency",
+                            "Quality",
+                            "Innovation",
+                            "Scalability",
+                            "Integration",
+                            "Compliance",
+                            "Reliability"
+                        ],
+                        "description": "Goal category"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": [
+                            "P0",
+                            "P1",
+                            "P2",
+                            "P3"
+                        ],
+                        "description": "Priority level (P0 = Critical, P3 = Low)"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "planned",
+                            "paused",
+                            "completed"
+                        ],
+                        "default": "active"
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 50,
+                        "description": "Detailed goal description"
+                    },
+                    "rationale": {
+                        "type": "string",
+                        "description": "Why this goal matters"
+                    },
+                    "success_metrics": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 2,
+                        "description": "Quantifiable success metrics"
+                    },
+                    "related_work_items": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Work item IDs that contribute to this goal"
+                    }
+                }
+            }
+        },
+        "work_items": {
+            "type": "array",
+            "minItems": 8,
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "title",
+                    "goal_keys",
+                    "description",
+                    "deliverables_structured",
+                    "acceptance_criteria"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "pattern": "^WI-\\d{3}$",
+                        "description": "Work item ID (e.g., WI-001)"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 100,
+                        "description": "Action-oriented work item title"
+                    },
+                    "goal_keys": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "description": "Goal IDs this work item contributes to"
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 50,
+                        "description": "Detailed work item description"
+                    },
+                    "deliverables_structured": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/deliverable_node"
+                        },
+                        "description": "Hierarchical deliverable tree"
+                    },
+                    "dependencies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "IDs of work items that must complete first"
+                    },
+                    "acceptance_criteria": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 2,
+                        "description": "Testable acceptance criteria"
+                    },
+                    "estimated_effort": {
+                        "type": "string",
+                        "description": "Effort estimate (e.g., '2 hours', '1 day')"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": [
+                            "P0",
+                            "P1",
+                            "P2",
+                            "P3"
+                        ],
+                        "description": "Priority level"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "planned",
+                            "completed"
+                        ],
+                        "default": "active"
+                    }
+                }
+            }
+        },
+        "roles": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+                "type": "object",
+                "required": [
+                    "code",
+                    "name",
+                    "description",
+                    "autonomy_level",
+                    "capabilities",
+                    "required_skills"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9-]+$",
+                        "description": "Unique role code (kebab-case)"
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 5,
+                        "maxLength": 50,
+                        "description": "Human-readable role name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 50,
+                        "description": "Role purpose and responsibilities"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Role capability tags"
+                    },
+                    "autonomy_level": {
+                        "type": "string",
+                        "enum": [
+                            "L0",
+                            "L1",
+                            "L2",
+                            "L3",
+                            "L4"
+                        ],
+                        "description": "Autonomy level (L0=Manual to L4=Full Autonomy)"
+                    },
+                    "capabilities": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 2,
+                        "description": "What the role can do"
+                    },
+                    "required_skills": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 2,
+                        "description": "Skills needed to perform role"
+                    },
+                    "token_budget": {
+                        "type": "integer",
+                        "minimum": 2000,
+                        "maximum": 32000,
+                        "description": "Token budget per LLM call"
+                    },
+                    "llm_model": {
+                        "type": "string",
+                        "enum": [
+                            "gpt-4",
+                            "gpt-3.5-turbo",
+                            "claude-sonnet",
+                            "claude-opus"
+                        ],
+                        "description": "Preferred LLM model"
+                    },
+                    "communication_patterns": {
+                        "type": "object",
+                        "properties": {
+                            "receives_from": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "sends_to": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "collaborates_with": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "raci_matrix": {
+            "type": "object",
+            "required": [
+                "activities",
+                "assignments"
+            ],
+            "properties": {
+                "activities": {
+                    "type": "array",
+                    "minItems": 10,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "id",
+                            "work_item_id",
+                            "name"
+                        ],
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "pattern": "^ACT-\\d{3}-\\d+$",
+                                "description": "Activity ID (e.g., ACT-001-1)"
+                            },
+                            "work_item_id": {
+                                "type": "string",
+                                "description": "Parent work item ID"
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "Activity name"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Activity description"
+                            }
+                        }
+                    }
+                },
+                "assignments": {
+                    "type": "array",
+                    "minItems": 30,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "activity_id",
+                            "role_code",
+                            "responsibility_type"
+                        ],
+                        "properties": {
+                            "activity_id": {
+                                "type": "string",
+                                "description": "Activity ID"
+                            },
+                            "role_code": {
+                                "type": "string",
+                                "description": "Role code"
+                            },
+                            "responsibility_type": {
+                                "type": "string",
+                                "enum": [
+                                    "R",
+                                    "A",
+                                    "C",
+                                    "I"
+                                ],
+                                "description": "Responsibility type (R=Responsible, A=Accountable, C=Consulted, I=Informed)"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "workflows": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "version",
+                    "status",
+                    "nodes",
+                    "edges"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "pattern": "^WF-\\d{3}$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string",
+                        "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "deprecated"
+                        ]
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "nodes": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "type"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string"
+                                },
+                                "label": {
+                                    "type": "string"
+                                },
+                                "work_item_id": {
+                                    "type": "string"
+                                },
+                                "position": {
+                                    "type": "object",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "edges": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "source",
+                                "target"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "source": {
+                                    "type": "string"
+                                },
+                                "target": {
+                                    "type": "string"
+                                },
+                                "label": {
+                                    "type": "string"
+                                },
+                                "condition": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "variables": {
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "created_by": {
+                    "type": "string",
+                    "description": "User ID or 'genesis-agency'"
+                },
+                "generated_by_genesis": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "generation_session_id": {
+                    "type": "string",
+                    "description": "Genesis Agency session ID"
+                },
+                "research_transcript": {
+                    "type": "string",
+                    "description": "Path to research Q&A transcript"
+                },
+                "validation_status": {
+                    "type": "string",
+                    "enum": [
+                        "passed",
+                        "failed",
+                        "not_validated"
+                    ]
+                },
+                "deployment_status": {
+                    "type": "string",
+                    "enum": [
+                        "pending",
+                        "deployed",
+                        "failed"
+                    ]
+                }
+            }
+        }
+    },
+    "definitions": {
+        "deliverable_node": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "folder",
+                        "file"
+                    ]
+                },
+                "file_extension": {
+                    "type": "string",
+                    "description": "File extension (e.g., '.md', '.json') if type=file"
+                },
+                "prompt_instructions": {
+                    "type": "string",
+                    "description": "Instructions for LLM to generate this deliverable"
+                },
+                "order": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Order within parent"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/deliverable_node"
+                    },
+                    "description": "Child deliverables (for folders)"
+                }
+            }
+        }
+    }
+}
