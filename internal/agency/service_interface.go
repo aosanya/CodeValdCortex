@@ -21,7 +21,7 @@ type Service interface {
 	// Specification methods (unified document approach)
 	GetSpecification(ctx context.Context, agencyID string) (*models.AgencySpecification, error)
 	UpdateSpecification(ctx context.Context, agencyID string, req *models.SpecificationUpdateRequest) (*models.AgencySpecification, error)
-	UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error)
+	UpdateIntroduction(ctx context.Context, agencyID string, introduction map[string]string, updatedBy string) (*models.AgencySpecification, error)
 	UpdateSpecificationGoals(ctx context.Context, agencyID string, goals []models.Goal, updatedBy string) (*models.AgencySpecification, error)
 	UpdateSpecificationWorkItems(ctx context.Context, agencyID string, workItems []models.WorkItem, updatedBy string) (*models.AgencySpecification, error)
 	UpdateSpecificationWorkflows(ctx context.Context, agencyID string, workflows []models.Workflow, updatedBy string) (*models.AgencySpecification, error)

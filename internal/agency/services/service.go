@@ -77,7 +77,7 @@ func (c *CompositeService) UpdateSpecification(ctx context.Context, agencyID str
 	return c.SpecificationService.UpdateSpecification(ctx, agencyID, req)
 }
 
-func (c *CompositeService) UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error) {
+func (c *CompositeService) UpdateIntroduction(ctx context.Context, agencyID string, introduction map[string]string, updatedBy string) (*models.AgencySpecification, error) {
 	return c.SpecificationService.UpdateIntroduction(ctx, agencyID, introduction, updatedBy)
 }
 

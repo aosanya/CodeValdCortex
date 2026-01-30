@@ -154,7 +154,7 @@ func (m *mockAgencyService) UpdateSpecification(ctx context.Context, agencyID st
 	return spec, nil
 }
 
-func (m *mockAgencyService) UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error) {
+func (m *mockAgencyService) UpdateIntroduction(ctx context.Context, agencyID string, introduction map[string]string, updatedBy string) (*models.AgencySpecification, error) {
 	return &models.AgencySpecification{
 		Introduction: introduction,
 		Goals:        []models.Goal{},

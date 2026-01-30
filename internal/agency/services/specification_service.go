@@ -48,7 +48,7 @@ func (s *SpecificationService) UpdateSpecification(ctx context.Context, agencyID
 }
 
 // UpdateIntroduction updates only the introduction section
-func (s *SpecificationService) UpdateIntroduction(ctx context.Context, agencyID, introduction, updatedBy string) (*models.AgencySpecification, error) {
+func (s *SpecificationService) UpdateIntroduction(ctx context.Context, agencyID string, introduction map[string]string, updatedBy string) (*models.AgencySpecification, error) {
 	return s.repo.PatchSpecificationSection(ctx, agencyID, "introduction", introduction, updatedBy)
 }
 

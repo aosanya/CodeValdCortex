@@ -419,13 +419,24 @@ func (h *AgencyHandler) UpdateIntroduction(c *gin.Context) {
 	id := c.Param("id")
 
 	var req struct {
-		Introduction string `json:"introduction"`
-		UpdatedBy    string `json:"updated_by"`
+		Introduction map[string]string `json:"introduction"`
+		UpdatedBy    string            `json:"updated_by"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
+	}
+
+	// Validate each field is max 1000 characters
+	for key, value := range req.Introduction {
+		if len(value) > 1000 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error":   "Validation failed",
+				"details": fmt.Sprintf("Field '%s' exceeds 1000 character limit (has %d)", key, len(value)),
+			})
+			return
+		}
 	}
 
 	spec, err := h.service.UpdateIntroduction(c.Request.Context(), id, req.Introduction, req.UpdatedBy)

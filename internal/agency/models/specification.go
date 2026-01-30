@@ -35,19 +35,19 @@ type AgencySpecification struct {
 	CreatedAt time.Time `json:"created_at"` // Initial creation timestamp
 
 	// Specification sections (embedded)
-	Introduction string      `json:"introduction"` // Problem statement and context
-	Goals        []Goal      `json:"goals"`        // Strategic objectives (reuses existing Goal model)
-	WorkItems    []WorkItem  `json:"work_items"`   // Tasks and activities (reuses existing WorkItem model)
-	Roles        []Role      `json:"roles"`        // Team roles and structure (uses Role model from role.go)
-	RACIMatrix   *RACIMatrix `json:"raci_matrix"`  // Responsibility assignments (reuses existing RACIMatrix model)
-	Workflows    []Workflow  `json:"workflows"`    // Process orchestration and work item flow
-	AIPolicy     *Policy     `json:"ai_policy"`    // AI Policy configuration (embedded policy document)
+	Introduction map[string]string `json:"introduction"` // Flexible key-value pairs (e.g., "overview", "context"), max 1000 chars per value
+	Goals        []Goal            `json:"goals"`        // Strategic objectives (reuses existing Goal model)
+	WorkItems    []WorkItem        `json:"work_items"`   // Tasks and activities (reuses existing WorkItem model)
+	Roles        []Role            `json:"roles"`        // Team roles and structure (uses Role model from role.go)
+	RACIMatrix   *RACIMatrix       `json:"raci_matrix"`  // Responsibility assignments (reuses existing RACIMatrix model)
+	Workflows    []Workflow        `json:"workflows"`    // Process orchestration and work item flow
+	AIPolicy     *Policy           `json:"ai_policy"`    // AI Policy configuration (embedded policy document)
 }
 
 // SpecificationUpdateRequest represents a request to update the entire specification
 type SpecificationUpdateRequest struct {
-	Introduction *string     `json:"introduction,omitempty"`
-	Goals        *[]Goal     `json:"goals,omitempty"`
+	Introduction *map[string]string `json:"introduction,omitempty"`
+	Goals        *[]Goal            `json:"goals,omitempty"`
 	WorkItems    *[]WorkItem `json:"work_items,omitempty"`
 	Roles        *[]Role     `json:"roles,omitempty"`
 	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
@@ -71,8 +71,8 @@ type GetSpecificationResponse struct {
 
 // CreateSpecificationRequest is the request to create a new specification
 type CreateSpecificationRequest struct {
-	Introduction string      `json:"introduction"`
-	Goals        []Goal      `json:"goals,omitempty"`
+	Introduction map[string]string `json:"introduction"`
+	Goals        []Goal            `json:"goals,omitempty"`
 	WorkItems    []WorkItem  `json:"work_items,omitempty"`
 	Roles        []Role      `json:"roles,omitempty"`
 	RACIMatrix   *RACIMatrix `json:"raci_matrix,omitempty"`
@@ -88,7 +88,7 @@ func NewAgencySpecification(agencyID string) *AgencySpecification {
 		Version:      1,
 		CreatedAt:    now,
 		UpdatedAt:    now,
-		Introduction: "",
+		Introduction: make(map[string]string),
 		Goals:        []Goal{},
 		WorkItems:    []WorkItem{},
 		Roles:        []Role{},
@@ -105,7 +105,7 @@ func (s *AgencySpecification) IncrementVersion(updatedBy string) {
 }
 
 // UpdateIntroduction updates the introduction section
-func (s *AgencySpecification) UpdateIntroduction(intro string, updatedBy string) {
+func (s *AgencySpecification) UpdateIntroduction(intro map[string]string, updatedBy string) {
 	s.Introduction = intro
 	s.IncrementVersion(updatedBy)
 }
