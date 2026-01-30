@@ -5,6 +5,11 @@
 - **Success Criteria**: Deployable system with essential features that satisfies primary user needs and business objectives
 - **Dependencies**: Infrastructure foundation and core technical architecture decisions
 
+## Platform Documentation
+- **Platform Introduction**: [platform-introduction.md](../2-SoftwareDesignAndArchitecture/platform-introduction.md) - Complete platform overview with Problem Statement, Solution, Scope, Context, Success Criteria, Stakeholders
+- **Agency Introduction Schema**: [agency-introduction-schema.md](../2-SoftwareDesignAndArchitecture/agency-introduction-schema.md) - Flexible, data-driven introduction architecture for agencies
+- **Research Session Summary**: [RESEARCH_SESSION_SUMMARY.md](mvp-details/RESEARCH_SESSION_SUMMARY.md) - Gap analysis and documentation findings
+
 ## Documentation Structure
 - **High-Level Overview**: This file (`mvp.md`) provides task tables, priorities, dependencies, and brief descriptions
 - **Detailed Specifications**: Each task with detailed requirements is documented in `/documents/3-SofwareDevelopment/mvp-details/{TASK_ID}.md`
@@ -64,11 +69,12 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-INTRO-001 | Flexible Introduction System | Implement complete data-driven introduction system with flexible section types (Text, List, Nested, Table), template support (Genesis, Minimal, Custom), AI generation, and validation. Backend API + Frontend UI. See architecture in agency-introduction-schema.md | 📋 Not Started | P0 | High (3-4 weeks) | Go, Flutter, AI/LLM, Backend Dev, Frontend Dev | MVP-044 ✅, MVP-FL-103 ✅ | [MVP-INTRO-001.md](mvp-details/MVP-INTRO-001.md) |
 | MVP-046 | Agency Admin & Configuration Page | Build comprehensive admin interface for agency-wide settings: token budgets (role & individual agent levels), rate limits, resource quotas, AI model selection, cost controls, monitoring dashboards, and operational parameters | 📋 Not Started | P0 | Medium | Go, Templ, Frontend Dev, Analytics | MVP-044 ✅ | [MVP-046.md](mvp-details/MVP-046.md) |
 | MVP-047 | Agency Designer Export System | Implement comprehensive export functionality for entire agency design (all sections) to PDF, Markdown, and JSON formats with customizable templates and branding | 📋 Not Started | P0 | Medium | Go, PDF Generation, File Export | MVP-044 ✅ | [MVP-047.md](mvp-details/MVP-047.md) |
 | MVP-049 | AI Policy Layer - Runtime Enforcement | Build action authorization, approval workflows, risk scoring, budget tracking, and policy violation handling with real-time feedback and audit logging | 📋 Not Started | P0 | High | Go, Security, Backend Dev | ~~MVP-048~~ ✅ | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-050 | AI Policy Layer - Advanced Features | Implement data classification engine, PII detection/masking, compliance reporting, policy versioning, and multi-policy inheritance | 📋 Not Started | P0 | Medium | Go, Security, ML, Backend Dev | MVP-049 | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
-| MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (introduction, goals, work items, roles, RACI), and batch AI generation | 📋 Not Started | P0 | High | Go, Templ, AI/LLM, Frontend Dev | MVP-047 | [MVP-042.md](mvp-details/MVP-042.md) |
+| MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (flexible introduction sections, goals, work items, roles, RACI), batch AI generation. Supports data-driven introduction structure per agency-introduction-schema.md | 📋 Not Started | P0 | High | Go, Templ, AI/LLM, Frontend Dev | MVP-047 | [MVP-042.md](mvp-details/MVP-042.md) |
 
 ---
 
