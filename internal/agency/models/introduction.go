@@ -207,16 +207,16 @@ func NewIntroductionSection(id, title string, order int, sectionType SectionType
 	}
 }
 
-// ValidationError represents a validation error
-type ValidationError struct {
+// IntroValidationError represents a validation error for introductions
+type IntroValidationError struct {
 	Message string
 }
 
-func (e *ValidationError) Error() string {
+func (e *IntroValidationError) Error() string {
 	return e.Message
 }
 
-// NewValidationError creates a new ValidationError
-func NewValidationError(message string) error {
-	return &ValidationError{Message: message}
+// NewIntroValidationError creates a new IntroValidationError
+func NewIntroValidationError(message string) error {
+	return &IntroValidationError{Message: message}
 }
