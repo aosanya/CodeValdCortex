@@ -87,13 +87,26 @@ Follow the **mandatory completion process** for MVP tasks:
    - Include summary, key deliverables, technical highlights, validation results
    - List dependencies unblocked by this completion
 
-5. **Remove completed task from active `mvp.md` file**
+5. **Check for mvp.md inconsistencies (MANDATORY)**
+   - **Before updating mvp.md, verify**:
+     - Dependency notation follows convention (~~MVP-XXX~~ ✅ for completed)
+     - Priority labels match section headers (P0 in P0 section, etc.)
+     - Task counts in summary match actual task counts
+     - No orphaned deprecated tasks outside "Deprecated" section
+   - **After removing your completed task, verify**:
+     - All dependent tasks now show `~~MVP-YOUR-TASK~~ ✅`
+     - Task count summary updated (subtract 1 from your priority)
+     - Grand total updated
+   - **Fix any inconsistencies found**
+   - Document any additional fixes in commit message
+
+6. **Remove completed task from active `mvp.md` file**
    - Strike through the completed MVP-XXX in dependency lists (~~MVP-XXX~~)
 
-6. **Update dependent task references**
-   - Update all tasks that depended on this one to show ~~MVP-XXX~~
+7. **Update dependent task references**
+   - Update all tasks that depended on this one to show ~~MVP-XXX~~ ✅
 
-7. **ALWAYS remove all debug logs before merge (MANDATORY)**
+8. **ALWAYS remove all debug logs before merge (MANDATORY)**
    
    **Backend Go Logs**:
    - Search for and remove all debug `fmt.Printf()`, `fmt.Println()` statements
@@ -215,7 +228,7 @@ Follow the **mandatory completion process** for MVP tasks:
    - **Test the application after removing logs to ensure nothing breaks**
    - This is MANDATORY - no debug logs should remain in merged code
 
-8. **Prepare next task (if applicable)**
+9. **Prepare next task (if applicable)**
    - Identify the next priority task from `mvp.md`
    - Check if `documents/3-SofwareDevelopment/mvp-details/MVP-XXX.md` exists for next task
    - **If details file doesn't exist for next task:**
@@ -250,7 +263,7 @@ Follow the **mandatory completion process** for MVP tasks:
        [Implementation details, architecture decisions]
        ```
 
-9. **Fix all linting issues before merge**
+10. **Fix all linting issues before merge**
    - Run `go vet ./...` and fix ALL errors and warnings (must show 0 issues)
    - Run `gofmt -w .` or `go fmt ./...` to ensure consistent code formatting
    - Run `golangci-lint run` if configured in project
@@ -263,7 +276,7 @@ Follow the **mandatory completion process** for MVP tasks:
      - Inefficient string concatenation
      - Missing documentation comments (if enabled)
 
-10. **Merge to main after testing validation**
+11. **Merge to main after testing validation**
    - Ensure all debug logs removed (no fmt.Printf/Println, no console.log)
    - Ensure `go vet ./...` shows 0 issues
    - Ensure `gofmt` or `go fmt` has been run

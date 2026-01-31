@@ -24,9 +24,15 @@
    - Create detailed coding session document in `coding_sessions/` using format: `{TaskID}_{description}.md`
    - Add completed task to summary table in `mvp_done.md` with completion date
    - Remove completed task from this active `mvp.md` file
-   - Update any dependent task references
+   - Update any dependent task references using notation: `~~TASK-ID~~ ✅` (strikethrough + checkmark)
    - Merge feature branch to main
 4. **Dependencies**: Ensure prerequisite tasks are completed before starting dependent work
+
+### Dependency Notation Convention
+- **Active dependencies**: `MVP-XXX` (plain text)
+- **Completed dependencies**: `~~MVP-XXX~~ ✅` (strikethrough + checkmark)
+- **Multiple dependencies**: Comma-separated, e.g., `MVP-001, ~~MVP-002~~ ✅, MVP-003`
+- **None**: Use `None` for tasks with no prerequisites
 
 ### Branch Management (MANDATORY)
 ```bash
@@ -53,15 +59,6 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P1: React Frontend API Support (PREREQUISITE FOR REACT MIGRATION)
-
-*REST API infrastructure to support the new React SPA frontend (CodeValdFortex)*
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | ✅ Completed | P1 | Medium | Go, Gin, ArangoDB | ~~MVP-RM-002~~ ✅ | [react-migration/MVP-RM-003_work_items_api.md](mvp-details/react-migration/MVP-RM-003_work_items_api.md) |
-
----
 
 ## P0: Agency Designer - Core Features (CRITICAL)
 
@@ -69,27 +66,34 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-INTRO-001 | Flexible Introduction System | Implement complete data-driven introduction system with flexible section types (Text, List, Nested, Table), template support (Genesis, Minimal, Custom), AI generation, and validation. Backend API + Frontend UI. See architecture in agency-introduction-schema.md | 📋 Not Started | P0 | High (3-4 weeks) | Go, Flutter, AI/LLM, Backend Dev, Frontend Dev | MVP-044 ✅, MVP-FL-103 ✅ | [MVP-INTRO-001.md](mvp-details/MVP-INTRO-001.md) |
-| MVP-046 | Agency Admin & Configuration Page | Build comprehensive admin interface for agency-wide settings: token budgets (role & individual agent levels), rate limits, resource quotas, AI model selection, cost controls, monitoring dashboards, and operational parameters | 📋 Not Started | P0 | Medium | Go, Templ, Frontend Dev, Analytics | MVP-044 ✅ | [MVP-046.md](mvp-details/MVP-046.md) |
-| MVP-047 | Agency Designer Export System | Implement comprehensive export functionality for entire agency design (all sections) to PDF, Markdown, and JSON formats with customizable templates and branding | 📋 Not Started | P0 | Medium | Go, PDF Generation, File Export | MVP-044 ✅ | [MVP-047.md](mvp-details/MVP-047.md) |
+| MVP-INTRO-001 | Flexible Introduction System | Implement complete data-driven introduction system with flexible section types (Text, List, Nested, Table), template support (Genesis, Minimal, Custom), AI generation, and validation. Backend API + Frontend UI. See architecture in agency-introduction-schema.md | 📋 Not Started | P0 | High (3-4 weeks) | Go, Flutter, AI/LLM, Backend Dev, Frontend Dev | ~~MVP-044~~ ✅, ~~MVP-FL-103~~ ✅ | [MVP-INTRO-001.md](mvp-details/MVP-INTRO-001.md) |
+| MVP-046 | Agency Admin & Configuration Page | Build comprehensive admin interface for agency-wide settings: token budgets (role & individual agent levels), rate limits, resource quotas, AI model selection, cost controls, monitoring dashboards, and operational parameters | 📋 Not Started | P0 | Medium | Go, Templ, Frontend Dev, Analytics | ~~MVP-044~~ ✅ | [MVP-046.md](mvp-details/MVP-046.md) |
+| MVP-047 | Agency Designer Export System | Implement comprehensive export functionality for entire agency design (all sections) to PDF, Markdown, and JSON formats with customizable templates and branding | 📋 Not Started | P0 | Medium | Go, PDF Generation, File Export | ~~MVP-044~~ ✅ | [MVP-047.md](mvp-details/MVP-047.md) |
 | MVP-049 | AI Policy Layer - Runtime Enforcement | Build action authorization, approval workflows, risk scoring, budget tracking, and policy violation handling with real-time feedback and audit logging | 📋 Not Started | P0 | High | Go, Security, Backend Dev | ~~MVP-048~~ ✅ | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-050 | AI Policy Layer - Advanced Features | Implement data classification engine, PII detection/masking, compliance reporting, policy versioning, and multi-policy inheritance | 📋 Not Started | P0 | Medium | Go, Security, ML, Backend Dev | MVP-049 | [AI Policy Layer](../../2-SoftwareDesignAndArchitecture/ai-policy-layer.md) |
 | MVP-042 | AI-Powered Agency Creator | Implement AI-driven agency creation flow with text upload, selective generation (flexible introduction sections, goals, work items, roles, RACI), batch AI generation. Supports data-driven introduction structure per agency-introduction-schema.md | 📋 Not Started | P0 | High | Go, Templ, AI/LLM, Frontend Dev | MVP-047 | [MVP-042.md](mvp-details/MVP-042.md) |
 
 ---
 
-## P0: Work Items & Document Management System (FOUNDATIONAL)
+## P0: Artifacts & Work Management System (FOUNDATIONAL)
 
-*Git-in-ArangoDB with Kanban workflow automation and agent instantiation*
+*Unified artifact storage with git-like versioning, Kanban workflow automation, and agent instantiation*
 
-### Core Architecture
+**Architecture Shift**: Replaces old git collections (git_objects, git_refs, repositories, git_artifacts) with unified artifacts system
+
+### Artifacts System
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-WI-007 | Pull Request System | Implement PR creation/management, diff generation, three-way merge algorithm, conflict detection, PR review workflow, approval tracking, merge operations | 📋 Not Started | P0 | High | Go, ArangoDB, Git Merge Logic | ~~MVP-WI-006~~ ✅ | [work-items-integration/pull-requests.md](mvp-details/work-items-integration/pull-requests.md) |
-| MVP-WI-009 | Issue-Git Integration | Implement branch creation from issues, issue-branch linking, PR-issue association, automatic issue progression on PR merge, workflow orchestration service | 📋 Not Started | P0 | Medium | Go, ArangoDB, Event System | MVP-WI-007, ~~MVP-WI-008~~ ✅, ~~MVP-054~~ ✅ | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
+| MVP-055 | Artifacts Storage System | Implement dual-table artifacts system: artifacts_system (draft→publish→archive lifecycle for agency specs) and artifacts_work (git-like versioning with commits, HEAD, tags, merge for workflow products). Virtual path structure, role-based access, format validation (JSON, MD, YAML, HTML, code). Replaces old git collections | 📋 Not Started | P0 | High | Go, ArangoDB, Backend Dev | None | [MVP-055.md](mvp-details/MVP-055.md) |
+
+### Workflow Integration
+
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-WI-009 | Issue-Artifact Integration | Implement issue-artifact linking, automatic artifact creation from issues, artifact commit on issue progression, workflow orchestration service for artifact lifecycle | 📋 Not Started | P0 | Medium | Go, ArangoDB, Event System | MVP-055, ~~MVP-WI-008~~ ✅, ~~MVP-054~~ ✅ | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
 | MVP-WI-010 | Agent Work Assignment | Implement flexible assignment model (manual + claim-based), agent-issue linking, work queue API, notification system, agent instance creation from work item definitions | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-WI-009, MVP-032 | [work-items-integration/kanban-workflow.md](mvp-details/work-items-integration/kanban-workflow.md) |
-| MVP-WI-011 | AI-Assisted Conflict Resolution | Build conflict detection in merges, AI-powered merge suggestions, conflict resolution UI, three-way merge with AI assistance, merge conflict analytics | 📋 Not Started | P1 | High | Go, AI/LLM, Git Merge, Frontend Dev | MVP-WI-007 | [work-items-integration/git-based-document-system.md](mvp-details/work-items-integration/git-based-document-system.md#ai-assisted-conflict-resolution) |
+| MVP-WI-011 | AI-Assisted Artifact Operations | Build AI-powered artifact merge suggestions, conflict resolution UI, content validation, format detection, and artifact analytics | 📋 Not Started | P1 | High | Go, AI/LLM, Backend Dev, Frontend Dev | MVP-055 | [MVP-055.md](mvp-details/MVP-055.md#ai-integration) |
 | MVP-WI-012 | Workbench Chat Panel & Workflows Section | Integrate chat panel and workflows section into the Workbench UI, reusing agency designer components and backend wiring. Ensure HTMX dynamic updates, multi-tenancy, and context-aware issue creation. See: mvp-details/work-items-integration/workbench-chat-panel.md | 🗒️ Not Started | P0 | Medium | Go, Templ, HTMX, Frontend Dev | MVP-WI-008 | [work-items-integration/workbench-chat-panel.md](mvp-details/work-items-integration/workbench-chat-panel.md) |
 
 ### Work Item Definitions & Workflows
@@ -99,13 +103,13 @@ git branch -d feature/MVP-XXX_description
 | MVP-031 | Work Item Lifecycle & SLA | Build work item state machines (open→assigned→in_progress→ready_for_review→completed), SLA tracking, deadline management, state transition validation | 📋 Not Started | P0 | Medium | Go, ArangoDB, State Machine | ~~MVP-030~~ ✅ | [work-items-integration/work-item-schema.md](mvp-details/work-items-integration/work-item-schema.md) |
 | MVP-032 | Agent Factory & Orchestration | Implement AgentFactory.CreateFromWorkItemDefinition(), agent lifecycle FSM (created→running→completed), agent→issue linking, workflow orchestrator that monitors issue events and spawns agents | 📋 Not Started | P0 | Medium | Go, ArangoDB, Backend Dev | MVP-031 | [MVP-032.md](mvp-details/MVP-032.md) |
 
-**Architecture Reference**: `/documents/3-SofwareDevelopment/mvp-details/work-items-integration/`
+**Architecture Reference**: `/documents/3-SofwareDevelopment/mvp-details/MVP-055.md`
 
-**Key Documents**:
-- [Git-Based Document System](mvp-details/work-items-integration/git-based-document-system.md) - Complete Git implementation in ArangoDB
+**Key Components**:
+- [Artifacts Storage System](mvp-details/MVP-055.md) - Unified artifacts with git-like versioning
 - [Kanban Workflow](mvp-details/work-items-integration/kanban-workflow.md) - End-to-end workflow from issue creation to completion
 - [Deliverables Structure](mvp-details/work-items-integration/deliverables-structure-research.md) - Enhanced deliverable architecture with folder trees and AI prompt instructions
-- [Architectural Decisions](mvp-details/work-items-integration/architecture/vcs-integration-decisions.md) - Why internal Git vs external VCS
+- [Architectural Decisions](mvp-details/work-items-integration/architecture/vcs-integration-decisions.md) - Why internal artifacts system vs external VCS
 
 ---
 
@@ -128,9 +132,9 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment | 📋 Not Started | P1 | High | DevOps, Kubernetes | MVP-010 ✅ | - |
-| MVP-015 | Management Dashboard | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | 🚀 In Progress | P1 | Medium | Go, Frontend Dev, Templ | MVP-013 ✅ | - |
-| MVP-023 | AI Agent Creator | Implement AI-powered conversational interface for creating agents. AI asks questions, resolves details, and generates complete agent configurations through natural language dialogue | 📋 Not Started | P1 | Medium | Go, Templ, AI/LLM, Frontend Dev | MVP-025 ✅ | [MVP-023.md](mvp-details/MVP-023.md) |
+| MVP-014 | Kubernetes Deployment | Create Kubernetes manifests and Helm charts for agent deployment | 📋 Not Started | P1 | High | DevOps, Kubernetes | ~~MVP-010~~ ✅ | - |
+| MVP-015 | Management Dashboard | Build web interface with Templ+HTMX+Alpine.js for agent monitoring, real-time updates, and control | 🚀 In Progress | P1 | Medium | Go, Frontend Dev, Templ | ~~MVP-013~~ ✅ | - |
+| MVP-023 | AI Agent Creator | Implement AI-powered conversational interface for creating agents. AI asks questions, resolves details, and generates complete agent configurations through natural language dialogue | 📋 Not Started | P1 | Medium | Go, Templ, AI/LLM, Frontend Dev | ~~MVP-025~~ ✅ | [MVP-023.md](mvp-details/MVP-023.md) |
 | MVP-037 | Deployment Rollouts | Implement blue-green, canary, and progressive delivery strategies with SLO-based rollback | 📋 Not Started | P1 | High | Go, DevOps, Deployment | MVP-036 | [MVP-037.md](mvp-details/MVP-037.md) |
 | MVP-038 | Namespace Isolation | Implement namespace hierarchy, resource quotas, network policies, and noisy neighbor protections | 📋 Not Started | P1 | High | Go, Kubernetes, Networking | MVP-037 | [MVP-038.md](mvp-details/MVP-038.md) |
 | MVP-039 | Organization & RBAC | Build org/BU/project hierarchy, role matrix, permission system, and approval chain engine | 📋 Not Started | P1 | High | Go, Security, Backend Dev | MVP-038 | [MVP-039.md](mvp-details/MVP-039.md) |
@@ -144,13 +148,25 @@ git branch -d feature/MVP-XXX_description
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-016 | Core Broadcasting Infrastructure | Implement BroadcastConfiguration, PropertyBroadcaster service, ContextEvaluator, and integration with PubSub | 📋 Not Started | P1 | High | Go, Backend Dev, PubSub | MVP-013 ✅ | - |
+| MVP-016 | Core Broadcasting Infrastructure | Implement BroadcastConfiguration, PropertyBroadcaster service, ContextEvaluator, and integration with PubSub | 📋 Not Started | P1 | High | Go, Backend Dev, PubSub | ~~MVP-013~~ ✅ | - |
 | MVP-017 | Subscription Management | Build SubscriptionManager, subscriber filtering, favorite functionality, and subscription API endpoints | 📋 Not Started | P1 | Medium | Go, Backend Dev, REST API | MVP-016 | - |
 | MVP-018 | Privacy & Security Controls | Implement geofencing, property masking, permission model, audit logging, and encryption for sensitive properties | 📋 Not Started | P1 | Medium | Security, Backend Dev | MVP-017 | - |
 | MVP-019 | Performance Optimization & Scale | Performance tuning, caching, load balancing for broadcasters, message broker optimization, monitoring & alerting | 📋 Not Started | P1 | Medium | Performance, DevOps | MVP-018 | [MVP-019.md](mvp-details/MVP-019.md) |
 | MVP-020 | UC-TRACK-001 Integration & Testing | Implement Vehicle & Passenger agents, build mobile/web UI, SACCO management portal, end-to-end testing | 📋 Not Started | P1 | High | Full-stack, Mobile Dev | MVP-019 | [MVP-020.md](mvp-details/MVP-020.md) |
 
 **Complete Technical Specification**: `/documents/3-SofwareDevelopment/core-systems/agent-property-broadcasting.md`
+
+---
+
+## P1: Security & Authentication (CRITICAL)
+
+*Core security features and authentication hardening*
+
+| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
+|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
+| MVP-026 | Password Reset & Email Verification | Implement forgot password flow, email verification on registration, password reset tokens, email service integration | 📋 Not Started | P1 | Medium | Backend Dev, Email, Security | ~~MVP-AUTH-005~~ ✅ | - |
+| MVP-027 | Security Implementation | Add input validation, HTTPS enforcement, security headers (CORS, CSP, HSTS), rate limiting on auth endpoints, brute force protection | 📋 Not Started | P1 | Medium | Security, Backend Dev | MVP-026 | - |
+| MVP-028 | Access Control System | Implement role-based access control (RBAC) for agent operations, permission matrix, admin/user/viewer roles, resource-level permissions | 📋 Not Started | P1 | Low | Backend Dev, Security | MVP-027 | - |
 
 ---
 
@@ -184,34 +200,12 @@ git branch -d feature/MVP-XXX_description
 
 ---
 
-## P0: Authentication & User Management (CRITICAL - FRONTEND PREREQUISITE)
+## P2: Advanced Security & Compliance (IMPORTANT)
 
-*Core authentication endpoints required by Flutter frontend (CodeValdFortex)*
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-AUTH-005 | Protected Routes Integration | Apply authentication middleware to protected routes, update handlers to use real user context (replace "system" with actual user_id from context), add permission checks for agency/instance operations | ~~✅ Complete~~ | P0 | Low | Go, Backend Dev | ~~MVP-AUTH-004~~ ✅ | [authentication.md](mvp-details/authentication.md) |
-
-**Frontend Integration**: CodeValdFortex Flutter app (MVP-FL-009, MVP-FL-010, MVP-FL-011) depends on these endpoints
-
-**API Endpoints Summary**:
-- `POST /api/v1/auth/register` - Create new user account
-- `POST /api/v1/auth/login` - Login with email/password, returns JWT tokens
-- `POST /api/v1/auth/refresh` - Refresh access token using refresh token
-- `POST /api/v1/auth/logout` - Invalidate tokens
-- `GET /api/v1/auth/me` - Get current authenticated user info
-
----
-
-## P2: Security & Authentication (IMPORTANT)
-
-*Advanced security features and hardening*
+*Advanced security hardening and compliance features*
 
 | Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
 |---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-026 | Password Reset & Email Verification | Implement forgot password flow, email verification on registration, password reset tokens, email service integration | 📋 Not Started | P2 | Medium | Backend Dev, Email, Security | MVP-AUTH-005 | - |
-| MVP-027 | Security Implementation | Add input validation, HTTPS enforcement, security headers (CORS, CSP, HSTS), rate limiting on auth endpoints, brute force protection | 📋 Not Started | P2 | Medium | Security, Backend Dev | MVP-026 | - |
-| MVP-028 | Access Control System | Implement role-based access control (RBAC) for agent operations, permission matrix, admin/user/viewer roles, resource-level permissions | 📋 Not Started | P2 | Low | Backend Dev, Security | MVP-027 | - |
 | MVP-041 | Multi-tenancy Hardening | Add advanced isolation (dedicated nodes, encryption), data residency controls, and compliance reporting | 📋 Not Started | P2 | Medium | Go, Security, Compliance | MVP-040 | [MVP-041.md](mvp-details/MVP-041.md) |
 
 ---
@@ -236,32 +230,6 @@ git branch -d feature/MVP-XXX_description
 - ✅ **Auditable**: Complete reasoning trail for compliance officers
 
 **Architecture**: Compliance agents analyze context → generate compliance plans → bridge converts plans to executable workflows → workflow designer executes and monitors
-
----
-
-## P1: React Migration - Frontend Modernization
-
-*Strategic migration from Templ+HTMX to React SPA for better separation of concerns and scalability*
-
-### Phase 1: Foundation & Work Items PoC (Weeks 1-5)
-
-| Task ID | Title | Description | Status | Priority | Effort | Skills | Dependencies | Details |
-|---------|-------|-------------|--------|----------|--------|--------|--------------|---------|
-| MVP-RM-003 | Work Items REST API | Implement 5 REST endpoints for work items (list with pagination/filtering, get single, create, update, delete). Enforce agency-specific data isolation | 📋 Not Started | P1 | Medium | Go, Gin, ArangoDB | ~~MVP-RM-002~~ ✅ | [react-migration/MVP-RM-003_work_items_api.md](mvp-details/react-migration/MVP-RM-003_work_items_api.md) |
-| MVP-RM-004 | Work Items Redux Store | Create Redux slice with async thunks for fetching, creating, updating, deleting work items. Implement filtering, pagination state, error handling | 📋 Not Started | P1 | Medium | React, Redux Toolkit, TypeScript | ~~MVP-RM-001~~ ✅, MVP-RM-003 | [react-migration/](mvp-details/react-migration/) |
-| MVP-RM-005 | Work Items UI Components | Build React components using Bulma CSS: WorkItemList, WorkItemCard, WorkItemForm, WorkItemFilters. Implement CRUD operations, form validation, loading states | 📋 Not Started | P1 | High | React, TypeScript, Bulma CSS | MVP-RM-004 | [react-migration/](mvp-details/react-migration/) |
-| MVP-RM-006 | Testing Suite | Write unit tests (Vitest), component tests (React Testing Library), integration tests for work items feature. Achieve >80% coverage | 📋 Not Started | P1 | Medium | Vitest, React Testing Library, Go testing | MVP-RM-005 | [react-migration/](mvp-details/react-migration/) |
-| MVP-RM-007 | Deployment Pipeline | Set up staging/production environments, CI/CD pipeline (GitHub Actions), Docker containerization, monitoring, rollback procedures | 📋 Not Started | P1 | Medium | Docker, CI/CD, Nginx | MVP-RM-006 | [react-migration/](mvp-details/react-migration/) |
-
-**Architecture Reference**: [react-migration/README.md](mvp-details/react-migration/README.md)  
-**Migration Plan**: `/documents/2-SoftwareDesignAndArchitecture/react-migration-plan.md`  
-**Tasks Summary**: [react-migration/TASKS_SUMMARY.md](mvp-details/react-migration/TASKS_SUMMARY.md)
-
-**Key Goals**:
-- Prove React + Go API architecture works
-- Establish clear separation: Backend = business logic, Frontend = presentation
-- Create patterns for future domain migrations
-- Side-by-side operation with existing Templ pages during rollout
 
 ---
 
@@ -338,43 +306,44 @@ The following tasks are no longer applicable due to architectural changes:
 
 | Task ID | Original Title | Reason | Replaced By |
 |---------|---------------|--------|-------------|
-| ~~MVP-WI-001~~ | ~~Gitea Webhook Integration~~ | ❌ **Removed** - External VCS integration not implemented | MVP-WI-005 through MVP-WI-011 (Git-in-ArangoDB) |
-| ~~MVP-WI-002~~ | ~~Gitea API Client~~ | ❌ **Removed** - No external VCS integration | MVP-WI-006 (File Explorer API) |
-| ~~MVP-WI-003~~ | ~~Bidirectional Sync~~ | ❌ **Removed** - No external system synchronization | MVP-WI-009 (Issue-Git Integration) |
-| ~~MVP-WI-004~~ | ~~PR Automation for External VCS~~ | ❌ **Removed** - Internal PR system instead | MVP-WI-007 (Pull Request System) |
+| ~~MVP-WI-001~~ | ~~Gitea Webhook Integration~~ | ❌ **Removed** - External VCS integration not implemented | MVP-055 (Artifacts Storage System) |
+| ~~MVP-WI-002~~ | ~~Gitea API Client~~ | ❌ **Removed** - No external VCS integration | MVP-055 (Artifacts Storage System) |
+| ~~MVP-WI-003~~ | ~~Bidirectional Sync~~ | ❌ **Removed** - No external system synchronization | MVP-WI-009 (Issue-Artifact Integration) |
+| ~~MVP-WI-004~~ | ~~PR Automation for External VCS~~ | ❌ **Removed** - Internal artifact system instead | MVP-055 (Artifacts Storage System) |
+| ~~MVP-WI-007~~ | ~~Pull Request System~~ | ❌ **Superseded** - Git-like features integrated into MVP-055 artifacts_work | MVP-055 (Artifacts Storage System) |
 
-**Architectural Decision**: After research, decided to implement Git directly in ArangoDB rather than integrate with external VCS (Gitea/GitHub/GitLab). See [vcs-integration-decisions.md](mvp-details/work-items-integration/architecture/vcs-integration-decisions.md) for rationale.
+**Architectural Decision**: After research, decided to implement a unified artifacts system with git-like versioning (MVP-055) rather than full Git implementation in ArangoDB or integration with external VCS. This provides simpler, more agent-friendly artifact management while still supporting versioning, branching, and history. See [MVP-055.md](mvp-details/MVP-055.md) for the new design.
 
 ---
 
 ## Task Summary by Priority
 
 ### P0 (Blocking - Must Complete First)
-- **Authentication & User Management**: 5 tasks (MVP-AUTH-001 through MVP-AUTH-005)
-- **Agency Designer**: 5 tasks (MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
-- **Work Items & Document Management**: 5 tasks (MVP-WI-007 through MVP-WI-010, ~~MVP-030~~ ✅)
+- **Agency Designer**: 6 tasks (MVP-INTRO-001, MVP-046, MVP-047, MVP-049, MVP-050, MVP-042)
+- **Artifacts & Work Management**: 4 tasks (MVP-055, MVP-WI-009, MVP-WI-010, MVP-WI-012)
 - **Work Item Definitions**: 2 tasks (MVP-031, MVP-032)
 - **A2A Protocol**: 6 foundational tasks (MVP-A2A-000 through MVP-A2A-004, MVP-A2A-006)
 
-**Total P0**: 23 tasks
+**Total P0**: 18 tasks
 
 ### P1 (Critical - Core Features)
-- **Git AI Features**: 1 task (MVP-WI-011 - AI-Assisted Conflict Resolution)
+- **AI-Assisted Artifacts**: 1 task (MVP-WI-011)
 - **Agent Lifecycle**: 4 tasks (MVP-033 through MVP-036)
 - **Platform Infrastructure**: 7 tasks (MVP-014, MVP-015, MVP-023, MVP-037 through MVP-040)
 - **Property Broadcasting**: 5 tasks (MVP-016 through MVP-020)
+- **Security & Authentication**: 3 tasks (MVP-026, MVP-027, MVP-028)
 - **A2A Advanced**: 4 tasks (MVP-A2A-005, MVP-A2A-007, MVP-A2A-008, MVP-A2A-009)
 
-**Total P1**: 21 tasks
+**Total P1**: 24 tasks
 
 ### P2 (Important - Quality & Enhancement)
-- **Advanced Security**: 4 tasks (MVP-026 through MVP-028, MVP-041)
+- **Advanced Security & Compliance**: 1 task (MVP-041)
 - **Compliance Agents**: 3 tasks (MVP-051, MVP-052-CMP, MVP-053)
 - **UI Migration & Cleanup**: 14 tasks (MVP-CLEANUP-001 through MVP-CLEANUP-014)
 
-**Total P2**: 21 tasks
+**Total P2**: 18 tasks
 
-**Grand Total Active Tasks**: 66 tasks
+**Grand Total Active Tasks**: 60 tasks
 
 ---
 
@@ -384,15 +353,15 @@ Follow This sequence!!!
 
 Phase 1 (P0 Core):
 
-1. ~~MVP-WI-005 - Git Core Layer~~ ✅
-2. ~~MVP-WI-006 - File Explorer~~ ✅
+1. ~~MVP-WI-005 - Git Core Layer~~ ✅ (Superseded by MVP-055)
+2. ~~MVP-WI-006 - File Explorer~~ ✅ (Integrated into MVP-055)
 3. ~~MVP-030 - Work Item Definitions~~ ✅
 4. ~~MVP-WI-008 - Kanban Board~~ ✅
-5. MVP-WI-007 - Pull Requests
+5. MVP-055 - Artifacts Storage System
 6. MVP-031 - Work Item Lifecycle
-7. MVP-WI-009 - Issue-Git Integration
+7. MVP-WI-009 - Issue-Artifact Integration
 8. MVP-032 - Agent Factory
 9. MVP-WI-010 - Agent Assignment
 
 Phase 2 (P1 Enhancement):
-10. MVP-WI-011 - AI Conflict Resolution
+10. MVP-WI-011 - AI-Assisted Artifact Operations
