@@ -97,7 +97,8 @@
 │  External Dependencies                                      │
 │  - ArangoDB (database)                                      │
 │  - Go standard library                                      │
-│  - Third-party packages (gin, templ, etc.)                  │
+│  - Third-party packages (gin, etc.)                         │
+│  - Templ (temporary dev UI - to be removed)                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -264,14 +265,16 @@
 - **Backend Developer (Go)**: Agent implementation, business logic, framework integration
 - **DevOps Engineer**: Kubernetes deployment, CI/CD, infrastructure automation
 - **IoT Specialist**: Sensor integration, protocol implementation, hardware interfacing
-- **Frontend Developer**: Dashboard UI, real-time visualizations, user experience
+- **Flutter Developer**: Cross-platform dashboard UI (CodeValdFortex), real-time visualizations, user experience
 - **Data Engineer**: Database design, time-series optimization, analytics queries
 
 ### Tools and Platforms
 - **Development**: Go 1.21+, CodeValdCortex Framework, Docker, Git
 - **Backend**: ArangoDB 3.11+ (multi-model database for documents, graphs, key-value, time-series)
 - **IoT**: MQTT Broker (Mosquitto), Modbus libraries, OPC UA toolkit
-- **Frontend**: Templ, HTMX, Alpine.js, Chart.js, SVG/D3.js
+- **Frontend (Primary)**: Flutter (CodeValdFortex) - Web, iOS, Android, Desktop
+- **Frontend (Temporary Dev UI)**: Templ + HTMX + Alpine.js (to be removed via MVP-CLEANUP-001-014)
+- **Visualization**: Chart.js, Deck.gl, MapLibre GL, SVG/D3.js
 - **CI/CD**: GitHub Actions, automated testing, Docker builds
 - **Monitoring**: Prometheus, Grafana, ELK Stack
 
@@ -466,7 +469,7 @@ git push origin main
 │   └── app/                             # ✅ Application initialization
 ├── static/                              # ✅ CSS, JS, images (self-hosted)
 │   ├── css/bulma.min.css                # ✅ Bulma CSS framework
-│   └── js/                              # ✅ HTMX, Alpine.js, Chart.js
+│   └── js/                              # ✅ Deck.gl, MapLibre GL, Chart.js (Templ dev UI - temporary)
 ├── bin/
 │   └── codevaldcortex                   # ✅ Compiled binary
 └── documents/                           # Framework documentation

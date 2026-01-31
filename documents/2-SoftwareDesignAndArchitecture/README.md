@@ -10,11 +10,12 @@ This directory contains the comprehensive software design and architecture docum
 - **[1-introduction.md](1-introduction.md)**: Architecture overview, design principles, and technology stack
 - **[2-general-architecture.md](2-general-architecture.md)**: High-level system architecture and component interactions
 - **[backend-architecture.md](backend-architecture.md)**: Detailed backend system design and Go implementation patterns
-- **[frontend-architecture.md](frontend-architecture.md)**: Management interface architecture and React/TypeScript implementation
+- **[frontend-architecture.md](frontend-architecture.md)**: Frontend strategy overview (Flutter migration status)
+- **[flutter-migration-plan.md](flutter-migration-plan.md)**: **Flutter cross-platform frontend architecture and migration strategy** ⭐ ACTIVE
 - **[usecase-architecture.md](usecase-architecture.md)**: **Use case design principles - configuration-only approach (no custom code)**
 - **[agency-operations-framework.md](agency-operations-framework.md)**: **Agency goals, work items, and RACI matrix framework**
 - **[a2a-protocol-integration.md](a2a-protocol-integration.md)**: **A2A Protocol integration - Multi-vendor agent interoperability** ⭐
-- **[a2a-go-sdk-integration.md](a2a-go-sdk-integration.md)**: **a2a-go SDK integration strategy and implementation guide** ⭐ NEW
+- **[a2a-go-sdk-integration.md](a2a-go-sdk-integration.md)**: **a2a-go SDK integration strategy and implementation guide** ⭐
 
 ## Architectural Principles
 
@@ -39,7 +40,7 @@ This directory contains the comprehensive software design and architecture docum
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Management    │    │   API Gateway   │    │  Agent Pools    │
 │   Interface     │◄──►│   (Auth/Rate)   │◄──►│   (Workers)     │
-│  (React/TS)     │    │                 │    │                 │
+│  (Flutter)      │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
@@ -68,9 +69,16 @@ State Store → Coordination Service → Monitoring → Results Collection
 
 ## Technology Stack
 
+### Frontend Technologies
+- **Framework**: Flutter 3.x (Dart) - Cross-platform (Web, iOS, Android, Desktop)
+- **State Management**: Riverpod 2.x for reactive state
+- **HTTP Client**: Dio 5.x for REST API communication
+- **Routing**: go_router 13.x for navigation
+- **Design**: Material Design 3
+
 ### Backend Technologies
 - **Runtime**: Go 1.21+ with native concurrency (goroutines, channels)
-- **Framework**: Gin/Echo for REST APIs, gRPC for service communication
+- **Framework**: Gin for REST APIs, gRPC for service communication
 - **Database**: ArangoDB 3.11+ for multi-model data storage
 - **Message Queue**: Go channels with Redis for persistence
 - **Caching**: Redis Cluster for distributed caching

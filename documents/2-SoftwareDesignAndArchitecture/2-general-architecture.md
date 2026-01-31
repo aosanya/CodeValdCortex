@@ -256,10 +256,6 @@ Identity Integration:
 
 ## 2. Technology Architecture
 
-### 2.1 Flutter Framework Integration
-
-## 2. Technology Architecture
-
 ### 2.1 Go Language Integration
 
 #### Core Go Components

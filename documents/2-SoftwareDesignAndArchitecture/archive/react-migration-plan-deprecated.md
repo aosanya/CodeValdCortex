@@ -1,25 +1,28 @@
-# React Migration Plan - CodeValdFortex Frontend
+# Flutter Migration Plan - CodeValdFortex Frontend
 
-**Date**: January 26, 2026  
-**Status**: Planning Phase  
-**Author**: Architecture Team
+**Date**: January 31, 2026  
+**Status**: Active Implementation  
+**Author**: Architecture Team  
+**Last Updated**: January 31, 2026
 
 ---
 
 ## Executive Summary
 
-This document outlines the complete migration strategy from the current Templ+HTMX+Alpine.js frontend to a new React-based SPA called **CodeValdFortex**. The migration addresses critical architectural concerns around separation of concerns and scalability.
+This document outlines the complete migration strategy from the current Templ+HTMX+Alpine.js frontend to a new **Flutter cross-platform application** called **CodeValdFortex**. The migration addresses critical architectural concerns around separation of concerns, scalability, and multi-platform support.
 
 ### Problem Statement
 - **Current Issue**: Templ template rendering logic is entangled with business logic in Go handlers
 - **Go Backend Bloat**: Presentation layer mixed with domain logic, making the codebase difficult to maintain
-- **Limited Tooling**: Alpine.js/HTMX ecosystem lacks the robust tooling available in React
+- **Limited Platform Reach**: Web-only interface, no native mobile or desktop apps
+- **State Management Complexity**: Alpine.js insufficient for complex state requirements
 
 ### Solution Overview
 - **Thin Go API Backend**: Pure REST API exposing business logic only (CodeValdCortex)
-- **React SPA Frontend**: All UI/presentation logic in CodeValdFortex
+- **Flutter Cross-Platform Frontend**: Single codebase for Web, iOS, Android, Desktop (CodeValdFortex)
 - **Clear Separation**: Backend = data/orchestration, Frontend = user experience
 - **Incremental Migration**: Domain-by-domain rollout to minimize risk
+- **Modern Architecture**: MVVM pattern with Riverpod for reactive state management
 
 ---
 
@@ -34,28 +37,29 @@ This document outlines the complete migration strategy from the current Templ+HT
 │  ├── CodeValdCortex/          (Go Backend - REST API)      │
 │  │   ├── cmd/main.go                                       │
 │  │   ├── internal/                                         │
-│  │   │   ├── api/             (NEW: REST API handlers)    │
+│  │   │   ├── api/             (REST API handlers)         │
 │  │   │   ├── agency/          (Business logic)            │
 │  │   │   ├── agent/           (Business logic)            │
 │  │   │   └── workflow/        (Business logic)            │
 │  │   └── config.yaml                                       │
 │  │                                                          │
-│  └── CodeValdFortex/          (React Frontend - SPA)       │
-│      ├── src/                                              │
-│      │   ├── features/        (Redux slices by domain)    │
-│      │   ├── components/      (React components)          │
-│      │   ├── api/             (API client)                │
-│      │   └── store/           (Redux store)               │
-│      ├── package.json                                      │
-│      └── vite.config.ts                                    │
+│  └── CodeValdFortex/          (Flutter App - Multi-Platform) │
+│      ├── lib/                                              │
+│      │   ├── features/        (Feature modules)          │
+│      │   ├── models/          (Data models)              │
+│      │   ├── services/        (API services)             │
+│      │   ├── viewmodels/      (Riverpod providers)       │
+│      │   └── widgets/         (Reusable widgets)         │
+│      ├── pubspec.yaml                                      │
+│      └── platforms/       (Web, iOS, Android, Desktop)   │
 └─────────────────────────────────────────────────────────────┘
 
 Runtime Architecture:
 ┌──────────────┐          HTTP          ┌──────────────┐
 │ CodeValdFortex│ ◄─────────────────────►│ CodeValdCortex│
-│  (React SPA) │      REST API          │  (Go Backend) │
-│  Port: 5173  │  /api/v1/agencies      │  Port: 8080   │
-│              │  /api/v1/work-items    │               │
+│ (Flutter App) │      REST API          │  (Go Backend) │
+│  Web/Mobile/  │  /api/v1/agencies      │  Port: 8080   │
+│   Desktop     │  /api/v1/work-items    │               │
 └──────────────┘  /api/v1/workflows     └──────────────┘
                                                 │
                                                 ▼

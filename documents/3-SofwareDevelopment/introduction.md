@@ -95,7 +95,7 @@ The CodeValdCortex development effort addresses critical gaps in the multi-agent
 - **Security Engineer**: Authentication, authorization, and enterprise security features
 
 **Frontend Development Team**:
-- **React Developer**: Management dashboard and operational interfaces
+- **Flutter Developer**: Cross-platform management dashboard (Web, iOS, Android, Desktop)
 - **UX/UI Designer**: User experience design for enterprise operations teams
 - **Frontend QA Engineer**: Frontend testing automation and quality assurance
 
