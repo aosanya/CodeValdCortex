@@ -7,7 +7,7 @@
 **Epic**: A2A Integration (v1.2)  
 **SDK**: Uses `a2a-go` (https://github.com/a2aproject/a2a-go)
 
-> **📘 Related Documentation**: See [a2a-go SDK Integration Strategy](./a2a-go-sdk-integration.md) for detailed SDK usage and implementation approach.
+> **📘 Related Documentation**: See [a2a-go SDK Integration Strategy](./go-sdk-integration.md) for detailed SDK usage and implementation approach.
 
 ---
 

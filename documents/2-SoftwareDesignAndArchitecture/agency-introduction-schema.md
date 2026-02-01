@@ -349,7 +349,7 @@ Agencies can define completely custom structures with any number and type of sec
 
 ## UI Components (Data-Driven)
 
-### React/Flutter Component Structure
+### Flutter Component Structure
 
 ```dart
 // Flutter Example - Data-Driven Section Renderer

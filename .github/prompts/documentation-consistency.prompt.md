@@ -1,15 +1,26 @@
 # Documentation Consistency & Organization Checker
 
 ## Purpose
-Perform systematic documentation consistency checks, identify outdated references, consolidate related files, and organize documentation structure for maintainability.
+Perform systematic documentation consistency checks through **one question at a time**, identifying outdated references, consolidating related files, and organizing documentation structure for maintainability.
 
-## Execution Workflow
+---
 
-### Step 1: Technology Stack Consistency Check
+## Instructions for AI Assistant
 
-**Objective**: Verify all documentation reflects current technology decisions.
+Conduct a comprehensive documentation consistency analysis through **iterative single-question exploration**. Ask ONE question at a time, wait for the response, then decide whether to:
+- **🔍 DEEPER**: Go deeper into the same topic with follow-up questions
+- **📝 NOTE**: Record an issue/gap for later action
+- **➡️ NEXT**: Move to the next consistency check area
+- **📊 REVIEW**: Summarize findings and determine next steps
 
-**Current Technology Stack** (Update this section when stack changes):
+The goal is to systematically check documentation consistency one area at a time rather than overwhelming with batch operations.
+
+---
+
+## Current Technology Stack (Reference)
+
+**Update this section when stack changes:**
+
 ```yaml
 Backend:
   Language: Go 1.21+
@@ -31,62 +42,123 @@ Development UI (Temporary - To be removed):
   Note: NOT the primary frontend
 ```
 
-**Actions**:
-1. Search for outdated technology references:
-   ```bash
-   # Common outdated patterns to search for:
-   - "React" (unless in archived files or Riverpod context)
-   - "TypeScript frontend" (Flutter uses Dart)
-   - "SPA" or "Single Page Application" (Flutter is not SPA)
-   - "Templ" as primary UI (it's temporary)
-   - "HTMX" as strategic choice (it's temporary)
-   ```
+---
 
-2. For each match found:
-   - **Context Check**: Determine if reference is appropriate (e.g., "reactive" is fine, "React framework" is not)
-   - **Archive vs Update**: 
-     - If entire document is outdated → Move to `archive/` folder with `-deprecated` suffix
-     - If section is outdated → Update section to reflect current stack
-     - If reference is historical context → Add note clarifying it's superseded
-   
-3. Create deprecation notices for archived major documents:
-   ```markdown
-   # [Original Document Title]
-   
-   **⚠️ DEPRECATION NOTICE**
-   
-   This document has been superseded by [new-document.md](new-document.md).
-   
-   **Reason**: [Brief explanation]
-   
-   **Archived Version**: [archive/original-document-deprecated.md](archive/original-document-deprecated.md)
-   
-   **Migration Date**: YYYY-MM-DD
-   ```
+## Question-by-Question Consistency Check Process
 
-### Step 2: Cross-Reference Validation
+## Question-by-Question Consistency Check Process
+
+### Session Initiation
+
+When starting a documentation consistency check:
+
+1. **State the scope** - Which documentation area are we checking?
+2. **Scan quickly** - Get overview of file structure and sizes
+3. **Ask the first question** - Start with highest priority check
+4. **Wait for user input** - Get confirmation or additional context before proceeding
+
+### Question Flow
+
+**After each answer, explicitly choose one of these paths:**
+
+- 🔍 **DEEPER**: "Let me examine this area more closely..."
+  - Investigate specific files flagged
+  - Check related documents
+  - Verify cross-references
+
+- 📝 **NOTE**: "I'll note this inconsistency: [description]..."
+  - Record issue for action list
+  - Mark files needing updates
+  - Continue to different check
+
+- ➡️ **NEXT**: "Moving to [new consistency check area]..."
+  - Current check complete
+  - Proceed to next question category
+  - Maintain systematic progress
+
+- 📊 **REVIEW**: "Let me summarize what we've found..."
+  - List inconsistencies discovered
+  - Identify files to archive/update
+  - Propose actions
+
+---
+
+## Question Categories (Execute in Order)
+
+### Question 1: Technology Stack Consistency
+
+**Objective**: Verify all documentation reflects current technology decisions.
+
+**Question Format**:
+```
+🔍 [Technology Stack Check]
+
+**Question**: Are there any references to [outdated technology] in the 
+current documentation?
+
+**Search Pattern**: [specific grep pattern or file locations]
+
+**Context**: We migrated from [old tech] to [new tech], need to verify 
+no outdated references remain.
+
+**What I'm Looking For**: File paths with outdated references, or 
+confirmation that area is clean.
+```
+
+**Common Searches**:
+- "React" (unless in archived files or Riverpod context)
+- "TypeScript frontend" (Flutter uses Dart)
+- "SPA" or "Single Page Application" (Flutter is not SPA)
+- "Templ" as primary UI (it's temporary)
+- "HTMX" as strategic choice (it's temporary)
+
+**For Each Match Found**:
+- **🔍 DEEPER**: Read file to determine context
+- **📝 NOTE**: Is it outdated? Archive or update?
+- **➡️ NEXT**: No issues found, proceed to next check
+
+---
+
+### Question 2: Cross-Reference Validation
 
 **Objective**: Ensure all internal document links point to current files.
 
-**Actions**:
-1. Extract all markdown links from documentation:
-   ```bash
-   grep -r "\[.*\](.*\.md)" documents/ --include="*.md"
-   ```
+**Question Format**:
+```
+🔍 [Link Validation Check]
 
-2. For each link:
-   - Verify target file exists
-   - Check if target is in archive (dead link)
-   - Validate link points to correct section (e.g., `#heading-anchor`)
+**Question**: Do all links in [specific file or folder] point to existing, 
+non-archived documents?
 
-3. Update broken links:
-   - Replace links to archived files with current equivalents
-   - Update README.md files that reference archived documents
-   - Add redirect notices in archived files pointing to replacements
+**Context**: Need to verify README and index files have current references.
 
-### Step 3: File Organization Analysis
+**What I'm Looking For**: Broken links, links to archived files, or 
+confirmation all links are valid.
+```
+
+**Actions Per Broken Link**:
+- **🔍 DEEPER**: Find the correct replacement document
+- **📝 NOTE**: Add to update list
+- **➡️ NEXT**: All links valid, move to next file/folder
+
+---
+
+### Question 3: File Organization Analysis
 
 **Objective**: Identify documentation that needs consolidation or subfolder organization.
+
+**Question Format**:
+```
+🔍 [File Organization Check]
+
+**Question**: Are there 3 or more files in [folder] that share a common 
+topic prefix (e.g., "agency-*.md", "a2a-*.md")?
+
+**Context**: Files with shared topics should be organized in subfolders 
+for better discoverability.
+
+**What I'm Looking For**: File groupings that exceed organization threshold.
+```
 
 **Organization Rules**:
 - **≤ 2 files on topic**: Keep in current directory
@@ -94,272 +166,706 @@ Development UI (Temporary - To be removed):
 - **500+ lines**: Consider splitting into smaller focused documents
 - **Duplicate content**: Consolidate into single source of truth
 
-**Actions**:
-1. **Topic Detection**:
-   ```bash
-   # Group files by naming patterns
-   ls documents/2-SoftwareDesignAndArchitecture/ | grep -E "^[a-z]+-" | cut -d'-' -f1 | sort | uniq -c
-   
-   # Example patterns:
-   # - agency-*.md → "agency" topic
-   # - a2a-*.md → "a2a" topic
-   # - mvp-*.md → "mvp" topic
-   ```
+**For Each Topic Group**:
+- **🔍 DEEPER**: Should these be merged or kept in subfolder?
+- **📝 NOTE**: Add to organization action list
+- **➡️ NEXT**: No groupings found, continue
 
-2. **Subfolder Creation** (when 3+ files share topic prefix):
-   ```bash
-   # Example for "agency" topic with 4+ files:
-   mkdir -p documents/2-SoftwareDesignAndArchitecture/agency/
-   mv agency-*.md documents/2-SoftwareDesignAndArchitecture/agency/
-   # Create README.md in subfolder explaining organization
-   ```
+---
 
-3. **Consolidation Analysis**:
-   - Compare files with similar topics using semantic search
-   - Identify overlapping content (≥30% similarity)
-   - Propose consolidation strategy:
-     - **Merge**: Combine into single comprehensive document
-     - **Split**: Break large file into logical sections
-     - **Reference**: Keep separate but add cross-references
-
-4. **Update Index Files**:
-   - Update parent folder README.md with subfolder references
-   - Maintain table of contents accuracy
-   - Add navigation breadcrumbs if needed
-
-### Step 4: File Size Compliance
+### Question 4: File Size Compliance
 
 **Objective**: Ensure documents remain maintainable and scannable.
+
+**Question Format**:
+```
+🔍 [File Size Check]
+
+**Question**: Are there any .md files in [folder] exceeding 500 lines?
+
+**Context**: Large files should be split for better maintainability.
+
+**What I'm Looking For**: Files over 500 lines (warning) or 1000+ lines 
+(action required).
+```
 
 **Size Guidelines**:
 - **Ideal**: 200-500 lines per document
 - **Warning**: 500-1000 lines (consider splitting)
 - **Action Required**: 1000+ lines (must split or justify)
 
-**Actions**:
-1. **Scan for oversized files**:
-   ```bash
-   find documents/ -name "*.md" -exec wc -l {} + | sort -n | awk '$1 > 500 {print}'
-   ```
+**For Each Large File**:
+- **🔍 DEEPER**: Analyze structure - can it be split logically?
+- **📝 NOTE**: Add to refactoring list with split strategy
+- **➡️ NEXT**: All files within guidelines
 
-2. **For each large file** (500+ lines):
-   - Analyze document structure and logical sections
-   - Determine if splitting is beneficial:
-     - **Split if**: Multiple distinct topics covered
-     - **Keep if**: Single cohesive narrative, splitting would harm comprehension
-   
-3. **Splitting Strategy**:
-   ```markdown
-   # Original: large-document.md (1200 lines)
-   
-   # After split:
-   large-topic/
-   ├── README.md (overview, 150 lines)
-   ├── section-1-foundation.md (400 lines)
-   ├── section-2-implementation.md (500 lines)
-   └── section-3-deployment.md (300 lines)
-   ```
+---
 
-4. **Update References**:
-   - Add clear README.md in new folder explaining structure
-   - Update parent folder index
-   - Add "See Also" sections for related documents
-
-### Step 5: Naming Convention Compliance
+### Question 5: Naming Convention Compliance
 
 **Objective**: Ensure consistent, discoverable file naming.
+
+**Question Format**:
+```
+🔍 [Naming Convention Check]
+
+**Question**: Do all files in [folder] follow the naming convention 
+pattern [expected-pattern.md]?
+
+**Context**: Consistent naming improves discoverability and automation.
+
+**What I'm Looking For**: Files violating naming conventions.
+```
 
 **Naming Standards**:
 ```yaml
 Architecture Documents:
   Pattern: "kebab-case-descriptive-name.md"
   Examples: "backend-architecture.md", "a2a-protocol-integration.md"
-  Avoid: CamelCase, snake_case, abbreviations without context
-
+  
 MVP Details:
   Pattern: "MVP-XXX.md" or "MVP-XXX-descriptive-name.md"
-  Examples: "MVP-015.md", "MVP-A2A-000_a2a_go_sdk_integration.md"
   
 Use Case Documentation:
   Pattern: "UC-ABBR-NNN-short-name/"
-  Examples: "UC-INFRA-001-water-distribution-network/"
-
+  
 Coding Sessions:
   Pattern: "MVP-XXX_descriptive_name.md" or "TASK-NNN_description.md"
-  Examples: "MVP-043_ai-status-chat-refresh-fix.md"
-
+  
 Archive Files:
-  Pattern: "original-name-deprecated.md" or "original-name-YYYYMMDD-deprecated.md"
-  Examples: "frontend-architecture-react-deprecated.md"
+  Pattern: "original-name-deprecated.md"
 ```
 
-**Actions**:
-1. Scan for naming violations
-2. Propose renames for clarity
-3. Update all references after rename
-4. Maintain backward compatibility notes in README
+**For Each Violation**:
+- **🔍 DEEPER**: What's the correct name per convention?
+- **📝 NOTE**: Add to rename action list
+- **➡️ NEXT**: All names compliant
 
-### Step 6: Content Duplication Detection
+---
+
+### Question 6: Content Duplication Detection
 
 **Objective**: Identify and consolidate duplicate or near-duplicate content.
 
-**Actions**:
-1. **Exact Duplication**:
-   ```bash
-   # Find files with identical content
-   find documents/ -name "*.md" -type f -exec md5sum {} + | sort | uniq -w32 -D
-   ```
+**Question Format**:
+```
+🔍 [Duplication Check]
 
-2. **Near Duplication** (use semantic search):
-   - Compare documents in same domain
-   - Calculate similarity score
-   - If similarity > 70%: Propose consolidation
+**Question**: Are there multiple files in [folder] covering the same topic 
+or with similar content?
 
-3. **Consolidation Strategy**:
-   - **Single Source of Truth**: Choose canonical document
-   - **Archive Duplicates**: Move to archive with redirect notice
-   - **Cross-Reference**: Add links from related documents
+**Context**: Duplicate content creates maintenance burden and confusion.
 
-### Step 7: Generate Consistency Report
-
-**Objective**: Document findings and actions taken.
-
-**Report Format**:
-```markdown
-# Documentation Consistency Report
-**Date**: YYYY-MM-DD
-**Scope**: /workspaces/CodeValdCortex/documents
-
-## Technology Stack Issues
-- [X] React references: 12 found → 10 archived, 2 updated
-- [X] TypeScript frontend: 5 found → all updated to Flutter/Dart
-- [ ] Templ primary UI: 3 found → 2 need context clarification
-
-## Broken Links
-- [X] react-migration-plan.md: 3 references → updated to flutter-migration-plan.md
-- [ ] MVP-RM-* files: 15 references → need review (in archived folder)
-
-## File Organization
-- [X] Created agency-operation-framework/ (8 files consolidated)
-- [X] Created flutter-designs/ in Fortex (6 files)
-- [ ] Consider: mvp-details/ subfolder structure (40+ files)
-
-## File Sizes
-- [ ] backend-architecture.md: 1992 lines → Consider splitting
-- [ ] a2a-protocol-integration.md: 1831 lines → Consider splitting
-- [X] frontend-architecture.md: 1586 lines → Archived (outdated)
-
-## Duplicates Found
-- [X] react-migration-plan.md (duplicate found and archived)
-- [ ] MVP-015 content appears in 3 places → Need consolidation
-
-## Actions Required
-1. Review mvp-details/ organization (40+ files, needs topic subfolders)
-2. Split large architecture documents (1500+ lines)
-3. Clarify Templ references (temporary vs historical context)
-4. Update use case mvp.md files with current stack references
-
-## Files Archived (this session)
-1. frontend-architecture-react-deprecated.md
-2. react-migration-plan-deprecated.md
-3. react-migration-plan-duplicate.md
-4. FRONTEND_IMPLEMENTATION_SUMMARY-templ-deprecated.md
-5. frontend-architecture-updated-templ-deprecated.md
-6. mvp-details/archive-react-migration-deprecated/ (folder)
-
-## Files Created
-1. frontend-architecture.md (deprecation notice)
-2. flutter-migration-plan.md (current strategy)
-
-## Files Updated
-1. 2-SoftwareDesignAndArchitecture/README.md
-2. 2-general-architecture.md
-3. 3-SofwareDevelopment/introduction.md
+**What I'm Looking For**: Files with overlapping purpose or >70% similar content.
 ```
 
-## Special Case: Use Case MVP Files
+**For Each Potential Duplicate**:
+- **🔍 DEEPER**: Compare files to verify duplication level
+- **📝 NOTE**: Decide merge strategy or keep with cross-references
+- **➡️ NEXT**: No duplicates detected
+
+---
+
+### Question 7: Use Case MVP Files Check
 
 **Objective**: Update use case-specific mvp.md files to reflect current platform architecture.
 
-**Use Case Files to Check**:
-```bash
-find usecases/ -name "mvp.md" -type f
+**Question Format**:
+```
+🔍 [Use Case Consistency Check]
+
+**Question**: Does [use-case]/mvp.md reference the current technology stack 
+(Flutter frontend, Templ as temporary)?
+
+**Context**: Use case documentation should reflect actual platform state.
+
+**What I'm Looking For**: Outdated tech stack references, deprecated 
+dependency links, incorrect frontend descriptions.
 ```
 
-**Update Strategy for Each Use Case**:
+**Update Strategy**:
+1. Technology Stack Section - Remove React/TypeScript references
+2. Architecture Diagrams - Update frontend layer labels
+3. Dependencies Section - Remove MVP-RM-* (React migration) references
+4. Implementation Notes - Clarify Backend (Cortex) vs Frontend (Fortex) separation
 
-1. **Technology Stack Section**:
-   - Remove React/TypeScript references
-   - Update to reflect Flutter frontend (if UI is mentioned)
-   - Ensure Templ is marked as temporary development UI only
+**For Each Use Case File**:
+- **🔍 DEEPER**: What specific sections need updates?
+- **📝 NOTE**: Add to use case update action list
+- **➡️ NEXT**: Use case file is current
 
-2. **Architecture Diagrams**:
-   - Update frontend layer: (React/TS) → (Flutter - Fortex)
-   - Add note: "(Templ - temporary dev UI)" if Templ is shown
+---
 
-3. **Dependencies Section**:
-   - Check for MVP-RM-* references (React migration) → Remove or mark deprecated
-   - Update to MVP-FL-* references if frontend dependencies exist
-   - Verify all MVP-CLEANUP-* dependencies are properly noted
+### Question 8: Production Readiness - Security & Authentication
 
-4. **Implementation Notes**:
-   - Clarify separation: Backend (Cortex) vs Frontend (Fortex)
-   - Note that use cases are configuration-only (per usecase-architecture.md)
-   - Remove any custom frontend implementation details
+**Objective**: Verify security documentation and implementation completeness for production deployment.
 
-**Example Update for UC-INFRA-001**:
+**Question Format**:
+```
+🔍 [Security Production Readiness Check]
+
+**Question**: Is there comprehensive documentation covering authentication, 
+authorization, secret management, and security hardening for production?
+
+**Context**: Production systems require robust security measures to protect 
+user data and prevent unauthorized access.
+
+**What I'm Looking For**: Documentation gaps in:
+- Authentication mechanisms (JWT, OAuth, API keys)
+- Authorization/RBAC implementation
+- Secrets management (environment variables, vaults)
+- TLS/HTTPS configuration
+- API rate limiting and throttling
+- Input validation and sanitization
+- Security headers and CORS policies
+- Audit logging for security events
+```
+
+**Production Security Checklist**:
+- ✅ Authentication flow documented
+- ✅ Authorization/permissions model defined
+- ✅ Secret rotation strategy documented
+- ✅ Security testing procedures defined
+- ✅ Incident response plan exists
+- ✅ Data encryption at rest/in transit documented
+- ✅ Vulnerability scanning process defined
+- ✅ Security compliance requirements addressed
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check implementation files for undocumented security features
+- **📝 NOTE**: Add missing documentation to action list
+- **➡️ NEXT**: Security documentation complete
+
+---
+
+### Question 9: Production Readiness - Monitoring & Observability
+
+**Objective**: Ensure monitoring, logging, and alerting are production-ready.
+
+**Question Format**:
+```
+🔍 [Monitoring Production Readiness Check]
+
+**Question**: Is there documentation for production monitoring, logging 
+infrastructure, metrics collection, and alerting strategies?
+
+**Context**: Production systems require comprehensive observability to 
+detect and resolve issues quickly.
+
+**What I'm Looking For**: Documentation gaps in:
+- Metrics collection (Prometheus, custom metrics)
+- Logging infrastructure (structured logging, log aggregation)
+- Distributed tracing (if microservices)
+- Alerting rules and escalation policies
+- Dashboard configurations
+- SLI/SLO/SLA definitions
+- Performance monitoring
+- Error tracking and reporting
+```
+
+**Production Observability Checklist**:
+- ✅ Metrics endpoints documented
+- ✅ Log format and retention policies defined
+- ✅ Critical alerts documented (SLIs)
+- ✅ Dashboard designs specified
+- ✅ On-call procedures documented
+- ✅ Runbook for common issues exists
+- ✅ Performance baselines established
+- ✅ Error budget policy defined
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check deployments/prometheus.yml and implementation
+- **📝 NOTE**: Add missing observability documentation
+- **➡️ NEXT**: Monitoring documentation complete
+
+---
+
+### Question 10: Production Readiness - Deployment & Infrastructure
+
+**Objective**: Verify deployment procedures, infrastructure configuration, and disaster recovery plans.
+
+**Question Format**:
+```
+🔍 [Deployment Production Readiness Check]
+
+**Question**: Is there complete documentation for deployment processes, 
+infrastructure as code, scaling strategies, and disaster recovery?
+
+**Context**: Production deployments require reliable, repeatable processes 
+and recovery mechanisms.
+
+**What I'm Looking For**: Documentation gaps in:
+- CI/CD pipeline configuration
+- Infrastructure as Code (Terraform, k8s manifests)
+- Environment configuration (dev/staging/prod)
+- Database migration procedures
+- Rollback procedures
+- Scaling strategies (horizontal/vertical)
+- Backup and restore procedures
+- Disaster recovery plan (RTO/RPO)
+- Blue-green or canary deployment strategy
+```
+
+**Production Deployment Checklist**:
+- ✅ CI/CD pipeline documented
+- ✅ Environment variables catalog exists
+- ✅ Database migration runbook exists
+- ✅ Rollback procedures documented
+- ✅ Backup schedule and testing documented
+- ✅ Infrastructure diagrams current
+- ✅ Scaling thresholds defined
+- ✅ DR plan tested and documented
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check docker-compose.yml, Dockerfile, deployments/
+- **📝 NOTE**: Add missing deployment documentation
+- **➡️ NEXT**: Deployment documentation complete
+
+---
+
+### Question 11: Production Readiness - Data Management & Compliance
+
+**Objective**: Ensure data handling, privacy, and compliance requirements are documented.
+
+**Question Format**:
+```
+🔍 [Data Management Production Readiness Check]
+
+**Question**: Is there documentation covering data models, database schemas, 
+data retention policies, and regulatory compliance requirements?
+
+**Context**: Production systems must handle data responsibly and comply 
+with regulations (GDPR, CCPA, etc.).
+
+**What I'm Looking For**: Documentation gaps in:
+- Database schema documentation (ArangoDB collections)
+- Data retention and archival policies
+- PII (Personally Identifiable Information) handling
+- GDPR/CCPA compliance procedures
+- Data backup and recovery testing
+- Database performance optimization
+- Migration and upgrade procedures
+- Data validation rules
+```
+
+**Production Data Management Checklist**:
+- ✅ Schema documentation current
+- ✅ Data retention policies defined
+- ✅ PII handling documented
+- ✅ Compliance requirements addressed
+- ✅ Backup verification procedures exist
+- ✅ Performance tuning guidelines documented
+- ✅ Data migration tested
+- ✅ Data access controls documented
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check internal/database/ and compliance docs
+- **📝 NOTE**: Add missing data management documentation
+- **➡️ NEXT**: Data documentation complete
+
+---
+
+### Question 12: Production Readiness - API Documentation & Versioning
+
+**Objective**: Verify API documentation is complete and production-ready for external consumers.
+
+**Question Format**:
+```
+🔍 [API Production Readiness Check]
+
+**Question**: Is there comprehensive API documentation including endpoints, 
+request/response schemas, error codes, rate limits, and versioning strategy?
+
+**Context**: Production APIs must be well-documented for developers and 
+support teams.
+
+**What I'm Looking For**: Documentation gaps in:
+- OpenAPI/Swagger specification
+- Authentication requirements per endpoint
+- Request/response examples
+- Error code catalog with resolution steps
+- Rate limiting and quota documentation
+- API versioning strategy (v1, v2, etc.)
+- Deprecation policy and timeline
+- Breaking change communication plan
+```
+
+**Production API Documentation Checklist**:
+- ✅ API specification (OpenAPI/Swagger) exists
+- ✅ Authentication per endpoint documented
+- ✅ All endpoints have examples
+- ✅ Error codes documented with meanings
+- ✅ Rate limits clearly specified
+- ✅ Versioning strategy documented
+- ✅ Deprecation policy defined
+- ✅ API changelog maintained
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check api/ and internal/api/ folders
+- **📝 NOTE**: Add missing API documentation
+- **➡️ NEXT**: API documentation complete
+
+---
+
+### Question 13: Production Readiness - Testing & Quality Assurance
+
+**Objective**: Ensure testing coverage and quality gates are production-ready.
+
+**Question Format**:
+```
+🔍 [Testing Production Readiness Check]
+
+**Question**: Is there documentation for test coverage requirements, testing 
+strategies, and quality gates for production releases?
+
+**Context**: Production code requires comprehensive testing to ensure 
+reliability and prevent regressions.
+
+**What I'm Looking For**: Documentation gaps in:
+- Unit test coverage requirements (minimum %)
+- Integration test strategy
+- End-to-end test scenarios
+- Performance/load testing procedures
+- Security testing (SAST/DAST)
+- Regression test suite
+- Test data management
+- Quality gates for CI/CD
+```
+
+**Production Testing Checklist**:
+- ✅ Test coverage targets defined (e.g., 80%+)
+- ✅ Integration test strategy documented
+- ✅ E2E test scenarios identified
+- ✅ Performance benchmarks established
+- ✅ Security testing integrated
+- ✅ Test data management documented
+- ✅ CI/CD quality gates configured
+- ✅ Testing runbook exists
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check test/ folder and CI configuration
+- **📝 NOTE**: Add missing testing documentation
+- **➡️ NEXT**: Testing documentation complete
+
+---
+
+### Question 14: Production Readiness - Operations & Support
+
+**Objective**: Verify operational runbooks, support procedures, and maintenance documentation exist.
+
+**Question Format**:
+```
+🔍 [Operations Production Readiness Check]
+
+**Question**: Is there documentation for operational procedures, troubleshooting 
+guides, support escalation, and maintenance windows?
+
+**Context**: Production systems require clear operational procedures for 
+support teams.
+
+**What I'm Looking For**: Documentation gaps in:
+- Operational runbooks for common tasks
+- Troubleshooting guides with decision trees
+- Support escalation matrix
+- Maintenance window procedures
+- Health check endpoints documentation
+- System dependencies map
+- Contact information for critical services
+- Change management process
+```
+
+**Production Operations Checklist**:
+- ✅ Runbooks for common operations exist
+- ✅ Troubleshooting guides documented
+- ✅ Escalation procedures defined
+- ✅ Maintenance procedures documented
+- ✅ Health check endpoints listed
+- ✅ System dependency map current
+- ✅ Emergency contacts documented
+- ✅ Change management process defined
+
+**For Each Gap**:
+- **🔍 DEEPER**: Check documents/4-QA/ and operations docs
+- **📝 NOTE**: Add missing operational documentation
+- **➡️ NEXT**: Operations documentation complete
+
+---
+
+## Response Processing Guidelines
+
+**After receiving each answer:**
+
+1. **Acknowledge**: "✅ Understood - [brief summary of finding]"
+2. **Decide Path**: Choose DEEPER/NOTE/NEXT/REVIEW
+3. **State Choice**: "🔍 Going deeper..." / "📝 Noting issue..." / "➡️ Moving to..." / "📊 Reviewing..."
+4. **Execute**: Ask next question OR provide review summary
+
+**Example Flow**:
+```
+AI: 🔍 [Technology Stack Check]
+    
+    Question: Are there references to "React" in 
+    /documents/2-SoftwareDesignAndArchitecture/?
+    
+    Context: We migrated to Flutter, need to verify no outdated references.
+    
+    What I'm Looking For: Files containing "React" references.
+
+User: Found 3 files: frontend-architecture.md, react-migration-plan.md, 
+      README.md
+
+AI: ✅ Found 3 files with React references.
+    
+    🔍 Going deeper - checking if these are already archived or current:
+    
+    Question: Have frontend-architecture.md and react-migration-plan.md 
+    already been archived, or are they still active documents?
+
+User: frontend-architecture.md is now just a deprecation notice. 
+      react-migration-plan.md is still in main folder.
+
+AI: ✅ Understood - one is deprecation notice (good), one needs archiving.
+    
+    📝 Noting issue: react-migration-plan.md needs to be archived to 
+    archive/react-migration-plan-deprecated.md
+    
+    ➡️ Moving to README.md check:
+    
+    Question: What React references exist in README.md?
+```
+
+---
+
+## Issue Tracking During Session
+
+**Maintain a running list visible every 3-5 questions:**
+
+### 🚨 Inconsistencies Found
+- 📝 **[File]**: Outdated tech reference - [specific issue]
+- 📝 **[File]**: Broken link - [link target]
+- 📝 **[Folder]**: Needs subfolder organization - [topic group]
+
+### ✅ Verified Clean
+- ✅ **[Area]**: No issues found
+- ✅ **[File]**: Already compliant
+
+### 🔄 Actions Required
+- 🔧 Archive: [list of files]
+- 🔧 Update: [list of files needing edits]
+- 🔧 Organize: [folders needing restructure]
+- 🔧 Rename: [files needing rename]
+
+---
+
+## Periodic Review Format
+
+**Every 5-7 questions, provide progress summary:**
+
+```
+📊 **CONSISTENCY CHECK - Progress Review**
+
+**Areas Checked:**
+✅ Technology Stack (2-SoftwareDesignAndArchitecture/) - 3 issues found
+✅ Cross-References (README files) - 2 broken links
+⏸️ File Organization - Not yet checked
+⏸️ File Sizes - Not yet checked
+
+**Issues Identified:**
+📝 react-migration-plan.md needs archiving
+📝 README.md has 2 React references to update
+📝 introduction.md references "React Developer" role
+
+**Files to Archive:**
+- react-migration-plan.md → archive/react-migration-plan-deprecated.md
+
+**Files to Update:**
+- README.md (2 locations)
+- introduction.md (1 location)
+
+**Remaining Checks:**
+- File organization analysis
+- File size compliance
+- Naming convention check
+- Duplication detection
+- Use case mvp.md updates
+
+**Next Steps**: Continue with file organization check, or address found 
+issues first?
+```
+
+---
+
+## Completion Criteria
+
+**The consistency check session is complete when:**
+
+- ✅ All 14 question categories have been systematically checked
+- ✅ All inconsistencies have been identified and noted
+- ✅ Action list is complete (archive/update/organize/rename)
+- ✅ Production readiness gaps documented
+- ✅ User confirms readiness to execute actions
+
+**Final Deliverable**:
 ```markdown
-## Technology Integration
+# Documentation Consistency & Production Readiness Report
+**Date**: YYYY-MM-DD
+**Scope**: [folders checked]
 
-### Backend (CodeValdCortex)
-- **Framework**: Go + Gin
-- **Database**: ArangoDB (graph + document storage)
-- **Communication**: Change streams + message passing
+## Summary
+- Files Scanned: XX
+- Issues Found: XX
+- Files to Archive: XX
+- Files to Update: XX
+- Reorganizations Needed: XX
+- Production Gaps Identified: XX
 
-### Frontend (CodeValdFortex)
-- **Framework**: Flutter (cross-platform)
-- **UI Components**: Material Design 3
-- **State Management**: Riverpod
-- **Note**: Templ-based dev UI exists temporarily, will be replaced
+## Technology Stack Issues
+[List with file paths and specific line numbers/content]
 
-### Development Status
-- ~~MVP-RM-001~~ ✅ (Deprecated - React migration cancelled)
-- MVP-FL-003: Routing & Navigation → Required for dashboard
-- MVP-CLEANUP-001 through 014: Remove Templ (blocked by Fortex MVP-FL-* tasks)
+## Broken Links
+[List with file paths and broken link targets]
+
+## File Organization
+[List topic groups needing subfolder creation]
+
+## File Sizes
+[List files exceeding thresholds]
+
+## Naming Violations
+[List files needing rename]
+
+## Duplicates Found
+[List duplicate/near-duplicate content]
+
+## Use Case Updates
+[List use case mvp.md files needing updates]
+
+## Production Readiness Gaps
+
+### Security & Authentication
+[List missing security documentation and implementation gaps]
+
+### Monitoring & Observability
+[List missing monitoring, logging, and alerting documentation]
+
+### Deployment & Infrastructure
+[List missing deployment and DR documentation]
+
+### Data Management & Compliance
+[List missing data policies and compliance documentation]
+
+### API Documentation & Versioning
+[List missing API documentation]
+
+### Testing & Quality Assurance
+[List missing test coverage and quality gate documentation]
+
+### Operations & Support
+[List missing runbooks and operational procedures]
+
+## Recommended Actions
+1. Archive: [commands to execute]
+2. Update: [files and specific changes]
+3. Organize: [folder restructure commands]
+4. Rename: [rename commands]
+5. Production Readiness: [critical documentation to create]
+
+## Verification Steps
+[How to confirm consistency after changes]
+
+## Production Launch Blockers
+**Critical Gaps** (Must be resolved before production):
+- [ ] [Critical security gap]
+- [ ] [Critical monitoring gap]
+- [ ] [Critical deployment gap]
+
+**High Priority** (Should be resolved before production):
+- [ ] [High priority gap]
+
+**Medium Priority** (Can be resolved post-launch with mitigation):
+- [ ] [Medium priority gap]
 ```
 
-## Automation Recommendations
+---
 
-**Scripts to Create**:
-1. `scripts/check-documentation-consistency.sh`:
-   - Grep for outdated technology references
-   - Validate all internal links
-   - Report file size violations
+## Example Question Sequence
 
-2. `scripts/organize-documentation.sh`:
-   - Detect topic groups (3+ files)
-   - Propose subfolder organization
-   - Generate consolidation reports
+**Session Start:**
+```
+AI: We're performing a documentation consistency check for 
+    /workspaces/CodeValdCortex/documents/
 
-3. `scripts/update-use-case-mvps.sh`:
-   - Batch update all use case mvp.md files
-   - Replace deprecated references
-   - Standardize technology stack sections
+    I've scanned the folder structure. Starting with Technology Stack Check.
 
-## Integration with Workflow Prompts
+    🔍 [Technology Stack Check - Question 1]
+    
+    **Question**: Are there any files in 
+    documents/2-SoftwareDesignAndArchitecture/ that reference "React" 
+    (excluding archive/ folder)?
+    
+    **Context**: We migrated from React to Flutter for the frontend. Need 
+    to verify no outdated references remain in active documentation.
+    
+    **What I'm Looking For**: File paths containing "React" references, 
+    or confirmation that the area is clean.
+```
 
-**Reference from start-task.prompt.md and finish-task.prompt.md**:
-- After task completion, run documentation consistency checks
-- Verify no new outdated references were introduced
-- Update cross-references if documentation structure changed
-- Maintain consistency report in session notes
+**After First Answer:**
+```
+User: Yes, found in frontend-architecture.md and README.md
+
+AI: ✅ Found 2 files with React references.
+    
+    🔍 Going deeper into frontend-architecture.md:
+    
+    **Question**: Is frontend-architecture.md a current document describing 
+    React architecture, or a deprecation notice pointing to the Flutter plan?
+    
+    **Context**: Need to determine if this is already handled or needs archiving.
+    
+    **What I'm Looking For**: File content/purpose - is it outdated content 
+    or a redirect notice?
+```
+
+**After Progress (Question 5):**
+```
+AI: 📊 **PROGRESS CHECK**
+    
+    **Completed Checks:**
+    ✅ Technology Stack - 3 issues identified
+    ✅ Cross-References - 1 broken link found
+    
+    **Issues Found:**
+    📝 react-migration-plan.md - needs archiving
+    📝 README.md - 2 React references to update
+    📝 docs link broken - points to archived file
+    
+    **Next Area**: File Organization Analysis
+    
+    Continue with organization check, or would you like to review/address 
+    issues first?
+```
+
+---
 
 ## Success Criteria
 
-- ✅ Zero references to outdated technologies (React, TypeScript frontend) in current docs
+**Documentation Consistency:**
+- ✅ Zero references to outdated technologies in active docs
 - ✅ All archived files have clear deprecation notices
-- ✅ No broken internal links in active documentation
+- ✅ No broken internal links
 - ✅ Topics with 3+ files organized in subfolders
 - ✅ No files exceed 1500 lines without justification
 - ✅ All use case mvp.md files reflect current architecture
-- ✅ Consistency report generated and reviewed
+- ✅ Comprehensive consistency report generated
+
+**Production Readiness:**
+- ✅ Security documentation complete (auth, secrets, hardening)
+- ✅ Monitoring & alerting documented with SLIs/SLOs
+- ✅ Deployment procedures and DR plans documented
+- ✅ Data management and compliance requirements addressed
+- ✅ API documentation production-ready (OpenAPI/Swagger)
+- ✅ Testing coverage and quality gates defined
+- ✅ Operational runbooks and troubleshooting guides exist
+- ✅ No critical blockers for production deployment
+- ✅ Production readiness checklist 100% complete

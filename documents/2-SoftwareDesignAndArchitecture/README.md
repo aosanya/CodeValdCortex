@@ -13,9 +13,9 @@ This directory contains the comprehensive software design and architecture docum
 - **[frontend-architecture.md](frontend-architecture.md)**: Frontend strategy overview (Flutter migration status)
 - **[flutter-migration-plan.md](flutter-migration-plan.md)**: **Flutter cross-platform frontend architecture and migration strategy** ⭐ ACTIVE
 - **[usecase-architecture.md](usecase-architecture.md)**: **Use case design principles - configuration-only approach (no custom code)**
-- **[agency-operations-framework.md](agency-operations-framework.md)**: **Agency goals, work items, and RACI matrix framework**
-- **[a2a-protocol-integration.md](a2a-protocol-integration.md)**: **A2A Protocol integration - Multi-vendor agent interoperability** ⭐
-- **[a2a-go-sdk-integration.md](a2a-go-sdk-integration.md)**: **a2a-go SDK integration strategy and implementation guide** ⭐
+- **[agency-operation-framework/agency-operations-framework.md](agency-operation-framework/agency-operations-framework.md)**: **Agency goals, work items, and RACI matrix framework**
+- **[a2a-integration/protocol-specification.md](a2a-integration/protocol-specification.md)**: **A2A Protocol integration - Multi-vendor agent interoperability** ⭐
+- **[a2a-integration/go-sdk-integration.md](a2a-integration/go-sdk-integration.md)**: **a2a-go SDK integration strategy and implementation guide** ⭐
 
 ## Architectural Principles
 
@@ -221,7 +221,7 @@ CodeValdCortex integrates with the Agent-to-Agent (A2A) Protocol to enable seaml
 - 3x expansion of addressable agent ecosystem
 - Linux Foundation open standards compliance
 
-**Complete Technical Specification**: See [A2A Protocol Integration](a2a-protocol-integration.md)
+**Complete Technical Specification**: See [A2A Protocol Integration](a2a-integration/protocol-specification.md)
 
 ### Cloud Platform Support
 - **AWS**: EKS, RDS, ElastiCache, S3 integration
