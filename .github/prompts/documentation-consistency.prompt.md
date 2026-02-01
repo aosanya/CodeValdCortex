@@ -703,87 +703,258 @@ issues first?
 - ✅ All inconsistencies have been identified and noted
 - ✅ Action list is complete (archive/update/organize/rename)
 - ✅ Production readiness gaps documented
+- ✅ **Gaps documented in structured format** (see below)
 - ✅ User confirms readiness to execute actions
 
-**Final Deliverable**:
+---
+
+## 📁 REQUIRED: Structured Gap Documentation
+
+**CRITICAL**: All findings MUST be documented in the structured gaps directory for tracking and accountability.
+
+### Gap Documentation Location
+
+```
+/workspaces/CodeValdCortex/documents/2-SoftwareDesignAndArchitecture/gaps/
+├── README.md                           # Gap tracking overview
+├── production-readiness/               # Production-critical gaps
+│   ├── security-authentication.md
+│   ├── deployment-infrastructure.md
+│   ├── monitoring-observability.md
+│   ├── data-compliance.md
+│   └── api-documentation.md
+├── file-organization/                  # File structure issues
+│   ├── oversized-files.md
+│   ├── duplicate-files.md
+│   ├── misplaced-files.md
+│   └── naming-violations.md
+├── cross-references/                   # Link and reference issues
+│   ├── broken-links.md
+│   └── outdated-references.md
+└── reports/                           # Timestamped full reports
+    └── YYYY-MM-DD_consistency-check.md
+```
+
+### Required Documentation Actions
+
+After completing the consistency check, you MUST:
+
+1. **Create/Update Category-Specific Gap Files**
+   - Update existing gap files with new findings
+   - Create new gap files for new categories
+   - Use consistent format (see templates in gaps/README.md)
+
+2. **Create Timestamped Report**
+   - File: `gaps/reports/YYYY-MM-DD_consistency-check.md`
+   - Include executive summary, metrics, findings, and action plan
+   - Reference category-specific gap files
+
+3. **Update gaps/README.md**
+   - Update "Current Gaps Summary" section
+   - Update metrics and status counts
+   - Update "Next Steps"
+
+### Gap File Format Template
+
+Each gap file MUST include:
+
 ```markdown
-# Documentation Consistency & Production Readiness Report
+# [Category] [Type] Gap/Issue
+
+**Last Updated**: YYYY-MM-DD  
+**Priority**: 🔴 BLOCKER | 🟡 HIGH | 🟢 MEDIUM | ⚪ LOW  
+**Status**: Open | In Progress | Resolved
+
+## Summary
+Brief description of the gap and impact
+
+## Missing Documentation / Issues
+- [ ] Item 1
+- [ ] Item 2
+
+## Impact
+What happens if we ship without this?
+
+## Recommended Solution
+Specific files to create, actions to take
+
+## Action Items
+- [ ] Action 1
+- [ ] Action 2
+
+## Resolution
+(Fill when resolved)
+- **Resolved By**: 
+- **Date**: 
+- **Notes**: 
+```
+
+### Production Readiness Gap Template
+
+For production blockers, use enhanced template:
+
+```markdown
+# [Category] Production Readiness Gap
+
+**Last Updated**: YYYY-MM-DD  
+**Priority**: 🔴 BLOCKER  
+**Status**: Open
+
+## Summary
+CRITICAL description of missing production capability
+
+## Missing Documentation
+### 1. [Specific Doc Category]
+- [ ] File 1
+- [ ] File 2
+
+### 2. [Another Category]
+- [ ] File 3
+
+## Current State
+**What Exists:**
+- ✅ Item that exists
+- ⚠️ Partial item
+
+**What's Missing:**
+- ❌ Critical missing item 1
+- ❌ Critical missing item 2
+
+## Impact of Shipping Without This
+1. Risk 1
+2. Risk 2
+3. Legal/compliance issue
+
+## Recommended Solution
+### Phase 1: Critical (Week 1)
+Detailed creation plan
+
+### Phase 2: Important (Week 2)
+Next priority items
+
+## Action Items
+- [ ] Immediate action
+- [ ] Urgent action
+- [ ] Validation
+
+## Resolution
+(To be filled)
+```
+
+---
+
+## Final Deliverable Structure
+
+**After each consistency check session, create:**
+
+### 1. Timestamped Report (Required)
+
+**File**: `gaps/reports/YYYY-MM-DD_consistency-check.md`
+
+**Contents**:
+```markdown
+# Documentation Consistency Check Report
+
 **Date**: YYYY-MM-DD
 **Scope**: [folders checked]
 
-## Summary
+## Executive Summary
+Overall assessment, key metrics, critical findings
+
+## Metrics Summary
 - Files Scanned: XX
 - Issues Found: XX
-- Files to Archive: XX
-- Files to Update: XX
-- Reorganizations Needed: XX
-- Production Gaps Identified: XX
+- Production Blockers: XX
+- High Priority: XX
+- Medium Priority: XX
 
-## Technology Stack Issues
-[List with file paths and specific line numbers/content]
+## Findings by Category
+### 1. Technology Stack Consistency
+### 2. File Organization
+### 3. File Size Compliance
+### 4. Cross-Reference Validation
+### 5. Production Readiness
 
-## Broken Links
-[List with file paths and broken link targets]
+## Recommended Actions (Prioritized)
+### 🔴 CRITICAL - This Week
+### 🟡 HIGH - Next 2 Weeks
+### 🟢 MEDIUM - Next Month
 
-## File Organization
-[List topic groups needing subfolder creation]
+## Timeline Estimate
+## Next Steps
+## Conclusion
+```
 
-## File Sizes
-[List files exceeding thresholds]
+### 2. Category-Specific Gap Files (Required)
 
-## Naming Violations
-[List files needing rename]
+Update or create gap files in appropriate subfolder:
+- `production-readiness/[category].md` for production gaps
+- `file-organization/[issue-type].md` for file issues
+- `cross-references/[issue-type].md` for link issues
 
-## Duplicates Found
-[List duplicate/near-duplicate content]
+### 3. Update gaps/README.md (Required)
 
-## Use Case Updates
-[List use case mvp.md files needing updates]
+Update the summary section:
+```markdown
+## Current Gaps Summary
 
-## Production Readiness Gaps
+**Last Check**: YYYY-MM-DD
 
-### Security & Authentication
-[List missing security documentation and implementation gaps]
+### Production Readiness
+- 🔴 X BLOCKER gaps (list categories)
+- 🟡 X HIGH gaps
 
-### Monitoring & Observability
-[List missing monitoring, logging, and alerting documentation]
+### File Organization
+- 🟡 X files exceeding 500 lines
+- 🔴 X files exceeding 1,000 lines
 
-### Deployment & Infrastructure
-[List missing deployment and DR documentation]
+### Total Issues
+- **Blockers**: X
+- **High Priority**: X
+```
 
-### Data Management & Compliance
-[List missing data policies and compliance documentation]
+---
 
-### API Documentation & Versioning
-[List missing API documentation]
+## Quality Checklist for Gap Documentation
 
-### Testing & Quality Assurance
-[List missing test coverage and quality gate documentation]
+Before completing a consistency check session, verify:
 
-### Operations & Support
-[List missing runbooks and operational procedures]
+- [ ] Timestamped report created in `gaps/reports/`
+- [ ] All production blockers documented in `production-readiness/`
+- [ ] All file issues documented in `file-organization/`
+- [ ] All broken links documented in `cross-references/`
+- [ ] Each gap file follows template format
+- [ ] Each gap has priority level (🔴/🟡/🟢/⚪)
+- [ ] Each gap has actionable "Action Items"
+- [ ] gaps/README.md updated with latest metrics
+- [ ] Cross-references between gap files added where relevant
+- [ ] Timeline estimates provided for resolution
 
-## Recommended Actions
-1. Archive: [commands to execute]
-2. Update: [files and specific changes]
-3. Organize: [folder restructure commands]
-4. Rename: [rename commands]
-5. Production Readiness: [critical documentation to create]
+---
 
-## Verification Steps
-[How to confirm consistency after changes]
+## Production Launch Blockers Format
 
-## Production Launch Blockers
-**Critical Gaps** (Must be resolved before production):
-- [ ] [Critical security gap]
-- [ ] [Critical monitoring gap]
-- [ ] [Critical deployment gap]
+In the timestamped report, include:
 
-**High Priority** (Should be resolved before production):
-- [ ] [High priority gap]
+```markdown
+## Production Launch Readiness: [STATUS]
 
-**Medium Priority** (Can be resolved post-launch with mitigation):
-- [ ] [Medium priority gap]
+**Status Options**: ✅ READY | ⚠️ NEEDS WORK | ⛔ BLOCKED
+
+### Critical Gaps (Must resolve before production)
+- [ ] Security & Authentication - [Link to gap doc]
+- [ ] Deployment & Infrastructure - [Link to gap doc]
+- [ ] Disaster Recovery - [Link to gap doc]
+
+### High Priority (Should resolve before production)
+- [ ] Monitoring & Observability - [Link to gap doc]
+- [ ] API Documentation - [Link to gap doc]
+
+### Medium Priority (Can defer with mitigation)
+- [ ] File organization improvements
+- [ ] Link cleanup
+
+**Timeline to Production Ready**: X weeks
 ```
 
 ---
