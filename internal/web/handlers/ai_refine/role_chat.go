@@ -79,7 +79,7 @@ func (h *Handler) ProcessRolesChatRequestStreaming(c *gin.Context) {
 	builderContextData, err := h.contextBuilder.BuildBuilderContext(
 		c.Request.Context(),
 		ag,
-		spec.Introduction,
+		spec.IntroductionText(),
 		userMessage,
 	)
 	if err != nil {

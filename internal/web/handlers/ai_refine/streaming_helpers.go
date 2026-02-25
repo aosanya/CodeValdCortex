@@ -151,9 +151,9 @@ func (h *Handler) BuilderContextFromSpec(
 
 // SaveIntroduction saves the refined introduction
 func (h *Handler) SaveIntroduction(c *gin.Context, agencyID string, spec *models.AgencySpecification, introduction string) error {
-	needsSave := (introduction != spec.Introduction)
+	needsSave := (introduction != spec.IntroductionText())
 	if needsSave {
-		_, err := h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, introduction, "ai-refine-stream")
+		_, err := h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, models.IntroductionFromString(introduction), "ai-refine-stream")
 		return err
 	}
 	return nil

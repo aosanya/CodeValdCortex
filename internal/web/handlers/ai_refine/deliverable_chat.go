@@ -51,7 +51,7 @@ func (h *Handler) ProcessDeliverableEnhancementStreaming(c *gin.Context, agencyI
 	builderContextData, err := h.contextBuilder.BuildBuilderContext(
 		c.Request.Context(),
 		ag,
-		spec.Introduction,
+		spec.IntroductionText(),
 		userMessage,
 	)
 	if err != nil {

@@ -65,7 +65,7 @@ func (h *Handler) refineIntroductionStandard(c *gin.Context, agencyID string) {
 
 	// Save refined introduction
 	if refinedResult.Data != nil && refinedResult.Data.Introduction != "" {
-		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, refinedResult.Data.Introduction, "ai-refine")
+		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, models.IntroductionFromString(refinedResult.Data.Introduction), "ai-refine")
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to save refined introduction")
 		}
@@ -138,8 +138,8 @@ func (h *Handler) refineIntroductionStreaming(c *gin.Context, agencyID string) {
 	h.logger.WithField("total_chunks", chunkCount).Info("✅ Streaming completed")
 
 	// Save if changed
-	if result.Data != nil && result.Data.Introduction != "" && result.Data.Introduction != spec.Introduction {
-		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, result.Data.Introduction, "ai-refine-stream")
+	if result.Data != nil && result.Data.Introduction != "" && result.Data.Introduction != spec.IntroductionText() {
+		_, err = h.agencyService.UpdateIntroduction(c.Request.Context(), agencyID, models.IntroductionFromString(result.Data.Introduction), "ai-refine-stream")
 		if err != nil {
 			h.logger.WithError(err).Error("Failed to save")
 			c.SSEvent("error", `{"error": "Failed to save changes"}`)
@@ -188,7 +188,7 @@ func (h *Handler) fetchAgencyAndSpec(c *gin.Context, agencyID string) (*models.A
 	spec, err := h.agencyService.GetSpecification(c.Request.Context(), agencyID)
 	if err != nil {
 		h.logger.WithError(err).Error("Failed to fetch specification")
-		spec = &models.AgencySpecification{Introduction: ""}
+		spec = &models.AgencySpecification{Introduction: map[string]string{}}
 	}
 
 	return ag, spec, nil
@@ -198,7 +198,7 @@ func (h *Handler) getCurrentIntroduction(c *gin.Context, spec *models.AgencySpec
 	currentIntroduction := c.PostForm("introduction-editor")
 	if currentIntroduction == "" {
 		h.logger.Warn("⚠️ Form empty, using database value")
-		currentIntroduction = spec.Introduction
+		currentIntroduction = spec.IntroductionText()
 	}
 	return currentIntroduction
 }

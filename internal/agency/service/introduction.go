@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yourusername/codevaldcortex/internal/agency/models"
-	"github.com/yourusername/codevaldcortex/internal/agency/repository"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/agency/repository"
 )
 
 // IntroductionService provides business logic for agency introductions

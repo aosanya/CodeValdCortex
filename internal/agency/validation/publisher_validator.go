@@ -68,14 +68,14 @@ func (v *PublisherValidator) ValidateForPublish(
 	}
 
 	// Check 2: Introduction must be non-empty
-	if spec.Introduction == "" {
+	if spec.IntroductionText() == "" {
 		result.Errors = append(result.Errors, ValidationError{
 			Field:   "specification.introduction",
 			Message: "Agency must have an introduction",
 			Code:    "INTRO_MISSING",
 		})
 		result.Valid = false
-	} else if len(spec.Introduction) < 50 {
+	} else if len(spec.IntroductionText()) < 50 {
 		result.Warnings = append(result.Warnings, ValidationWarning{
 			Field:   "specification.introduction",
 			Message: "Introduction is very short (less than 50 characters)",

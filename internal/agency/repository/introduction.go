@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/arangodb/go-driver"
-	"github.com/yourusername/codevaldcortex/internal/agency/models"
+	"github.com/aosanya/CodeValdCortex/internal/agency/models"
 )
 
 // IntroductionRepository handles database operations for agency introductions

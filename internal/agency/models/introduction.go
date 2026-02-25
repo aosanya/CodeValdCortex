@@ -86,7 +86,7 @@ type TableContent struct {
 // Validate performs validation on an IntroductionSection based on its type and validation rules
 func (s *IntroductionSection) Validate() error {
 	if s.Title == "" {
-		return NewValidationError("section title is required")
+		return NewIntroValidationError("section title is required")
 	}
 
 	if s.Validation != nil {
@@ -108,15 +108,15 @@ func (s *IntroductionSection) Validate() error {
 func (s *IntroductionSection) validateTextSection() error {
 	content, ok := s.Content.(string)
 	if !ok {
-		return NewValidationError("text section content must be a string")
+		return NewIntroValidationError("text section content must be a string")
 	}
 
 	if s.Validation.MinLength != nil && len(content) < *s.Validation.MinLength {
-		return NewValidationError("content length below minimum")
+		return NewIntroValidationError("content length below minimum")
 	}
 
 	if s.Validation.MaxLength != nil && len(content) > *s.Validation.MaxLength {
-		return NewValidationError("content length exceeds maximum")
+		return NewIntroValidationError("content length exceeds maximum")
 	}
 
 	return nil
@@ -144,11 +144,11 @@ func (s *IntroductionSection) validateTableSection() error {
 // Validate performs validation on the entire AgencyIntroduction
 func (ai *AgencyIntroduction) Validate() error {
 	if ai.AgencyID == "" {
-		return NewValidationError("agency_id is required")
+		return NewIntroValidationError("agency_id is required")
 	}
 
 	if len(ai.Sections) == 0 {
-		return NewValidationError("at least one section is required")
+		return NewIntroValidationError("at least one section is required")
 	}
 
 	// Check for duplicate section IDs
@@ -157,12 +157,12 @@ func (ai *AgencyIntroduction) Validate() error {
 
 	for _, section := range ai.Sections {
 		if seenIDs[section.ID] {
-			return NewValidationError("duplicate section ID: " + section.ID)
+			return NewIntroValidationError("duplicate section ID: " + section.ID)
 		}
 		seenIDs[section.ID] = true
 
 		if seenOrders[section.Order] {
-			return NewValidationError("duplicate section order")
+			return NewIntroValidationError("duplicate section order")
 		}
 		seenOrders[section.Order] = true
 

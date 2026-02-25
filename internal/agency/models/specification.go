@@ -1,6 +1,7 @@
 package models
 
 import (
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -95,6 +96,33 @@ func NewAgencySpecification(agencyID string) *AgencySpecification {
 		RACIMatrix:   nil,
 		Workflows:    []Workflow{},
 	}
+}
+
+// IntroductionText returns the introduction map as a single concatenated string.
+// It prefers the "content" key for backward compatibility.
+func (s *AgencySpecification) IntroductionText() string {
+	if len(s.Introduction) == 0 {
+		return ""
+	}
+	if v, ok := s.Introduction["content"]; ok {
+		return v
+	}
+	parts := make([]string, 0, len(s.Introduction))
+	for _, v := range s.Introduction {
+		if v != "" {
+			parts = append(parts, v)
+		}
+	}
+	return strings.Join(parts, "\n\n")
+}
+
+// IntroductionFromString wraps a plain string into the map[string]string
+// format stored in AgencySpecification.Introduction.
+func IntroductionFromString(s string) map[string]string {
+	if s == "" {
+		return map[string]string{}
+	}
+	return map[string]string{"content": s}
 }
 
 // IncrementVersion increments the version and updates the timestamp

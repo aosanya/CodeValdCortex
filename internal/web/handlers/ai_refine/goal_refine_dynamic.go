@@ -82,7 +82,7 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 	if err != nil {
 		h.logger.WithError(err).Warn("Failed to fetch specification")
 		spec = &models.AgencySpecification{
-			Introduction: "",
+			Introduction: map[string]string{},
 			Goals:        []models.Goal{},
 			WorkItems:    []models.WorkItem{},
 		}
@@ -122,7 +122,7 @@ func (h *Handler) RefineGoals(c *gin.Context) {
 	builderContext, err := h.contextBuilder.BuildBuilderContext(
 		c.Request.Context(),
 		ag,
-		spec.Introduction,
+		spec.IntroductionText(),
 		req.UserMessage,
 	)
 	if err != nil {
